@@ -87,7 +87,7 @@ public class AppResourceITest {
     }
     
     @Test
-    public void testUpdateCompany() throws Exception {
+    public void testUpdate() throws Exception {
     	PGApp app = testApp();
     	app = appRepo.save(app);
     	
@@ -101,7 +101,6 @@ public class AppResourceITest {
             PGApp updatedApp = appRepo.findById(app.getId()).orElse(null);
             assertThat(updatedApp).isNotNull();
             assertThat(updatedApp.getName()).isEqualTo(app.getName());
-
     }
     
     @Test

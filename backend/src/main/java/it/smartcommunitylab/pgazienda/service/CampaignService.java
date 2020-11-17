@@ -18,6 +18,7 @@ package it.smartcommunitylab.pgazienda.service;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,10 +31,13 @@ import org.springframework.stereotype.Service;
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
+import it.smartcommunitylab.pgazienda.domain.Employee;
+import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
+import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 
 /**
  * @author raman
@@ -46,6 +50,8 @@ public class CampaignService {
 	private CompanyRepository companyRepo;
 	@Autowired
 	private CampaignRepository campaignRepo;
+	@Autowired
+	private EmployeeRepository employeeRepo;
 	@Autowired
 	private UserService userService;
 	
@@ -87,8 +93,67 @@ public class CampaignService {
 			}
 		}
 		return Collections.emptyList();
-		
 	}
+	
+	/**
+	 * Subscribe a campaign for the current user. The user should exist, the campaign should 
+	 * exist, the company should exist and should adhere to the campaign 
+	 * @param key
+	 * @param companyCode
+	 * @param campaignId
+	 */
+	public void subscribe(String key, String companyCode, String campaignId) {
+		// find user
+		User user = userService.getUserWithAuthorities().orElse(null);
+		if (user == null) throw new IllegalArgumentException("Invalid user");
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new IllegalArgumentException("Invalid campaign");
+		Company company = companyRepo.findOneByCode(companyCode).orElse(null);
+		if (company == null || company.getCampaigns() == null || !company.getCampaigns().contains(campaignId)) throw new IllegalArgumentException("Invalid company");
+		// app user role
+		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
+		// not yet subscribed
+		if (role == null || !role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId))) {
+			Employee employee = employeeRepo.findOneByCode(key).orElse(null);
+			if (employee == null || !employee.getCompanyId().equals(company.getId())) throw new IllegalArgumentException("Invalid user key");
+			if (employee.getCampaigns() == null) employee.setCampaigns(new LinkedList<>());
+			if (!employee.getCampaigns().contains(campaignId)) {
+				employee.getCampaigns().add(campaignId);
+				employeeRepo.save(employee);
+			}
+			Subscription s = new Subscription();
+			s.setCampaign(campaignId);
+			s.setKey(key);
+			s.setCompanyCode(companyCode);
+			userService.addAppSubscription(user.getId(), s);
+		}
+	}
+	
+	/**
+	 * Unsubscribe a campaign for the current user. The user should exist
+	 * @param key
+	 * @param companyCode
+	 * @param campaignId
+	 */
+	public void unsubscribe(String key, String companyCode, String campaignId) {
+		// find user
+		User user = userService.getUserWithAuthorities().orElse(null);
+		if (user == null) throw new IllegalArgumentException("Invalid user");
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) return;
+		// app user role
+		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
+		// not yet subscribed
+		if (role != null && role.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaignId))) {
+			Employee employee = employeeRepo.findOneByCode(key).orElse(null);
+			if (employee != null && employee.getCampaigns().contains(campaignId)) {
+				employee.getCampaigns().remove(campaignId);
+				employeeRepo.save(employee);
+			}
+			userService.removeAppSubscription(user.getId(), key, companyCode, campaignId);
+		}
+	}
+	
 	/**
 	 * List of company campaigns
 	 * @param id
@@ -97,7 +162,7 @@ public class CampaignService {
 	public List<Campaign> getCompanyCampaigns(String id) {
 		Company company = companyRepo.findById(id).orElse(null);
 		if (company != null) {
-			campaignRepo.findByIdIn(company.getCampaigns());
+			return campaignRepo.findByIdIn(company.getCampaigns());
 		}
 		return Collections.emptyList();
 	}

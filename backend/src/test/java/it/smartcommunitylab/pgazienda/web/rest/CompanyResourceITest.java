@@ -183,6 +183,7 @@ public class CompanyResourceITest {
 
     private Company testCompany() {
     	Company c = new Company();
+    	c.setCode("code");
     	c.setAddress("address");
     	c.setContactEmail("email");
     	c.setContactPhone("123");

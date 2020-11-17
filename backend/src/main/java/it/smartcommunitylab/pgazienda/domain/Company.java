@@ -19,9 +19,11 @@ package it.smartcommunitylab.pgazienda.domain;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 /**
  * @author raman
@@ -31,6 +33,10 @@ public class Company {
 
 	@Id
 	private String id;
+	
+	@Indexed(unique=true)
+	@NotEmpty
+	private String code;
 	
 	@NotNull
 	private String name;
@@ -165,5 +171,16 @@ public class Company {
 	public void setCampaigns(List<String> campaigns) {
 		this.campaigns = campaigns;
 	}
-	
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
 }

@@ -142,6 +142,17 @@ public class CampaignResource {
     	return ResponseEntity.ok(campaignService.getPublicCampaigns(pageable));
 	}
     
+    
+    /**
+     * Read all campaigns of the curent user
+     * @param companyId
+     * @return
+     */
+    @GetMapping("/campaigns/me")
+	public ResponseEntity<List<Campaign>> getUserCampaigns() {
+    	log.debug("Read campaigns");
+    	return ResponseEntity.ok(campaignService.getUserCampaigns());
+	}
     /**
      * Associate campaign to company
      * @param company
@@ -149,7 +160,7 @@ public class CampaignResource {
      */
     @PutMapping("/companies/{companyId}/campaigns/{campaignId:.*}")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
-	public ResponseEntity<Company> createCompanyCampaign(@PathVariable String companyId, @Valid @PathVariable String campaignId) {
+	public ResponseEntity<Company> createCompanyCampaign(@PathVariable String companyId, @PathVariable String campaignId) {
     	log.debug("Adding a campaign to company {} / {}", companyId, campaignId);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.assignCampaign(companyId, campaignId));
@@ -167,6 +178,30 @@ public class CampaignResource {
     	log.debug("Deleting a campaign from company {} / {}", companyId, campaignId);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
     	companyService.deleteCampaign(companyId, campaignId);
+    	return ResponseEntity.ok(null);
+	}
+    
+    /**
+     * Subscribe to campaign 
+     * @param company
+     * @return
+     */
+    @PutMapping("/campaigns/{campaignId:.*}/subscribe/{companyCode}/{key}")
+	public ResponseEntity<Void> subscribeCampaign(@PathVariable String campaignId, @PathVariable String companyCode, @PathVariable String key) {
+    	log.debug("Subscriving to campaign {} / {} / {}", campaignId, companyCode, key);
+    	campaignService.subscribe(key, companyCode, campaignId);
+    	return ResponseEntity.ok(null);
+	}
+    
+    /**
+     * Subscribe to campaign 
+     * @param company
+     * @return
+     */
+    @DeleteMapping("/campaigns/{campaignId:.*}/unsubscribe/{companyCode}/{key}")
+	public ResponseEntity<Void> unsubscribeCampaign(@PathVariable String campaignId, @PathVariable String companyCode, @PathVariable String key) {
+    	log.debug("Subscriving to campaign {} / {} / {}", campaignId, companyCode, key);
+    	campaignService.unsubscribe(key, companyCode, campaignId);
     	return ResponseEntity.ok(null);
 	}
 }

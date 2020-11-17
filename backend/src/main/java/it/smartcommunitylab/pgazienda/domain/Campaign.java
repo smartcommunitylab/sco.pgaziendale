@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
 
@@ -38,8 +39,10 @@ public class Campaign {
 	@NotEmpty
 	private String application;
 
-	@NotEmpty
-	private LocalDate from, to;
+	@NotNull
+	private LocalDate from;
+	@NotNull
+	private LocalDate to;
 	private Boolean active;
 	private List<String> means;
 	/**
@@ -94,7 +97,7 @@ public class Campaign {
 	 * @return the active
 	 */
 	public Boolean getActive() {
-		return active;
+		return active == null ? false : active;
 	}
 	/**
 	 * @param active the active to set
