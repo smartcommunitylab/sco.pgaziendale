@@ -16,8 +16,10 @@
 
 package it.smartcommunitylab.pgazienda.repository;
 
-import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import it.smartcommunitylab.pgazienda.domain.Employee;
@@ -28,7 +30,8 @@ import it.smartcommunitylab.pgazienda.domain.Employee;
  */
 public interface EmployeeRepository  extends MongoRepository<Employee, String> {
 
-	public List<Employee> findByCompanyId(String companyId);
-	public List<Employee> findByCompanyIdAndLocation(String id, String location);
+	public Page<Employee> findByCompanyId(String companyId, Pageable pageable);
+	public Page<Employee> findByCompanyIdAndLocation(String id, String location, Pageable pageable);
+	public Optional<Employee> findOneByCode(String code);
 	
 }

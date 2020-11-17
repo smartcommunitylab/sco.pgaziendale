@@ -19,7 +19,8 @@ package it.smartcommunitylab.pgazienda.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,11 +31,8 @@ import org.springframework.util.StringUtils;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Employee;
-import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
-import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
-import it.smartcommunitylab.pgazienda.repository.UserRepository;
 
 /**
  * @author raman
@@ -46,11 +44,7 @@ public class CompanyService {
 	@Autowired
 	private CompanyRepository companyRepo;
 	@Autowired
-	private UserRepository userRepo;
-	@Autowired
 	private EmployeeRepository employeeRepo;
-	@Autowired
-	private PGAppRepository pgappRepo;
 	
 	/**
 	 * List of all companies, paginated
@@ -71,25 +65,14 @@ public class CompanyService {
 	}
 	
 	/**
-	 * @param id
-	 * @return list of all company user with management role (company admin or mobility manager)
-	 */
-	public List<User> getCompanyUsers(String id) {
-		List<User> res = userRepo.findByCompanyId(id);
-		res.forEach(u -> u.setRoles(
-				u.getRoles().stream().filter(r -> id.equals(r.getCompanyId()))
-				.collect(Collectors.toList())));
-		return res;
-	}
-	/**
 	 * Find list of company employees
 	 * @param id
 	 * @param locationId
 	 * @return
 	 */
-	public List<Employee> findEmployees(String id, String locationId) {
-		if (StringUtils.isEmpty(locationId)) return employeeRepo.findByCompanyId(id);
-		else return employeeRepo.findByCompanyIdAndLocation(id, locationId);
+	public Page<Employee> findEmployees(String id, String locationId, Pageable pageable) {
+		if (StringUtils.isEmpty(locationId)) return employeeRepo.findByCompanyId(id, pageable);
+		else return employeeRepo.findByCompanyIdAndLocation(id, locationId, pageable);
 	}
 	
 	/**
@@ -203,6 +186,7 @@ public class CompanyService {
 		companyRepo.findById(companyId).ifPresent(company -> {
 			if (company.getLocations() != null) {
 				company.getLocations().removeIf(l -> l.getId().equals(locationId));
+				companyRepo.save(company);
 			}
 		});		
 	}
@@ -214,5 +198,45 @@ public class CompanyService {
 	public List<CompanyLocation> readlocations(String companyId) {
 		Company company = companyRepo.findById(companyId).orElse(null);
 		return (company != null) ? company.getLocations() : Collections.emptyList(); 
+	}
+
+	/**
+	 * @param companyId
+	 * @param employee
+	 * @return
+	 */
+	public Employee createEmployee(String companyId, @Valid Employee employee) {
+		employee.setCompanyId(companyId);
+		return employeeRepo.save(employee);
+	}
+
+	/**
+	 * @param companyId
+	 * @param employee
+	 * @return
+	 */
+	public Employee updateEmployee(String companyId, Employee employee) {
+		employeeRepo.findById(employee.getId()).ifPresent(e -> {
+			if (e.getCompanyId().equals(companyId)) {
+				e.setCompanyEmail(employee.getCompanyEmail());
+				e.setCode(employee.getCode());
+				e.setLocation(employee.getLocation());
+				e.setName(employee.getName());
+				e.setSurname(e.getSurname());
+				employeeRepo.save(e);
+			}
+		});
+		return employeeRepo.findById(employee.getId()).orElse(null);
+	}
+
+	/**
+	 * @param companyId
+	 * @param employeeId
+	 */
+	public void deleteEmployee(String companyId, String employeeId) {
+		employeeRepo.findById(employeeId).ifPresent(e -> {
+			employeeRepo.delete(e);
+		});
+		
 	}
 }

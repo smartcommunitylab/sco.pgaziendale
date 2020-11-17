@@ -22,20 +22,20 @@ package it.smartcommunitylab.pgazienda.domain;
  *
  */
 public class Subscription {
-	private String companyId, campaign, key;
+	private String companyCode, campaign, key;
 
 	/**
-	 * @return the companyId
+	 * @return the companyCode
 	 */
-	public String getCompanyId() {
-		return companyId;
+	public String getCompanyCode() {
+		return companyCode;
 	}
 
 	/**
-	 * @param companyId the companyId to set
+	 * @param companyCode the companyCode to set
 	 */
-	public void setCompanyId(String companyId) {
-		this.companyId = companyId;
+	public void setCompanyCode(String companyCode) {
+		this.companyCode = companyCode;
 	}
 
 	/**

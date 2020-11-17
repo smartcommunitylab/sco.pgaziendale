@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 
 import it.smartcommunitylab.pgazienda.Constants;
+import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
@@ -174,6 +175,46 @@ public class UserService {
             });
     }
 
+
+
+	/**
+	 * Add subscription to the app user role of the specified user
+	 * @param id
+	 * @param s
+	 */
+	public void addAppSubscription(String id, Subscription s) {
+		User user = userRepository.findById(id).orElse(null);
+		if (user != null) {
+			UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
+			if (role == null) {
+				role = UserRole.createAppUserRole(s);
+				user.getRoles().add(role);
+			} else {
+				role.getSubscriptions().add(s);
+			}
+			userRepository.save(user);
+		}
+	}
+
+	/**
+	 * Remove subscription from the app user role of the specified user
+	 * @param id
+	 * @param key
+	 * @param companyCode
+	 * @param campaignId
+	 */
+	public void removeAppSubscription(String id, String key, String companyCode, String campaignId) {
+		User user = userRepository.findById(id).orElse(null);
+		if (user != null) {
+			UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
+			if (role != null) {
+				if (role.getSubscriptions().removeIf(s -> s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(companyCode) && s.getKey().equals(key))) {
+					userRepository.save(user);
+				}
+			}
+		}
+	}
+
     /**
      * Update all information for a specific user, and return the modified user.
      * @param string 
@@ -289,7 +330,11 @@ public class UserService {
 	 * @return
 	 */
 	public List<User> getAllManagedUsers(String companyId) {
-		return userRepository.findByCompanyId(companyId);
+		List<User> res = userRepository.findByCompanyId(companyId);
+		res.forEach(u -> u.setRoles(
+				u.getRoles().stream().filter(r -> companyId.equals(r.getCompanyId()))
+				.collect(Collectors.toList())));
+		return res;
 	}
 
 	/**
@@ -304,4 +349,5 @@ public class UserService {
 		}
 		return false;
 	}
+
 }
