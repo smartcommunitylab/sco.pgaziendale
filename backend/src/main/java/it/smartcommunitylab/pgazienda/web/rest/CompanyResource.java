@@ -1,0 +1,120 @@
+/*******************************************************************************
+ * Copyright 2015 Fondazione Bruno Kessler
+ * 
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ ******************************************************************************/
+
+package it.smartcommunitylab.pgazienda.web.rest;
+
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import it.smartcommunitylab.pgazienda.Constants;
+import it.smartcommunitylab.pgazienda.domain.Company;
+import it.smartcommunitylab.pgazienda.service.CompanyService;
+import it.smartcommunitylab.pgazienda.service.UserService;
+
+/**
+ * @author raman
+ *
+ */
+@RestController
+@RequestMapping("/api")
+public class CompanyResource {
+
+    private final Logger log = LoggerFactory.getLogger(CompanyResource.class);
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private CompanyService companyService;
+    
+	/**
+	 * List all companies
+	 * @param pageable
+	 * @return
+	 */
+    @GetMapping("/companies")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
+	public ResponseEntity<Page<Company>> getCompanies(Pageable pageable) {
+    	log.debug("List companies");
+		return ResponseEntity.ok(companyService.getCompanies(pageable));
+	}
+    /**
+     * Create a new company
+     * @param company
+     * @return
+     */
+    @PostMapping("/companies")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
+	public ResponseEntity<Company> createCompany(@Valid @RequestBody Company company) {
+    	log.debug("Creating company {}", company);
+		return ResponseEntity.ok(companyService.createCompany(company));
+	}
+    /**
+     * Read a single company info
+     * @param companyId
+     * @return
+     */
+    @GetMapping("/companies/{companyId:.*}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN  + "\", \""+Constants.ROLE_MOBILITY_MANAGER +"\")")
+	public ResponseEntity<Company> getCompany(@PathVariable String companyId) {
+    	log.debug("Reading company {}", companyId);
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	return ResponseEntity.of(companyService.getCompany(companyId));
+	}
+
+    /**
+     * Update basic company info
+     * @param companyId
+     * @param company
+     * @return
+     */
+    @PutMapping("/companies/{companyId:.*}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
+	public ResponseEntity<Company> updateCompany(@PathVariable String companyId, @RequestBody Company company) {
+    	log.debug("Updating company {}", companyId);
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	company.setId(companyId);
+		return ResponseEntity.of(companyService.updateCompany(company));
+	}
+    /**
+     * Delete a company
+     * @param companyId
+     * @return
+     */
+    @DeleteMapping("/companies/{companyId:.*}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
+	public ResponseEntity<Void> deleteCompany(@PathVariable String companyId) {
+    	log.debug("Deleting company {}", companyId);
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+		companyService.deleteCompany(companyId);
+		return ResponseEntity.ok(null);
+	}
+}

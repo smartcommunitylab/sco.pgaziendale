@@ -1,0 +1,39 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: pgaziendatest
+  mail:
+    host: localhost
+    from: pgazienda@test.com
+    baseurl: http://localhost:8080/
+  messages:
+    basename: i18n/messages
+
+app:
+  security:
+    authentication:
+      jwt:
+        # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
+        base64-secret: ${SECURITY_SECRET:bgYh3rbvGzbJKK/q7k624Ct360QuA4IHHO8jBtMUKA/spqu+BMLkktWpiQuBMXuoVxBYOUwWnBvLXnizzrhKFyJkX9gf9gU6+L8tJl6D1VjAwh8w/iwqiubqmmMSSRxdmu7rmFWLlSi3HpumEfsIzagI2TiPI2U2pCn27vn2TAthiUXELXusVYe3r9awz2DQP/V10yi3j9AIh0Gslz89yUjY6tmrQ8RcJSApvo4FGBdK1EzZU/6CZaEFvmPQEx3I8TG26Y8pVqfcuR+OELhLQ2iOfP5ZlwQiom4UmkNdbMh4ZLyfSN0C9anZojYnpSBym6N8XOQo+7Ueqgpm0w0dFw==}
+        # Token is valid 24 hours
+        token-validity-in-seconds: 86400
+        token-validity-in-seconds-for-remember-me: 2592000
+    ext:
+      endpoint-userinfo: http://localhost:8080/aac/basicprofile/me
+      username-field: userId
+      name-field: name
+      surname-field: surname
+      domain: '@local.com'
+
+# SWAGGER
+swagger:
+   title: Play&Go Aziendale API
+   description: API for the company management and user association
+   version: 1.0.0
+   license: Apache License, Version 2.0
+   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
+   contact:
+      name: Smart Community Lab
+      url: www.smartcommunitylab.it
+      email: info@smartcommunitylab.it
