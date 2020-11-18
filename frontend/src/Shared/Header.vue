@@ -1,20 +1,20 @@
 <template>
     <div>
-    <button class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded">
+    <t-button>
     Entra
-</button>
-<button class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded">
+</t-button>
+ <t-button>
     Esci
-</button>
-<button class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded">
+</t-button>
+ <t-button>
     Campagne
-</button>
-<button class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded">
+</t-button>
+ <t-button>
     Info
-</button>
-<button class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded">
+</t-button>
+ <t-button>
     Contatti
-</button>
+</t-button>
     </div>
 </template>
 <script>
