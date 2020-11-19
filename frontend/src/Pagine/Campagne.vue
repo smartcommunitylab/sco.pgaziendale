@@ -1,6 +1,6 @@
 <template>
   <div
-    class=" bg-blue-600 flex  flex-col sm:flex-row sm:flex-wrap justify-center"
+    class=" bg-blue-600 flex  flex-col sm:flex-row sm:flex-wrap sm:justify-center md:justify-start md:pl-12"
   >
     <template v-for="campaign in fakeCampaigns">
       <campaign-card
