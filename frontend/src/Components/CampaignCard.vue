@@ -29,24 +29,37 @@
       <div
         class="flex flex-col-reverse xl:flex-row lg:flex-row  lg:mt-auto align-middle  lg:ml-0 t-auto mx-2 lg:mx-0 "
       >
-        <button
-          type="button"
-          class=" p-0 xl:mr-2 my-1 inline-flex items-center bg-transparent hover:bg-red-600  font-semibold hover:text-white py-1 px-4 border-2 border-red-600 hover:border-transparent rounded"
-        >
-          <img
-            class="w-4 h-4 mr-2"
-            :src="require('../assets/images/increase-up-profit.svg')"
-          />Performance
-        </button>
-        <button
-          type="button"
-          class="my-1  inline-flex items-center lg:ml-auto bg-transparent hover:bg-blue-600  font-semibold hover:text-white py-1 px-4 border-2 border-blue-600 hover:border-transparent rounded"
-        >
-          <img
-            class="w-4 h-4 mr-2"
-            :src="require('../assets/images/information.svg')"
-          />Info
-        </button>
+        <template v-if="dUserInCampaign">
+          <button
+            type="button"
+            class=" p-0 xl:mr-2 my-1 inline-flex items-center bg-transparent hover:bg-red-600  font-semibold hover:text-white py-1 px-4 border-2 border-red-600 hover:border-transparent rounded"
+          >
+            <img
+              class="w-4 h-4 mr-2"
+              :src="require('../assets/images/increase-up-profit.svg')"
+            />Performance
+          </button>
+          <button
+            type="button"
+            class="my-1  inline-flex items-center lg:ml-auto bg-transparent hover:bg-blue-600  font-semibold hover:text-white py-1 px-4 border-2 border-blue-600 hover:border-transparent rounded"
+          >
+            <img
+              class="w-4 h-4 mr-2"
+              :src="require('../assets/images/information.svg')"
+            />Info
+          </button>
+        </template>
+        <template v-else-if="!dFinished">
+          <button
+            type="button"
+            class="my-1  inline-flex items-center lg:ml-auto bg-transparent hover:bg-green-600  font-semibold hover:text-white py-1 px-4 border-2 border-green-600 hover:border-transparent rounded"
+          >
+            <img
+              class="w-4 h-4 mr-2"
+              :src="require('../assets/images/information.svg')"
+            />Partecipa
+          </button>
+        </template>
       </div>
     </div>
   </div>
@@ -72,9 +85,22 @@ export default {
       dStartDate: this.startDate,
       dEndDate: this.endDate,
       dMeans: this.means,
+      dFinished: false,
+      dUserInCampaign: false,
     };
+  },
+
+  mounted: function() {
+    let data = this.endDate.split("-");
+    let date = new Date(data[2], data[1], data[0]);
+    if (date < new Date()) this.dFinished = true;
   },
 };
 </script>
 
-<style></style>
+<style>
+.in_corso {
+  right: 0;
+  top: 0;
+}
+</style>
