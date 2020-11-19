@@ -5,6 +5,8 @@ import Info from "./Pagine/Info.vue";
 import Contatti from "./Pagine/Contatti.vue";
 import Campagne from "./Pagine/Campagne.vue";
 import MyPerformance from "./Pagine/MyPerformance.vue";
+import store from './store/store'
+
 const routes = [
     {
       path: '/',
@@ -24,12 +26,26 @@ const routes = [
     {
       path: '/campagne',
       name: 'campagne',
-      component: Campagne
+      component: Campagne,
+      beforeEnter (to, from, next) {
+        if (store.state.idToken) {
+          next()
+        } else {
+          next('/signin')
+        }
+      }
     },
     {
       path: '/la-mia-performance/:id',
       name: 'myperformance',
-      component: MyPerformance
+      component: MyPerformance,
+      beforeEnter (to, from, next) {
+        if (store.state.idToken) {
+          next()
+        } else {
+          next('/signin')
+        }
+      }
     }
   ];
 

@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <app-header></app-header>
-    <router-view></router-view>
+    <router-view class="mt-32 lg:mt-16"></router-view>
   </div>
 </template>
 
