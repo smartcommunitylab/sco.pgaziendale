@@ -61,14 +61,14 @@ public class RestResponseEntityExceptionHandler
     @ExceptionHandler(BadRequestAlertException.class)
     protected ResponseEntity<Object> handleBadRequest(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Incorrect data"), 
+        return handleExceptionInternal(ex, new ErrorMsg("Incorrect data: " + ex.getMessage()), 
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     protected ResponseEntity<Object> handleIllegalArgument(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Incorrect data"), 
+        return handleExceptionInternal(ex, new ErrorMsg("Incorrect data: " + ex.getMessage()), 
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 

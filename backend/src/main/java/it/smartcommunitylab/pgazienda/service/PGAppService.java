@@ -17,6 +17,7 @@
 package it.smartcommunitylab.pgazienda.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,11 @@ public class PGAppService {
 	public List<PGApp> getApps() {
 		return repo.findAll();
 	}
-	
+
+	public Optional<PGApp> getApp(String id) {
+		return repo.findById(id);
+	}
+
 	public PGApp saveApp(PGApp app) {
 		return repo.save(app);
 	}

@@ -239,4 +239,12 @@ public class CompanyService {
 		});
 		
 	}
+
+	/**
+	 * @param code
+	 * @return
+	 */
+	public Optional<Company> findByCode(String code) {
+		return companyRepo.findOneByCode(code);
+	}
 }

@@ -71,6 +71,8 @@ public class CampaignResourceITest {
 
 	static final String ADMIN = "admin";
 
+	private static final String CAMPAIGN_ID = "campaignId";
+
     @Autowired
     private PGAppRepository appRepo;
     
@@ -368,6 +370,7 @@ public class CampaignResourceITest {
     private Campaign testCampaign() {
     	Campaign c = new Campaign();
     	c.setTitle("campaign");
+    	c.setId(CAMPAIGN_ID);
     	c.setApplication(APP_ID);
     	c.setDescription("description");
     	c.setFrom(LocalDate.now().minusDays(10));

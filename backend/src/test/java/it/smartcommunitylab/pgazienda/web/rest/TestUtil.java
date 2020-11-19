@@ -16,8 +16,11 @@
 package it.smartcommunitylab.pgazienda.web.rest;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -47,6 +50,10 @@ public final class TestUtil {
     public static byte[] convertObjectToJsonBytes(Object object) throws IOException {
         return mapper.writeValueAsBytes(object);
     }
+    
+    public static <T> T readObject(InputStream is, Class<T> cls) throws JsonParseException, JsonMappingException, IOException {
+    	return mapper.readValue(is, cls);
+    } 
 
     private TestUtil() {}
 }

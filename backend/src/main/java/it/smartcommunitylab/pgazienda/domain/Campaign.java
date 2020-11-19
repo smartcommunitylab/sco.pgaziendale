@@ -31,6 +31,7 @@ import org.springframework.data.annotation.Id;
 public class Campaign {
 
 	@Id
+	@NotEmpty
 	private String id;
 	@NotEmpty
 	private String title;

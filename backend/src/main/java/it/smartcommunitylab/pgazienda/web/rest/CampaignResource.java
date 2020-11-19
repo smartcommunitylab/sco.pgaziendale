@@ -68,7 +68,7 @@ public class CampaignResource {
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
 	public ResponseEntity<Campaign> createCampaign(@Valid @RequestBody Campaign campaign) {
     	log.debug("Creating a campaign {} ", campaign);
-    	return ResponseEntity.ok(campaignService.createCampaign(campaign));
+    	return ResponseEntity.ok(campaignService.saveCampaign(campaign));
 	}
 
     /**
@@ -91,7 +91,8 @@ public class CampaignResource {
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
 	public ResponseEntity<Campaign> updateCampaign( @PathVariable String campaignId, @Valid @RequestBody Campaign campaign) {
     	log.debug("Updating a campaign {}", campaignId);
-    	return ResponseEntity.ok(campaignService.updateCampaign(campaign));
+    	campaign.setId(campaignId);
+    	return ResponseEntity.ok(campaignService.saveCampaign(campaign));
 	}
     /**
      * Delete a campaign

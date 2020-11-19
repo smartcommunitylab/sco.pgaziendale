@@ -26,6 +26,10 @@ app:
       surname-field: surname
       domain: '@local.com'
 
+admin:
+  username: ${ADMIN_USERNAME:admin}
+  password: ${ADMIN_PASSWORD:admin}
+
 # SWAGGER
 swagger:
    title: Play&Go Aziendale API
