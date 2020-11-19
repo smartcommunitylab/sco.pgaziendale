@@ -1,11 +1,30 @@
 <template>
   <div>
-    <div class="flex flex-col lg:flex-row">
-      <div class="lg:w-7/12"><h1>Contatti</h1></div>
-      <div class="lg:w-4/12">
+    <div class="flex flex-col lg:flex-row bg-blue-600">
+      <div
+        class=" pb-6 lg:w-7/12 lg:my-2 text-white text-center lg:text-left md:pl-6 lg:pb-0"
+      >
+        <h1 class="text-6xl font-bold">Contattaci</h1>
+        <h2 class="text-2xl pb-2 font-semibold">
+          Saremo felici di rispondere alle tue domande.
+        </h2>
+        <p>
+          Contattaci via e-mail all'indirizzo
+          <a class="font-bold" href="mailto: email@fbk.eu">email@fbk.eu</a>.
+        </p>
+        <p>
+          Altrimenti compila il form di richiesta e ci mettere noi in contatto
+          con te.
+        </p>
+
+        <div class="hidden   md:bg-white md:-ml-6 md:max-h-full">
+          <img class="object-cover md:object-scale-down h-auto bg-opacity-0" />
+        </div>
+      </div>
+      <div class="lg:w-4/12 lg:my-2">
         <form
           action=""
-          class="form flex flex-col bg-white p-6 my-10 relative lg:rounded-xl justify-center "
+          class="form flex flex-col bg-white p-6 relative lg:rounded-xl justify-center "
         >
           <div
             class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
