@@ -1,6 +1,6 @@
 <template>
   <div
-    class="  m-auto justify-center  flex flex-col-reverse md:flex-row lg:w-1/3 bg-white rounded-lg sm:mx-12  my-4 lg:mx-2 xl:w-1/5 justify-cente shadow-2xl"
+    class="  m-auto justify-center  flex flex-col-reverse md:flex-row lg:w-1/3 bg-white rounded-lg sm:mx-12  my-4 lg:mx-2 xl:w-1/5 justify-cente shadow-xl"
   >
     <div class="flex flex-col py-2 lg:mx-2 justify-center">
       <h2
