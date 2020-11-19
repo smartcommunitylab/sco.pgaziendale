@@ -1,10 +1,12 @@
 <template>
-  <h1>Campagne</h1>
+  <campaign-card title="Prova" />
 </template>
 
 <script>
+import CampaignCard from "../Components/CampaignCard.vue";
 export default {
   name: "Campagne",
+  components: { CampaignCard },
 };
 </script>
 
