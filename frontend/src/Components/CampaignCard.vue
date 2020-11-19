@@ -1,5 +1,55 @@
 <template>
-  <div>Card</div>
+  <div
+    class="  m-auto justify-center  flex flex-col-reverse md:flex-row lg:w-1/3 bg-white rounded-lg sm:mx-12  my-4 lg:mx-2 xl:w-1/5 justify-cente shadow-2xl"
+  >
+    <div class="flex flex-col py-2 lg:mx-2 justify-center">
+      <h2
+        class=" text-xl sm:text-3xl font-semibold break-normal lg:text-left text-center"
+      >
+        {{ dTitolo }}
+      </h2>
+
+      <div
+        class="flex flex-col-reverse justify-self-center text-center lg:flex-row lg:text-left"
+      >
+        <div
+          class="flex flex-row lg:flex-col justify-center align-middle text-lg font-light  "
+        >
+          <span class="font-light">dal {{ dStartDate }} </span
+          ><span class="font-light"> al {{ dEndDate }}</span>
+        </div>
+        <div class="">
+          <img
+            class="h-48 w-full object-content sm:px-8 py-2 lg:px-0 "
+            :src="require('../assets/images/bike.svg')"
+          />
+        </div>
+      </div>
+
+      <div
+        class="flex flex-col-reverse xl:flex-row lg:flex-row  lg:mt-auto align-middle  lg:ml-0 t-auto mx-2 lg:mx-0 "
+      >
+        <button
+          type="button"
+          class=" p-0 xl:mr-2 my-1 inline-flex items-center bg-transparent hover:bg-red-600  font-semibold hover:text-white py-1 px-4 border-2 border-red-600 hover:border-transparent rounded"
+        >
+          <img
+            class="w-4 h-4 mr-2"
+            :src="require('../assets/images/increase-up-profit.svg')"
+          />Performance
+        </button>
+        <button
+          type="button"
+          class="my-1  inline-flex items-center lg:ml-auto bg-transparent hover:bg-blue-600  font-semibold hover:text-white py-1 px-4 border-2 border-blue-600 hover:border-transparent rounded"
+        >
+          <img
+            class="w-4 h-4 mr-2"
+            :src="require('../assets/images/information.svg')"
+          />Info
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -11,7 +61,7 @@ export default {
     active: Boolean,
     startDate: String,
     endDate: String,
-    means: [],
+    means: Array,
   },
 
   data: function() {
