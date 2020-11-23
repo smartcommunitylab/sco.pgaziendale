@@ -37,6 +37,7 @@ public class Campaign {
 	@NotEmpty
 	private String title;
 	private String description;
+	private String logo;
 	
 	@NotEmpty
 	private String application;
@@ -142,6 +143,18 @@ public class Campaign {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	/**
+	 * @return the logo
+	 */
+	public String getLogo() {
+		return logo;
+	}
+	/**
+	 * @param logo the logo to set
+	 */
+	public void setLogo(String logo) {
+		this.logo = logo;
 	}
 
 }

@@ -53,9 +53,10 @@ public class ExternalUserDetailsService {
 
     @Value("${app.security.ext.endpoint-userinfo}")
     private String userInfoEndpoint;
-    @Value("${app.security.ext.username-field:username}")
+    
+    @Value("${app.security.ext.player-field:username}")
     private String playerField;
-    @Value("${app.security.ext.player-field:sub}")
+    @Value("${app.security.ext.username-field:sub}")
     private String userNameField;
     @Value("${app.security.ext.name-field:first_name}")
     private String nameField;

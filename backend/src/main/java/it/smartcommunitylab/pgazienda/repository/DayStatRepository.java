@@ -16,37 +16,24 @@
 
 package it.smartcommunitylab.pgazienda.repository;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
-import it.smartcommunitylab.pgazienda.domain.User;
+import it.smartcommunitylab.pgazienda.domain.DayStat;
 
 /**
  * @author raman
  *
  */
-public interface UserRepository  extends MongoRepository<User, String> {
+public interface DayStatRepository  extends MongoRepository<DayStat, String> {
 
-	@Query("{'roles.companyId': ?0}")
-	List<User> findByCompanyId(String id);
+	public List<DayStat> findByPlayerIdAndCampaign(String playerId, String campaign);
 
-	Optional<User> findByUsername(String username);
+	@Query("{playerId:?0, campaign:?1, date : {$gte:?2 , $lt: ?3}}")
+	public List<DayStat> findByPlayerIdAndCampaignAndPeriod(String playerId, String campaign, String from, String to);
 
-	Optional<User> findOneByActivationKey(String key);
-
-	Optional<User> findOneByResetKey(String key);
-
-	Optional<User> findOneByUsernameIgnoreCase(String mail);
-
-    List<User> findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(Instant dateTime);
-
-	@Query("{'roles.subscriptions.campaign': {$in: ?0}}")
-	List<User> findByCampaignIn(List<String> campaigns);
-
-	@Query("{'roles.subscriptions': {$elemMatch: {companyCode:?0, key:?1}}}")
-	Optional<User> findOneByEmployeeCode(String companyCode, String key);
+	@Query("{playerId:?0, campaign:?1, date : ?2}")
+	public DayStat findOneByPlayerIdAndCampaignAndDate(String key, String id, String date);
 }

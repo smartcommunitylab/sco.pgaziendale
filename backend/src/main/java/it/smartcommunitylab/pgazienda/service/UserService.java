@@ -319,6 +319,9 @@ public class UserService {
     public Optional<User> getUserWithAuthorities() {
         return SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneByUsernameIgnoreCase);
     }
+    public Optional<User> getUserByEmployeeCode(String companyCode, String userCode) {
+        return userRepository.findOneByEmployeeCode(companyCode, userCode);
+    }
 
     /**
      * Not activated users should be automatically deleted after 3 days.

@@ -22,6 +22,7 @@ app:
     ext:
       endpoint-userinfo: http://localhost:8080/aac/basicprofile/me
       username-field: userId
+      player-field: userId
       name-field: name
       surname-field: surname
       domain: '@local.com'
