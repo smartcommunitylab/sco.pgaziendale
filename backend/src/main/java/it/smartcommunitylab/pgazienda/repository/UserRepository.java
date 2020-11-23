@@ -44,4 +44,7 @@ public interface UserRepository  extends MongoRepository<User, String> {
 
     List<User> findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(Instant dateTime);
 
+	@Query("{'roles.subscriptions.campaign': {$in: ?0}}")
+	List<User> findByCampaignIn(List<String> campaigns);
+
 }

@@ -38,4 +38,6 @@ public interface CampaignRepository  extends MongoRepository<Campaign, String> {
 
 	@Query("{id: {$in: ?0}}")
 	public List<Campaign> findByIdIn(Collection<String> ids);
+
+	public List<Campaign> findByApplication(String app);
 }

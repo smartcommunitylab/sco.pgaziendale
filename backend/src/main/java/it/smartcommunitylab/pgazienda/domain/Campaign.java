@@ -17,6 +17,7 @@
 package it.smartcommunitylab.pgazienda.domain;
 
 import java.time.LocalDate;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
@@ -45,7 +46,7 @@ public class Campaign {
 	@NotNull
 	private LocalDate to;
 	private Boolean active;
-	private List<String> means;
+	private List<String> means = new LinkedList<>();
 	/**
 	 * @return the id
 	 */

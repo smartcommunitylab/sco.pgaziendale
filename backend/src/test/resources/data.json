@@ -1,14 +1,16 @@
 {
   "apps": [
     {
-      "id": "ferrara_playandgo",
-      "name": "Ferrara Play&Go"
+      "id": "ferraraplaygo2020",
+      "name": "Ferrara Play&Go",
+      "password": "password",
+      "endpoint": "https://ferrara.smartcommunitylab.it/playandgo/gamification/trackingdata"
     }
   ],
   "campaigns": [
     {
       "active": true,
-      "application": "ferrara_playandgo",
+      "application": "ferraraplaygo2020",
       "description": "Ferrara Play&Go Aziendale Bici",
       "from": "2020-11-01",
       "id": "ferrara_bike2work",
@@ -29,7 +31,7 @@
       "contactEmail": "urp@comune.fe.it",
       "contactPhone": "+390532419111",
       "enabledApps": [
-        "ferrara_playandgo"
+        "ferraraplaygo2020"
       ],
       "locations": [
         {

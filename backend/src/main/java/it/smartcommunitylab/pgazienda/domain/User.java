@@ -41,6 +41,9 @@ public class User extends AbstractAuditingEntity {
     @Email
     @Size(min = 5, max = 254)
 	private String username;
+    
+    private String playerId;
+    
 	private String name, surname;
 
 	private List<UserRole> roles = new LinkedList<>();
@@ -176,6 +179,18 @@ public class User extends AbstractAuditingEntity {
 		this.resetDate = resetDate;
 	}
 	
+	/**
+	 * @return the playerId
+	 */
+	public String getPlayerId() {
+		return playerId;
+	}
+	/**
+	 * @param playerId the playerId to set
+	 */
+	public void setPlayerId(String playerId) {
+		this.playerId = playerId;
+	}
 	public Optional<UserRole> findRole(String role) {
 		if (roles == null) return Optional.empty();
 		return roles.stream().filter(r -> r.getRole().equals(role)).findFirst();

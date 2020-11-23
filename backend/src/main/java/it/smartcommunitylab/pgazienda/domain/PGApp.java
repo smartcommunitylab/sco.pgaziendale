@@ -27,6 +27,9 @@ public class PGApp {
 	@Id
 	private String id;
 	private String name;
+	private String password;
+	private String endpoint;
+	
 	/**
 	 * @return the id
 	 */
@@ -51,4 +54,37 @@ public class PGApp {
 	public void setName(String name) {
 		this.name = name;
 	}
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+	/**
+	 * @param password the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	/**
+	 * @return
+	 */
+	public PGApp cleanPassword() {
+		this.password = null;
+		return this;
+	}
+	/**
+	 * @return the endpoint
+	 */
+	public String getEndpoint() {
+		return endpoint;
+	}
+	/**
+	 * @param endpoint the endpoint to set
+	 */
+	public void setEndpoint(String endpoint) {
+		this.endpoint = endpoint;
+	}
+	
+	
 }

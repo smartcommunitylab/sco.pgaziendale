@@ -18,6 +18,15 @@ spring:
   messages:
     basename: i18n/messages
     
+management:
+   server:
+      port: ${MANAGEMENT_PORT:7878}
+   endpoints:
+      web:
+         base-path: /
+         exposure:
+            include: health,info,metrics
+
 # SWAGGER
 swagger:
    title: Play&Go Aziendale API
@@ -45,6 +54,7 @@ app:
         token-validity-in-seconds-for-remember-me: 2592000
     ext:
       endpoint-userinfo: ${SECURITY_EXT_USERINFO_ENDPOINT}
+      player-field: ${SECURITY_EXT_USERINFO_PLAYER_FIELD:sub}
       username-field: ${SECURITY_EXT_USERINFO_USERNAME_FIELD:username}
       name-field: ${SECURITY_EXT_USERINFO_NAME_FIELD:first_name}
       surname-field: ${SECURITY_EXT_USERINFO_SURNAME_FIELD:last_name}

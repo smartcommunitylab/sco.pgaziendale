@@ -48,7 +48,7 @@ public class AdminService {
 	
 	public void loadData(DataModelDTO model) {
 		validateApps(model);
-		model.getApps().forEach(app -> appService.saveApp(app));
+		model.getApps().forEach(app -> appService.updateApp(app));
 		
 		validateCampaigns(model);
 		model.getCampaigns().forEach(c -> campaignService.saveCampaign(c));

@@ -41,11 +41,23 @@ public class PGAppService {
 	}
 
 	public Optional<PGApp> getApp(String id) {
-		return repo.findById(id);
+		return repo.findById(id).map(app -> app.cleanPassword());
 	}
 
-	public PGApp saveApp(PGApp app) {
-		return repo.save(app);
+	public PGApp createApp(PGApp app) {
+		return repo.save(app).cleanPassword();
+	}
+
+	public PGApp updateApp(PGApp app) {
+		PGApp old = repo.findById(app.getId()).orElse(null);
+		if (old != null) {
+			old.setName(app.getName());
+			old.setEndpoint(app.getEndpoint());
+			if (app.getPassword() != null) old.setPassword(app.getPassword());
+			return repo.save(old).cleanPassword();
+		} else {
+			return createApp(app);
+		}
 	}
 
 	public void deleteApp(String id) {
