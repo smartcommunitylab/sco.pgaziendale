@@ -6,15 +6,20 @@
 </template>
 
 <script>
-import Header from './Shared/Header.vue'
+import Header from "./Shared/Header.vue";
+
 export default {
   name: "App",
   components: {
-            appHeader: Header
-        },
+    appHeader: Header,
+  },
+  created () {
+      this.$store.dispatch('tryAutoLogin').then(() => {
+        this.$router.push('campagne').catch(()=>{});
+   })
+    }
+
 };
 </script>
 
-<style>
-
-</style>
+<style></style>
