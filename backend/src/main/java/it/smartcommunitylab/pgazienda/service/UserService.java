@@ -64,9 +64,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("${admin.username:admin}")
+    @Value("${admin.username}")
     private String adminUsername;
-    @Value("${admin.password:admin}")
+    @Value("${admin.password}")
     private String adminPassword;
     
     @PostConstruct
@@ -146,6 +146,23 @@ public class UserService {
         return user;
     }
 
+    
+    public User createUser(User userDTO) {
+        User user = new User();
+        user.setUsername(userDTO.getUsername().toLowerCase());
+        user.setName(userDTO.getName());
+        user.setSurname(userDTO.getSurname());
+        String encryptedPassword = passwordEncoder.encode(userDTO.getPassword());
+        user.setPassword(encryptedPassword);
+        user.setResetKey(RandomUtil.generateResetKey());
+        user.setResetDate(Instant.now());
+        user.setActivated(true);
+    	user.setRoles(userDTO.getRoles());
+        
+        userRepository.save(user);
+        log.debug("Created Information for User: {}", user);
+        return user;
+    }
     /**
      * Update all information for a specific user, and return the modified user.
      *
@@ -301,6 +318,9 @@ public class UserService {
 
     public Optional<User> getUserWithAuthorities() {
         return SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneByUsernameIgnoreCase);
+    }
+    public Optional<User> getUserByEmployeeCode(String companyCode, String userCode) {
+        return userRepository.findOneByEmployeeCode(companyCode, userCode);
     }
 
     /**

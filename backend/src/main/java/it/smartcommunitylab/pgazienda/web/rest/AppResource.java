@@ -83,7 +83,7 @@ public class AppResource {
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
 	public ResponseEntity<PGApp> createApp(@Valid @RequestBody PGApp app) {
     	log.debug("Creating app {}", app);
-		return ResponseEntity.ok(service.saveApp(app));
+		return ResponseEntity.ok(service.createApp(app));
 	}
     /**
      * Update basic company info
@@ -93,10 +93,10 @@ public class AppResource {
      */
     @PutMapping("/apps/{appId:.*}")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
-	public ResponseEntity<PGApp> updateCompany(@PathVariable String appId, @RequestBody PGApp app) {
+	public ResponseEntity<PGApp> updateApp(@PathVariable String appId, @RequestBody PGApp app) {
     	log.debug("Updating app {}", appId);
     	app.setId(appId);
-		return ResponseEntity.ok(service.saveApp(app));
+		return ResponseEntity.ok(service.updateApp(app));
 	}
     /**
      * Delete a company
@@ -105,7 +105,7 @@ public class AppResource {
      */
     @DeleteMapping("/apps/{appId:.*}")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
-	public ResponseEntity<Void> deleteCompany(@PathVariable String appId) {
+	public ResponseEntity<Void> deleteApp(@PathVariable String appId) {
     	log.debug("Deleting app {}", appId);
 		service.deleteApp(appId);
 		return ResponseEntity.ok(null);

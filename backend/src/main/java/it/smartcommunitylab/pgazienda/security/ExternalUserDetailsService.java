@@ -53,7 +53,10 @@ public class ExternalUserDetailsService {
 
     @Value("${app.security.ext.endpoint-userinfo}")
     private String userInfoEndpoint;
-    @Value("${app.security.ext.username-field:username}")
+    
+    @Value("${app.security.ext.player-field:username}")
+    private String playerField;
+    @Value("${app.security.ext.username-field:sub}")
     private String userNameField;
     @Value("${app.security.ext.name-field:first_name}")
     private String nameField;
@@ -89,6 +92,7 @@ public class ExternalUserDetailsService {
     		userDTO.setName(name);
     		userDTO.setSurname(surname);
     		userDTO.setUsername(username);
+    		userDTO.setPlayerId((String)userInfo.get(playerField));
     		userDTO.setRoles(Collections.singletonList(UserRole.createAppUserRole()));
 			user = userService.createUser(userDTO, null);
     	} else if (user.findRole(Constants.ROLE_APP_USER).isEmpty()) {

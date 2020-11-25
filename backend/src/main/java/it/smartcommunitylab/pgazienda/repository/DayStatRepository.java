@@ -16,28 +16,24 @@
 
 package it.smartcommunitylab.pgazienda.repository;
 
-import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
-import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.DayStat;
 
 /**
  * @author raman
  *
  */
-public interface CampaignRepository  extends MongoRepository<Campaign, String> {
-	
-	@Query("{active: true, from: {$lte: ?0}, to: {$gte: ?0}}")
-	public Page<Campaign> findActive(LocalDate date, Pageable pageable);
+public interface DayStatRepository  extends MongoRepository<DayStat, String> {
 
-	@Query("{id: {$in: ?0}}")
-	public List<Campaign> findByIdIn(Collection<String> ids);
+	public List<DayStat> findByPlayerIdAndCampaign(String playerId, String campaign);
 
-	public List<Campaign> findByApplication(String app);
+	@Query("{playerId:?0, campaign:?1, date : {$gte:?2 , $lt: ?3}}")
+	public List<DayStat> findByPlayerIdAndCampaignAndPeriod(String playerId, String campaign, String from, String to);
+
+	@Query("{playerId:?0, campaign:?1, date : ?2}")
+	public DayStat findOneByPlayerIdAndCampaignAndDate(String key, String id, String date);
 }

@@ -1,0 +1,66 @@
+{
+  "apps": [
+    {
+      "id": "ferraraplaygo2020",
+      "name": "Ferrara Play&Go",
+      "password": "password",
+      "endpoint": "https://ferrara.smartcommunitylab.it/playandgo/gamification/trackingdata"
+    }
+  ],
+  "campaigns": [
+    {
+      "active": true,
+      "application": "ferraraplaygo2020",
+      "description": "Ferrara Play&Go Aziendale Bici",
+      "from": "2020-11-01",
+      "id": "ferrara_bike2work",
+      "means": [
+        "bike"
+      ],
+      "title": "Ferrara Bike2Work",
+      "to": "2022-12-31"
+    }
+  ],
+  "companies": [
+    {
+      "address": "Piazza del Municipio 2, Ferrara, 44121",
+      "campaigns": [
+        "ferrara_bike2work"
+      ],
+      "code": "comunediferrara",
+      "contactEmail": "urp@comune.fe.it",
+      "contactPhone": "+390532419111",
+      "enabledApps": [
+        "ferraraplaygo2020"
+      ],
+      "locations": [
+        {
+          "address": "Piazza del Municipio",
+          "city": "Ferrara",
+          "country": "Italy",
+          "id": "main",
+          "latitute": 44.836158,
+          "longitude": 11.619019,
+          "province": "Ferrara",
+          "radius": 200,
+          "region": "Emilia-Romagna",
+          "streetNumber": "2",
+          "zip": "44121"
+        }
+      ],
+      "logo": "https://www.comune.fe.it/pix/logo.png",
+      "name": "Comune di Ferrara",
+      "web": "https://www.comune.fe.it/"
+    }
+  ],
+  "companyUsers": [
+    {
+      "companyCode": "comunediferrara",
+      "name": "Admin",
+      "role": "ROLE_COMPANY_ADMIN",
+      "surname": "ComuneDiFerrara",
+      "username": "bike2work@comune.fe.it",
+      "password": "123456"
+    }
+  ]
+}

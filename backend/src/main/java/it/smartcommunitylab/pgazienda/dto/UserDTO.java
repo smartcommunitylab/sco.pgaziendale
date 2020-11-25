@@ -14,34 +14,24 @@
  *    limitations under the License.
  ******************************************************************************/
 
-package it.smartcommunitylab.pgazienda.domain;
+package it.smartcommunitylab.pgazienda.dto;
 
-import org.springframework.data.annotation.Id;
+import java.util.List;
 
 /**
  * @author raman
  *
  */
-public class PGApp {
+public class UserDTO {
 
-	@Id
-	private String id;
 	private String name;
+	private String surname;
+	private String companyCode;
+	private String username;
+	private String role;
 	private String password;
-	private String endpoint;
 	
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
+	private List<String> locations;
 	/**
 	 * @return the name
 	 */
@@ -53,6 +43,54 @@ public class PGApp {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+	/**
+	 * @return the surname
+	 */
+	public String getSurname() {
+		return surname;
+	}
+	/**
+	 * @param surname the surname to set
+	 */
+	public void setSurname(String surname) {
+		this.surname = surname;
+	}
+	/**
+	 * @return the companyCode
+	 */
+	public String getCompanyCode() {
+		return companyCode;
+	}
+	/**
+	 * @param companyCode the companyCode to set
+	 */
+	public void setCompanyCode(String companyCode) {
+		this.companyCode = companyCode;
+	}
+	/**
+	 * @return the username
+	 */
+	public String getUsername() {
+		return username;
+	}
+	/**
+	 * @param username the username to set
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	/**
+	 * @return the role
+	 */
+	public String getRole() {
+		return role;
+	}
+	/**
+	 * @param role the role to set
+	 */
+	public void setRole(String role) {
+		this.role = role;
 	}
 	/**
 	 * @return the password
@@ -67,24 +105,16 @@ public class PGApp {
 		this.password = password;
 	}
 	/**
-	 * @return
+	 * @return the locations
 	 */
-	public PGApp cleanPassword() {
-		this.password = null;
-		return this;
+	public List<String> getLocations() {
+		return locations;
 	}
 	/**
-	 * @return the endpoint
+	 * @param locations the locations to set
 	 */
-	public String getEndpoint() {
-		return endpoint;
+	public void setLocations(List<String> locations) {
+		this.locations = locations;
 	}
-	/**
-	 * @param endpoint the endpoint to set
-	 */
-	public void setEndpoint(String endpoint) {
-		this.endpoint = endpoint;
-	}
-	
 	
 }

@@ -171,15 +171,7 @@ public class CampaignService {
 	 * @param campaign
 	 * @return
 	 */
-	public Campaign createCampaign(Campaign campaign) {
-		return campaignRepo.save(campaign);
-	}
-
-	/**
-	 * @param campaign
-	 * @return
-	 */
-	public Campaign updateCampaign(Campaign campaign) {
+	public Campaign saveCampaign(Campaign campaign) {
 		return campaignRepo.save(campaign);
 	}
 

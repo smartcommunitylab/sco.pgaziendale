@@ -17,6 +17,7 @@
 package it.smartcommunitylab.pgazienda.domain;
 
 import java.time.LocalDate;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
@@ -31,10 +32,12 @@ import org.springframework.data.annotation.Id;
 public class Campaign {
 
 	@Id
+	@NotEmpty
 	private String id;
 	@NotEmpty
 	private String title;
 	private String description;
+	private String logo;
 	
 	@NotEmpty
 	private String application;
@@ -44,7 +47,7 @@ public class Campaign {
 	@NotNull
 	private LocalDate to;
 	private Boolean active;
-	private List<String> means;
+	private List<String> means = new LinkedList<>();
 	/**
 	 * @return the id
 	 */
@@ -140,6 +143,18 @@ public class Campaign {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	/**
+	 * @return the logo
+	 */
+	public String getLogo() {
+		return logo;
+	}
+	/**
+	 * @param logo the logo to set
+	 */
+	public void setLogo(String logo) {
+		this.logo = logo;
 	}
 
 }
