@@ -9,6 +9,13 @@ import "./assets/styles/index.css";
 import settings from './myTheme.js'
 import store from './store/store'
 import axios from 'axios'
+import InformationOutlineIcon from 'vue-material-design-icons/InformationOutline.vue';
+import PencilOutlineIcon from 'vue-material-design-icons/PencilOutline.vue';
+import LoginIcon from 'vue-material-design-icons/LoginVariant.vue';
+import LogoutIcon from 'vue-material-design-icons/LogoutVariant.vue';
+import ArrowLeftIcon from 'vue-material-design-icons/ArrowLeft.vue';
+import ChartBarIcon from 'vue-material-design-icons/ChartBarStacked.vue';
+import ListCampaingsIcon from 'vue-material-design-icons/FormatListText.vue';
 
 
 Vue.config.productionTip = false
@@ -36,3 +43,11 @@ new Vue({
   router,
   store,
 }).$mount('#app')
+Vue.component('info-outline-icon', InformationOutlineIcon);
+Vue.component('pencil-outline-icon', PencilOutlineIcon);
+Vue.component('login-icon', LoginIcon);
+Vue.component('logout-icon', LogoutIcon);
+Vue.component('arrow-left-icon', ArrowLeftIcon);
+Vue.component('chart-bar-icon', ChartBarIcon);
+Vue.component('list-campaigns-icon', ListCampaingsIcon);
+
