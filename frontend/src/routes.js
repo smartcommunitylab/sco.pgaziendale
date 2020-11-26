@@ -4,7 +4,9 @@ import Homepage from "./Pagine/Homepage.vue";
 import Info from "./Pagine/Info.vue";
 import Contatti from "./Pagine/Contatti.vue";
 import Campagne from "./Pagine/Campagne.vue";
-import Campagna from "./Pagine/Campagna.vue";
+import Campagna from "./Pagine/Campagna/Campagna.vue";
+import Privacy from "./Pagine/Campagna/Privacy.vue";
+import Rules from "./Pagine/Campagna/Rules.vue";
 import Callback from "./Pagine/Callback.vue";
 import Logout from "./Pagine/Logout.vue";
 import MyPerformance from "./Pagine/MyPerformance.vue";
@@ -71,7 +73,43 @@ const routes = [
           next('/')
         }
       }
+    },
+    {
+      path: '/rules/:id',
+      name: 'rules',
+      component: Rules,
+      beforeEnter (to, from, next) {
+        if (store.getters.isAuthenticated) {
+          next()
+        } else {
+          next('/')
+        }
+      }
+    },
+    {
+      path: '/send-request/:id',
+      name: 'sendrequest',
+      component: MyPerformance,
+      beforeEnter (to, from, next) {
+        if (store.getters.isAuthenticated) {
+          next()
+        } else {
+          next('/')
+        }
+      }},
+    {
+      path: '/privacy/:id',
+      name: 'privacy',
+      component: Privacy,
+      beforeEnter (to, from, next) {
+        if (store.getters.isAuthenticated) {
+          next()
+        } else {
+          next('/')
+        }
+      }
     }
+    
   ];
 
   export default routes;

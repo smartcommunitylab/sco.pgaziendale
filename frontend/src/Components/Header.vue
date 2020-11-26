@@ -83,12 +83,52 @@
             <span>Indietro</span></span
           ></router-link
         >
-        <router-link to="/la-mia-performance/1">
+          <router-link :to="{ name: 'campagna', params: { id: campagna.id }}">
+          <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
+            ><span class="mr-2">
+              <chart-bar-icon />
+            </span>
+            <span>Campagna</span></span
+          >
+        </router-link>
+        <router-link :to="{ name: 'myperformance', params: { id: campagna.id }}">
           <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
             ><span class="mr-2">
               <chart-bar-icon />
             </span>
             <span>Le mie performance</span></span
+          >
+        </router-link>
+        <router-link :to="{ name: 'rules', params: { id: campagna.id }}">
+          <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
+            ><span class="mr-2">
+              <rules-icon />
+            </span>
+            <span>Regolamento</span></span
+          >
+        </router-link>
+                <router-link :to="{ name: 'sendrequest', params: { id: campagna.id }}">
+          <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
+            ><span class="mr-2">
+              <chart-bar-icon />
+            </span>
+            <span>Invia Richiesta</span></span
+          >
+        </router-link>
+                <router-link :to="{ name: 'privacy', params: { id: campagna.id }}">
+          <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
+            ><span class="mr-2">
+              <chart-bar-icon />
+            </span>
+            <span>Privacy Policy</span></span
+          >
+        </router-link>
+                <router-link  to="/" v-on:click.native="leaveCampaign">
+          <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
+            ><span class="mr-2">
+              <chart-bar-icon />
+            </span>
+            <span>Abbandona campagna</span></span
           >
         </router-link>
       </div>
@@ -113,6 +153,9 @@ export default {
       this.$store.dispatch("exitCampagna").then(() => {
         this.$router.push("campagne").catch(() => {});
       });
+    },
+    leaveCampaign() {
+      //quit campaign
     },
     onLogout() {
       this.$store.dispatch("logout");
@@ -145,7 +188,7 @@ export default {
       return this.$store.getters.isAuthenticated;
     },
     campagna() {
-      return this.$store.getters.campagna != null;
+      return this.$store.getters.campagna;
     },
   },
 };

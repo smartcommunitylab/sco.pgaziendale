@@ -69,6 +69,7 @@
 export default {
   name: "CampaignCard",
   props: {
+    id:String,
     title: String,
     description: String,
     active: Boolean,
@@ -91,7 +92,7 @@ export default {
   },
   methods: {
     dettaglio() {
-      this.$store.dispatch('enterCampagna',{id:'1'}).then(() => {
+      this.$store.dispatch('enterCampagna',{id:this.id}).then(() => {
         this.$router.push({name:'campagna',params: { id: '1' }}).catch(()=>{});
        })
     }

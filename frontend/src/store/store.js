@@ -14,10 +14,10 @@ export default new Vuex.Store({
   },
   mutations: {
       initApp (state) {
-state.idToken=null;
-state.userId=null;
-state.user=null;
-    state.campagna=null;
+        state.idToken=null;
+        state.userId=null;
+        state.user=null;
+        state.campagna=null;
       },
     authUser (state, userData) {
       state.idToken = userData.token

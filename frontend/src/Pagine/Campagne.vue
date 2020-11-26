@@ -15,6 +15,7 @@
           <campaign-card
             class=""
             :key="campaign.id"
+            :id="campaign.id"
             :title="campaign.title"
             :description="campaign.description"
             :startDate="campaign.startDate"
