@@ -13,6 +13,12 @@ export default new Vuex.Store({
     campagna:null
   },
   mutations: {
+      initApp (state) {
+state.idToken=null;
+state.userId=null;
+state.user=null;
+    state.campagna=null;
+      },
     authUser (state, userData) {
       state.idToken = userData.token
       state.userId = userData.userId
@@ -32,6 +38,10 @@ export default new Vuex.Store({
     }
   },
   actions: {
+      initApp({commit}) {
+        commit('initApp')
+
+    },
     enterCampagna ({commit}, campagna) {
         commit('enterCampagna',campagna)
 
