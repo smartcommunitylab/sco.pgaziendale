@@ -20,11 +20,17 @@
 </template>
 
 <script>
+import { AUTH } from '../variables.js'
+
 export default {
   name: "Homepage",
   methods: {
     login() {
-      return window.open("https://tn.smartcommunitylab.it/aac/eauth/authorize?response_type=token&client_id=ec03a596-e41e-49cc-808c-62f39e01de0b&redirect_uri=http://localhost:8080/callback","_self")
+      var authUrl=AUTH.AUTH_URL;
+      var tokenId=AUTH.TOKEN_ID;
+      var redirectUri=AUTH.REDIRECT_URI;
+      return window.open(authUrl+"response_type=token&client_id="+tokenId+"&redirect_uri="+redirectUri,"_self")
+
     }
   },
 };
