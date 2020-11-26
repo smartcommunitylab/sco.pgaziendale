@@ -28,7 +28,7 @@
         </button>
         <ul
           class="bg-white border rounded-sm transform scale-0 group-hover:scale-100 absolute 
-  transition duration-150 ease-in-out origin-top min-w "
+       transition duration-150 ease-in-out origin-top min-w "
         >
           <template v-for="element in getOtherOptions()">
             <li
@@ -42,6 +42,24 @@
         </ul>
       </div>
     </div>
+
+    <div class="pt-2">
+      <nav class="flex flex-row text-white">
+        <button
+          class="flex-1 py-4 px-6 block focus:outline-none border-b-2 font-medium "
+          :class="mode == 'TAB' ? 'border-white border-b-4' : ''"
+          @click="changeMode('TAB')"
+        >
+          Tabella</button
+        ><button
+          class="flex-1 py-4 px-6 block  focus:outline-none"
+          :class="mode == 'GRAPH' ? 'border-white border-b-4' : ''"
+          @click="changeMode('GRAPH')"
+        >
+          Grafico
+        </button>
+      </nav>
+    </div>
   </div>
 </template>
 
@@ -52,6 +70,7 @@ export default {
     return {
       stats: [],
       currentOption: "KM",
+      mode: "TAB",
     };
   },
   methods: {
@@ -64,6 +83,10 @@ export default {
     },
     changeCurrentOption(id) {
       this.currentOption = id;
+    },
+    changeMode(mode) {
+      if (this.mode == mode) return;
+      this.mode = mode;
     },
     getOtherOptions() {
       let options = [
