@@ -87,7 +87,7 @@ public class CampaignResource {
      * @param company
      * @return
      */
-    @PutMapping("//campaigns/{campaignId:.*}")
+    @PutMapping("/campaigns/{campaignId:.*}")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
 	public ResponseEntity<Campaign> updateCampaign( @PathVariable String campaignId, @Valid @RequestBody Campaign campaign) {
     	log.debug("Updating a campaign {}", campaignId);
@@ -149,7 +149,7 @@ public class CampaignResource {
      * @param companyId
      * @return
      */
-    @GetMapping("/campaigns/me")
+    @GetMapping("/campaigns/user/me")
 	public ResponseEntity<List<Campaign>> getUserCampaigns() {
     	log.debug("Read campaigns");
     	return ResponseEntity.ok(campaignService.getUserCampaigns());

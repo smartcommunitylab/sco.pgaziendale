@@ -2,8 +2,11 @@ version: "3"
 
 services:
   mongo:
-    image: mongo:3.6.2-jessie
+    image: mongo:latest
     container_name: pgazienda-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: pgazienda
+      MONGO_INITDB_ROOT_PASSWORD: pgazienda   
     ports:
       - "50000:27017"
     volumes:
@@ -14,6 +17,7 @@ services:
     container_name: pgazienda
     ports:
       - "8010:8080"
+      - "7878:7878"
     depends_on:
       - mongo
     links:
