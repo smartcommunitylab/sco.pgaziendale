@@ -63,26 +63,29 @@
       </div>
     </div>
 
-    <div class="bg-white py-2">
-      <template v-if="mode == 'TAB'">
-        <table class="table-fixed justify-center text-center w-full text-xl">
-          <thead>
-            <tr>
-              <th class="w-1/2 ">Mesi</th>
-              <th class="w-1/2 ">{{ getCurrentOption() }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template v-for="element in stats">
-              <tr :key="element.month">
-                <td>{{ element.month }}</td>
-                <td>{{ element[currentOption] }}</td>
-              </tr></template
-            >
-          </tbody>
-        </table>
-      </template>
-      <template v-else></template>
+    <div class="bg-white py-2 ">
+      <table
+        v-show="mode == 'TAB'"
+        class="table-fixed justify-center text-center w-full text-xl"
+      >
+        <thead>
+          <tr>
+            <th class="w-1/2 ">Mesi</th>
+            <th class="w-1/2 ">{{ getCurrentOption() }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="element in stats">
+            <tr :key="element.month">
+              <td>{{ element.month }}</td>
+              <td>{{ element[currentOption] }}</td>
+            </tr></template
+          >
+        </tbody>
+      </table>
+      <div id="chart_container" v-show="mode == 'GRAPH'">
+        <canvas ref="canvas"></canvas>
+      </div>
     </div>
   </div>
 </template>
@@ -95,6 +98,7 @@ export default {
       stats: [],
       currentOption: "KM",
       mode: "TAB",
+      chart: undefined,
     };
   },
   methods: {
@@ -112,6 +116,7 @@ export default {
       if (this.mode == mode) return;
       this.mode = mode;
     },
+
     getOtherOptions() {
       let options = [
         { id: "KM", text: "Km Totali" },
@@ -153,6 +158,58 @@ export default {
         TRIPS: trips[i],
       });
     }
+
+    let Chart = require("chart.js");
+    let ctx = this.$refs.canvas;
+
+    let config = {
+      type: "line",
+      data: {
+        labels: months,
+        datasets: [
+          {
+            label: "",
+            borderColor: "rgb(25, 112, 183)",
+            data: this.stats.map((element) => element.KM),
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        legend: { display: false },
+        responsive: true,
+
+        tooltips: {
+          mode: "index",
+          intersect: false,
+        },
+        hover: {
+          mode: "nearest",
+          intersect: true,
+        },
+        scales: {
+          xAxes: [
+            {
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: "Mesi",
+              },
+            },
+          ],
+          yAxes: [
+            {
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: "Km",
+              },
+            },
+          ],
+        },
+      },
+    };
+    this.chart = new Chart(ctx, config);
   },
 };
 </script>
