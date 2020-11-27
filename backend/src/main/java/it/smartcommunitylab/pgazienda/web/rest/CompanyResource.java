@@ -16,6 +16,8 @@
 
 package it.smartcommunitylab.pgazienda.web.rest;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -66,6 +68,17 @@ public class CompanyResource {
     	log.debug("List companies");
 		return ResponseEntity.ok(companyService.getCompanies(pageable));
 	}
+
+    /**
+     * List of companies assigned to the campaign
+     * @param campaignId
+     * @return
+     */
+    @GetMapping("/companies/campaign/{campaignId}")
+    public ResponseEntity<List<Company>> getCampaignCompanies(@PathVariable String campaignId) {
+    	return ResponseEntity.ok(companyService.getCampaignCompanies(campaignId));
+    }
+    
     /**
      * Create a new company
      * @param company

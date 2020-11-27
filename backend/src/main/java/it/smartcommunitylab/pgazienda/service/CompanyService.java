@@ -111,6 +111,16 @@ public class CompanyService {
 		return Optional.empty();
 	}
 
+
+	/**
+	 * List of companies assigned to a campaign
+	 * @param id
+	 * @return
+	 */
+	public List<Company> getCampaignCompanies(String id) {
+		return companyRepo.findByCampaign(id);
+	}
+	
 	/**
 	 * @param companyId
 	 * @param campaignId

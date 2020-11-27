@@ -16,6 +16,7 @@
 
 package it.smartcommunitylab.pgazienda.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -39,4 +40,7 @@ public interface CompanyRepository  extends MongoRepository<Company, String> {
 	 * @return
 	 */
 	Optional<Company> findOneByCode(String companyCode);
+
+	@Query("{campaigns: $0}")
+	List<Company> findByCampaign(String id);
 }
