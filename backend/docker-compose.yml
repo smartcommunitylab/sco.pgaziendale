@@ -2,15 +2,14 @@ version: "3"
 
 services:
   mongo:
-    image: mongo:3.6.2-jessie
+    image: mongo:4.2.6
     container_name: pgazienda-mongo
     ports:
       - "50000:27017"
     volumes:
       - mongo-data:/data/db
   pgazienda:
-    build: 
-      context: .
+    image: smartcommunitylab/pgazienda-backend
     container_name: pgazienda
     ports:
       - "8010:8080"
