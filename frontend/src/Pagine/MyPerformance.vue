@@ -83,8 +83,12 @@
           >
         </tbody>
       </table>
-      <div id="chart_container" v-show="mode == 'GRAPH'">
-        <canvas ref="canvas"></canvas>
+      <div
+        id="chart_container"
+        v-show="mode == 'GRAPH'"
+        class="relative h-screen"
+      >
+        <canvas ref="canvas" class="h-full"></canvas>
       </div>
     </div>
   </div>
@@ -111,6 +115,27 @@ export default {
     },
     changeCurrentOption(id) {
       this.currentOption = id;
+
+      this.updateGraph(id);
+    },
+    updateGraph(id) {
+      let data = this.stats.map((element) => element[id]);
+
+      this.chart.data.datasets.pop();
+      this.chart.data.datasets.push({
+        label: "",
+        borderColor: "rgb(25, 112, 183)",
+        data: data,
+        fill: false,
+      });
+      let label = "Kilometri";
+      if (id == "CO2") label = "CO2 Salvata (Kg)";
+      else if (id == "TRIPS") label = "# Viaggi validi";
+
+      console.log(this.chart);
+      console.log(label);
+      this.chart.options.scales.yAxes[0].scaleLabel.labelString = label;
+      this.chart.update();
     },
     changeMode(mode) {
       if (this.mode == mode) return;
