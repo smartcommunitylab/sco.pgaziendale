@@ -44,17 +44,25 @@
         </div>
       </div>
 
-      <div class="pt-2">
+      <div class="pt-4">
         <nav class="flex flex-row text-white">
           <button
-            class="flex-1 py-4 px-6 block focus:outline-none border-b-2 font-medium "
-            :class="mode == 'TAB' ? 'border-green-500 border-b-4' : ''"
+            class="flex-1 py-4 px-6 block focus:outline-none font-medium "
+            :class="
+              mode == 'TAB'
+                ? 'border-green-500 border-b-4 bg-blue-400 rounded-t-sm'
+                : ''
+            "
             @click="changeMode('TAB')"
           >
             Tabella</button
           ><button
             class="flex-1 py-4 px-6 block  focus:outline-none"
-            :class="mode == 'GRAPH' ? ' border-green-500 border-b-4' : ''"
+            :class="
+              mode == 'GRAPH'
+                ? ' border-green-500 border-b-4 bg-blue-400 rounded-t-sm'
+                : ''
+            "
             @click="changeMode('GRAPH')"
           >
             Grafico
