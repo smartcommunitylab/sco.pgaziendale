@@ -6,7 +6,7 @@
       >
         Le Mie Performance
       </h1>
-      <div class="flex flex-col justify-center">
+      <div class="flex flex-col justify-center text-xl">
         <div class="group inline-block mx-auto">
           <button
             class="outline-none focus:outline-none border px-3 py-1 bg-white rounded-sm flex items-center min-w "
@@ -44,10 +44,10 @@
         </div>
       </div>
 
-      <div class="pt-4">
+      <div class="pt-4 text-xl">
         <nav class="flex flex-row text-white">
           <button
-            class="flex-1 py-4 px-6 block focus:outline-none font-medium "
+            class="flex-1 py-4 px-6 block focus:outline-none font-medium sm:bg-green-400"
             :class="
               mode == 'TAB'
                 ? 'border-green-500 border-b-4 bg-blue-400 rounded-t-sm'
@@ -71,7 +71,7 @@
       </div>
     </div>
 
-    <div class="bg-white py-2 ">
+    <div class=" bg-opacity-0 py-2 ">
       <table
         v-show="mode == 'TAB'"
         class="table-fixed justify-center text-center w-full text-xl"
@@ -91,12 +91,8 @@
           >
         </tbody>
       </table>
-      <div
-        id="chart_container"
-        v-show="mode == 'GRAPH'"
-        class="relative h-screen"
-      >
-        <canvas ref="canvas" class="h-full"></canvas>
+      <div id="chart_container" v-show="mode == 'GRAPH'" class="">
+        <canvas ref="canvas" class=""></canvas>
       </div>
     </div>
   </div>
