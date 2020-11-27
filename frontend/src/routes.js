@@ -4,8 +4,13 @@ import Homepage from "./Pagine/Homepage.vue";
 import Info from "./Pagine/Info.vue";
 import Contatti from "./Pagine/Contatti.vue";
 import Campagne from "./Pagine/Campagne.vue";
+import Campagna from "./Pagine/Campagna/Campagna.vue";
+import Privacy from "./Pagine/Campagna/Privacy.vue";
+import Rules from "./Pagine/Campagna/Rules.vue";
+import Callback from "./Pagine/Callback.vue";
+import Logout from "./Pagine/Logout.vue";
 import MyPerformance from "./Pagine/MyPerformance.vue";
-import store from './store/store'
+ import store from './store/store'
 
 const routes = [
     {
@@ -28,10 +33,32 @@ const routes = [
       name: 'campagne',
       component: Campagne,
       beforeEnter (to, from, next) {
-        if (store.state.idToken) {
+        if (store.getters.isAuthenticated) {
           next()
         } else {
-          next('/signin')
+          next('/')
+        }
+      }
+    },
+    {
+      path: '/callback',
+      name: 'callback',
+      component: Callback
+    },
+    {
+      path: '/logout',
+      name: 'logout',
+      component: Logout
+    },
+    {
+      path: '/campagna/:id',
+      name: 'campagna',
+      component: Campagna,
+      beforeEnter (to, from, next) {
+        if (store.getters.isAuthenticated) {
+          next()
+        } else {
+          next('/')
         }
       }
     },
@@ -40,13 +67,49 @@ const routes = [
       name: 'myperformance',
       component: MyPerformance,
       beforeEnter (to, from, next) {
-        if (store.state.idToken) {
+        if (store.getters.isAuthenticated) {
           next()
         } else {
-          next('/signin')
+          next('/')
+        }
+      }
+    },
+    {
+      path: '/rules/:id',
+      name: 'rules',
+      component: Rules,
+      beforeEnter (to, from, next) {
+        if (store.getters.isAuthenticated) {
+          next()
+        } else {
+          next('/')
+        }
+      }
+    },
+    {
+      path: '/send-request/:id',
+      name: 'sendrequest',
+      component: MyPerformance,
+      beforeEnter (to, from, next) {
+        if (store.getters.isAuthenticated) {
+          next()
+        } else {
+          next('/')
+        }
+      }},
+    {
+      path: '/privacy/:id',
+      name: 'privacy',
+      component: Privacy,
+      beforeEnter (to, from, next) {
+        if (store.getters.isAuthenticated) {
+          next()
+        } else {
+          next('/')
         }
       }
     }
+    
   ];
 
   export default routes;

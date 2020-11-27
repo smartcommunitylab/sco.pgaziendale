@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import routes from '../routes'
+// import routes from '../routes'
+// import axios from 'axios'
 
 Vue.use(Vuex)
 
@@ -8,9 +9,16 @@ export default new Vuex.Store({
   state: {
     idToken: null,
     userId: null,
-    user: null
+    user: null,
+    campagna:null
   },
   mutations: {
+      initApp (state) {
+        state.idToken=null;
+        state.userId=null;
+        state.user=null;
+        state.campagna=null;
+      },
     authUser (state, userData) {
       state.idToken = userData.token
       state.userId = userData.userId
@@ -21,9 +29,26 @@ export default new Vuex.Store({
     clearAuthData (state) {
       state.idToken = null
       state.userId = null
+    },
+    enterCampagna (state,campagna) {
+        state.campagna = campagna
+    },
+    exitCampagna(state) {
+        state.campagna = null
     }
   },
   actions: {
+      initApp({commit}) {
+        commit('initApp')
+
+    },
+    enterCampagna ({commit}, campagna) {
+        commit('enterCampagna',campagna)
+
+    },
+    exitCampagna ({commit}) {
+        commit('exitCampagna')
+    },
     setLogoutTimer ({commit}, expirationTime) {
       setTimeout(() => {
         commit('clearAuthData')
@@ -49,6 +74,19 @@ export default new Vuex.Store({
           dispatch('setLogoutTimer', res.data.expiresIn)
 
     },
+    loginWithToken ({commit, dispatch}, dataToken) {
+      
+        const now = new Date()
+        const expirationDate = new Date(now.getTime() + dataToken.expiresIn * 1000)
+        localStorage.setItem('token', dataToken.idToken)
+        localStorage.setItem('userId', 1)
+        localStorage.setItem('expirationDate', expirationDate)
+        commit('authUser', {
+          token: dataToken.idToken,
+          userId: 1
+        })
+        dispatch('setLogoutTimer', dataToken.expiresIn)
+  },
     login ({commit, dispatch}, authData) {
           console.log(authData)
         var res = {
@@ -86,11 +124,18 @@ export default new Vuex.Store({
       })
     },
     logout ({commit}) {
-      commit('clearAuthData')
-      localStorage.removeItem('expirationDate')
-      localStorage.removeItem('token')
-      localStorage.removeItem('userId')
-      routes.replace('/home')
+
+        // axios.get('https://tn.smartcommunitylab.it/aac/logout?target=http://localhost:8080/campagne')
+            // .then(res => {
+                commit('clearAuthData')
+                  localStorage.removeItem('expirationDate')
+                  localStorage.removeItem('token')
+                  localStorage.removeItem('userId')
+                //   console.log(res);
+                //   routes.replace('/home');
+            // })
+            // .catch(error => console.log(error))
+
     },
    },
   getters: {
@@ -99,6 +144,9 @@ export default new Vuex.Store({
     },
     isAuthenticated: state => {
       return state.idToken !== null
+    },
+    campagna: state => {
+        return state.campagna
     }
   }
 })

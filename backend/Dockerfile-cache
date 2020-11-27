@@ -1,0 +1,7 @@
+FROM maven:3-jdk-11 AS mvn
+COPY . /tmp
+WORKDIR /tmp
+RUN mvn install -DskipTests
+
+FROM alpine
+COPY --from=mvn /root/.m2 /root/.m2

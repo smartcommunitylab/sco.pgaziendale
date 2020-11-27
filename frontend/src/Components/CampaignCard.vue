@@ -51,7 +51,7 @@
         </template>
         <template v-else-if="!dFinished">
           <button
-            type="button"
+            type="button" @click="dettaglio"
             class="my-1  inline-flex items-center lg:ml-auto bg-transparent hover:bg-green-600  font-semibold hover:text-white py-1 px-4 border-2 border-green-600 hover:border-transparent rounded"
           >
             <img
@@ -69,6 +69,7 @@
 export default {
   name: "CampaignCard",
   props: {
+    id:String,
     title: String,
     description: String,
     active: Boolean,
@@ -89,7 +90,13 @@ export default {
       dUserInCampaign: false,
     };
   },
-
+  methods: {
+    dettaglio() {
+      this.$store.dispatch('enterCampagna',{id:this.id}).then(() => {
+        this.$router.push({name:'campagna',params: { id: '1' }}).catch(()=>{});
+       })
+    }
+    },
   mounted: function() {
     let data = this.endDate.split("-");
     let date = new Date(data[2], data[1], data[0]);

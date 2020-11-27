@@ -7,6 +7,7 @@
         Campagne Attive
       </h1>
       <hr class="mx-12" />
+
       <div
         class=" flex  flex-col sm:flex-row sm:flex-wrap sm:justify-center md:justify-start md:pl-12"
       >
@@ -14,6 +15,7 @@
           <campaign-card
             class=""
             :key="campaign.id"
+            :id="campaign.id"
             :title="campaign.title"
             :description="campaign.description"
             :startDate="campaign.startDate"
@@ -55,7 +57,7 @@
 import CampaignCard from "../Components/CampaignCard.vue";
 export default {
   name: "Campagne",
-  components: { CampaignCard },
+    components: { CampaignCard },
 
   data: function() {
     return {
@@ -66,9 +68,9 @@ export default {
     let x = require("../tmp-data/campaigns").campaigns;
     this.fakeCampaigns = x;
 
-    console.log(x);
-  },
+    console.log(x);  }
 };
 </script>
 
-<style></style>
+<style>
+</style>
