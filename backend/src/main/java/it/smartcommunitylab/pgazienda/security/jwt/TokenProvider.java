@@ -53,9 +53,9 @@ public class TokenProvider {
     @Value("${app.security.authentication.jwt.base64-secret}")
     private String tokenSecret;
     @Value("${app.security.authentication.jwt.token-validity-in-seconds}")
-    private long tokenValidityInMilliseconds;
+    private long tokenValidityInSeconds;
     @Value("${app.security.authentication.jwt.token-validity-in-seconds-for-remember-me}")
-    private long tokenValidityInMillisecondsForRememberMe;
+    private long tokenValidityInSecondsForRememberMe;
 
     @PostConstruct
     public void init() {
@@ -73,9 +73,9 @@ public class TokenProvider {
         long now = (new Date()).getTime();
         Date validity;
         if (rememberMe) {
-            validity = new Date(now + this.tokenValidityInMillisecondsForRememberMe);
+            validity = new Date(now + this.tokenValidityInSecondsForRememberMe * 1000);
         } else {
-            validity = new Date(now + this.tokenValidityInMilliseconds);
+            validity = new Date(now + this.tokenValidityInSeconds * 1000);
         }
 
         return Jwts.builder()

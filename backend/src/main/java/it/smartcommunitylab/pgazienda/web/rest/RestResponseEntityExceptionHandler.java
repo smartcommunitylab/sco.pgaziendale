@@ -19,6 +19,7 @@ package it.smartcommunitylab.pgazienda.web.rest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -82,6 +83,12 @@ public class RestResponseEntityExceptionHandler
 
     @ExceptionHandler(SecurityException.class)
     protected ResponseEntity<Object> handleAccess(
+      Exception ex, WebRequest request) {
+        return handleExceptionInternal(ex, new ErrorMsg("Insufficient rights"), 
+          new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
+    @ExceptionHandler(AccessDeniedException.class)
+    protected ResponseEntity<Object> handleAccessDenied(
       Exception ex, WebRequest request) {
         return handleExceptionInternal(ex, new ErrorMsg("Insufficient rights"), 
           new HttpHeaders(), HttpStatus.FORBIDDEN, request);
