@@ -1,64 +1,88 @@
 <template>
-  <div class="px-8 bg-blue-600">
-    <h1
-      class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
-    >
-      Le Mie Performance
-    </h1>
-    <div class="flex flex-col justify-center">
-      <div class="group inline-block mx-auto">
-        <button
-          class="outline-none focus:outline-none border px-3 py-1 bg-white rounded-sm flex items-center min-w "
-        >
-          <span class="pr-1 font-semibold flex-1">{{
-            getCurrentOption()
-          }}</span>
-          <span>
-            <svg
-              class="fill-current h-4 w-4 transform group-hover:-rotate-180
+  <div class="">
+    <div class="px-8 bg-blue-600">
+      <h1
+        class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
+      >
+        Le Mie Performance
+      </h1>
+      <div class="flex flex-col justify-center">
+        <div class="group inline-block mx-auto">
+          <button
+            class="outline-none focus:outline-none border px-3 py-1 bg-white rounded-sm flex items-center min-w "
+          >
+            <span class="pr-1 font-semibold flex-1">{{
+              getCurrentOption()
+            }}</span>
+            <span>
+              <svg
+                class="fill-current h-4 w-4 transform group-hover:-rotate-180
         transition duration-150 ease-in-out"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-              />
-            </svg>
-          </span>
-        </button>
-        <ul
-          class="bg-white border rounded-sm transform scale-0 group-hover:scale-100 absolute 
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
+                />
+              </svg>
+            </span>
+          </button>
+          <ul
+            class="bg-white border rounded-sm transform scale-0 group-hover:scale-100 absolute 
        transition duration-150 ease-in-out origin-top min-w "
-        >
-          <template v-for="element in getOtherOptions()">
-            <li
-              :key="element.id"
-              @click="changeCurrentOption(element.id)"
-              class=" select-none cursor-pointer text-center  rounded-sm px-3 py-1 hover:bg-gray-100 "
-            >
-              {{ element.text }}
-            </li>
-          </template>
-        </ul>
+          >
+            <template v-for="element in getOtherOptions()">
+              <li
+                :key="element.id"
+                @click="changeCurrentOption(element.id)"
+                class=" select-none cursor-pointer text-center  rounded-sm px-3 py-1 hover:bg-gray-100 "
+              >
+                {{ element.text }}
+              </li>
+            </template>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <nav class="flex flex-row text-white">
+          <button
+            class="flex-1 py-4 px-6 block focus:outline-none border-b-2 font-medium "
+            :class="mode == 'TAB' ? 'border-green-500 border-b-4' : ''"
+            @click="changeMode('TAB')"
+          >
+            Tabella</button
+          ><button
+            class="flex-1 py-4 px-6 block  focus:outline-none"
+            :class="mode == 'GRAPH' ? ' border-green-500 border-b-4' : ''"
+            @click="changeMode('GRAPH')"
+          >
+            Grafico
+          </button>
+        </nav>
       </div>
     </div>
 
-    <div class="pt-2">
-      <nav class="flex flex-row text-white">
-        <button
-          class="flex-1 py-4 px-6 block focus:outline-none border-b-2 font-medium "
-          :class="mode == 'TAB' ? 'border-white border-b-4' : ''"
-          @click="changeMode('TAB')"
-        >
-          Tabella</button
-        ><button
-          class="flex-1 py-4 px-6 block  focus:outline-none"
-          :class="mode == 'GRAPH' ? 'border-white border-b-4' : ''"
-          @click="changeMode('GRAPH')"
-        >
-          Grafico
-        </button>
-      </nav>
+    <div class="bg-white py-2">
+      <template v-if="mode == 'TAB'">
+        <table class="table-fixed justify-center text-center w-full text-xl">
+          <thead>
+            <tr>
+              <th class="w-1/2 ">Mesi</th>
+              <th class="w-1/2 ">{{ getCurrentOption() }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="element in stats">
+              <tr :key="element.month">
+                <td>{{ element.month }}</td>
+                <td>{{ element[currentOption] }}</td>
+              </tr></template
+            >
+          </tbody>
+        </table>
+      </template>
+      <template v-else></template>
     </div>
   </div>
 </template>
@@ -124,9 +148,9 @@ export default {
     for (let i = 0; i < kms.length; i++) {
       this.stats.push({
         month: months[i],
-        kms: kms[i],
-        co2: co2[i],
-        trips: trips[i],
+        KM: kms[i],
+        CO2: co2[i],
+        TRIPS: trips[i],
       });
     }
   },
@@ -145,5 +169,9 @@ export default {
 }
 .min-w {
   min-width: 10rem;
+}
+
+td {
+  @apply py-2;
 }
 </style>
