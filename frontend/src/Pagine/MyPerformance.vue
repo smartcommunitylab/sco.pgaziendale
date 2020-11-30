@@ -7,41 +7,16 @@
         Le Mie Performance
       </h1>
       <div class="flex flex-col justify-center text-md">
-        <div class="group inline-block mx-auto">
-          <button
-            class="outline-none focus:outline-none border px-3 py-1 bg-white rounded-sm flex items-center min-w "
-          >
-            <span class="pr-1 font-semibold flex-1">{{
-              getCurrentOption()
-            }}</span>
-            <span>
-              <svg
-                class="fill-current h-4 w-4 transform group-hover:-rotate-180
-        transition duration-150 ease-in-out"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-                />
-              </svg>
-            </span>
-          </button>
-          <ul
-            class="bg-white border rounded-sm transform scale-0 group-hover:scale-100 absolute 
-       transition duration-150 ease-in-out origin-top min-w "
-          >
-            <template v-for="element in getOtherOptions()">
-              <li
-                :key="element.id"
-                @click="changeCurrentOption(element.id)"
-                class=" select-none cursor-pointer text-center  rounded-sm px-3 py-1 hover:bg-gray-100 "
-              >
-                {{ element.text }}
-              </li>
-            </template>
-          </ul>
-        </div>
+        <context-menu
+          ref="menu"
+          class="mx-auto"
+          @click.native="changeDataType()"
+          v-bind:_options="[
+            { name: 'CO2', view_name: 'CO2 Salvata', default: false },
+            { name: 'KM', view_name: 'Kilometri', default: true },
+            { name: 'TRIPS', view_name: 'Viaggi Validi', default: false },
+          ]"
+        />
       </div>
 
       <div class="pt-2 text-md">
@@ -75,14 +50,14 @@
         <thead>
           <tr>
             <th class="w-1/2 ">Mesi</th>
-            <th class="w-1/2 ">{{ getCurrentOption() }}</th>
+            <th class="w-1/2 ">{{ option_selected.view_name }}</th>
           </tr>
         </thead>
         <tbody>
           <template v-for="element in stats">
             <tr :key="element.month">
               <td>{{ element.month }}</td>
-              <td>{{ element[currentOption] }}</td>
+              <td>{{ element[getDataType()] }}</td>
             </tr></template
           >
         </tbody>
@@ -95,27 +70,31 @@
 </template>
 
 <script>
+import ContextMenu from "../Components/ContextMenu.vue";
 export default {
+  components: { ContextMenu },
   name: "MyPerformance",
   data: function() {
     return {
       stats: [],
-      currentOption: "KM",
       mode: "TAB",
       chart: undefined,
+      option_selected: {},
     };
   },
   methods: {
-    getCurrentOption() {
-      let toRtn = "Km Totali";
-      if (this.currentOption == "CO2") toRtn = "CO2 Salvata";
-      else if (this.currentOption == "TRIPS") toRtn = "Viaggi Validi";
+    getDataType() {
+      return this.option_selected.name;
+    },
+    changeDataType: function() {
+      let option = this.$refs["menu"].getCurrentOption();
+      if (option.name == this.option_selected) return;
 
-      return toRtn;
+      this.option_selected = option;
+      this.changeCurrentOption(this.option_selected.name);
+      console.log(option.name);
     },
     changeCurrentOption(id) {
-      this.currentOption = id;
-
       this.updateGraph(id);
     },
     updateGraph(id) {
@@ -140,24 +119,6 @@ export default {
     changeMode(mode) {
       if (this.mode == mode) return;
       this.mode = mode;
-    },
-
-    getOtherOptions() {
-      let options = [
-        { id: "KM", text: "Km Totali" },
-        { id: "CO2", text: "CO2 Salvata" },
-        { id: "TRIPS", text: "Viaggi Validi" },
-      ];
-
-      let toRtn = [];
-
-      options.forEach((element) => {
-        if (this.currentOption != element.id) {
-          toRtn.push(element);
-        }
-      });
-
-      return toRtn;
     },
   },
   mounted: function() {
@@ -235,6 +196,8 @@ export default {
       },
     };
     this.chart = new Chart(ctx, config);
+
+    this.option_selected = { name: "KM", view_name: "Kilometri" };
   },
 };
 </script>
