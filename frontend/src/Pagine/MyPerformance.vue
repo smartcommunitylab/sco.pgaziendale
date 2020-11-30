@@ -6,7 +6,7 @@
       >
         Le Mie Performance
       </h1>
-      <div class="flex flex-col justify-center text-xl">
+      <div class="flex flex-col justify-center text-md">
         <div class="group inline-block mx-auto">
           <button
             class="outline-none focus:outline-none border px-3 py-1 bg-white rounded-sm flex items-center min-w "
@@ -44,24 +44,20 @@
         </div>
       </div>
 
-      <div class="pt-4 text-xl">
+      <div class="pt-2 text-md">
         <nav class="flex flex-row text-white">
           <button
-            class="flex-1 py-4 px-6 block focus:outline-none font-medium sm:bg-green-400"
+            class="flex-1 py-2 px-6 block focus:outline-none font-medium sm:bg-green-400 hover:bg-blue-700"
             :class="
-              mode == 'TAB'
-                ? 'border-green-500 border-b-4 bg-blue-400 rounded-t-sm'
-                : ''
+              mode == 'TAB' ? 'border-blue-300 border-b-4 text-blue-300' : ''
             "
             @click="changeMode('TAB')"
           >
             Tabella</button
           ><button
-            class="flex-1 py-4 px-6 block  focus:outline-none"
+            class="flex-1 py-2 px-6 block  focus:outline-none hover:bg-blue-700"
             :class="
-              mode == 'GRAPH'
-                ? ' border-green-500 border-b-4 bg-blue-400 rounded-t-sm'
-                : ''
+              mode == 'GRAPH' ? ' border-blue-300 border-b-4 text-blue-300' : ''
             "
             @click="changeMode('GRAPH')"
           >
