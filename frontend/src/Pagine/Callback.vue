@@ -35,7 +35,6 @@ export default {
     axios
       .get(
         BASE_URL + TOKEN_API,
-
         { headers }
       )
       .then((res) => {

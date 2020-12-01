@@ -1,5 +1,6 @@
 <template>
   <div class="bg-blue-600">
+  {{user.username}}
     <div>
       <h1
         class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
@@ -55,6 +56,7 @@
 
 <script>
 import CampaignCard from "../Components/CampaignCard.vue";
+import DataApi from "../communication/dataApi"
 export default {
   name: "Campagne",
     components: { CampaignCard },
@@ -62,13 +64,20 @@ export default {
   data: function() {
     return {
       fakeCampaigns: [],
+      user:{}
     };
   },
   mounted: function() {
     let x = require("../tmp-data/campaigns").campaigns;
     this.fakeCampaigns = x;
-
-    console.log(x);  }
+    console.log(x);  
+    DataApi.getUser().then(res => {
+      console.log(res)
+      this.user=res.data;
+    }, err => {
+      console.log(err)
+    })
+    }
 };
 </script>
 
