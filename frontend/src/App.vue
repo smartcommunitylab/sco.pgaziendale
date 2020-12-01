@@ -14,7 +14,8 @@ export default {
     appHeader: Header,
   },
   created () {
-      this.$store.dispatch('tryAutoLogin').then(() => {
+      this.$store.dispatch('tryAutoLogin').then(logged => {
+      if (logged) 
         this.$router.push('campagne').catch(()=>{});
    })
     }
