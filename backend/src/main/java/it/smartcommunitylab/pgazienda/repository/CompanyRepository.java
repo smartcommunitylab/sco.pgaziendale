@@ -41,6 +41,6 @@ public interface CompanyRepository  extends MongoRepository<Company, String> {
 	 */
 	Optional<Company> findOneByCode(String companyCode);
 
-	@Query("{campaigns: $0}")
+	@Query("{campaigns:?0}")
 	List<Company> findByCampaign(String id);
 }
