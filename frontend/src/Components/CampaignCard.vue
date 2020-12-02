@@ -99,7 +99,7 @@ export default {
     },
   mounted: function() {
     let data = this.endDate.split("-");
-    let date = new Date(data[2], data[1], data[0]);
+    let date = new Date(data[0], data[1], data[2]);
     if (date < new Date()) this.dFinished = true;
   },
 };
