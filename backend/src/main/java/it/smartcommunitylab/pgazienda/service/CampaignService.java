@@ -113,9 +113,9 @@ public class CampaignService {
 		// app user role
 		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 		// not yet subscribed
-		if (role == null || !role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId))) {
-			Employee employee = employeeRepo.findOneByCode(key).orElse(null);
-			if (employee == null || !employee.getCompanyId().equals(company.getId())) throw new IllegalArgumentException("Invalid user key");
+		if (role == null || role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId))) {
+			Employee employee = employeeRepo.findOneByCompanyIdAndCode(company.getId(), key).orElse(null);
+			if (employee == null ) throw new IllegalArgumentException("Invalid user key");
 			if (employee.getCampaigns() == null) employee.setCampaigns(new LinkedList<>());
 			if (!employee.getCampaigns().contains(campaignId)) {
 				employee.getCampaigns().add(campaignId);
@@ -141,11 +141,13 @@ public class CampaignService {
 		if (user == null) throw new IllegalArgumentException("Invalid user");
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) return;
+		Company company = companyRepo.findOneByCode(companyCode).orElse(null);
+		if (company == null || company.getCampaigns() == null || !company.getCampaigns().contains(campaignId)) return;
 		// app user role
 		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 		// not yet subscribed
 		if (role != null && role.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaignId))) {
-			Employee employee = employeeRepo.findOneByCode(key).orElse(null);
+			Employee employee = employeeRepo.findOneByCompanyIdAndCode(company.getId(), key).orElse(null);
 			if (employee != null && employee.getCampaigns().contains(campaignId)) {
 				employee.getCampaigns().remove(campaignId);
 				employeeRepo.save(employee);
