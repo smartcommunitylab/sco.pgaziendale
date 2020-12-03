@@ -18,7 +18,7 @@ export default   {
           
     },
     subscribeCampaing(campaignId,companyCode,key) {
-        return axios.put(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+SUBSCRIBE+companyCode+key)
+        return axios.put(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+SUBSCRIBE+companyCode+'/'+key)
         .then(result => { console.log(result); return result; })
         .catch(error => { console.error(error); return Promise.reject(error); });
     }

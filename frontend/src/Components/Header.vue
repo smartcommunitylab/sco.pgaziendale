@@ -91,7 +91,7 @@
             <span>Campagna</span></span
           >
         </router-link>
-        <router-link :to="{ name: 'myperformance', params: { id: campagna.id }}">
+        <router-link :to="{ name: 'myperformance', params: { id: campagna.id }}" v-if="campagna.userInCampaign">
           <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
             ><span class="mr-2">
               <chart-bar-icon />
@@ -107,7 +107,7 @@
             <span>Regolamento</span></span
           >
         </router-link>
-                <router-link :to="{ name: 'sendrequest', params: { id: campagna.id }}">
+           <router-link :to="{ name: 'sendrequest', params: { id: campagna.id }}">
           <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
             ><span class="mr-2">
               <chart-bar-icon />
@@ -123,27 +123,29 @@
             <span>Privacy Policy</span></span
           >
         </router-link>
-                <router-link  to="/" v-on:click.native="leaveCampaign">
+          <div  @click="leaveCampaign" v-if="campagna.userInCampaign">
           <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
             ><span class="mr-2">
               <chart-bar-icon />
             </span>
             <span>Abbandona campagna</span></span
           >
-        </router-link>
+        </div>
       </div>
+
     </aside>
+
   </nav>
 </template>
 
 <script>
 import { AUTH } from '../variables.js'
+import EventBus from '../communication/eventBus';
 
 export default {
   data() {
     return {
-      isOpen: false,
-    };
+      isOpen: false    };
   },
   methods: {
     drawer() {
@@ -156,6 +158,7 @@ export default {
     },
     leaveCampaign() {
       //quit campaign
+      EventBus.$emit('LEAVE_CAMPAIGN');
     },
     onLogout() {
       this.$store.dispatch("logout");

@@ -23,12 +23,14 @@
             class=""
             :key="campaign.id"
             :id="campaign.id"
+            :logo="campaign.logo"
             :title="campaign.title"
             :description="campaign.description"
             :startDate="campaign.from"
             :endDate="campaign.to"
             :active="campaign.active"
             :means="campaign.means"
+            :userInCampaign="campaign.userInCampaign"
           />
         </template>
       </div>
@@ -49,12 +51,14 @@
             class=""
             :key="campaign.id"
             :id="campaign.id"
+            :logo="campaign.logo"
             :title="campaign.title"
             :description="campaign.description"
             :startDate="campaign.from"
             :endDate="campaign.to"
             :active="campaign.active"
             :means="campaign.means"
+            :userInCampaign="campaign.userInCampaign"
           />
         </template>
       </div>
@@ -74,11 +78,13 @@
             class=""
             :key="campaign.id"
             :title="campaign.title"
+            :logo="campaign.logo"
             :description="campaign.description"
             :startDate="campaign.startDate"
             :endDate="campaign.endDate"
             :active="campaign.active"
             :means="campaign.means"
+            :userInCampaign="campaign.userInCampaign"
           />
         </template>
       </div>
@@ -102,6 +108,7 @@ export default {
     };
   },
   mounted: function () {
+    //tmp
     let x = require("../tmp-data/campaigns").campaigns;
     this.fakeCampaigns = x;
     // console.log(x);
@@ -109,6 +116,7 @@ export default {
       (res) => {
         this.allCampaigns = res.data.content;
         console.log(this.campaigns);
+        //todo userInCampaign calculation
       },
       (err) => {
         console.log(err);
@@ -130,6 +138,7 @@ export default {
     // }, err => {
     //   console.log(err)
     // })
+    
     DataApi.getUser().then((res) => {
       this.$store.dispatch("storeUser", res.data).then(
         () => {},

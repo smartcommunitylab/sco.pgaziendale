@@ -1,10 +1,10 @@
 <template>
   <div
-    class="  m-auto justify-center  flex flex-col-reverse md:flex-row lg:w-1/3 bg-white rounded-lg sm:mx-12  my-4 lg:mx-2 xl:w-1/5 justify-cente shadow-xl"
+    class="m-auto justify-center flex flex-col-reverse md:flex-row lg:w-1/3 bg-white rounded-lg sm:mx-12 my-4 lg:mx-2 xl:w-1/5 justify-cente shadow-xl"
   >
     <div class="flex flex-col py-2 lg:mx-2 justify-center">
       <h2
-        class=" text-xl sm:text-3xl font-semibold break-normal lg:text-left text-center"
+        class="text-xl sm:text-3xl font-semibold break-normal lg:text-left text-center"
       >
         {{ dTitolo }}
       </h2>
@@ -13,26 +13,26 @@
         class="flex flex-col-reverse justify-self-center text-center lg:flex-row lg:text-left"
       >
         <div
-          class="flex flex-row lg:flex-col justify-center align-middle text-lg font-light  "
+          class="flex flex-row lg:flex-col justify-center align-middle text-lg font-light"
         >
           <span class="font-light">dal {{ dStartDate }} </span
           ><span class="font-light"> al {{ dEndDate }}</span>
         </div>
         <div class="">
           <img
-            class="h-48 w-full object-content sm:px-8 py-2 lg:px-0 "
-            :src="require('../assets/images/bike.svg')"
+            class="h-48 w-full object-none sm:px-8 py-2 lg:px-0"
+            :src="dLogo"
           />
         </div>
       </div>
 
       <div
-        class="flex flex-col-reverse xl:flex-row lg:flex-row  lg:mt-auto align-middle  lg:ml-0 t-auto mx-2 lg:mx-0 "
+        class="flex flex-col-reverse xl:flex-row lg:flex-row lg:mt-auto align-middle lg:ml-0 t-auto mx-2 lg:mx-0"
       >
         <template v-if="dUserInCampaign">
           <button
             type="button"
-            class=" p-0 xl:mr-2 my-1 inline-flex items-center bg-transparent hover:bg-red-600  font-semibold hover:text-white py-1 px-4 border-2 border-red-600 hover:border-transparent rounded"
+            class="p-0 xl:mr-2 my-1 inline-flex items-center bg-transparent hover:bg-red-600 font-semibold hover:text-white py-1 px-4 border-2 border-red-600 hover:border-transparent rounded"
           >
             <img
               class="w-4 h-4 mr-2"
@@ -41,23 +41,18 @@
           </button>
           <button
             type="button"
-            class="my-1  inline-flex items-center lg:ml-auto bg-transparent hover:bg-blue-600  font-semibold hover:text-white py-1 px-4 border-2 border-blue-600 hover:border-transparent rounded"
+            class="my-1 inline-flex items-center lg:ml-auto bg-transparent hover:bg-blue-600 font-semibold hover:text-white py-1 px-4 border-2 border-blue-600 hover:border-transparent rounded"
           >
-            <img
-              class="w-4 h-4 mr-2"
-              :src="require('../assets/images/information.svg')"
-            />Info
+            <info-outline-icon />Info
           </button>
         </template>
         <template v-else-if="!dFinished">
           <button
-            type="button" @click="dettaglio"
-            class="my-1  inline-flex items-center lg:ml-auto bg-transparent hover:bg-green-600  font-semibold hover:text-white py-1 px-4 border-2 border-green-600 hover:border-transparent rounded"
+            type="button"
+            @click="dettaglio"
+            class="my-1 inline-flex items-center lg:ml-auto bg-transparent hover:bg-green-600 font-semibold hover:text-white py-1 px-4 border-2 border-green-600 hover:border-transparent rounded"
           >
-            <img
-              class="w-4 h-4 mr-2"
-              :src="require('../assets/images/information.svg')"
-            />Partecipa
+            <info-outline-icon />Partecipa
           </button>
         </template>
       </div>
@@ -69,35 +64,52 @@
 export default {
   name: "CampaignCard",
   props: {
-    id:String,
+    id: String,
     title: String,
+    logo: String,
     description: String,
     active: Boolean,
     startDate: String,
     endDate: String,
     means: Array,
+    userInCampaign: Boolean
   },
 
-  data: function() {
+  data: function () {
     return {
       dTitolo: this.title,
+      dLogo: this.logo,
       dDescription: this.description,
       dActive: this.active,
       dStartDate: this.startDate,
       dEndDate: this.endDate,
       dMeans: this.means,
       dFinished: false,
-      dUserInCampaign: false,
+      dUserInCampaign: this.userInCampaign
     };
   },
   methods: {
     dettaglio() {
-      this.$store.dispatch('enterCampagna',{id:this.id}).then(() => {
-        this.$router.push({name:'campagna',params: { id: '1' }}).catch(()=>{});
-       })
-    }
+      this.$store
+        .dispatch("enterCampagna", {
+          id: this.id,
+          title: this.title,
+          description: this.description,
+          logo: this.logo,
+          active:this.active,
+          startDate:this.startDate,
+          endDate:this.endDate,
+          means:this.means,
+          dUserInCampaign: this.userInCampaign
+        })
+        .then(() => {
+          this.$router
+            .push({ name: "campagna", params: { id: this.id } })
+            .catch(() => {});
+        });
     },
-  mounted: function() {
+  },
+  mounted: function () {
     let data = this.endDate.split("-");
     let date = new Date(data[0], data[1], data[2]);
     if (date < new Date()) this.dFinished = true;

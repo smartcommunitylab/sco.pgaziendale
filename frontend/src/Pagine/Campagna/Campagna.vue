@@ -1,40 +1,132 @@
 <template>
-  <div class="capagna flex flex-col">
+  <div class="capagna flex flex-col" >
     <div class="flex flex-col ml-8 mt-8">
-      <div class="text-4xl mt-8 text-black text-center">Campagna</div>
+      <div class="text-4xl mt-8 text-black text-center">Campagna:{{campagna.title}}</div>
     </div>
     <div class="flex flex-col">
-      <img class="object-contain h-48 w-full" src="@/assets/images/bike.svg" />
+      <img class="object-none h-48 w-full" :src="campagna.logo" />
     </div>
-    <div class="flex flex-col">
+    <div v-if="companies && companies.length">
+    <div class="flex flex-col" >
       <div class="text-4xl mt-8 text-black text-center">Organizzata da</div>
     </div>
     <div class="flex flex-col">
-      <img class="object-contain h-48 w-full" src="@/assets/images/bike.svg" />
+      <img class="object-contain h-48 w-full" :src="companies[0].logo" />
     </div>
-    <div class="flex flex-col m-8  text-justify">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean congue mauris diam. Morbi commodo enim at turpis porta, id molestie magna vehicula. Morbi malesuada sapien nec augue ullamcorper, vitae consectetur velit ullamcorper. Nullam malesuada sodales neque, quis laoreet urna. Nullam interdum neque a vehicula
-      feugiat. Integer non velit ut metus vulputate consequat. Cras vitae rutrum tellus, et accumsan dui. Vivamus dignissim maximus augue, sed sagittis lectus maximus et. Maecenas eu ligula urna. Nulla eros dolor, ornare eu metus non, imperdiet tempor leo. Nam nibh turpis, pretium in tincidunt et, euismod at purus.
-      Pellentesque est leo, malesuada nec lobortis at, aliquet sit amet massa. Vivamus et dolor dui. Donec euismod tellus ut convallis ultrices. Phasellus eget eleifend ligula. Sed lobortis luctus feugiat. Morbi tristique dolor rutrum nulla tempus, id sagittis lorem cursus. Ut lacinia, orci a aliquam interdum, odio
-      elit congue neque, eu rhoncus velit nisi a felis. Morbi porta, dui non facilisis luctus, ante turpis ultricies enim, sed molestie magna dolor in dui. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean a odio rhoncus, varius odio eu, aliquam lacus. Donec sagittis pulvinar felis, nec consequat libero
-      ultrices vitae. Morbi aliquet ligula sit amet ipsum venenatis finibus. In hac habitasse platea dictumst. Interdum et malesuada fames ac ante ipsum primis in faucibus. Aliquam pharetra mi eu tellus semper, vitae porttitor urna iaculis.
     </div>
+    <button v-if="!campagna.userInCampaign"
+            type="button"
+            @click="subscribe"
+            class="my-1 inline-flex items-center lg:m-auto bg-transparent hover:bg-green-600 font-semibold hover:text-white py-1 px-4 border-2 border-green-600 hover:border-transparent rounded"
+          >
+            <info-outline-icon />Iscriviti
+          </button>
+    <div class="flex flex-col m-8 text-justify">
+      {{campagna.description}}
+    </div>
+    <div  v-if="companies && companies.length>1">
     <div class="flex flex-col">
-      <div class="text-4xl mt-8 text-black text-center">A questa campagna partecipa anche:</div>
+      <div class="text-4xl mt-8 text-black text-center">
+        A questa campagna partecipa anche:
+      </div>
     </div>
-    <div class="flex flex-col">
-      <img class="object-contain h-48 w-full" src="@/assets/images/bike.svg" />
+    <div class="flex flex-col" v-for="otherCompany in companies" v-bind:key="otherCompany.id">
+      <img class="object-contain h-48 w-full" :src="otherCompany.logo" />
     </div>
+    </div>
+<card-modal :showing="modalSubscribeShowing" @close="modalSubscribeShowing = false">
+    <h2 class="text-xl font-bold text-gray-900">Iscrizione alla campagna</h2>
+    <p>Vuoi iscriverti alla campagna?</p>
+    <label class="block">
+  <span class="text-gray-700">Codice utente</span>
+  <input class="form-input mt-1 block w-full" placeholder="Codice" v-model="key">
+</label>
+        <button v-if="!campagna.userInCampaign"
+      class="bg-blue-600 text-white px-4 py-2 text-sm uppercase tracking-wide font-bold rounded-lg"
+      @click="confirm"
+    >
+      Iscriviti
+    </button>
+    <button
+      class="bg-blue-600 text-white px-4 py-2 text-sm uppercase tracking-wide font-bold rounded-lg"
+      @click="modalSubscribeShowing = false"
+    >
+      Chiudi
+    </button>
+</card-modal>
+  <card-modal :showing="modalUnsubscribeShowing" @close="modalUnsubscribeShowing = false">
+    <h2 class="text-xl font-bold text-gray-900">Iscrizione alla campagna</h2>
+    <p>Vuoi abbandonare la campagna?</p>
+        <button 
+      class="bg-blue-600 text-white px-4 py-2 text-sm uppercase tracking-wide font-bold rounded-lg"
+      @click="confirmLeave"
+    >
+      Conferma
+    </button>
+    <button
+      class="bg-blue-600 text-white px-4 py-2 text-sm uppercase tracking-wide font-bold rounded-lg"
+      @click="modalUnsubscribeShowing = false"
+    >
+      Chiudi
+    </button>
+</card-modal>
   </div>
 </template>
 
 <script>
+import DataApi from "../../communication/dataApi";
+import EventBus from '../../communication/eventBus';
+
+import CardModal from "../../Components/GenericModal.vue"
 export default {
   name: "Campagna",
-    computed: {
+  components: {
+    CardModal
+  },
+
+  data() {
+    return {
+      companies:[],
+      modalUnsubscribeShowing:false,
+      modalSubscribeShowing:false,
+      key:''
+    }
+  },
+  methods: {
+    subscribe: function() {
+      this.modalSubscribeShowing=true
+    },
+    confirm:function() {
+      if (this.key)
+      DataApi.subscribeCampaing(this.campagna.id,this.companies[0].code,this.key).then(res => {
+        //change campaign in store (subscribed)
+        console.log(res);
+        this.modalSubscribeShowing=false;
+      })
+    },
+    confirmLeave:function() {
+      console.log('left')
+      
+    }
+  },
+  mounted: function () {
+    DataApi.getCompaniesOfCampaign(this.campagna.id).then(
+      (res) => {
+        this.companies = res.data;
+        console.log(this.campaigns);
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
+    EventBus.$on('LEAVE_CAMPAIGN',  () => {
+     this.modalUnsubscribeShowing=true;
+    });
+  },
+  computed: {
     campagna() {
       return this.$store.getters.campagna;
-    }
+    },
   },
 };
 </script>
