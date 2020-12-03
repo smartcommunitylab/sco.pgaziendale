@@ -33,6 +33,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -81,6 +82,7 @@ public class TrackingDataService {
 	@Autowired
 	private MongoTemplate template;
 	
+	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*5)
 	public void synchronizeApps() {
 		appRepo.findAll().forEach(a -> {
 			final List<Campaign> campaigns = campaignRepo.findByApplication(a.getId()).stream().filter(c -> !c.getFrom().isAfter(LocalDate.now()) && !c.getTo().isBefore(LocalDate.now())).collect(Collectors.toList());
@@ -146,7 +148,7 @@ public class TrackingDataService {
 	 * @return
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-public List<DayStat> getUserCampaignData(String playerId, String campaignId, LocalDate from, LocalDate to, String groupBy, Boolean withTracks) {
+	public List<DayStat> getUserCampaignData(String playerId, String campaignId, LocalDate from, LocalDate to, String groupBy, Boolean withTracks) {
 		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString()).gte(from.toString());
 		if (GROUPBY_DAY.equals(groupBy)) {
 			Query q = Query.query(criteria);

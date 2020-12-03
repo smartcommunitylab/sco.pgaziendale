@@ -21,6 +21,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
 import it.smartcommunitylab.pgazienda.service.AdminService;
+import it.smartcommunitylab.pgazienda.service.TrackingDataService;
 
 /**
  * @author raman
@@ -41,6 +43,8 @@ public class AdminResource {
 
 	@Autowired
 	private AdminService service;
+	@Autowired
+	private TrackingDataService trackingDataService;
 	
 	@PostMapping("/admin/load")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
@@ -48,5 +52,12 @@ public class AdminResource {
 		service.loadData(model);
 		return ResponseEntity.ok(null);
 	}
-	
+
+	@GetMapping("/admin/datasync")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public @ResponseBody ResponseEntity<Void> syncTrackingData() {
+		trackingDataService.synchronizeApps();
+		return ResponseEntity.ok(null);
+	}
+
 }
