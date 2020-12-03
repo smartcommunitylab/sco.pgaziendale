@@ -57,6 +57,10 @@
   <card-modal :showing="modalUnsubscribeShowing" @close="modalUnsubscribeShowing = false">
     <h2 class="text-xl font-bold text-gray-900">Iscrizione alla campagna</h2>
     <p>Vuoi abbandonare la campagna?</p>
+        <label class="block">
+  <span class="text-gray-700">Codice utente</span>
+  <input class="form-input mt-1 block w-full" placeholder="Codice" v-model="key">
+</label>
         <button 
       class="bg-blue-600 text-white px-4 py-2 text-sm uppercase tracking-wide font-bold rounded-lg"
       @click="confirmLeave"
@@ -98,18 +102,26 @@ export default {
     },
     confirm:function() {
       if (this.key)
-      DataApi.subscribeCampaing(this.campagna.id,this.companies[0].code,this.key).then(res => {
+      DataApi.subscribeCampaign(this.campagna.id,this.companies[0].code,this.key).then(res => {
         //change campaign in store (subscribed)
         console.log(res);
         this.modalSubscribeShowing=false;
+      },err => {
+        console.log(err)
       })
     },
     confirmLeave:function() {
-      console.log('left')
+            DataApi.unsubrscribeCampaign(this.campagna.id,this.companies[0].code,this.key).then(res => {
+        //change campaign in store (subscribed)
+        console.log(res);
+        this.modalUnsubscribeShowing=false;
+      },err => {
+        console.log(err)
+      })
       
     }
   },
-  mounted: function () {
+  created: function () {
     DataApi.getCompaniesOfCampaign(this.campagna.id).then(
       (res) => {
         this.companies = res.data;

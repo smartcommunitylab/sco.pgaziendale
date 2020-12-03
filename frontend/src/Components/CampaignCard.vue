@@ -33,7 +33,7 @@
           <button
             type="button"
             class="p-0 xl:mr-2 my-1 inline-flex items-center bg-transparent hover:bg-red-600 font-semibold hover:text-white py-1 px-4 border-2 border-red-600 hover:border-transparent rounded"
-          >
+            @click="dettaglio">
             <img
               class="w-4 h-4 mr-2"
               :src="require('../assets/images/increase-up-profit.svg')"
@@ -41,6 +41,7 @@
           </button>
           <button
             type="button"
+            @click="dettaglio"
             class="my-1 inline-flex items-center lg:ml-auto bg-transparent hover:bg-blue-600 font-semibold hover:text-white py-1 px-4 border-2 border-blue-600 hover:border-transparent rounded"
           >
             <info-outline-icon />Info
@@ -100,7 +101,7 @@ export default {
           startDate:this.startDate,
           endDate:this.endDate,
           means:this.means,
-          dUserInCampaign: this.userInCampaign
+          userInCampaign: this.userInCampaign
         })
         .then(() => {
           this.$router

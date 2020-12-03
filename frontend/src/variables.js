@@ -7,6 +7,7 @@ export const MY_CAMPAIGNS_API = `campaigns/user/me`
 export const COMPANIES_IN_CAMPAIGN_API = `companies/campaign/`
 export const SUBSCRIBE_CAMPAIGN_API = `campaigns/`
 export const SUBSCRIBE = `/subscribe/`
+export const UNSUBSCRIBE = `/unsubscribe/`
 
 export const AUTH = {
   TOKEN_ID: `ec03a596-e41e-49cc-808c-62f39e01de0b`,

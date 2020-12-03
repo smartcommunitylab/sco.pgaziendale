@@ -107,7 +107,7 @@ export default {
       // user:{}
     };
   },
-  mounted: function () {
+  created: function () {
     //tmp
     let x = require("../tmp-data/campaigns").campaigns;
     this.fakeCampaigns = x;
@@ -125,6 +125,9 @@ export default {
     DataApi.getMyCampaigns().then(
       (res) => {
         this.myCampaigns = res.data;
+        this.myCampaigns.forEach(campaign=>{
+          campaign.userInCampaign=true;
+        })
         console.log(this.campaigns);
       },
       (err) => {

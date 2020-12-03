@@ -123,13 +123,15 @@
             <span>Privacy Policy</span></span
           >
         </router-link>
-          <div  @click="leaveCampaign" v-if="campagna.userInCampaign">
+        <div v-if="campagna.userInCampaign">
+          <div  @click="leaveCampaign" >
           <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
             ><span class="mr-2">
               <chart-bar-icon />
             </span>
             <span>Abbandona campagna</span></span
           >
+        </div>
         </div>
       </div>
 
@@ -192,7 +194,7 @@ export default {
     },
     campagna() {
       return this.$store.getters.campagna;
-    },
+    }
   },
 };
 </script>
