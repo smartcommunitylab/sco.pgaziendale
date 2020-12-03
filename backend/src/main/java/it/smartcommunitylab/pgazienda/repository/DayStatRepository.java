@@ -34,6 +34,6 @@ public interface DayStatRepository  extends MongoRepository<DayStat, String> {
 	@Query("{playerId:?0, campaign:?1, date : {$gte:?2 , $lt: ?3}}")
 	public List<DayStat> findByPlayerIdAndCampaignAndPeriod(String playerId, String campaign, String from, String to);
 
-	@Query("{playerId:?0, campaign:?1, date : ?2}")
-	public DayStat findOneByPlayerIdAndCampaignAndDate(String key, String id, String date);
+	@Query("{playerId:?0, campaign:?1, company:?2, date : ?3}")
+	public DayStat findOneByPlayerIdAndCampaignAndCompanyAndDate(String playerId, String campaign, String company, String date);
 }

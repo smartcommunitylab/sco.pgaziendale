@@ -31,7 +31,7 @@ public class DayStat {
 	@Id
 	private String id;
 	
-	private String campaign, playerId, date, month;
+	private String campaign, playerId, date, month, company;
 	
 	private Double co2saved;
 	private Integer trackCount;
@@ -147,6 +147,21 @@ public class DayStat {
 		this.month = month;
 	}
 
+	/**
+	 * @return the company
+	 */
+	public String getCompany() {
+		return company;
+	}
+	/**
+	 * @param company the company to set
+	 */
+	public void setCompany(String company) {
+		this.company = company;
+	}
+
+
+
 	public static class Distances {
 		private Double bike, car, walk, bus, train, boat;
 
@@ -248,7 +263,6 @@ public class DayStat {
 			distances.setWalk(map.getOrDefault("walk", 0d));
 			return distances;
 		}
-		
 	}
 	
 }

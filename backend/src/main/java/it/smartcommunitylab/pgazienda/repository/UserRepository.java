@@ -19,6 +19,7 @@ package it.smartcommunitylab.pgazienda.repository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -49,4 +50,8 @@ public interface UserRepository  extends MongoRepository<User, String> {
 
 	@Query("{'roles.subscriptions': {$elemMatch: {companyCode:?0, key:?1}}}")
 	Optional<User> findOneByEmployeeCode(String companyCode, String key);
+	
+	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1, key:{$in:?2}}}}")
+	List<User> findByCampaignAndCompanyAndEmployeeCode(String campaign, String companyCode, Set<String> keys);
+	
 }
