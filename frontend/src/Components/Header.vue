@@ -10,15 +10,21 @@
     </div>
     <div class="flex items-center">
       <div class="hidden md:block md:flex md:justify-between md:bg-transparent">
+      <router-link to="/info">
         <button title="Info" class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400">
           <info-outline-icon />
           <span>Info</span>
+          
         </button>
+      </router-link>
+                  <router-link to="/contatti">
+
         <button title="Contatti" class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400">
           <pencil-outline-icon />
 
           <span>Contatti</span>
         </button>
+                  </router-link>
       </div>
     </div>
 
