@@ -59,8 +59,6 @@ import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
-import it.smartcommunitylab.pgazienda.service.TrackingDataService.LocationDTO;
-import it.smartcommunitylab.pgazienda.service.TrackingDataService.TrackingDataRequestDTO;
 
 /**
  * @author raman
@@ -126,7 +124,7 @@ public class TrackingDataService {
 							LocationDTO ldto = new LocationDTO();
 							ldto.setLat(l.getLatitute());
 							ldto.setLng(l.getLongitude());
-							ldto.setRad(ldto.getRad());
+							ldto.setRad(l.getRadius());
 							return ldto;
 						}).collect(Collectors.toList()));
 						
