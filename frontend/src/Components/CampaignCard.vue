@@ -10,7 +10,7 @@
     </div>
     <div class="flex flex-col py-2 lg:mx-2 justify-center">
       <div class="px-2">
-        <h2 class="text-xl font-semibold break-normal ">
+        <h2 class="text-2xl font-semibold break-normal ">
           {{ dTitolo }}
         </h2>
 
