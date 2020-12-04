@@ -1,7 +1,7 @@
 <template>
   <div class="group inline-block ">
     <button
-      class="outline-none focus:outline-none border px-3 py-1 bg-white rounded-sm flex items-center min-w "
+      class="outline-none focus:outline-none border px-3 py-1 bg-white rounded-sm flex items-center min-w w-full"
     >
       <span class="pr-1 font-semibold flex-1">{{
         getCurrentOption().view_name
@@ -19,20 +19,22 @@
         </svg>
       </span>
     </button>
-    <ul
-      class="bg-white border rounded-sm transform scale-0 group-hover:scale-100 absolute 
-       transition duration-150 ease-in-out origin-top min-w "
-    >
-      <template v-for="element in getOtherOptions()">
-        <li
-          :key="element.name"
-          @click="changeCurrentOption(element)"
-          class=" select-none cursor-pointer text-center  rounded-sm px-3 py-1 hover:bg-gray-100 "
-        >
-          {{ element.view_name }}
-        </li>
-      </template>
-    </ul>
+    <div>
+      <ul
+        class="bg-white border rounded-sm transform scale-0 group-hover:scale-100 relative 
+       transition duration-150 ease-in-out origin-top min-w w-full"
+      >
+        <template v-for="element in getOtherOptions()">
+          <li
+            :key="element.name"
+            @click="changeCurrentOption(element)"
+            class=" select-none cursor-pointer text-center  rounded-sm px-3 py-1 hover:bg-gray-100 "
+          >
+            {{ element.view_name }}
+          </li>
+        </template>
+      </ul>
+    </div>
   </div>
 </template>
 

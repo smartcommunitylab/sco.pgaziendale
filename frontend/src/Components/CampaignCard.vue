@@ -1,8 +1,8 @@
 <template>
   <div
-    class="m-auto justify-center flex flex-col  lg:w-1/3 bg-white rounded-lg sm:mx-12 my-4 lg:mx-2 xl:w-1/5 justify-cente shadow-xl"
+    class="m-auto justify-center flex flex-col  lg:w-1/3 bg-white rounded-lg my-4 lg:mx-2 xl:w-1/5 justify-cente shadow-xl"
   >
-    <div class="flex flex-col align-middle p-2 h-40">
+    <div class="flex flex-col align-middle p-2 pt-0 h-40">
       <img
         class="mt-auto w-full object-fill sm:px-8 py-2 lg:px-0"
         :src="dLogo"
@@ -15,9 +15,13 @@
         </h2>
 
         <div class="flex flex-row justify-self-center text-sm">
-          <span class="font-light">dal {{ dStartDate }} al {{ dEndDate }}</span>
+          <span class="font-light">{{ printDate }} </span>
+        </div>
+        <div class="pt-4 break-words text-sm">
+          <p>{{ description }}</p>
         </div>
       </div>
+
       <div class="flex flex-row lg:mt-auto align-middle pt-4 text-sm">
         <template v-if="dUserInCampaign">
           <button
@@ -25,7 +29,7 @@
             class="p-0 text-blue-600 hover:bg-blue-600 rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
             @click="dettaglio"
           >
-            <performance class="pr-1" />
+            <performance-icon class="pr-1" />
             Performance
           </button>
           <button
@@ -40,9 +44,9 @@
           <button
             type="button"
             @click="dettaglio"
-            class="my-1 inline-flex items-center lg:ml-auto bg-transparent hover:bg-green-600 font-semibold hover:text-white py-1 px-4 border-2 border-green-600 hover:border-transparent rounded"
+            class="p-0 text-blue-600 hover:bg-blue-600 rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
           >
-            <info-outline-icon />Partecipa
+            <join-icon class="pr-1" />Partecipa
           </button>
         </template>
       </div>
@@ -77,6 +81,23 @@ export default {
       dFinished: false,
       dUserInCampaign: this.userInCampaign,
     };
+  },
+  computed: {
+    printDate: function() {
+      let from = new Intl.DateTimeFormat("it", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(new Date(this.startDate));
+
+      let to = new Intl.DateTimeFormat("it", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(new Date(this.endDate));
+
+      return from + " - " + to;
+    },
   },
   methods: {
     dettaglio() {
