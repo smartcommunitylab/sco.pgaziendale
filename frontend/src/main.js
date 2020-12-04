@@ -17,6 +17,8 @@ import ArrowLeftIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import ChartBarIcon from 'vue-material-design-icons/ChartBarStacked.vue';
 import ListCampaingsIcon from 'vue-material-design-icons/FormatListText.vue';
 import RulesIcon from 'vue-material-design-icons/TextBoxSearchOutline.vue';
+import Performance from 'vue-material-design-icons/ChartLine.vue';
+
 Vue.component('info-outline-icon', InformationOutlineIcon);
 Vue.component('pencil-outline-icon', PencilOutlineIcon);
 Vue.component('login-icon', LoginIcon);
@@ -25,6 +27,7 @@ Vue.component('arrow-left-icon', ArrowLeftIcon);
 Vue.component('chart-bar-icon', ChartBarIcon);
 Vue.component('list-campaigns-icon', ListCampaingsIcon);
 Vue.component('rules-icon', RulesIcon);
+Vue.component('Performance',Performance)
 Vue.config.productionTip = false
 const router = new Router({routes:routes,mode:'history'})
 Vue.use(Router);
