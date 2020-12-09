@@ -56,7 +56,7 @@ export default new Vuex.Store({
 
     loginWithToken ({commit}, dataToken) {
       
-        localStorage.setItem('token', dataToken.idToken)
+      sessionStorage.setItem('token', dataToken.idToken)
         commit('authUser', {
           token: dataToken.idToken
         })
@@ -64,13 +64,13 @@ export default new Vuex.Store({
     login ({commit}, authData) {
            console.log(authData)
  
-          localStorage.setItem('token', authData.idToken)
+           sessionStorage.setItem('token', authData.idToken)
           commit('authUser', {
             token: authData.idToken
           })
     },
     tryAutoLogin ({commit}) {
-      const token = localStorage.getItem('token')
+      const token = sessionStorage.getItem('token')
       if (!token) {
         return false
       }
@@ -81,11 +81,8 @@ export default new Vuex.Store({
       return true
     },
     logout ({commit}) {
-
-                commit('clearAuthData')
-                  localStorage.removeItem('token')
-
-
+      commit('clearAuthData')
+      sessionStorage.removeItem('token')
     },
    },
   getters: {

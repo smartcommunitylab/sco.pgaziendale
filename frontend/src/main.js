@@ -31,7 +31,7 @@ Vue.use(Router);
 Vue.use(VueTailwind, settings)
 axios.interceptors.request.use(
   (config) => {
-    let token = localStorage.getItem('token');
+    let token = sessionStorage.getItem('token');
 
     if (token) {
       config.headers['Authorization'] = `Bearer ${ token }`;
