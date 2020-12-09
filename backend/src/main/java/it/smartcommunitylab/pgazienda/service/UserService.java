@@ -191,10 +191,12 @@ public class UserService {
                 }
                 
                 userRepository.save(user);
-                try {
-					log.info("Changed Information for User: {} / {}", new ObjectMapper().writeValueAsString(user), new ObjectMapper().writeValueAsString(userDTO));
-				} catch (JsonProcessingException e) {
-				}
+                if (log.isDebugEnabled()) {
+                    try {
+    					log.debug("Changed Information for User: {} / {}", new ObjectMapper().writeValueAsString(user), new ObjectMapper().writeValueAsString(userDTO));
+    				} catch (JsonProcessingException e) {
+    				}
+                }
                 return user;
             });
     }

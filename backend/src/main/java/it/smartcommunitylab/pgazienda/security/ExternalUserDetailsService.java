@@ -109,10 +109,12 @@ public class ExternalUserDetailsService {
     		if (user.findRole(Constants.ROLE_APP_USER).isEmpty())  {
         		user.getRoles().add(UserRole.createAppUserRole());
     		}
+    		user.setName(name);
+    		user.setSurname(surname);
     		user.setPlayerId(playerId);
     		user = userService.updateUser(user, null).orElse(null);
     	}
-		log.info("With fields: " + nameField +", " + surnameField +", " + userNameField +", " + playerField);
+		log.debug("With fields: " + nameField +", " + surnameField +", " + userNameField +", " + playerField);
         List<GrantedAuthority> grantedAuthorities = user.getRoles().stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getRole()))
                 .collect(Collectors.toList());
