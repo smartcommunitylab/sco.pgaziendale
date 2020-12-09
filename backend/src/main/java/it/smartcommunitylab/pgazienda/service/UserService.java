@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -341,7 +341,7 @@ public class UserService {
 	 * @param pageable
 	 * @return
 	 */
-	public Page<User> getAllManagedUsers(PageRequest pageable) {
+	public Page<User> getAllManagedUsers(Pageable pageable) {
 		return userRepository.findAll(pageable);
 	}
 
