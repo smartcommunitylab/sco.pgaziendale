@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -50,6 +52,8 @@ import it.smartcommunitylab.pgazienda.service.UserService;
  */
 @Service
 public class ExternalUserDetailsService {
+
+    private final Logger log = LoggerFactory.getLogger(ExternalUserDetailsService.class);
 
     @Value("${app.security.ext.endpoint-userinfo}")
     private String userInfoEndpoint;
@@ -84,21 +88,29 @@ public class ExternalUserDetailsService {
     	if (!StringUtils.isEmpty(userDomain)) {
     		username += userDomain;
     	}
+    	
     	String name = (String) userInfo.get(nameField);
     	String surname = (String) userInfo.get(surnameField);
+    	String playerId = (String)userInfo.get(playerField);
+    	if (playerId == null) playerId = username;
     	User user = userService.getUserWithAuthoritiesByUsername(username.toLowerCase()).orElse(null);
     	if (user == null) {
+    		log.info("Registering new User: " + userInfo);
+    		
     		User userDTO = new User();
     		userDTO.setName(name);
     		userDTO.setSurname(surname);
     		userDTO.setUsername(username);
-    		userDTO.setPlayerId((String)userInfo.get(playerField));
+    		userDTO.setPlayerId(playerId);
     		userDTO.setRoles(Collections.singletonList(UserRole.createAppUserRole()));
 			user = userService.createUser(userDTO, null);
     	} else if (user.findRole(Constants.ROLE_APP_USER).isEmpty()) {
+    		log.info("Updating existing User: " + userInfo);
+    		user.setPlayerId(playerId);
     		user.getRoles().add(UserRole.createAppUserRole());
     		user = userService.updateUser(user, null).orElse(null);
     	}
+		log.info("With fields: {}, {}, {}, {}" + nameField, surnameField, userNameField, playerField);
         List<GrantedAuthority> grantedAuthorities = user.getRoles().stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getRole()))
                 .collect(Collectors.toList());
