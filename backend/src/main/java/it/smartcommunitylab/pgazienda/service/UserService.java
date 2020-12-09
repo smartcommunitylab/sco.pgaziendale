@@ -41,6 +41,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import it.smartcommunitylab.pgazienda.Constants;
@@ -189,7 +191,10 @@ public class UserService {
                 }
                 
                 userRepository.save(user);
-                log.info("Changed Information for User: {} / {}", user, userDTO);
+                try {
+					log.info("Changed Information for User: {} / {}", new ObjectMapper().writeValueAsString(user), new ObjectMapper().writeValueAsString(userDTO));
+				} catch (JsonProcessingException e) {
+				}
                 return user;
             });
     }
