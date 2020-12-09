@@ -31,9 +31,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.smartcommunitylab.pgazienda.Constants;
+import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.User;
+import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.TrackingDataService;
 import it.smartcommunitylab.pgazienda.service.UserService;
@@ -55,6 +57,8 @@ public class TrackingDataResource {
 
 	@Autowired
 	private EmployeeRepository employeeRepo;
+	@Autowired
+	private CompanyRepository companyRepo;
 	
     /**
      * Read all company locations
@@ -86,7 +90,11 @@ public class TrackingDataResource {
     	if (employee == null) throw new IllegalArgumentException("Invalid employee: "+ employeeId);
     	
     	if (!userService.isInCompanyRole(employee.getCompanyId(), Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
-    	Optional<User> user = userService.getUserByEmployeeCode(employee.getCompanyId(), employee.getCode());
+    	
+    	Optional<Company> company = companyRepo.findById(employee.getCompanyId());
+    	if (company.isEmpty())  throw new IllegalArgumentException("Invalid company: "+ employee.getCompanyId());
+    	
+    	Optional<User> user = userService.getUserByEmployeeCode(company.get().getCode(), employee.getCode());
     	if (user == null) throw new IllegalArgumentException("Invalid employee - no subscription: "+ employeeId);
     	
     	return ResponseEntity.ok(dataService.getUserCampaignData(user.get().getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks));
