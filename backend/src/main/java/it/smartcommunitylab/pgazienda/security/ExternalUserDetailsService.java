@@ -104,13 +104,15 @@ public class ExternalUserDetailsService {
     		userDTO.setPlayerId(playerId);
     		userDTO.setRoles(Collections.singletonList(UserRole.createAppUserRole()));
 			user = userService.createUser(userDTO, null);
-    	} else if (user.findRole(Constants.ROLE_APP_USER).isEmpty()) {
+    	} else {
     		log.info("Updating existing User: " + userInfo);
+    		if (user.findRole(Constants.ROLE_APP_USER).isEmpty())  {
+        		user.getRoles().add(UserRole.createAppUserRole());
+    		}
     		user.setPlayerId(playerId);
-    		user.getRoles().add(UserRole.createAppUserRole());
     		user = userService.updateUser(user, null).orElse(null);
     	}
-		log.info("With fields: {}, {}, {}, {}" + nameField, surnameField, userNameField, playerField);
+		log.info("With fields: " + nameField +", " + surnameField +", " + userNameField +", " + playerField);
         List<GrantedAuthority> grantedAuthorities = user.getRoles().stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getRole()))
                 .collect(Collectors.toList());

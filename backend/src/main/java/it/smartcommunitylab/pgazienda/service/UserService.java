@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,6 +179,7 @@ public class UserService {
                 user.setUsername(userDTO.getUsername().toLowerCase());
                 user.setName(userDTO.getName());
                 user.setSurname(userDTO.getSurname());
+                if (!StringUtils.isEmpty(user.getPlayerId())) user.setPlayerId(userDTO.getPlayerId());
 
                 if (companyId != null) {
                     // check roles: only the company roles are applicable
