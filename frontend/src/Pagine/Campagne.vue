@@ -217,6 +217,14 @@ export default {
           campaign.userInCampaign = true;
         });
         console.log(this.campaigns);
+        if (this.myCampaigns.length == 0) {
+          this.$refs["menu"].currentOption = {
+            name: "active",
+            view_name: "Campagne Attive",
+            default: false,
+          };
+          this.currentView = "active";
+        }
       },
       (err) => {
         console.log(err);
@@ -239,17 +247,6 @@ export default {
         }
       );
     });
-  },
-  mounted: function() {
-    console.log(this.myCampaigns.length);
-    if (this.myCampaigns.length == 0) {
-      this.$refs["menu"].currentOption = {
-        name: "active",
-        view_name: "Campagne Attive",
-        default: false,
-      };
-      this.currentView = "active";
-    }
   },
 };
 </script>
