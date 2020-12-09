@@ -176,8 +176,18 @@ export default {
       let toRtn = this.myCampaigns;
 
       if (this.currentView == "active") {
-        toRtn = this.allCampaigns;
+        toRtn = [];
+        this.allCampaigns.forEach((campaign) => {
+          if (
+            !this.myCampaigns.some(function isUserInCampaign(element) {
+              return element.id == campaign.id;
+            })
+          ) {
+            toRtn.push(campaign);
+          }
+        });
       } else if (this.currentView == "finished") {
+        toRtn = [];
         this.allCampaigns.forEach((campaign) => {
           if (new Date(campaign.to) < new Date()) {
             toRtn.push(campaign);
@@ -229,6 +239,17 @@ export default {
         }
       );
     });
+  },
+  mounted: function() {
+    console.log(this.myCampaigns.length);
+    if (this.myCampaigns.length == 0) {
+      this.$refs["menu"].currentOption = {
+        name: "active",
+        view_name: "Campagne Attive",
+        default: false,
+      };
+      this.currentView = "active";
+    }
   },
 };
 </script>
