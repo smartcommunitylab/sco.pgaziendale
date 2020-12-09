@@ -43,6 +43,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
 
@@ -94,6 +95,9 @@ public class TrackingDataService {
 	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*5)
 	public void synchronizeApps() {
 		appRepo.findAll().forEach(a -> {
+			
+			logger.info("Styncronizing app: " + a.getId());
+			
 			final List<Campaign> campaigns = campaignRepo.findByApplication(a.getId()).stream().filter(c -> !c.getFrom().isAfter(LocalDate.now()) && !c.getTo().isBefore(LocalDate.now())).collect(Collectors.toList());
 
 			if (campaigns.isEmpty()) return;
@@ -101,9 +105,11 @@ public class TrackingDataService {
 			// Application campaigns
 			campaigns.forEach(campaign -> {
 				// campaign companies
+				logger.info("Styncronizing app campaign: " + campaign.getId());
 				List<Company> companies = companyRepo.findByCampaign(campaign.getId());
 				companies.forEach(company -> {
 					try {
+						logger.info("Styncronizing app campaign company: " + company.getCode());
 						// company employees subscribed to this campaign 
 						List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(company.getId(), campaign.getId());
 						if (employees.isEmpty()) return;
@@ -112,6 +118,7 @@ public class TrackingDataService {
 						List<User>  users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaign.getId(), company.getCode(), codeSet);
 						if (users.isEmpty()) return;
 						List<String> playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+						logger.info("Styncronizing app campaign company users: " + playerIds);
 
 						TrackingDataRequestDTO request = new TrackingDataRequestDTO();
 						request.setFrom(LocalDate.now().toString());
@@ -137,6 +144,9 @@ public class TrackingDataService {
 						headers.add("Authorization", "Basic " + es);
 						headers.add("Accept", "application/json");
 						headers.add("Content-Type", "application/json");
+						
+						logger.info("Styncronizing app campaign company data: " + new ObjectMapper().writeValueAsString(request));
+
 						HttpEntity<TrackingDataRequestDTO> entity = new HttpEntity<>(request, headers);
 
 						List<TrackingData> list = restTemplate.exchange(a.getEndpoint(), HttpMethod.POST, entity, resp).getBody();
@@ -144,7 +154,8 @@ public class TrackingDataService {
 
 						multimap.keySet().forEach(key -> {
 							List<TrackingData> playerList = multimap.get(key);
-							
+							logger.info("Received data for player: " + key +" - " + playerList.size()+ " entities");
+
 							DayStat stat = new DayStat();
 							stat.setPlayerId(key);
 							stat.setCampaign(campaign.getId());
