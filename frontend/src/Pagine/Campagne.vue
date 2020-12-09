@@ -1,9 +1,15 @@
 <template>
   <div class="bg-blue-600">
     <div class="flex flex-col">
+      <!-- tmp-->
+      <h1
+        class="justify-self-center text-center text-white text-5xl pt-2 lg:text-6xl font-semibold pb-4"
+      >
+        Campagne
+      </h1>
       <context-menu
         ref="menu"
-        class="mx-auto"
+        class="mx-auto -mb-8"
         @click.native="sortCampaign()"
         v-bind:_options="[
           { name: 'my', view_name: 'Le mie Campagne', default: true },
@@ -12,15 +18,8 @@
         ]"
       />
 
-      <!-- tmp-->
-      <h1
-        class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
-      >
-        {{ getCurrentViewTitle }}
-      </h1>
-
       <div
-        class="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center md:justify-start md:px-12"
+        class="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center  md:px-12"
       >
         <template v-if="!campaignToShow.length">
           <div
@@ -179,7 +178,6 @@ export default {
       if (this.currentView == "active") {
         toRtn = this.allCampaigns;
       } else if (this.currentView == "finished") {
-        toRtn = [];
         this.allCampaigns.forEach((campaign) => {
           if (new Date(campaign.to) < new Date()) {
             toRtn.push(campaign);
@@ -190,9 +188,6 @@ export default {
     },
   },
   created: function() {
-    //tmp
-    let x = require("../tmp-data/campaigns").campaigns;
-    this.fakeCampaigns = x;
     // console.log(x);
     DataApi.getPublicCampaigns().then(
       (res) => {
@@ -204,6 +199,7 @@ export default {
         console.log(err);
       }
     );
+
     DataApi.getMyCampaigns().then(
       (res) => {
         this.myCampaigns = res.data;
@@ -216,6 +212,7 @@ export default {
         console.log(err);
       }
     );
+
     // // just example on how to use it
     // DataApi.getCompaniesOfCampaign('prova').then (res => {
     //   this.campaigns = res.data;
