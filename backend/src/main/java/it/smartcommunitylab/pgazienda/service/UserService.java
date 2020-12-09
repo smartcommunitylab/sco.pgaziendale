@@ -181,7 +181,7 @@ public class UserService {
                 user.setUsername(userDTO.getUsername().toLowerCase());
                 user.setName(userDTO.getName());
                 user.setSurname(userDTO.getSurname());
-                if (!StringUtils.isEmpty(user.getPlayerId())) user.setPlayerId(userDTO.getPlayerId());
+                if (!StringUtils.isEmpty(userDTO.getPlayerId())) user.setPlayerId(userDTO.getPlayerId());
 
                 if (companyId != null) {
                     // check roles: only the company roles are applicable
