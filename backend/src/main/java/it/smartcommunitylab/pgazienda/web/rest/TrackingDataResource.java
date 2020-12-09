@@ -94,10 +94,10 @@ public class TrackingDataResource {
     	Optional<Company> company = companyRepo.findById(employee.getCompanyId());
     	if (company.isEmpty())  throw new IllegalArgumentException("Invalid company: "+ employee.getCompanyId());
     	
-    	Optional<User> user = userService.getUserByEmployeeCode(company.get().getCode(), employee.getCode());
-    	if (user == null) throw new IllegalArgumentException("Invalid employee - no subscription: "+ employeeId);
+    	List<User> users = userService.getUserByEmployeeCode(campaignId, company.get().getCode(), employee.getCode());
+    	if (users == null || users.isEmpty()) throw new IllegalArgumentException("Invalid employee - no subscription: "+ employeeId);
     	
-    	return ResponseEntity.ok(dataService.getUserCampaignData(user.get().getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks));
+    	return ResponseEntity.ok(dataService.getUserCampaignData(users.get(0).getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks));
 	}
 
 

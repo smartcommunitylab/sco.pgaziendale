@@ -319,8 +319,8 @@ public class UserService {
     public Optional<User> getUserWithAuthorities() {
         return SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneByUsernameIgnoreCase);
     }
-    public Optional<User> getUserByEmployeeCode(String companyCode, String userCode) {
-        return userRepository.findOneByEmployeeCode(companyCode, userCode);
+    public List<User> getUserByEmployeeCode(String campaign, String companyCode, String userCode) {
+        return userRepository.findByCampaignAndCompanyAndEmployeeCode(campaign, companyCode, Collections.singleton(userCode));
     }
 
     /**
