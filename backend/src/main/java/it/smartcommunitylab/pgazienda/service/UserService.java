@@ -189,7 +189,7 @@ public class UserService {
                 }
                 
                 userRepository.save(user);
-                log.debug("Changed Information for User: {}", user);
+                log.info("Changed Information for User: {} / {}", user, userDTO);
                 return user;
             });
     }
