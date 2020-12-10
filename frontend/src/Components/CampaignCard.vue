@@ -67,6 +67,7 @@ export default {
     endDate: String,
     means: Array,
     userInCampaign: Boolean,
+    subscribedCompany:Object
   },
 
   data: function() {
@@ -80,6 +81,7 @@ export default {
       dMeans: this.means,
       dFinished: false,
       dUserInCampaign: this.userInCampaign,
+      dSubscribedCompany: this.subscribedCompany
     };
   },
   computed: {
@@ -102,7 +104,7 @@ export default {
   methods: {
     dettaglio() {
       this.$store
-        .dispatch("enterCampagna", {
+        .dispatch("storeCampagna", {
           id: this.id,
           title: this.title,
           description: this.description,
@@ -112,6 +114,7 @@ export default {
           endDate: this.endDate,
           means: this.means,
           userInCampaign: this.userInCampaign,
+          subscribedCompany:this.subscribedCompany
         })
         .then(() => {
           this.$router

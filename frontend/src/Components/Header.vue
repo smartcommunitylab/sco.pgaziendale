@@ -173,8 +173,8 @@ export default {
     },
     onLogin() {
        var authUrl=AUTH.AUTH_URL;
-      var tokenId=AUTH.TOKEN_ID;
-      var redirectUri=AUTH.REDIRECT_URI;
+       var tokenId=AUTH.TOKEN_ID;
+       var redirectUri=AUTH.REDIRECT_URI;
       return window.open(authUrl+"response_type=token&client_id="+tokenId+"&redirect_uri="+redirectUri,"_self")
     },
   },

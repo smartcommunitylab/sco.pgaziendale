@@ -42,6 +42,7 @@
               :active="campaign.active"
               :means="campaign.means"
               :userInCampaign="campaign.userInCampaign"
+              :subscribedCompany="campaign.subscribedCompany"
             /> </template
         ></template>
       </div>
@@ -203,18 +204,26 @@ export default {
       (res) => {
         this.allCampaigns = res.data.content;
         console.log(this.campaigns);
-        //todo userInCampaign calculation
       },
       (err) => {
         console.log(err);
       }
     );
 
-    DataApi.getMyCampaigns().then(
+   
+
+
+    DataApi.getUser().then((res) => {
+      let user =res.data;
+      this.$store.dispatch("storeUser", res.data).then(
+        () => {
+        DataApi.getMyCampaigns().then(
       (res) => {
         this.myCampaigns = res.data;
         this.myCampaigns.forEach((campaign) => {
           campaign.userInCampaign = true;
+          campaign.subscribedCompany = {companyCode: user.roles[0].subscriptions.find(x => x.campaign == campaign.id).companyCode};
+
         });
         console.log(this.campaigns);
         if (this.myCampaigns.length == 0) {
@@ -231,17 +240,7 @@ export default {
       }
     );
 
-    // // just example on how to use it
-    // DataApi.getCompaniesOfCampaign('prova').then (res => {
-    //   this.campaigns = res.data;
-    //    console.log(this.campaigns)
-    // }, err => {
-    //   console.log(err)
-    // })
-
-    DataApi.getUser().then((res) => {
-      this.$store.dispatch("storeUser", res.data).then(
-        () => {},
+        },
         (err) => {
           console.log(err);
         }

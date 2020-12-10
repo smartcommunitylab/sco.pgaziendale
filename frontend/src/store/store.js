@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -25,7 +24,7 @@ export default new Vuex.Store({
     clearAuthData (state) {
       state.idToken = null
     },
-    enterCampagna (state,campagna) {
+    storeCampagna (state,campagna) {
         state.campagna = campagna
     },
     exitCampagna(state) {
@@ -37,10 +36,10 @@ export default new Vuex.Store({
         commit('initApp')
 
     },
-    enterCampagna ({commit}, campagna) {
-        commit('enterCampagna',campagna)
-
-    },
+    storeCampagna ({commit}, campagna) {
+      commit('storeCampagna',campagna)
+  },
+  
     exitCampagna ({commit}) {
         commit('exitCampagna')
     },
