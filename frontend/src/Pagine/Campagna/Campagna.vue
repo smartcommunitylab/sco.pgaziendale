@@ -2,7 +2,7 @@
   <div class="capagna flex flex-col">
     <div class="flex flex-col ml-8 mt-8">
       <div class="text-4xl mt-8 text-black text-center">
-        Campagna:{{ campagna.title }}
+        Campagna: {{ campagna.title }}
       </div>
     </div>
     <div class="flex flex-col">
@@ -26,7 +26,6 @@
       </div>
       <div class="flex flex-col">
         <img class="object-contain h-48 w-full" :src="myCompany.logo" />
-        {{campagna.subscribedCompany}}
       </div>
     </div>
     <button

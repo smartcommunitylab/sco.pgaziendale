@@ -19,6 +19,7 @@ import ListCampaingsIcon from 'vue-material-design-icons/FormatListText.vue';
 import RulesIcon from 'vue-material-design-icons/TextBoxSearchOutline.vue';
 import Performance from 'vue-material-design-icons/ChartLine.vue';
 import Join from "vue-material-design-icons/ControllerClassicOutline";
+import Unsubscribe from "vue-material-design-icons/ClipboardOffOutline";
 
 Vue.component('info-outline-icon', InformationOutlineIcon);
 Vue.component('pencil-outline-icon', PencilOutlineIcon);
@@ -30,6 +31,7 @@ Vue.component('list-campaigns-icon', ListCampaingsIcon);
 Vue.component('rules-icon', RulesIcon);
 Vue.component('performance-icon',Performance)
 Vue.component('join-icon',Join);
+Vue.component('unsubscribe-icon',Unsubscribe);
 Vue.config.productionTip = false
 const router = new Router({routes:routes,mode:'history'})
 Vue.use(Router);

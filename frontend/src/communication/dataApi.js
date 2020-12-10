@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BASE_URL, USER_API,PUBLIC_CAMPAIGNS_API,MY_CAMPAIGNS_API, COMPANIES_IN_CAMPAIGN_API, SUBSCRIBE_CAMPAIGN_API, SUBSCRIBE,UNSUBSCRIBE } from '../variables.js'
+import { BASE_URL, USER_API,PUBLIC_CAMPAIGNS_API,MY_CAMPAIGNS_API, MY_STATS_API,COMPANIES_IN_CAMPAIGN_API, SUBSCRIBE_CAMPAIGN_API, SUBSCRIBE,UNSUBSCRIBE } from '../variables.js'
 export default   {
 
     getUser() {
@@ -20,5 +20,17 @@ export default   {
     },
     unsubrscribeCampaign(campaignId,companyCode,key) {
         return axios.delete(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+UNSUBSCRIBE+companyCode+'/'+key);
+    },
+    getStats(campaignId, from, to, groupBy, withTracks) {
+        
+        return  axios.get(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+MY_STATS_API,
+            {
+                params: {
+                    ...(from ? { from: from} : {}),
+                    ...(to ? { to: to} : {}),
+                    ...(groupBy ? { groupBy: groupBy} : {}),
+                    ...(withTracks ? { withTracks: withTracks} : {})
+                }
+            })
     }
   }

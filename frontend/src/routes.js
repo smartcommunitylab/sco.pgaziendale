@@ -9,7 +9,7 @@ import Privacy from "./Pagine/Campagna/Privacy.vue";
 import Rules from "./Pagine/Campagna/Rules.vue";
 import Callback from "./Pagine/Callback.vue";
 import Logout from "./Pagine/Logout.vue";
-import MyPerformance from "./Pagine/MyPerformance.vue";
+import MyPerformance from "./Pagine/Campagna/MyPerformance.vue";
  import store from './store/store'
 
 const routes = [

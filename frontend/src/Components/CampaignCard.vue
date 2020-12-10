@@ -27,7 +27,7 @@
           <button
             type="button"
             class="p-0 text-blue-600 hover:bg-blue-600 rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
-            @click="dettaglio"
+            @click="performance"
           >
             <performance-icon class="pr-1" />
             Performance
@@ -119,6 +119,26 @@ export default {
         .then(() => {
           this.$router
             .push({ name: "campagna", params: { id: this.id } })
+            .catch(() => {});
+        });
+    },
+      performance() {
+      this.$store
+        .dispatch("storeCampagna", {
+          id: this.id,
+          title: this.title,
+          description: this.description,
+          logo: this.logo,
+          active: this.active,
+          startDate: this.startDate,
+          endDate: this.endDate,
+          means: this.means,
+          userInCampaign: this.userInCampaign,
+          subscribedCompany:this.subscribedCompany
+        })
+        .then(() => {
+          this.$router
+            .push({ name: "myperformance", params: { id: this.id } })
             .catch(() => {});
         });
     },

@@ -133,7 +133,7 @@
           <div  @click="leaveCampaign" >
           <span @click="isOpen = false" class="flex items-center p-4 hover:bg-indigo-500 hover:text-white"
             ><span class="mr-2">
-              <chart-bar-icon />
+              <unsubscribe-icon />
             </span>
             <span>Abbandona campagna</span></span
           >
