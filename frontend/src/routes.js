@@ -10,6 +10,7 @@ import Rules from "./Pagine/Campagna/Rules.vue";
 import Callback from "./Pagine/Callback.vue";
 import Logout from "./Pagine/Logout.vue";
 import MyPerformance from "./Pagine/MyPerformance.vue";
+import InviaRichiesta from "./Pagine/Campagna/InviaRichiesta.vue"
  import store from './store/store'
 
 const routes = [
@@ -89,7 +90,7 @@ const routes = [
     {
       path: '/send-request/:id',
       name: 'sendrequest',
-      component: MyPerformance,
+      component: InviaRichiesta,
       beforeEnter (to, from, next) {
         if (store.getters.isAuthenticated) {
           next()
