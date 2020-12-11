@@ -26,7 +26,7 @@
       </div>
       <div class="flex flex-col">
         <img class="object-contain h-48 w-full" :src="myCompany.logo" />
-        {{campagna.subscribedCompany}}
+        {{ campagna.subscribedCompany }}
       </div>
     </div>
     <button
@@ -58,53 +58,95 @@
       :showing="modalSubscribeShowing"
       @close="modalSubscribeShowing = false"
     >
-      <form v-on:submit.prevent="onSubmit"
+      <h2 class="text-xl font-bold text-gray-900">
+        Iscrizione alla campagna
+      </h2>
+
+      <form
+        name="unsub"
         action=""
-        class="form flex flex-col bg-white p-6 relative lg:rounded-xl justify-center"
+        class="bg-white form flex flex-col p-6 relative lg:rounded-xl justify-center "
       >
-        <h2 class="text-xl font-bold text-gray-900">
-          Iscrizione alla campagna
-        </h2>
-        <div class="flex flex-row">
-        <p>Quale azienda scegli per l'iscrizione</p>
-        <select v-model="selectedCompany" @change="onChange($event)" required>
-          <option disabled value="" >Seleziona un'azienda</option>
-          <option
-            v-for="company in companies"
-            v-bind:value="company"
-            v-bind:key="company.code"
+        <div
+          class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
+        >
+          <label for="unsub_select"
+            >Quale azienda scegli per la iscrizione</label
           >
-            {{ company.name }}
-          </option>
-        </select>
-        </div>
-        <label class="block">
-          <span class="text-gray-700">Codice utente</span>
-          <input
+          <select
+            class="focus:border-blue-600  border-2  p-2  mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
+            name="unsub_select"
+            id="cars"
+            form="send_request"
+            v-model="selectedCompany"
+            @change="onChange($event)"
             required
-            class="form-input mt-1 block w-full"
+          >
+            <option disabled value="">Seleziona un'azienda</option>
+            <option
+              v-for="company in companies"
+              v-bind:value="company"
+              v-bind:key="company.code"
+            >
+              {{ company.name }}
+            </option>
+          </select>
+          <label for="code">Codice Utente</label>
+          <input
+            name="code"
+            class="focus:border-blue-600  border-2  p-2  mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
             placeholder="Codice"
             v-model="key"
+            required
           />
-        </label>
-        <div class="flex justify-center">
-          <div class="p-5" x-data="{ active: false }">
-            <button
-              v-if="!campagna.userInCampaign"
-              class="bg-blue-600 text-white px-4 py-2 text-sm uppercase tracking-wide font-bold rounded-lg"
-              @click="confirm"
-            >
-              Iscriviti
-            </button>
+          <div class="flex items-baseline space-x-2 mt-2">
+            <input
+              type="checkbox"
+              name="policy"
+              id=""
+              required
+              class="inline-block"
+            />
+            <label @click="showPolicy" for="policy">
+              <span
+                class="font-bold underline pointer-events-auto cursor-pointer"
+                >Policy*</span
+              >
+              <p v-show="show_policy" class="text-gray-600 text-xs ">
+                Ai sensi dell'art. 13 del Regolamento EU n. 2016/679 (GDPR), i
+                dati personali forniti saranno trattati per poter dare riscontro
+                alla sua richiesta tramite strumenti manuali, informatici e
+                telematici, comunque ideonei a garantire la sicurezza e la
+                riservatezza dei dati stessi. L'informativa Privacy completa è
+                disponibile al seguente link {LINK}. Dichiaro di aver letto e
+                compreso l'informativa sul trattamento dei dati personali.
+              </p>
+            </label>
           </div>
-          <div class="p-5" x-data="{ active: false }">
-            <button
-              class="bg-blue-600 text-white px-4 py-2 text-sm uppercase tracking-wide font-bold rounded-lg"
-              @click="modalSubscribeShowing = false"
-            >
-              Chiudi
-            </button>
+          <div class="flex items-baseline space-x-2 mt-2">
+            <input
+              type="checkbox"
+              name="regolamento"
+              id=""
+              required
+              class="inline-block"
+            />
+            <label for="regolamento">
+              <span class="font-bold underline">Regolamento*</span>
+            </label>
           </div>
+          <button
+            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
+            @click="confirmLeave"
+          >
+            Conferma
+          </button>
+          <button
+            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
+            @click="modalUnsubscribeShowing = false"
+          >
+            Chiudi
+          </button>
         </div>
       </form>
     </card-modal>
@@ -112,38 +154,62 @@
       :showing="modalUnsubscribeShowing"
       @close="modalUnsubscribeShowing = false"
     >
-      <h2 class="text-xl font-bold text-gray-900">Iscrizione alla campagna</h2>
-      <p>Quale azienda scegli per la disiscrizione</p>
-      <select v-model="selectedCompany" @change="onChange($event)" required>
-        <option disabled value="">Seleziona un'azienda</option>
-        <option
-          v-for="company in companies"
-          v-bind:value="company"
-          v-bind:key="company.code"
+      <h2 class="text-xl font-bold text-gray-900">
+        Disiscrizione alla campagna
+      </h2>
+
+      <form
+        name="unsub"
+        action=""
+        class="bg-white form flex flex-col p-6 relative lg:rounded-xl justify-center "
+      >
+        <div
+          class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
         >
-          {{ company.name }}
-        </option>
-      </select>
-      <label class="block">
-        <span class="text-gray-700">Codice utente</span>
-        <input
-          class="form-input mt-1 block w-full"
-          placeholder="Codice"
-          v-model="key"
-        />
-      </label>
-      <button
-        class="bg-blue-600 text-white px-4 py-2 text-sm uppercase tracking-wide font-bold rounded-lg"
-        @click="confirmLeave"
-      >
-        Conferma
-      </button>
-      <button
-        class="bg-blue-600 text-white px-4 py-2 text-sm uppercase tracking-wide font-bold rounded-lg"
-        @click="modalUnsubscribeShowing = false"
-      >
-        Chiudi
-      </button>
+          <label for="unsub_select"
+            >Quale azienda scegli per la disiscrizione</label
+          >
+          <select
+            class="focus:border-blue-600  border-2  p-2  mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
+            name="unsub_select"
+            id="cars"
+            form="send_request"
+            v-model="selectedCompany"
+            @change="onChange($event)"
+            required
+          >
+            <option disabled value="">Seleziona un'azienda</option>
+            <option
+              v-for="company in companies"
+              v-bind:value="company"
+              v-bind:key="company.code"
+            >
+              {{ company.name }}
+            </option>
+          </select>
+          <label for="code">Codice Utente</label>
+          <input
+            name="code"
+            class="focus:border-blue-600  border-2  p-2  mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
+            placeholder="Codice"
+            v-model="key"
+            required
+          />
+
+          <button
+            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
+            @click="confirmLeave"
+          >
+            Conferma
+          </button>
+          <button
+            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
+            @click="modalUnsubscribeShowing = false"
+          >
+            Chiudi
+          </button>
+        </div>
+      </form>
     </card-modal>
   </div>
 </template>
@@ -162,25 +228,29 @@ export default {
   data() {
     return {
       companies: [],
-      myCompany:{},
+      myCompany: {},
       selectedCompany: null,
       modalUnsubscribeShowing: false,
       modalSubscribeShowing: false,
       key: "",
+      show_policy: false,
     };
   },
   methods: {
     setMyCompany(company) {
-      this.myCompany =company;
+      this.myCompany = company;
     },
     onChange(event) {
       console.log(event.target.value);
     },
-    subscribe: function () {
+    subscribe: function() {
       this.modalSubscribeShowing = true;
     },
+    showPolicy: function() {
+      this.show_policy = !this.show_policy;
+    },
 
-    confirm: function () {
+    confirm: function() {
       if (this.key && this.selectedCompany)
         DataApi.subscribeCampaign(
           this.campagna.id,
@@ -192,18 +262,18 @@ export default {
             console.log(res);
             this.modalSubscribeShowing = false;
             this.campagna.userInCampaign = true;
-            this.campagna.subscribedCompany=this.selectedCompany;
-            this.$store.dispatch("storeCampagna", this.campagna)
-             DataApi.getUser().then((res) => {
-                this.$store.dispatch("storeUser", res.data)
-            })
+            this.campagna.subscribedCompany = this.selectedCompany;
+            this.$store.dispatch("storeCampagna", this.campagna);
+            DataApi.getUser().then((res) => {
+              this.$store.dispatch("storeUser", res.data);
+            });
           },
           (err) => {
             console.log(err);
           }
         );
     },
-    confirmLeave: function () {
+    confirmLeave: function() {
       DataApi.unsubrscribeCampaign(
         this.campagna.id,
         this.selectedCompany.code,
@@ -222,14 +292,16 @@ export default {
       );
     },
   },
-  created: function () {
+  created: function() {
     DataApi.getCompaniesOfCampaign(this.campagna.id).then(
       (res) => {
         this.companies = res.data;
-        if (this.campagna.userInCampaign){
-          this.setMyCompany(this.companies.find((x) => {
-            return x.code == this.campagna.subscribedCompany.companyCode
-            }))
+        if (this.campagna.userInCampaign) {
+          this.setMyCompany(
+            this.companies.find((x) => {
+              return x.code == this.campagna.subscribedCompany.companyCode;
+            })
+          );
         }
         console.log(this.campaigns);
       },
@@ -242,7 +314,6 @@ export default {
     });
   },
   computed: {
-
     campagna() {
       return this.$store.getters.campagna;
     },
