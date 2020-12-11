@@ -12,7 +12,7 @@
           class="mx-auto"
           @click.native="changeDataType()"
           v-bind:_options="[
-            { name: 'CO2', view_name: 'CO2 Salvata', default: false },
+            { name: 'co2saved', view_name: 'CO2 Salvata', default: false },
             { name: 'KM', view_name: 'Kilometri', default: true },
             { name: 'trackCount', view_name: 'Viaggi Validi', default: false },
           ]"
@@ -60,15 +60,15 @@
       >
         <thead>
           <tr>
-            <th class="w-1/2">{{option_group_selected.view_name}}</th>
+            <th class="w-1/2">{{ option_group_selected.view_name }}</th>
             <th class="w-1/2">{{ option_data_selected.view_name }}</th>
           </tr>
         </thead>
         <tbody>
-          <template v-for="(element,index) in stats" >
-            <tr :key="index" >
+          <template v-for="(element, index) in stats">
+            <tr :key="index">
               <td>{{ labels[index] }}</td>
-              <td>{{ stats[index][option_data_selected.name] }}</td>
+              <td>{{ stats[index].value| round(2) }}</td>
             </tr></template
           >
         </tbody>
@@ -93,15 +93,15 @@ export default {
   data: function () {
     return {
       stats: [],
-      labels:[],
+      labels: [],
       from: moment().subtract(7, "d").format(MOMENT_DATE_FORMAT),
       to: moment().format(MOMENT_DATE_FORMAT),
-      groupBy: this.option_group_selected,
+      groupBy: "day",
       withTracks: false,
       mode: "TAB",
       chart: undefined,
-      option_data_selected: { name: "trackCount", view_name: "Viaggi Validi" },
-      option_group_selected: {name: "day", view_name: "Giorni"},
+      option_data_selected: { name: "KM", view_name: "Kilometri" },
+      option_group_selected: { name: "day", view_name: "Giorni" },
     };
   },
   methods: {
@@ -109,29 +109,25 @@ export default {
       return DataApi.getStats(campaignId, from, to, groupBy, withTracks);
     },
     buildConfig(labels) {
-      // let kms = [23, 53, 22, 64, 34, 53, 23, 74];
-      // let co2 = [2, 5, 3, 6, 4, 6, 1, 7];
-      // let trips = [1, 3, 1, 5, 2, 3, 1, 5];
-
-      // for (let i = 0; i < this.stats.length; i++) {
-      //   this.stats.push({
-      //     month: months[i],
-      //     KM: kms[i],
-      //     CO2: co2[i],
-      //     TRIPS: trips[i],
-      //   });
-      // }
 
       //get the right data from stats
-      var data = this.stats.map((stat,index) => {
+      // check if Km, select the rigth km
+      var data=[];
+      if (this.option_data_selected.name =="KM")
+      data = this.stats.map((stat, index) => {
         return {
-               data:labels[index], 
-               value:stat.trackCount}
-        });
-      // trackCount
-      // co2saved
-      // km
-       return {
+          data: labels[index],
+          value: stat.distances['bike']/1000,
+        };
+      });
+       else data = this.stats.map((stat, index) => {
+        return {
+          data: labels[index],
+          value: stat[this.option_data_selected.name],
+        };
+      });
+      this.stats = data;
+      return {
         type: "line",
         data: {
           labels: labels,
@@ -139,7 +135,7 @@ export default {
             {
               label: "",
               borderColor: "rgb(25, 112, 183)",
-              data: data,
+              data: data.map((element) => element.value),
               fill: false,
             },
           ],
@@ -171,7 +167,7 @@ export default {
                 display: true,
                 scaleLabel: {
                   display: true,
-                  labelString:this.option_data_selected.view_name,
+                  labelString: this.option_data_selected.view_name,
                 },
               },
             ],
@@ -180,119 +176,67 @@ export default {
       };
     },
     buildLabels(stats) {
-      console.log(stats)
+      console.log(stats);
       var label = [];
-      //cicle stats and return the label 
-      if (this.groupBy=='months'){
-        stats.forEach(elem => {
-          label.push(elem.month)
-        })
+      //cicle stats and return the label
+      if (this.groupBy == "month") {
+        stats.forEach((elem) => {
+          label.push(elem.month);
+        });
       } else {
-                stats.forEach(elem => {
+        stats.forEach((elem) => {
           label.push(elem.date);
-        })
+        });
       }
-      return label
-    }, 
+      return label;
+    },
     buildChart(stats) {
-      console.log(stats)
-      this.labels = this.buildLabels(stats)
-     
+      console.log(stats);
+      this.labels = this.buildLabels(stats);
 
       let ctx = this.$refs.canvas;
-      let config =this.buildConfig(this.labels );
-      // let config = {
-      //   type: "line",
-      //   data: {
-      //     labels: labels,
-      //     datasets: [
-      //       {
-      //         label: "",
-      //         borderColor: "rgb(25, 112, 183)",
-      //         data: this.stats.map((element) => element.KM),
-      //         fill: false,
-      //       },
-      //     ],
-      //   },
-      //   options: {
-      //     legend: { display: false },
-      //     responsive: true,
-
-      //     tooltips: {
-      //       mode: "index",
-      //       intersect: false,
-      //     },
-      //     hover: {
-      //       mode: "nearest",
-      //       intersect: true,
-      //     },
-      //     scales: {
-      //       xAxes: [
-      //         {
-      //           display: true,
-      //           scaleLabel: {
-      //             display: true,
-      //             labelString: "Mesi",
-      //           },
-      //         },
-      //       ],
-      //       yAxes: [
-      //         {
-      //           display: true,
-      //           scaleLabel: {
-      //             display: true,
-      //             labelString: "Km",
-      //           },
-      //         },
-      //       ],
-      //     },
-      //   },
-      // };
+      let config = this.buildConfig(this.labels);
       this.chart = new Chart(ctx, config);
-      //set default data
-      // this.option_data_selected = { name: "KM", view_name: "Kilometri" };
     },
     getDataType() {
       return this.option_data_selected.name;
     },
     changeDataType: function () {
-      let option = this.$refs["menuGroup"].getCurrentOption();
+      let option = this.$refs["menuValue"].getCurrentOption();
       if (option.name == this.option_data_selected.name) return;
 
       this.option_data_selected = option;
-      this.changeCurrentOption(this.option_data_selected.name);
+      this.changeCurrentOption(this.option_data_selected.name, false);
       console.log(option.name);
     },
     changeGroup: function () {
-      let option = this.$refs["menuValue"].getCurrentOption();
+      let option = this.$refs["menuGroup"].getCurrentOption();
       if (option.name == this.option_group_selected.name) return;
 
       this.option_group_selected = option;
-      this.changeCurrentOption(this.option_group_selected.name);
+      this.groupBy = this.option_group_selected.name;
+      this.changeCurrentOption(this.option_group_selected.name, true);
       console.log(option.name);
     },
-    changeCurrentOption(id) {
-      this.updateGraph(id);
+    changeCurrentOption(id, groubBy) {
+      this.updateGraph(id, groubBy);
     },
-    updateGraph(id) {
+    updateGraph(id, groupBy) {
       //todo manage option group and data
-      let data = this.stats.map((element) => element[id]);
-
-      this.chart.data.datasets.pop();
-      this.chart.data.datasets.push({
-        label: "",
-        borderColor: "rgb(25, 112, 183)",
-        data: data,
-        fill: false,
-      });
-      let label = "Kilometri";
-      if (id == "CO2") label = "CO2 Salvata (Kg)";
-      else if (id == "TRIPS") label = "# Viaggi validi";
-
-      console.log(this.chart);
-      console.log(label);
-      this.chart.options.scales.yAxes[0].scaleLabel.labelString = label;
-      this.chart.update();
+      //if change groupBy get new API
+      console.log(id+groupBy);
+      // if (!groupBy)
+        this.getData(
+          this.campagna.id,
+          this.from,
+          this.to,
+          this.groupBy,
+          this.withTracks
+        ).then((stats) => {
+          console.log(stats);
+          this.stats = stats.data;
+          this.buildChart(this.stats);
+        });
     },
     changeMode(mode) {
       if (this.mode == mode) return;

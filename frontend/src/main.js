@@ -51,6 +51,21 @@ axios.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+//filters
+Vue.filter('round', function(value, decimals) {
+  if(!value) {
+    value = 0;
+  }
+
+  if(!decimals) {
+    decimals = 0;
+  }
+
+  value = Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
+  return value;
+});
+
 new Vue({
   render: h => h(App),
   router,
