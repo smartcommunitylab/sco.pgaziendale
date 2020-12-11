@@ -199,10 +199,10 @@ public class CampaignResource {
      * @param company
      * @return
      */
-    @DeleteMapping("/campaigns/{campaignId:.*}/unsubscribe/{companyCode}/{key}")
-	public ResponseEntity<Void> unsubscribeCampaign(@PathVariable String campaignId, @PathVariable String companyCode, @PathVariable String key) {
-    	log.debug("Subscriving to campaign {} / {} / {}", campaignId, companyCode, key);
-    	campaignService.unsubscribe(key, companyCode, campaignId);
+    @DeleteMapping("/campaigns/{campaignId:.*}/unsubscribe")
+	public ResponseEntity<Void> unsubscribeCampaign(@PathVariable String campaignId) {
+    	log.debug("Subscriving to campaign {}", campaignId);
+    	campaignService.unsubscribe(campaignId);
     	return ResponseEntity.ok(null);
 	}
 }

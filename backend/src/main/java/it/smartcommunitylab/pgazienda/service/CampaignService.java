@@ -131,28 +131,29 @@ public class CampaignService {
 	
 	/**
 	 * Unsubscribe a campaign for the current user. The user should exist
-	 * @param key
-	 * @param companyCode
 	 * @param campaignId
 	 */
-	public void unsubscribe(String key, String companyCode, String campaignId) {
+	public void unsubscribe(String campaignId) {
 		// find user
 		User user = userService.getUserWithAuthorities().orElse(null);
 		if (user == null) throw new IllegalArgumentException("Invalid user");
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) return;
-		Company company = companyRepo.findOneByCode(companyCode).orElse(null);
-		if (company == null || company.getCampaigns() == null || !company.getCampaigns().contains(campaignId)) return;
 		// app user role
 		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 		// not yet subscribed
 		if (role != null && role.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaignId))) {
-			Employee employee = employeeRepo.findOneByCompanyIdAndCode(company.getId(), key).orElse(null);
-			if (employee != null && employee.getCampaigns().contains(campaignId)) {
-				employee.getCampaigns().remove(campaignId);
-				employeeRepo.save(employee);
-			}
-			userService.removeAppSubscription(user.getId(), key, companyCode, campaignId);
+			role.getSubscriptions().forEach(s -> {
+				Company company = companyRepo.findOneByCode(s.getCompanyCode()).orElse(null);
+				if (company != null) {
+					Employee employee = employeeRepo.findOneByCompanyIdAndCode(company.getId(), s.getKey()).orElse(null);					
+					if (employee != null && employee.getCampaigns().contains(campaignId)) {
+						employee.getCampaigns().remove(campaignId);
+						employeeRepo.save(employee);
+					}
+					userService.removeAppSubscription(user.getId(), s.getKey(), s.getCompanyCode(), campaignId);
+				}
+			});			
 		}
 	}
 	
