@@ -11,11 +11,7 @@
           ref="menuValue"
           class="mx-auto"
           @click.native="changeDataType()"
-          v-bind:_options="[
-            { name: 'co2saved', view_name: 'CO2 Salvata', default: false },
-            { name: 'KM', view_name: 'Kilometri', default: true },
-            { name: 'trackCount', view_name: 'Viaggi Validi', default: false },
-          ]"
+          v-bind:_options="options"
         />
       </div>
       <div class="flex flex-col justify-center text-md">
@@ -83,7 +79,7 @@
 <script>
 import ContextMenu from "../../Components/ContextMenu.vue";
 import DataApi from "../../communication/dataApi";
-import { MOMENT_DATE_FORMAT } from "../../variables";
+import { MOMENT_DATE_FORMAT,STATS_DISTANCE } from "../../variables";
 import moment from "moment";
 import Chart from "chart.js";
 
@@ -100,11 +96,12 @@ export default {
       withTracks: false,
       mode: "TAB",
       chart: undefined,
-      option_data_selected: { name: "KM", view_name: "Kilometri" },
+      option_data_selected: { name: STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].name, view_name: STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].view_name },
       option_group_selected: { name: "day", view_name: "Giorni" },
     };
   },
   methods: {
+
     getData(campaignId, from, to, groupBy, withTracks) {
       return DataApi.getStats(campaignId, from, to, groupBy, withTracks);
     },
@@ -113,11 +110,11 @@ export default {
       //get the right data from stats
       // check if Km, select the rigth km
       var data=[];
-      if (this.option_data_selected.name =="KM")
+      if (this.option_data_selected.name.startsWith("KM"))
       data = this.stats.map((stat, index) => {
         return {
           data: labels[index],
-          value: stat.distances['bike']/1000,
+          value: stat.distances[this.option_data_selected.name.substring(3)]/1000,
         };
       });
        else data = this.stats.map((stat, index) => {
@@ -181,11 +178,11 @@ export default {
       //cicle stats and return the label
       if (this.groupBy == "month") {
         stats.forEach((elem) => {
-          label.push(elem.month);
+          label.push(moment(elem.month,'YYYY-MM').format('MMMM'));
         });
       } else {
         stats.forEach((elem) => {
-          label.push(elem.date);
+          label.push(moment(elem.date,'YYYY-MM-DD').format('DD-MM'));
         });
       }
       return label;
@@ -261,6 +258,13 @@ export default {
     campagna() {
       return this.$store.getters.campagna;
     },
+    options() {
+      return [
+            { name: 'co2saved', view_name: 'CO2 Salvata', default: false },
+            { name: 'trackCount', view_name: 'Viaggi Validi', default: false },
+          ].concat(this.campagna.means.map(x=> {
+            return {name: STATS_DISTANCE[x].name, view_name: STATS_DISTANCE[x].view_name, default: (STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].name ==  STATS_DISTANCE[x].name)}}))
+    }
   },
 };
 </script>

@@ -10,6 +10,23 @@ export const SUBSCRIBE = `/subscribe/`
 export const UNSUBSCRIBE = `/unsubscribe/`
 export const MY_STATS_API=`/stats/me`
 export const MOMENT_DATE_FORMAT=`YYYY-MM-DD`
+export const STATS_DISTANCE = {
+  bike: {
+    name: "KM_bike",
+    view_name: "Km bici",
+    stat:"bike"
+  },
+  car: {
+    name: "KM_car",
+    view_name: "Km macchina",
+    stat:"car"
+  },
+  foot: {
+    name: "KM_foot",
+    view_name: "Km piedi",
+    stat:"foot"
+  }
+}
 export const AUTH = {
   TOKEN_ID: `ec03a596-e41e-49cc-808c-62f39e01de0b`,
   REDIRECT_URI:`http://localhost:8080/callback`,
