@@ -187,19 +187,21 @@ export default {
           this.selectedCompany.code,
           this.key
         ).then(
-          (res) => {
+           (res) => {
             //change campaign in store (subscribed)
             console.log(res);
             this.modalSubscribeShowing = false;
             this.campagna.userInCampaign = true;
             this.campagna.subscribedCompany = this.selectedCompany;
             this.$store.dispatch("storeCampagna", this.campagna);
-            DataApi.getUser().then((res) => {
+            DataApi.getUser().then( (res) =>  {
               this.$store.dispatch("storeUser", res.data);
               //add iscritto con
+              console.log(JSON.stringify(this.campagna))
+              console.log(JSON.stringify(this.companies))
               this.setMyCompany(
-                this.companies.find((x) => {
-                  return x.code == this.campagna.subscribedCompany.companyCode;
+                this.companies.find((x)=>{
+                  return x.code == this.campagna.subscribedCompany.code;
                 })
               );
             });

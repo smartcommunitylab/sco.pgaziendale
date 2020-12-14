@@ -278,7 +278,7 @@ export default {
           
           //todo toast and subscribed
           this.$store.dispatch("exitCampagna").then(() => {
-           this.$router.push("campagne").catch(() => {});
+           this.$router.push({ path: `/campagne`}).catch(() => {});
           });
         },
         (err) => {
