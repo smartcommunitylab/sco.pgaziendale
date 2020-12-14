@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div class=" bg-primary">
     <div v-if="stats && stats.length>0">
     <div class="px-8 bg-blue-600">
       <h1
@@ -53,15 +53,15 @@
       >
         <thead>
           <tr>
-            <th class="w-1/2">{{ option_group_selected.view_name }}</th>
-            <th class="w-1/2">{{ option_data_selected.view_name }}</th>
+            <th class="w-1/2 text-white">{{ option_group_selected.view_name }}</th>
+            <th class="w-1/2  text-white">{{ option_data_selected.view_name }}</th>
           </tr>
         </thead>
         <tbody>
           <template v-for="(element, index) in stats">
             <tr :key="index">
-              <td>{{ labels[index] }}</td>
-              <td>{{ stats[index].value | round(2) }}</td>
+              <td class=" text-white">{{ labels[index] }}</td>
+              <td class=" text-white">{{ stats[index].value | round(2) }}</td>
             </tr></template
           >
         </tbody>
@@ -139,7 +139,7 @@ export default {
           datasets: [
             {
               label: "",
-              borderColor: "rgb(25, 112, 183)",
+              borderColor: "rgb(255, 255, 255)",
               data: data.map((element) => element.value),
               fill: false,
             },
@@ -160,6 +160,12 @@ export default {
           scales: {
             xAxes: [
               {
+                 ticks: {
+                        fontColor: "white",
+                        fontSize: 18,
+                        stepSize: 1,
+                        beginAtZero: true
+                    },
                 display: true,
                 scaleLabel: {
                   display: true,
@@ -169,6 +175,12 @@ export default {
             ],
             yAxes: [
               {
+                 ticks: {
+                        fontColor: "white",
+                        fontSize: 18,
+                        stepSize: 1,
+                        beginAtZero: true
+                    },
                 display: true,
                 scaleLabel: {
                   display: true,
