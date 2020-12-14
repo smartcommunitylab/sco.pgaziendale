@@ -1,5 +1,6 @@
 <template>
   <div class="">
+    <div v-if="stats && stats.length>0">
     <div class="px-8 bg-blue-600">
       <h1
         class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
@@ -69,6 +70,15 @@
         <canvas ref="canvas" class=""></canvas>
       </div>
     </div>
+    </div> 
+    <div v-else class="flex flex-col justify-center text-md">
+      <h1
+        class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
+      >
+      Al momento non ci sono statistiche.<br>
+      Generale con l'applicazione mobile
+      </h1>
+      </div>
   </div>
 </template>
 
