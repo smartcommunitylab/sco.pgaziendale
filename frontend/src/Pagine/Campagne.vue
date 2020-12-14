@@ -198,7 +198,7 @@ export default {
       return toRtn;
     },
   },
-  created: function() {
+  mounted: function() {
     // console.log(x);
     DataApi.getPublicCampaigns().then(
       (res) => {

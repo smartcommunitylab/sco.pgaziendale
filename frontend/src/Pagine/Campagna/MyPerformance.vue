@@ -201,6 +201,7 @@ export default {
 
       let ctx = this.$refs.canvas;
       let config = this.buildConfig(this.labels);
+      if (ctx)
       this.chart = new Chart(ctx, config);
     },
     getDataType() {
@@ -239,12 +240,15 @@ export default {
       ).then((stats) => {
         console.log(stats);
         this.stats = stats.data;
+        if (this.stats && this.stats.lenth>0)
         this.buildChart(this.stats);
       });
     },
     changeMode(mode) {
       if (this.mode == mode) return;
       this.mode = mode;
+            this.buildChart(this.stats);
+
     },
   },
   created: function () {
