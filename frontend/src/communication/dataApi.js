@@ -18,8 +18,8 @@ export default   {
     subscribeCampaign(campaignId,companyCode,key) {
         return axios.put(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+SUBSCRIBE+companyCode+'/'+key);
     },
-    unsubrscribeCampaign(campaignId,companyCode,key) {
-        return axios.delete(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+UNSUBSCRIBE+companyCode+'/'+key);
+    unsubrscribeCampaign(campaignId) {
+        return axios.delete(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+UNSUBSCRIBE);
     },
     getStats(campaignId, from, to, groupBy, withTracks) {
         

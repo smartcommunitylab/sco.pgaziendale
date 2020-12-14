@@ -62,19 +62,20 @@
       </h2>
 
       <form
-        name="unsub"
+        name="sub"
         action=""
+        v-on:submit.prevent="onSubmit"
         class="bg-white form flex flex-col p-6 relative lg:rounded-xl justify-center "
       >
         <div
           class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
         >
-          <label for="unsub_select"
+          <label for="sub_select"
             >Quale azienda scegli per la iscrizione</label
           >
           <select
             class="focus:border-blue-600  border-2  p-2  mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
-            name="unsub_select"
+            name="sub_select"
             id="cars"
             form="send_request"
             v-model="selectedCompany"
@@ -136,13 +137,13 @@
           </div>
           <button
             class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
-            @click="confirmLeave"
+            @click="confirm"
           >
             Conferma
           </button>
           <button
             class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
-            @click="modalUnsubscribeShowing = false"
+            @click="modalSubscribeShowing = false"
           >
             Chiudi
           </button>
@@ -160,9 +161,29 @@
       <form
         name="unsub"
         action=""
+        v-on:submit.prevent="onSubmit"
         class="bg-white form flex flex-col p-6 relative lg:rounded-xl justify-center "
       >
-        <div
+      <div
+          class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
+        >
+        <span>
+          Sei sicuro di voler disiscriverti?
+        </span>
+                  <button
+            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
+            @click="confirmLeave"
+          >
+            Conferma
+          </button>
+          <button
+            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
+            @click="modalUnsubscribeShowing = false"
+          >
+            Chiudi
+          </button>
+      </div>
+        <!-- <div
           class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
         >
           <label for="unsub_select"
@@ -207,7 +228,7 @@
           >
             Chiudi
           </button>
-        </div>
+        </div> -->
       </form>
     </card-modal>
   </div>
@@ -274,9 +295,8 @@ export default {
     },
     confirmLeave: function() {
       DataApi.unsubrscribeCampaign(
-        this.campagna.id,
-        this.selectedCompany.code,
-        this.key
+        this.campagna.id
+
       ).then(
         (res) => {
           //change campaign in store (subscribed)

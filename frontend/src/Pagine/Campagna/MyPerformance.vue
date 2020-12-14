@@ -30,17 +30,13 @@
         <nav class="flex flex-row text-white">
           <button
             class="flex-1 py-2 px-6 block focus:outline-none font-medium sm:bg-green-400 hover:bg-blue-700"
-            :class="
-              mode == 'TAB' ? 'border-blue-300 border-b-4 text-blue-300' : ''
-            "
+            :class="mode == 'TAB' ? 'border-blue-300 border-b-4 text-blue-300' : ''"
             @click="changeMode('TAB')"
           >
             Tabella</button
           ><button
             class="flex-1 py-2 px-6 block focus:outline-none hover:bg-blue-700"
-            :class="
-              mode == 'GRAPH' ? ' border-blue-300 border-b-4 text-blue-300' : ''
-            "
+            :class="mode == 'GRAPH' ? ' border-blue-300 border-b-4 text-blue-300' : ''"
             @click="changeMode('GRAPH')"
           >
             Grafico
@@ -64,7 +60,7 @@
           <template v-for="(element, index) in stats">
             <tr :key="index">
               <td>{{ labels[index] }}</td>
-              <td>{{ stats[index].value| round(2) }}</td>
+              <td>{{ stats[index].value | round(2) }}</td>
             </tr></template
           >
         </tbody>
@@ -79,7 +75,7 @@
 <script>
 import ContextMenu from "../../Components/ContextMenu.vue";
 import DataApi from "../../communication/dataApi";
-import { MOMENT_DATE_FORMAT,STATS_DISTANCE } from "../../variables";
+import { MOMENT_DATE_FORMAT, STATS_DISTANCE } from "../../variables";
 import moment from "moment";
 import Chart from "chart.js";
 
@@ -96,33 +92,35 @@ export default {
       withTracks: false,
       mode: "TAB",
       chart: undefined,
-      option_data_selected: { name: STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].name, view_name: STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].view_name },
+      option_data_selected: {
+        name: STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].name,
+        view_name: STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].view_name,
+      },
       option_group_selected: { name: "day", view_name: "Giorni" },
     };
   },
   methods: {
-
     getData(campaignId, from, to, groupBy, withTracks) {
       return DataApi.getStats(campaignId, from, to, groupBy, withTracks);
     },
     buildConfig(labels) {
-
       //get the right data from stats
       // check if Km, select the rigth km
-      var data=[];
+      var data = [];
       if (this.option_data_selected.name.startsWith("KM"))
-      data = this.stats.map((stat, index) => {
-        return {
-          data: labels[index],
-          value: stat.distances[this.option_data_selected.name.substring(3)]/1000,
-        };
-      });
-       else data = this.stats.map((stat, index) => {
-        return {
-          data: labels[index],
-          value: stat[this.option_data_selected.name],
-        };
-      });
+        data = this.stats.map((stat, index) => {
+          return {
+            data: labels[index],
+            value: stat.distances[this.option_data_selected.name.substring(3)] / 1000,
+          };
+        });
+      else
+        data = this.stats.map((stat, index) => {
+          return {
+            data: labels[index],
+            value: stat[this.option_data_selected.name],
+          };
+        });
       this.stats = data;
       return {
         type: "line",
@@ -178,11 +176,11 @@ export default {
       //cicle stats and return the label
       if (this.groupBy == "month") {
         stats.forEach((elem) => {
-          label.push(moment(elem.month,'YYYY-MM').format('MMMM'));
+          label.push(moment(elem.month, "YYYY-MM").format("MMMM"));
         });
       } else {
         stats.forEach((elem) => {
-          label.push(moment(elem.date,'YYYY-MM-DD').format('DD-MM'));
+          label.push(moment(elem.date, "YYYY-MM-DD").format("DD-MM"));
         });
       }
       return label;
@@ -219,21 +217,20 @@ export default {
       this.updateGraph(id, groubBy);
     },
     updateGraph(id, groupBy) {
-      //todo manage option group and data
-      //if change groupBy get new API
-      console.log(id+groupBy);
+      //if change groupBy get new by API
+      console.log(id + groupBy);
       // if (!groupBy)
-        this.getData(
-          this.campagna.id,
-          this.from,
-          this.to,
-          this.groupBy,
-          this.withTracks
-        ).then((stats) => {
-          console.log(stats);
-          this.stats = stats.data;
-          this.buildChart(this.stats);
-        });
+      this.getData(
+        this.campagna.id,
+        this.from,
+        this.to,
+        this.groupBy,
+        this.withTracks
+      ).then((stats) => {
+        console.log(stats);
+        this.stats = stats.data;
+        this.buildChart(this.stats);
+      });
     },
     changeMode(mode) {
       if (this.mode == mode) return;
@@ -260,11 +257,20 @@ export default {
     },
     options() {
       return [
-            { name: 'co2saved', view_name: 'CO2 Salvata', default: false },
-            { name: 'trackCount', view_name: 'Viaggi Validi', default: false },
-          ].concat(this.campagna.means.map(x=> {
-            return {name: STATS_DISTANCE[x].name, view_name: STATS_DISTANCE[x].view_name, default: (STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].name ==  STATS_DISTANCE[x].name)}}))
-    }
+        { name: "co2saved", view_name: "CO2 Salvata", default: false },
+        { name: "trackCount", view_name: "Viaggi Validi", default: false },
+      ].concat(
+        this.campagna.means.map((x) => {
+          return {
+            name: STATS_DISTANCE[x].name,
+            view_name: STATS_DISTANCE[x].view_name,
+            default:
+              STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].name ==
+              STATS_DISTANCE[x].name,
+          };
+        })
+      );
+    },
   },
 };
 </script>
