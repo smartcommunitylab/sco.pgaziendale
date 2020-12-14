@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="">
     <app-header></app-header>
     <router-view class="pt-32 lg:pt-32"></router-view>
   </div>
@@ -13,14 +13,16 @@ export default {
   components: {
     appHeader: Header,
   },
-  created () {
-      this.$store.dispatch('tryAutoLogin').then(logged => {
-      if (logged) 
-        this.$router.push('campagne').catch(()=>{});
-   })
-    }
-
+  created() {
+    this.$store.dispatch("tryAutoLogin").then((logged) => {
+      if (logged) this.$router.push("campagne").catch(() => {});
+    });
+  },
 };
 </script>
 
-<style></style>
+<style>
+body {
+  @apply bg-background;
+}
+</style>

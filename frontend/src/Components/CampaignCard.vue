@@ -26,7 +26,7 @@
         <template v-if="dUserInCampaign">
           <button
             type="button"
-            class="p-0 text-blue-600 hover:bg-blue-600 rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
+            class="p-0 text-secondary hover:bg-secondary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
             @click="performance"
           >
             <performance-icon class="pr-1" />
@@ -35,7 +35,7 @@
           <button
             type="button"
             @click="dettaglio"
-            class="p-0 text-blue-600 hover:bg-blue-600 rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
+            class="p-0 text-secondary hover:bg-secondary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
           >
             <info-outline-icon class="pr-1" />Info
           </button>
@@ -44,7 +44,7 @@
           <button
             type="button"
             @click="dettaglio"
-            class="p-0 text-blue-600 hover:bg-blue-600 rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
+            class="p-0 text-primary hover:bg-primary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
           >
             <join-icon class="pr-1" />Partecipa
           </button>
@@ -67,7 +67,7 @@ export default {
     endDate: String,
     means: Array,
     userInCampaign: Boolean,
-    subscribedCompany:Object
+    subscribedCompany: Object,
   },
 
   data: function() {
@@ -81,7 +81,7 @@ export default {
       dMeans: this.means,
       dFinished: false,
       dUserInCampaign: this.userInCampaign,
-      dSubscribedCompany: this.subscribedCompany
+      dSubscribedCompany: this.subscribedCompany,
     };
   },
   computed: {
@@ -114,7 +114,7 @@ export default {
           endDate: this.endDate,
           means: this.means,
           userInCampaign: this.userInCampaign,
-          subscribedCompany:this.subscribedCompany
+          subscribedCompany: this.subscribedCompany,
         })
         .then(() => {
           this.$router
@@ -122,7 +122,7 @@ export default {
             .catch(() => {});
         });
     },
-      performance() {
+    performance() {
       this.$store
         .dispatch("storeCampagna", {
           id: this.id,
@@ -134,7 +134,7 @@ export default {
           endDate: this.endDate,
           means: this.means,
           userInCampaign: this.userInCampaign,
-          subscribedCompany:this.subscribedCompany
+          subscribedCompany: this.subscribedCompany,
         })
         .then(() => {
           this.$router

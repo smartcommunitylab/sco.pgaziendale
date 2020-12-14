@@ -1,7 +1,7 @@
 <template>
-  <div class="group inline-block ">
+  <div class="group inline-block  ">
     <button
-      class="outline-none focus:outline-none border px-3 py-1 bg-white rounded-sm flex items-center min-w w-full"
+      class="outline-none focus:outline-none border px-3 py-1 bg-white rounded-sm flex items-center min-w w-full "
     >
       <span class="pr-1 font-semibold flex-1">{{
         getCurrentOption().view_name

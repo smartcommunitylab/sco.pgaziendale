@@ -18,7 +18,7 @@
           class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
         >
           <select
-            class="focus:border-blue-600  border-2  p-2  mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
+            class="focus:border-primary  border-2  p-2  mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
             name="request_type"
             id="cars"
             form="send_request"
@@ -35,7 +35,7 @@
           rows="3"
           required
           placeholder="Inserisci qua il tuo messaggio * "
-          class="focus:border-blue-600  border-2  p-2 mt-3 w-full"
+          class="focus:border-primary  border-2  p-2 mt-3 w-full"
         ></textarea>
         <p class="font-bold text-sm mt-3">Privacy Policy *</p>
         <div class="flex items-baseline space-x-2 mt-2">
@@ -54,7 +54,7 @@
         <input
           type="submit"
           value="Invia Richiesta"
-          class=" mt-6 bg-blue-600 hover:bg-blue-500 text-white font-semibold p-3 md:self-end flex-1"
+          class=" mt-6 bg-primary focus:border-primary hover:bg-primary_light text-white font-semibold p-3 md:self-end flex-1"
         />
       </form>
     </div>
