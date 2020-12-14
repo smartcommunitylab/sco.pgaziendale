@@ -1,9 +1,9 @@
 <template>
-  <div class="bg-blue-600">
+  <div class="">
     <div class="flex flex-col">
       <!-- tmp-->
       <h1
-        class="justify-self-center text-center text-white text-5xl pt-2 lg:text-6xl font-semibold pb-4"
+        class="justify-self-center text-center  text-5xl pt-2 lg:text-6xl font-semibold pb-4"
       >
         Campagne
       </h1>
@@ -50,7 +50,7 @@
 
       <!--
       <h1
-        class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
+        class="justify-self-center text-center  text-4xl pt-2 md:text-6xl font-semibold pb-6"
       >
         Le mie campagne
       </h1>
@@ -85,7 +85,7 @@
     </div>
     <div>
       <h1
-        class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
+        class="justify-self-center text-center  text-4xl pt-2 md:text-6xl font-semibold pb-6"
       >
         Campagne Attive
       </h1>
@@ -113,7 +113,7 @@
     </div>
     <div>
       <h1
-        class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
+        class="justify-self-center text-center  text-4xl pt-2 md:text-6xl font-semibold pb-6"
       >
         Campagne Concluse
       </h1>
@@ -210,36 +210,35 @@ export default {
       }
     );
 
-   
-
-
     DataApi.getUser().then((res) => {
-      let user =res.data;
+      let user = res.data;
       this.$store.dispatch("storeUser", res.data).then(
         () => {
-        DataApi.getMyCampaigns().then(
-      (res) => {
-        this.myCampaigns = res.data;
-        this.myCampaigns.forEach((campaign) => {
-          campaign.userInCampaign = true;
-          campaign.subscribedCompany = {companyCode: user.roles[0].subscriptions.find(x => x.campaign == campaign.id).companyCode};
-
-        });
-        console.log(this.campaigns);
-        if (this.myCampaigns.length == 0) {
-          this.$refs["menu"].currentOption = {
-            name: "active",
-            view_name: "Campagne Attive",
-            default: false,
-          };
-          this.currentView = "active";
-        }
-      },
-      (err) => {
-        console.log(err);
-      }
-    );
-
+          DataApi.getMyCampaigns().then(
+            (res) => {
+              this.myCampaigns = res.data;
+              this.myCampaigns.forEach((campaign) => {
+                campaign.userInCampaign = true;
+                campaign.subscribedCompany = {
+                  companyCode: user.roles[0].subscriptions.find(
+                    (x) => x.campaign == campaign.id
+                  ).companyCode,
+                };
+              });
+              console.log(this.campaigns);
+              if (this.myCampaigns.length == 0) {
+                this.$refs["menu"].currentOption = {
+                  name: "active",
+                  view_name: "Campagne Attive",
+                  default: false,
+                };
+                this.currentView = "active";
+              }
+            },
+            (err) => {
+              console.log(err);
+            }
+          );
         },
         (err) => {
           console.log(err);
