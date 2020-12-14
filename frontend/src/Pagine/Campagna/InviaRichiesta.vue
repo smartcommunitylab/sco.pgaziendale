@@ -1,10 +1,10 @@
 <template>
-  <div class="flex flex-col lg:flex-row">
+  <div class="flex flex-col lg:flex-row bg-primary send_request">
     <div
-      class="pb-6 lg:w-7/12 lg:my-2 text-white text-center lg:text-left md:pl-6 lg:pb-0"
+      class="pb-6 lg:w-7/12 lg:my-2 text-white text-center lg:text-left md:pl-6 lg:pb-0 lg:pl-12"
     >
       <h1 class="text-6xl font-bold">Invia una richiesta</h1>
-      <h2 class="text-2xl pb-2 font-semibold">
+      <h2 class="text-2xl pb-2 ">
         Ti ri-contatteremo non appena possibile
       </h2>
     </div>
@@ -67,4 +67,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.send_request {
+  height: 100vh;
+}
+</style>

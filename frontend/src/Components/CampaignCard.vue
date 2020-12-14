@@ -26,7 +26,7 @@
         <template v-if="dUserInCampaign">
           <button
             type="button"
-            class="p-0 text-secondary hover:bg-secondary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
+            class="p-0 text-primary hover:bg-primary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
             @click="performance"
           >
             <performance-icon class="pr-1" />
@@ -35,7 +35,7 @@
           <button
             type="button"
             @click="dettaglio"
-            class="p-0 text-secondary hover:bg-secondary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
+            class="p-0 text-primary hover:bg-primary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
           >
             <info-outline-icon class="pr-1" />Info
           </button>
