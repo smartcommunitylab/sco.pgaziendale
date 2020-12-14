@@ -1,4 +1,5 @@
 <template>
+<div>
   <nav
     class="flex fixed w-full items-center justify-between px-6 h-16 bg-primary text-white text-gray-700  z-10"
   >
@@ -146,7 +147,7 @@
             @click="isOpen = false"
             class="flex items-center p-4 hover:bg-white hover:text-primary"
             ><span class="mr-2">
-              <chart-bar-icon />
+              <campaign-icon />
             </span>
             <span>Campagna</span></span
           >
@@ -179,7 +180,7 @@
             @click="isOpen = false"
             class="flex items-center p-4 hover:bg-white hover:text-primary"
             ><span class="mr-2">
-              <chart-bar-icon />
+              <send-request-icon />
             </span>
             <span>Invia Richiesta</span></span
           >
@@ -189,7 +190,7 @@
             @click="isOpen = false"
             class="flex items-center p-4 hover:bg-white hover:text-primary"
             ><span class="mr-2">
-              <chart-bar-icon />
+              <privacy-icon />
             </span>
             <span>Privacy Policy</span></span
           >
@@ -209,19 +210,79 @@
       </div>
     </aside>
   </nav>
+  <card-modal
+      :showing="modalUnsubscribeShowing"
+      @close="modalUnsubscribeShowing = false"
+    >
+      <h2 class="text-xl font-bold text-gray-900">
+        Disiscrizione alla campagna
+      </h2>
+
+      <form
+        name="unsub"
+        action=""
+        v-on:submit.prevent="onSubmit"
+        class="bg-white form flex flex-col p-6 relative lg:rounded-xl justify-center "
+      >
+      <div
+          class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
+        >
+        <span>
+          Sei sicuro di voler disiscriverti?
+        </span>
+                  <button
+            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
+            @click="confirmLeave"
+          >
+            Conferma
+          </button>
+          <button
+            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
+            @click="modalUnsubscribeShowing = false"
+          >
+            Chiudi
+          </button>
+      </div>
+      </form>
+    </card-modal>
+    </div>
 </template>
 
 <script>
 import { AUTH } from "../variables.js";
 import EventBus from "../communication/eventBus";
+import CardModal from "./GenericModal.vue";
+import DataApi from "../communication/dataApi";
 
 export default {
   data() {
     return {
       isOpen: false,
+      modalUnsubscribeShowing: false
     };
   },
+  components: {
+    cardModal: CardModal
+  },
   methods: {
+        confirmLeave: function() {
+      DataApi.unsubrscribeCampaign(
+        this.campagna.id
+
+      ).then(
+        (res) => {
+          //change campaign in store (subscribed)
+          console.log(res);
+          this.modalUnsubscribeShowing = false;
+          //todo change campaign in store
+          //toast and subscribed
+        },
+        (err) => {
+          console.log(err);
+        }
+      );
+    },
+
     drawer() {
       this.isOpen = !this.isOpen;
     },
@@ -261,6 +322,11 @@ export default {
         }
       },
     },
+  },
+  created() {
+    EventBus.$on("LEAVE_CAMPAIGN", () => {
+      this.modalUnsubscribeShowing = true;
+    });
   },
   mounted() {
     document.addEventListener("keydown", (e) => {

@@ -150,93 +150,12 @@
         </div>
       </form>
     </card-modal>
-    <card-modal
-      :showing="modalUnsubscribeShowing"
-      @close="modalUnsubscribeShowing = false"
-    >
-      <h2 class="text-xl font-bold text-gray-900">
-        Disiscrizione alla campagna
-      </h2>
-
-      <form
-        name="unsub"
-        action=""
-        v-on:submit.prevent="onSubmit"
-        class="bg-white form flex flex-col p-6 relative lg:rounded-xl justify-center "
-      >
-      <div
-          class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
-        >
-        <span>
-          Sei sicuro di voler disiscriverti?
-        </span>
-                  <button
-            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
-            @click="confirmLeave"
-          >
-            Conferma
-          </button>
-          <button
-            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
-            @click="modalUnsubscribeShowing = false"
-          >
-            Chiudi
-          </button>
-      </div>
-        <!-- <div
-          class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
-        >
-          <label for="unsub_select"
-            >Quale azienda scegli per la disiscrizione</label
-          >
-          <select
-            class="focus:border-blue-600  border-2  p-2  mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
-            name="unsub_select"
-            id="cars"
-            form="send_request"
-            v-model="selectedCompany"
-            @change="onChange($event)"
-            required
-          >
-            <option disabled value="">Seleziona un'azienda</option>
-            <option
-              v-for="company in companies"
-              v-bind:value="company"
-              v-bind:key="company.code"
-            >
-              {{ company.name }}
-            </option>
-          </select>
-          <label for="code">Codice Utente</label>
-          <input
-            name="code"
-            class="focus:border-blue-600  border-2  p-2  mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
-            placeholder="Codice"
-            v-model="key"
-            required
-          />
-
-          <button
-            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
-            @click="confirmLeave"
-          >
-            Conferma
-          </button>
-          <button
-            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
-            @click="modalUnsubscribeShowing = false"
-          >
-            Chiudi
-          </button>
-        </div> -->
-      </form>
-    </card-modal>
   </div>
 </template>
 
 <script>
 import DataApi from "../../communication/dataApi";
-import EventBus from "../../communication/eventBus";
+// import EventBus from "../../communication/eventBus";
 
 import CardModal from "../../Components/GenericModal.vue";
 export default {
@@ -250,7 +169,7 @@ export default {
       companies: [],
       myCompany: {},
       selectedCompany: null,
-      modalUnsubscribeShowing: false,
+      // modalUnsubscribeShowing: false,
       modalSubscribeShowing: false,
       key: "",
       show_policy: false,
@@ -293,23 +212,23 @@ export default {
           }
         );
     },
-    confirmLeave: function() {
-      DataApi.unsubrscribeCampaign(
-        this.campagna.id
+    // confirmLeave: function() {
+    //   DataApi.unsubrscribeCampaign(
+    //     this.campagna.id
 
-      ).then(
-        (res) => {
-          //change campaign in store (subscribed)
-          console.log(res);
-          this.modalUnsubscribeShowing = false;
-          //todo change campaign in store
-          //toast and subscribed
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
-    },
+    //   ).then(
+    //     (res) => {
+    //       //change campaign in store (subscribed)
+    //       console.log(res);
+    //       this.modalUnsubscribeShowing = false;
+    //       //todo change campaign in store
+    //       //toast and subscribed
+    //     },
+    //     (err) => {
+    //       console.log(err);
+    //     }
+    //   );
+    // },
   },
   created: function() {
     DataApi.getCompaniesOfCampaign(this.campagna.id).then(
@@ -328,9 +247,9 @@ export default {
         console.log(err);
       }
     );
-    EventBus.$on("LEAVE_CAMPAIGN", () => {
-      this.modalUnsubscribeShowing = true;
-    });
+    // EventBus.$on("LEAVE_CAMPAIGN", () => {
+    //   this.modalUnsubscribeShowing = true;
+    // });
   },
   computed: {
     campagna() {

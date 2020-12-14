@@ -11,13 +11,17 @@ import Header from "./Components/Header.vue";
 export default {
   name: "App",
   components: {
-    appHeader: Header,
+    appHeader: Header
   },
+
+
   created() {
     this.$store.dispatch("tryAutoLogin").then((logged) => {
       if (logged) this.$router.push("campagne").catch(() => {});
     });
+
   },
+  
 };
 </script>
 

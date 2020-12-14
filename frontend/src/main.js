@@ -20,7 +20,9 @@ import RulesIcon from 'vue-material-design-icons/TextBoxSearchOutline.vue';
 import Performance from 'vue-material-design-icons/ChartLine.vue';
 import Join from "vue-material-design-icons/ControllerClassicOutline";
 import Unsubscribe from "vue-material-design-icons/ClipboardOffOutline";
-
+import Campaign from "vue-material-design-icons/SealVariant";
+import SendRequest from "vue-material-design-icons/EmailSendOutline";
+import Privacy from "vue-material-design-icons/FileDocumentEditOutline";
 Vue.component('info-outline-icon', InformationOutlineIcon);
 Vue.component('pencil-outline-icon', PencilOutlineIcon);
 Vue.component('login-icon', LoginIcon);
@@ -32,6 +34,9 @@ Vue.component('rules-icon', RulesIcon);
 Vue.component('performance-icon',Performance)
 Vue.component('join-icon',Join);
 Vue.component('unsubscribe-icon',Unsubscribe);
+Vue.component('campaign-icon',Campaign);
+Vue.component('send-request-icon',SendRequest);
+Vue.component('privacy-icon',Privacy);
 Vue.config.productionTip = false
 const router = new Router({routes:routes,mode:'history'})
 Vue.use(Router);
