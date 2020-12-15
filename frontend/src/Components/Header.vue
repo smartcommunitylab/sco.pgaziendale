@@ -225,7 +225,7 @@
       <form
         name="unsub"
         action=""
-        v-on:submit.prevent="onSubmit"
+        v-on:submit.prevent=""
         class="bg-white form flex flex-col p-6 relative lg:rounded-xl justify-center "
       >
         <div
@@ -276,7 +276,11 @@ export default {
           console.log(res);
           this.modalUnsubscribeShowing = false;
           //todo change campaign in store
-          //toast and subscribed
+          
+          //todo toast and subscribed
+          this.$store.dispatch("exitCampagna").then(() => {
+           this.$router.push({ path: `/campagne`}).catch(() => {});
+          });
         },
         (err) => {
           console.log(err);

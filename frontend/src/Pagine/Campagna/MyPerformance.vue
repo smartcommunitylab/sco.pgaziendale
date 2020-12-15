@@ -255,12 +255,15 @@ export default {
       ).then((stats) => {
         console.log(stats);
         this.stats = stats.data;
+        if (this.stats && this.stats.lenth>0)
         this.buildChart(this.stats);
       });
     },
     changeMode(mode) {
       if (this.mode == mode) return;
       this.mode = mode;
+            this.buildChart(this.stats);
+
     },
   },
   mounted() {
