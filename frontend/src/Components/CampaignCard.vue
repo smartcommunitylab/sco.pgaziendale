@@ -1,6 +1,6 @@
 <template>
   <div
-    class="m-auto justify-center flex flex-col  lg:w-1/3 bg-white rounded-lg my-4 lg:mx-2 xl:w-1/5 justify-cente shadow-xl"
+    class=" m-auto justify-center flex flex-col  lg:w-1/3 bg-white rounded-lg my-4 lg:mx-2 xl:w-1/5 justify-cente shadow-xl"
   >
     <div class="flex flex-col align-middle p-2 pt-0 h-40">
       <img
@@ -26,7 +26,7 @@
         <template v-if="dUserInCampaign">
           <button
             type="button"
-            class="p-0 text-primary hover:bg-primary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
+            class="p-0 text-primary hover:bg-primary   my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
             @click="performance"
           >
             <performance-icon class="pr-1" />
@@ -35,7 +35,7 @@
           <button
             type="button"
             @click="dettaglio"
-            class="p-0 text-primary hover:bg-primary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
+            class="p-0 text-primary hover:bg-primary  my-1 inline-flex items-center bg-transparent  font-semibold hover:text-white py-1 px-2  "
           >
             <info-outline-icon class="pr-1" />Info
           </button>
