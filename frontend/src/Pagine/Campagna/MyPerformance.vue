@@ -1,13 +1,14 @@
 <template>
   <div class=" bg-primary">
-    <div v-if="stats && stats.length>0">
+    <div v-show="stats && stats.length>0">
     <div class="px-8 bg-blue-600">
       <h1
         class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
       >
         Le Mie Performance
       </h1>
-      <div class="flex flex-col justify-center text-md">
+      <div class="flex flex-row justify-center text-md">
+
         <context-menu
           ref="menuValue"
           class="mx-auto"
@@ -71,7 +72,7 @@
       </div>
     </div>
     </div> 
-    <div v-else class="flex flex-col justify-center text-md">
+    <div v-show="stats.length==0" class="flex flex-col justify-center text-md">
       <h1
         class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
       >
@@ -170,6 +171,7 @@ export default {
                 scaleLabel: {
                   display: true,
                   labelString: this.option_group_selected.view_name,
+                  fontColor: "white"
                 },
               },
             ],
@@ -185,6 +187,7 @@ export default {
                 scaleLabel: {
                   display: true,
                   labelString: this.option_data_selected.view_name,
+                  fontColor: "white"
                 },
               },
             ],
@@ -213,6 +216,7 @@ export default {
 
       let ctx = this.$refs.canvas;
       let config = this.buildConfig(this.labels);
+      if (ctx && config)
       this.chart = new Chart(ctx, config);
     },
     getDataType() {
@@ -259,7 +263,7 @@ export default {
       this.mode = mode;
     },
   },
-  created: function () {
+  mounted() {
     //get stats with default value in creation hook
     this.getData(
       this.campagna.id,
