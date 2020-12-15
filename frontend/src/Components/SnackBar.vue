@@ -21,16 +21,10 @@
 </template>
 
 <script>
+import EventBus from "../communication/eventBus";
 export default {
   name: "SnackBar",
-  props: {
-    title: String,
-    description: String,
-    showing: {
-      required: true,
-      type: Boolean,
-    },
-  },
+  props: {},
 
   data: function() {
     return {
@@ -48,13 +42,18 @@ export default {
       }
     },
   },
+  created: function() {
+    EventBus.$on("snack-open", (title, description) => {
+      this.openSnackbar(title, description);
+    });
+  },
   methods: {
     close(e) {
       console.log(e);
       if (e == undefined) setTimeout(() => (this.dShowing = false), 3000);
       else this.dShowing = false;
     },
-    open(title, text) {
+    openSnackbar(title, text) {
       this.dTitle = title;
       this.dDescription = text;
       this.dShowing = true;
