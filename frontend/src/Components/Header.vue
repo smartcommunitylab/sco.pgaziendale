@@ -288,10 +288,18 @@ export default {
           console.log(res);
           this.modalUnsubscribeShowing = false;
           //todo change campaign in store
-          
+
+          EventBus.$emit(
+            "snack-open",
+            "Disiscrizione Effettuata",
+            "Ti sei disiscritto con successo alla campagna " +
+              this.campagna.title,
+            0
+          );
+
           //todo toast and subscribed
           this.$store.dispatch("exitCampagna").then(() => {
-           this.$router.push({ path: `/campagne`}).catch(() => {});
+            this.$router.push({ path: `/campagne` }).catch(() => {});
           });
         },
         (err) => {
