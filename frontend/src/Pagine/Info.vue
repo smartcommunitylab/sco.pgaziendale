@@ -1,13 +1,99 @@
 <template>
-  <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit id leo nec sollicitudin. Cras dui magna, feugiat et purus id, tempus bibendum nunc. Donec non ligula at massa gravida ultrices. Aliquam quis lacus eget sem dictum malesuada. Integer in rutrum purus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Sed diam neque, fermentum pellentesque hendrerit vitae, pulvinar vel lorem. Mauris convallis felis non dui varius ultricies. Etiam auctor sem quam, in faucibus arcu feugiat eget. Mauris elementum neque quis diam finibus tempus. Sed vel elementum erat. Sed cursus lectus nibh, quis molestie massa gravida in. Vestibulum tempus velit metus, eu efficitur urna eleifend vitae. Proin sed feugiat leo. Mauris laoreet turpis ultricies nulla eleifend, a ullamcorper ante finibus. Etiam finibus vitae orci non luctus.
+<div class="py-8 px-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+  <div class="text-center"><h1><b>Play&Go Aziende</b></h1></div>
+<p>
+      Il settore dei trasporti è quello che contribuisce di più alle emissioni di gas a
+      effetto serra (GHG). Nel 2017, il 27% delle emissioni totali dell’ EU-28 GHG e’
+      stato prodotto da questo settore. In questo ambito le città sono le principali
+      sorgenti di richiesta di mobilità globale a causa delle attività di trasporto dei
+      cittadini all’interno e tra le aree urbane.
+    </p>
+    <br />
+    <p>
+      Il traffico e le inefficienze del pendolarismo hanno un impatto negativo sulle
+      infrastrutture urbane, aumentano l'inquinamento, danneggiano l'ambiente e la salute
+      delle persone. Per affrontare e mitigare il traffico generato dai pendolari è
+      necessario coinvolgere gli stakeholder pubblici e privati attraverso un nuovo
+      approccio innovativo e collaborativo in grado di concentrarsi non solo sull'offerta
+      (ad esempio, strade e veicoli), ma anche sulla gestione della domanda di trasporto.
+    </p>
+    <br />
+    <p>
+      Negli ultimi anni, le autorità pubbliche hanno allargato la loro attenzione dalle
+      politiche di gestione della domanda che si rivolgono agli individui e alle famiglie
+      (che sono un obiettivo politico ampiamente eterogeneo e disaggregato) alle politiche
+      di gestione della domanda che si rivolgono ai grandi generatori di traffico -
+      compresi i settori pubblico e privato.
+    </p>
+    <br />
+    <p>
+      Ora, il COVID-19 sta generando un rapido cambiamento nel modo in cui le persone
+      lavorano, agiscono e si muovono, che potrebbe aprire la strada a un maggiore
+      cambiamento nel comportamento dei trasporti. Ciò significa che sarà necessario un
+      duro lavoro per plasmare i nuovi comportamenti che si formeranno in futuro.
+    </p>
+    <br />
+    <p>
+      Per questo motivo, il progetto <b>Play&Go Aziende</b> promuove un approccio al trasporto e
+      alla mobilità orientato ai lavoratori in grado di supportare il Mobility Manager
+      aziendale agendo sulla promozione della mobilità sostenibile e gestione della
+      domanda di trasporto analizzando i problemi, le necessità e le abitudini dei
+      lavoratori, le misure Covid-19 adottate dalle aziende, cercando di orientarli verso
+      nuove abitudini di trasporto sostenibile;
+    </p>
+    <br />
+    <p>
+      <b>Play&Go Aziende</b> intende proporre un approccio socio-tecnico in grado di coniugare
+      strumenti tecnologici, metodologie di progettazione collaborativa, accesso a dati e
+      informazioni, incentivi e azioni e iniziative integrative di informazione,
+      promozione e apprendimento basate anche sulla gamification.
+    </p>
+    <br />
+    <p>
+            <b>Play&Go Aziende</b>, facendo leva sul cambiamento comportamentale, sulle tecnologie e
+      sul modello di business, intende agire sui fattori risolutivi che ostacolano il
+      trasferimento modale fornendo servizi, informazioni, raccomandazioni e incentivi al
+      fine di:
+    </p>
+            <ul class="list-disc space-y-2">
+              <li class="flex items-start">
+                <span class="h-6 flex items-center sm:h-7">
+                  <svg class="flex-shrink-0 h-5 w-5 text-cyan-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+                <p class="ml-2">
+                   supportare le Aziende nell'adozione di politiche e iniziative per pianificare e
+          attuare azioni e misure per individuare la soluzione di mobilità più
+          sostenibile.
+                </p>
+              </li>
+              <li class="flex items-start">
+                <span class="h-6 flex items-center sm:h-7">
+                  <svg class="flex-shrink-0 h-5 w-5 text-cyan-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+                <p class="ml-2">
+          incoraggiare i lavoratori a cambiare significativamente i loro modelli di
+          mobilità, rendendoli parte attiva della soluzione.
+                </p>
+              </li>
 
-Cras at ultricies nibh, quis vulputate enim. Aliquam dignissim turpis vitae rhoncus imperdiet. Ut sodales tellus tincidunt mauris tempor, eget cursus arcu finibus. Fusce sit amet velit non nisi vulputate porttitor ut eu mi. Nam ex leo, gravida sit amet consequat sed, facilisis eget lorem. Vestibulum dapibus massa nisl. Nulla risus nulla, viverra et magna vel, rhoncus tincidunt risus. Nulla aliquam purus nec lectus volutpat pharetra. Curabitur efficitur turpis id nisi facilisis gravida. Nullam sodales tincidunt elit eu tincidunt. Quisque sit amet nunc vel purus rhoncus dictum. Vestibulum cursus egestas lectus, ut fermentum nibh mollis id. Vivamus ac varius est, sed porttitor nulla. Fusce id massa ut ligula posuere lobortis quis id libero. Maecenas et luctus ipsum.
-
-Proin eget quam sit amet mauris consectetur lobortis ut nec ipsum. Sed eu placerat magna. Curabitur nec arcu ligula. Nulla rhoncus diam eget placerat convallis. Cras eget tempus lectus, eu facilisis felis. In hac habitasse platea dictumst. Aenean tristique dolor massa, at semper lectus porttitor non.
-
-Nam dignissim auctor velit, quis iaculis nisl hendrerit ut. Morbi nec orci ex. Sed a mattis est, eu ultricies tortor. Ut sollicitudin sollicitudin condimentum. Aliquam et orci erat. Duis eu blandit nisi. Nunc ultricies pretium est quis dignissim. Quisque a dui at mauris efficitur posuere. Aliquam lobortis convallis rutrum. Sed imperdiet bibendum turpis, vitae efficitur tortor tempor at.
-
-In sodales diam id ante dignissim, vel lacinia est cursus. Aenean at nibh id enim convallis molestie. In hac habitasse platea dictumst. Nam ornare mauris accumsan, molestie arcu quis, laoreet enim. Interdum et malesuada fames ac ante ipsum primis in faucibus. Sed venenatis diam sed nibh placerat convallis. Phasellus lobortis, elit ac tempus elementum, enim lorem fermentum felis, eget venenatis nibh urna nec lorem. Sed non consectetur erat. Maecenas id erat et massa gravida maximus. Curabitur tristique quam vitae egestas lacinia. Donec porta est lacinia, aliquam mi eget, commodo urna. Mauris convallis tincidunt venenatis. Vivamus condimentum nulla ac scelerisque vehicula.</div>
+            </ul>
+    <p>
+      Trasformare positivamente il modo di viaggiare delle persone a beneficio della
+      società richiede una profonda trasformazione delle abitudini e dei comportamenti dei
+      lavoratori, che deve essere basata su valutazioni e simulazioni di impatto complete,
+      che tengano conto degli impatti sociali, sanitari, ambientali e climatici, nonché
+      dell'impatto economico. <b>Play&Go Aziende</b>vuole impegnarsi in una nuova soluzione
+      innovativa che fornisca una console di dati, informazioni, raccomandazioni e
+      simulazioni per i Mobility Manager che permettono di valutare, anche attraverso
+      analisi what-if, l'impatto ambientale del pendolarismo dei dipendenti, di valutare i
+      cambiamenti a seguito di misure e azioni specifiche e di pianificare strategie di
+      mobilità dei lavoratori ottimali e sostenibili.
+    </p>          </div>
+    
 </template>
 
 <script>
