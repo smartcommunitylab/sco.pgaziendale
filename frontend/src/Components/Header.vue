@@ -177,7 +177,7 @@
               <span>Regolamento</span></span
             >
           </router-link>
-          <router-link
+          <!-- <router-link
             :to="{ name: 'sendrequest', params: { id: campagna.id } }"
           >
             <span
@@ -188,7 +188,14 @@
               </span>
               <span>Invia Richiesta</span></span
             >
-          </router-link>
+          </router-link> -->
+              <span
+              @click="sendRequest()"
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <send-request-icon />
+              </span>
+              <span>Invia Richiesta</span></span>
           <router-link :to="{ name: 'privacy', params: { id: campagna.id } }">
             <span
               @click="isOpen = false"
@@ -269,6 +276,11 @@ export default {
     cardModal: CardModal,
   },
   methods: {
+    sendRequest: function() {
+      this.isOpen = false;
+      window.location.href = "mailto:blabla@blabla.com?subject=Richiesta informazioni&body=Vorrei avere delucidazioni";
+
+    },
     confirmLeave: function() {
       DataApi.unsubrscribeCampaign(this.campagna.id).then(
         (res) => {
