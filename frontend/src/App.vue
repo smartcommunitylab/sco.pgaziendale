@@ -2,16 +2,18 @@
   <div id="app" class="">
     <app-header></app-header>
     <router-view class="pt-32 lg:pt-32"></router-view>
+    <snack-bar />
   </div>
 </template>
 
 <script>
 import Header from "./Components/Header.vue";
-
+import SnackBar from "./Components/SnackBar.vue";
 export default {
   name: "App",
   components: {
     appHeader: Header,
+    "snack-bar": SnackBar,
   },
 
   created() {
