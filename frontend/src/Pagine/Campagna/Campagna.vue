@@ -1,7 +1,7 @@
 <template>
   <div class="capagna flex flex-col" v-if="campagna">
     <div class="flex flex-col ml-8 mt-8">
-      <div class="text-4xl mt-8 text-black text-center" >
+      <div class="text-4xl mt-8 text-black text-center">
         Campagna: {{ campagna.title }}
       </div>
     </div>
@@ -12,7 +12,11 @@
       <div class="flex flex-col">
         <div class="text-4xl mt-8 text-black text-center">Organizzata da</div>
       </div>
-      <div class="flex flex-col" v-for="company in companies" v-bind:key="company.id">
+      <div
+        class="flex flex-col"
+        v-for="company in companies"
+        v-bind:key="company.id"
+      >
         <img class="object-contain h-48 w-full" :src="company.logo" />
       </div>
     </div>
@@ -49,7 +53,10 @@
         <img class="object-contain h-48 w-full" :src="otherCompany.logo" />
       </div>
     </div>
-    <card-modal :showing="modalSubscribeShowing" @close="modalSubscribeShowing = false">
+    <card-modal
+      :showing="modalSubscribeShowing"
+      @close="modalSubscribeShowing = false"
+    >
       <h2 class="text-xl font-bold text-gray-900">Iscrizione alla campagna</h2>
 
       <form
@@ -96,17 +103,18 @@
               class="inline-block"
             />
             <label @click="showPolicy" for="policy">
-              <span class="font-bold underline pointer-events-auto cursor-pointer"
+              <span
+                class="font-bold underline pointer-events-auto cursor-pointer"
                 >Policy*</span
               >
               <p v-show="show_policy" class="text-gray-600 text-xs">
-                Ai sensi dell'art. 13 del Regolamento EU n. 2016/679 (GDPR), i dati
-                personali forniti saranno trattati per poter dare riscontro alla sua
-                richiesta tramite strumenti manuali, informatici e telematici, comunque
-                ideonei a garantire la sicurezza e la riservatezza dei dati stessi.
-                L'informativa Privacy completa è disponibile al seguente link {LINK}.
-                Dichiaro di aver letto e compreso l'informativa sul trattamento dei dati
-                personali.
+                Ai sensi dell'art. 13 del Regolamento EU n. 2016/679 (GDPR), i
+                dati personali forniti saranno trattati per poter dare riscontro
+                alla sua richiesta tramite strumenti manuali, informatici e
+                telematici, comunque ideonei a garantire la sicurezza e la
+                riservatezza dei dati stessi. L'informativa Privacy completa è
+                disponibile al seguente link {LINK}. Dichiaro di aver letto e
+                compreso l'informativa sul trattamento dei dati personali.
               </p>
             </label>
           </div>
@@ -143,6 +151,7 @@
 
 <script>
 import DataApi from "../../communication/dataApi";
+import EventBus from "../../communication/eventBus";
 // import EventBus from "../../communication/eventBus";
 
 import CardModal from "../../Components/GenericModal.vue";
@@ -167,46 +176,53 @@ export default {
   },
   methods: {
     setMyCompany(company) {
-      if (company)
-      this.myCompany = company;
+      if (company) this.myCompany = company;
     },
     onChange(event) {
       console.log(event.target.value);
     },
-    subscribe: function () {
+    subscribe: function() {
       this.modalSubscribeShowing = true;
     },
-    showPolicy: function () {
+    showPolicy: function() {
       this.show_policy = !this.show_policy;
     },
 
-    confirm: function () {
+    confirm: function() {
       if (this.key && this.selectedCompany && this.regolamento && this.policy)
         DataApi.subscribeCampaign(
           this.campagna.id,
           this.selectedCompany.code,
           this.key
         ).then(
-           (res) => {
+          (res) => {
             //change campaign in store (subscribed)
             console.log(res);
             this.modalSubscribeShowing = false;
             this.campagna.userInCampaign = true;
             this.campagna.subscribedCompany = this.selectedCompany;
             this.$store.dispatch("storeCampagna", this.campagna);
-            DataApi.getUser().then( (res) =>  {
+            DataApi.getUser().then((res) => {
               this.$store.dispatch("storeUser", res.data);
               //add iscritto con
-              console.log(JSON.stringify(this.campagna))
-              console.log(JSON.stringify(this.companies))
+              console.log(JSON.stringify(this.campagna));
+              console.log(JSON.stringify(this.companies));
               this.setMyCompany(
-                this.companies.find((x)=>{
+                this.companies.find((x) => {
                   return x.code == this.campagna.subscribedCompany.code;
                 })
               );
             });
+            EventBus.$emit(
+              "snack-open",
+              "Iscrizione Effettuata",
+              "Ti sei iscritto con successo alla campagna " +
+                this.campagna.title,
+              0
+            );
           },
           (err) => {
+            EventBus.$emit("snack-open");
             console.log(err);
           }
         );
@@ -229,7 +245,7 @@ export default {
     //   );
     // },
   },
-  created: function () {
+  created: function() {
     DataApi.getCompaniesOfCampaign(this.campagna.id).then(
       (res) => {
         this.companies = res.data;

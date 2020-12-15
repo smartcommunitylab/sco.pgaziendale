@@ -2,7 +2,8 @@
   <Transition name="fade">
     <div
       v-if="dShowing"
-      class="snackbar  p-4 bg-danger absolute w-1/2 text-center text-white shadow-xl rounded-md"
+      class="snackbar  p-4 absolute w-1/2 text-center text-white shadow-xl rounded-md"
+      :class="getType"
     >
       <button
         type="button"
@@ -31,7 +32,19 @@ export default {
       dTitle: this.title,
       dDescription: this.description,
       dShowing: this.showing,
+      dType: 0,
     };
+  },
+  computed: {
+    getType: function() {
+      let toRtn = "bg-danger";
+      if (this.dType == 0) {
+        toRtn = "bg-secondary";
+      } else if (this.dType == 1) {
+        toRtn = "bg-info";
+      }
+      return toRtn;
+    },
   },
   watch: {
     dShowing(value) {
@@ -43,8 +56,8 @@ export default {
     },
   },
   created: function() {
-    EventBus.$on("snack-open", (title, description) => {
-      this.openSnackbar(title, description);
+    EventBus.$on("snack-open", (title, description, type) => {
+      this.openSnackbar(title, description, type);
     });
   },
   methods: {
@@ -53,9 +66,16 @@ export default {
       if (e == undefined) setTimeout(() => (this.dShowing = false), 3000);
       else this.dShowing = false;
     },
-    openSnackbar(title, text) {
-      this.dTitle = title;
-      this.dDescription = text;
+    openSnackbar(title, text, type) {
+      if (title == undefined && text == undefined && type == undefined) {
+        this.dTitle = "Errore";
+        this.dDescription = "Ops, qualcosa è andato storto...";
+        this.dType = 2;
+      } else {
+        this.dTitle = title;
+        this.dDescription = text;
+        this.dType = type;
+      }
       this.dShowing = true;
     },
   },
