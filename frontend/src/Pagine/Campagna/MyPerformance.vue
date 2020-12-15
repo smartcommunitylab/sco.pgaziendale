@@ -96,6 +96,7 @@ export default {
   data: function () {
     return {
       stats: [],
+      originalStats:[],
       labels: [],
       from: moment().subtract(7, "d").format(MOMENT_DATE_FORMAT),
       to: moment().format(MOMENT_DATE_FORMAT),
@@ -119,16 +120,16 @@ export default {
       // check if Km, select the rigth km
       var data = [];
       if (this.option_data_selected.name.startsWith("KM"))
-        data = this.stats.map((stat, index) => {
+        data = this.originalStats.map((stat, index) => {
           return {
             data: labels[index],
             value: stat.distances[this.option_data_selected.name.substring(3)] / 1000,
           };
         });
       else
-        data = this.stats.map((stat, index) => {
+        data = this.originalStats.map((stat, index) => {
           return {
-            data: labels[index],
+            date: labels[index],
             value: stat[this.option_data_selected.name],
           };
         });
@@ -254,15 +255,14 @@ export default {
         this.withTracks
       ).then((stats) => {
         console.log(stats);
-        this.stats = stats.data;
-        if (this.stats && this.stats.lenth>0)
-        this.buildChart(this.stats);
+        this.originalStats = stats.data;
+        this.buildChart(this.originalStats);
       });
     },
     changeMode(mode) {
       if (this.mode == mode) return;
       this.mode = mode;
-            this.buildChart(this.stats);
+      this.buildChart(this.originalStats);
 
     },
   },
@@ -276,8 +276,8 @@ export default {
       this.withTracks
     ).then((stats) => {
       console.log(stats);
-      this.stats = stats.data;
-      this.buildChart(this.stats);
+      this.originalStats = stats.data;
+      this.buildChart(this.originalStats);
     });
   },
   computed: {
