@@ -61,11 +61,7 @@ public class CampaignService {
 	 * @return
 	 */
 	public Page<Campaign> getCampaigns(Pageable page) {
-		return campaignRepo.findAll(page).map(c -> {
-			c.setRules(null);
-			c.setPrivacy(null);
-			return c;
-		});
+		return campaignRepo.findAll(page);
 	}
 
 	/**
@@ -82,11 +78,7 @@ public class CampaignService {
 	 * @return
 	 */
 	public Page<Campaign> getPublicCampaigns(Pageable pageable) {
-		return campaignRepo.findActive(LocalDate.now(), pageable).map(c -> {
-			c.setRules(null);
-			c.setPrivacy(null);
-			return c;
-		});
+		return campaignRepo.findActive(LocalDate.now(), pageable);
 	}
 	/**
 	 * List of campaigns the current user is subscribed to
