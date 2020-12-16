@@ -3,7 +3,7 @@
     <div class="flex flex-col">
       <!-- tmp-->
       <h1
-        class="justify-self-center text-center  text-5xl pt-2 lg:text-6xl font-semibold pb-4"
+        class="justify-self-center text-center text-5xl pt-2 lg:text-6xl font-semibold pb-4"
       >
         Campagne
       </h1>
@@ -18,9 +18,7 @@
         ]"
       />
 
-      <div
-        class="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center  md:px-12"
-      >
+      <div class="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center md:px-12">
         <template v-if="!campaignToShow.length">
           <div
             class="m-auto justify-center flex flex-col-reverse bg-white rounded-lg w-full my-4 text-center justify-cente shadow-xl p-12"
@@ -144,11 +142,12 @@
 import DataApi from "../communication/dataApi";
 import ContextMenu from "../Components/ContextMenu.vue";
 import CampaignCard from "../Components/CampaignCard.vue";
+import EventBus from "../communication/eventBus";
 export default {
   name: "Campagne",
   components: { ContextMenu, CampaignCard },
 
-  data: function() {
+  data: function () {
     return {
       fakeCampaigns: [],
       myCampaigns: [],
@@ -158,13 +157,13 @@ export default {
     };
   },
   methods: {
-    sortCampaign: function() {
+    sortCampaign: function () {
       if (this.$refs["menu"].getCurrentOption().name != this.currentView)
         this.currentView = this.$refs["menu"].getCurrentOption().name;
     },
   },
   computed: {
-    getCurrentViewTitle: function() {
+    getCurrentViewTitle: function () {
       let toRtn = "Campagne Concluse";
       if (this.currentView == "my") {
         toRtn = "Le mie Campagne";
@@ -173,7 +172,7 @@ export default {
       }
       return toRtn;
     },
-    campaignToShow: function() {
+    campaignToShow: function () {
       let toRtn = this.myCampaigns;
 
       if (this.currentView == "active") {
@@ -198,8 +197,13 @@ export default {
       return toRtn;
     },
   },
-  mounted: function() {
-    // console.log(x);
+  mounted: function () {
+    let loader = this.$loading.show({
+      canCancel: false,
+      backgroundColor: "#000",
+      color: "#fff",
+    });
+
     DataApi.getPublicCampaigns().then(
       (res) => {
         this.allCampaigns = res.data.content;
@@ -207,6 +211,8 @@ export default {
       },
       (err) => {
         console.log(err);
+        loader.hide();
+        EventBus.$emit("snack-open");
       }
     );
 
@@ -226,6 +232,7 @@ export default {
                 };
               });
               console.log(this.campaigns);
+              loader.hide();
               if (this.myCampaigns.length == 0) {
                 this.$refs["menu"].currentOption = {
                   name: "active",
@@ -237,11 +244,13 @@ export default {
             },
             (err) => {
               console.log(err);
+              loader.hide();
             }
           );
         },
         (err) => {
           console.log(err);
+          loader.hide();
         }
       );
     });
