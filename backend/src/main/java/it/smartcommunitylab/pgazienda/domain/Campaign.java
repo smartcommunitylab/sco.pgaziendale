@@ -48,6 +48,8 @@ public class Campaign {
 	private LocalDate to;
 	private Boolean active;
 	private List<String> means = new LinkedList<>();
+	
+	private String rules, privacy;
 	/**
 	 * @return the id
 	 */
@@ -156,5 +158,30 @@ public class Campaign {
 	public void setLogo(String logo) {
 		this.logo = logo;
 	}
+	/**
+	 * @return the rules
+	 */
+	public String getRules() {
+		return rules;
+	}
+	/**
+	 * @param rules the rules to set
+	 */
+	public void setRules(String rules) {
+		this.rules = rules;
+	}
+	/**
+	 * @return the privacy
+	 */
+	public String getPrivacy() {
+		return privacy;
+	}
+	/**
+	 * @param privacy the privacy to set
+	 */
+	public void setPrivacy(String privacy) {
+		this.privacy = privacy;
+	}
 
+	
 }
