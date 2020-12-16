@@ -16,6 +16,8 @@
 
 package it.smartcommunitylab.pgazienda.domain;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -30,6 +32,7 @@ public class CompanyLocation {
 	private String address, streetNumber, zip, city, province, region, country;
 	@NotNull
 	private Double latitute, longitude, radius;
+	private List<Integer> nonWorking;
 	/**
 	 * @return the id
 	 */
@@ -161,6 +164,21 @@ public class CompanyLocation {
 	 */
 	public void setRadius(Double radius) {
 		this.radius = radius;
+	}
+	
+	
+	
+	/**
+	 * @return the nonWorking
+	 */
+	public List<Integer> getNonWorking() {
+		return nonWorking;
+	}
+	/**
+	 * @param nonWorking the nonWorking to set
+	 */
+	public void setNonWorking(List<Integer> nonWorking) {
+		this.nonWorking = nonWorking;
 	}
 	@Override
 	public int hashCode() {

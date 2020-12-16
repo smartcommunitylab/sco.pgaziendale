@@ -92,7 +92,7 @@ public class TrackingDataService {
 	@Autowired
 	private MongoTemplate template;
 	
-	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*5)
+	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*2)
 	public void synchronizeApps() {
 		appRepo.findAll().forEach(a -> {
 			
@@ -127,7 +127,9 @@ public class TrackingDataService {
 						request.setMeans(means);
 						request.setMultimodal(true);
 						request.setPlayerId(playerIds);
-						request.setLocations(company.getLocations().stream().map(l -> {
+						request.setLocations(company.getLocations().stream()
+						.filter(l -> l.getNonWorking() == null || l.getNonWorking().isEmpty() || l.getNonWorking().contains(LocalDate.now().getDayOfWeek().getValue()))
+						.map(l -> {
 							LocationDTO ldto = new LocationDTO();
 							ldto.setLat(l.getLatitute());
 							ldto.setLng(l.getLongitude());
