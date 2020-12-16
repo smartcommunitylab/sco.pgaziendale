@@ -1,7 +1,7 @@
 <template>
   <div>
-    <nav
-      class="flex fixed w-full items-center justify-between px-6 h-16 bg-primary text-white text-gray-700  z-10 "
+    <nav 
+      class="visible lg:invisible flex fixed w-full items-center justify-between px-6 h-16 bg-primary text-white text-gray-700  z-10 "
     >
       <div class="flex items-center">
         <button class="mr-2" aria-label="Open Menu" @click="drawer">
@@ -210,6 +210,192 @@
             <div @click="leaveCampaign">
               <span
                 @click="isOpen = false"
+                class="flex items-center p-4 hover:bg-white hover:text-primary"
+                ><span class="mr-2">
+                  <unsubscribe-icon />
+                </span>
+                <span>Abbandona campagna</span></span
+              >
+            </div>
+          </div>
+        </div>
+      </aside>
+    </nav>
+     <nav 
+      class="invisible lg:visible flex fixed w-full items-center justify-between px-6 h-16 bg-primary text-white text-gray-700  z-10 "
+    >
+      <div class="flex items-center">
+        <img src="@/assets/images/logo.png" alt="Logo" class="h-auto w-12" />
+      </div>
+      <div class="flex items-center">
+        <div
+          class="hidden md:block md:flex md:justify-between md:bg-transparent"
+        >
+          <router-link to="/info">
+            <button
+              title="Info"
+              class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
+            >
+              <info-outline-icon />
+              <span>Info</span>
+            </button>
+          </router-link>
+          <router-link to="/contatti">
+            <button
+              title="Contatti"
+              class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
+            >
+              <pencil-outline-icon />
+
+              <span>Contatti</span>
+            </button>
+          </router-link>
+        </div>
+      </div>
+      <aside
+        class="transform top-0 left-0 w-64 bg-primary text-white fixed h-full  ease-in-out transition-all duration-300 z-30"
+      >
+        <span
+          
+          class="flex w-full items-center p-4 "
+        >
+          <img
+            src="@/assets/images/logo.png"
+            alt="Logo"
+            class="h-auto w-32 mx-auto"
+          />
+        </span>
+        <div v-if="!campagna">
+          <router-link to="/" v-on:click.native="onLogin" v-if="!auth">
+            <span
+              
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <login-icon />
+              </span>
+              <span>Entra</span></span
+            >
+          </router-link>
+
+          <router-link to="/campagne" v-if="auth">
+            <span
+              
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <list-campaigns-icon />
+              </span>
+              <span>Campagne</span></span
+            >
+          </router-link>
+          <router-link to="/info">
+            <span
+             
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <info-outline-icon />
+              </span>
+              <span>Info</span></span
+            ></router-link
+          >
+          <router-link to="/contatti">
+            <span
+              
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+            >
+              <span class="mr-2">
+                <pencil-outline-icon />
+              </span>
+              <span>Contatti</span></span
+            >
+          </router-link>
+          <router-link to="/" v-on:click.native="onLogout" v-if="auth">
+            <span
+              @
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <logout-icon />
+              </span>
+              <span>Esci</span></span
+            >
+          </router-link>
+        </div>
+        <div v-if="campagna">
+          <router-link to="/campagne" v-on:click.native="indietro">
+            <span
+              @click="isOpen = false"
+              class="flex items-center p-4 hover:bg-white hover:text-primary m-2 border-white border-2 rounded"
+              ><span class="mr-2">
+                <arrow-left-icon />
+              </span>
+              <span>Indietro</span></span
+            ></router-link
+          >
+          <router-link :to="{ name: 'campagna', params: { id: campagna.id } }">
+            <span
+              @
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <campaign-icon />
+              </span>
+              <span>Campagna</span></span
+            >
+          </router-link>
+          <router-link
+            :to="{ name: 'myperformance', params: { id: campagna.id } }"
+            v-if="campagna.userInCampaign"
+          >
+            <span
+              
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <chart-bar-icon />
+              </span>
+              <span>Le mie performance</span></span
+            >
+          </router-link>
+          <router-link :to="{ name: 'rules', params: { id: campagna.id } }">
+            <span
+              @
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <rules-icon />
+              </span>
+              <span>Regolamento</span></span
+            >
+          </router-link>
+          <!-- <router-link
+            :to="{ name: 'sendrequest', params: { id: campagna.id } }"
+          >
+            <span
+              @click="isOpen = false"
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <send-request-icon />
+              </span>
+              <span>Invia Richiesta</span></span
+            >
+          </router-link> -->
+              <span
+              @click="sendRequest()"
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <send-request-icon />
+              </span>
+              <span>Invia Richiesta</span></span>
+          <router-link :to="{ name: 'privacy', params: { id: campagna.id } }">
+            <span
+             
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <privacy-icon />
+              </span>
+              <span>Privacy Policy</span></span
+            >
+          </router-link>
+          <div v-if="campagna.userInCampaign">
+            <div @click="leaveCampaign">
+              <span
+                @
                 class="flex items-center p-4 hover:bg-white hover:text-primary"
                 ><span class="mr-2">
                   <unsubscribe-icon />
