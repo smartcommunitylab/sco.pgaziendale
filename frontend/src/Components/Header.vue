@@ -111,17 +111,17 @@
             >
           </router-link>
 
-          <router-link to="/campagne" v-if="auth">
+          <router-link to="/campagne" v-if="auth" >
             <span
               @click="isOpen = false"
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Campagne'}"
               ><span class="mr-2">
                 <list-campaigns-icon />
               </span>
               <span>Campagne</span></span
             >
           </router-link>
-          <router-link to="/info">
+          <router-link to="/info" :class="{active:page.title === 'Info'}">
             <span
               @click="isOpen = false"
               class="flex items-center p-4 hover:bg-white hover:text-primary"
@@ -131,7 +131,7 @@
               <span>Info</span></span
             ></router-link
           >
-          <router-link to="/contatti">
+          <router-link to="/contatti" :class="{active:page.title === 'Contatti'}">
             <span
               @click="isOpen = false"
               class="flex items-center p-4 hover:bg-white hover:text-primary"
@@ -303,7 +303,7 @@
           <router-link to="/campagne" v-if="auth">
             <span
               
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Campagne'}"
               ><span class="mr-2">
                 <list-campaigns-icon />
               </span>
@@ -313,7 +313,7 @@
           <router-link to="/info">
             <span
              
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Info'}"
               ><span class="mr-2">
                 <info-outline-icon />
               </span>
@@ -323,7 +323,7 @@
           <router-link to="/contatti">
             <span
               
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Contatti'}"
             >
               <span class="mr-2">
                 <pencil-outline-icon />
@@ -356,7 +356,7 @@
           <router-link :to="{ name: 'campagna', params: { id: campagna.id } }">
             <span
               @
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Campagna'}"
               ><span class="mr-2">
                 <campaign-icon />
               </span>
@@ -369,7 +369,7 @@
           >
             <span
               
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Le mie performance'}"
               ><span class="mr-2">
                 <chart-bar-icon />
               </span>
@@ -379,7 +379,7 @@
           <router-link :to="{ name: 'rules', params: { id: campagna.id } }">
             <span
               @
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              class="flex items-center p-4 hover:bg-white hover:text-primary"  :class="{active:page.title === 'Regolamento'}"
               ><span class="mr-2">
                 <rules-icon />
               </span>
@@ -400,15 +400,14 @@
           </router-link> -->
               <span
               @click="sendRequest()"
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" 
               ><span class="mr-2">
                 <send-request-icon />
               </span>
               <span>Invia Richiesta</span></span>
           <router-link :to="{ name: 'privacy', params: { id: campagna.id } }">
-            <span
-             
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+            <span         
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Privacy'}"
               ><span class="mr-2">
                 <privacy-icon />
               </span>
@@ -577,9 +576,15 @@ export default {
     campagna() {
       return this.$store.getters.campagna;
     },
-        page() {
+    page() {
       return this.$store.getters.page;
     },
   },
 };
 </script>
+<style scoped>
+.active{
+      color: #0f70b7;
+      background-color: #fff;
+}
+</style>
