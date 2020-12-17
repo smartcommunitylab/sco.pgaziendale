@@ -468,7 +468,6 @@
 </template>
 
 <script>
-import { AUTH } from "../variables.js";
 import EventBus from "../communication/eventBus";
 import CardModal from "./GenericModal.vue";
 import DataApi from "../communication/dataApi";
@@ -535,9 +534,9 @@ export default {
       this.$store.dispatch("logout");
     },
     onLogin() {
-      var authUrl = AUTH.AUTH_URL;
-      var tokenId = AUTH.TOKEN_ID;
-      var redirectUri = AUTH.REDIRECT_URI;
+      var authUrl = process.env.VUE_APP_AUTH_URL;
+      var tokenId = process.env.VUE_APP_AUTH_TOKEN_ID;
+      var redirectUri = process.env.VUE_APP_REDIRECT_URI;
       return window.open(
         authUrl +
           "response_type=token&client_id=" +

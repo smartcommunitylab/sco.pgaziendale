@@ -1,29 +1,28 @@
 import axios from "axios";
-import { BASE_URL, USER_API,PUBLIC_CAMPAIGNS_API,MY_CAMPAIGNS_API, MY_STATS_API,COMPANIES_IN_CAMPAIGN_API, SUBSCRIBE_CAMPAIGN_API, SUBSCRIBE,UNSUBSCRIBE } from '../variables.js'
 export default   {
 
     getUser() {
-        return  axios.get(BASE_URL+USER_API)
+        return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_USER_API)
     },
     getPublicCampaigns() {
-        return  axios.get(BASE_URL+PUBLIC_CAMPAIGNS_API)
+        return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_PUBLIC_CAMPAIGNS_API)
     },
     getMyCampaigns() {
-        return  axios.get(BASE_URL+MY_CAMPAIGNS_API)
+        return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_MY_CAMPAIGNS_API)
     },
     getCompaniesOfCampaign(campaignId) {
-        return axios.get(BASE_URL+COMPANIES_IN_CAMPAIGN_API+campaignId);
+        return axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_COMPANIES_IN_CAMPAIGN_API+campaignId);
           
     },
     subscribeCampaign(campaignId,companyCode,key) {
-        return axios.put(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+SUBSCRIBE+companyCode+'/'+key);
+        return axios.put(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_SUBSCRIBE_CAMPAIGN_API+campaignId+process.env.VUE_APP_SUBSCRIBE+companyCode+'/'+key);
     },
     unsubrscribeCampaign(campaignId) {
-        return axios.delete(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+UNSUBSCRIBE);
+        return axios.delete(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_SUBSCRIBE_CAMPAIGN_API+campaignId+process.env.VUE_APP_UNSUBSCRIBE);
     },
     getStats(campaignId, from, to, groupBy, withTracks) {
         
-        return  axios.get(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+MY_STATS_API,
+        return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_SUBSCRIBE_CAMPAIGN_API+campaignId+process.env.VUE_APP_MY_STATS_API,
             {
                 params: {
                     ...(from ? { from: from} : {}),
