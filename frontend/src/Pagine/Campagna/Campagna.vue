@@ -1,6 +1,150 @@
 <template>
   <div class="capagna flex flex-col" v-if="campagna">
-    <div class="flex flex-col ml-8 mt-8">
+    <div
+      :class="campagna.userInCampaign ? 'flex flex-row' : 'flex flex-col'"
+      class="align-middle justify-center"
+    >
+      <img
+        class="object-contain h-48 w-2/3 mb-auto "
+        :class="
+          !campagna.userInCampaign ? 'm-auto lg:w-2/6 lg:h-24' : 'lg:w-2/6'
+        "
+        :src="campagna.logo"
+      />
+
+      <div v-if="campagna.userInCampaign" class="w-1/6 my-auto">
+        <div class="">
+          <div class="text-sm text-black text-center pb-4">Iscritto con</div>
+        </div>
+        <div>
+          <img
+            class=" object-contain w-1/2 mx-auto my-auto"
+            :src="myCompany.logo"
+          />
+        </div>
+      </div>
+    </div>
+    <div v-if="companies && companies.length && !campagna.userInCampaign">
+      <div class="flex flex-col pt-8">
+        <h2 class=" text-xl pl-2 pb-2 text-center">
+          A questa campagna partecipano
+        </h2>
+      </div>
+      <div
+        class="flex flex-row overflow-x-auto  pb-4  "
+        :class="companies.length >= 3 ? 'justify-start' : 'justify-center'"
+      >
+        <div
+          v-for="company in companies"
+          v-bind:key="company.id"
+          class="flex-shrink-0"
+        >
+          <img class="object-contain h-40 w-full mx-2" :src="company.logo" />
+        </div>
+      </div>
+    </div>
+    <div
+      v-if="campagna.userInCampaign"
+      class="flex flex-col  py-4 pt-0 justify-center align-middle"
+    >
+      <h2 class=" text-2xl pl-2 pb-2 md:text-center md:text-3xl md:pt-5">
+        Il tuo ultimo mese
+      </h2>
+      <div class="flex flex-col lg:flex-row">
+        <div
+          class="bg-primary text-white pl-20 text-left md:text-center md:p-0 md:my-2 md:w-3/4 md:m-auto md:rounded-md md:shadow-lg lg:rounded-none"
+        >
+          <p class="font-semibold text-6xl -mb-4">{{ total_distance }}</p>
+          <p class="font-semibold text-lg pb-2">km percorsi</p>
+        </div>
+        <div
+          class="bg-secondary text-white pr-20 text-right md:text-center md:p-0 md:my-2 md:w-3/4 md:m-auto md:rounded-md md:shadow-lg lg:rounded-none"
+        >
+          <p class="font-semibold text-6xl -mb-4">{{ co2_saved }}g</p>
+          <p class="font-semibold text-lg pb-2">CO2 salvata</p>
+        </div>
+        <div
+          class="bg-primary text-white pl-20 text-left md:text-center md:p-0 md:my-2 md:w-3/4 md:m-auto md:rounded-md md:shadow-lg lg:rounded-none"
+        >
+          <p class="font-semibold text-6xl -mb-4">{{ totalTracks }}</p>
+          <p class="font-semibold text-lg pb-2">viaggi validi</p>
+        </div>
+      </div>
+
+      <router-link
+        :to="{ name: 'myperformance', params: { id: campagna.id } }"
+        tag="button"
+        type="button"
+        class="text-center m-auto pt-2 text-primary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold  py-1 px-2  lg:hidden"
+      >
+        <performance-icon class="pr-1" />Mostra dettagli
+      </router-link>
+    </div>
+    <div v-if="!campagna.userInCampaign" class="flex">
+      <button
+        @click="subscribe"
+        class="text-center mx-auto pt-2 text-white bg-primary w-full  items-center bg-transparent  font-semibold  py-2 px-2 md:w-3/5 md:mx-auto md:my-10 lg:w-1/6"
+      >
+        Iscriviti
+      </button>
+    </div>
+    <div class="px-2 flex flex-col">
+      <h2 class=" text-2xl  pb-2 md:text-center md:text-3xl md:pt-5">
+        Riguardo {{ campagna.title }}
+      </h2>
+      <p class="pr-2 break-words md:text-lg md:px-16 lg:px-48 lg:text-center">
+        {{ campagna.description }}
+      </p>
+      <router-link
+        :to="{ name: 'rules', params: { id: campagna.id } }"
+        tag="button"
+        class="lg:hidden text-center m-auto pt-2 text-primary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold  py-1 px-2  "
+      >
+        <rules-icon class="pr-1" /> Leggi il regolamento
+      </router-link>
+    </div>
+    <div class="px-12 py-4">
+      <p class="text-xs md:px-20 lg:px-56">
+        Ai sensi dell’art. 13 del Regolamento EU n.2016/679 (GDPR), i dati
+        personali forniti saranno trattati per poter dare riscontro alla sua
+        richiesta tramite strumenti manuali, informatici e telematici, comunque
+        idonei a garantire la sicurezza e la riservatezza dei dati stessi.
+        L’informativa Privacy completa è disponibile al seguente link
+      </p>
+    </div>
+
+    <div v-if="companies && companies.length && campagna.userInCampaign">
+      <div class="flex flex-col pt-8">
+        <h2 class=" text-xl pl-2 pb-2 text-center">
+          A questa campagna partecipano
+        </h2>
+      </div>
+      <div
+        class="flex flex-row overflow-x-auto  pb-4  "
+        :class="
+          companies.length >= 3
+            ? 'justify-start lg:justify-center'
+            : 'justify-center'
+        "
+      >
+        <div
+          v-for="company in companies"
+          v-bind:key="company.id"
+          class="flex-shrink-0"
+        >
+          <img class="object-contain h-40 w-full mx-2" :src="company.logo" />
+        </div>
+      </div>
+    </div>
+    <div v-if="campagna.userInCampaign" class="flex lg:hidden">
+      <button
+        @click="leaveCampaign"
+        class="text-center mx-auto pt-2 text-white bg-danger w-full  items-center bg-transparent  font-semibold  py-2 px-2 md:w-3/5 md:mx-auto md:my-10"
+      >
+        Abbandona Campagna
+      </button>
+    </div>
+    <!--<div class="flex flex-col ml-8 mt-8">
       <div class="text-4xl mt-8 text-black text-center">
         Campagna: {{ campagna.title }}
       </div>
@@ -48,8 +192,12 @@
       >
         <img class="object-contain h-48 w-full" :src="otherCompany.logo" />
       </div>
-    </div>
-    <card-modal :showing="modalSubscribeShowing" @close="modalSubscribeShowing = false">
+    </div>-->
+
+    <card-modal
+      :showing="modalSubscribeShowing"
+      @close="modalSubscribeShowing = false"
+    >
       <h2 class="text-xl font-bold text-gray-900">Iscrizione alla campagna</h2>
 
       <form
@@ -96,17 +244,18 @@
               class="inline-block"
             />
             <label @click="showPolicy" for="policy">
-              <span class="font-bold underline pointer-events-auto cursor-pointer"
+              <span
+                class="font-bold underline pointer-events-auto cursor-pointer"
                 >Policy*</span
               >
               <p v-show="show_policy" class="text-gray-600 text-xs">
-                Ai sensi dell'art. 13 del Regolamento EU n. 2016/679 (GDPR), i dati
-                personali forniti saranno trattati per poter dare riscontro alla sua
-                richiesta tramite strumenti manuali, informatici e telematici, comunque
-                ideonei a garantire la sicurezza e la riservatezza dei dati stessi.
-                L'informativa Privacy completa è disponibile al seguente link {LINK}.
-                Dichiaro di aver letto e compreso l'informativa sul trattamento dei dati
-                personali.
+                Ai sensi dell'art. 13 del Regolamento EU n. 2016/679 (GDPR), i
+                dati personali forniti saranno trattati per poter dare riscontro
+                alla sua richiesta tramite strumenti manuali, informatici e
+                telematici, comunque ideonei a garantire la sicurezza e la
+                riservatezza dei dati stessi. L'informativa Privacy completa è
+                disponibile al seguente link {LINK}. Dichiaro di aver letto e
+                compreso l'informativa sul trattamento dei dati personali.
               </p>
             </label>
           </div>
@@ -146,6 +295,8 @@ import DataApi from "../../communication/dataApi";
 import EventBus from "../../communication/eventBus";
 // import EventBus from "../../communication/eventBus";
 
+import { MOMENT_DATE_FORMAT } from "../../variables";
+
 import CardModal from "../../Components/GenericModal.vue";
 export default {
   name: "Campagna",
@@ -164,23 +315,29 @@ export default {
       modalSubscribeShowing: false,
       key: "",
       show_policy: false,
+      totalTracks: 0,
+      co2_saved: 0,
+      total_distance: 0,
     };
   },
   methods: {
+    leaveCampaign: function() {
+      EventBus.$emit("LEAVE_CAMPAIGN");
+    },
     setMyCompany(company) {
       if (company) this.myCompany = company;
     },
     onChange(event) {
       console.log(event.target.value);
     },
-    subscribe: function () {
+    subscribe: function() {
       this.modalSubscribeShowing = true;
     },
-    showPolicy: function () {
+    showPolicy: function() {
       this.show_policy = !this.show_policy;
     },
 
-    confirm: function () {
+    confirm: function() {
       let loader = this.$loading.show({
         canCancel: false,
         backgroundColor: "#000",
@@ -221,7 +378,8 @@ export default {
             EventBus.$emit(
               "snack-open",
               "Iscrizione Effettuata",
-              "Ti sei iscritto con successo alla campagna " + this.campagna.title,
+              "Ti sei iscritto con successo alla campagna " +
+                this.campagna.title,
               0
             );
           },
@@ -252,7 +410,6 @@ export default {
   },
   created: function () {
     this.$store.dispatch("storePage", {title:"Campagna",back:false});
-
     let loader = this.$loading.show({
       canCancel: false,
       backgroundColor: "#000",
@@ -260,7 +417,6 @@ export default {
     });
     DataApi.getCompaniesOfCampaign(this.campagna.id).then(
       (res) => {
-        loader.hide();
         this.companies = res.data;
         if (this.campagna.userInCampaign) {
           this.setMyCompany(
@@ -274,9 +430,26 @@ export default {
       (err) => {
         console.log(err);
         EventBus.$emit("snack-open");
-        loader.hide();
       }
     );
+    const moment = require("moment");
+    let from = moment()
+      .subtract(30, "d")
+      .format(MOMENT_DATE_FORMAT);
+    let to = moment().format(MOMENT_DATE_FORMAT);
+
+    DataApi.getStats(this.campagna.id, from, to, "month", false).then((res) => {
+      if (res.data.length != 0) {
+        console.log(res.data);
+        this.totalTracks = Object.keys(res.data[0].distances).map((key) => {
+          this.total_distance += res.data[0].distances[key];
+        });
+        this.co2_saved = res.data[0].co2_saved;
+        this.totalTracks = res.data[0].trackCount;
+      }
+    });
+
+    loader.hide();
     // EventBus.$on("LEAVE_CAMPAIGN", () => {
     //   this.modalUnsubscribeShowing = true;
     // });
