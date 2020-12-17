@@ -1,8 +1,11 @@
 <template>
-  <h1>Callback</h1>
+  <svg class="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24">Login</svg>
 </template>
 
 <script>
+import axios from "axios";
+import { BASE_URL, TOKEN_API } from '../variables.js'
+
 export default {
   name: "Callback",
   methods: {},
@@ -18,11 +21,31 @@ export default {
     this.hasData = new URLSearchParams(
       window.location.hash.substr(1) // skip the first char (#)
     );
-    var expires_in = this.hasData.get("expires_in");
+
+    //call api for getting token
+    //and store the id_token
     var access_token = this.hasData.get("access_token");
-    this.$store.dispatch("loginWithToken", { idToken: access_token, expiresIn: expires_in }).then(() => {
-      this.$router.push("campagne").catch(() => {});
-    });
+
+    if (mobileToken)
+      access_token = mobileToken
+    const headers = {
+      Accept: "*/*",
+      Authorization: access_token,
+    };
+    axios
+      .get(
+        BASE_URL + TOKEN_API,
+        { headers }
+      )
+      .then((res) => {
+        this.$store.dispatch("loginWithToken", { idToken: res.data.id_token }).then(() => {
+          this.$router.push("campagne").catch(() => {});
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        this.$router.push("/");
+      });
   },
 };
 </script>
