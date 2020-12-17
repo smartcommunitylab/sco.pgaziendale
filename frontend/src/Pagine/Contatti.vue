@@ -71,7 +71,7 @@
         <input
           type="submit"
           value="Invia Email"
-          class=" mt-6 bg-blue-600 hover:bg-blue-500 text-white font-semibold p-3 md:self-end flex-1"
+          class=" mt-6 bg-blue-600 hover:bg-blue-500 text-white font-semibold p-3 md:self-end flex-1 lg:mx-8"
         />
       </form>
     </div>

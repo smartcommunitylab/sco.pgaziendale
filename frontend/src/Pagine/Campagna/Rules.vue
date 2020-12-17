@@ -1,6 +1,6 @@
 <template>
   <div >
-    <div v-html="campagna.rules"></div>
+    <div v-html="campagna.rules" class="lg:mx-8 lg:my-8"></div>
   </div>
 </template>
 
