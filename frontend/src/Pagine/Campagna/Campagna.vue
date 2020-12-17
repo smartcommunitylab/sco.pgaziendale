@@ -2,7 +2,7 @@
   <div class="capagna flex flex-col" v-if="campagna">
     <div
       :class="campagna.userInCampaign ? 'flex flex-row' : 'flex flex-col'"
-      class="align-middle justify-center"
+      class="align-middle justify-center pt-4"
     >
       <img
         class="object-contain h-48 w-2/3 mb-auto "
@@ -47,24 +47,26 @@
       v-if="campagna.userInCampaign"
       class="flex flex-col  py-4 pt-0 justify-center align-middle"
     >
-      <h2 class=" text-2xl pl-2 pb-2 md:text-center md:text-3xl md:pt-5">
+      <h2 class=" text-2xl pl-2 pb-2 text-center md:text-3xl md:pt-5">
         Il tuo ultimo mese
       </h2>
       <div class="flex flex-col lg:flex-row">
         <div
-          class="bg-primary text-white pl-20 text-left md:text-center md:p-0 md:my-2 md:w-3/4 md:m-auto md:rounded-md md:shadow-lg lg:rounded-none"
+          class=" flex-none bg-primary text-white pl-20 sm:pl-48 sm:my-2 sm:pt-2 text-left md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/3 md:m-auto rounded-md md:shadow-lg "
         >
-          <p class="font-semibold text-6xl -mb-4">{{ total_distance }}</p>
+          <p class="font-semibold text-6xl -mb-4">
+            {{ (total_distance / 1000).toFixed(2) }}
+          </p>
           <p class="font-semibold text-lg pb-2">km percorsi</p>
         </div>
         <div
-          class="bg-secondary text-white pr-20 text-right md:text-center md:p-0 md:my-2 md:w-3/4 md:m-auto md:rounded-md md:shadow-lg lg:rounded-none"
+          class="flex-none bg-secondary text-white pr-20 sm:pr-48 sm:my-2 sm:pt-2 text-right md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/3 md:m-auto rounded-md md:shadow-lg "
         >
           <p class="font-semibold text-6xl -mb-4">{{ co2_saved }}g</p>
           <p class="font-semibold text-lg pb-2">CO2 salvata</p>
         </div>
         <div
-          class="bg-primary text-white pl-20 text-left md:text-center md:p-0 md:my-2 md:w-3/4 md:m-auto md:rounded-md md:shadow-lg lg:rounded-none"
+          class="flex-none bg-primary text-white pl-20 sm:pl-48 sm:my-2 sm:pt-2 text-left md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/3 md:m-auto rounded-md md:shadow-lg "
         >
           <p class="font-semibold text-6xl -mb-4">{{ totalTracks }}</p>
           <p class="font-semibold text-lg pb-2">viaggi validi</p>
@@ -89,10 +91,10 @@
       </button>
     </div>
     <div class="px-2 flex flex-col">
-      <h2 class=" text-2xl  pb-2 md:text-center md:text-3xl md:pt-5">
+      <h2 class=" text-2xl  pb-2 text-center md:text-3xl md:pt-5">
         Riguardo {{ campagna.title }}
       </h2>
-      <p class="pr-2 break-words md:text-lg md:px-16 lg:px-48 lg:text-center">
+      <p class="pr-2 break-words md:text-lg md:px-16 lg:px-48 text-center">
         {{ campagna.description }}
       </p>
       <router-link
@@ -408,8 +410,8 @@ export default {
     //   );
     // },
   },
-  created: function () {
-    this.$store.dispatch("storePage", {title:"Campagna",back:false});
+  created: function() {
+    this.$store.dispatch("storePage", { title: "Campagna", back: false });
     let loader = this.$loading.show({
       canCancel: false,
       backgroundColor: "#000",
@@ -444,7 +446,7 @@ export default {
         this.totalTracks = Object.keys(res.data[0].distances).map((key) => {
           this.total_distance += res.data[0].distances[key];
         });
-        this.co2_saved = res.data[0].co2_saved;
+        this.co2_saved = res.data[0].co2saved;
         this.totalTracks = res.data[0].trackCount;
       }
     });
