@@ -52,7 +52,7 @@
       </h2>
       <div class="flex flex-col lg:flex-row">
         <div
-          class=" flex-none bg-primary text-white pl-20 sm:pl-48 sm:my-2 sm:pt-2 text-left md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/3 md:m-auto rounded-md md:shadow-lg "
+          class=" flex-none bg-primary text-white pl-20 sm:pl-48 sm:my-2 sm:pt-2 text-left md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/4 md:m-auto rounded-md md:shadow-lg lg:m-auto"
         >
           <p class="font-semibold text-6xl -mb-4">
             {{ (total_distance / 1000).toFixed(2) }}
@@ -60,13 +60,13 @@
           <p class="font-semibold text-lg pb-2">km percorsi</p>
         </div>
         <div
-          class="flex-none bg-secondary text-white pr-20 sm:pr-48 sm:my-2 sm:pt-2 text-right md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/3 md:m-auto rounded-md md:shadow-lg "
+          class="flex-none bg-secondary text-white pr-20 sm:pr-48 sm:my-2 sm:pt-2 text-right md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/4 md:m-auto rounded-md md:shadow-lg lg:m-auto"
         >
           <p class="font-semibold text-6xl -mb-4">{{ co2_saved }}g</p>
           <p class="font-semibold text-lg pb-2">CO2 salvata</p>
         </div>
         <div
-          class="flex-none bg-primary text-white pl-20 sm:pl-48 sm:my-2 sm:pt-2 text-left md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/3 md:m-auto rounded-md md:shadow-lg "
+          class="flex-none bg-primary text-white pl-20 sm:pl-48 sm:my-2 sm:pt-2 text-left md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/4 md:m-auto rounded-md md:shadow-lg lg:m-auto"
         >
           <p class="font-semibold text-6xl -mb-4">{{ totalTracks }}</p>
           <p class="font-semibold text-lg pb-2">viaggi validi</p>

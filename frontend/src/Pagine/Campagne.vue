@@ -50,6 +50,7 @@
               :endDate="campaign.to"
               :active="campaign.active"
               :means="campaign.means"
+              :rules="campaign.rules"
               :userInCampaign="campaign.userInCampaign"
               :subscribedCompany="campaign.subscribedCompany"
             /> </template
@@ -78,6 +79,7 @@
               :endDate="campaign.to"
               :active="campaign.active"
               :means="campaign.means"
+              :rules="campaign.rules"
               :userInCampaign="campaign.userInCampaign"
               :subscribedCompany="campaign.subscribedCompany"
             /> </template

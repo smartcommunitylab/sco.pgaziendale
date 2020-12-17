@@ -114,14 +114,14 @@
           <router-link to="/campagne" v-if="auth" >
             <span
               @click="isOpen = false"
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Campagne'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page &&  page.title === 'Campagne'}"
               ><span class="mr-2">
                 <list-campaigns-icon />
               </span>
               <span>Campagne</span></span
             >
           </router-link>
-          <router-link to="/info" :class="{active:page.title === 'Info'}">
+          <router-link to="/info" :class="{active:page &&  page.title === 'Info'}">
             <span
               @click="isOpen = false"
               class="flex items-center p-4 hover:bg-white hover:text-primary"
@@ -131,7 +131,7 @@
               <span>Info</span></span
             ></router-link
           >
-          <router-link to="/contatti" :class="{active:page.title === 'Contatti'}">
+          <router-link to="/contatti" :class="{active:page && page.title === 'Contatti'}">
             <span
               @click="isOpen = false"
               class="flex items-center p-4 hover:bg-white hover:text-primary"
@@ -303,7 +303,7 @@
           <router-link to="/campagne" v-if="auth">
             <span
               
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Campagne'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page &&  page.title === 'Campagne'}"
               ><span class="mr-2">
                 <list-campaigns-icon />
               </span>
@@ -313,7 +313,7 @@
           <router-link to="/info">
             <span
              
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Info'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Info'}"
               ><span class="mr-2">
                 <info-outline-icon />
               </span>
@@ -323,7 +323,7 @@
           <router-link to="/contatti">
             <span
               
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Contatti'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Contatti'}"
             >
               <span class="mr-2">
                 <pencil-outline-icon />
@@ -356,7 +356,7 @@
           <router-link :to="{ name: 'campagna', params: { id: campagna.id } }">
             <span
               @
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Campagna'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Campagna'}"
               ><span class="mr-2">
                 <campaign-icon />
               </span>
@@ -369,7 +369,7 @@
           >
             <span
               
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Le mie performance'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Le mie performance'}"
               ><span class="mr-2">
                 <chart-bar-icon />
               </span>
@@ -407,7 +407,7 @@
               <span>Invia Richiesta</span></span>
           <router-link :to="{ name: 'privacy', params: { id: campagna.id } }">
             <span         
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page.title === 'Privacy'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Privacy'}"
               ><span class="mr-2">
                 <privacy-icon />
               </span>
