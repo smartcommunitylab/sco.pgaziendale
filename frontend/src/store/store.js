@@ -7,7 +7,8 @@ export default new Vuex.Store({
   state: {
     idToken: null,
     user: null,
-    campagna:null
+    campagna:null,
+    page:null
   },
   mutations: {
       initApp (state) {
@@ -28,8 +29,15 @@ export default new Vuex.Store({
         state.campagna = campagna
     },
     exitCampagna(state) {
-        state.campagna = null
-    }
+      state.campagna = null
+  },
+    storePage (state,page) {
+      state.page = page
+  },
+  resetPage (state) {
+    state.page = null
+}
+   
   },
   actions: {
       initApp({commit}) {
@@ -42,6 +50,13 @@ export default new Vuex.Store({
   
     exitCampagna ({commit}) {
         commit('exitCampagna')
+    },
+    storePage ({commit}, page) {
+      commit('storePage',page)
+  },
+  
+  resetPage ({commit}) {
+        commit('resetPage')
     },
     setLogoutTimer ({commit}, expirationTime) {
       setTimeout(() => {
@@ -93,6 +108,9 @@ export default new Vuex.Store({
     },
     campagna: state => {
         return state.campagna
+    },
+    page: state => {
+      return state.page
     }
   }
 })

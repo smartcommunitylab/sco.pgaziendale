@@ -45,6 +45,10 @@
 <script>
 export default {
   name: "Privacy",
+  created() {
+        this.$store.dispatch("storePage", {title:"Privacy",back:true});
+
+  },
 };
 </script>
 

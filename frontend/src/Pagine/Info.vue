@@ -99,6 +99,10 @@
 <script>
 export default {
   name: "Info",
+  created() {
+        this.$store.dispatch("storePage", {title:"Info",back:false});
+
+  },
 };
 </script>
 

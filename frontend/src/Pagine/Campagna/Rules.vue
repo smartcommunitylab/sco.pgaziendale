@@ -142,6 +142,10 @@
 <script>
 export default {
   name: "Rules",
+  created() {
+        this.$store.dispatch("storePage", {title:"Regolamento",back:true});
+
+  },
 };
 </script>
 

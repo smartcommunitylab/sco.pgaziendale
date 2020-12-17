@@ -64,6 +64,10 @@
 <script>
 export default {
   name: "InviaRichiesta",
+  created() {
+        this.$store.dispatch("storePage", {title:"Invia Richiesta",back:true});
+
+  },
 };
 </script>
 

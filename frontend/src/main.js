@@ -23,6 +23,7 @@ import Unsubscribe from "vue-material-design-icons/ClipboardOffOutline";
 import Campaign from "vue-material-design-icons/SealVariant";
 import SendRequest from "vue-material-design-icons/EmailSendOutline";
 import Privacy from "vue-material-design-icons/FileDocumentEditOutline";
+import Back from "vue-material-design-icons/ArrowLeft";
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 Vue.use(Loading);
@@ -40,6 +41,7 @@ Vue.component('unsubscribe-icon',Unsubscribe);
 Vue.component('campaign-icon',Campaign);
 Vue.component('send-request-icon',SendRequest);
 Vue.component('privacy-icon',Privacy);
+Vue.component('back-icon',Back);
 Vue.config.productionTip = false
 const router = new Router({routes:routes,mode:'history'})
 Vue.use(Router);

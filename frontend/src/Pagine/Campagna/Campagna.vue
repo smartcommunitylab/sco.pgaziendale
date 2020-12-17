@@ -251,6 +251,8 @@ export default {
     // },
   },
   created: function () {
+    this.$store.dispatch("storePage", {title:"Campagna",back:false});
+
     let loader = this.$loading.show({
       canCancel: false,
       backgroundColor: "#000",

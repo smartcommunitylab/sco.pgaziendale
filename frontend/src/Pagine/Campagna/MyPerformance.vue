@@ -275,6 +275,10 @@ export default {
       this.buildChart(this.originalStats);
     },
   },
+  created() {
+        this.$store.dispatch("storePage", {title:"Le mie performance",back:true});
+
+  },
   mounted() {
     //get stats with default value in creation hook
     let loader = this.$loading.show({

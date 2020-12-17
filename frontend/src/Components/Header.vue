@@ -3,7 +3,7 @@
     <nav 
       class="visible lg:invisible flex fixed w-full items-center justify-between px-6 h-16 bg-primary text-white text-gray-700  z-10 "
     >
-      <div class="flex items-center">
+      <div class="flex items-center" v-if="page && page.back==false">
         <button class="mr-2" aria-label="Open Menu" @click="drawer">
           <svg
             fill="none"
@@ -19,6 +19,26 @@
         </button>
         <img src="@/assets/images/logo.png" alt="Logo" class="h-auto w-12" />
       </div>
+      <div class="flex items-center" v-if="page && page.back==true">
+        <button class="mr-2" aria-label="Open Menu" @click="backPage">
+          <!-- <svg
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            class="w-8 h-8"
+          >
+            <path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"></path>
+          </svg> -->
+          <back-icon/>
+        </button>
+        <img src="@/assets/images/logo.png" alt="Logo" class="h-auto w-12" />
+      </div>
+           <div class="flex items-center" v-if="page">
+              <span class="text-xl">{{page.title}}</span>
+            </div>
       <div class="flex items-center">
         <div
           class="hidden md:block md:flex md:justify-between md:bg-transparent"
@@ -227,6 +247,9 @@
       <div class="flex items-center">
         <img src="@/assets/images/logo.png" alt="Logo" class="h-auto w-12" />
       </div>
+           <div class="flex items-center" v-if="page">
+              <span class="text-xl">{{page.title}}</span>
+            </div>
       <div class="flex items-center">
         <div
           class="hidden md:block md:flex md:justify-between md:bg-transparent"
@@ -497,6 +520,9 @@ export default {
     drawer() {
       this.isOpen = !this.isOpen;
     },
+    backPage() {
+      this.$router.go(-1);
+    },
     indietro() {
       this.$store.dispatch("exitCampagna").then(() => {
         this.$router.push("campagne").catch(() => {});
@@ -550,6 +576,9 @@ export default {
     },
     campagna() {
       return this.$store.getters.campagna;
+    },
+        page() {
+      return this.$store.getters.page;
     },
   },
 };

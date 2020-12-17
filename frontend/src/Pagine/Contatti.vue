@@ -81,6 +81,9 @@
 <script>
 export default {
   name: "Contatti",
+  created() {
+        this.$store.dispatch("storePage", {title:"Contatti",back:false});
+  },
 };
 </script>
 

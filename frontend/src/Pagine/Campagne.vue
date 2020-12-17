@@ -167,6 +167,10 @@ export default {
       return toRtn;
     },
   },
+  created: function() {
+    this.$store.dispatch("storePage", {title:"Campagne",back:false});
+
+  },
   mounted: function () {
     let loader = this.$loading.show({
       canCancel: false,
