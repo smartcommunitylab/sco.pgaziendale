@@ -4,7 +4,6 @@
 
 <script>
 import axios from "axios";
-import { BASE_URL, TOKEN_API } from '../variables.js'
 
 export default {
   name: "Callback",
@@ -34,7 +33,7 @@ export default {
     };
     axios
       .get(
-        BASE_URL + TOKEN_API,
+        process.env.VUE_APP_BASE_URL + process.env.VUE_APP_TOKEN_API,
         { headers }
       )
       .then((res) => {

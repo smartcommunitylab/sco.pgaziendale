@@ -1,14 +1,14 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
     idToken: null,
     user: null,
-    campagna:null
+    campagna:null,
+    page:null
   },
   mutations: {
       initApp (state) {
@@ -25,24 +25,38 @@ export default new Vuex.Store({
     clearAuthData (state) {
       state.idToken = null
     },
-    enterCampagna (state,campagna) {
+    storeCampagna (state,campagna) {
         state.campagna = campagna
     },
     exitCampagna(state) {
-        state.campagna = null
-    }
+      state.campagna = null
+  },
+    storePage (state,page) {
+      state.page = page
+  },
+  resetPage (state) {
+    state.page = null
+}
+   
   },
   actions: {
       initApp({commit}) {
         commit('initApp')
 
     },
-    enterCampagna ({commit}, campagna) {
-        commit('enterCampagna',campagna)
-
-    },
+    storeCampagna ({commit}, campagna) {
+      commit('storeCampagna',campagna)
+  },
+  
     exitCampagna ({commit}) {
         commit('exitCampagna')
+    },
+    storePage ({commit}, page) {
+      commit('storePage',page)
+  },
+  
+  resetPage ({commit}) {
+        commit('resetPage')
     },
     setLogoutTimer ({commit}, expirationTime) {
       setTimeout(() => {
@@ -56,7 +70,7 @@ export default new Vuex.Store({
 
     loginWithToken ({commit}, dataToken) {
       
-        localStorage.setItem('token', dataToken.idToken)
+      sessionStorage.setItem('token', dataToken.idToken)
         commit('authUser', {
           token: dataToken.idToken
         })
@@ -64,13 +78,13 @@ export default new Vuex.Store({
     login ({commit}, authData) {
            console.log(authData)
  
-          localStorage.setItem('token', authData.idToken)
+           sessionStorage.setItem('token', authData.idToken)
           commit('authUser', {
             token: authData.idToken
           })
     },
     tryAutoLogin ({commit}) {
-      const token = localStorage.getItem('token')
+      const token = sessionStorage.getItem('token')
       if (!token) {
         return false
       }
@@ -81,11 +95,8 @@ export default new Vuex.Store({
       return true
     },
     logout ({commit}) {
-
-                commit('clearAuthData')
-                  localStorage.removeItem('token')
-
-
+      commit('clearAuthData')
+      sessionStorage.removeItem('token')
     },
    },
   getters: {
@@ -97,6 +108,9 @@ export default new Vuex.Store({
     },
     campagna: state => {
         return state.campagna
+    },
+    page: state => {
+      return state.page
     }
   }
 })

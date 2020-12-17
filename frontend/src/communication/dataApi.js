@@ -1,25 +1,35 @@
 import axios from "axios";
-import { BASE_URL, USER_API,PUBLIC_CAMPAIGNS_API,MY_CAMPAIGNS_API, COMPANIES_IN_CAMPAIGN_API, SUBSCRIBE_CAMPAIGN_API, SUBSCRIBE } from '../variables.js'
 export default   {
 
     getUser() {
-        return  axios.get(BASE_URL+USER_API)
+        return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_USER_API)
     },
     getPublicCampaigns() {
-        return  axios.get(BASE_URL+PUBLIC_CAMPAIGNS_API)
+        return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_PUBLIC_CAMPAIGNS_API)
     },
     getMyCampaigns() {
-        return  axios.get(BASE_URL+MY_CAMPAIGNS_API)
+        return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_MY_CAMPAIGNS_API)
     },
     getCompaniesOfCampaign(campaignId) {
-        return axios.get(BASE_URL+COMPANIES_IN_CAMPAIGN_API+campaignId)
-    .then(result => { console.log(result); return result; })
-    .catch(error => { console.error(error); return Promise.reject(error); });
+        return axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_COMPANIES_IN_CAMPAIGN_API+campaignId);
           
     },
-    subscribeCampaing(campaignId,companyCode,key) {
-        return axios.put(BASE_URL+SUBSCRIBE_CAMPAIGN_API+campaignId+SUBSCRIBE+companyCode+key)
-        .then(result => { console.log(result); return result; })
-        .catch(error => { console.error(error); return Promise.reject(error); });
+    subscribeCampaign(campaignId,companyCode,key) {
+        return axios.put(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_SUBSCRIBE_CAMPAIGN_API+campaignId+process.env.VUE_APP_SUBSCRIBE+companyCode+'/'+key);
+    },
+    unsubrscribeCampaign(campaignId) {
+        return axios.delete(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_SUBSCRIBE_CAMPAIGN_API+campaignId+process.env.VUE_APP_UNSUBSCRIBE);
+    },
+    getStats(campaignId, from, to, groupBy, withTracks) {
+        
+        return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_SUBSCRIBE_CAMPAIGN_API+campaignId+process.env.VUE_APP_MY_STATS_API,
+            {
+                params: {
+                    ...(from ? { from: from} : {}),
+                    ...(to ? { to: to} : {}),
+                    ...(groupBy ? { groupBy: groupBy} : {}),
+                    ...(withTracks ? { withTracks: withTracks} : {})
+                }
+            })
     }
   }
