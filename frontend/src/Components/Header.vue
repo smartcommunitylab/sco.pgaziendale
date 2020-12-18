@@ -17,7 +17,7 @@
             <path d="M4 6h16M4 12h16M4 18h16"></path>
           </svg>
         </button>
-        <img src="@/assets/images/logo.png" alt="Logo" class="h-auto w-12" />
+        <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
       </div>
       <div class="flex items-center" v-if="page && page.back==true">
         <button class="mr-2" aria-label="Open Menu" @click="backPage">
@@ -34,7 +34,7 @@
           </svg> -->
           <back-icon/>
         </button>
-        <img src="@/assets/images/logo.png" alt="Logo" class="h-auto w-12" />
+        <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
       </div>
            <div class="flex items-center" v-if="page">
               <span class="text-xl">{{page.title}}</span>
@@ -94,7 +94,7 @@
           class="flex w-full items-center p-4 border-b"
         >
           <img
-            src="@/assets/images/logo.png"
+            src="@/assets/images/pgaziendale.png"
             alt="Logo"
             class="h-auto w-32 mx-auto"
           />
@@ -245,7 +245,7 @@
       class="invisible lg:visible flex fixed w-full items-center justify-between px-6 h-16 bg-primary text-white text-gray-700  z-10 "
     >
       <div class="flex items-center">
-        <img src="@/assets/images/logo.png" alt="Logo" class="h-auto w-12" />
+        <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
       </div>
            <div class="flex items-center" v-if="page">
               <span class="text-xl">{{page.title}}</span>
@@ -283,7 +283,7 @@
           class="flex w-full items-center p-4 "
         >
           <img
-            src="@/assets/images/logo.png"
+            src="@/assets/images/pgaziendale.png"
             alt="Logo"
             class="h-auto w-32 mx-auto"
           />
