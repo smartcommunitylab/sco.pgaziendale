@@ -1,5 +1,5 @@
 <template>
-<div class="py-8 px-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+<div class="py-8 px-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7 lg:mx-8">
   <div class="text-center"><h1><b>Play&Go Aziende</b></h1></div>
 <p>
       Il settore dei trasporti è quello che contribuisce di più alle emissioni di gas a

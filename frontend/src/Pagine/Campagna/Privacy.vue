@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div>
+    <div class="lg:mx-8 lg:my-8">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit id leo nec
       sollicitudin. Cras dui magna, feugiat et purus id, tempus bibendum nunc. Donec non
       ligula at massa gravida ultrices. Aliquam quis lacus eget sem dictum malesuada.

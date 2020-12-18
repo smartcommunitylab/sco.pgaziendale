@@ -26,6 +26,9 @@
 
 export default {
   name: "Homepage",
+    created() {
+        this.$store.dispatch("storePage", {title:"",back:false});
+  },
   methods: {
     login() {
       var authUrl = process.env.VUE_APP_AUTH_URL;
