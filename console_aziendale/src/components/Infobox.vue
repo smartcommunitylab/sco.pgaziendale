@@ -1,0 +1,11 @@
+<template>
+  <div class="bg-red-300 lg:w-2/6"><h1>InfoBox</h1></div>
+</template>
+
+<script>
+export default {
+  name: "InfoBox",
+};
+</script>
+
+<style></style>
