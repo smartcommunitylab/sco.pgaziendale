@@ -8,17 +8,19 @@
           Le Mie Performance
         </h1>
         <div class="flex flex-row justify-center text-md">
+          <label class="text-right ml-auto mr-4 mt-1 text-primary">Dato</label>
           <context-menu
             ref="menuValue"
-            class="mx-auto"
+            class="mr-auto"
             @click.native="changeDataType()"
             v-bind:_options="options"
           />
         </div>
-        <div class="flex flex-col justify-center text-md">
+        <div class="flex flex-row justify-center text-md">
+           <label class="text-right ml-auto mr-2 mt-1 text-primary">Tempo</label>
           <context-menu
             ref="menuGroup"
-            class="mx-auto"
+            class="mr-auto"
             @click.native="changeGroup()"
             v-bind:_options="[
               { name: 'month', view_name: 'Mesi', default: true },
