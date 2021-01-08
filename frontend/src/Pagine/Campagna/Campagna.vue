@@ -2,9 +2,9 @@
   <div class="capagna flex flex-col" v-if="campagna">
     <div
       :class="campagna.userInCampaign ? 'flex flex-row' : 'flex flex-col'"
-      class="align-middle justify-center pt-4"
+      class="align-middle justify-center pt-4 flex flex-col"
     >
-      <img
+      <img v-if="campagna.logo"
         class="object-contain h-48 w-2/3 mb-auto "
         :class="
           !campagna.userInCampaign ? 'm-auto lg:w-2/6 lg:h-24' : 'lg:w-2/6'
@@ -12,7 +12,7 @@
         :src="campagna.logo"
       />
 
-      <div v-if="campagna.userInCampaign" class="w-1/6 my-auto">
+      <div v-if="campagna.userInCampaign" class="w-1/6 mx-auto">
         <div class="">
           <div class="text-sm text-black text-center pb-4">Iscritto con</div>
         </div>
@@ -24,7 +24,7 @@
         </div>
       </div>
     </div>
-    <div v-if="companies && companies.length && !campagna.userInCampaign">
+    <div v-if="companies && companies.length && !campagna.userInCampaign" >
       <div class="flex flex-col pt-8">
         <h2 class=" text-xl pl-2 pb-2 text-center">
           A questa campagna partecipano
@@ -346,7 +346,7 @@ export default {
         color: "#fff",
       });
       if (this.key && this.selectedCompany && this.regolamento && this.policy)
-        DataApi.subscribeCampaign(
+        {DataApi.subscribeCampaign(
           this.campagna.id,
           this.selectedCompany.code,
           this.key
@@ -390,7 +390,9 @@ export default {
             console.log(err);
             loader.hide();
           }
-        );
+        )} else {
+          loader.hide();
+        }
     },
     // confirmLeave: function() {
     //   DataApi.unsubrscribeCampaign(
