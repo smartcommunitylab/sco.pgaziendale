@@ -157,7 +157,7 @@
           <router-link to="/campagne" v-on:click.native="indietro">
             <span
               @click="isOpen = false"
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              class="flex items-center p-4 hover:bg-white hover:text-primary  m-2 border-white border-2 rounded"
               ><span class="mr-2">
                 <arrow-left-icon />
               </span>
@@ -167,8 +167,7 @@
           <router-link :to="{ name: 'campagna', params: { id: campagna.id } }">
             <span
               @click="isOpen = false"
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
-              ><span class="mr-2">
+              class="flex items-center p-4 hover:bg-white hover:text-primary " :class="{active:page && page.title === 'Campagna'}"><span class="mr-2">
                 <campaign-icon />
               </span>
               <span>Campagna</span></span
@@ -180,7 +179,7 @@
           >
             <span
               @click="isOpen = false"
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              class="flex items-center p-4 hover:bg-white hover:text-primary" 
               ><span class="mr-2">
                 <chart-bar-icon />
               </span>
@@ -433,8 +432,8 @@
       :showing="modalUnsubscribeShowing"
       @close="modalUnsubscribeShowing = false"
     >
-      <h2 class="text-xl font-bold text-gray-900">
-        Disiscrizione alla campagna
+      <h2 class="text-xl text-center font-bold text-gray-900">
+        Cancella l'iscrizione dalla campagna
       </h2>
 
       <form
@@ -447,7 +446,7 @@
           class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
         >
           <span>
-            Sei sicuro di voler disiscriverti?
+            Sei sicuro di voler cancellare l'iscrizione?
           </span>
           <button
             class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
@@ -498,8 +497,8 @@ export default {
 
           EventBus.$emit(
             "snack-open",
-            "Disiscrizione Effettuata",
-            "Ti sei disiscritto con successo alla campagna " +
+            "Cancellazione Effettuata",
+            "Sei stato rimosso con successo dalla campagna " +
               this.campagna.title,
             0
           );

@@ -2,13 +2,14 @@
   <div
     class=" m-auto justify-center flex flex-col  lg:w-1/3 bg-white rounded-lg my-4 lg:mx-2 xl:w-1/5 justify-cente shadow-xl"
   >
-    <div class="flex flex-col align-middle p-2 pt-0 h-40">
-      <img
-        class="mt-auto w-full object-fill sm:px-8 py-2 lg:px-0"
+    <div class="flex flex-col align-middle p-2 pt-0 h-40" >
+      <img 
+        class="mt-auto  object-scale-down sm:px-8 py-2 lg:px-0  h-48" v-if="dLogo"
         :src="dLogo"
       />
     </div>
-    <div class="flex flex-col py-2 lg:mx-2 justify-center">
+    
+    <div class="flex flex-col py-6 lg:mx-2 justify-center">
       <div class="px-2">
         <h2 class="text-2xl font-semibold break-normal ">
           {{ dTitolo }}

@@ -1,7 +1,7 @@
 <template>
   <div class="group inline-block  ">
     <button
-      class="outline-none focus:outline-none border px-3 py-1 bg-white rounded-sm flex items-center min-w w-full "
+      class="outline-none focus:outline-none border px-3 py-1 bg-white border-primary  text-primary rounded-sm flex items-center min-w w-full "
     >
       <span class="pr-1 font-semibold flex-1">{{
         getCurrentOption().view_name
@@ -21,7 +21,7 @@
     </button>
     <div>
       <ul
-        class="bg-white border rounded-sm transform scale-0 group-hover:scale-100 relative 
+        class="bg-white  text-primary border rounded-sm transform scale-0 group-hover:scale-100 relative 
        transition duration-150 ease-in-out origin-top min-w w-full"
       >
         <template v-for="element in getOtherOptions()">

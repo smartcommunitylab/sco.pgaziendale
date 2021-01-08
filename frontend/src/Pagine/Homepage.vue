@@ -6,10 +6,10 @@
         <h1>Campagne di mobilitá</h1>
       </div>
       <div class="text-xl mt-8 text-white">
-        <b>Partecipa </b> campagne di mobilitá proposte dalla tua azienda
+        <b>Muoversi in modo Sostenibile </b> conviene
       </div>
-      <div class="text-xl  text-white">
-        <b>Accedi </b> le stesse credenziali utilizzate nell'APP Play&go
+      <div class="text-xl mt-4 text-white">
+        Partecipa alle <b>Campagne di Mobilitá</b> pensate dalla <b>tua azienda</b>, e i tuoi Km sostenibili li ritrovi in busta paga.
       </div>
       <t-button class="w-3/12 mt-8 m-auto" variant="green"
         ><login-icon />

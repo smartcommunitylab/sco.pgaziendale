@@ -20,6 +20,18 @@ export default   {
     unsubrscribeCampaign(campaignId) {
         return axios.delete(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_SUBSCRIBE_CAMPAIGN_API+campaignId+process.env.VUE_APP_UNSUBSCRIBE);
     },
+    thereIsData (campaignId, from, to, groupBy, withTracks) {
+        
+    return axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_SUBSCRIBE_CAMPAIGN_API+campaignId+process.env.VUE_APP_MY_STATS_API,
+            {
+                params: {
+                    ...(from ? { from: from} : {}),
+                    ...(to ? { to: to} : {}),
+                    ...(groupBy ? { groupBy: groupBy} : {}),
+                    ...(withTracks ? { withTracks: withTracks} : {})
+                }
+            }
+    )},
     getStats(campaignId, from, to, groupBy, withTracks) {
         
         return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_SUBSCRIBE_CAMPAIGN_API+campaignId+process.env.VUE_APP_MY_STATS_API,

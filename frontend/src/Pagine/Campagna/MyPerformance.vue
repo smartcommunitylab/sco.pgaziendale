@@ -1,9 +1,9 @@
 <template>
-  <div class="bg-primary">
+  <div >
     <div v-show="stats && stats.length > 0">
       <div class="px-8 bg-blue-600">
         <h1
-          class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
+          class="justify-self-center text-center text-primary text-4xl pt-2 md:text-6xl font-semibold pb-6"
         >
           Le Mie Performance
         </h1>
@@ -21,14 +21,14 @@
             class="mx-auto"
             @click.native="changeGroup()"
             v-bind:_options="[
-              { name: 'month', view_name: 'Mesi', default: false },
-              { name: 'day', view_name: 'Giorni', default: true },
+              { name: 'month', view_name: 'Mesi', default: true },
+              { name: 'day', view_name: 'Giorni', default: false },
             ]"
           />
         </div>
 
         <div class="pt-2 text-md">
-          <nav class="flex flex-row text-white">
+          <nav class="flex flex-row text-primary">
             <button
               class="flex-1 py-2 px-6 block focus:outline-none font-medium sm:bg-green-400 hover:bg-blue-700"
               :class="mode == 'TAB' ? 'border-blue-300 border-b-4 text-blue-300' : ''"
@@ -53,30 +53,29 @@
         >
           <thead>
             <tr>
-              <th class="w-1/2 text-white">{{ option_group_selected.view_name }}</th>
-              <th class="w-1/2 text-white">{{ option_data_selected.view_name }}</th>
+              <th class="w-1/2 text-primary">{{ option_group_selected.view_name }}</th>
+              <th class="w-1/2 text-primary">{{ option_data_selected.view_name }}</th>
             </tr>
           </thead>
           <tbody>
             <template v-for="(element, index) in stats">
               <tr :key="index">
-                <td class="text-white">{{ labels[index] }}</td>
-                <td class="text-white">{{ stats[index].value | round(2) }}</td>
+                <td class="text-primary">{{ labels[index] }}</td>
+                <td class="text-primary">{{ stats[index].value | round(2) }}</td>
               </tr></template
             >
           </tbody>
         </table>
         <div id="chart_container" v-show="mode == 'GRAPH'" class="">
-          <canvas ref="canvas" class=""></canvas>
+          <canvas ref="canvas" class="p-4"></canvas>
         </div>
       </div>
     </div>
     <div v-show="stats.length == 0" class="flex flex-col justify-center text-md">
       <h1
-        class="justify-self-center text-center text-white text-4xl pt-2 md:text-6xl font-semibold pb-6"
+        class="justify-self-center text-center text-primary text-4xl pt-2 md:text-6xl font-semibold pb-6"
       >
         Al momento non ci sono statistiche.<br />
-        Generale con l'applicazione mobile
       </h1>
     </div>
   </div>
@@ -97,9 +96,9 @@ export default {
       stats: [],
       originalStats: [],
       labels: [],
-      from: moment().subtract(7, "d").format(MOMENT_DATE_FORMAT),
-      to: moment().format(MOMENT_DATE_FORMAT),
-      groupBy: "day",
+      from: moment(this.$store.getters.campagna.startDate).format(MOMENT_DATE_FORMAT),
+      to: moment(this.$store.getters.campagna.endDate).format(MOMENT_DATE_FORMAT),
+      groupBy: "month",
       withTracks: false,
       mode: "TAB",
       chart: undefined,
@@ -107,10 +106,20 @@ export default {
         name: STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].name,
         view_name: STATS_DISTANCE[Object.keys(STATS_DISTANCE)[0]].view_name,
       },
-      option_group_selected: { name: "day", view_name: "Giorni" },
+      option_group_selected: { name: "month", view_name: "Mesi" },
     };
   },
   methods: {
+     async thereIsData() {
+       var data = await DataApi.thereIsData(this.campagna.id, this.campagna.startDate, this.campagna.endDate, 'month', this.withTracks)
+        if (data) 
+                {for (var i=0;i<data.length;i++)
+                    if (data[i].trackCount!=0)
+                        return true;
+                }
+                return false
+       
+    },
     getData(campaignId, from, to, groupBy, withTracks) {
       return DataApi.getStats(campaignId, from, to, groupBy, withTracks);
     },
@@ -134,14 +143,19 @@ export default {
         });
       this.stats = data;
       return {
-        type: "line",
+        type: "bar",
         data: {
           labels: labels,
           datasets: [
             {
               label: "",
-              borderColor: "rgb(255, 255, 255)",
+              borderColor: "#1970b7",
+              backgroundColor: 
+                "#1970b7",
+                borderWidth: 1,
               data: data.map((element) => element.value),
+              barThickness:'flex',
+              maxBarThickness:40,
               fill: false,
             },
           ],
@@ -161,8 +175,9 @@ export default {
           scales: {
             xAxes: [
               {
+                
                 ticks: {
-                  fontColor: "white",
+                  fontColor: "#1970b7",
                   fontSize: 18,
                   stepSize: 1,
                   beginAtZero: true,
@@ -171,14 +186,15 @@ export default {
                 scaleLabel: {
                   display: true,
                   labelString: this.option_group_selected.view_name,
-                  fontColor: "white",
+                  fontColor: "#1970b7",
                 },
               },
             ],
             yAxes: [
               {
+                
                 ticks: {
-                  fontColor: "white",
+                  fontColor: "#1970b7",
                   fontSize: 18,
                   stepSize: 1,
                   beginAtZero: true,
@@ -187,7 +203,7 @@ export default {
                 scaleLabel: {
                   display: true,
                   labelString: this.option_data_selected.view_name,
-                  fontColor: "white",
+                  fontColor: "#1970b7",
                 },
               },
             ],
@@ -205,7 +221,7 @@ export default {
         });
       } else {
         stats.forEach((elem) => {
-          label.push(moment(elem.date, "YYYY-MM-DD").format("DD-MM"));
+          label.push(moment(elem.date, "YYYY-MM-DD").format("DD/MM"));
         });
       }
       return label;
@@ -213,7 +229,6 @@ export default {
     buildChart(stats) {
       console.log(stats);
       this.labels = this.buildLabels(stats);
-
       let ctx = this.$refs.canvas;
       let config = this.buildConfig(this.labels);
       if (ctx && config) this.chart = new Chart(ctx, config);
@@ -241,7 +256,7 @@ export default {
     changeCurrentOption(id, groubBy) {
       this.updateGraph(id, groubBy);
     },
-    updateGraph(id, groupBy) {
+     updateGraph(id, groupBy) {
       //if change groupBy get new by API
       console.log(id + groupBy);
       let loader = this.$loading.show({
@@ -249,7 +264,8 @@ export default {
         backgroundColor: "#000",
         color: "#fff",
       });
-      this.getData(
+      if (this.thereIsData())
+      {this.getData(
         this.campagna.id,
         this.from,
         this.to,
@@ -267,7 +283,9 @@ export default {
           console.log(err);
           loader.hide();
         }
-      );
+      )} else {
+        loader.hide();
+      }
     },
     changeMode(mode) {
       if (this.mode == mode) return;
@@ -279,14 +297,15 @@ export default {
         this.$store.dispatch("storePage", {title:"Le mie performance",back:true});
 
   },
-  mounted() {
+   mounted() {
     //get stats with default value in creation hook
     let loader = this.$loading.show({
       canCancel: false,
       backgroundColor: "#000",
       color: "#fff",
     });
-    this.getData(
+    if ( this.thereIsData())
+    {this.getData(
       this.campagna.id,
       this.from,
       this.to,
@@ -304,7 +323,9 @@ export default {
         console.log(err);
         loader.hide();
       }
-    );
+    )} else {
+        loader.hide();
+    }
   },
   computed: {
     campagna() {
