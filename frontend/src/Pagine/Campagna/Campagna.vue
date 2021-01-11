@@ -4,11 +4,10 @@
       :class="campagna.userInCampaign ? 'flex flex-row' : 'flex flex-col'"
       class="align-middle justify-center pt-4 flex flex-col"
     >
-      <img v-if="campagna.logo"
-        class="object-contain h-48 w-2/3 mb-auto "
-        :class="
-          !campagna.userInCampaign ? 'm-auto lg:w-2/6 lg:h-24' : 'lg:w-2/6'
-        "
+      <img
+        v-if="campagna.logo"
+        class="object-contain h-48 w-2/3 mb-auto"
+        :class="!campagna.userInCampaign ? 'm-auto lg:w-2/6 lg:h-24' : 'lg:w-2/6'"
         :src="campagna.logo"
       />
 
@@ -17,42 +16,33 @@
           <div class="text-sm text-black text-center pb-4">Iscritto con</div>
         </div>
         <div>
-          <img
-            class=" object-contain w-1/2 mx-auto my-auto"
-            :src="myCompany.logo"
-          />
+          <img class="object-contain w-1/2 mx-auto my-auto" :src="myCompany.logo" />
         </div>
       </div>
     </div>
-    <div v-if="companies && companies.length && !campagna.userInCampaign" >
+    <div v-if="companies && companies.length && !campagna.userInCampaign">
       <div class="flex flex-col pt-8">
-        <h2 class=" text-xl pl-2 pb-2 text-center">
-          A questa campagna partecipano
-        </h2>
+        <h2 class="text-xl pl-2 pb-2 text-center">A questa campagna partecipano</h2>
       </div>
       <div
-        class="flex flex-row overflow-x-auto  pb-4  "
+        class="flex flex-row overflow-x-auto pb-4"
         :class="companies.length >= 3 ? 'justify-start' : 'justify-center'"
       >
-        <div
-          v-for="company in companies"
-          v-bind:key="company.id"
-          class="flex-shrink-0"
-        >
+        <div v-for="company in companies" v-bind:key="company.id" class="flex-shrink-0">
           <img class="object-contain h-40 w-full mx-2" :src="company.logo" />
         </div>
       </div>
     </div>
     <div
       v-if="campagna.userInCampaign"
-      class="flex flex-col  py-4 pt-0 justify-center align-middle"
+      class="flex flex-col py-4 pt-0 justify-center align-middle"
     >
-      <h2 class=" text-2xl pl-2 pb-2 text-center md:text-3xl md:pt-5">
+      <h2 class="text-2xl pl-2 pb-2 text-center md:text-3xl md:pt-5">
         Il tuo ultimo mese
       </h2>
       <div class="flex flex-col lg:flex-row">
         <div
-          class=" flex-none bg-primary text-white pl-20 sm:pl-48 m-2 sm:pt-2 text-left md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/4 md:m-auto rounded-md md:shadow-lg lg:m-auto"
+          class="flex-none bg-primary text-white pl-20 sm:pl-48 m-2 sm:pt-2 text-left md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/4 md:m-auto rounded-md md:shadow-lg lg:m-auto"
         >
           <p class="font-semibold text-6xl -mb-4">
             {{ (total_distance / 1000).toFixed(2) }}
@@ -77,7 +67,7 @@
         :to="{ name: 'myperformance', params: { id: campagna.id } }"
         tag="button"
         type="button"
-        class="text-center m-auto pt-2 text-primary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold  py-1 px-2  lg:hidden"
+        class="text-center m-auto pt-2 text-primary rounded-md my-1 inline-flex items-center bg-transparent font-semibold py-1 px-2 lg:hidden"
       >
         <performance-icon class="pr-1" />Mostra dettagli
       </router-link>
@@ -85,13 +75,13 @@
     <div v-if="!campagna.userInCampaign" class="flex">
       <button
         @click="subscribe"
-        class="text-center mx-auto pt-2 text-white bg-primary w-full  items-center bg-transparent  font-semibold  py-2 px-2 md:w-3/5 md:mx-auto md:my-10 lg:w-1/6"
+        class="text-center mx-auto pt-2 text-white bg-primary w-full items-center bg-transparent font-semibold py-2 px-2 md:w-3/5 md:mx-auto md:my-10 lg:w-1/6"
       >
         Iscriviti
       </button>
     </div>
     <div class="px-2 flex flex-col">
-      <h2 class=" text-2xl  pb-2 text-center md:text-3xl md:pt-5">
+      <h2 class="text-2xl pb-2 text-center md:text-3xl md:pt-5">
         Riguardo {{ campagna.title }}
       </h2>
       <p class="pr-2 break-words md:text-lg md:px-16 lg:px-48 text-center">
@@ -100,40 +90,32 @@
       <router-link
         :to="{ name: 'rules', params: { id: campagna.id } }"
         tag="button"
-        class="lg:hidden text-center m-auto pt-2 text-primary rounded-md  my-1 inline-flex items-center bg-transparent  font-semibold  py-1 px-2  "
+        class="lg:hidden text-center m-auto pt-2 text-primary rounded-md my-1 inline-flex items-center bg-transparent font-semibold py-1 px-2"
       >
         <rules-icon class="pr-1" /> Leggi il regolamento
       </router-link>
     </div>
     <div class="px-12 py-4">
       <p class="text-xs md:px-20 lg:px-56">
-        Ai sensi dell’art. 13 del Regolamento EU n.2016/679 (GDPR), i dati
-        personali forniti saranno trattati per poter dare riscontro alla sua
-        richiesta tramite strumenti manuali, informatici e telematici, comunque
-        idonei a garantire la sicurezza e la riservatezza dei dati stessi.
-        L’informativa Privacy completa è disponibile al seguente link
+        Ai sensi dell’art. 13 del Regolamento EU n.2016/679 (GDPR), i dati personali
+        forniti saranno trattati per poter dare riscontro alla sua richiesta tramite
+        strumenti manuali, informatici e telematici, comunque idonei a garantire la
+        sicurezza e la riservatezza dei dati stessi. L’informativa Privacy completa è
+        disponibile al seguente link
       </p>
     </div>
 
     <div v-if="companies && companies.length && campagna.userInCampaign">
       <div class="flex flex-col pt-8">
-        <h2 class=" text-xl pl-2 pb-2 text-center">
-          A questa campagna partecipano
-        </h2>
+        <h2 class="text-xl pl-2 pb-2 text-center">A questa campagna partecipano</h2>
       </div>
       <div
-        class="flex flex-row overflow-x-auto  pb-4  "
+        class="flex flex-row overflow-x-auto pb-4"
         :class="
-          companies.length >= 3
-            ? 'justify-start lg:justify-center'
-            : 'justify-center'
+          companies.length >= 3 ? 'justify-start lg:justify-center' : 'justify-center'
         "
       >
-        <div
-          v-for="company in companies"
-          v-bind:key="company.id"
-          class="flex-shrink-0"
-        >
+        <div v-for="company in companies" v-bind:key="company.id" class="flex-shrink-0">
           <img class="object-contain h-40 w-full mx-2" :src="company.logo" />
         </div>
       </div>
@@ -141,7 +123,7 @@
     <div v-if="campagna.userInCampaign" class="flex lg:hidden">
       <button
         @click="leaveCampaign"
-        class="text-center mx-auto pt-2 text-white bg-danger w-full  items-center bg-transparent  font-semibold  py-2 px-2 md:w-3/5 md:mx-auto md:my-10"
+        class="text-center mx-auto pt-2 text-white bg-danger w-full items-center bg-transparent font-semibold py-2 px-2 md:w-3/5 md:mx-auto md:my-10"
       >
         Abbandona Campagna
       </button>
@@ -196,10 +178,7 @@
       </div>
     </div>-->
 
-    <card-modal
-      :showing="modalSubscribeShowing"
-      @close="modalSubscribeShowing = false"
-    >
+    <card-modal :showing="modalSubscribeShowing" @close="modalSubscribeShowing = false">
       <h2 class="text-xl font-bold text-gray-900">Iscrizione alla campagna</h2>
 
       <form
@@ -246,18 +225,17 @@
               class="inline-block"
             />
             <label @click="showPolicy" for="policy">
-              <span
-                class="font-bold underline pointer-events-auto cursor-pointer"
-                >Policy*</span
+              <span class="font-bold underline pointer-events-auto cursor-pointer"
+                >Privacy*</span
               >
               <p v-show="show_policy" class="text-gray-600 text-xs">
-                Ai sensi dell'art. 13 del Regolamento EU n. 2016/679 (GDPR), i
-                dati personali forniti saranno trattati per poter dare riscontro
-                alla sua richiesta tramite strumenti manuali, informatici e
-                telematici, comunque ideonei a garantire la sicurezza e la
-                riservatezza dei dati stessi. L'informativa Privacy completa è
-                disponibile al seguente link {LINK}. Dichiaro di aver letto e
-                compreso l'informativa sul trattamento dei dati personali.
+                Ho letto e compreso
+                <router-link :to="{ name: 'privacy', params: { id: campagna.id } }">
+<a href="" class="underline text-primary"
+                  >l'informativa sul trattamento dei dati personali</a></router-link>.   
+                , acconsento al trattamento dei miei dati personali come in essa indicato
+                e sono consapevole che i dati relativi ai miei spostamenti casa-lavoro
+                saranno comunicati mensilmente in forma aggregata al mio datore di lavoro
               </p>
             </label>
           </div>
@@ -270,8 +248,17 @@
               class="inline-block"
               v-model="regolamento"
             />
-            <label for="regolamento">
-              <span class="font-bold underline">Regolamento*</span>
+
+            <label @click="showRegolamento" for="regolamento">
+              <span class="font-bold underline pointer-events-auto cursor-pointer"
+                >Regolamento*</span
+              >
+              <p v-show="show_regolamento" class="text-gray-600 text-xs">
+                Dichiaro di aver preso visione e di accettare integralmente il           <router-link :to="{ name: 'rules', params: { id: campagna.id } }">
+<a href="" class="underline text-primary"
+                  >Regolamento
+                della campagna {{this.campagna.title}}</a></router-link>.   
+              </p>
             </label>
           </div>
           <button
@@ -316,14 +303,15 @@ export default {
       // modalUnsubscribeShowing: false,
       modalSubscribeShowing: false,
       key: "",
-      show_policy: false,
+      show_policy: true,
+      show_regolamento: true,
       totalTracks: 0,
       co2_saved: 0,
       total_distance: 0,
     };
   },
   methods: {
-    leaveCampaign: function() {
+    leaveCampaign: function () {
       EventBus.$emit("LEAVE_CAMPAIGN");
     },
     setMyCompany(company) {
@@ -332,21 +320,24 @@ export default {
     onChange(event) {
       console.log(event.target.value);
     },
-    subscribe: function() {
+    subscribe: function () {
       this.modalSubscribeShowing = true;
     },
-    showPolicy: function() {
+    showPolicy: function () {
       this.show_policy = !this.show_policy;
     },
+showRegolamento:function() {
+        this.show_regolamento = !this.show_regolamento;
 
-    confirm: function() {
+},
+    confirm: function () {
       let loader = this.$loading.show({
         canCancel: false,
         backgroundColor: "#000",
         color: "#fff",
       });
-      if (this.key && this.selectedCompany && this.regolamento && this.policy)
-        {DataApi.subscribeCampaign(
+      if (this.key && this.selectedCompany && this.regolamento && this.policy) {
+        DataApi.subscribeCampaign(
           this.campagna.id,
           this.selectedCompany.code,
           this.key
@@ -380,8 +371,7 @@ export default {
             EventBus.$emit(
               "snack-open",
               "Iscrizione Effettuata",
-              "Ti sei iscritto con successo alla campagna " +
-                this.campagna.title,
+              "Ti sei iscritto con successo alla campagna " + this.campagna.title,
               0
             );
           },
@@ -390,9 +380,10 @@ export default {
             console.log(err);
             loader.hide();
           }
-        )} else {
-          loader.hide();
-        }
+        );
+      } else {
+        loader.hide();
+      }
     },
     // confirmLeave: function() {
     //   DataApi.unsubrscribeCampaign(
@@ -412,7 +403,7 @@ export default {
     //   );
     // },
   },
-  created: function() {
+  created: function () {
     this.$store.dispatch("storePage", { title: "Campagna", back: false });
     let loader = this.$loading.show({
       canCancel: false,
@@ -437,9 +428,7 @@ export default {
       }
     );
     const moment = require("moment");
-    let from = moment()
-      .subtract(30, "d")
-      .format(MOMENT_DATE_FORMAT);
+    let from = moment().subtract(30, "d").format(MOMENT_DATE_FORMAT);
     let to = moment().format(MOMENT_DATE_FORMAT);
 
     DataApi.getStats(this.campagna.id, from, to, "month", false).then((res) => {

@@ -1,12 +1,12 @@
 <template>
   <div >
     <div v-show="stats && stats.length > 0">
-      <div class="px-8 bg-blue-600">
-        <h1
+      <div class="p-8 bg-blue-600">
+        <!-- <h1
           class="justify-self-center text-center text-primary text-4xl pt-2 md:text-6xl font-semibold pb-6"
         >
           Le Mie Performance
-        </h1>
+        </h1> -->
         <div class="flex flex-row justify-center text-md">
           <label class="text-right ml-auto mr-4 mt-1 text-primary">Dato</label>
           <context-menu

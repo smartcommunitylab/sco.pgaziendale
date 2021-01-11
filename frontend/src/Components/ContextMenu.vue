@@ -8,7 +8,7 @@
       }}</span>
       <span>
         <svg
-          class="fill-current h-4 w-4 transform group-hover:-rotate-180
+          class="fill-current h-4 w-4  group-hover:-rotate-180
         transition duration-150 ease-in-out"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
@@ -21,7 +21,7 @@
     </button>
     <div>
       <ul
-        class="bg-white  text-primary border rounded-sm transform scale-0 group-hover:scale-100 relative 
+        class="bg-white  text-primary border rounded-sm  scale-0 group-hover:scale-100 relative 
        transition duration-150 ease-in-out origin-top min-w w-full"
       >
         <template v-for="element in getOtherOptions()">
