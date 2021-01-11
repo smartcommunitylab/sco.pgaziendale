@@ -78,29 +78,29 @@
               ><span class="mr-2">
                 <login-icon />
               </span>
-              <span>Entra</span></span
+              <span>Link2</span></span
             >
           </router-link>
 
-          <router-link to="/campagne">
+          <router-link to="/link1">
             <span
               @click="isOpen = false"
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
                 <list-campaigns-icon />
               </span>
-              <span>Campagne</span></span
+              <span>Link1</span></span
             >
           </router-link>
 
-          <router-link to="/" v-on:click.native="onLogout">
+          <router-link to="/">
             <span
               @click="isOpen = false"
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
                 <logout-icon />
               </span>
-              <span>Esci</span></span
+              <span>Link3</span></span
             >
           </router-link>
         </div>
@@ -137,7 +137,7 @@
             >
           </router-link>
 
-          <router-link to="/campagne">
+          <router-link to="/gestionedipendenti">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -146,7 +146,7 @@
               <span>Gestione Dipendenti</span></span
             >
           </router-link>
-          <router-link to="/info">
+          <router-link to="/gestionecampagne">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -155,7 +155,7 @@
               <span>Gestione Campagne</span></span
             ></router-link
           >
-          <router-link to="/contatti">
+          <router-link to="/stats">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
             >
