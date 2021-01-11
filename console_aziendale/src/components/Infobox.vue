@@ -5,6 +5,11 @@
 <script>
 export default {
   name: "InfoBox",
+  methods: {
+    showCompanyDetails(company) {
+      console.log(company);
+    },
+  },
 };
 </script>
 

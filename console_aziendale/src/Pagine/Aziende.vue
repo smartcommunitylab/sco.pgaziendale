@@ -6,8 +6,11 @@
         <tbody class="bg-white">
           <template v-for="company in companies">
             <tr
-              class="flex border-b border-background hover:bg-background transition ease-in duration-100 "
+              class="select-none cursor-pointer flex border-b border-background hover:bg-background transition ease-in duration-100 "
               :key="company.id"
+              tag="tr"
+              @dblclick="goToCompany(company.name)"
+              @click="showCompanyInfo(company)"
             >
               <td class="flex  items-center align-middle w-5/6">
                 <span>
@@ -40,7 +43,7 @@
         </tbody>
       </table>
     </div>
-    <infobox />
+    <infobox ref="infobox" />
   </div>
 </template>
 
@@ -59,6 +62,14 @@ export default {
   },
   mounted: function() {
     this.companies = companies;
+  },
+  methods: {
+    goToCompany: function(companyName) {
+      this.$router.push("/azienda/" + companyName);
+    },
+    showCompanyInfo: function(company) {
+      this.$refs["infobox"].showCompanyDetails(company);
+    },
   },
 };
 </script>
