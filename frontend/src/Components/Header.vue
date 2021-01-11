@@ -62,6 +62,16 @@
               <span>Contatti</span>
             </button>
           </router-link>
+          <router-link to="/credits">
+            <button
+              title="Credits"
+              class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
+            >
+              <credits-icon />
+
+              <span>Credits</span>
+            </button>
+          </router-link>
         </div>
       </div>
 
@@ -272,6 +282,16 @@
               <span>Contatti</span>
             </button>
           </router-link>
+                    <router-link to="/credits">
+            <button
+              title="Credits"
+              class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
+            >
+              <credits-icon />
+
+              <span>Credits</span>
+            </button>
+          </router-link>
         </div>
       </div>
       <aside
@@ -329,6 +349,16 @@
               </span>
               <span>Contatti</span></span
             >
+          </router-link>
+                    <router-link to="/credits">
+            <button
+              title="Credits"
+              class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
+            >
+              <credits-icon />
+
+              <span>Credits</span>
+            </button>
           </router-link>
           <router-link to="/" v-on:click.native="onLogout" v-if="auth">
             <span

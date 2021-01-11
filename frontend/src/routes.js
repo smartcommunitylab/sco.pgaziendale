@@ -6,6 +6,7 @@ import Contatti from "./Pagine/Contatti.vue";
 import Campagne from "./Pagine/Campagne.vue";
 import Campagna from "./Pagine/Campagna/Campagna.vue";
 import Privacy from "./Pagine/Campagna/Privacy.vue";
+import Credits from "./Pagine/Credits.vue";
 import Rules from "./Pagine/Campagna/Rules.vue";
 import Callback from "./Pagine/Callback.vue";
 import Logout from "./Pagine/Logout.vue";
@@ -28,6 +29,11 @@ const routes = [
       path: '/contatti',
       name: 'contatti',
       component: Contatti
+    },
+    {
+      path: '/credits',
+      name: 'credits',
+      component: Credits
     },
     {
       path: '/campagne',
