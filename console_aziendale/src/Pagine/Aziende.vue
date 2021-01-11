@@ -1,12 +1,12 @@
 <template>
   <div class="flex flex-col lg:flex-row">
-    <div class="bg-green-300 lg:w-4/6">
+    <div class="bg-green-300 lg:w-4/6 mx-2 my-2">
       <h1>Aziende</h1>
       <table class=" shadow-lg rounded relative w-full">
         <tbody class="bg-white">
           <template v-for="company in companies">
             <tr
-              class="flex border-b border-grey-light hover:bg-gray-100 "
+              class="flex border-b border-background hover:bg-background transition ease-in duration-100 "
               :key="company.id"
             >
               <td class="flex  items-center align-middle w-5/6">
