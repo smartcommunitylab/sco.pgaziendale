@@ -68,6 +68,7 @@ export default {
     endDate: String,
     means: Array,
     rules:String,
+    privacy:String,
     userInCampaign: Boolean,
     subscribedCompany: Object,
   },
@@ -83,6 +84,7 @@ export default {
       dMeans: this.means,
       dFinished: false,
        dRules: this.rules,
+       dPrivacy:this.privacy,
       dUserInCampaign: this.userInCampaign,
       dSubscribedCompany: this.subscribedCompany,
     };
@@ -117,6 +119,7 @@ export default {
           endDate: this.endDate,
           means: this.means,
           rules: this.rules,
+          privacy:this.privacy,
           userInCampaign: this.userInCampaign,
           subscribedCompany: this.subscribedCompany,
         })
@@ -138,6 +141,7 @@ export default {
           endDate: this.endDate,
           means: this.means,
                     rules: this.rules,
+                    privacy:this.privacy,
           userInCampaign: this.userInCampaign,
           subscribedCompany: this.subscribedCompany,
         })

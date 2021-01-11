@@ -585,4 +585,8 @@ export default {
       color: #0f70b7;
       background-color: #fff;
 }
+card-modal {
+    background-color: rgba(0, 0, 0, 0.7);
+
+}
 </style>

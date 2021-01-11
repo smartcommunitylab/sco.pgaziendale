@@ -51,6 +51,7 @@
               :active="campaign.active"
               :means="campaign.means"
               :rules="campaign.rules"
+              :privacy="campaign.privacy"
               :userInCampaign="campaign.userInCampaign"
               :subscribedCompany="campaign.subscribedCompany"
             /> </template
@@ -80,6 +81,7 @@
               :active="campaign.active"
               :means="campaign.means"
               :rules="campaign.rules"
+              :privacy="campaign.privacy"
               :userInCampaign="campaign.userInCampaign"
               :subscribedCompany="campaign.subscribedCompany"
             /> </template

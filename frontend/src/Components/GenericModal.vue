@@ -2,7 +2,7 @@
 <Transition name="fade">
     <div
       v-if="showing"
-      class="fixed inset-0 w-full h-screen flex items-center justify-center bg-semi-75"
+      class="modal fixed inset-0 w-full h-screen flex items-center justify-center bg-semi-75"
       @click.self="close"
     >
       <div class="lg:ml-64 relative w-full max-w-2xl bg-white shadow-lg rounded-lg p-8">
@@ -29,11 +29,11 @@ export default {
   },
   watch: {
     showing(value) {
-      if (value) {
-        return document.querySelector('body').classList.add('overflow-hidden');
-      }
-
-      document.querySelector('body').classList.remove('overflow-hidden');
+      console.log(value)
+      // if (value) {
+      //   return document.querySelector('body').classList.add('overflow-hidden');
+      // }
+      // document.querySelector('body').classList.remove('overflow-hidden');
     }
   },
   methods: {
@@ -51,5 +51,9 @@ export default {
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
+}
+.modal {
+  z-index: 9999;
+  background-color: rgba(0, 0, 0, 0.7);
 }
 </style>
