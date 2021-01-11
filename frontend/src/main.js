@@ -24,6 +24,7 @@ import Campaign from "vue-material-design-icons/SealVariant";
 import SendRequest from "vue-material-design-icons/EmailSendOutline";
 import Privacy from "vue-material-design-icons/FileDocumentEditOutline";
 import Back from "vue-material-design-icons/ArrowLeft";
+import Credits from "vue-material-design-icons/Creation";
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 Vue.use(Loading);
@@ -42,6 +43,7 @@ Vue.component('campaign-icon',Campaign);
 Vue.component('send-request-icon',SendRequest);
 Vue.component('privacy-icon',Privacy);
 Vue.component('back-icon',Back);
+Vue.component('credits-icon',Credits);
 Vue.config.productionTip = false
 const router = new Router({routes:routes,mode:'history'})
 Vue.use(Router);
