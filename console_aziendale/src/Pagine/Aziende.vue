@@ -2,7 +2,7 @@
   <div class="flex flex-col lg:flex-row">
     <div class="bg-green-300 lg:w-4/6">
       <h1>Aziende</h1>
-      <table class=" shadow-lg rounded fixed w-4/6">
+      <table class=" shadow-lg rounded relative w-full">
         <tbody class="bg-white">
           <template v-for="company in companies">
             <tr
