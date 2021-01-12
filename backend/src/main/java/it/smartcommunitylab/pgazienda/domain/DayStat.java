@@ -90,7 +90,20 @@ public class DayStat {
 	 * @return the co2saved
 	 */
 	public Double getCo2saved() {
+		if (co2saved == null || co2saved == 0) {
+			co2saved = computeCO2();
+		}
+		
 		return co2saved;
+	}
+	/**
+	 * @return CO2 saved for bike/walk trips
+	 */
+	public Double computeCO2() {
+		
+		return distances == null ? 
+				  0d 
+				: ((distances.walk == null ? 0d : distances.walk) + (distances.bike == null ? 0d : distances.bike))*0.27;
 	}
 	/**
 	 * @param co2saved the co2saved to set
