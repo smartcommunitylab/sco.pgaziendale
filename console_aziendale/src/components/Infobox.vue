@@ -23,20 +23,87 @@
     >
       <div class="pt-16">
         <div class="flex flex-col justify-center text-center pt-16">
+          <div class="flex flex-row ml-auto pr-8">
+            <span class="mr-2">
+              <svg
+                class=" h-12 w-6  text-grey-dark-m-r-4"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
+                />
+              </svg>
+            </span>
+            <span class="mr-2">
+              <svg
+                class=" h-12 w-6  text-grey-dark-m-r-4"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
+                />
+              </svg>
+            </span>
+          </div>
           <img
             :src="showObject.logo"
             class="object-contain w-1/2 m-auto pb-2"
           />
-          <h1 class="text-2xl">{{ showObject.name }}</h1>
-          <div class="flex flex-col">
-            <span>{{ showObject.address }}</span>
-            <span>{{ showObject.phone }}</span>
-
-            <span
+          <h1 class="text-2xl pt-2">{{ showObject.name }}</h1>
+          <div class="flex flex-col pt-4">
+            <span class="flex items-center justify-center"
+              ><span class="mr-2">
+                <svg
+                  class=" h-12 w-6  text-grey-dark-m-r-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
+                  />
+                </svg> </span
+              >{{ showObject.address }}</span
+            >
+            <span class="flex items-center justify-center"
+              ><span class="mr-2">
+                <svg
+                  class=" h-12 w-6  text-grey-dark-m-r-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
+                  />
+                </svg> </span
+              >{{ showObject.phone }}</span
+            >
+            <span class="flex items-center justify-center"
+              ><span class="mr-2">
+                <svg
+                  class=" h-12 w-6  text-grey-dark-m-r-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
+                  />
+                </svg> </span
               ><a :href="showObject.web">{{ showObject.web }}</a></span
             >
 
-            <span
+            <span class="flex items-center justify-center"
+              ><span class="mr-2">
+                <svg
+                  class=" h-12 w-6  text-grey-dark-m-r-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
+                  />
+                </svg> </span
               ><a :href="'mailto:' + showObject.email">{{
                 showObject.email
               }}</a></span

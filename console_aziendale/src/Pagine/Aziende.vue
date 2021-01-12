@@ -11,6 +11,7 @@
               tag="tr"
               @dblclick="goToCompany(company.name)"
               @click="showCompanyInfo(company)"
+              :id="company.id"
             >
               <td class="flex  items-center align-middle w-5/6">
                 <span>
@@ -58,6 +59,7 @@ export default {
   data: function() {
     return {
       companies: [],
+      currentCompanySelected: undefined,
     };
   },
   mounted: function() {
@@ -68,10 +70,31 @@ export default {
       this.$router.push("/azienda/" + companyName);
     },
     showCompanyInfo: function(company) {
+      if (this.currentCompanySelected == company) {
+        window.document
+          .getElementById(this.currentCompanySelected.id)
+          .classList.toggle("selected");
+        this.currentCompanySelected = undefined;
+      } else {
+        if (this.currentCompanySelected != undefined) {
+          window.document
+            .getElementById(this.currentCompanySelected.id)
+            .classList.toggle("selected");
+        }
+        this.currentCompanySelected = company;
+        window.document
+          .getElementById(this.currentCompanySelected.id)
+          .classList.toggle("selected");
+      }
+
       this.$refs["infobox"].showCompanyDetails(company);
     },
   },
 };
 </script>
 
-<style></style>
+<style>
+.selected {
+  @apply bg-background;
+}
+</style>
