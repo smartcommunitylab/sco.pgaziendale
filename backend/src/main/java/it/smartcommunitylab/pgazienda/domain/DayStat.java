@@ -103,7 +103,7 @@ public class DayStat {
 		
 		return distances == null ? 
 				  0d 
-				: ((distances.walk == null ? 0d : distances.walk) + (distances.bike == null ? 0d : distances.bike))*0.27;
+				: ((distances.walk == null ? 0d : distances.walk) + (distances.bike == null ? 0d : distances.bike))*0.27/1000;
 	}
 	/**
 	 * @param co2saved the co2saved to set
