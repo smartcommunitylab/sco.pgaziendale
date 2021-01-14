@@ -3,8 +3,8 @@ import {router} from '../routes';
 
 const user = JSON.parse(localStorage.getItem('user'));
 const state = user
-    ? { status: { loggedIn: true }, user}
-    : { status: {}, user: null };
+    ? { status: { loggedIn: true }, user, role: userService.getRole(user)}
+    : { status: {}, user: null, role:null };
 
 const actions = {
     login({ dispatch, commit }, { username, password }) {
@@ -16,7 +16,9 @@ const actions = {
                     commit('loginSuccess', token);
                     userService.getAccount().then (user=>{
                         commit('userLogged', user);
-                        var page = userService.getHome(user);
+                        var role =userService.getRole(user);
+                        commit('roleUser', role);
+                        var page = userService.getHome(role);
                         dispatch('navigation/changePage', page, {root:true}  );
                         router.push(page.route);
                     })
@@ -50,25 +52,19 @@ const mutations = {
         state.status = { loggedIn: true };
         state.user = user;
     },
+    roleUser(state, role) {
+        console.log('role')
+        state.role = role;
+    },
     loginFailure(state) {
         state.status = {};
         state.user = null;
+        state.role = null;
     },
     logout(state) {
         state.status = {};
         state.user = null;
-    },
-    // eslint-disable-next-line no-unused-vars
-    registerRequest(state, user) {
-        state.status = { registering: true };
-    },
-    // eslint-disable-next-line no-unused-vars
-    registerSuccess(state, user) {
-        state.status = {};
-    },
-    // eslint-disable-next-line no-unused-vars
-    registerFailure(state, error) {
-        state.status = {};
+        state.role = null;
     }
 };
 

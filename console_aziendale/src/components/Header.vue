@@ -126,7 +126,7 @@
           <img src="" alt="Logo" class="h-auto w-32 mx-auto" />
         </span>
         <div>
-        <router-link to="/aziende" v-if="user.role=='ROLE_ADMIN'">
+        <router-link to="/aziende" v-if="role=='ROLE_ADMIN'">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -135,7 +135,16 @@
               <span>Gestione Aziende</span></span
             >
           </router-link>
-          <router-link to="/azienda/:azienda/sedi" v-if="user.role=='ROLE_ADMIN'">
+          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'">
+            <span
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <login-icon />
+              </span>
+              <span>Profilo Azienda</span></span
+            >
+          </router-link>
+          <router-link to="/sedi" v-if="role=='ROLE_ADMIN'|| role=='ROLE_COMPANY_ADMIN'">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -144,7 +153,7 @@
               <span>Gestione Sedi</span></span
             >
           </router-link>
-          <router-link to="/gestionedipendenti">
+          <router-link to="/dipendenti">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -153,7 +162,7 @@
               <span>Gestione Dipendenti</span></span
             >
           </router-link>
-          <router-link to="/gestionecampagne" v-if="user.role=='ROLE_COMPANY_ADMIN'">
+          <router-link to="/gestionecampagne" v-if="role=='ROLE_COMPANY_ADMIN' || role=='ROLE_ADMIN'">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -162,7 +171,7 @@
               <span>Gestione Campagne</span></span
             ></router-link
           >
-          <router-link to="/stats" v-if="user.role!='ROLE_COMPANY_ADMIN'">
+          <router-link to="/stats" v-if="role!='ROLE_COMPANY_ADMIN' || role=='ROLE_ADMIN'">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
             >
@@ -196,7 +205,7 @@ export default {
     return { isOpen: true };
   },
     computed: {
-        ...mapState('account', ['status','user']),
+        ...mapState('account', ['status','user','role']),
         ...mapState('navigation', ['page'])
     },
   methods: {

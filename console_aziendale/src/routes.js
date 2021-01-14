@@ -27,12 +27,12 @@ const routes = [
       component: Aziende
     },
     {
-        path: '/azienda/:azienda/sedi',
+        path: '/sedi',
         name: 'sedi',
         component: Sedi
     },
     {
-        path: '/azienda/:azienda/dipendenti',
+        path: '/dipendenti',
         name: 'sede',
         component: GestioneDipendenti
     },
@@ -42,8 +42,8 @@ const routes = [
       component: Stats
   },
   {
-    path: '/camapagne',
-    name: 'camapagne',
+    path: '/campagne',
+    name: 'campagne',
     component: GestioneCampagne
 },
     { 
