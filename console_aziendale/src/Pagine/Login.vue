@@ -16,7 +16,7 @@
     </div>
     <div class="flex items-center justify-between">
       <div class="form-group">
-      <button class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded" type="button" @click="handleSubmit">
+      <button class="bg-blue hover:bg-blue-dark text-primary font-bold py-2 px-4 rounded" type="button" @click="handleSubmit">
         Sign In
       </button>
     </div>
