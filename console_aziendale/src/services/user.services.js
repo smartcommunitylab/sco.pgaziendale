@@ -64,7 +64,7 @@ function update(user) {
                     return {title:'aziende',
                     route:'/aziende'};
              case 'ROLE_MOBILITY_MANAGER':
-                        return {title:'aziende',
+                        return {title:'Statistiche',
                         route:'/aziende'};
             case 'ROLE_APP_USER':
                 return {title:'aziende',

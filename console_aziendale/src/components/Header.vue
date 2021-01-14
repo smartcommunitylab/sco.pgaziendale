@@ -144,7 +144,6 @@
               <span>Gestione Sedi</span></span
             >
           </router-link>
-
           <router-link to="/gestionedipendenti">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"

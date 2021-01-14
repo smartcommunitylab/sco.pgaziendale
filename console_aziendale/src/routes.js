@@ -4,7 +4,9 @@ import Aziende from "./Pagine/Aziende.vue"
 import Login from "./Pagine/Login.vue"
 import Home from "./Pagine/Home.vue"
 import Sedi from "./Pagine/Sedi.vue"
+import Stats from "./Pagine/Stats.vue"
 import GestioneDipendenti from "./Pagine/GestioneDipendenti.vue"
+import GestioneCampagne from "./Pagine/GestioneCampagne.vue"
 import NotFound from "./Pagine/NotFound.vue"
 Vue.use(Router);
 const routes = [
@@ -34,6 +36,16 @@ const routes = [
         name: 'sede',
         component: GestioneDipendenti
     },
+    {
+      path: '/stats',
+      name: 'stats',
+      component: Stats
+  },
+  {
+    path: '/camapagne',
+    name: 'camapagne',
+    component: GestioneCampagne
+},
     { 
         path: '/404', 
         component: NotFound 
