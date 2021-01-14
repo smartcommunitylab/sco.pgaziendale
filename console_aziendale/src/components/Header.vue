@@ -36,10 +36,9 @@
         </button>
         <img src="" alt="Logo" class="h-auto w-12" />
       </div>
-      <div class="flex items-center">
-        <span class="text-xl">Titolo pagina</span>
-      </div>
-
+           <div class="flex items-center" v-if="page">
+              <span class="text-xl">{{page.title}}</span>
+            </div>
       <transition
         enter-class="opacity-0"
         enter-active-class="ease-out transition-medium"
@@ -112,8 +111,8 @@
       <div class="flex items-center">
         <img src="" alt="Logo" class="h-auto w-12" />
       </div>
-      <div class="flex items-center">
-        <span class="text-xl">Titolo pagina</span>
+      <div class="flex items-center" v-if="page">
+        <span class="text-xl">{{page.title}}</span>
       </div>
       <div class="flex items-center">
         <div
@@ -127,7 +126,16 @@
           <img src="" alt="Logo" class="h-auto w-32 mx-auto" />
         </span>
         <div>
-          <router-link to="/">
+        <router-link to="/aziende" v-if="user.role=='ROLE_ADMIN'">
+            <span
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <login-icon />
+              </span>
+              <span>Gestione Aziende</span></span
+            >
+          </router-link>
+          <router-link to="/azienda/:azienda/sedi" v-if="user.role=='ROLE_ADMIN'">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -146,7 +154,7 @@
               <span>Gestione Dipendenti</span></span
             >
           </router-link>
-          <router-link to="/gestionecampagne">
+          <router-link to="/gestionecampagne" v-if="user.role=='ROLE_COMPANY_ADMIN'">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -155,7 +163,7 @@
               <span>Gestione Campagne</span></span
             ></router-link
           >
-          <router-link to="/stats">
+          <router-link to="/stats" v-if="user.role!='ROLE_COMPANY_ADMIN'">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
             >
@@ -165,6 +173,15 @@
               <span>Statistiche</span></span
             >
           </router-link>
+          <router-link to="/" v-on:click.native="logout">
+            <span
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              ><span class="mr-2">
+                <logout-icon />
+              </span>
+              <span>Esci</span></span
+            >
+          </router-link>
         </div>
       </aside>
     </nav>
@@ -172,16 +189,22 @@
 </template>
 
 <script>
+import { mapState,mapActions } from 'vuex'
+
 export default {
   name: "Header",
   data: function() {
     return { isOpen: true };
   },
-
+    computed: {
+        ...mapState('account', ['status','user']),
+        ...mapState('navigation', ['page'])
+    },
   methods: {
     drawer() {
       this.isOpen = !this.isOpen;
     },
+     ...mapActions('account', ['logout'])
   },
 };
 </script>
