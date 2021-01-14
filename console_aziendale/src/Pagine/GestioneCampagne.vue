@@ -1,110 +1,66 @@
 <template>
-  <div class="flex flex-col lg:flex-row ">
+  <div class="flex flex-col lg:flex-row">
     <div class=" lg:w-4/6 mx-2 my-2 flex flex-col bg-white">
-      <div class="flex flex-row justify-center py-4">
-        <div class="px-2">
-          <select
-            class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
-            v-model="selectedHq"
-            required
-          >
-            <option value="0" selected disabled hidden
-              >Seleziona una sede</option
-            >
-            <option value="1">
-              Sede 1
-            </option>
-            <option value="2">
-              Sede 2
-            </option>
-            <option value="3">
-              Sede 3
-            </option>
-          </select>
-        </div>
-
-        <div class="px-2">
-          <select
-            class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
-            v-model="selectedCampaign"
-            required
-          >
-            <option value="0" selected disabled hidden
-              >Seleziona una Campagna</option
-            >
-            <option value="1">
-              Sede 1
-            </option>
-            <option value="2">
-              Sede 2
-            </option>
-            <option value="3">
-              Sede 3
-            </option>
-          </select>
-        </div>
-
-        <div class="px-2">
-          <button
-            class="inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
-          >
-            Importa CSV
-          </button>
-        </div>
-      </div>
       <table class="table-auto rounded relative w-full">
         <thead class="text-center justify-between">
           <tr
             class="truncate px-2  flex border-b border-background text-center"
           >
-            <th class="w-1/5">
+            <th class="w-1/6">
               Nome
             </th>
 
-            <th class=" w-1/5">
-              Cognome
+            <th class=" w-1/6">
+              Inizio
             </th>
-            <th class="w-1/5">
-              Matricola
+            <th class="w-1/6">
+              Fine
             </th>
-            <th class="w-1/5">
-              Email
+            <th class="w-1/6">
+              Regola
             </th>
-            <th class="w-1/5"></th>
+            <th class="w-1/6">Status</th>
+            <th class="w-1/6"></th>
           </tr>
         </thead>
         <tbody class="bg-white text-center justify-between">
-          <template v-for="employee in employees">
+          <template v-for="(campaign, index) in campaigns">
             <tr
               class=" text-center m-auto truncate px-2 select-none cursor-pointer flex items-center border-b border-background hover:bg-background transition ease-in duration-100 "
-              :key="employee.id"
+              :key="campaign.id"
               tag="tr"
-              :id="employee.id"
-              @click="showInfoBox()"
+              :class="campaign.active ? '' : 'bg-background'"
             >
-              <td class=" w-1/5">
+              <td class=" w-1/6">
                 <p class="text-gray-800 text-sm font-semibold text-center">
-                  {{ employee.first_name }}
+                  {{ campaign.title }}
                 </p>
               </td>
-              <td class=" w-1/5">
+              <td class=" w-1/6">
                 <p class="text-gray-800 text-sm font-semibold text-center">
-                  {{ employee.last_name }}
+                  {{ formatDate(campaign.startDate) }}
                 </p>
               </td>
-              <td class=" w-1/5">
+              <td class=" w-1/6">
                 <p class="text-gray-800 text-sm font-semibold text-center">
-                  {{ employee.matricola }}
+                  {{ formatDate(campaign.endDate) }}
                 </p>
               </td>
-              <td class=" w-1/5">
+              <td class=" w-1/6">
                 <p
                   class="text-gray-800 text-sm font-semibold text-center truncate"
                 >
-                  {{ employee.email }}
+                  {{ getMeans(index) }}
                 </p>
               </td>
-              <td class="flex  items-end w-1/5 pr-12">
+              <td class=" w-1/6">
+                <p
+                  class="text-gray-800 text-sm font-semibold text-center truncate"
+                >
+                  {{ getStatus(campaign.active) }}
+                </p>
+              </td>
+              <td class="flex  items-end w-1/6 pr-12">
                 <svg
                   class="mr-3 md:mr-1 h-12 w-6 fill-current text-grey-dark m-auto "
                   xmlns="http://www.w3.org/2000/svg"
@@ -138,32 +94,52 @@
         </button>
       </div>
     </div>
-    <infobox ref="infobox" />
+    <infobox />
   </div>
 </template>
 
 <script>
 import Infobox from "../components/Infobox.vue";
-import { employees } from "../tmp-data/employees.js";
+import { campaigns } from "../tmp-data/campaigns.js";
 export default {
   components: { Infobox },
-  name: "Sede",
+  name: "GestioneCampagne",
   data: function() {
     return {
-      employees: [],
-      selectedHq: 0,
-      selectedCampaign: 0,
+      campaigns: [],
     };
   },
 
   mounted: function() {
-    this.employees = employees;
-    console.log(this.$refs["infobox"].$el.getBoundingClientRect());
+    this.campaigns = campaigns;
   },
 
   methods: {
-    showInfoBox: function() {
-      this.$refs["infobox"].showEmployeeDetails();
+    getMeans: function(index) {
+      let toRtn = "";
+
+      this.campaigns[index]["means"].map((el) => {
+        toRtn += el + " - ";
+      });
+      return toRtn.slice(0, -3);
+    },
+    getStatus: function(status) {
+      let toRtn = "";
+      if (status) {
+        toRtn = "Attiva";
+      } else {
+        toRtn = "Non attiva";
+      }
+
+      return toRtn;
+    },
+
+    formatDate: function(date) {
+      const moment = require("moment");
+
+      moment.locale("it");
+
+      return moment(date).format("DD MMMM YYYY");
     },
   },
 };
