@@ -1,8 +1,6 @@
 <template>
     <div>
-       {{user}}
-       {{status}}
-       {{status.loggedIn}}
+Home Page
     </div>
 </template>
 
@@ -12,9 +10,7 @@ import { mapState, mapActions } from 'vuex'
 export default {
     data () {
         return {
-            username: '',
-            password: '',
-            submitted: false
+
         }
     },
     computed: {
