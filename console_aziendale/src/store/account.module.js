@@ -3,8 +3,8 @@ import {router} from '../routes';
 
 const user = JSON.parse(localStorage.getItem('user'));
 const state = user
-    ? { status: { loggedIn: true }, user, role: userService.getRole(user)}
-    : { status: {}, user: null, role:null };
+    ? { status: { loggedIn: true }, user, role: userService.getRole(user),home:userService.getHome(userService.getRole(user))}
+    : { status: {}, user: null, role:null,home:null };
 
 const actions = {
     login({ dispatch, commit }, { username, password }) {
@@ -19,6 +19,7 @@ const actions = {
                         var role =userService.getRole(user);
                         commit('roleUser', role);
                         var page = userService.getHome(role);
+                        commit('homeUser', page);
                         dispatch('navigation/changePage', page, {root:true}  );
                         router.push(page.route);
                     })
@@ -56,15 +57,21 @@ const mutations = {
         console.log('role')
         state.role = role;
     },
+    homeUser(state,home) {
+        console.log('home')
+        state.home = home;   
+    },
     loginFailure(state) {
         state.status = {};
         state.user = null;
         state.role = null;
+        state.home=null;
     },
     logout(state) {
         state.status = {};
         state.user = null;
         state.role = null;
+        state.home=null;
     }
 };
 
