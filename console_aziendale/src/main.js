@@ -11,6 +11,10 @@ import Chart from "vue-material-design-icons/ChartLine";
 import Users from "vue-material-design-icons/AccountGroup";
 import Sedi from "vue-material-design-icons/HomeGroup";
 import Podio from "vue-material-design-icons/Podium";
+import Web from "vue-material-design-icons/Web";
+import Address from "vue-material-design-icons/MapMarker";
+import Email from "vue-material-design-icons/Email";
+import Phone from "vue-material-design-icons/Phone";
 
 
 import axios from 'axios'
@@ -30,6 +34,10 @@ Vue.component('chart-icon', Chart);
 Vue.component('users-icon', Users);
 Vue.component('sedi-icon', Sedi);
 Vue.component('podio-icon', Podio);
+Vue.component('web-icon', Web);
+Vue.component('address-icon', Address);
+Vue.component('email-icon', Email);
+Vue.component('phone-icon', Phone);
 
 axios.interceptors.request.use(
   (config) => {
