@@ -7,7 +7,7 @@
 
 <script>
 import Header from "./components/Header.vue";
-import { mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import {router} from './routes'
 export default {
   name: "App",
@@ -21,18 +21,26 @@ export default {
     created () {
         console.log('account'+this.account);
         //check login and push the right page
-        if (this.account && this.account.home)
-          router.push(this.account.home.route);
+        this.bootProfile();
+        
     },
+methods: {
+    ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
+  bootProfile() {
+    //if role!= admin load default company (first)
+
+if (this.account && this.account.home)
+          {
+            this.setDefaultCompany();
+            router.push(this.account.home.route);
+            }
+  }
+},
     watch: {
       account(newCount, oldCount) {
       // Our fancy notification (2).
       console.log(JSON.stringify(newCount)+JSON.stringify(oldCount))
-    },
-      // eslint-disable-next-line no-unused-vars
-        $route (to, from){
-            this.clearAlert();
-        }
+    }
     } 
 };
 </script>

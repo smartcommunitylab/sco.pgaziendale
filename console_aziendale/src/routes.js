@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Aziende from "./Pagine/Aziende.vue"
+import Azienda from "./Pagine/Azienda.vue"
 import Login from "./Pagine/Login.vue"
 import Home from "./Pagine/Home.vue"
 import Sedi from "./Pagine/Sedi.vue"
@@ -42,9 +43,14 @@ const routes = [
       component: Stats
   },
   {
-    path: '/campagne',
-    name: 'campagne',
+    path: '/gestionecampagne',
+    name: 'gestionecampagne',
     component: GestioneCampagne
+},
+{
+  path: '/azienda',
+  name: 'azienda',
+  component: Azienda
 },
     { 
         path: '/404', 

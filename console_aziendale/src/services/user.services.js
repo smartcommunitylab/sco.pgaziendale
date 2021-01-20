@@ -6,7 +6,8 @@ export const userService = {
     getAccount,
     getHome,
     getRole,
-    update
+    update,
+    getCompanies
 };
 
 function login(username, password) {
@@ -70,6 +71,16 @@ function getRole(user) {
         }
     }
 }
+
+function getCompanies(user) {
+    var companies=[];
+    for (var i = 0; i < user.roles.length; i++) {
+        if (user.roles[i].role != 'ROLE_ADMIN') {
+            companies.push(user.roles[i].companyId);
+        }
+    }
+    return companies;
+}
 function getHome(role) {
     switch (role) {
         case 'ROLE_ADMIN':
@@ -80,7 +91,7 @@ function getHome(role) {
         case 'ROLE_COMPANY_ADMIN':
             return {
                 title: 'Gestione campagne',
-                route: '/campagne'
+                route: '/gestionecampagne'
             };
         case 'ROLE_MOBILITY_MANAGER':
             return {

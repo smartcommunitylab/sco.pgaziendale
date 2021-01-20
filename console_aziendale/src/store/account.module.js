@@ -34,8 +34,12 @@ const actions = {
         userService.logout();
         commit('logout');
         router.push('/login');
+    },
+    setDefaultCompany({dispatch}) {
+        var userCompanies=userService.getCompanies(user);
+        if (userCompanies.length>0)
+        dispatch('company/getActualCompany', userCompanies[0], {root:true}  );
     }
-   
 };
 
 const mutations = {

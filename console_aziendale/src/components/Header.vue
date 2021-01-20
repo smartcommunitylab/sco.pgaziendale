@@ -204,7 +204,7 @@
               <span>Gestione Campagne</span></span
             ></router-link
           >
-          <router-link to="/stats" v-if="role!='ROLE_COMPANY_ADMIN' || role=='ROLE_ADMIN'">
+          <router-link to="/stats" v-if="role=='ROLE_COMPANY_ADMIN' || role=='ROLE_ADMIN'">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
             >
