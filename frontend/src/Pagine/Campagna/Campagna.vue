@@ -459,7 +459,5 @@ showRegolamento:function() {
 </script>
 
 <style scope>
-.check-campaign{
-  min-width: 15px;
-}
+
 </style>

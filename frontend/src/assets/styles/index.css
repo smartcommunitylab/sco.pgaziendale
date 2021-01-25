@@ -9,3 +9,6 @@
     --green: #30a852;
   }
 
+  .check-campaign{
+  min-width: 15px;
+}
