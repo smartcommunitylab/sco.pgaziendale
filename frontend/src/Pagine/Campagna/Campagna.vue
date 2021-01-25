@@ -222,7 +222,7 @@
               v-model="policy"
               id=""
               required
-              class="inline-block"
+              class="inline-block check-campaign"
             />
             <label @click="showPolicy" for="policy">
               <span class="font-bold underline pointer-events-auto cursor-pointer"
@@ -245,7 +245,7 @@
               name="regolamento"
               id=""
               required
-              class="inline-block"
+              class="inline-block check-campaign"
               v-model="regolamento"
             />
 
@@ -458,4 +458,8 @@ showRegolamento:function() {
 };
 </script>
 
-<style></style>
+<style scope>
+.check-campaign{
+  min-width: 15px;
+}
+</style>
