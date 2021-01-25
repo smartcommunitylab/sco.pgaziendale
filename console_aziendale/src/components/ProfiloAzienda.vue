@@ -1,6 +1,5 @@
 <template>
     <div>
-        {{company}}
         <div class="max-w-4xl flex items-center h-auto lg:h-screen flex-wrap mx-auto my-32 lg:my-0">
     
 	<!--Main Col-->
@@ -17,8 +16,7 @@
 			<p class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"><web-icon /> {{company.web}}</p>
 			<p class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"><email-icon /> {{company.contactEmail}}</p>
 			<p class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"><phone-icon /> {{company.contactPhone}}</p>
-            Amministratori Aziendali
-            Mobility Manager
+
 
 			<!-- <div class="mt-6 pb-16 lg:pb-0 w-4/5 lg:w-full mx-auto flex flex-wrap items-center justify-between">
 				<a class="link" href="#" data-tippy-content="@facebook_handle"><svg class="h-6 fill-current text-gray-600 hover:text-green-700" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M22.676 0H1.324C.593 0 0 .593 0 1.324v21.352C0 23.408.593 24 1.324 24h11.494v-9.294H9.689v-3.621h3.129V8.41c0-3.099 1.894-4.785 4.659-4.785 1.325 0 2.464.097 2.796.141v3.24h-1.921c-1.5 0-1.792.721-1.792 1.771v2.311h3.584l-.465 3.63H16.56V24h6.115c.733 0 1.325-.592 1.325-1.324V1.324C24 .593 23.408 0 22.676 0"/></svg></a>
@@ -44,10 +42,11 @@
 	
 	
 	<!-- Pin to top right corner -->
-    <div class="absolute top-0 right-0 h-12 w-18 p-4">
-          <button class="js-change-theme focus:outline-none">🌙</button>
+    <div >
           </div>
-
+            <div>Amministratori Aziendali</div>
+            <div>Mobility Manager</div>
+            <div>Campagne associate</div>
 </div>
     </div>
 </template>
