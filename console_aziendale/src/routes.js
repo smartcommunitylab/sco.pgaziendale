@@ -1,13 +1,25 @@
+import Vue from 'vue';
+import Router from 'vue-router';
 import Aziende from "./Pagine/Aziende.vue"
-import HelloWorld from "./Pagine/HelloWorld.vue"
+import Azienda from "./Pagine/Azienda.vue"
+import Login from "./Pagine/Login.vue"
+import Home from "./Pagine/Home.vue"
 import Sedi from "./Pagine/Sedi.vue"
-import Sede from "./Pagine/Sede.vue"
+import Stats from "./Pagine/Stats.vue"
+import GestioneDipendenti from "./Pagine/GestioneDipendenti.vue"
+import GestioneCampagne from "./Pagine/GestioneCampagne.vue"
 import NotFound from "./Pagine/NotFound.vue"
+Vue.use(Router);
 const routes = [
     {
       path: '/',
       name: 'homepage',
-      component: HelloWorld
+      component: Home
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
     },
     
     {
@@ -16,15 +28,30 @@ const routes = [
       component: Aziende
     },
     {
-        path: '/azienda/:azienda/sedi',
+        path: '/sedi',
         name: 'sedi',
         component: Sedi
     },
     {
-        path: '/azienda/:azienda/sede/:sede',
+        path: '/dipendenti',
         name: 'sede',
-        component: Sede
+        component: GestioneDipendenti
     },
+    {
+      path: '/stats',
+      name: 'stats',
+      component: Stats
+  },
+  {
+    path: '/gestionecampagne',
+    name: 'gestionecampagne',
+    component: GestioneCampagne
+},
+{
+  path: '/azienda',
+  name: 'azienda',
+  component: Azienda
+},
     { 
         path: '/404', 
         component: NotFound 
@@ -36,4 +63,18 @@ const routes = [
     
   ];
 
-  export default routes;
+  export const router = new Router({
+    mode: 'history',
+    routes})
+    router.beforeEach((to, from, next) => {
+      // redirect to login page if not logged in and trying to access a restricted page
+      const publicPages = ['/login'];
+      const authRequired = !publicPages.includes(to.path);
+      const loggedIn = localStorage.getItem('user');
+    
+      if (authRequired && !loggedIn) {
+        return next('/login');
+      }
+    
+      next();
+    })
