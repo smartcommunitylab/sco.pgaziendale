@@ -166,7 +166,7 @@ public class TrackingDataService {
 							stat.setTrackCount(playerList.size());
 							stat.setDistances(Distances.fromMap(playerList.stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance())))));
 							stat.setTracks(playerList);
-							stat.setCo2saved(0d);
+							stat.setCo2saved(stat.computeCO2());
 							stat.setMonth(LocalDate.now().format(MONTH_PATTERN));
 							DayStat old = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(key, campaign.getId(), company.getId(), stat.getDate());
 							if (old != null) {
