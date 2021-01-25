@@ -11,7 +11,7 @@
       <div class="text-xl mt-4 text-white">
         Partecipa alle <b>Campagne di Mobilitá</b> pensate dalla <b>tua azienda</b>, e i tuoi Km sostenibili li ritrovi in busta paga.
       </div>
-      <t-button class="w-3/12 mt-8 m-auto" variant="green"
+      <t-button class="w-5/12 mt-8 m-auto " variant="green"
         ><login-icon />
         <p class="text-center w-full" @click="login">Entra</p></t-button
       >
@@ -48,9 +48,10 @@ export default {
 </script>
 
 <style scoped>
+
 .home {
   background-color: var(--blue);
-  height: 100vh;
-  min-height: 90vh;
+  /* height: 100vh; */
+   min-height: 100vh; 
 }
 </style>
