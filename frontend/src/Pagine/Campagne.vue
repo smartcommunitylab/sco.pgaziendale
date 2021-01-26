@@ -171,11 +171,11 @@ export default {
       return toRtn;
     },
   },
-  created: function() {
+  created() {
     this.$store.dispatch("storePage", {title:"Campagne",back:false});
 
   },
-  mounted: function () {
+  mounted () {
     let loader = this.$loading.show({
       canCancel: false,
       backgroundColor: "#000",
@@ -185,7 +185,7 @@ export default {
     DataApi.getPublicCampaigns().then(
       (res) => {
         this.allCampaigns = res.data.content;
-        console.log(this.campaigns);
+        console.log(this.allCampaigns);
       },
       (err) => {
         console.log(err);
@@ -209,7 +209,7 @@ export default {
                   ).companyCode,
                 };
               });
-              console.log(this.campaigns);
+              console.log(this.myCampaigns);
               loader.hide();
               if (this.myCampaigns.length == 0) {
                 // this.$refs["menu"].currentOption = {
