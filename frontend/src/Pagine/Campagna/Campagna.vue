@@ -6,17 +6,16 @@
     >
       <img
         v-if="campagna.logo"
-        class="object-contain h-48 w-2/3 mb-auto"
-        :class="!campagna.userInCampaign ? 'm-auto lg:w-2/6 lg:h-24' : 'lg:w-2/6'"
+        class="object-contain h-48 w-2/3 m-auto"
         :src="campagna.logo"
       />
 
-      <div v-if="campagna.userInCampaign" class="w-1/6 mx-auto">
+      <div v-if="campagna.userInCampaign" class="w-2/6 mx-auto">
         <div class="">
           <div class="text-sm text-black text-center pb-4">Iscritto con</div>
         </div>
         <div>
-          <img class="object-contain w-1/2 mx-auto my-auto" :src="myCompany.logo" />
+          <img class="object-contain m-auto" :src="myCompany.logo" />
         </div>
       </div>
     </div>
