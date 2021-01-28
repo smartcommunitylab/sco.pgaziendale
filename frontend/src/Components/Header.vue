@@ -62,7 +62,7 @@
               <span>Contatti</span>
             </button>
           </router-link>
-          <router-link to="/credits">
+          <!-- <router-link to="/credits">
             <button
               title="Credits"
               class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
@@ -71,7 +71,7 @@
 
               <span>Credits</span>
             </button>
-          </router-link>
+          </router-link> -->
         </div>
       </div>
 
