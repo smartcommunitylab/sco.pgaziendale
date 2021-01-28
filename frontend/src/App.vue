@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="">
     <app-header></app-header>
-    <router-view class="pt-16 lg:pt-16 lg:pl-64"></router-view>
+    <router-view class="pt-16 lg:pt-16 lg:pl-64 min-h-screen padding-bottom"></router-view>
     <snack-bar />
     <app-footer />
   </div>
@@ -30,7 +30,9 @@ export default {
 <style>
 body {
   @apply bg-background;
+  
 }
+
 #app {
   position: relative;
 }
