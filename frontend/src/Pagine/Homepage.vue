@@ -17,7 +17,7 @@
       >
     </div>
     <div class="flex flex-col lg:w-5/12 lg:ml-16 lg:mt-16 bg-primary">
-      <img src="@/assets/images/home.png" />
+      <img class="object-contain" src="@/assets/images/home.png" />
     </div>
   </div>
 </template>
