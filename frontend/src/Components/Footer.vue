@@ -18,7 +18,7 @@
         
         <div class="w-full lg:w-4/12 px-4  text-center lg:text-right">
           <div class="text-sm text-primary font-semibold py-1">
-            In collaborazione con:
+            Nell'ambito del progetto:
           </div>
         </div>
         <div class="w-full lg:w-4/12 px-4">
