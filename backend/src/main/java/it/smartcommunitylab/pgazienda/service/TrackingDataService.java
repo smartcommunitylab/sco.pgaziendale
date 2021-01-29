@@ -128,7 +128,7 @@ public class TrackingDataService {
 						request.setMultimodal(true);
 						request.setPlayerId(playerIds);
 						request.setLocations(company.getLocations().stream()
-						.filter(l -> l.getNonWorking() == null || l.getNonWorking().isEmpty() || l.getNonWorking().contains(LocalDate.now().getDayOfWeek().getValue()))
+						.filter(l -> l.getNonWorking() == null || l.getNonWorking().isEmpty() || !l.getNonWorking().contains(LocalDate.now().getDayOfWeek().getValue()))
 						.map(l -> {
 							LocationDTO ldto = new LocationDTO();
 							ldto.setLat(l.getLatitute());
