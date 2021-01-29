@@ -23,14 +23,14 @@
         </div>
         <div class="w-full lg:w-4/12 px-4">
           <div
-            class="lg:grid lg:grid-cols-2 list-none lg:justify-end  justify-center"
+            class="grid grid-cols-2 list-none lg:justify-end  justify-center mt-2"
           >
-            <div>
-             <img src="@/assets/images/airbreak.png" alt="Airbreak" class="  object-contain  h-12 w-auto max-w-32 m-auto" @click="openTab('https://www.uia-initiative.eu/en/uia-cities/ferrara-0')" />
+            <div class="">
+             <img src="@/assets/images/airbreak.png" alt="Airbreak" class="  object-contain  h-12 w-auto max-w-32 lg:m-auto ml-auto mr-1" @click="openTab('https://www.uia-initiative.eu/en/uia-cities/ferrara-0')" />
 
             </div>
             <div>
-             <img src="@/assets/images/eu.png" alt="Urban Innovative Actions" class="object-contain  h-12 w-auto max-w-32 m-auto" @click="openTab('https://www.uia-initiative.eu')"/>
+             <img src="@/assets/images/eu.png" alt="Urban Innovative Actions" class="object-contain  h-12 w-auto max-w-32 lg:m-auto mr-auto ml-1" @click="openTab('https://www.uia-initiative.eu')"/>
             </div>
           </div>
         </div>
