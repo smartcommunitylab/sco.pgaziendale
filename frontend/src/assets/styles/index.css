@@ -9,3 +9,9 @@
     --green: #30a852;
   }
 
+  .check-campaign{
+  min-width: 15px;
+}
+.padding-bottom {
+  padding-bottom: 100px;
+}

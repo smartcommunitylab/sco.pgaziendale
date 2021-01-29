@@ -6,17 +6,16 @@
     >
       <img
         v-if="campagna.logo"
-        class="object-contain h-48 w-2/3 mb-auto"
-        :class="!campagna.userInCampaign ? 'm-auto lg:w-2/6 lg:h-24' : 'lg:w-2/6'"
+        class="object-contain h-48 w-2/3 m-auto"
         :src="campagna.logo"
       />
 
-      <div v-if="campagna.userInCampaign" class="w-1/6 mx-auto">
+      <div v-if="campagna.userInCampaign" class="w-2/6 mx-auto">
         <div class="">
           <div class="text-sm text-black text-center pb-4">Iscritto con</div>
         </div>
         <div>
-          <img class="object-contain w-1/2 mx-auto my-auto" :src="myCompany.logo" />
+          <img class="object-contain m-auto" :src="myCompany.logo" />
         </div>
       </div>
     </div>
@@ -52,7 +51,7 @@
         <div
           class="flex-none bg-secondary text-white pr-20 sm:pr-48 m-2 sm:pt-2 text-right md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/4 md:m-auto rounded-md md:shadow-lg lg:m-auto"
         >
-          <p class="font-semibold text-6xl -mb-4">{{ co2_saved }}g</p>
+          <p class="font-semibold text-6xl -mb-4">{{ (co2_saved).toFixed(2) }}g</p>
           <p class="font-semibold text-lg pb-2">CO2 salvata</p>
         </div>
         <div
@@ -222,7 +221,7 @@
               v-model="policy"
               id=""
               required
-              class="inline-block"
+              class="inline-block check-campaign"
             />
             <label @click="showPolicy" for="policy">
               <span class="font-bold underline pointer-events-auto cursor-pointer"
@@ -245,7 +244,7 @@
               name="regolamento"
               id=""
               required
-              class="inline-block"
+              class="inline-block check-campaign"
               v-model="regolamento"
             />
 
@@ -458,4 +457,6 @@ showRegolamento:function() {
 };
 </script>
 
-<style></style>
+<style scope>
+
+</style>

@@ -1,19 +1,22 @@
 <template>
   <div id="app" class="">
     <app-header></app-header>
-    <router-view class="pt-16 lg:pt-16 lg:pl-64"></router-view>
+    <router-view class="pt-16 lg:pt-16 lg:pl-64 min-h-screen padding-bottom"></router-view>
     <snack-bar />
+    <app-footer />
   </div>
 </template>
 
 <script>
 import Header from "./Components/Header.vue";
 import SnackBar from "./Components/SnackBar.vue";
+import Footer from "./Components/Footer.vue";
 export default {
   name: "App",
   components: {
     appHeader: Header,
     "snack-bar": SnackBar,
+    "app-footer":Footer
   },
 
   created() {
@@ -27,5 +30,10 @@ export default {
 <style>
 body {
   @apply bg-background;
+  
+}
+
+#app {
+  position: relative;
 }
 </style>

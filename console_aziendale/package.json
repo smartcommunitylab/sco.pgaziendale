@@ -13,12 +13,14 @@
     "axios": "^0.21.1",
     "chart.js": "^2.9.4",
     "core-js": "^3.6.5",
+    "dayjs": "^1.10.3",
     "moment": "^2.29.1",
     "postcss": "^7.0.35",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
     "vue": "^2.6.11",
     "vue-material-design-icons": "^4.11.0",
     "vue-router": "^3.4.9",
+    "vue-tailwind-picker": "^1.1.5",
     "vuex": "^3.6.0"
   },
   "devDependencies": {

@@ -1,23 +1,23 @@
 <template>
   <div class="home flex flex-col lg:flex-row">
-    <div class="flex flex-col ml-8 mt-8 lg:w-5/12 lg:ml-16 lg:mt-16">
-      <div class="text-4xl mt-8 text-white">Aderisci alle tue</div>
-      <div class="text-4xl  text-white font-bold">
+    <div class="flex flex-col m-4 lg:w-5/12 lg:ml-16 lg:mt-16">
+      <div class="lg:text-4xl text-xl lg:mt-8 mt-2 text-white">Aderisci alle tue</div>
+      <div class="lg:text-4xl  text-xl text-white font-bold">
         <h1>Campagne di mobilitá</h1>
       </div>
-      <div class="text-xl mt-8 text-white">
+      <div class="lg:text-xl text-l lg:mt-8 mt-2 text-white">
         <b>Muoversi in modo Sostenibile </b> conviene
       </div>
-      <div class="text-xl mt-4 text-white">
+      <div class="lg:text-xl text-l lg:mt-4 mt-2 text-white">
         Partecipa alle <b>Campagne di Mobilitá</b> pensate dalla <b>tua azienda</b>, e i tuoi Km sostenibili li ritrovi in busta paga.
       </div>
-      <t-button class="w-3/12 mt-8 m-auto" variant="green"
+      <t-button class="w-5/12 mt-4 lg:mt-8 m-auto " variant="green"
         ><login-icon />
         <p class="text-center w-full" @click="login">Entra</p></t-button
       >
     </div>
     <div class="flex flex-col lg:w-5/12 lg:ml-16 lg:mt-16 bg-primary">
-      <img src="@/assets/images/home.svg" />
+      <img class="home-img object-contain" src="@/assets/images/home.png" />
     </div>
   </div>
 </template>
@@ -48,9 +48,13 @@ export default {
 </script>
 
 <style scoped>
+
 .home {
   background-color: var(--blue);
-  height: 100vh;
-  min-height: 90vh;
+  /* height: 100vh; */
+   min-height: 100vh; 
+}
+.home-img{
+  max-height: 24rem;
 }
 </style>

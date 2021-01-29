@@ -56,7 +56,7 @@
         ></textarea>
         <p class="font-bold text-sm mt-3">Privacy Policy *</p>
         <div class="flex items-baseline space-x-2 mt-2">
-          <input type="checkbox" name="" id="" required class="inline-block" />
+          <input type="checkbox" name="" id="" required class="inline-block check-campaign" />
           <p class="text-gray-600 text-xs ">
             Ai sensi dell'art. 13 del Regolamento EU n. 2016/679 (GDPR), i dati
             personali forniti saranno trattati per poter dare riscontro alla sua
