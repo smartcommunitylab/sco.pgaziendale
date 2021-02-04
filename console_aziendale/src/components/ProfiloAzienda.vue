@@ -8,14 +8,14 @@
 
 		<div class="p-4 md:p-12 text-center lg:text-left">
 			<!-- Image for mobile view-->
-			<div class="block lg:hidden rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center" v-bind:style="{backgroundImage: 'url('+company.logo+ ')' }"></div>
+			<div class="block lg:hidden rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center" v-bind:style="{backgroundImage: 'url('+actualCompany.logo+ ')' }"></div>
 			
-			<h1 class="text-3xl font-bold pt-8 lg:pt-0">{{company.name}}</h1>
+			<h1 class="text-3xl font-bold pt-8 lg:pt-0">{{actualCompany.item.name}}</h1>
 			<div class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"></div>
-			<p class="pt-4 text-base font-bold flex items-center justify-center lg:justify-start"><address-icon />{{company.address}}</p>
-			<p class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"><web-icon /> {{company.web}}</p>
-			<p class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"><email-icon /> {{company.contactEmail}}</p>
-			<p class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"><phone-icon /> {{company.contactPhone}}</p>
+			<p class="pt-4 text-base font-bold flex items-center justify-center lg:justify-start"><address-icon />{{actualCompany.item.address}}</p>
+			<p class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"><web-icon /> {{actualCompany.item.web}}</p>
+			<p class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"><email-icon /> {{actualCompany.item.contactEmail}}</p>
+			<p class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"><phone-icon /> {{actualCompany.item.contactPhone}}</p>
 
 
 			<!-- <div class="mt-6 pb-16 lg:pb-0 w-4/5 lg:w-full mx-auto flex flex-wrap items-center justify-between">
@@ -37,7 +37,7 @@
 	<!--Img Col-->
 	<div class="w-full lg:w-2/5">
 		<!-- Big profile image for side bar (desktop) -->
-		<img :src="company.logo" class="rounded-none lg:rounded-lg shadow-2xl hidden lg:block">
+		<img :src="actualCompany.item.logo" class="rounded-none lg:rounded-lg shadow-2xl hidden lg:block">
 	</div>
 	
 	
@@ -56,11 +56,6 @@ import { mapState,mapActions } from 'vuex';
 
 export default {
     name:"ProfiloAzienda",
-    props:{
-        company: {
-            type:Object
-        }
-    },
     data() {
         return {
             

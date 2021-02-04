@@ -2,7 +2,7 @@
   <div class="flex flex-col lg:flex-row">
     <div class="bg-green-300 lg:w-4/6 mx-2 my-2">
       <h1>Profilo azienda</h1>
-      <profilo-azienda :company="actualCompany.item"></profilo-azienda>
+      <profilo-azienda></profilo-azienda>
     </div>
   </div>
 </template>
@@ -25,7 +25,8 @@ ProfiloAzienda
     //check actualCompany otherwise get it by id
     if (!this.actualCompany)
       { //get company Id from profile
-        this.actualCompany = this.getActualCompany(this.role)
+      this.setDefaultCompany();
+        //this.actualCompany = this.getActualCompany(this.role)
       }
   },
     computed: {
@@ -33,7 +34,7 @@ ProfiloAzienda
     ...mapState("account", ["role"]),
     },
     methods: {
-      ...mapActions("company",{getActualCompany:"getActualCompany"})
+      ...mapActions("company",{getActualCompany:"getActualCompany", setDefaultCompany: "setDefaultCompany"})
     },
 };
 </script>
