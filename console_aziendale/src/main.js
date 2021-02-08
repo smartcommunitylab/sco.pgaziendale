@@ -15,8 +15,10 @@ import Web from "vue-material-design-icons/Web";
 import Address from "vue-material-design-icons/MapMarker";
 import Email from "vue-material-design-icons/Email";
 import Phone from "vue-material-design-icons/Phone";
-
-
+import Add from "vue-material-design-icons/Plus";
+import AddEmployess from "vue-material-design-icons/AccountPlus";
+import Import from "vue-material-design-icons/Import";
+import DotsHorizzontal from "vue-material-design-icons/DotsHorizontal";
 import axios from 'axios'
 import {router} from "./routes.js"
 import { store } from './store'
@@ -38,7 +40,10 @@ Vue.component('web-icon', Web);
 Vue.component('address-icon', Address);
 Vue.component('email-icon', Email);
 Vue.component('phone-icon', Phone);
-
+Vue.component('add-icon', Add);
+Vue.component('add-employee', AddEmployess);
+Vue.component('import-icon',Import)
+Vue.component('dots-h-icon',DotsHorizzontal)
 axios.interceptors.request.use(
   (config) => {
     let token = localStorage.getItem('token');

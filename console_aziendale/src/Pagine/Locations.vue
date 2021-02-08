@@ -1,7 +1,6 @@
 <template>
   <div class="flex flex-col lg:flex-row">
     <div class="bg-green-300 lg:w-4/6 mx-2 my-2">
-      <h1>Sedi</h1>
       <table class="shadow-lg rounded relative w-full">
         <thead class="text-center justify-between">
           <tr class="truncate px-2 flex border-b border-background text-center">
