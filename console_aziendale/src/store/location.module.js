@@ -1,11 +1,12 @@
 import { locationService } from '../services';
 
 const state = {
-    allLocations: {}
+    allLocations: {},
+    actualLocation:null
 };
 
 const actions = {
-    getAll({ commit },companyId) {
+    getAllLocations({ commit },companyId) {
         commit('getAllLocations');
 
         locationService.getAllLocations(companyId)
@@ -13,7 +14,18 @@ const actions = {
                 locations => commit('getAllSuccess', locations),
                 error => commit('getAllFailure', error)
             );
+    },
+    selectActualLocation({commit},location){
+        commit('selectActualLocation',location)
+    },
+    changeActualLocation({commit},location){
+        locationService.changeLocation(location)
+        .then(
+            location => commit('selectActualLocation', location),
+            error => commit('getAllFailure', error)
+        );
     }
+
 };
 
 const mutations = {
@@ -25,6 +37,9 @@ const mutations = {
     },
     getAllFailure(state, error) {
         state.allLocations = { error };
+    },
+    selectActualLocation(state, location) {
+        state.actualLocation = location ;
     }
 };
 
