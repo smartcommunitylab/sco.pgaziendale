@@ -6,20 +6,41 @@ const state = {
 };
 
 const actions = {
-    getAll({ commit }) {
+    getAll({ commit,dispatch }) {
         commit('getAllCompanies');
-
         companyService.getAllCompanies()
             .then(
                 companies => commit('getAllSuccess', companies),
-                error => commit('getAllFailure', error)
+                error => {
+                    commit('getAllFailure', error);
+                    dispatch('alert/error', error, { root: true });}
             );
     },
-    getActualCompany({commit},companyId)  {
-        commit('getActualCompany');
+    getCompanyById({commit,dispatch},companyId)  {
+        commit('getCompanyById');
         companyService.getCompanyById(companyId).then(
-            company => commit('getCompanySuccess', company),
-            error => commit('getCompanyFailure', error)
+            company => commit('getCompanyByIdSuccess', company),
+            error => {
+                commit('getAllFailure', error);
+                dispatch('alert/error', error, { root: true });}
+        );
+    },
+    addCompany({commit,dispatch},company) {
+        commit('addCompany');
+        companyService.addCompany(company).then(
+            company => commit('addCompanySuccess', company),
+            error => {
+                commit('getAllFailure', error);
+                dispatch('alert/error', error, { root: true });}
+        );
+    },
+    updateCompany({commit,dispatch},company) {
+        commit('updateCompany');
+        companyService.addCompany(company).then(
+            company => commit('updateCompanySuccess', company),
+            error => {
+                commit('getAllFailure', error);
+                dispatch('alert/error', error, { root: true });}
         );
     }
 };
@@ -34,15 +55,34 @@ const mutations = {
     getAllFailure(state, error) {
         state.allCompanies = { error };
     },
-    getActualCompany(state) {
+    getCompanyById(state) {
         state.actualCompany = { loading: true };
     },
-    getCompanySuccess(state, company) {
+    getCompanyByIdSuccess(state, company) {
         state.actualCompany = { item: company };
     },
-    getCompanyFailure(state, error) {
+    getCompanyByIdFailure(state, error) {
         state.actualCompany = { error };
-    }
+    },
+    addCompany(state) {
+        state.actualCompany = { loading: true };
+    },
+    addCompanySuccess(state, company) {
+        state.actualCompany = { item: company };
+    },
+    addCompanyFailure(state, error) {
+        state.actualCompany = { error };
+    },
+    updateCompany(state) {
+        state.actualCompany = { loading: true };
+    },
+    updateCompanySuccess(state, company) {
+        state.actualCompany = { item: company };
+    },
+    updateCompanyFailure(state, error) {
+        state.actualCompany = { error };
+    },
+    
 };
 
 export const company = {

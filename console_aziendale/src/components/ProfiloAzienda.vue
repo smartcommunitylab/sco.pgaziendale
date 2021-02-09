@@ -66,7 +66,7 @@ export default {
 
     },
     methods: {
-    ...mapActions("company", { getActualCompany: "getActualCompany" , setActualCompany:"setActualCompany"}),
+    ...mapActions("company", { getCompanyById: "getCompanyById"}),
     },
 }
 </script>

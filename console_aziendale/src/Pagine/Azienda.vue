@@ -26,7 +26,7 @@ ProfiloAzienda
     if (!this.actualCompany)
       { //get company Id from profile
       this.setDefaultCompany();
-        //this.actualCompany = this.getActualCompany(this.role)
+        //this.actualCompany = this.getCompanyById(this.role)
       }
   },
     computed: {
@@ -34,7 +34,7 @@ ProfiloAzienda
     ...mapState("account", ["role"]),
     },
     methods: {
-      ...mapActions("company",{getActualCompany:"getActualCompany", setDefaultCompany: "setDefaultCompany"})
+      ...mapActions("company",{getCompanyById:"getCompanyById"})
     },
 };
 </script>
