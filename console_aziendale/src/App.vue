@@ -74,6 +74,9 @@ export default {
   color: white;
   position: absolute;
   margin: 10px;
+      left: 50%;
+    transform: translate(-50%, 0);
+    z-index: 999;
 }
 .alert-success {
   background-color: #17a2b8;
