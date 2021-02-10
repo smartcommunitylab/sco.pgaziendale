@@ -37,7 +37,7 @@ function getCompanyById(companyId) {
 }
 //create a new company
 function addCompany(company){
-    return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API,{company}).then(
+    return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API,company).then(
         res => {
             if (res && res.data && res.data) {
                 return Promise.resolve(res.data);
