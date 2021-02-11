@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col lg:flex-row">
-    <div class="bg-green-300 lg:w-4/6 mx-2 my-2 pb-16">
+    <div class="bg-green-300 lg:w-4/6 mx-2 my-2 pb-16 relative">
       <table class="shadow-lg rounded relative w-full">
         <thead class="text-center justify-between">
           <tr class="truncate px-2 flex border-b border-background text-center">
@@ -36,13 +36,13 @@
                 </span>
               </td>
               <td class="w-1/6">
-                <dots-h-icon />
+                <eye-icon />
               </td>
             </tr>
           </template>
         </tbody>
       </table>
-      <div class="ml-auto pt-4 pr-4 absolute right-0 lg:mr-96">
+      <div class="ml-auto pt-4 pr-4 absolute right-0 ">
         <button
           @click="showModal('Aggiungi azienda')"
           class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
@@ -51,7 +51,7 @@
         </button>
       </div>
     </div>
-    <infobox ref="infobox" />
+     <profilo-azienda></profilo-azienda>
     <modal v-show="isModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
@@ -68,7 +68,7 @@
                   name="companyName"
                   placeholder="Nome *"
                   v-model.trim="$v.company.name.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2  flex-1 mr-2"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                   id="companyName"
                 />
               </div>
@@ -90,7 +90,7 @@
                   id="companyCode"
                   placeholder="Codice *"
                   v-model.trim="$v.company.code.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2  flex-1 mr-2"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
               <div v-if="$v.company.code.$error">
@@ -112,7 +112,7 @@
                   required
                   placeholder="Address *"
                   v-model.trim="$v.company.address.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2  flex-1 mr-2"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
             </div>
@@ -129,10 +129,10 @@
                   required
                   placeholder="Telefono *"
                   v-model.trim="$v.company.contactPhone.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2  flex-1 mr-2"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-                            <div v-if="$v.company.contactPhone.$error">
+              <div v-if="$v.company.contactPhone.$error">
                 <div class="error" v-if="!$v.company.contactPhone.required">
                   Il campo telefono e' richiesto.
                 </div>
@@ -150,12 +150,11 @@
                   id=""
                   required
                   placeholder="Email *"
-                                    v-model.trim="$v.company.contactEmail.$model"
-
-                  class="focus:border-blue-600 border-2 p-2 mb-2  flex-1 mr-2"
+                  v-model.trim="$v.company.contactEmail.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-                                          <div v-if="$v.company.contactEmail.$error">
+              <div v-if="$v.company.contactEmail.$error">
                 <div class="error" v-if="!$v.company.contactEmail.required">
                   Il campo email e' richiesto.
                 </div>
@@ -174,12 +173,33 @@
                   required
                   placeholder="Web *"
                   v-model.trim="$v.company.web.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2  flex-1 mr-2"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-                                                        <div v-if="$v.company.web.$error">
+              <div v-if="$v.company.web.$error">
                 <div class="error" v-if="!$v.company.web.required">
                   Il campo web e' richiesto.
+                </div>
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.company.logo.$error }"
+              >
+                <label class="field-label" for="first_name">Logo Azienda</label>
+                <input
+                  type="text"
+                  name="companyLogo"
+                  id="companyLogo"
+                  placeholder="Logo *"
+                  v-model.trim="$v.company.logo.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.company.logo.$error">
+                <div class="error" v-if="!$v.company.logo.required">
+                  Il campo logo e' richiesto.
                 </div>
               </div>
             </div>
@@ -212,14 +232,14 @@
 </template>
 
 <script>
-import Infobox from "../components/Infobox.vue";
+import ProfiloAzienda from "../components/ProfiloAzienda.vue";
 // import { companies } from "../tmp-data/companies";
 import Modal from "../components/Modal.vue";
 import { mapState, mapActions } from "vuex";
 import { required } from "vuelidate/lib/validators";
 
 export default {
-  components: { Infobox, Modal },
+  components: { ProfiloAzienda, Modal },
   name: "Aziende",
 
   data: function () {
@@ -254,6 +274,9 @@ export default {
       web: {
         required,
       },
+      logo: {
+        required,
+      },
     },
   },
   computed: {
@@ -267,6 +290,7 @@ export default {
       getAllCompanies: "getAll",
       addCompanyCall: "addCompany",
       updateCompanyCall: "updateCompany",
+      getCompanyById:"getCompanyById"
     }),
     showModal(title) {
       this.isModalVisible = true;
@@ -302,33 +326,32 @@ export default {
     },
     showCompanyInfo: function (company) {
       if (this.currentCompanySelected == company) {
-        window.document
-          .getElementById(this.currentCompanySelected.id)
-          .classList.toggle("selected");
+        this.getCompanyById(null)
+        // window.document
+        //   .getElementById(this.currentCompanySelected.id)
+        //   .classList.toggle("selected");
         this.currentCompanySelected = undefined;
       } else {
-        if (this.currentCompanySelected != undefined) {
-          window.document
-            .getElementById(this.currentCompanySelected.id)
-            .classList.toggle("selected");
-        }
+        // if (this.currentCompanySelected != undefined) {
+             this.getCompanyById(company.id)
+        // }
         this.currentCompanySelected = company;
-        window.document
-          .getElementById(this.currentCompanySelected.id)
-          .classList.toggle("selected");
+        // window.document
+        //   .getElementById(this.currentCompanySelected.id)
+        //   .classList.toggle("selected");
       }
 
-      this.$refs["infobox"].showCompanyDetails(company);
+      // this.$refs["infobox"].showCompanyDetails(company);
     },
   },
 };
 </script>
 
 <style>
-.field-label{
-    display: inline-block;
-    width: 40%;
-    }
+.field-label {
+  display: inline-block;
+  width: 40%;
+}
 .selected {
   @apply bg-background;
 }

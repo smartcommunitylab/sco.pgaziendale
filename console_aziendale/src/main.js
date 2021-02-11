@@ -19,6 +19,7 @@ import Add from "vue-material-design-icons/Plus";
 import AddEmployess from "vue-material-design-icons/AccountPlus";
 import Import from "vue-material-design-icons/Import";
 import DotsHorizzontal from "vue-material-design-icons/DotsHorizontal";
+import Eye from "vue-material-design-icons/Eye";
 import axios from 'axios'
 import {router} from "./routes.js"
 import { store } from './store'
@@ -45,6 +46,7 @@ Vue.component('add-icon', Add);
 Vue.component('add-employee', AddEmployess);
 Vue.component('import-icon',Import)
 Vue.component('dots-h-icon',DotsHorizzontal)
+Vue.component('eye-icon',Eye)
 axios.interceptors.request.use(
   (config) => {
     let token = localStorage.getItem('token');

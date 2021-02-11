@@ -11,7 +11,7 @@
 <template>
   <transition name="modal-fade">
     <div class="modal-backdrop">
-      <div class="modal w-1/2 z-50"
+      <div class="modal w-1/2 z-50 m-0 absolute top-20"
         role="dialog"
         aria-labelledby="modalTitle"
         aria-describedby="modalDescription"
@@ -79,6 +79,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    
   }
 
   .modal {
@@ -109,6 +110,8 @@
   .modal-body {
     position: relative;
     padding: 20px 10px;
+    max-height: calc(100vh - 210px);
+    overflow-y: auto;
   }
 
   .btn-close {
