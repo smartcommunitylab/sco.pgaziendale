@@ -73,7 +73,7 @@ export default {
 		EventBus.$emit("DELETE_COMPANY");
 	},
 	editAzienda() {
-		EventBus.$emit("EDIT_COMPANY");
+		EventBus.$emit("EDIT_COMPANY",this.actualCompany);
 	}
   },
 };

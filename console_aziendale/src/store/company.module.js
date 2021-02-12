@@ -39,7 +39,7 @@ const actions = {
     },
     updateCompany({ commit, dispatch }, company) {
         commit('updateCompany');
-        companyService.addCompany(company).then(
+        companyService.updateCompany(company).then(
             company => commit('updateCompanySuccess', company),
             error => {
                 commit('getAllFailure', error);

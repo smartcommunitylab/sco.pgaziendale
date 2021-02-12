@@ -51,7 +51,7 @@ function addCompany(company){
 }
 // update an old company
 function updateCompany(company){
-    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+company.id).then(
+    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+company.id,company).then(
         res => {
             if (res && res.data && res.data) {
                 return Promise.resolve(res.data);

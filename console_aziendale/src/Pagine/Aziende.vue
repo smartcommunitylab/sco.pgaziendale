@@ -42,7 +42,7 @@
           </template>
         </tbody>
       </table>
-      <div class="ml-auto pt-4 pr-4 absolute right-0 ">
+      <div class="ml-auto pt-4 pr-4 absolute right-0">
         <button
           @click="showModal('Aggiungi azienda')"
           class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
@@ -51,7 +51,7 @@
         </button>
       </div>
     </div>
-     <profilo-azienda v-if="actualCompany"></profilo-azienda>
+    <profilo-azienda v-if="actualCompany"></profilo-azienda>
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
@@ -210,10 +210,10 @@
         <button
           type="button"
           class="btn-close"
-          @click="addCompany"
+          @click="saveCompany"
           aria-label="Close modal"
         >
-          Aggiungi
+          Salva
         </button>
         <button
           type="button"
@@ -228,13 +228,13 @@
         </p>
       </template>
     </modal>
-        <modal v-show="deleteModalVisible">
+    <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Azienda </template>
       <template v-slot:body>
         Sei sicuro di voler cancellare l'azienda selezionata?
       </template>
-            <template v-slot:footer>
-       <button
+      <template v-slot:footer>
+        <button
           type="button"
           class="btn-close"
           @click="deleteConfirm"
@@ -251,7 +251,7 @@
           Annulla
         </button>
       </template>
-        </modal>
+    </modal>
   </div>
 </template>
 
@@ -309,8 +309,12 @@ export default {
   },
   mounted: function () {
     this.getAllCompanies();
-    EventBus.$on("EDIT_COMPANY", () => {
+    EventBus.$on("EDIT_COMPANY", company => {
       this.editModalVisible = true;
+      this.company = company.item;
+      this.popup = {
+        title: "Modifica",
+      };
     });
     EventBus.$on("DELETE_COMPANY", () => {
       this.deleteModalVisible = true;
@@ -325,30 +329,41 @@ export default {
     }),
     showModal(title) {
       this.editModalVisible = true;
+      this.newCompany =true;
       this.popup = {
-        title: title,
+        title: title
       };
     },
     closeModal() {
       this.editModalVisible = false;
+      this.newCompany =false;
     },
         closeDeleteModal() {
       this.deleteModalVisible = false;
     },
-    addCompany() {
+    saveCompany() {
       //check fields
       // eslint-disable-next-line no-constant-condition
-      console.log("submit!");
+      // console.log("submit!");
       this.$v.$touch();
       if (this.$v.$invalid) {
         this.submitStatus = "ERROR";
+        return;
       } else {
+        if (this.newCompany) {
         this.addCompanyCall(this.company);
-        this.editModalVisible = false;
+        }
+        else {
+            this.updateCompanyCall(this.company);
+            }
       }
-    },
+
+        this.editModalVisible = false;
+        this.newCompany =false;
+        }
+      ,
     deleteConfirm() {
-this.deleteModalVisible = false;
+        this.deleteModalVisible = false;
     },
     updateCompany() {
       //check fields
