@@ -51,8 +51,8 @@
         </button>
       </div>
     </div>
-     <profilo-azienda></profilo-azienda>
-    <modal v-show="isModalVisible">
+     <profilo-azienda v-if="actualCompany"></profilo-azienda>
+    <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <form action="" id="addAzienda">
@@ -228,6 +228,30 @@
         </p>
       </template>
     </modal>
+        <modal v-show="deleteModalVisible">
+      <template v-slot:header> Cancella Azienda </template>
+      <template v-slot:body>
+        Sei sicuro di voler cancellare l'azienda selezionata?
+      </template>
+            <template v-slot:footer>
+       <button
+          type="button"
+          class="btn-close"
+          @click="deleteConfirm"
+          aria-label="Close modal"
+        >
+          Conferma
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeDeleteModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+      </template>
+        </modal>
   </div>
 </template>
 
@@ -237,7 +261,7 @@ import ProfiloAzienda from "../components/ProfiloAzienda.vue";
 import Modal from "../components/Modal.vue";
 import { mapState, mapActions } from "vuex";
 import { required } from "vuelidate/lib/validators";
-
+import EventBus from "../components/eventBus"
 export default {
   components: { ProfiloAzienda, Modal },
   name: "Aziende",
@@ -245,7 +269,8 @@ export default {
   data: function () {
     return {
       // companies: [],
-      isModalVisible: false,
+      editModalVisible: false,
+      deleteModalVisible:false,
       currentCompanySelected: undefined,
       popup: {
         title: "",
@@ -280,10 +305,16 @@ export default {
     },
   },
   computed: {
-    ...mapState("company", ["allCompanies"]),
+    ...mapState("company", ["allCompanies","actualCompany"]),
   },
   mounted: function () {
     this.getAllCompanies();
+    EventBus.$on("EDIT_COMPANY", () => {
+      this.editModalVisible = true;
+    });
+    EventBus.$on("DELETE_COMPANY", () => {
+      this.deleteModalVisible = true;
+    });
   },
   methods: {
     ...mapActions("company", {
@@ -293,13 +324,16 @@ export default {
       getCompanyById:"getCompanyById"
     }),
     showModal(title) {
-      this.isModalVisible = true;
+      this.editModalVisible = true;
       this.popup = {
         title: title,
       };
     },
     closeModal() {
-      this.isModalVisible = false;
+      this.editModalVisible = false;
+    },
+        closeDeleteModal() {
+      this.deleteModalVisible = false;
     },
     addCompany() {
       //check fields
@@ -310,15 +344,18 @@ export default {
         this.submitStatus = "ERROR";
       } else {
         this.addCompanyCall(this.company);
-        this.isModalVisible = false;
+        this.editModalVisible = false;
       }
+    },
+    deleteConfirm() {
+this.deleteModalVisible = false;
     },
     updateCompany() {
       //check fields
       // eslint-disable-next-line no-constant-condition
       if (true) {
         this.updateCompanyCall(this.company);
-        this.isModalVisible = false;
+        this.editModalVisible = false;
       }
     },
     goToCompany: function (companyName) {
