@@ -61,15 +61,7 @@
                 </p>
               </td>
               <td class="flex  items-end w-1/6 pr-12">
-                <svg
-                  class="mr-3 md:mr-1 h-12 w-6 fill-current text-grey-dark m-auto "
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                  />
-                </svg>
+                <dots-h-icon  class="dots-icon"/>
               </td>
             </tr>
           </template>
@@ -145,4 +137,12 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.dots-icon {
+    width: 40px;
+
+}
+.dots-icon svg{
+  width: 100%;
+  height: 100%;
+}</style>

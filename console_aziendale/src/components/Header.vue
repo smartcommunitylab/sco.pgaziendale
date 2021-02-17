@@ -177,7 +177,7 @@
               <span>Profilo Azienda</span></span
             >
           </router-link>
-          <router-link to="/sedi" v-if="role=='ROLE_ADMIN'|| role=='ROLE_COMPANY_ADMIN'">
+          <router-link to="/locations" v-if="role=='ROLE_ADMIN'|| role=='ROLE_COMPANY_ADMIN'">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">

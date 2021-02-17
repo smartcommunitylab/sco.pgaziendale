@@ -15,12 +15,17 @@ import Web from "vue-material-design-icons/Web";
 import Address from "vue-material-design-icons/MapMarker";
 import Email from "vue-material-design-icons/Email";
 import Phone from "vue-material-design-icons/Phone";
-
-
+import Add from "vue-material-design-icons/Plus";
+import AddEmployess from "vue-material-design-icons/AccountPlus";
+import Import from "vue-material-design-icons/Import";
+import DotsHorizzontal from "vue-material-design-icons/DotsHorizontal";
+import Eye from "vue-material-design-icons/Eye";
+import Delete from "vue-material-design-icons/Delete";
 import axios from 'axios'
 import {router} from "./routes.js"
 import { store } from './store'
 import './assets/styles/index.css';
+import Vuelidate from 'vuelidate'
 
 Vue.config.productionTip = false
 Vue.component('pencil-outline-icon', PencilOutlineIcon);
@@ -38,7 +43,12 @@ Vue.component('web-icon', Web);
 Vue.component('address-icon', Address);
 Vue.component('email-icon', Email);
 Vue.component('phone-icon', Phone);
-
+Vue.component('add-icon', Add);
+Vue.component('add-employee', AddEmployess);
+Vue.component('import-icon',Import)
+Vue.component('dots-h-icon',DotsHorizzontal)
+Vue.component('eye-icon',Eye)
+Vue.component('delete-icon',Delete)
 axios.interceptors.request.use(
   (config) => {
     let token = localStorage.getItem('token');
@@ -55,6 +65,7 @@ axios.interceptors.request.use(
   }
 );
 
+Vue.use(Vuelidate)
 
 new Vue({
   render: h => h(App),

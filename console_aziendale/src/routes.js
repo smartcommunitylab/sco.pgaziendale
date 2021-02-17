@@ -4,7 +4,7 @@ import Aziende from "./Pagine/Aziende.vue"
 import Azienda from "./Pagine/Azienda.vue"
 import Login from "./Pagine/Login.vue"
 import Home from "./Pagine/Home.vue"
-import Sedi from "./Pagine/Sedi.vue"
+import Locations from "./Pagine/Locations.vue"
 import Stats from "./Pagine/Stats.vue"
 import GestioneDipendenti from "./Pagine/GestioneDipendenti.vue"
 import GestioneCampagne from "./Pagine/GestioneCampagne.vue"
@@ -28,13 +28,13 @@ const routes = [
       component: Aziende
     },
     {
-        path: '/sedi',
-        name: 'sedi',
-        component: Sedi
+        path: '/locations',
+        name: 'locations',
+        component: Locations
     },
     {
         path: '/dipendenti',
-        name: 'sede',
+        name: 'dipendenti',
         component: GestioneDipendenti
     },
     {
