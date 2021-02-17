@@ -301,7 +301,7 @@
           </tr>
         </thead>
         <tbody class="bg-white text-center justify-between">
-          <template v-for="(employee, index) in employees">
+          <template v-for="(employee, index) in allEmployees">
             <template
               v-if="
                 (selectedHq == 0 || employee.idSede == selectedHq) &&
@@ -359,9 +359,12 @@
 
 <script>
 import Infobox from "../components/Infobox.vue";
-import { employees } from "../tmp-data/employees.js";
-import { headquarters } from "../tmp-data/hqs.js";
-import { campaigns } from "../tmp-data/campaigns.js";
+import { mapState, mapActions } from 'vuex';
+
+
+// import { employees } from "../tmp-data/employees.js";
+// import { headquarters } from "../tmp-data/hqs.js";
+// import { campaigns } from "../tmp-data/campaigns.js";
 export default {
   components: { Infobox },
   name: "Sede",
@@ -380,17 +383,27 @@ export default {
   },
 
   mounted: function() {
-    this.employees = employees;
-    console.log(this.$refs["infobox"].$el.getBoundingClientRect());
-    this.filter_hqs = headquarters;
-    this.filter_campaigns = campaigns;
+    this.getAllEmployees();
+    // this.employees = employees;
+    // console.log(this.$refs["infobox"].$el.getBoundingClientRect());
+    this.filter_hqs = null;
+    this.filter_campaigns = null;
   },
   computed: {
+        ...mapState("employee", ["allEmployees","actualEmployee"]),
     fileName() {
       return this.fileUploaded.item(0).name;
     },
+
   },
   methods: {
+     ...mapActions("employee", {
+      getAllEmployees: "getAll",
+      addEmployeeCall: "addEmployee",
+      updateEmployeeCall: "updateEmployee",
+      getEmployeeById:"getEmployeeById",
+      deleteEmployee:"deleteEmployee"
+    }),
     showInfoBox: function(index) {
       this.$refs["infobox"].showEmployeeDetails(this.employees[index]);
     },

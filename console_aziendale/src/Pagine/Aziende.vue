@@ -20,8 +20,8 @@
               :id="company.id"
             >
               <td class="flex items-center align-middle w-1/6">
-                <span class="m-auto">
-                  <img
+                <span class="m-auto" v-if="company.logo">
+                  <img 
                     class="hidden mr-1 md:mr-2 md:inline-block h-8 w-8 rounded-sm object-cover"
                     :src="company.logo"
                     alt=""
@@ -316,8 +316,12 @@ export default {
         title: "Modifica",
       };
     });
-    EventBus.$on("DELETE_COMPANY", () => {
+    EventBus.$on("DELETE_COMPANY", company => {
       this.deleteModalVisible = true;
+      this.company = company.item;
+      this.popup = {
+        title: "Cancella",
+      };
     });
   },
   methods: {
@@ -325,7 +329,8 @@ export default {
       getAllCompanies: "getAll",
       addCompanyCall: "addCompany",
       updateCompanyCall: "updateCompany",
-      getCompanyById:"getCompanyById"
+      getCompanyById:"getCompanyById",
+      deleteCompany:"deleteCompany"
     }),
     showModal(title) {
       this.editModalVisible = true;
@@ -364,6 +369,7 @@ export default {
       ,
     deleteConfirm() {
         this.deleteModalVisible = false;
+        this.deleteCompany(this.company);
     },
     updateCompany() {
       //check fields

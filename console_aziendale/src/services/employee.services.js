@@ -1,14 +1,30 @@
 import axios from "axios";
 
-export const companyService = {
-    getAllCompanies,
-    getCompanyById,
-    addCompany,
-    updateCompany,
-    deleteCompany
+export const employeeService = {
+    importEmployees,
+    getAllEmployees,
+    getEmployeeById,
+    addEmployee,
+    updateEmployee,
+    deleteEmployee
 };
-//get all the companies
-function getAllCompanies() {
+
+function importEmployees() {
+    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API).then(
+        res => {
+            if (res && res.data && res.data.content) {
+                return Promise.resolve(res.data.content);
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+
+//get all the employee
+function getAllEmployees() {
     return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API).then(
         res => {
             if (res && res.data && res.data.content) {
@@ -23,8 +39,8 @@ function getAllCompanies() {
 }
 
 //get company byid
-function getCompanyById(companyId) {
-    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+companyId).then(
+function getEmployeeById(employeId) {
+    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+employeId).then(
         res => {
             if (res && res.data && res.data) {
                 return Promise.resolve(res.data);
@@ -37,8 +53,8 @@ function getCompanyById(companyId) {
     )
 }
 //create a new company
-function addCompany(company){
-    return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API,company).then(
+function addEmployee(employee){
+    return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API,employee).then(
         res => {
             if (res && res.data && res.data) {
                 return Promise.resolve(res.data);
@@ -51,8 +67,8 @@ function addCompany(company){
     )
 }
 // update an old company
-function updateCompany(company){
-    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+company.id,company).then(
+function updateEmployee(employee){
+    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+employee.id,employee).then(
         res => {
             if (res && res.data && res.data) {
                 return Promise.resolve(res.data);
@@ -65,11 +81,11 @@ function updateCompany(company){
     )
 }
 // update an old company
-function deleteCompany(company){
-    return axios.delete(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+company.id).then(
+function deleteEmployee(employee){
+    return axios.delete(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+employee.id).then(
         res => {
             if (res) {
-                return Promise.resolve(company);
+                return Promise.resolve(employee);
             }
         }, err => {
             return Promise.reject(err);

@@ -19,7 +19,7 @@
             <pencil-outline-icon />
           </button>
         </div>
-        <div class="p-4 md:p-12 text-center lg:text-left">
+        <div class="p-4 md:p-12 text-center lg:text-left" >
           <!-- Image for mobile view-->
           <div
             class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
@@ -70,7 +70,7 @@ export default {
   methods: {
 	...mapActions("company", { getCompanyById: "getCompanyById" }),
 	deleteAzienda() {
-		EventBus.$emit("DELETE_COMPANY");
+		EventBus.$emit("DELETE_COMPANY",this.actualCompany);
 	},
 	editAzienda() {
 		EventBus.$emit("EDIT_COMPANY",this.actualCompany);
