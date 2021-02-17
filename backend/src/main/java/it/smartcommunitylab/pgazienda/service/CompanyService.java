@@ -16,17 +16,29 @@
 
 package it.smartcommunitylab.pgazienda.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvException;
 
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
@@ -200,7 +212,6 @@ public class CompanyService {
 			}
 		});		
 	}
-
 	/**
 	 * @param companyId
 	 * @return
@@ -256,5 +267,59 @@ public class CompanyService {
 	 */
 	public Optional<Company> findByCode(String code) {
 		return companyRepo.findOneByCode(code);
+	}
+
+	/**
+	 * @param companyId
+	 * @param inputStream
+	 * @throws CsvException 
+	 * @throws IOException 
+	 */
+	public void importEmployees(String companyId, InputStream inputStream) throws Exception {
+		List<String[]> lines = null;
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		IOUtils.copy(inputStream, baos);
+		byte[] bytes = baos.toByteArray();
+		try {
+			lines = readCSV(new ByteArrayInputStream(bytes), ',');
+		} catch (Exception e) {
+			lines = readCSV(new ByteArrayInputStream(bytes), ';');
+		}
+		lines.forEach(l -> {
+			Employee existing = employeeRepo.findOneByCompanyIdAndCode(companyId, companyId).orElse(null);
+			if (existing != null) {
+				existing.setLocation(l[3]);
+				existing.setName(l[0]);
+				existing.setSurname(l[1]);
+				employeeRepo.save(existing);
+			} else {
+				Employee e = new Employee();
+				e.setCode(l[2]);
+				e.setName(l[0]);
+				e.setSurname(l[1]);
+				e.setCompanyId(companyId);
+				e.setLocation(l[3]);
+				employeeRepo.save(e);
+			}
+		});
+	}
+
+	private List<String[]> readCSV(InputStream is, char separator) throws Exception {
+		CSVParser parser = new CSVParserBuilder()
+			    .withSeparator(separator)
+			    .build();
+		
+		CSVReader csvReader = new CSVReaderBuilder(new InputStreamReader(is))
+			    .withSkipLines(1)
+			    .withCSVParser(parser)
+			    .build();
+		
+		List<String[]> list = csvReader.readAll();
+		if (list.size() > 0 && list.get(0).length != 4) {
+			throw new IllegalArgumentException("Invalid CSV format");
+		}
+		
+		return list;
 	}
 }
