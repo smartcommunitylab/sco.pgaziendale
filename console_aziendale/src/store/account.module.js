@@ -38,7 +38,7 @@ const actions = {
     setDefaultCompany({dispatch}) {
         var userCompanies=userService.getCompanies(user);
         if (userCompanies.length>0)
-        dispatch('company/getActualCompany', userCompanies[0], {root:true}  );
+        dispatch('company/getCompanyById', userCompanies[0], {root:true}  );
     }
 };
 

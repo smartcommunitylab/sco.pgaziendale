@@ -5,7 +5,7 @@ export const locationService = {
 };
 //get all the companies
 function getAllLocations(companyId) {
-    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_ALL_COMPANIES_API+ '/' + companyId + '/' +process.env.VUE_APP_LOCATIONS_API ).then(
+    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+ '/' + companyId + '/' +process.env.VUE_APP_LOCATIONS_API ).then(
         res => {
             if (res && res.data && res.data) {
                 return Promise.resolve(res.data);

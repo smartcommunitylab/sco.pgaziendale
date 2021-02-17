@@ -25,26 +25,12 @@
         <div class="flex flex-col justify-center text-center pt-16">
           <div class="flex flex-row ml-auto pr-8">
             <span class="mr-2">
-              <svg
-                class=" h-12 w-6  text-grey-dark-m-r-4"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                />
-              </svg>
+              <dots-h-icon class="dots-icon"/>
+             
             </span>
             <span class="mr-2">
-              <svg
-                class=" h-12 w-6  text-grey-dark-m-r-4"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                />
-              </svg>
+                            <dots-h-icon class="dots-icon"/>
+
             </span>
           </div>
           <img
@@ -55,55 +41,27 @@
           <div class="flex flex-col pt-4">
             <span class="flex items-center justify-center"
               ><span class="mr-2">
-                <svg
-                  class=" h-12 w-6  text-grey-dark-m-r-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                  />
-                </svg> </span
+                              <dots-h-icon class="dots-icon"/>
+</span
               >{{ showObject.address }}</span
             >
             <span class="flex items-center justify-center"
               ><span class="mr-2">
-                <svg
-                  class=" h-12 w-6  text-grey-dark-m-r-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                  />
-                </svg> </span
+                              <dots-h-icon class="dots-icon"/>
+ </span
               >{{ showObject.phone }}</span
             >
             <span class="flex items-center justify-center"
               ><span class="mr-2">
-                <svg
-                  class=" h-12 w-6  text-grey-dark-m-r-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                  />
-                </svg> </span
+                              <dots-h-icon class="dots-icon"/>
+ </span
               ><a :href="showObject.web">{{ showObject.web }}</a></span
             >
 
             <span class="flex items-center justify-center"
               ><span class="mr-2">
-                <svg
-                  class=" h-12 w-6  text-grey-dark-m-r-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                  />
-                </svg> </span
+                             <dots-h-icon class="dots-icon"/>
+ </span
               ><a :href="'mailto:' + showObject.email">{{
                 showObject.email
               }}</a></span
@@ -123,26 +81,12 @@
         <div class="flex flex-col justify-center text-center ">
           <div class="flex flex-row ml-auto pr-8">
             <span class="mr-2">
-              <svg
-                class=" h-12 w-6  text-grey-dark-m-r-4"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                />
-              </svg>
+                            <dots-h-icon class="dots-icon"/>
+
             </span>
             <span class="mr-2">
-              <svg
-                class=" h-12 w-6  text-grey-dark-m-r-4"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M4 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-                />
-              </svg>
+                            <dots-h-icon class="dots-icon"/>
+
             </span>
           </div>
           <img
@@ -224,4 +168,12 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.dots-icon {
+    width: 40px;
+
+}
+.dots-icon svg{
+  width: 100%;
+  height: 100%;
+}</style>
