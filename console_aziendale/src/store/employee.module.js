@@ -6,9 +6,9 @@ const state = {
 };
 
 const actions = {
-    getAll({ commit, dispatch }) {
+    getAll({ commit, dispatch },companyId) {
         commit('getAllEmployees');
-        employeeService.getAllEmployees()
+        employeeService.getAllEmployees(companyId)
             .then(
                 employees => commit('getAllSuccess', employees),
                 error => {
@@ -17,24 +17,24 @@ const actions = {
                 }
             );
     },
-    getEmployeeById({ commit, dispatch }, employeeId) {
-        if (employeeId){
-        commit('getEmployeeById');
-        employeeService.getEmployeeById(employeeId).then(
-            employee => commit('getEmployeeByIdSuccess', employee),
-            error => {
-                commit('getAllFailure', error);
-                dispatch('alert/error', error, { root: true });
-            }
-        );
+    getEmployee({ commit }, employee) {
+        if (employee){
+        commit('getEmployee', employee)
+        // employeeService.getEmployeeById(companyId,employeeId).then(
+        //     employee => commit('getEmployeeByIdSuccess', employee),
+        //     error => {
+        //         commit('getAllFailure', error);
+        //         dispatch('alert/error', error, { root: true });
+        //     }
+        // );
         }
         else {
             commit('removeActualEmployee'); 
         }
     },
-    addEmployee({ commit, dispatch }, employee) {
+    addEmployee({ commit, dispatch },{companyId,employee}) {
         commit('addEmployee');
-        employeeService.addEmployee(employee).then(
+        employeeService.addEmployee(companyId,employee).then(
             employee => commit('addEmployeeSuccess', employee),
             error => {
                 commit('getAllFailure', error);
@@ -42,9 +42,9 @@ const actions = {
             }
         );
     },
-    updateEmployee({ commit, dispatch }, employee) {
+    updateEmployee({ commit, dispatch },{companyId,employee}) {
         commit('updateEmployee');
-        employeeService.updateEmployee(employee).then(
+        employeeService.updateEmployee(companyId,employee).then(
             employee => {
             commit('updateEmployeeSuccess', employee);
             dispatch('alert/success', "Dipendente modificato con successo", { root: true });
@@ -55,9 +55,9 @@ const actions = {
             }
         );
     },
-    deleteEmployee({ commit, dispatch }, employee) {
+    deleteEmployee({ commit, dispatch }, {companyId,employee}) {
         commit('deleteEmployee');
-        employeeService.deleteEmployee(employee).then(
+        employeeService.deleteEmployee(companyId,employee).then(
             employee => {
                 commit('deleteEmployeeSuccess', employee);
                 dispatch('alert/success', "Dipendente cancellato con successo", { root: true });
@@ -84,15 +84,11 @@ const mutations = {
     getAllFailure(state, error) {
         state.allEmployees = { error };
     },
-    getEmployeeById(state) {
-        state.actualEmployee = { loading: true };
-    },
-    getEmployeeByIdSuccess(state, employee) {
+
+    getEmployee(state, employee) {
         state.actualEmployee = { item: employee };
     },
-    getEmployeeByIdFailure(state, error) {
-        state.actualEmployee = { error };
-    },
+
     addEmployee(state) {
         state.actualEmployee = { loading: true };
     },

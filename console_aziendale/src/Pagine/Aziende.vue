@@ -9,7 +9,7 @@
             <th class="w-4/6">Nome</th>
           </tr>
         </thead>
-        <tbody class="bg-white">
+        <tbody class="bg-white" v-if="allCompanies">
           <template v-for="company in allCompanies.items">
             <tr
               class="select-none cursor-pointer flex border-b border-background hover:bg-background transition ease-in duration-100"
@@ -385,21 +385,13 @@ export default {
     showCompanyInfo: function (company) {
       if (this.currentCompanySelected == company) {
         this.getCompanyById(null)
-        // window.document
-        //   .getElementById(this.currentCompanySelected.id)
-        //   .classList.toggle("selected");
+
         this.currentCompanySelected = undefined;
       } else {
-        // if (this.currentCompanySelected != undefined) {
              this.getCompanyById(company.id)
-        // }
         this.currentCompanySelected = company;
-        // window.document
-        //   .getElementById(this.currentCompanySelected.id)
-        //   .classList.toggle("selected");
+       
       }
-
-      // this.$refs["infobox"].showCompanyDetails(company);
     },
   },
 };
