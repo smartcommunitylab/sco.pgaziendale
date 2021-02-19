@@ -2,7 +2,7 @@
   <div class="flex flex-col lg:flex-row ">
     <div class=" lg:w-4/6 mx-2 my-2 flex flex-col bg-white">
       <div class="flex flex-row justify-center py-4">
-        <div class="px-2">
+        <!-- <div class="px-2">
           <select
             class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
             v-model="selectedHq"
@@ -15,9 +15,9 @@
               <option :key="hq.id" :value="hq.id">{{ hq.address }}</option>
             </template>
           </select>
-        </div>
+        </div> -->
 
-        <div class="px-2">
+        <!-- <div class="px-2">
           <select
             class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
             v-model="selectedCampaign"
@@ -34,7 +34,7 @@
               >
             </template>
           </select>
-        </div>
+        </div> -->
 
         <div class="px-2">
           <button
@@ -291,17 +291,18 @@
             <th class=" w-1/5">
               Cognome
             </th>
-            <th class="w-1/5">
-              Matricola
-            </th>
+
             <th class="w-1/5">
               Email
+            </th>
+                        <th class="w-1/5">
+              Codice
             </th>
             <th class="w-1/5"></th>
           </tr>
         </thead>
-        <tbody class="bg-white text-center justify-between">
-          <template v-for="(employee, index) in allEmployees">
+        <tbody class="bg-white text-center justify-between" v-if="allEmployees">
+          <template v-for="employee in allEmployees.items">
             <template
               v-if="
                 (selectedHq == 0 || employee.idSede == selectedHq) &&
@@ -313,32 +314,33 @@
                 :key="employee.id"
                 tag="tr"
                 :id="employee.id"
-                @click="showInfoBox(index)"
+              @click="showEmployeeInfo(employee)"
               >
                 <td class=" w-1/5">
                   <p class="text-gray-800 text-sm font-semibold text-center">
-                    {{ employee.first_name }}
+                    {{ employee.name }}
                   </p>
                 </td>
                 <td class=" w-1/5">
                   <p class="text-gray-800 text-sm font-semibold text-center">
-                    {{ employee.last_name }}
+                    {{ employee.surname }}
                   </p>
                 </td>
-                <td class=" w-1/5">
-                  <p class="text-gray-800 text-sm font-semibold text-center">
-                    {{ employee.matricola }}
-                  </p>
-                </td>
+
                 <td class=" w-1/5">
                   <p
                     class="text-gray-800 text-sm font-semibold text-center truncate"
                   >
-                    {{ employee.email }}
+                    {{ employee.companyEmail }}
+                  </p>
+                </td>
+                <td class=" w-1/5">
+                  <p class="text-gray-800 text-sm font-semibold text-center">
+                    {{ employee.code }}
                   </p>
                 </td>
                 <td class="flex  items-end w-1/5 pr-12">
-                <dots-h-icon  class="dots-icon"/>
+                <eye-icon />
                 </td></tr
             ></template>
           </template>
@@ -346,51 +348,238 @@
       </table>
       <div class="ml-auto pt-4 pr-4">
         <button
-          @click="modalInsertEmployeeOpen = !modalInsertEmployeeOpen"
+        @click="showModal('Aggiungi dipendente')"
           class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
         >
         <add-icon class="add-icon"/>
         </button>
       </div>
     </div>
-    <infobox ref="infobox" />
+    <!-- <infobox ref="infobox" /> -->
+    <profilo-employee v-if="actualEmployee"></profilo-employee>
+    
+    <modal v-show="deleteModalVisible">
+      <template v-slot:header> Cancella Dipendente </template>
+      <template v-slot:body>
+        Sei sicuro di voler cancellare il dipendente?
+      </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn-close"
+          @click="deleteConfirm"
+          aria-label="Close modal"
+        >
+          Conferma
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeDeleteModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+      </template>
+    </modal>
+    <modal v-show="editModalVisible">
+      <template v-slot:header> {{ popup.title }} </template>
+      <template v-slot:body>
+        <form action="" id="addEmployee">
+          <div class="mb-4 flex flex-wrap justify-between">
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.employee.name.$error }"
+              >
+                <label class="field-label" for="first_name">Nome </label>
+                <input
+                  type="text"
+                  name="employeeName"
+                  placeholder="Nome *"
+                  v-model.trim="$v.employee.name.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                  id="employeeName"
+                />
+              </div>
+              <div v-if="$v.employee.name.$error">
+                <div class="error" v-if="!$v.employee.name.required">
+                  Il campo nome e' richiesto.
+                </div>
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.employee.surname.$error }"
+              >
+                <label class="field-label" for="first_name">Cognome </label>
+                <input
+                  type="text"
+                  name="employeeSurname"
+                  placeholder="Cognome *"
+                  v-model.trim="$v.employee.surname.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                  id="employeeName"
+                />
+              </div>
+              <div v-if="$v.employee.surname.$error">
+                <div class="error" v-if="!$v.employee.surname.required">
+                  Il campo Cognome e' richiesto.
+                </div>
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.employee.code.$error }"
+              >
+                <label class="field-label" for="first_name">Codice</label>
+                <input
+                  type="text"
+                  name="employeeCode"
+                  id="employeeCode"
+                  placeholder="Codice *"
+                  v-model.trim="$v.employee.code.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.employee.code.$error">
+                <div class="error" v-if="!$v.employee.code.required">
+                  Il campo codice e' richiesto.
+                </div>
+              </div>
+            </div>
+            
+            
+            <div class="field-group mb-6 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.employee.companyEmail.$error }"
+              >
+                <label class="field-label" for="password">Email </label>
+                <input
+                  type="text"
+                  name="employeeEmail"
+                  id=""
+                  required
+                  placeholder="Email *"
+                  v-model.trim="$v.employee.companyEmail.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.employee.companyEmail.$error">
+                <div class="error" v-if="!$v.employee.companyEmail.required">
+                  Il campo email e' richiesto.
+                </div>
+              </div>
+            </div>
+            
+           
+          </div>
+        </form>
+      </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn-close"
+          @click="saveEmployee"
+          aria-label="Close modal"
+        >
+          Salva
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+        <p class="typo__p" v-if="submitStatus === 'ERROR'">
+          Riempire i dati nel modo corretto
+        </p>
+      </template>
+    </modal>
   </div>
 </template>
 
 <script>
-import Infobox from "../components/Infobox.vue";
+// import Infobox from "../components/Infobox.vue";
 import { mapState, mapActions } from 'vuex';
-
+import ProfiloEmployee from "../components/ProfiloEmployee.vue";
+import Modal from "../components/Modal.vue";
+import EventBus from '../components/eventBus';
+import { required } from "vuelidate/lib/validators";
 
 // import { employees } from "../tmp-data/employees.js";
 // import { headquarters } from "../tmp-data/hqs.js";
 // import { campaigns } from "../tmp-data/campaigns.js";
 export default {
-  components: { Infobox },
-  name: "Sede",
+  components: { ProfiloEmployee, Modal  },
+  name: "Dipendenti",
   data: function() {
     return {
+      editModalVisible: false,
+      deleteModalVisible:false,
+      currentEmployeeSelected: undefined,
+      employee:{},
       employees: [],
+      popup: {
+        title: "",
+      },
+       submitStatus: null,
       selectedHq: 0,
       selectedCampaign: 0,
-      filter_campaigns: [],
-      filter_hqs: [],
+      // filter_campaigns: [],
+      // filter_hqs: [],
       modalInsertEmployeeOpen: false,
       modalImportEmployeesOpen: false,
       fileUploaded: null,
       inDragArea: false,
     };
   },
-
+validations: {
+    employee: {
+      name: {
+        required,
+      },
+      surname: {
+        required,
+      },
+      code: {
+        required,
+      },
+      companyEmail: {
+        required,
+      }
+    },
+  },
   mounted: function() {
-    this.getAllEmployees();
+    if (this.actualCompany && this.actualCompany.item)
+    this.getAllEmployees(this.actualCompany.item.id);
     // this.employees = employees;
     // console.log(this.$refs["infobox"].$el.getBoundingClientRect());
-    this.filter_hqs = null;
-    this.filter_campaigns = null;
+    // this.filter_hqs = null;
+    // this.filter_campaigns = null;
+    EventBus.$on("EDIT_EMPLOYEE", employee => {
+      this.editModalVisible = true;
+      this.employee = employee.item;
+      this.popup = {
+        title: "Modifica",
+      };
+    });
+    EventBus.$on("DELETE_EMPLOYEE", employee => {
+      this.deleteModalVisible = true;
+      this.employee = employee.item;
+      this.popup = {
+        title: "Cancella",
+      };
+    });
   },
   computed: {
         ...mapState("employee", ["allEmployees","actualEmployee"]),
+        ...mapState("company", ["actualCompany"]),
     fileName() {
       return this.fileUploaded.item(0).name;
     },
@@ -401,72 +590,133 @@ export default {
       getAllEmployees: "getAll",
       addEmployeeCall: "addEmployee",
       updateEmployeeCall: "updateEmployee",
-      getEmployeeById:"getEmployeeById",
+      getEmployee:"getEmployee",
       deleteEmployee:"deleteEmployee"
     }),
-    showInfoBox: function(index) {
-      this.$refs["infobox"].showEmployeeDetails(this.employees[index]);
+    showModal(title) {
+      this.editModalVisible = true;
+      this.newEmployee =true;
+      this.popup = {
+        title: title
+      };
     },
-
-    hasCampaignNotEnded: function(campaign) {
-      console.log(campaign);
-      return new Date(campaign.endDate) > new Date();
+    closeModal() {
+      this.editModalVisible = false;
+      this.newEmployee =false;
     },
-    isEmployeeInCampaign: function(employee) {
-      let toRtn = false;
-      if (this.selectedCampaign == 0) return true;
-      employee.campagne.forEach((campaign) => {
-        if (campaign.id == this.selectedCampaign) {
-          toRtn = true;
+    closeDeleteModal() {
+      this.deleteModalVisible = false;
+    },
+    saveEmployee() {
+      //check fields
+      // eslint-disable-next-line no-constant-condition
+      // console.log("submit!");
+      this.$v.$touch();
+      if (this.$v.$invalid) {
+        this.submitStatus = "ERROR";
+        return;
+      } else {
+      if (this.newEmployee) {
+        this.addEmployeeCall({companyId:this.actualCompany.item.id,employee:this.employee});
         }
-      });
+        else {
+            this.updateEmployeeCall({companyId:this.actualCompany.item.id,employee:this.employee});
+            }
+      }
 
-      return toRtn;
+        this.editModalVisible = false;
+        this.newEmployee =false;
+        }
+      ,
+    deleteConfirm() {
+        this.deleteModalVisible = false;
+        this.deleteEmployee({companyId:this.actualCompany.item.id,employeeId:this.actualEmployee.item.id});
     },
-    onAddEmployeeSubmit: function(submitEvent) {
-      console.log(submitEvent);
-      let employee = {};
-      let tmp = submitEvent.target.elements;
-      employee.first_name = tmp.employeeName.value;
-      employee.last_name = tmp.employeeSurname.value;
-      employee.id = this.employees.length + 1;
-      employee.email = tmp.employeeEmail.value;
-      employee.matricola = tmp.employeeID.value;
-      employee.campagne = [];
-      employee.idSede = 0;
-      console.log(employee);
-      this.employees.push(employee);
-      this.modalInsertEmployeeOpen = false;
+    updateEmployee() {
+      //check fields
+      // eslint-disable-next-line no-constant-condition
+      if (true) {
+        this.updateEmployeeCall(this.employee);
+        this.editModalVisible = false;
+      }
     },
+    goToEmployee: function (employeeName) {
+      this.$router.push("/azienda/" + employeeName);
+    },
+    showEmployeeInfo: function (employee) {
+      if (this.currentEmployeeSelected == employee) {
+        this.getEmployee(null)
 
-    onFileUploaderChange: function() {
-      console.log(this.$refs["file"]);
-      this.fileUploaded = this.$refs["file"].files;
-    },
-    removeUploadedFile: function() {
-      this.fileUploaded = null;
-    },
+        this.currentEmployeeSelected = undefined;
+      } else {
+             this.getEmployee(employee)
+        this.currentEmployeeSelected = employee;
+       
+      }
+  },
+    // showInfoBox: function(index) {
+    //   this.$refs["infobox"].showEmployeeDetails(this.employees[index]);
+    // },
 
-    dragover: function() {
-      this.inDragArea = true;
-    },
-    dragleave: function() {
-      this.inDragArea = false;
-    },
-    drop: function(event) {
-      event.preventDefault();
-      this.inDragArea = false;
+  //   hasCampaignNotEnded: function(campaign) {
+  //     console.log(campaign);
+  //     return new Date(campaign.endDate) > new Date();
+  //   },
+  //   isEmployeeInCampaign: function(employee) {
+  //     let toRtn = false;
+  //     if (this.selectedCampaign == 0) return true;
+  //     employee.campagne.forEach((campaign) => {
+  //       if (campaign.id == this.selectedCampaign) {
+  //         toRtn = true;
+  //       }
+  //     });
 
-      this.$refs["file"].files = event.dataTransfer.files;
-      this.onFileUploaderChange();
-    },
-    importEmployees: function() {
-      console.log(this.fileUploaded);
-      this.modalImportEmployeesOpen = false;
-    },
-    removeFile: function() {
-      this.fileUploaded = null;
-    },
+  //     return toRtn;
+  //   },
+  //   onAddEmployeeSubmit: function(submitEvent) {
+  //     console.log(submitEvent);
+  //     let employee = {};
+  //     let tmp = submitEvent.target.elements;
+  //     employee.first_name = tmp.employeeName.value;
+  //     employee.last_name = tmp.employeeSurname.value;
+  //     employee.id = this.employees.length + 1;
+  //     employee.email = tmp.employeeEmail.value;
+  //     employee.matricola = tmp.employeeID.value;
+  //     employee.campagne = [];
+  //     employee.idSede = 0;
+  //     console.log(employee);
+  //     this.employees.push(employee);
+  //     this.modalInsertEmployeeOpen = false;
+  //   },
+
+  //   onFileUploaderChange: function() {
+  //     console.log(this.$refs["file"]);
+  //     this.fileUploaded = this.$refs["file"].files;
+  //   },
+  //   removeUploadedFile: function() {
+  //     this.fileUploaded = null;
+  //   },
+
+  //   dragover: function() {
+  //     this.inDragArea = true;
+  //   },
+  //   dragleave: function() {
+  //     this.inDragArea = false;
+  //   },
+  //   drop: function(event) {
+  //     event.preventDefault();
+  //     this.inDragArea = false;
+
+  //     this.$refs["file"].files = event.dataTransfer.files;
+  //     this.onFileUploaderChange();
+  //   },
+  //   importEmployees: function() {
+  //     console.log(this.fileUploaded);
+  //     this.modalImportEmployeesOpen = false;
+  //   },
+  //   removeFile: function() {
+  //     this.fileUploaded = null;
+  //   },
   },
 };
 </script>
