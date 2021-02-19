@@ -287,7 +287,7 @@ public class CompanyService {
 			lines = readCSV(new ByteArrayInputStream(bytes), ';');
 		}
 		lines.forEach(l -> {
-			Employee existing = employeeRepo.findOneByCompanyIdAndCode(companyId, companyId).orElse(null);
+			Employee existing = employeeRepo.findOneByCompanyIdAndCode(companyId, l[2]).orElse(null);
 			if (existing != null) {
 				existing.setLocation(l[3]);
 				existing.setName(l[0]);
