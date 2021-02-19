@@ -50,16 +50,16 @@ const actions = {
             dispatch('alert/success', "Dipendente modificato con successo", { root: true });
         },
             error => {
-                commit('getAllFailure', error);
+                commit('updateEmployeeFailure', error);
                 dispatch('alert/error', error, { root: true });
             }
         );
     },
-    deleteEmployee({ commit, dispatch }, {companyId,employee}) {
+    deleteEmployee({ commit, dispatch }, {companyId,employeeId}) {
         commit('deleteEmployee');
-        employeeService.deleteEmployee(companyId,employee).then(
-            employee => {
-                commit('deleteEmployeeSuccess', employee);
+        employeeService.deleteEmployee(companyId,employeeId).then(
+            employeeId => {
+                commit('deleteEmployeeSuccess', employeeId);
                 dispatch('alert/success', "Dipendente cancellato con successo", { root: true });
 
             },
@@ -118,11 +118,11 @@ const mutations = {
     deleteEmployee(state) {
         state.actualEmployee = { loading: true };
     },
-    deleteEmployeeSuccess(state, employee) {
+    deleteEmployeeSuccess(state, employeeId) {
         state.actualEmployee = null;
         if (state.allEmployees.items)
         state.allEmployees.items= state.allEmployees.items.filter(function(element){
-            return employee.id!=element.id
+            return employeeId!=element.id
         })
     },
     deleteEmployeeFailure(state, error) {

@@ -348,7 +348,7 @@
       </table>
       <div class="ml-auto pt-4 pr-4">
         <button
-          @click="modalInsertEmployeeOpen = !modalInsertEmployeeOpen"
+        @click="showModal('Aggiungi dipendente')"
           class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
         >
         <add-icon class="add-icon"/>
@@ -357,6 +357,7 @@
     </div>
     <!-- <infobox ref="infobox" /> -->
     <profilo-employee v-if="actualEmployee"></profilo-employee>
+    
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Dipendente </template>
       <template v-slot:body>
@@ -381,6 +382,125 @@
         </button>
       </template>
     </modal>
+    <modal v-show="editModalVisible">
+      <template v-slot:header> {{ popup.title }} </template>
+      <template v-slot:body>
+        <form action="" id="addEmployee">
+          <div class="mb-4 flex flex-wrap justify-between">
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.employee.name.$error }"
+              >
+                <label class="field-label" for="first_name">Nome </label>
+                <input
+                  type="text"
+                  name="employeeName"
+                  placeholder="Nome *"
+                  v-model.trim="$v.employee.name.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                  id="employeeName"
+                />
+              </div>
+              <div v-if="$v.employee.name.$error">
+                <div class="error" v-if="!$v.employee.name.required">
+                  Il campo nome e' richiesto.
+                </div>
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.employee.surname.$error }"
+              >
+                <label class="field-label" for="first_name">Cognome </label>
+                <input
+                  type="text"
+                  name="employeeSurname"
+                  placeholder="Cognome *"
+                  v-model.trim="$v.employee.surname.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                  id="employeeName"
+                />
+              </div>
+              <div v-if="$v.employee.surname.$error">
+                <div class="error" v-if="!$v.employee.surname.required">
+                  Il campo Cognome e' richiesto.
+                </div>
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.employee.code.$error }"
+              >
+                <label class="field-label" for="first_name">Codice</label>
+                <input
+                  type="text"
+                  name="employeeCode"
+                  id="employeeCode"
+                  placeholder="Codice *"
+                  v-model.trim="$v.employee.code.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.employee.code.$error">
+                <div class="error" v-if="!$v.employee.code.required">
+                  Il campo codice e' richiesto.
+                </div>
+              </div>
+            </div>
+            
+            
+            <div class="field-group mb-6 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.employee.companyEmail.$error }"
+              >
+                <label class="field-label" for="password">Email </label>
+                <input
+                  type="text"
+                  name="employeeEmail"
+                  id=""
+                  required
+                  placeholder="Email *"
+                  v-model.trim="$v.employee.companyEmail.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.employee.companyEmail.$error">
+                <div class="error" v-if="!$v.employee.companyEmail.required">
+                  Il campo email e' richiesto.
+                </div>
+              </div>
+            </div>
+            
+           
+          </div>
+        </form>
+      </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn-close"
+          @click="saveEmployee"
+          aria-label="Close modal"
+        >
+          Salva
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+        <p class="typo__p" v-if="submitStatus === 'ERROR'">
+          Riempire i dati nel modo corretto
+        </p>
+      </template>
+    </modal>
   </div>
 </template>
 
@@ -400,7 +520,7 @@ export default {
   name: "Dipendenti",
   data: function() {
     return {
-         editModalVisible: false,
+      editModalVisible: false,
       deleteModalVisible:false,
       currentEmployeeSelected: undefined,
       employee:{},
@@ -420,28 +540,19 @@ export default {
     };
   },
 validations: {
-    company: {
+    employee: {
       name: {
+        required,
+      },
+      surname: {
         required,
       },
       code: {
         required,
       },
-      address: {
+      companyEmail: {
         required,
-      },
-      contactEmail: {
-        required,
-      },
-      contactPhone: {
-        required,
-      },
-      web: {
-        required,
-      },
-      logo: {
-        required,
-      },
+      }
     },
   },
   mounted: function() {
@@ -493,7 +604,7 @@ validations: {
       this.editModalVisible = false;
       this.newEmployee =false;
     },
-        closeDeleteModal() {
+    closeDeleteModal() {
       this.deleteModalVisible = false;
     },
     saveEmployee() {
@@ -506,10 +617,10 @@ validations: {
         return;
       } else {
       if (this.newEmployee) {
-        this.addEmployeeCall(this.employee);
+        this.addEmployeeCall({companyId:this.actualCompany.item.id,employee:this.employee});
         }
         else {
-            this.updateEmployeeCall(this.employee);
+            this.updateEmployeeCall({companyId:this.actualCompany.item.id,employee:this.employee});
             }
       }
 
@@ -519,7 +630,7 @@ validations: {
       ,
     deleteConfirm() {
         this.deleteModalVisible = false;
-        this.deleteEmployee(this.employee);
+        this.deleteEmployee({companyId:this.actualCompany.item.id,employeeId:this.actualEmployee.item.id});
     },
     updateEmployee() {
       //check fields

@@ -67,9 +67,9 @@ function addEmployee(companyId,employee){
 }
 // update an old company
 function updateEmployee(companyId,employee){
-    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+companyId+'/'+process.env.VUE_APP_EMPLOYEES_API,employee).then(
+    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+companyId+'/'+process.env.VUE_APP_EMPLOYEES_API+'/'+employee.id,employee).then(
         res => {
-            if (res && res.data && res.data) {
+            if (res && res.data ) {
                 return Promise.resolve(res.data);
             }
             else return Promise.reject(null);
@@ -80,11 +80,11 @@ function updateEmployee(companyId,employee){
     )
 }
 // update an old company
-function deleteEmployee(companyId,employee){
-    return axios.delete(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+employee.idprocess.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+companyId+'/'+process.env.VUE_APP_EMPLOYEES_API).then(
+function deleteEmployee(companyId,employeeId){
+    return axios.delete(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+companyId+'/'+process.env.VUE_APP_EMPLOYEES_API+'/'+employeeId).then(
         res => {
             if (res) {
-                return Promise.resolve(employee);
+                return Promise.resolve(employeeId);
             }
         }, err => {
             return Promise.reject(err);

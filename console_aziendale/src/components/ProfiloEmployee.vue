@@ -42,7 +42,7 @@
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
-            <email-icon /> {{ actualEmployee.item.email }}
+            <email-icon /> {{ actualEmployee.item.companyEmail }}
           </p>
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
