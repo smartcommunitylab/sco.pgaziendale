@@ -28,6 +28,7 @@ build_backend_prod:
 build_backend_dev:
   stage: build
   script:
+    - cd backend
     - docker login -u $DHUB_USER -p $DHUB_PASS
     - DOCKER_BUILDKIT=1 docker build -f Dockerfile -t $CONTAINER_BACKEND_DEV_IMAGE -t $CONTAINER_BACKEND_DEV_IMAGE_LATEST .
     - docker push $CONTAINER_BACKEND_DEV_IMAGE
@@ -43,7 +44,7 @@ deploy_backend_prod:
   script:
     - echo "deploy"
     - kubectl -n pgaziendale set image deployments/pgaziendale-backend-prod pgaziendale-backend-prod=$CONTAINER_BACKEND_PROD_IMAGE --record=true
-    - kubectl -n pgaziendale rollout status deployment pgaziendale-backend
+    - kubectl -n pgaziendale rollout status deployment pgaziendale-backend-prod
   only:
     - prod
 
