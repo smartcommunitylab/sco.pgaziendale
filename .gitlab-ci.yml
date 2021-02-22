@@ -50,6 +50,7 @@ deploy_backend_prod:
 
 deploy_backend_dev:
   stage: deploy
+  image: smartcommunitylab/kubectl-alpine:latest
   environment:
     name: develop
   script:
