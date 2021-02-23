@@ -1,50 +1,7 @@
 <template>
   <div class="flex flex-col lg:flex-row ">
     <div class=" lg:w-4/6 mx-2 my-2 flex flex-col bg-white">
-      <div class="flex flex-row justify-center py-4">
-        <!-- <div class="px-2">
-          <select
-            class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
-            v-model="selectedHq"
-            required
-          >
-            <option value="0" selected disabled hidden
-              >Seleziona una sede</option
-            >
-            <template v-for="hq in filter_hqs">
-              <option :key="hq.id" :value="hq.id">{{ hq.address }}</option>
-            </template>
-          </select>
-        </div> -->
-
-        <!-- <div class="px-2">
-          <select
-            class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
-            v-model="selectedCampaign"
-            required
-          >
-            <option value="0" selected disabled hidden
-              >Seleziona una Campagna</option
-            >
-            <template v-for="campaign in filter_campaigns">
-              <template v-if="hasCampaignNotEnded(campaign)">
-                <option :key="campaign.id" :value="campaign.id">{{
-                  campaign.title
-                }}</option></template
-              >
-            </template>
-          </select>
-        </div> -->
-
-        <div class="px-2">
-          <button
-            @click="modalImportEmployeesOpen = true"
-            class="inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
-          >
-            Importa CSV
-          </button>
-        </div>
-      </div>
+     
 
       <transition
         enter-active-class="transition duration-300 ease-out transform"
@@ -208,7 +165,13 @@
                       id="modal-headline"
                     >
                       Importa dipendenti
-                    </h3>
+                    </h3> 
+                   <button
+                  class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+                >
+                  <a href="/files/example.csv" download>Scarica file di esempio</a>
+
+                </button>
                     <template v-if="fileUploaded != null"
                       ><div class="pt-2">
                         <span class=" text-left text-lg"> {{ fileName }} </span
@@ -346,6 +309,50 @@
           </template>
         </tbody>
       </table>
+       <div class="flex flex-row justify-center py-4">
+        <!-- <div class="px-2">
+          <select
+            class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
+            v-model="selectedHq"
+            required
+          >
+            <option value="0" selected disabled hidden
+              >Seleziona una sede</option
+            >
+            <template v-for="hq in filter_hqs">
+              <option :key="hq.id" :value="hq.id">{{ hq.address }}</option>
+            </template>
+          </select>
+        </div> -->
+
+        <!-- <div class="px-2">
+          <select
+            class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
+            v-model="selectedCampaign"
+            required
+          >
+            <option value="0" selected disabled hidden
+              >Seleziona una Campagna</option
+            >
+            <template v-for="campaign in filter_campaigns">
+              <template v-if="hasCampaignNotEnded(campaign)">
+                <option :key="campaign.id" :value="campaign.id">{{
+                  campaign.title
+                }}</option></template
+              >
+            </template>
+          </select>
+        </div> -->
+
+        <div class="px-2">
+          <button
+            @click="modalImportEmployeesOpen = true"
+            class="inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+          >
+            Importa CSV
+          </button>
+        </div>
+      </div>
       <div class="ml-auto pt-4 pr-4">
         <button
         @click="showModal('Aggiungi dipendente')"
@@ -591,7 +598,8 @@ validations: {
       addEmployeeCall: "addEmployee",
       updateEmployeeCall: "updateEmployee",
       getEmployee:"getEmployee",
-      deleteEmployee:"deleteEmployee"
+      deleteEmployee:"deleteEmployee",
+      importData:"importEmployees"
     }),
     showModal(title) {
       this.editModalVisible = true;
@@ -607,6 +615,7 @@ validations: {
     closeDeleteModal() {
       this.deleteModalVisible = false;
     },
+
     saveEmployee() {
       //check fields
       // eslint-disable-next-line no-constant-condition
@@ -689,34 +698,39 @@ validations: {
   //     this.modalInsertEmployeeOpen = false;
   //   },
 
-  //   onFileUploaderChange: function() {
-  //     console.log(this.$refs["file"]);
-  //     this.fileUploaded = this.$refs["file"].files;
-  //   },
-  //   removeUploadedFile: function() {
-  //     this.fileUploaded = null;
-  //   },
+    onFileUploaderChange: function() {
+      console.log(this.$refs["file"]);
+      this.fileUploaded = this.$refs["file"].files;
+    },
+    removeUploadedFile: function() {
+      this.fileUploaded = null;
+    },
 
-  //   dragover: function() {
-  //     this.inDragArea = true;
-  //   },
-  //   dragleave: function() {
-  //     this.inDragArea = false;
-  //   },
-  //   drop: function(event) {
-  //     event.preventDefault();
-  //     this.inDragArea = false;
+    dragover: function() {
+      this.inDragArea = true;
+    },
+    dragleave: function() {
+      this.inDragArea = false;
+    },
+    drop: function(event) {
+      event.preventDefault();
+      this.inDragArea = false;
 
-  //     this.$refs["file"].files = event.dataTransfer.files;
-  //     this.onFileUploaderChange();
-  //   },
-  //   importEmployees: function() {
-  //     console.log(this.fileUploaded);
-  //     this.modalImportEmployeesOpen = false;
-  //   },
-  //   removeFile: function() {
-  //     this.fileUploaded = null;
-  //   },
+      this.$refs["file"].files = event.dataTransfer.files;
+      this.onFileUploaderChange();
+    },
+    importEmployees: function() {
+      console.log(this.fileUploaded);
+      this.modalImportEmployeesOpen = false;
+      var formData = new FormData();
+      formData.append("image", this.fileUploaded.item(0));
+      
+      this.importData(this.actualCompany.id,formData)
+    },
+    removeFile: function() {
+      this.fileUploaded = null;
+    },
+
   },
 };
 </script>

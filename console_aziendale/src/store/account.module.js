@@ -6,6 +6,7 @@ const state = user
     ? { status: { loggedIn: true }, user, role: userService.getRole(user),home:userService.getHome(userService.getRole(user))}
     : { status: {}, user: null, role:null,home:null };
 
+   
 const actions = {
     login({ dispatch, commit }, { username, password }) {
         commit('loginRequest', { username });
@@ -21,6 +22,7 @@ const actions = {
                         var page = userService.getHome(role);
                         commit('homeUser', page);
                         dispatch('navigation/changePage', page, {root:true}  );
+                        dispatch('setDefaultCompany',{root:true} );
                         router.push(page.route);
                     })
                 },
@@ -30,9 +32,12 @@ const actions = {
                 }
             );
     },
-    logout({ commit }) {
+    logout({ commit,dispatch }) {
         userService.logout();
         commit('logout');
+        dispatch('alert/success', "Utente uscito con successo", { root: true });
+        dispatch('company/getCompanyById',null,  { root: true });
+        dispatch('company/resetCompanyAdmin', null, { root: true });
         router.push('/login');
     },
     setDefaultCompany({dispatch}) {

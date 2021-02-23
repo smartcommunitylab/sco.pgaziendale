@@ -6,6 +6,17 @@ const state = {
 };
 
 const actions = {
+    importEmployees({ commit, dispatch },{companyId,file}) {
+        commit('importEmployees');
+        employeeService.importEmployees(companyId,file)
+            .then(
+                employees => commit('importEmployeesSuccess', employees),
+                error => {
+                    commit('importEmployeesFailure', error);
+                    dispatch('alert/error', error, { root: true });
+                }
+            );
+    },
     getAll({ commit, dispatch },companyId) {
         commit('getAllEmployees');
         employeeService.getAllEmployees(companyId)
