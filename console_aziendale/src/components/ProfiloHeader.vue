@@ -1,10 +1,14 @@
 <template>
-              <div>
+      <div class="container">
            <div v-if="role=='ROLE_ADMIN'">
               <div v-if="adminCompany!=null">
 
             <span>{{adminCompany.item.name}}</span>
-              <button @click="resetCompany">esci</button>
+              <button @click="resetCompany">
+                 <span class="mr-2">
+                <logout-icon />
+              </span>
+              </button>
               </div>
               <div v-else>
                 Amministratore
@@ -38,5 +42,13 @@ export default {
 }
 </script>
 <style scoped>
+.container {
+    text-align: center;
+    border: solid 1px white;
+    margin: 10px 20px;
+    padding: 8px;
+    width: 80%;
+    border-radius: 8px;
 
+}
 </style>
