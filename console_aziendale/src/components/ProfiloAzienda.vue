@@ -19,9 +19,9 @@
             <pencil-outline-icon />
           </button>
         </div>
-        <div class="p-4 md:p-12 text-center lg:text-left" >
+        <div class="p-4 md:p-12 text-center lg:text-left" v-if="actualCompany && actualCompany.item" >
           <!-- Image for mobile view-->
-          <div
+          <div 
             class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
             v-bind:style="{ backgroundImage: 'url(' + actualCompany.item.logo + ')' }"
           ></div>

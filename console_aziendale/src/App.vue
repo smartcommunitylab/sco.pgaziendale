@@ -18,7 +18,6 @@
 <script>
 import Header from "./components/Header.vue";
 import { mapActions, mapState } from "vuex";
-import { router } from "./routes";
 export default {
   name: "App",
   components: { "app-header": Header },
@@ -31,18 +30,12 @@ export default {
   created() {
     console.log("account" + this.account);
     //check login and push the right page
-    this.bootProfile();
+    // this.bootProfile();
   },
   methods: {
     ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
     ...mapActions("alert", { clearAlert: "clear" }),
-    bootProfile() {
-      if (this.account && this.account.home) {
-        //if role!= admin load default company (first)
-        this.setDefaultCompany();
-        router.push(this.account.home.route);
-      }
-    },
+
   },
   watch: {
     account(newCount, oldCount) {
