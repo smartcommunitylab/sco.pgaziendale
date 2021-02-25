@@ -89,10 +89,10 @@
 // import Infobox from "../components/Infobox.vue";
 // import { campaigns } from "../tmp-data/campaigns.js";
 import { mapState,mapActions } from 'vuex';
-
+import ProfiloCampagna from '../components/ProfiloCampagna.vue'
 
 export default {
-  // components: { Infobox },
+  components: { ProfiloCampagna },
   name: "GestioneCampagne",
   data: function() {
     return {

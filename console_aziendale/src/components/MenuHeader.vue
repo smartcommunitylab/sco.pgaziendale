@@ -246,7 +246,8 @@ export default {
     computed: {
         ...mapState('account', ['status','user','role']),
         ...mapState('navigation', ['page']),
-        ...mapState('company',['adminCompany','actualCompany'])
+        ...mapState('company',['adminCompany','actualCompany']),
+          
     },
   methods: {
     drawer() {

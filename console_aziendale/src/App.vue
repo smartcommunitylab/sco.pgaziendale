@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <menu-header v-if="account && account.status && account.status.loggedIn" />
+    <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login'" />
     <div v-if="alert.message" :class="`alert ${alert.type}`">
       <span class="closebtn" onclick="this.parentElement.style.display='none';"
         >&times;</span
@@ -9,7 +9,7 @@
     </div>
     <router-view
       :class="{
-        'lg:pl-64 pt-16 lg:pt-16': account && account.status && account.status.loggedIn,
+        'lg:pl-64 pt-16 lg:pt-16': account && account.status && account.status.loggedIn && currentRouteName!='login',
       }"
     />
   </div>
@@ -26,6 +26,9 @@ export default {
       account: (state) => state.account,
       alert: (state) => state.alert,
     }),
+      currentRouteName() {
+        return this.$route.name;
+    }
   },
   created() {
     console.log("account" + this.account);
