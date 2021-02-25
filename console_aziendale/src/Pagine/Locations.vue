@@ -37,7 +37,7 @@
         </tbody>
       </table>
     </div>
-  <div v-else>
+  <div v-else class="text-center">
     Non ci sono sedi. Premi + per aggiungerne
   </div>
     <profilo-location v-if="actualLocation" />
