@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <app-header v-if="account && account.status && account.status.loggedIn" />
+    <menu-header v-if="account && account.status && account.status.loggedIn" />
     <div v-if="alert.message" :class="`alert ${alert.type}`">
       <span class="closebtn" onclick="this.parentElement.style.display='none';"
         >&times;</span
@@ -16,11 +16,11 @@
 </template>
 
 <script>
-import Header from "./components/Header.vue";
+import MenuHeader from "./components/MenuHeader.vue";
 import { mapActions, mapState } from "vuex";
 export default {
   name: "App",
-  components: { "app-header": Header },
+  components: { "menu-header": MenuHeader },
   computed: {
     ...mapState({
       account: (state) => state.account,

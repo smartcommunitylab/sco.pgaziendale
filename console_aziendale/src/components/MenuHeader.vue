@@ -70,9 +70,7 @@
         <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
         </span>
         <div>
-          <div v-if="role=='ROLE_ADMIN'&&adminCompany!=null">
-            {{adminCompany.item.name}}
-          </div>
+         <profilo-header></profilo-header>
           <router-link to="/aziende" v-if="role=='ROLE_ADMIN'&&adminCompany==null">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
@@ -91,7 +89,7 @@
               <span>Profilo Azienda</span></span
             >
           </router-link>
-          <router-link to="/locations" v-if="role==('ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&& actualCompany!=null)">
+          <router-link to="/locations" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&& actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -100,7 +98,7 @@
               <span>Gestione Sedi</span></span
             >
           </router-link>
-          <router-link to="/dipendenti" v-if="role==('ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
+          <router-link to="/dipendenti" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -182,7 +180,7 @@
               <span>Profilo Azienda</span></span
             >
           </router-link>
-          <router-link to="/locations" v-if="role==('ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
+          <router-link to="/locations" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -238,7 +236,7 @@
 import { mapState,mapActions } from 'vuex'
 import ProfiloHeader from '../components/ProfiloHeader.vue'
 export default {
-  name: "Header",
+  name: "MenuHeader",
   components: {
       ProfiloHeader
   },

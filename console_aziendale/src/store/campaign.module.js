@@ -5,13 +5,16 @@ const state = {
 };
 
 const actions = {
-    getAll({ commit },id) {
+    getAll({ commit,dispatch },id) {
         commit('getAllCampaigns');
 
         campaignService.getAllCampaigns(id)
             .then(
                 campaigns => commit('getAllSuccess', campaigns),
-                error => commit('getAllFailure', error)
+                error => {
+                    commit('getAllFailure', error);
+                    dispatch('alert/error', error, { root: true });
+                }
             );
     }
 };

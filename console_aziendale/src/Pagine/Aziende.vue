@@ -1,6 +1,8 @@
 <template>
   <div class="flex flex-col lg:flex-row">
     <div class="bg-green-300 lg:w-4/6 mx-2 my-2 pb-16 relative">
+              <div v-if="allCompanies &&allCompanies.items &&allCompanies.items.length>0">
+
       <table class="shadow-lg rounded relative w-full">
         <thead class="text-center justify-between">
           <tr class="truncate px-2 flex border-b border-background text-center">
@@ -42,6 +44,11 @@
           </template>
         </tbody>
       </table>
+              </div>
+              <div v-else>
+                Non ci sono Aziende
+              </div>
+
       <div class="ml-auto pt-4 pr-4 absolute right-0">
         <button
           @click="showModal('Aggiungi azienda')"

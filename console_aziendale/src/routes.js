@@ -3,7 +3,6 @@ import Router from 'vue-router';
 import Aziende from "./Pagine/Aziende.vue"
 import Azienda from "./Pagine/Azienda.vue"
 import Login from "./Pagine/Login.vue"
-import Home from "./Pagine/Home.vue"
 import Locations from "./Pagine/Locations.vue"
 import Stats from "./Pagine/Stats.vue"
 import GestioneDipendenti from "./Pagine/GestioneDipendenti.vue"
@@ -13,8 +12,7 @@ Vue.use(Router);
 const routes = [
     {
       path: '/',
-      name: 'homepage',
-      component: Home
+      redirect: '/login' 
     },
     {
       path: '/login',

@@ -241,6 +241,7 @@
           </div>
         </div>
       </transition>
+          <div v-if="allEmployees && allEmployees.items && allEmployees.items.length>0">
 
       <table class="table-auto rounded relative w-full">
         <thead class="text-center justify-between">
@@ -309,6 +310,10 @@
           </template>
         </tbody>
       </table>
+          </div>
+          <div v-else class="text-center">
+            Non ci sono dipendenti
+          </div>
        <div class="flex flex-row justify-center py-4">
         <!-- <div class="px-2">
           <select
