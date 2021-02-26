@@ -68,7 +68,7 @@
       </button>
     </div>
     <!-- <infobox /> -->
-    <profilo-campagna />
+    <profilo-campagna v-if="actualCampaign" />
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Campagna </template>
       <template v-slot:body> Sei sicuro di voler cancellare la campagna? </template>
@@ -99,20 +99,20 @@
             <div class="field-group mb-4 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.campaign.logo.$error }"
+                :class="{ 'form-group--error': $v.logo.$error }"
               >
                 <label class="field-label" for="first_name">Logo </label>
                 <input
                   type="text"
                   name="campaignLogo"
                   placeholder="Logo *"
-                  v-model.trim="$v.campaign.logo.$model"
+                  v-model.trim="$v.logo.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                   id="campaignLogo"
                 />
               </div>
-              <div v-if="$v.campaign.logo.$error">
-                <div class="error" v-if="!$v.campaign.logo.required">
+              <div v-if="$v.logo.$error">
+                <div class="error" v-if="!$v.logo.required">
                   Il campo Logo e' richiesto.
                 </div>
               </div>
@@ -120,20 +120,20 @@
             <div class="field-group mb-4 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.campaign.title.$error }"
+                :class="{ 'form-group--error': $v.title.$error }"
               >
                 <label class="field-label" for="first_name">Titolo </label>
                 <input
                   type="text"
                   name="campaignTitle"
                   placeholder="Titolo *"
-                  v-model.trim="$v.campaign.title.$model"
+                  v-model.trim="$v.title.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                   id="campaignTitle"
                 />
               </div>
-              <div v-if="$v.campaign.title.$error">
-                <div class="error" v-if="!$v.campaign.title.required">
+              <div v-if="$v.title.$error">
+                <div class="error" v-if="!$v.title.required">
                   Il campo titolo e' richiesto.
                 </div>
               </div>
@@ -142,7 +142,7 @@
             <div class="field-group mb-4 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.campaign.description.$error }"
+                :class="{ 'form-group--error': $v.description.$error }"
               >
                 <label class="field-label" for="first_name">Descrizione</label>
                 <input
@@ -150,12 +150,12 @@
                   name="campaignDescription"
                   id="campaignDescription"
                   placeholder="Descrizione *"
-                  v-model.trim="$v.campaign.description.$model"
+                  v-model.trim="$v.description.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.campaign.description.$error">
-                <div class="error" v-if="!$v.campaign.description.required">
+              <div v-if="$v.description.$error">
+                <div class="error" v-if="!$v.description.required">
                   Il campo descrizione e' richiesto.
                 </div>
               </div>
@@ -164,7 +164,7 @@
             <div class="field-group mb-6 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.campaign.from.$error }"
+                :class="{ 'form-group--error': $v.from.$error }"
               >
                 <label class="field-label" for="password">Da </label>
                 <input
@@ -173,12 +173,12 @@
                   id=""
                   required
                   placeholder="Da *"
-                  v-model.trim="$v.campaign.from.$model"
+                  v-model.trim="$v.from.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.campaign.from.$error">
-                <div class="error" v-if="!$v.campaign.from.required">
+              <div v-if="$v.from.$error">
+                <div class="error" v-if="!$v.from.required">
                   Il campo da e' richiesto.
                 </div>
               </div>
@@ -186,7 +186,7 @@
             <div class="field-group mb-6 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.campaign.to.$error }"
+                :class="{ 'form-group--error': $v.to.$error }"
               >
                 <label class="field-label" for="password">A </label>
                 <input
@@ -195,16 +195,83 @@
                   id=""
                   required
                   placeholder="A *"
-                  v-model.trim="$v.campaign.to.$model"
+                  v-model.trim="$v.to.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.campaign.to.$error">
-                <div class="error" v-if="!$v.campaign.to.required">
+              <div v-if="$v.to.$error">
+                <div class="error" v-if="!$v.to.required">
                   Il campo a e' richiesto.
                 </div>
               </div>
             </div>
+                        <div class="field-group mb-6 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.rules.$error }"
+              >
+                <label class="field-label" for="password">Regole</label>
+                <input
+                  type="text"
+                  name="campaignRules"
+                  id=""
+                  required
+                  placeholder="Regole *"
+                  v-model.trim="$v.rules.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.rules.$error">
+                <div class="error" v-if="!$v.rules.required">
+                  Il campo privacy e' richiesto.
+                </div>
+              </div>
+            </div>
+            <div class="field-group mb-6 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.privacy.$error }"
+              >
+                <label class="field-label" for="password">Privacy</label>
+                <input
+                  type="text"
+                  name="campaignPrivacy"
+                  id=""
+                  required
+                  placeholder="Privacy *"
+                  v-model.trim="$v.privacy.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.privacy.$error">
+                <div class="error" v-if="!$v.privacy.required">
+                  Il campo privacy e' richiesto.
+                </div>
+              </div>
+            </div>
+             <div class="field-group mb-6 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.means.$error }"
+              >
+                <label class="field-label" for="password">Mezzi</label>
+                <input
+                  type="text"
+                  name="campaignMeans"
+                  id=""
+                  required
+                  placeholder="Mezzi *"
+                  v-model.trim="$v.means.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.means.$error">
+                <div class="error" v-if="!$v.means.required">
+                  Il campo Mezzi e' richiesto.
+                </div>
+              </div>
+            </div>
+            
           </div>
         </form>
       </template>
@@ -250,39 +317,23 @@ export default {
       editModalVisible: false,
       deleteModalVisible: false,
       currentCampaignSelected: undefined,
+      logo:"",
+      title:"",
+      description:"",
+        from:"",
+        to:"",
+        rules:"",
+        privacy:"",
+        means:""
+      ,
       popup: {
         title: "",
       },
       submitStatus: null,
     };
   },
-  computed: {
-    ...mapState("company", ["actualCompany", "adminCompany"]),
-    ...mapState("campaign", ["allCampaigns"]),
-  },
-  mounted: function () {
-    // this.campaigns = campaigns;
-    if (this.adminCompany) this.getAllCampaigns(this.adminCompany.item.id);
-    if (this.actualCompany) this.getAllCampaigns(this.actualCompany.item.id);
-    if (!this.adminCompany && !this.actualCompany) this.getAllCampaigns(null);
-    EventBus.$on("EDIT_CAMPAIGN", (campaign) => {
-      this.editModalVisible = true;
-      this.campaign = campaign.item;
-      this.popup = {
-        title: "Modifica",
-      };
-    });
-    EventBus.$on("DELETE_CAMPAIGN", (campaign) => {
-      this.deleteModalVisible = true;
-      this.campaign = campaign.item;
-      this.popup = {
-        title: "Cancella",
-      };
-    });
-  },
+   validations: {
 
-  validations: {
-    campaign: {
       logo: {
         required,
       },
@@ -307,8 +358,33 @@ export default {
       means: {
         required,
       },
-    },
   },
+  computed: {
+    ...mapState("company", ["actualCompany", "adminCompany"]),
+    ...mapState("campaign", ["allCampaigns","actualCampaign"]),
+  },
+  mounted: function () {
+    // this.campaigns = campaigns;
+    if (this.adminCompany) this.getAllCampaigns(this.adminCompany.item.id);
+    if (this.actualCompany) this.getAllCampaigns(this.actualCompany.item.id);
+    if (!this.adminCompany && !this.actualCompany) this.getAllCampaigns(null);
+    EventBus.$on("EDIT_CAMPAIGN", (campaign) => {
+      this.editModalVisible = true;
+      this.campaign = campaign.item;
+      this.popup = {
+        title: "Modifica",
+      };
+    });
+    EventBus.$on("DELETE_CAMPAIGN", (campaign) => {
+      this.deleteModalVisible = true;
+      this.campaign = campaign.item;
+      this.popup = {
+        title: "Cancella",
+      };
+    });
+  },
+
+ 
   methods: {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
@@ -317,6 +393,8 @@ export default {
       updateCampaignCall: "updateCampaign",
       deleteCampaignCall: "deleteCampaign",
     }),
+
+
     showCampaignInfo: function (campaign) {
       if (this.currentCampaignSelected == campaign) {
         this.getCampaignCall(null);
@@ -356,6 +434,7 @@ export default {
     showModal(title) {
       this.editModalVisible = true;
       this.newEmployee = true;
+      this.campaign={};
       this.popup = {
         title: title,
       };
@@ -363,10 +442,25 @@ export default {
     closeModal() {
       this.editModalVisible = false;
       this.newCampaign = false;
+       this.$v.$reset();
+
     },
     closeDeleteModal() {
       this.deleteModalVisible = false;
     },
+    createCampaign() {
+      this.campaign = {
+              logo: this.logo,
+      title: this.title,
+      description: this.description,
+      from: this.from,
+      to: this.to,
+      rules: this.rules,
+      privacy: this.privacy,
+      means: this.means,
+      }
+    },
+    
     saveCampaign() {
       //check fields
       // eslint-disable-next-line no-constant-condition
@@ -376,11 +470,14 @@ export default {
         this.submitStatus = "ERROR";
         return;
       } else {
+        this.createCampaign();
+        this.submitStatus = "SUCCESS";
         if (this.newCampaign) {
           this.addCampaignCall({ campaign: this.campaign });
         } else {
           this.updateCampaignCall({ campaign: this.campaign });
         }
+        this.$v.$reset();
       }
       this.editModalVisible = false;
       this.newCampaign = false;
@@ -388,8 +485,7 @@ export default {
     deleteConfirm() {
       this.deleteModalVisible = false;
       this.deleteCampaignCall({
-        companyId: this.actualCompany.item.id,
-        employeeId: this.actualCampaign.item.id,
+        campaignId: this.actualCampaign.item.id,
       });
     },
   },

@@ -1,7 +1,8 @@
 import { campaignService } from '../services';
 
 const state = {
-    allCampaigns: {}
+    allCampaigns: null,
+    actualCampaign:null
 };
 
 const actions = {

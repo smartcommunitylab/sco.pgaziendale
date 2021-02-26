@@ -75,20 +75,22 @@
             <div class="field-group mb-4 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.company.name.$error }"
+                :class="{ 'form-group--error': $v.name.$error }"
               >
                 <label class="field-label" for="first_name">Nome </label>
                 <input
                   type="text"
                   name="companyName"
                   placeholder="Nome *"
-                  v-model.trim="$v.company.name.$model"
+                  v-model.trim="$v.name.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                   id="companyName"
+
+                
                 />
               </div>
-              <div v-if="$v.company.name.$error">
-                <div class="error" v-if="!$v.company.name.required">
+              <div v-if="$v.name.$error">
+                <div class="error" v-if="!$v.name.required">
                   Il campo nome e' richiesto.
                 </div>
               </div>
@@ -96,7 +98,7 @@
             <div class="field-group mb-4 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.company.code.$error }"
+                :class="{ 'form-group--error': $v.code.$error }"
               >
                 <label class="field-label" for="first_name">Codice Azienda</label>
                 <input
@@ -104,12 +106,12 @@
                   name="companyCode"
                   id="companyCode"
                   placeholder="Codice *"
-                  v-model.trim="$v.company.code.$model"
+                  v-model.trim="$v.code.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.company.code.$error">
-                <div class="error" v-if="!$v.company.code.required">
+              <div v-if="$v.code.$error">
+                <div class="error" v-if="!$v.code.required">
                   Il campo codice e' richiesto.
                 </div>
               </div>
@@ -117,7 +119,7 @@
             <div class="field-group mb-4 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.company.address.$error }"
+                :class="{ 'form-group--error': $v.address.$error }"
               >
                 <label class="field-label" for="last_name">Indirizzo </label>
                 <input
@@ -126,7 +128,7 @@
                   id=""
                   required
                   placeholder="Address *"
-                  v-model.trim="$v.company.address.$model"
+                  v-model.trim="$v.address.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
@@ -134,7 +136,7 @@
             <div class="field-group mb-4 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.company.contactPhone.$error }"
+                :class="{ 'form-group--error': $v.contactPhone.$error }"
               >
                 <label class="field-label" for="email">Telefono</label>
                 <input
@@ -143,12 +145,12 @@
                   id=""
                   required
                   placeholder="Telefono *"
-                  v-model.trim="$v.company.contactPhone.$model"
+                  v-model.trim="$v.contactPhone.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.company.contactPhone.$error">
-                <div class="error" v-if="!$v.company.contactPhone.required">
+              <div v-if="$v.contactPhone.$error">
+                <div class="error" v-if="!$v.contactPhone.required">
                   Il campo telefono e' richiesto.
                 </div>
               </div>
@@ -156,7 +158,7 @@
             <div class="field-group mb-6 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.company.contactEmail.$error }"
+                :class="{ 'form-group--error': $v.contactEmail.$error }"
               >
                 <label class="field-label" for="password">Email </label>
                 <input
@@ -165,12 +167,12 @@
                   id=""
                   required
                   placeholder="Email *"
-                  v-model.trim="$v.company.contactEmail.$model"
+                  v-model.trim="$v.contactEmail.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.company.contactEmail.$error">
-                <div class="error" v-if="!$v.company.contactEmail.required">
+              <div v-if="$v.contactEmail.$error">
+                <div class="error" v-if="!$v.contactEmail.required">
                   Il campo email e' richiesto.
                 </div>
               </div>
@@ -178,7 +180,7 @@
             <div class="field-group mb-6 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.company.web.$error }"
+                :class="{ 'form-group--error': $v.web.$error }"
               >
                 <label class="field-label" for="password">Web </label>
                 <input
@@ -187,12 +189,12 @@
                   id=""
                   required
                   placeholder="Web *"
-                  v-model.trim="$v.company.web.$model"
+                  v-model.trim="$v.web.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.company.web.$error">
-                <div class="error" v-if="!$v.company.web.required">
+              <div v-if="$v.web.$error">
+                <div class="error" v-if="!$v.web.required">
                   Il campo web e' richiesto.
                 </div>
               </div>
@@ -200,7 +202,7 @@
             <div class="field-group mb-4 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.company.logo.$error }"
+                :class="{ 'form-group--error': $v.logo.$error }"
               >
                 <label class="field-label" for="first_name">Logo Azienda</label>
                 <input
@@ -208,12 +210,12 @@
                   name="companyLogo"
                   id="companyLogo"
                   placeholder="Logo *"
-                  v-model.trim="$v.company.logo.$model"
+                  v-model.trim="$v.logo.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.company.logo.$error">
-                <div class="error" v-if="!$v.company.logo.required">
+              <div v-if="$v.logo.$error">
+                <div class="error" v-if="!$v.logo.required">
                   Il campo logo e' richiesto.
                 </div>
               </div>
@@ -292,10 +294,16 @@ export default {
       },
       company: {},
       submitStatus: null,
+      name: "",
+      code:"",
+      address: "",
+      contactEmail: "",
+      contactPhone: "",
+      web: "",
+      logo: ""
     };
   },
   validations: {
-    company: {
       name: {
         required,
       },
@@ -316,8 +324,7 @@ export default {
       },
       logo: {
         required,
-      },
-    },
+      }
   },
   computed: {
     ...mapState("company", ["allCompanies","actualCompany","adminCompany"]),
@@ -365,6 +372,17 @@ export default {
         closeDeleteModal() {
       this.deleteModalVisible = false;
     },
+    createCompany() {
+      this.company = {
+       name: this.name,
+      code: this.code,
+      address: this.address,
+      contactEmail: this.contactEmail,
+      contactPhone: this.contactPhone,
+      web: this.web,
+      logo: this.logo
+      };
+    },
     saveCompany() {
       //check fields
       // eslint-disable-next-line no-constant-condition
@@ -374,12 +392,14 @@ export default {
         this.submitStatus = "ERROR";
         return;
       } else {
+        this.createCompany();
         if (this.newCompany) {
         this.addCompanyCall(this.company);
         }
         else {
             this.updateCompanyCall(this.company);
             }
+            this.$v.$reset();
       }
 
         this.editModalVisible = false;
