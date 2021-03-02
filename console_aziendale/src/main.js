@@ -20,7 +20,6 @@ import AddEmployess from "vue-material-design-icons/AccountPlus";
 import Import from "vue-material-design-icons/Import";
 import DotsHorizzontal from "vue-material-design-icons/DotsHorizontal";
 import Eye from "vue-material-design-icons/Eye";
-import EyeOff from "vue-material-design-icons/EyeOff";
 import Delete from "vue-material-design-icons/Delete";
 import axios from 'axios'
 import {router} from "./routes.js"
@@ -49,8 +48,9 @@ Vue.component('add-employee', AddEmployess);
 Vue.component('import-icon',Import)
 Vue.component('dots-h-icon',DotsHorizzontal)
 Vue.component('eye-icon',Eye)
-Vue.component('eye-off-icon',EyeOff)
 Vue.component('delete-icon',Delete)
+axios.defaults.showLoader = true;
+
 axios.interceptors.request.use(
   (config) => {
     let token = localStorage.getItem('token');
@@ -58,15 +58,37 @@ axios.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = 'Bearer '+ token;
     }
-
+    if (config.showLoader) {
+      store.dispatch('loader/pending');
+  }
     return config;
   }, 
 
   (error) => {
+    if (error.config.showLoader) {
+      store.dispatch('loader/done');
+  }
     return Promise.reject(error);
   }
 );
+axios.interceptors.response.use(
+  response => {
+      if (response.config.showLoader) {
+          store.dispatch('loader/done');
+      }
 
+      return response;
+  },
+  error => {
+      let response = error.response;
+
+      if (response.config.showLoader) {
+          store.dispatch('loader/done');
+      }
+
+      return Promise.reject(error);
+  }
+)
 Vue.use(Vuelidate)
 
 new Vue({
