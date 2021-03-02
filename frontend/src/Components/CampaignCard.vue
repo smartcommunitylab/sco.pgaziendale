@@ -19,7 +19,7 @@
           <span class="font-light">{{ printDate }} </span>
         </div>
         <div class="pt-4 break-words text-sm">
-          <p>{{ description }}</p>
+          <p class="card-description">{{ description }}</p>
         </div>
       </div>
 
@@ -164,5 +164,12 @@ export default {
 .in_corso {
   right: 0;
   top: 0;
+}
+.card-description{
+  overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 </style>

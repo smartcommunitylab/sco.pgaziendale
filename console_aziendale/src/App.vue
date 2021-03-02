@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <app-header v-if="account && account.status && account.status.loggedIn" />
+    <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login'" />
     <div v-if="alert.message" :class="`alert ${alert.type}`">
       <span class="closebtn" onclick="this.parentElement.style.display='none';"
         >&times;</span
@@ -9,40 +9,36 @@
     </div>
     <router-view
       :class="{
-        'lg:pl-64 pt-16 lg:pt-16': account && account.status && account.status.loggedIn,
+        'lg:pl-64 pt-16 lg:pt-16': account && account.status && account.status.loggedIn && currentRouteName!='login',
       }"
     />
   </div>
 </template>
 
 <script>
-import Header from "./components/Header.vue";
+import MenuHeader from "./components/MenuHeader.vue";
 import { mapActions, mapState } from "vuex";
-import { router } from "./routes";
 export default {
   name: "App",
-  components: { "app-header": Header },
+  components: { "menu-header": MenuHeader },
   computed: {
     ...mapState({
       account: (state) => state.account,
       alert: (state) => state.alert,
     }),
+      currentRouteName() {
+        return this.$route.name;
+    }
   },
   created() {
     console.log("account" + this.account);
     //check login and push the right page
-    this.bootProfile();
+    // this.bootProfile();
   },
   methods: {
     ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
     ...mapActions("alert", { clearAlert: "clear" }),
-    bootProfile() {
-      if (this.account && this.account.home) {
-        //if role!= admin load default company (first)
-        this.setDefaultCompany();
-        router.push(this.account.home.route);
-      }
-    },
+
   },
   watch: {
     account(newCount, oldCount) {

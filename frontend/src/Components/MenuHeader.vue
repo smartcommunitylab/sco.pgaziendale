@@ -52,16 +52,16 @@
               <span>Info</span>
             </button>
           </router-link>
-          <router-link to="/contatti">
-            <button
-              title="Contatti"
+          <!-- <router-link to="/contatti"> -->
+            <button @click="contacts()"
+              title="Contatti" 
               class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
             >
               <pencil-outline-icon />
 
               <span>Contatti</span>
             </button>
-          </router-link>
+          <!-- </router-link> -->
           <!-- <router-link to="/credits">
             <button
               title="Credits"
@@ -141,9 +141,9 @@
               <span>Info</span></span
             ></router-link
           >
-          <router-link to="/contatti" :class="{active:page && page.title === 'Contatti'}">
-            <span
-              @click="isOpen = false"
+          <!-- <router-link to="/contatti" :class="{active:page && page.title === 'Contatti'}"> -->
+            <span @click="contacts()"
+              
               class="flex items-center p-4 hover:bg-white hover:text-primary"
             >
               <span class="mr-2">
@@ -151,7 +151,7 @@
               </span>
               <span>Contatti</span></span
             >
-          </router-link>
+          <!-- </router-link> -->
           <router-link to="/" v-on:click.native="onLogout" v-if="auth">
             <span
               @click="isOpen = false"
@@ -272,8 +272,8 @@
               <span>Info</span>
             </button>
           </router-link>
-          <router-link to="/contatti">
-            <button
+          <!-- <router-link to="/contatti"> -->
+            <button @click="contacts()"
               title="Contatti"
               class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
             >
@@ -281,7 +281,7 @@
 
               <span>Contatti</span>
             </button>
-          </router-link>
+          <!-- </router-link> -->
                     <!-- <router-link to="/credits">
             <button
               title="Credits"
@@ -339,8 +339,8 @@
               <span>Info</span></span
             ></router-link
           >
-          <router-link to="/contatti">
-            <span
+          <!-- <router-link to="/contatti"> -->
+            <span @click="contacts()"
               
               class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Contatti'}"
             >
@@ -349,7 +349,7 @@
               </span>
               <span>Contatti</span></span
             >
-          </router-link>
+          <!-- </router-link> -->
                     <!-- <router-link to="/credits">
             <button
               title="Credits"
@@ -513,9 +513,12 @@ export default {
   },
   methods: {
     sendRequest: function() {
-      this.isOpen = false;
-      window.location.href = "mailto:blabla@blabla.com?subject=Richiesta informazioni&body=Vorrei avere delucidazioni";
+      window.location.href = "mailto:help-aziende@playngo.it?subject=Richiesta informazioni "+this.campagna.title+"&body="+this.campagna.title;
 
+    },
+    contacts: function() {
+      this.isOpen = false;
+       window.location.href = "mailto:info-aziende@playngo.it?subject=Richiesta informazioni&body=Sarei interessato ad avere ulteriori notizie sul progetto";
     },
     confirmLeave: function() {
       DataApi.unsubrscribeCampaign(this.campagna.id).then(
