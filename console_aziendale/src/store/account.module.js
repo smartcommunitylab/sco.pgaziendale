@@ -22,8 +22,9 @@ const actions = {
                         var page = userService.getHome(role);
                         commit('homeUser', page);
                         dispatch('navigation/changePage', page, {root:true}  );
-                        dispatch('setDefaultCompany',{root:true} );
-                        router.push(page.route);
+                        var userCompanies=userService.getCompanies(user);
+                        if (userCompanies.length>0)
+                        dispatch('company/getCompanyById', userCompanies[0], {root:true}  );                        router.push(page.route);
                     })
                 },
                 error => {
@@ -40,7 +41,7 @@ const actions = {
         dispatch('company/resetCompanyAdmin', null, { root: true });
         router.push('/login');
     },
-    setDefaultCompany({dispatch}) {
+    setDefaultCompany({dispatch},user) {
         var userCompanies=userService.getCompanies(user);
         if (userCompanies.length>0)
         dispatch('company/getCompanyById', userCompanies[0], {root:true}  );

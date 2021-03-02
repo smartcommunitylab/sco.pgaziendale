@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col lg:flex-row">
-    <div class="bg-green-300 lg:w-4/6 mx-2 my-2">
+    <div class="bg-green-300 lg:w-4/6 mx-2 my-2" v-if="allLocations && allLocations.items &&  allLocations.items.length>0">
       <table class="shadow-lg rounded relative w-full">
         <thead class="text-center justify-between">
           <tr class="truncate px-2 flex border-b border-background text-center">
@@ -37,7 +37,17 @@
         </tbody>
       </table>
     </div>
+  <div v-else class="text-center">
+    Non ci sono sedi. Premi + per aggiungerne
+  </div>
     <profilo-location v-if="actualLocation" />
+          <div class="ml-auto pt-4 pr-4">
+        <button
+          class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
+        >
+        <add-icon class="add-icon"/>
+        </button>
+          </div>
   </div>
 </template>
 

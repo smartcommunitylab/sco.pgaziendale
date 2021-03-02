@@ -513,12 +513,12 @@ export default {
   },
   methods: {
     sendRequest: function() {
-      window.location.href = "mailto:help@aziende.playngo.it?subject=Richiesta informazioni "+this.campagna.title+"&body="+this.campagna.title;
+      window.location.href = "mailto:help-aziende@playngo.it?subject=Richiesta informazioni "+this.campagna.title+"&body="+this.campagna.title;
 
     },
     contacts: function() {
       this.isOpen = false;
-       window.location.href = "mailto:info@aziende.playngo.it?subject=Richiesta informazioni&body=Sarei interessato ad avere ulteriori notizie sul progetto";
+       window.location.href = "mailto:info-aziende@playngo.it?subject=Richiesta informazioni&body=Sarei interessato ad avere ulteriori notizie sul progetto";
     },
     confirmLeave: function() {
       DataApi.unsubrscribeCampaign(this.campagna.id).then(

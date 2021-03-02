@@ -25,13 +25,13 @@ export default {
     //check actualCompany otherwise get it by id
     if (!this.actualCompany) {
       //get company Id from profile
-      this.setDefaultCompany();
+      this.setDefaultCompany(this.user);
       //this.actualCompany = this.getCompanyById(this.role)
     }
   },
   computed: {
     ...mapState("company", ["actualCompany"]),
-    ...mapState("account", ["role"]),
+    ...mapState("account", ["role","user"]),
   },
   methods: {
     ...mapActions("company", { getCompanyById: "getCompanyById" }),

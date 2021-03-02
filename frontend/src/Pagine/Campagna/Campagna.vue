@@ -94,15 +94,7 @@
         <rules-icon class="pr-1" /> Leggi il regolamento
       </router-link>
     </div>
-    <div class="px-12 py-4">
-      <p class="text-xs md:px-20 lg:px-56">
-        Ai sensi dell’art. 13 del Regolamento EU n.2016/679 (GDPR), i dati personali
-        forniti saranno trattati per poter dare riscontro alla sua richiesta tramite
-        strumenti manuali, informatici e telematici, comunque idonei a garantire la
-        sicurezza e la riservatezza dei dati stessi. L’informativa Privacy completa è
-        disponibile al seguente link
-      </p>
-    </div>
+   
 
     <div v-if="companies && companies.length && campagna.userInCampaign">
       <div class="flex flex-col pt-8">

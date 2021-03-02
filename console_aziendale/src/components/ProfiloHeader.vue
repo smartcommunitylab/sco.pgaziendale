@@ -14,7 +14,7 @@
                 Amministratore
               </div>
           </div>
-           <div v-if="role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null">
+           <div v-if="role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null && actualCompany.item!=null" >
             {{actualCompany.item.name}}
           </div>
           </div>
@@ -31,9 +31,6 @@ export default {
         ...mapState('company',['adminCompany','actualCompany'])
     },
   methods: {
-    drawer() {
-      this.isOpen = !this.isOpen;
-    },
     resetCompany() {
       this.resetCompanyAdmin();
     },
