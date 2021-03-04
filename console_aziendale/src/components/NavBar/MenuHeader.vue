@@ -239,8 +239,8 @@
 
 <script>
 import { mapState,mapActions } from 'vuex'
-import ProfiloHeader from '../components/ProfiloHeader.vue'
-import ProfileManager from '../components/ProfileManager.vue'
+import ProfiloHeader from './ProfiloHeader.vue'
+import ProfileManager from './ProfileManager.vue'
 export default {
   name: "MenuHeader",
   components: {
