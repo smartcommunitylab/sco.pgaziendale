@@ -4,20 +4,25 @@
       class="lg:w-4/6 mx-2 my-2 flex flex-col bg-white"
       v-if="allCampaigns && allCampaigns.items && allCampaigns.items.length > 0"
     >
-      <table class="table-auto rounded relative w-full">
+      <generic-table
+        :data="allCampaigns.items"
+        :columns="gridColumns"
+        :header="headerColumns"
+        :method="showCampaignInfo"
+      >
+      </generic-table>
+      <!-- <table class="table-auto rounded relative w-full">
         <thead class="text-center justify-between">
           <tr class="truncate px-2 flex border-b border-background text-center">
-            <th class="w-1/6">Nome</th>
-
+            <th class="w-1/4">Nome</th>
             <th class="w-1/6">Inizio</th>
             <th class="w-1/6">Fine</th>
-            <th class="w-1/6">Regola</th>
             <th class="w-1/6">Status</th>
             <th class="w-1/6"></th>
           </tr>
         </thead>
         <tbody class="bg-white text-center justify-between">
-          <template v-for="(campaign, index) in allCampaigns.items">
+          <template v-for="(campaign) in allCampaigns.items">
             <tr
               class="text-center m-auto truncate px-2 select-none cursor-pointer flex items-center border-b border-background hover:bg-background transition ease-in duration-100"
               :key="campaign.id"
@@ -25,7 +30,7 @@
               :class="campaign.active ? '' : 'bg-background'"
               @click="showCampaignInfo(campaign)"
             >
-              <td class="w-1/6">
+              <td class="w-1/4">
                 <p class="text-gray-800 text-sm font-semibold text-center">
                   {{ campaign.title }}
                 </p>
@@ -40,26 +45,20 @@
                   {{ formatDate(campaign.endDate) }}
                 </p>
               </td>
-              <td class="w-1/6">
-                <p class="text-gray-800 text-sm font-semibold text-center truncate">
-                  {{ getMeans(index) }}
-                </p>
-              </td>
+
               <td class="w-1/6">
                 <p class="text-gray-800 text-sm font-semibold text-center truncate">
                   {{ getStatus(campaign.active) }}
                 </p>
               </td>
               <td class="flex items-end w-1/6 pr-12">
-                <dots-h-icon class="dots-icon" />
+                <eye-icon />
               </td>
             </tr>
           </template>
         </tbody>
-      </table>
-    </div>
-    <div v-else class="text-center">Non ci sono campagne</div>
-    <div class="ml-auto pt-4 pr-4">
+      </table> -->
+          <div class="ml-auto pt-4 pr-4">
       <button
         @click="showModal('Aggiungi campagna')"
         class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
@@ -67,6 +66,9 @@
         <add-icon class="add-icon" />
       </button>
     </div>
+    </div>
+    <div v-else class="text-center">Non ci sono campagne</div>
+
     <!-- <infobox /> -->
     <profilo-campagna v-if="actualCampaign" />
     <modal v-show="deleteModalVisible">
@@ -308,12 +310,14 @@ import ProfiloCampagna from "../components/ProfiloCampagna.vue";
 import EventBus from "../components/eventBus";
 import { required } from "vuelidate/lib/validators";
 import Modal from "../components/Modal.vue";
-
+import GenericTable from "../components/GenericTable.vue"
 export default {
-  components: { ProfiloCampagna, Modal },
+  components: { ProfiloCampagna, Modal,GenericTable },
   name: "GestioneCampagne",
   data: function () {
     return {
+      gridColumns: ["title", "from","to","active"],
+      headerColumns: ["Nome", "Inizio","Fine","Status"],
       editModalVisible: false,
       deleteModalVisible: false,
       currentCampaignSelected: undefined,
@@ -364,6 +368,8 @@ export default {
     ...mapState("campaign", ["allCampaigns","actualCampaign"]),
   },
   mounted: function () {
+            this.changePage({title: 'Lista campagne',
+                route: '/gestionecampagne'})
     // this.campaigns = campaigns;
     if (this.adminCompany) this.getAllCampaigns(this.adminCompany.item.id);
     if (this.actualCompany) this.getAllCampaigns(this.actualCompany.item.id);
@@ -393,6 +399,7 @@ export default {
       updateCampaignCall: "updateCampaign",
       deleteCampaignCall: "deleteCampaign",
     }),
+        ...mapActions("navigation", { changePage: "changePage" }),
 
 
     showCampaignInfo: function (campaign) {
@@ -405,14 +412,14 @@ export default {
         this.currentCampaignSelected = campaign;
       }
     },
-    getMeans: function (index) {
-      let toRtn = "";
+    // getMeans: function (index) {
+    //   let toRtn = "";
 
-      this.allCampaigns.items[index]["means"].map((el) => {
-        toRtn += el + " - ";
-      });
-      return toRtn.slice(0, -3);
-    },
+    //   this.allCampaigns.items[index]["means"].map((el) => {
+    //     toRtn += el + " - ";
+    //   });
+    //   return toRtn.slice(0, -3);
+    // },
     getStatus: function (status) {
       let toRtn = "";
       if (status) {
@@ -429,7 +436,7 @@ export default {
 
       moment.locale("it");
 
-      return moment(date).format("DD MMMM YYYY");
+      return moment(date).format("DD MM YYYY");
     },
     showModal(title) {
       this.editModalVisible = true;

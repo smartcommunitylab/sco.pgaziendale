@@ -36,10 +36,12 @@
         </button>
         <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
       </div>
-           <div class="flex items-center" v-if="page">
+           <div class="m-auto" v-if="page">
               <span class="text-xl">{{page.title}}</span>
             </div>
-      <transition
+      <div class="profile-button">
+        <profile-manager />
+      </div>      <transition
         enter-class="opacity-0"
         enter-active-class="ease-out transition-medium"
         enter-to-class="opacity-100"
@@ -144,8 +146,11 @@
       <div class="flex items-center">
         <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
       </div>
-      <div class="flex items-center" v-if="page">
+      <div class="m-auto" v-if="page">
         <span class="text-xl">{{page.title}}</span>
+      </div>
+      <div class="profile-button">
+        <profile-manager />
       </div>
       <div class="flex items-center">
         <div
@@ -235,10 +240,11 @@
 <script>
 import { mapState,mapActions } from 'vuex'
 import ProfiloHeader from '../components/ProfiloHeader.vue'
+import ProfileManager from '../components/ProfileManager.vue'
 export default {
   name: "MenuHeader",
   components: {
-      ProfiloHeader
+      ProfiloHeader,ProfileManager
   },
   data: function() {
     return { isOpen: true };
@@ -262,4 +268,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.profile-button {
+  position: absolute;
+    right: 50px;
+}</style>

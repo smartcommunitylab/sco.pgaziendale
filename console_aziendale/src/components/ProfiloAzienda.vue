@@ -3,7 +3,7 @@
     <div class="w-full max-w-4xl flex h-full flex-wrap mx-auto my-32 lg:my-0 lg:mr-16">
       <div
         id="profile"
-        class="min-w-full w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-2xl bg-white opacity-75 mx-6 lg:mx-0"
+        class="min-w-full w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none  bg-white opacity-75 mx-6 lg:mx-0"
       >
         <div class="w-full">
           <button
@@ -49,9 +49,24 @@
           >
             <phone-icon /> {{ actualCompany.item.contactPhone }}
           </p>
+           </div>
+          <button v-if="!adminCompany && actualCompany"
+          type="button"
+          class="btn-close"
+          @click="chooseCompanyAdmin"
+          aria-label="Close modal"
+        >
+      Diventa amministratore
+    </button>
+        <span v-if="adminCompany"
+          class="btn-close"
+          
+        >
+      Sei amministratore
+
+    </span>
         </div>
-      </div>
-      <div></div>
+     
     </div>
   </div>
 </template>
@@ -65,16 +80,21 @@ export default {
   },
 
   computed: {
-    ...mapState("company", ["actualCompany"]),
+    ...mapState("company", ["adminCompany","actualCompany"]),
   },
   methods: {
-	...mapActions("company", { getCompanyById: "getCompanyById" }),
+  ...mapActions("company", { getCompanyById: "getCompanyById" ,
+      chooseCompanyAdminCall:"chooseCompanyAdmin"}),
+  
 	deleteAzienda() {
 		EventBus.$emit("DELETE_COMPANY",this.actualCompany);
 	},
 	editAzienda() {
 		EventBus.$emit("EDIT_COMPANY",this.actualCompany);
-	}
+  },
+      chooseCompanyAdmin() {
+      this.chooseCompanyAdminCall(this.actualCompany)
+    },
   },
 };
 </script>
