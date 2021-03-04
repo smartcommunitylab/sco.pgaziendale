@@ -226,7 +226,14 @@
         </div>
       </transition>
       <div v-if="allEmployees && allEmployees.items && allEmployees.items.length > 0">
-        <table class="table-auto rounded relative w-full">
+          <generic-table
+        :data="allEmployees.items"
+        :columns="gridColumns"
+        :header="headerColumns"
+        :method="showEmployeeInfo"
+      >
+      </generic-table>
+        <!-- <table class="table-auto rounded relative w-full">
           <thead class="text-center justify-between">
             <tr class="truncate px-2 flex border-b border-background text-center">
               <th class="w-1/5">Nome</th>
@@ -280,7 +287,7 @@
               ></template>
             </template>
           </tbody>
-        </table>
+        </table> -->
       </div>
       <div v-else class="text-center">Non ci sono dipendenti</div>
       <div class="flex flex-row justify-center py-4">
@@ -478,15 +485,17 @@ import ProfiloEmployee from "../components/ProfiloEmployee.vue";
 import Modal from "../components/Modal.vue";
 import EventBus from "../components/eventBus";
 import { required } from "vuelidate/lib/validators";
-
+import GenericTable from "../components/GenericTable.vue"
 // import { employees } from "../tmp-data/employees.js";
 // import { headquarters } from "../tmp-data/hqs.js";
 // import { campaigns } from "../tmp-data/campaigns.js";
 export default {
-  components: { ProfiloEmployee, Modal },
+  components: { ProfiloEmployee, Modal,GenericTable },
   name: "Dipendenti",
   data: function () {
     return {
+      gridColumns: ["name", "surname","companyEmail","code"],
+      headerColumns: ["Nome", "Cognome","Email","Codice"],
       editModalVisible: false,
       deleteModalVisible: false,
       currentEmployeeSelected: undefined,
@@ -525,6 +534,8 @@ export default {
     },
   },
   mounted: function () {
+     this.changePage({title: 'Lista dipendenti',
+                route: '/dipendenti'})
     if (this.actualCompany && this.actualCompany.item)
       this.getAllEmployees(this.actualCompany.item.id);
     // this.employees = employees;
@@ -562,6 +573,8 @@ export default {
       deleteEmployee: "deleteEmployee",
       importData: "importEmployees",
     }),
+            ...mapActions("navigation", { changePage: "changePage" }),
+
     showModal(title) {
       this.editModalVisible = true;
       this.newEmployee = true;

@@ -513,7 +513,7 @@ export default {
   },
   methods: {
     sendRequest: function() {
-      window.location.href = "mailto:help-aziende@playngo.it?subject=Richiesta informazioni "+this.campagna.title+"&body="+this.campagna.title;
+      window.location.href = "mailto:help-aziende@playngo.it?subject=Richiesta informazioni "+this.campagna.title+"&body="+this.user.name+" "+this.user.surname+"%0d%0a"+ this.campagna.title+"%0d%0a";
 
     },
     contacts: function() {
@@ -610,6 +610,9 @@ export default {
     page() {
       return this.$store.getters.page;
     },
+    user() {
+      return this.$store.getters.user;
+    }
   },
 };
 </script>

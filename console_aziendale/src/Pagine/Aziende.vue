@@ -2,8 +2,14 @@
   <div class="flex flex-col lg:flex-row">
     <div class="bg-green-300 lg:w-4/6 mx-2 my-2 pb-16 relative">
               <div v-if="allCompanies &&allCompanies.items &&allCompanies.items.length>0">
-
-      <table class="shadow-lg rounded relative w-full">
+      <generic-table
+        :data="allCompanies.items"
+        :columns="gridColumns"
+        :header="headerColumns"
+        :method="showCompanyInfo"
+      >
+      </generic-table>
+      <!-- <table class="shadow-lg rounded relative w-full">
         <thead class="text-center justify-between">
           <tr class="truncate px-2 flex border-b border-background text-center">
             <th class="w-1/6">Logo</th>
@@ -43,7 +49,7 @@
             </tr>
           </template>
         </tbody>
-      </table>
+      </table> -->
               </div>
               <div v-else>
                 Non ci sono Aziende
@@ -59,14 +65,6 @@
       </div>
     </div>
     <profilo-azienda v-if="actualCompany"></profilo-azienda>
-    <button v-if="!adminCompany && actualCompany"
-          type="button"
-          class="btn-close"
-          @click="chooseCompanyAdmin"
-          aria-label="Close modal"
-        >
-          Diventa amministratore
-        </button>
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
@@ -279,13 +277,14 @@ import Modal from "../components/Modal.vue";
 import { mapState, mapActions } from "vuex";
 import { required } from "vuelidate/lib/validators";
 import EventBus from "../components/eventBus"
+import GenericTable from '../components/GenericTable.vue';
 export default {
-  components: { ProfiloAzienda, Modal },
+  components: { ProfiloAzienda, Modal,GenericTable },
   name: "Aziende",
-
   data: function () {
     return {
-      // companies: [],
+      gridColumns: ["name", "code"],
+      headerColumns: ["Nome", "Codice"],
       editModalVisible: false,
       deleteModalVisible:false,
       currentCompanySelected: undefined,
@@ -330,6 +329,8 @@ export default {
     ...mapState("company", ["allCompanies","actualCompany","adminCompany"]),
   },
   mounted: function () {
+        this.changePage({title: 'Lista aziende',
+                route: '/aziende'})
     this.getAllCompanies();
     EventBus.$on("EDIT_COMPANY", company => {
       this.editModalVisible = true;
@@ -352,12 +353,9 @@ export default {
       addCompanyCall: "addCompany",
       updateCompanyCall: "updateCompany",
       getCompanyById:"getCompanyById",
-      deleteCompany:"deleteCompany",
-      chooseCompanyAdminCall:"chooseCompanyAdmin"
+      deleteCompany:"deleteCompany"
     }),
-    chooseCompanyAdmin() {
-      this.chooseCompanyAdminCall(this.actualCompany)
-    },
+        ...mapActions("navigation", { changePage: "changePage" }),
     showModal(title) {
       this.editModalVisible = true;
       this.newCompany =true;

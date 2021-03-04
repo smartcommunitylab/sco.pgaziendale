@@ -1,6 +1,6 @@
 <template>
 
-	<div id="location" class="w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-2xl bg-white opacity-75 mx-6 lg:mx-0" v-if="actualLocation">
+	<div id="location" class="w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none  bg-white opacity-75 mx-6 lg:mx-0" v-if="actualLocation">
 	
 
 		<div class="p-4 md:p-12 text-center lg:text-left">
