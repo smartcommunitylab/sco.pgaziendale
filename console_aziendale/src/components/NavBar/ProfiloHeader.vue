@@ -5,7 +5,7 @@
 
             <span>{{adminCompany.item.name}}</span>
               <button @click="resetCompany">
-                 <span class="mr-2">
+                 <span class="img-exit-profile">
                 <logout-icon />
               </span>
               </button>
@@ -47,5 +47,10 @@ export default {
     width: 80%;
     border-radius: 8px;
 
+}
+.img-exit-profile {
+margin: 2px 4px;
+      vertical-align: middle;
+    display: inline-block;
 }
 </style>

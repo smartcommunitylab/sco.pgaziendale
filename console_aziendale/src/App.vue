@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <Loader v-if="loading" />
     <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login'" />
     <div v-if="alert.message" :class="`alert ${alert.type}`">
       <span class="closebtn" onclick="this.parentElement.style.display='none';"
@@ -16,16 +17,19 @@
 </template>
 
 <script>
-import MenuHeader from "./components/MenuHeader.vue";
+import MenuHeader from "./components/NavBar/MenuHeader.vue";
 import { mapActions, mapState } from "vuex";
+import Loader from "./components/Loader";
+// import httpClient from './utils/httpClient';
 export default {
   name: "App",
-  components: { "menu-header": MenuHeader },
+  components: { "menu-header": MenuHeader,Loader },
   computed: {
     ...mapState({
       account: (state) => state.account,
-      alert: (state) => state.alert,
+      alert: (state) => state.alert
     }),
+    ...mapState("loader", ["loading"]),
       currentRouteName() {
         return this.$route.name;
     }
