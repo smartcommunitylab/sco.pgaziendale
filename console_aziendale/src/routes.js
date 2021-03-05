@@ -8,6 +8,7 @@ import Stats from "./Pagine/Stats.vue"
 import GestioneDipendenti from "./Pagine/GestioneDipendenti.vue"
 import GestioneCampagne from "./Pagine/GestioneCampagne.vue"
 import NotFound from "./Pagine/NotFound.vue"
+import ResetPwd from "./Pagine/ResetPwd.vue"
 Vue.use(Router);
 const routes = [
     {
@@ -18,6 +19,11 @@ const routes = [
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/resetPwd',
+      name: 'resetpwd',
+      component: ResetPwd
     },
     
     {
@@ -70,7 +76,7 @@ const routes = [
       const authRequired = !publicPages.includes(to.path);
       const loggedIn = localStorage.getItem('user');
     
-      if (authRequired && !loggedIn) {
+      if (authRequired && !loggedIn && to.name!='resetpwd') {
         return next('/login');
       }
     
