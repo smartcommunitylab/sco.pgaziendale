@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Loader v-if="loading" />
-    <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login'" />
+    <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
     <div v-if="alert.message" :class="`alert ${alert.type}`">
       <span class="closebtn" onclick="this.parentElement.style.display='none';"
         >&times;</span
@@ -10,7 +10,7 @@
     </div>
     <router-view
       :class="{
-        'lg:pl-64 pt-16 lg:pt-16': account && account.status && account.status.loggedIn && currentRouteName!='login',
+        'lg:pl-64 pt-16 lg:pt-16': account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd',
       }"
     />
   </div>
