@@ -41,7 +41,7 @@ public class Company {
 	@NotNull
 	private String name;
 	private String logo;
-	private String address;
+	private String address, streetNumber, zip, city, province, region, country;
 	private String web;
 	private String contactEmail;
 	private String contactPhone;
@@ -183,4 +183,77 @@ public class Company {
 	public void setCode(String code) {
 		this.code = code;
 	}
+	/**
+	 * @return the streetNumber
+	 */
+	public String getStreetNumber() {
+		return streetNumber;
+	}
+	/**
+	 * @param streetNumber the streetNumber to set
+	 */
+	public void setStreetNumber(String streetNumber) {
+		this.streetNumber = streetNumber;
+	}
+	/**
+	 * @return the zip
+	 */
+	public String getZip() {
+		return zip;
+	}
+	/**
+	 * @param zip the zip to set
+	 */
+	public void setZip(String zip) {
+		this.zip = zip;
+	}
+	/**
+	 * @return the city
+	 */
+	public String getCity() {
+		return city;
+	}
+	/**
+	 * @param city the city to set
+	 */
+	public void setCity(String city) {
+		this.city = city;
+	}
+	/**
+	 * @return the province
+	 */
+	public String getProvince() {
+		return province;
+	}
+	/**
+	 * @param province the province to set
+	 */
+	public void setProvince(String province) {
+		this.province = province;
+	}
+	/**
+	 * @return the region
+	 */
+	public String getRegion() {
+		return region;
+	}
+	/**
+	 * @param region the region to set
+	 */
+	public void setRegion(String region) {
+		this.region = region;
+	}
+	/**
+	 * @return the country
+	 */
+	public String getCountry() {
+		return country;
+	}
+	/**
+	 * @param country the country to set
+	 */
+	public void setCountry(String country) {
+		this.country = country;
+	}
+	
 }

@@ -49,6 +49,7 @@ import com.google.common.collect.Multimaps;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
+import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.DayStat.Distances;
 import it.smartcommunitylab.pgazienda.domain.Employee;
@@ -120,15 +121,16 @@ public class TrackingDataService {
 						List<String> playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
 						logger.info("Styncronizing app campaign company users: " + playerIds);
 
+						LocalDate today = LocalDate.now();
 						TrackingDataRequestDTO request = new TrackingDataRequestDTO();
-						request.setFrom(LocalDate.now().toString());
+						request.setFrom(today.toString());
 						request.setTo(request.getFrom());
 						List<String> means = campaigns.stream().flatMap(c -> c.getMeans().stream()).collect(Collectors.toList());
 						request.setMeans(means);
 						request.setMultimodal(true);
 						request.setPlayerId(playerIds);
 						request.setLocations(company.getLocations().stream()
-						.filter(l -> l.getNonWorking() == null || l.getNonWorking().isEmpty() || !l.getNonWorking().contains(LocalDate.now().getDayOfWeek().getValue()))
+						.filter(l -> checkWorking(l, today))
 						.map(l -> {
 							LocationDTO ldto = new LocationDTO();
 							ldto.setLat(l.getLatitute());
@@ -184,6 +186,24 @@ public class TrackingDataService {
 		});
 	}
 	
+	/**
+	 * @param l
+	 * @param today
+	 * @return
+	 */
+	private boolean checkWorking(CompanyLocation l, LocalDate today) {
+		boolean res = true;
+		String todayStr = today.toString();
+		if (l.getNonWorking() != null && !l.getNonWorking().isEmpty()) {
+			res = res && !l.getNonWorking().contains(today.getDayOfWeek().getValue());
+		}
+		if (res && l.getNonWorkingDays() != null && !l.getNonWorkingDays().isEmpty()) {
+			res = res && !l.getNonWorkingDays().contains(todayStr);
+		}
+		
+		return res;
+	}
+
 	/**
 	 * Retrieve aggregated statistics
 	 * @param playerId
