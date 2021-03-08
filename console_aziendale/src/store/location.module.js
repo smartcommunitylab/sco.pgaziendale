@@ -24,6 +24,46 @@ const actions = {
             location => commit('selectActualLocation', location),
             error => commit('getAllFailure', error)
         );
+    },
+    addLocation({ commit, dispatch },{companyId,location}) {
+        commit('addLocation');
+        locationService.addLocation(companyId,location).then(
+            location => {
+                commit('addLocationSuccess', location);
+                dispatch('alert/success', "Sede creata con successo", { root: true });
+            },
+            error => {
+                commit('addLocationFailure', error);
+                dispatch('alert/error', error, { root: true });
+            }
+        );
+    },
+    updateLocation({ commit, dispatch },{companyId,location}) {
+        commit('updateLocation');
+        locationService.updateLocation(companyId,location).then(
+            location => {
+            commit('updateLocationSuccess', location);
+            dispatch('alert/success', "Sede modificata con successo", { root: true });
+        },
+            error => {
+                commit('updateLocationFailure', error);
+                dispatch('alert/error', error, { root: true });
+            }
+        );
+    },
+    deleteLocation({ commit, dispatch }, {companyId,locationId}) {
+        commit('deleteLocation');
+        locationService.deleteLocation(companyId,locationId).then(
+            locationId => {
+                commit('deleteLocationSuccess', locationId);
+                dispatch('alert/success', "Sede cancellata con successo", { root: true });
+
+            },
+            error => {
+                commit('deleteLocationFailure', error);
+                dispatch('alert/error', error, { root: true });
+            }
+        );
     }
 
 };

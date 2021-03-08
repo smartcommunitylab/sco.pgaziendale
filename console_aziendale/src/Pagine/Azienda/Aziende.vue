@@ -125,8 +125,110 @@
                   name="companyAddress"
                   id=""
                   required
-                  placeholder="Address *"
+                  placeholder="Indirizzo *"
                   v-model.trim="$v.address.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+             <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.streetNumber.$error }"
+              >
+                <label class="field-label" for="last_name">Numero </label>
+                <input
+                  type="text"
+                  name="companyNumber"
+                  id=""
+                  required
+                  placeholder="Numero *"
+                  v-model.trim="$v.streetNumber.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+ <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.city.$error }"
+              >
+                <label class="field-label" for="last_name">Cittá </label>
+                <input
+                  type="text"
+                  name="companyCity"
+                  id=""
+                  required
+                  placeholder="Cittá *"
+                  v-model.trim="$v.city.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.province.$error }"
+              >
+                <label class="field-label" for="last_name">Provincia </label>
+                <input
+                  type="text"
+                  name="companyProvince"
+                  id=""
+                  required
+                  placeholder="Provincia *"
+                  v-model.trim="$v.province.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+                        <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.region.$error }"
+              >
+                <label class="field-label" for="last_name">Regione </label>
+                <input
+                  type="text"
+                  name="companyRegion"
+                  id=""
+                  required
+                  placeholder="Regione *"
+                  v-model.trim="$v.region.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+                        <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.country.$error }"
+              >
+                <label class="field-label" for="last_name">Stato </label>
+                <input
+                  type="text"
+                  name="companyCountry"
+                  id=""
+                  required
+                  placeholder="Stato *"
+                  v-model.trim="$v.country.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.zip.$error }"
+              >
+                <label class="field-label" for="last_name">CAP </label>
+                <input
+                  type="text"
+                  name="companyCap"
+                  id=""
+                  required
+                  placeholder="CAP *"
+                  v-model.trim="$v.zip.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
@@ -271,13 +373,12 @@
 </template>
 
 <script>
-import ProfiloAzienda from "../components/ProfiloAzienda.vue";
-// import { companies } from "../tmp-data/companies";
-import Modal from "../components/Modal.vue";
+import ProfiloAzienda from "./ProfiloAzienda.vue";
+import Modal from "@/components/Modal.vue";
 import { mapState, mapActions } from "vuex";
 import { required } from "vuelidate/lib/validators";
-import EventBus from "../components/eventBus"
-import GenericTable from '../components/GenericTable.vue';
+ import EventBus from "@/components/eventBus"
+import GenericTable from '@/components/GenericTable.vue';
 export default {
   components: { ProfiloAzienda, Modal,GenericTable },
   name: "Aziende",
@@ -296,6 +397,12 @@ export default {
       name: "",
       code:"",
       address: "",
+      streetNumber:  "",
+      city:"",
+      province: "",
+      region:"",
+      country:"",
+      zip: "",
       contactEmail: "",
       contactPhone: "",
       web: "",
@@ -310,6 +417,24 @@ export default {
         required,
       },
       address: {
+        required,
+      },
+      streetNumber: {
+        required,
+      },
+      city: {
+        required,
+      },
+      province: {
+        required,
+      },
+      region: {
+        required,
+      },
+      country: {
+        required
+      },
+      zip: {
         required,
       },
       contactEmail: {
@@ -375,6 +500,12 @@ export default {
        name: this.name,
       code: this.code,
       address: this.address,
+       number:  this.number,
+      city:this.city,
+      province: this.province,
+      region:this.region,
+      country:this.country,
+      cap: this.cap,
       contactEmail: this.contactEmail,
       contactPhone: this.contactPhone,
       web: this.web,

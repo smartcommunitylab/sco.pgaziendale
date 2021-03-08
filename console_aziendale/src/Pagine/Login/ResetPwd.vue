@@ -139,7 +139,7 @@ export default {
     }
   },
   methods: {
-        ...mapActions("account", {resetPasswordInit:"resetPasswordInit"}),
+        ...mapActions("account", {resetPasswordInit:"resetPasswordInit",resetPasswordFinish:"resetPasswordInit"}),
 
       back() {
                 this.$router.push('login');
