@@ -3,7 +3,7 @@
     <div class="w-full max-w-4xl flex h-full flex-wrap mx-auto my-32 lg:my-0 lg:mr-16">
       <div
         id="profile"
-        class="min-w-full w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none  bg-white opacity-75 mx-6 lg:mx-0"
+        class="min-w-full w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none bg-white opacity-75 mx-6 lg:mx-0"
       >
         <div class="w-full">
           <button
@@ -19,9 +19,12 @@
             <pencil-outline-icon />
           </button>
         </div>
-        <div class="p-4 md:p-12 text-center lg:text-left" v-if="actualCompany && actualCompany.item" >
+        <div
+          class="p-4 md:p-12 text-center lg:text-left"
+          v-if="actualCompany && actualCompany.item"
+        >
           <!-- Image for mobile view-->
-          <div 
+          <div
             class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
             v-bind:style="{ backgroundImage: 'url(' + actualCompany.item.logo + ')' }"
           ></div>
@@ -32,8 +35,9 @@
           <p
             class="pt-4 text-base font-bold flex items-center justify-center lg:justify-start"
           >
-            <address-icon />{{ actualCompany.item.address }}
+            <address-icon />{{ actualCompany.item.address }}{{ actualCompany.item.number }}{{ actualCompany.item.city }}{{ actualCompany.item.province }}{{ actualCompany.item.cap }}
           </p>
+         
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
@@ -49,30 +53,24 @@
           >
             <phone-icon /> {{ actualCompany.item.contactPhone }}
           </p>
-           </div>
-          <button v-if="!adminCompany && actualCompany"
+        </div>
+        <button
+          v-if="!adminCompany && actualCompany && role=='ROLE_ADMIN'"
           type="button"
-          class="btn-close"
+          class="btn-admin"
           @click="chooseCompanyAdmin"
           aria-label="Close modal"
         >
-      Diventa amministratore
-    </button>
-        <span v-if="adminCompany"
-          class="btn-close"
-          
-        >
-      Sei amministratore
-
-    </span>
-        </div>
-     
+          Diventa amministratore
+        </button>
+        <span v-if="adminCompany" class="btn-admin "> Sei amministratore </span>
+      </div>
     </div>
   </div>
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
-import EventBus from "../components/eventBus";
+ import EventBus from "@/components/eventBus"
 export default {
   name: "ProfiloAzienda",
   data() {
@@ -80,23 +78,34 @@ export default {
   },
 
   computed: {
-    ...mapState("company", ["adminCompany","actualCompany"]),
-  },
+    ...mapState("company", ["adminCompany", "actualCompany"]),
+...mapState("account", ["role"])  },
   methods: {
-  ...mapActions("company", { getCompanyById: "getCompanyById" ,
-      chooseCompanyAdminCall:"chooseCompanyAdmin"}),
-  
-	deleteAzienda() {
-		EventBus.$emit("DELETE_COMPANY",this.actualCompany);
-	},
-	editAzienda() {
-		EventBus.$emit("EDIT_COMPANY",this.actualCompany);
-  },
-      chooseCompanyAdmin() {
-      this.chooseCompanyAdminCall(this.actualCompany)
+    ...mapActions("company", {
+      getCompanyById: "getCompanyById",
+      chooseCompanyAdminCall: "chooseCompanyAdmin",
+    }),
+
+    deleteAzienda() {
+      EventBus.$emit("DELETE_COMPANY", this.actualCompany);
+    },
+    editAzienda() {
+      EventBus.$emit("EDIT_COMPANY", this.actualCompany);
+    },
+    chooseCompanyAdmin() {
+      this.chooseCompanyAdminCall(this.actualCompany);
     },
   },
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+ .btn-admin {
+    border: none;
+    font-size: 20px;
+    padding: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #4AAE9B;
+    background: transparent;
+  }</style>

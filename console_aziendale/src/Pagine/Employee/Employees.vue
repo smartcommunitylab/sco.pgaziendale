@@ -479,13 +479,12 @@
 </template>
 
 <script>
-// import Infobox from "../components/Infobox.vue";
 import { mapState, mapActions } from "vuex";
-import ProfiloEmployee from "../components/ProfiloEmployee.vue";
-import Modal from "../components/Modal.vue";
-import EventBus from "../components/eventBus";
+import ProfiloEmployee from "./ProfiloEmployee.vue";
+import Modal from "@/components/Modal.vue";
+import EventBus from "@/components/eventBus";
 import { required } from "vuelidate/lib/validators";
-import GenericTable from "../components/GenericTable.vue"
+import GenericTable from "@/components/GenericTable.vue"
 // import { employees } from "../tmp-data/employees.js";
 // import { headquarters } from "../tmp-data/hqs.js";
 // import { campaigns } from "../tmp-data/campaigns.js";

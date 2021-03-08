@@ -10,8 +10,8 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-import ProfiloAzienda from "../components/ProfiloAzienda.vue";
-import GestioneAzienda from "../components/GestioneAzienda.vue";
+import ProfiloAzienda from "./ProfiloAzienda.vue";
+import GestioneAzienda from "./GestioneAzienda.vue";
 export default {
   name: "Azienda",
   components: {

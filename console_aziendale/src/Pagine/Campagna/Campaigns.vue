@@ -58,14 +58,14 @@
           </template>
         </tbody>
       </table> -->
-          <div class="ml-auto pt-4 pr-4">
-      <button
-        @click="showModal('Aggiungi campagna')"
-        class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
-      >
-        <add-icon class="add-icon" />
-      </button>
-    </div>
+      <div class="ml-auto pt-4 pr-4">
+        <button
+          @click="showModal('Aggiungi campagna')"
+          class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
+        >
+          <add-icon class="add-icon" />
+        </button>
+      </div>
     </div>
     <div v-else class="text-center">Non ci sono campagne</div>
 
@@ -99,10 +99,7 @@
         <form action="" id="addCampaign">
           <div class="mb-4 flex flex-wrap justify-between">
             <div class="field-group mb-4 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.logo.$error }"
-              >
+              <div class="form-group" :class="{ 'form-group--error': $v.logo.$error }">
                 <label class="field-label" for="first_name">Logo </label>
                 <input
                   type="text"
@@ -120,10 +117,7 @@
               </div>
             </div>
             <div class="field-group mb-4 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.title.$error }"
-              >
+              <div class="form-group" :class="{ 'form-group--error': $v.title.$error }">
                 <label class="field-label" for="first_name">Titolo </label>
                 <input
                   type="text"
@@ -164,10 +158,7 @@
             </div>
 
             <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.from.$error }"
-              >
+              <div class="form-group" :class="{ 'form-group--error': $v.from.$error }">
                 <label class="field-label" for="password">Da </label>
                 <input
                   type="text"
@@ -186,10 +177,7 @@
               </div>
             </div>
             <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.to.$error }"
-              >
+              <div class="form-group" :class="{ 'form-group--error': $v.to.$error }">
                 <label class="field-label" for="password">A </label>
                 <input
                   type="text"
@@ -202,16 +190,11 @@
                 />
               </div>
               <div v-if="$v.to.$error">
-                <div class="error" v-if="!$v.to.required">
-                  Il campo a e' richiesto.
-                </div>
+                <div class="error" v-if="!$v.to.required">Il campo a e' richiesto.</div>
               </div>
             </div>
-                        <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.rules.$error }"
-              >
+            <div class="field-group mb-6 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.rules.$error }">
                 <label class="field-label" for="password">Regole</label>
                 <input
                   type="text"
@@ -230,10 +213,7 @@
               </div>
             </div>
             <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.privacy.$error }"
-              >
+              <div class="form-group" :class="{ 'form-group--error': $v.privacy.$error }">
                 <label class="field-label" for="password">Privacy</label>
                 <input
                   type="text"
@@ -251,11 +231,8 @@
                 </div>
               </div>
             </div>
-             <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.means.$error }"
-              >
+            <div class="field-group mb-6 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.means.$error }">
                 <label class="field-label" for="password">Mezzi</label>
                 <input
                   type="text"
@@ -273,7 +250,6 @@
                 </div>
               </div>
             </div>
-            
           </div>
         </form>
       </template>
@@ -303,73 +279,68 @@
 </template>
 
 <script>
-// import Infobox from "../components/Infobox.vue";
-// import { campaigns } from "../tmp-data/campaigns.js";
 import { mapState, mapActions } from "vuex";
-import ProfiloCampagna from "../components/ProfiloCampagna.vue";
-import EventBus from "../components/eventBus";
+import ProfiloCampagna from "./ProfiloCampaign.vue";
+import EventBus from "@/components/eventBus";
 import { required } from "vuelidate/lib/validators";
-import Modal from "../components/Modal.vue";
-import GenericTable from "../components/GenericTable.vue"
+import Modal from "@/components/Modal.vue";
+import GenericTable from "@/components/GenericTable.vue";
 export default {
-  components: { ProfiloCampagna, Modal,GenericTable },
+  components: { ProfiloCampagna, Modal, GenericTable },
   name: "GestioneCampagne",
   data: function () {
     return {
-      gridColumns: ["title", "from","to","active"],
-      headerColumns: ["Nome", "Inizio","Fine","Status"],
+      gridColumns: ["title", "from", "to", "active"],
+      headerColumns: ["Nome", "Inizio", "Fine", "Status"],
       editModalVisible: false,
       deleteModalVisible: false,
       currentCampaignSelected: undefined,
-      logo:"",
-      title:"",
-      description:"",
-        from:"",
-        to:"",
-        rules:"",
-        privacy:"",
-        means:""
-      ,
+      logo: "",
+      title: "",
+      description: "",
+      from: "",
+      to: "",
+      rules: "",
+      privacy: "",
+      means: "",
       popup: {
         title: "",
       },
       submitStatus: null,
     };
   },
-   validations: {
-
-      logo: {
-        required,
-      },
-      title: {
-        required,
-      },
-      description: {
-        required,
-      },
-      from: {
-        required,
-      },
-      to: {
-        required,
-      },
-      rules: {
-        required,
-      },
-      privacy: {
-        required,
-      },
-      means: {
-        required,
-      },
+  validations: {
+    logo: {
+      required,
+    },
+    title: {
+      required,
+    },
+    description: {
+      required,
+    },
+    from: {
+      required,
+    },
+    to: {
+      required,
+    },
+    rules: {
+      required,
+    },
+    privacy: {
+      required,
+    },
+    means: {
+      required,
+    },
   },
   computed: {
     ...mapState("company", ["actualCompany", "adminCompany"]),
-    ...mapState("campaign", ["allCampaigns","actualCampaign"]),
+    ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
   },
   mounted: function () {
-            this.changePage({title: 'Lista campagne',
-                route: '/gestionecampagne'})
+    this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
     // this.campaigns = campaigns;
     if (this.adminCompany) this.getAllCampaigns(this.adminCompany.item.id);
     if (this.actualCompany) this.getAllCampaigns(this.actualCompany.item.id);
@@ -390,7 +361,6 @@ export default {
     });
   },
 
- 
   methods: {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
@@ -399,8 +369,7 @@ export default {
       updateCampaignCall: "updateCampaign",
       deleteCampaignCall: "deleteCampaign",
     }),
-        ...mapActions("navigation", { changePage: "changePage" }),
-
+    ...mapActions("navigation", { changePage: "changePage" }),
 
     showCampaignInfo: function (campaign) {
       if (this.currentCampaignSelected == campaign) {
@@ -441,7 +410,7 @@ export default {
     showModal(title) {
       this.editModalVisible = true;
       this.newEmployee = true;
-      this.campaign={};
+      this.campaign = {};
       this.popup = {
         title: title,
       };
@@ -449,25 +418,24 @@ export default {
     closeModal() {
       this.editModalVisible = false;
       this.newCampaign = false;
-       this.$v.$reset();
-
+      this.$v.$reset();
     },
     closeDeleteModal() {
       this.deleteModalVisible = false;
     },
     createCampaign() {
       this.campaign = {
-              logo: this.logo,
-      title: this.title,
-      description: this.description,
-      from: this.from,
-      to: this.to,
-      rules: this.rules,
-      privacy: this.privacy,
-      means: this.means,
-      }
+        logo: this.logo,
+        title: this.title,
+        description: this.description,
+        from: this.from,
+        to: this.to,
+        rules: this.rules,
+        privacy: this.privacy,
+        means: this.means,
+      };
     },
-    
+
     saveCampaign() {
       //check fields
       // eslint-disable-next-line no-constant-condition

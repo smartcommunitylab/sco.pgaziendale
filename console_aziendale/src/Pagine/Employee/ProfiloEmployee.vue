@@ -62,7 +62,7 @@
 </template>
 <script>
 import { mapState } from "vuex";
-import EventBus from "../components/eventBus";
+import EventBus from "@/components/eventBus";
 export default {
   name: "ProfiloEmployee",
   data() {
