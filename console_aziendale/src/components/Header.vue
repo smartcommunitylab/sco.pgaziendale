@@ -70,7 +70,10 @@
         <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
         </span>
         <div>
-          <router-link to="/aziende" v-if="role=='ROLE_ADMIN'">
+          <div v-if="role=='ROLE_ADMIN'&&adminCompany!=null">
+            {{adminCompany.item.name}}
+          </div>
+          <router-link to="/aziende" v-if="role=='ROLE_ADMIN'&&adminCompany==null">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -79,7 +82,7 @@
               <span>Gestione Aziende</span></span
             >
           </router-link>
-          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'">
+          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -88,7 +91,7 @@
               <span>Profilo Azienda</span></span
             >
           </router-link>
-          <router-link to="/sedi" v-if="role=='ROLE_ADMIN'|| role=='ROLE_COMPANY_ADMIN'">
+          <router-link to="/locations" v-if="role==('ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&& actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -97,7 +100,7 @@
               <span>Gestione Sedi</span></span
             >
           </router-link>
-          <router-link to="/dipendenti">
+          <router-link to="/dipendenti" v-if="role==('ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -159,7 +162,9 @@
  />
         </span>
         <div>
-        <router-link to="/aziende" v-if="role=='ROLE_ADMIN'">
+          <profilo-header></profilo-header>
+
+        <router-link to="/aziende" v-if="role=='ROLE_ADMIN'&&adminCompany==null">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -168,7 +173,7 @@
               <span>Gestione Aziende</span></span
             >
           </router-link>
-          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'">
+          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -177,7 +182,7 @@
               <span>Profilo Azienda</span></span
             >
           </router-link>
-          <router-link to="/locations" v-if="role=='ROLE_ADMIN'|| role=='ROLE_COMPANY_ADMIN'">
+          <router-link to="/locations" v-if="role==('ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -186,7 +191,7 @@
               <span>Gestione Sedi</span></span
             >
           </router-link>
-          <router-link to="/dipendenti">
+          <router-link to="/dipendenti" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -231,21 +236,29 @@
 
 <script>
 import { mapState,mapActions } from 'vuex'
-
+import ProfiloHeader from '../components/ProfiloHeader.vue'
 export default {
   name: "Header",
+  components: {
+      ProfiloHeader
+  },
   data: function() {
     return { isOpen: true };
   },
     computed: {
         ...mapState('account', ['status','user','role']),
-        ...mapState('navigation', ['page'])
+        ...mapState('navigation', ['page']),
+        ...mapState('company',['adminCompany','actualCompany'])
     },
   methods: {
     drawer() {
       this.isOpen = !this.isOpen;
     },
-     ...mapActions('account', ['logout'])
+    resetCompany() {
+      this.resetCompanyAdmin();
+    },
+     ...mapActions('account', ['logout']),
+     ...mapActions('company', ['resetCompanyAdmin'])
   },
 };
 </script>

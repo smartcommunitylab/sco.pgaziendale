@@ -2,7 +2,8 @@ import { companyService } from '../services';
 
 const state = {
     allCompanies: null,
-    actualCompany: null
+    actualCompany: null,
+    adminCompany:null
 };
 
 const actions = {
@@ -42,6 +43,14 @@ const actions = {
             }
         );
     },
+    chooseCompanyAdmin({ commit, dispatch }, company){
+        commit('choooseCompanyAdmin', company);
+        dispatch('alert/success', "Azienda selezionata", { root: true });
+    },
+    resetCompanyAdmin({ commit, dispatch }){
+        commit('resetCompanyAdmin');
+        dispatch('alert/success', "Azienda deselezionata", { root: true });
+    },
     updateCompany({ commit, dispatch }, company) {
         commit('updateCompany');
         companyService.updateCompany(company).then(
@@ -72,6 +81,12 @@ const actions = {
 };
 
 const mutations = {
+    choooseCompanyAdmin(state,company) {
+state.adminCompany=company;
+    },
+    resetCompanyAdmin(state) {
+        state.adminCompany=null;
+            },
     removeActualCompany(state) {
         state.actualCompany=null;
     },

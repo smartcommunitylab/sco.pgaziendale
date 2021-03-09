@@ -9,7 +9,7 @@
             <th class="w-4/6">Nome</th>
           </tr>
         </thead>
-        <tbody class="bg-white">
+        <tbody class="bg-white" v-if="allCompanies">
           <template v-for="company in allCompanies.items">
             <tr
               class="select-none cursor-pointer flex border-b border-background hover:bg-background transition ease-in duration-100"
@@ -52,6 +52,14 @@
       </div>
     </div>
     <profilo-azienda v-if="actualCompany"></profilo-azienda>
+    <button v-if="!adminCompany && actualCompany"
+          type="button"
+          class="btn-close"
+          @click="chooseCompanyAdmin"
+          aria-label="Close modal"
+        >
+          Diventa amministratore
+        </button>
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
@@ -305,7 +313,7 @@ export default {
     },
   },
   computed: {
-    ...mapState("company", ["allCompanies","actualCompany"]),
+    ...mapState("company", ["allCompanies","actualCompany","adminCompany"]),
   },
   mounted: function () {
     this.getAllCompanies();
@@ -330,8 +338,12 @@ export default {
       addCompanyCall: "addCompany",
       updateCompanyCall: "updateCompany",
       getCompanyById:"getCompanyById",
-      deleteCompany:"deleteCompany"
+      deleteCompany:"deleteCompany",
+      chooseCompanyAdminCall:"chooseCompanyAdmin"
     }),
+    chooseCompanyAdmin() {
+      this.chooseCompanyAdminCall(this.actualCompany)
+    },
     showModal(title) {
       this.editModalVisible = true;
       this.newCompany =true;
@@ -385,21 +397,13 @@ export default {
     showCompanyInfo: function (company) {
       if (this.currentCompanySelected == company) {
         this.getCompanyById(null)
-        // window.document
-        //   .getElementById(this.currentCompanySelected.id)
-        //   .classList.toggle("selected");
+
         this.currentCompanySelected = undefined;
       } else {
-        // if (this.currentCompanySelected != undefined) {
              this.getCompanyById(company.id)
-        // }
         this.currentCompanySelected = company;
-        // window.document
-        //   .getElementById(this.currentCompanySelected.id)
-        //   .classList.toggle("selected");
+       
       }
-
-      // this.$refs["infobox"].showCompanyDetails(company);
     },
   },
 };

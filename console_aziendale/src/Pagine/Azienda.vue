@@ -35,6 +35,8 @@ export default {
   },
   methods: {
     ...mapActions("company", { getCompanyById: "getCompanyById" }),
+        ...mapActions("account", { setDefaultCompany: "setDefaultCompany" })
+
   },
 };
 </script>
