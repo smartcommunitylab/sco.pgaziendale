@@ -32,7 +32,7 @@ public class CompanyLocation {
 	@NotNull
 	private String address, streetNumber, zip, city, province, region, country;
 	@NotNull
-	private Double latitute, longitude, radius;
+	private Double latitude, longitude, radius;
 	private List<Integer> nonWorking;
 	private Set<String> nonWorkingDays;
 	/**
@@ -132,16 +132,16 @@ public class CompanyLocation {
 		this.country = country;
 	}
 	/**
-	 * @return the latitute
+	 * @return the latitude
 	 */
-	public Double getLatitute() {
-		return latitute;
+	public Double getLatitude() {
+		return latitude;
 	}
 	/**
-	 * @param latitute the latitute to set
+	 * @param latitude the latitude to set
 	 */
-	public void setLatitute(Double latitute) {
-		this.latitute = latitute;
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
 	}
 	/**
 	 * @return the longitude

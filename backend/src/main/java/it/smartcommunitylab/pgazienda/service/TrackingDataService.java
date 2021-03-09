@@ -133,7 +133,7 @@ public class TrackingDataService {
 						.filter(l -> checkWorking(l, today))
 						.map(l -> {
 							LocationDTO ldto = new LocationDTO();
-							ldto.setLat(l.getLatitute());
+							ldto.setLat(l.getLatitude());
 							ldto.setLng(l.getLongitude());
 							ldto.setRad(l.getRadius());
 							return ldto;
