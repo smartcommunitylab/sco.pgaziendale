@@ -6,7 +6,11 @@ const state = user
     ? { status: { loggedIn: true }, user, role: userService.getRole(user), home: userService.getHome(userService.getRole(user)) }
     : { status: {}, user: null, role: null, home: null };
 
-
+function isCompanyAdmin(role){
+    if (role==='ROLE_COMPANY_ADMIN')
+    return true
+    return false
+}
 const actions = {
     login({ dispatch, commit }, { username, password }) {
         commit('loginRequest', { username });
@@ -21,10 +25,18 @@ const actions = {
                         commit('roleUser', role);
                         var page = userService.getHome(role);
                         commit('homeUser', page);
-                        dispatch('navigation/changePage', page, { root: true });
                         var userCompanies = userService.getCompanies(user);
-                        if (userCompanies.length > 0)
+                        if (userCompanies.length > 0){
                             dispatch('company/getCompanyById', userCompanies[0], { root: true }); router.push(page.route);
+                            if (isCompanyAdmin(role))
+                            {
+                            dispatch('company/initCompanyAdmin', userCompanies[0], { root: true }); router.push(page.route);
+                            dispatch('campaign/getAll',userCompanies[0], { root: true });
+                            }
+                            
+                        }
+                        dispatch('navigation/changePage', page, { root: true });
+
                     })
                 },
                 error => {

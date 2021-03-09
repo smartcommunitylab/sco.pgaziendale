@@ -79,8 +79,47 @@ const mutations = {
         state.allLocations = { error };
     },
     selectActualLocation(state, location) {
-        state.actualLocation = location ;
-    }
+        state.actualLocation = {item: location };
+    },
+    addLocation(state) {
+        state.actualLocation = { loading: true };
+    },
+    addLocationSuccess(state, location) {
+        state.actualLocation = { item: location };
+        if (!state.allLocations.items)
+            state.allLocations = { items: [] }
+        state.allLocations.items.push(location)
+    },
+    addLocationFailure(state, error) {
+        state.actualLocation = { error };
+    },
+    updateLocation(state) {
+        state.actualLocation = { loading: true };
+    },
+    updateLocationSuccess(state, location) {
+        state.actualLocation = { item: location };
+        //update allLocations
+        if (state.allLocations.items)
+        state.allLocations.items= state.allLocations.items.map(function(element){
+              return location.id==element.id?  location : element
+        })
+    },
+    updateLocationFailure(state, error) {
+        state.actualLocation = { error };
+    },
+    deleteLocation(state) {
+        state.actualLocation = { loading: true };
+    },
+    deleteLocationSuccess(state, locationId) {
+        state.actualLocation = null;
+        if (state.allLocations.items)
+        state.allLocations.items= state.allLocations.items.filter(function(element){
+            return locationId!=element.id
+        })
+    },
+    deleteLocationFailure(state, error) {
+        state.actualLocation = { error };
+    },
 };
 
 export const location = {
