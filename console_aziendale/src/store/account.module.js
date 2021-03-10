@@ -27,16 +27,16 @@ const actions = {
                         commit('homeUser', page);
                         var userCompanies = userService.getCompanies(user);
                         if (userCompanies.length > 0){
-                            dispatch('company/getCompanyById', userCompanies[0], { root: true }); router.push(page.route);
+                            dispatch('company/getCompanyById', userCompanies[0], { root: true });
                             if (isCompanyAdmin(role))
                             {
-                            dispatch('company/initCompanyAdmin', userCompanies[0], { root: true }); router.push(page.route);
+                            dispatch('company/initCompanyAdmin', userCompanies[0], { root: true }); 
                             dispatch('campaign/getAll',userCompanies[0], { root: true });
                             }
                             
                         }
                         dispatch('navigation/changePage', page, { root: true });
-
+                        router.push(page.route);
                     })
                 },
                 error => {
