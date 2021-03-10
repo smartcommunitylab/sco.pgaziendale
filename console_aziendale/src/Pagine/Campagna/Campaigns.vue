@@ -202,7 +202,7 @@
                 </div>
               </div>
             </div>
-                        <div class="field-group mb-6 w-full">
+            <div class="field-group mb-6 w-full">
               <div class="form-group" :class="{ 'form-group--error': $v.active.$error }">
                 <label class="field-label" for="password">Attiva</label>
                 <input
@@ -218,6 +218,25 @@
               <div v-if="$v.active.$error">
                 <div class="error" v-if="!$v.active.required">
                   Il campo Attiva e' richiesto.
+                </div>
+              </div>
+            </div>
+                        <div class="field-group mb-6 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.application.$error }">
+                <label class="field-label" for="password">Applicazione</label>
+                <input
+                  type="text"
+                  name="campaignApplication"
+                  id=""
+                  required
+                  placeholder="Applicazione *"
+                  v-model.trim="$v.application.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.application.$error">
+                <div class="error" v-if="!$v.application.required">
+                  Il campo Applicazione e' richiesto.
                 </div>
               </div>
             </div>
@@ -275,6 +294,7 @@ export default {
       privacy: "",
       means: [],
       active:false,
+      application:"",
       popup: {
         title: "",
       },
@@ -307,6 +327,9 @@ export default {
       required,
     },
     active: {
+      required
+    },
+    application: {
       required
     }
   },
@@ -417,6 +440,7 @@ export default {
       this.privacy="";
       this.means=[]
       this.active=false;
+      this.application="";
       
   },
     copyFormValues() {
@@ -433,7 +457,8 @@ export default {
         rules: this.rules,
         privacy: this.privacy,
         means: [],
-        active:this.active
+        active:this.active,
+        application:this.application
       };
     },
 

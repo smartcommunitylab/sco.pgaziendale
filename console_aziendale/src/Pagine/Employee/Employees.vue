@@ -236,39 +236,6 @@
       </div>
       <div v-else class="text-center">Non ci sono dipendenti</div>
       <div class="flex flex-row justify-center py-4">
-        <!-- <div class="px-2">
-          <select
-            class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
-            v-model="selectedHq"
-            required
-          >
-            <option value="0" selected disabled hidden
-              >Seleziona una sede</option
-            >
-            <template v-for="hq in filter_hqs">
-              <option :key="hq.id" :value="hq.id">{{ hq.address }}</option>
-            </template>
-          </select>
-        </div> -->
-
-        <!-- <div class="px-2">
-          <select
-            class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
-            v-model="selectedCampaign"
-            required
-          >
-            <option value="0" selected disabled hidden
-              >Seleziona una Campagna</option
-            >
-            <template v-for="campaign in filter_campaigns">
-              <template v-if="hasCampaignNotEnded(campaign)">
-                <option :key="campaign.id" :value="campaign.id">{{
-                  campaign.title
-                }}</option></template
-              >
-            </template>
-          </select>
-        </div> -->
 
         <div class="px-2">
           <button
@@ -430,9 +397,6 @@ import Modal from "@/components/Modal.vue";
 import EventBus from "@/components/eventBus";
 import { required } from "vuelidate/lib/validators";
 import GenericTable from "@/components/GenericTable.vue"
-// import { employees } from "../tmp-data/employees.js";
-// import { headquarters } from "../tmp-data/hqs.js";
-// import { campaigns } from "../tmp-data/campaigns.js";
 export default {
   components: { ProfiloEmployee, Modal,GenericTable },
   name: "Dipendenti",

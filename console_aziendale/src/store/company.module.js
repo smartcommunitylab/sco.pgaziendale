@@ -158,6 +158,7 @@ const mutations = {
     },
     resetCompanyAdmin(state) {
         state.adminCompany=null;
+        state.actualCompany=null;
             },
     removeActualCompany(state) {
         state.actualCompany=null;
