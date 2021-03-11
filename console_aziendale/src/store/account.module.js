@@ -82,7 +82,7 @@ const actions = {
     },
     resetPasswordFinish({ commit, dispatch },{key,newPassword}){
         commit('resetPasswordFinish');
-        userService.changePassword(key,newPassword).then(function(){
+        userService.resetPasswordFinish(key,newPassword).then(function(){
             commit('resetPasswordFinishSuccess');
             dispatch('alert/success', "Password cambiata con successo", { root: true });
 
@@ -90,7 +90,8 @@ const actions = {
             commit('cresetPasswordFinishFailure', error);
             dispatch('alert/error', error, { root: true });
         })
-    }
+    },
+
 };
 
 const mutations = {
