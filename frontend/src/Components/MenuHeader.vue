@@ -469,10 +469,11 @@
       >
         <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
           <span>
-            Sei sicuro di voler cancellare l'iscrizione?<br />
             Una volta confermata la cancellazione dalla campagna Il Partecipante non potrà
             più accumulare i Km in bici e riceverà dalla propria azienda soltanto gli
-            incentivi maturati nel periodo di partecipazione
+            incentivi maturati nel periodo di partecipazione.<br />
+            Sei sicuro di voler cancellare l'iscrizione?
+
           </span>
           <button
             class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3 flex-1"
