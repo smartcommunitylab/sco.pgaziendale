@@ -7,7 +7,10 @@ export const userService = {
     getHome,
     getRole,
     update,
-    getCompanies
+    getCompanies,
+    changePassword,
+    resetPasswordInit,
+    resetPasswordFinish
 };
 
 function login(username, password) {
@@ -73,7 +76,7 @@ function getRole(user) {
 }
 
 function getCompanies(user) {
-    var companies=[];
+    var companies = [];
     for (var i = 0; i < user.roles.length; i++) {
         if (user.roles[i].role != 'ROLE_ADMIN') {
             companies.push(user.roles[i].companyId);
@@ -111,6 +114,49 @@ function getHome(role) {
     }
 }
 
+function changePassword(oldPassword, newPassword) {
+    return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_GET_ACCOUNT_API + '/' + process.env.VUE_APP_CHANGE_PASSWORD_API, 
+    { 
+    "currentPassword": oldPassword, 
+    "newPassword": newPassword
+ }).then(
+        res => {
+            if (res && res.data ) {
+                return Promise.resolve(res.data);
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+function resetPasswordInit(username) {
+    return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_GET_ACCOUNT_API + '/' + process.env.VUE_APP_INIT_RESET_PASSWORD_API, username).then(
+        res => {
+                return Promise.resolve(res.data);
+
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+
+function resetPasswordFinish(key, newPassword) {
+    return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_GET_ACCOUNT_API + '/' + process.env.VUE_APP_FINISH_RESET_PASSWORD_API, {
+        "key": key,
+        "newPassword": newPassword
+      }).then(
+        res => {
+               return Promise.resolve(res.data);
+
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
 
 
 

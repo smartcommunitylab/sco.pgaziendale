@@ -33,6 +33,24 @@ const actions = {
             commit('removeActualCompany'); 
         }
     },
+    initCompanyAdmin({ commit, dispatch }, companyId) {
+        if (companyId){
+            commit('initCompanyAdmin');
+            companyService.getCompanyById(companyId).then(
+                company => {
+                    commit('chooseCompanyAdmin', company);
+                    dispatch('alert/success', "Azienda selezionata", { root: true });
+                },
+                error => {
+                    commit('initCompanyAdminFailure', error);
+                    dispatch('alert/error', error, { root: true });
+                }
+            );
+            }
+            else {
+                commit('removeActualCompany'); 
+            }
+    },
     addCompany({ commit, dispatch }, company) {
         commit('addCompany');
         companyService.addCompany(company).then(
@@ -140,6 +158,7 @@ const mutations = {
     },
     resetCompanyAdmin(state) {
         state.adminCompany=null;
+        state.actualCompany=null;
             },
     removeActualCompany(state) {
         state.actualCompany=null;

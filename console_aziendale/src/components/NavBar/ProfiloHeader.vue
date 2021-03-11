@@ -14,7 +14,7 @@
                 Amministratore
               </div>
           </div>
-           <div v-if="role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null && actualCompany.item!=null" >
+           <div v-if="(role=='ROLE_COMPANY_ADMIN' || role== 'ROLE_MOBILITY_MANAGER')&&actualCompany!=null && actualCompany.item!=null" >
             {{actualCompany.item.name}}
           </div>
           </div>

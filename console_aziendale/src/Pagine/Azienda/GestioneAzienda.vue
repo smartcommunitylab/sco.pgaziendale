@@ -10,41 +10,18 @@
         </div>
       </div>
       <div v-else class="empty-row">Non sono presenti elementi</div>
+
+      
       <div class="ml-auto pt-4 pr-4">
         <button
-          @click="showModal('Aggiungi utente')"
+          @click="showUser('Aggiungi utente')"
           class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
         >
           <add-icon class="add-icon" />
         </button>
       </div>
     </div>
-    <!-- <div>
-      Mobility Manager
-      <div v-if="adminCompany.item.managers && adminCompany.item.managers.length > 0">
-        <div v-for="manager in adminCompany.item.managers" v-bind:key="manager.id">
-          {{ administrator.name }} {{ administrator.surname }}
-          {{ administrator.username }}
-        </div>
-      </div>
-      <div v-else class="empty-row">Non sono presenti elementi</div>
-      <div class="ml-auto pt-4 pr-4">
-        <button
-          @click="showModal('Aggiungi mobility manager', 'ROLE_MOBILITY_MANAGER')"
-          class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
-        >
-          <add-icon class="add-icon" />
-        </button>
-      </div>
-    </div> -->
-    <div v-if="allCampaigns && allCampaigns.items">
-      Campagne associate
-      <div v-for="campaign in allCampaigns.items" v-bind:key="campaign.id">
-        <div>
-          {{ campaign.title }}
-        </div>
-      </div>
-    </div>
+  
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
@@ -106,6 +83,28 @@
               <div v-if="$v.username.$error">
                 <div class="error" v-if="!$v.username.required">
                   Il campo username e' richiesto.
+                </div>
+              </div>
+            </div>
+            <div class="field-group mb-6 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.phone.$error }"
+              >
+                <label class="field-label" for="phone">Telefono </label>
+                <input
+                  type="text"
+                  name="phone"
+                  id=""
+                  required
+                  placeholder="Telefono *"
+                  v-model.trim="$v.phone.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.phone.$error">
+                <div class="error" v-if="!$v.phone.required">
+                  Il campo telefono e' richiesto.
                 </div>
               </div>
             </div>
@@ -172,7 +171,7 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import { required } from "vuelidate/lib/validators";
-import Modal from "../components/Modal.vue";
+import Modal from "@/components/Modal.vue";
 
 export default {
   name: "GestioneAzienda",
@@ -186,6 +185,7 @@ export default {
       name: "",
       surname: "",
       mail: "",
+      phone: "",
       popup: {
         title: "",
       },
@@ -204,6 +204,9 @@ export default {
       required,
     },
     username: {
+      required,
+    },
+    phone: {
       required,
     },
     roles: {

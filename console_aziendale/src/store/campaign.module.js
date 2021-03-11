@@ -26,9 +26,9 @@ const actions = {
             commit('removeActualCampaign'); 
         }
     },
-    addCampaign({ commit, dispatch },campaign) {
+    addCampaign({ commit, dispatch },{companyId,campaign}) {
         commit('addCampaign');
-        campaignService.addCampaign(campaign).then(
+        campaignService.addCampaign(companyId,campaign).then(
             campaign => commit('addCampaignSuccess', campaign),
             error => {
                 commit('addCampaignFailure', error);
@@ -36,9 +36,9 @@ const actions = {
             }
         );
     },
-    updateCampaign({ commit, dispatch },campaign) {
+    updateCampaign({ commit, dispatch },{companyId,campaign}) {
         commit('updateCampaign');
-        campaignService.updateCampaign(campaign).then(
+        campaignService.updateCampaign(companyId,campaign).then(
             campaign => {
             commit('updateCampaignSuccess', campaign);
             dispatch('alert/success', "Dipendente modificato con successo", { root: true });
@@ -49,9 +49,9 @@ const actions = {
             }
         );
     },
-    deleteCampaign({ commit, dispatch }, campaignId) {
+    deleteCampaign({ commit, dispatch }, {companyId,campaign}) {
         commit('deleteCampaign');
-        campaignService.deleteCampaign(campaignId).then(
+        campaignService.deleteCampaign(companyId, campaign).then(
             campaignId => {
                 commit('deleteCampaignSuccess', campaignId);
                 dispatch('alert/success', "Dipendente cancellato con successo", { root: true });

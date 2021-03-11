@@ -7,94 +7,78 @@
       >
         <div class="w-full">
           <button
-            @click="deleteAzienda"
+            @click="deleteEmployee"
             class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
           >
             <delete-icon />
           </button>
           <button
-            @click="editAzienda"
+            @click="editEmployee"
             class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
           >
             <pencil-outline-icon />
           </button>
         </div>
-        <div class="p-4 md:p-12 text-center lg:text-left" v-if="actualCompany && actualCompany.item" >
+        <div class="p-4 md:p-12 text-center lg:text-left" >
           <!-- Image for mobile view-->
-          <div 
+          <!-- <div
             class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
-            v-bind:style="{ backgroundImage: 'url(' + actualCompany.item.logo + ')' }"
-          ></div>
-          <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualCompany.item.name }}</h1>
+            v-bind:style="{ backgroundImage: 'url(' + actualEmployee.item.logo + ')' }"
+          ></div> -->
+          <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualEmployee.item.name }}</h1>
           <div
             class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
           ></div>
           <p
             class="pt-4 text-base font-bold flex items-center justify-center lg:justify-start"
           >
-            <address-icon />{{ actualCompany.item.address }}
+            <address-icon />{{ actualEmployee.item.surname }}
+          </p>
+          <!-- <p
+            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+          >
+            <web-icon /> {{ actualEmployee.item.web }}
+          </p> -->
+          <p
+            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+          >
+            <email-icon /> {{ actualEmployee.item.companyEmail }}
           </p>
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
-            <web-icon /> {{ actualCompany.item.web }}
+            <phone-icon /> {{ actualEmployee.item.code }}
           </p>
-          <p
+           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
-            <email-icon /> {{ actualCompany.item.contactEmail }}
+            <phone-icon /> {{ actualEmployee.item.campaigns }}
           </p>
-          <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
-            <phone-icon /> {{ actualCompany.item.contactPhone }}
-          </p>
-           </div>
-          <button v-if="!adminCompany && actualCompany"
-          type="button"
-          class="btn-close"
-          @click="chooseCompanyAdmin"
-          aria-label="Close modal"
-        >
-      Diventa amministratore
-    </button>
-        <span v-if="adminCompany"
-          class="btn-close"
-          
-        >
-      Sei amministratore
-
-    </span>
         </div>
-     
+      </div>
+      <div></div>
     </div>
   </div>
 </template>
 <script>
-import { mapState, mapActions } from "vuex";
-import EventBus from "../components/eventBus";
+import { mapState } from "vuex";
+import EventBus from "@/components/eventBus";
 export default {
-  name: "ProfiloAzienda",
+  name: "ProfiloEmployee",
   data() {
     return {};
   },
 
   computed: {
-    ...mapState("company", ["adminCompany","actualCompany"]),
+    ...mapState("employee", ["actualEmployee"]),
   },
   methods: {
-  ...mapActions("company", { getCompanyById: "getCompanyById" ,
-      chooseCompanyAdminCall:"chooseCompanyAdmin"}),
-  
-	deleteAzienda() {
-		EventBus.$emit("DELETE_COMPANY",this.actualCompany);
+	deleteEmployee() {
+		EventBus.$emit("DELETE_EMPLOYEE",this.actualEmployee);
 	},
-	editAzienda() {
-		EventBus.$emit("EDIT_COMPANY",this.actualCompany);
-  },
-      chooseCompanyAdmin() {
-      this.chooseCompanyAdminCall(this.actualCompany)
-    },
+	editEmployee() {
+		EventBus.$emit("EDIT_EMPLOYEE",this.actualEmployee);
+	}
   },
 };
 </script>

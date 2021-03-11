@@ -2,11 +2,11 @@
       <table class="table-auto w-full">
         <thead >
           <tr>
-            <th v-for="key in header" class="p-2"
-              @click="sortBy(key)"
-              :class="{ active: sortKey == key }" :key="key">
+            <th v-for="(key,index) in header" class="p-2"
+              @click="sortBy(columns[index])"
+              :class="{ active: sortKey == columns[index] }" :key="key">
               {{ key | capitalize }}
-              <span class="arrow" :class="sortOrders[key] > 0 ? 'asc' : 'dsc'">
+              <span class="arrow" :class="sortOrders[columns[index]] > 0 ? 'asc' : 'dsc'">
               </span>
             </th>
           </tr>
@@ -28,7 +28,7 @@ export default {
           data: Array,
           header: Array,
           columns:Array,
-          filterKey: String,
+          // filterKey: String,
           method:Function
         },
         data: function() {
@@ -44,20 +44,20 @@ export default {
         computed: {
           filteredData: function() {
             var sortKey = this.sortKey;
-            var filterKey = this.filterKey && this.filterKey.toLowerCase();
+            // var filterKey = this.filterKey && this.filterKey.toLowerCase();
             var order = this.sortOrders[sortKey] || 1;
             var data = this.data;
-            if (filterKey) {
-              data = data.filter(function(row) {
-                return Object.keys(row).some(function(key) {
-                  return (
-                    String(row[key])
-                      .toLowerCase()
-                      .indexOf(filterKey) > -1
-                  );
-                });
-              });
-            }
+            // if (filterKey) {
+            //   data = data.filter(function(row) {
+            //     return Object.keys(row).some(function(key) {
+            //       return (
+            //         String(row[key])
+            //           .toLowerCase()
+            //           .indexOf(filterKey) > -1
+            //       );
+            //     });
+            //   });
+            // }
             if (sortKey) {
               data = data.slice().sort(function(a, b) {
                 a = a[sortKey];
@@ -75,6 +75,7 @@ export default {
         },
         methods: {
           sortBy: function(key) {
+            //find sortkey
             this.sortKey = key;
             this.sortOrders[key] = this.sortOrders[key] * -1;
           }

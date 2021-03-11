@@ -82,7 +82,7 @@
               <span>Gestione Aziende</span></span
             >
           </router-link>
-          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)">
+          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)||(role=='ROLE_MOBILITY_MANAGER'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -100,7 +100,7 @@
               <span>Gestione Sedi</span></span
             >
           </router-link>
-          <router-link to="/dipendenti" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
+          <router-link to="/dipendenti" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_ADMIN'&&actualCompany!=null)|| (role=='ROLE_MOBILITY_MANAGER'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -176,7 +176,7 @@
               <span>Gestione Aziende</span></span
             >
           </router-link>
-          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)">
+          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)||(role=='ROLE_MOBILITY_MANAGER'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -194,7 +194,7 @@
               <span>Gestione Sedi</span></span
             >
           </router-link>
-          <router-link to="/dipendenti" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
+          <router-link to="/dipendenti" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)|| (role=='ROLE_MOBILITY_MANAGER'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
