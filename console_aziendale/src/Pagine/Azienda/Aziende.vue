@@ -1,7 +1,15 @@
 <template>
   <div class="flex flex-col lg:flex-row">
     <div class="bg-green-300 lg:w-4/6 mx-2 my-2 pb-16 relative">
-      <table class="shadow-lg rounded relative w-full">
+      <div v-if="allCompanies && allCompanies.items && allCompanies.items.length > 0">
+        <generic-table
+          :data="allCompanies.items"
+          :columns="gridColumns"
+          :header="headerColumns"
+          :method="showCompanyInfo"
+        >
+        </generic-table>
+        <!-- <table class="shadow-lg rounded relative w-full">
         <thead class="text-center justify-between">
           <tr class="truncate px-2 flex border-b border-background text-center">
             <th class="w-1/6">Logo</th>
@@ -41,7 +49,10 @@
             </tr>
           </template>
         </tbody>
-      </table>
+      </table> -->
+      </div>
+      <div v-else>Non ci sono Aziende</div>
+
       <div class="ml-auto pt-4 pr-4 absolute right-0">
         <button
           @click="showModal('Aggiungi azienda')"
@@ -52,74 +63,57 @@
       </div>
     </div>
     <profilo-azienda v-if="actualCompany"></profilo-azienda>
-    <button v-if="!adminCompany && actualCompany"
-          type="button"
-          class="btn-close"
-          @click="chooseCompanyAdmin"
-          aria-label="Close modal"
-        >
-          Diventa amministratore
-        </button>
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <form action="" id="addAzienda">
           <div class="mb-4 flex flex-wrap justify-between">
             <div class="field-group mb-4 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.company.name.$error }"
-              >
+              <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
                 <label class="field-label" for="first_name">Nome </label>
                 <input
                   type="text"
                   name="companyName"
                   placeholder="Nome *"
-                  v-model.trim="$v.company.name.$model"
+                  v-model.trim="$v.name.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                   id="companyName"
                 />
               </div>
-              <div v-if="$v.company.name.$error">
-                <div class="error" v-if="!$v.company.name.required">
+              <div v-if="$v.name.$error">
+                <div class="error" v-if="!$v.name.required">
                   Il campo nome e' richiesto.
                 </div>
               </div>
             </div>
             <div class="field-group mb-4 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.company.code.$error }"
-              >
+              <div class="form-group" :class="{ 'form-group--error': $v.code.$error }">
                 <label class="field-label" for="first_name">Codice Azienda</label>
                 <input
                   type="text"
                   name="companyCode"
                   id="companyCode"
                   placeholder="Codice *"
-                  v-model.trim="$v.company.code.$model"
+                  v-model.trim="$v.code.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.company.code.$error">
-                <div class="error" v-if="!$v.company.code.required">
+              <div v-if="$v.code.$error">
+                <div class="error" v-if="!$v.code.required">
                   Il campo codice e' richiesto.
                 </div>
               </div>
             </div>
             <div class="field-group mb-4 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.company.address.$error }"
-              >
+              <div class="form-group" :class="{ 'form-group--error': $v.address.$error }">
                 <label class="field-label" for="last_name">Indirizzo </label>
                 <input
                   type="text"
                   name="companyAddress"
                   id=""
                   required
-                  placeholder="Address *"
-                  v-model.trim="$v.company.address.$model"
+                  placeholder="Indirizzo *"
+                  v-model.trim="$v.address.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
@@ -127,7 +121,97 @@
             <div class="field-group mb-4 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.company.contactPhone.$error }"
+                :class="{ 'form-group--error': $v.streetNumber.$error }"
+              >
+                <label class="field-label" for="last_name">Numero </label>
+                <input
+                  type="text"
+                  name="companyNumber"
+                  id=""
+                  required
+                  placeholder="Numero *"
+                  v-model.trim="$v.streetNumber.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.city.$error }">
+                <label class="field-label" for="last_name">Cittá </label>
+                <input
+                  type="text"
+                  name="companyCity"
+                  id=""
+                  required
+                  placeholder="Cittá *"
+                  v-model.trim="$v.city.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.province.$error }"
+              >
+                <label class="field-label" for="last_name">Provincia </label>
+                <input
+                  type="text"
+                  name="companyProvince"
+                  id=""
+                  required
+                  placeholder="Provincia *"
+                  v-model.trim="$v.province.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.region.$error }">
+                <label class="field-label" for="last_name">Regione </label>
+                <input
+                  type="text"
+                  name="companyRegion"
+                  id=""
+                  required
+                  placeholder="Regione *"
+                  v-model.trim="$v.region.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.country.$error }">
+                <label class="field-label" for="last_name">Stato </label>
+                <input
+                  type="text"
+                  name="companyCountry"
+                  id=""
+                  required
+                  placeholder="Stato *"
+                  v-model.trim="$v.country.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.zip.$error }">
+                <label class="field-label" for="last_name">CAP </label>
+                <input
+                  type="text"
+                  name="companyCap"
+                  id=""
+                  required
+                  placeholder="CAP *"
+                  v-model.trim="$v.zip.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+            </div>
+            <div class="field-group mb-4 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.contactPhone.$error }"
               >
                 <label class="field-label" for="email">Telefono</label>
                 <input
@@ -136,12 +220,12 @@
                   id=""
                   required
                   placeholder="Telefono *"
-                  v-model.trim="$v.company.contactPhone.$model"
+                  v-model.trim="$v.contactPhone.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.company.contactPhone.$error">
-                <div class="error" v-if="!$v.company.contactPhone.required">
+              <div v-if="$v.contactPhone.$error">
+                <div class="error" v-if="!$v.contactPhone.required">
                   Il campo telefono e' richiesto.
                 </div>
               </div>
@@ -149,7 +233,7 @@
             <div class="field-group mb-6 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.company.contactEmail.$error }"
+                :class="{ 'form-group--error': $v.contactEmail.$error }"
               >
                 <label class="field-label" for="password">Email </label>
                 <input
@@ -158,21 +242,18 @@
                   id=""
                   required
                   placeholder="Email *"
-                  v-model.trim="$v.company.contactEmail.$model"
+                  v-model.trim="$v.contactEmail.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.company.contactEmail.$error">
-                <div class="error" v-if="!$v.company.contactEmail.required">
+              <div v-if="$v.contactEmail.$error">
+                <div class="error" v-if="!$v.contactEmail.required">
                   Il campo email e' richiesto.
                 </div>
               </div>
             </div>
             <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.company.web.$error }"
-              >
+              <div class="form-group" :class="{ 'form-group--error': $v.web.$error }">
                 <label class="field-label" for="password">Web </label>
                 <input
                   type="text"
@@ -180,33 +261,30 @@
                   id=""
                   required
                   placeholder="Web *"
-                  v-model.trim="$v.company.web.$model"
+                  v-model.trim="$v.web.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.company.web.$error">
-                <div class="error" v-if="!$v.company.web.required">
+              <div v-if="$v.web.$error">
+                <div class="error" v-if="!$v.web.required">
                   Il campo web e' richiesto.
                 </div>
               </div>
             </div>
             <div class="field-group mb-4 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.company.logo.$error }"
-              >
+              <div class="form-group" :class="{ 'form-group--error': $v.logo.$error }">
                 <label class="field-label" for="first_name">Logo Azienda</label>
                 <input
                   type="text"
                   name="companyLogo"
                   id="companyLogo"
                   placeholder="Logo *"
-                  v-model.trim="$v.company.logo.$model"
+                  v-model.trim="$v.logo.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.company.logo.$error">
-                <div class="error" v-if="!$v.company.logo.required">
+              <div v-if="$v.logo.$error">
+                <div class="error" v-if="!$v.logo.required">
                   Il campo logo e' richiesto.
                 </div>
               </div>
@@ -264,67 +342,98 @@
 </template>
 
 <script>
-import ProfiloAzienda from "../components/ProfiloAzienda.vue";
-// import { companies } from "../tmp-data/companies";
-import Modal from "../components/Modal.vue";
+import ProfiloAzienda from "./ProfiloAzienda.vue";
+import Modal from "@/components/Modal.vue";
 import { mapState, mapActions } from "vuex";
 import { required } from "vuelidate/lib/validators";
-import EventBus from "../components/eventBus"
+import EventBus from "@/components/eventBus";
+import GenericTable from "@/components/GenericTable.vue";
 export default {
-  components: { ProfiloAzienda, Modal },
+  components: { ProfiloAzienda, Modal, GenericTable },
   name: "Aziende",
-
   data: function () {
     return {
-      // companies: [],
+      gridColumns: ["name", "code"],
+      headerColumns: ["Nome", "Codice"],
       editModalVisible: false,
-      deleteModalVisible:false,
+      deleteModalVisible: false,
       currentCompanySelected: undefined,
       popup: {
         title: "",
       },
       company: {},
       submitStatus: null,
+      name: "",
+      code: "",
+      address: "",
+      streetNumber: "",
+      city: "",
+      province: "",
+      region: "",
+      country: "",
+      zip: "",
+      contactEmail: "",
+      contactPhone: "",
+      web: "",
+      logo: "",
     };
   },
   validations: {
-    company: {
-      name: {
-        required,
-      },
-      code: {
-        required,
-      },
-      address: {
-        required,
-      },
-      contactEmail: {
-        required,
-      },
-      contactPhone: {
-        required,
-      },
-      web: {
-        required,
-      },
-      logo: {
-        required,
-      },
+    name: {
+      required,
+    },
+    code: {
+      required,
+    },
+    address: {
+      required,
+    },
+    streetNumber: {
+      required,
+    },
+    city: {
+      required,
+    },
+    province: {
+      required,
+    },
+    region: {
+      required,
+    },
+    country: {
+      required,
+    },
+    zip: {
+      required,
+    },
+    contactEmail: {
+      required,
+    },
+    contactPhone: {
+      required,
+    },
+    web: {
+      required,
+    },
+    logo: {
+      required,
     },
   },
   computed: {
-    ...mapState("company", ["allCompanies","actualCompany","adminCompany"]),
+    ...mapState("company", ["allCompanies", "actualCompany", "adminCompany"]),
   },
   mounted: function () {
+    this.changePage({ title: "Lista aziende", route: "/aziende" });
     this.getAllCompanies();
-    EventBus.$on("EDIT_COMPANY", company => {
+    EventBus.$on("EDIT_COMPANY", (company) => {
       this.editModalVisible = true;
       this.company = company.item;
+      this.copyFormValues();
       this.popup = {
         title: "Modifica",
       };
     });
-    EventBus.$on("DELETE_COMPANY", company => {
+    EventBus.$on("DELETE_COMPANY", (company) => {
       this.deleteModalVisible = true;
       this.company = company.item;
       this.popup = {
@@ -337,26 +446,64 @@ export default {
       getAllCompanies: "getAll",
       addCompanyCall: "addCompany",
       updateCompanyCall: "updateCompany",
-      getCompanyById:"getCompanyById",
-      deleteCompany:"deleteCompany",
-      chooseCompanyAdminCall:"chooseCompanyAdmin"
+      getCompanyById: "getCompanyById",
+      deleteCompany: "deleteCompany",
     }),
-    chooseCompanyAdmin() {
-      this.chooseCompanyAdminCall(this.actualCompany)
-    },
+    ...mapActions("navigation", { changePage: "changePage" }),
     showModal(title) {
       this.editModalVisible = true;
-      this.newCompany =true;
+      this.newCompany = true;
+      this.initCompany();
       this.popup = {
-        title: title
+        title: title,
       };
     },
     closeModal() {
       this.editModalVisible = false;
-      this.newCompany =false;
+      this.newCompany = false;
     },
-        closeDeleteModal() {
+    initCompany() {
+      this.company={};
+        this.name= "";
+      this.code= "";
+      this.address= "";
+      this.streetNumber= "";
+      this.city= "";
+      this.province= "";
+      this.region= "";
+      this.country= "";
+      this.zip= "";
+      this.contactEmail= "";
+      this.contactPhone= "";
+      this.web= "";
+      this.logo= "";
+      
+    },
+    closeDeleteModal() {
       this.deleteModalVisible = false;
+    },
+    copyFormValues() {
+      for (const [key] of Object.entries(this.company)) {
+        this[key] = this.company[key];
+      }
+    },
+
+    createCompany() {
+      this.company = {
+        name: this.name,
+        code: this.code,
+        address: this.address,
+        streetNumber: this.streetNumber,
+        city: this.city,
+        province: this.province,
+        region: this.region,
+        country: this.country,
+        zip: this.zip,
+        contactEmail: this.contactEmail,
+        contactPhone: this.contactPhone,
+        web: this.web,
+        logo: this.logo,
+      };
     },
     saveCompany() {
       //check fields
@@ -367,21 +514,21 @@ export default {
         this.submitStatus = "ERROR";
         return;
       } else {
+        this.createCompany();
         if (this.newCompany) {
-        this.addCompanyCall(this.company);
+          this.addCompanyCall(this.company);
+        } else {
+          this.updateCompanyCall(this.company);
         }
-        else {
-            this.updateCompanyCall(this.company);
-            }
+        this.$v.$reset();
       }
 
-        this.editModalVisible = false;
-        this.newCompany =false;
-        }
-      ,
+      this.editModalVisible = false;
+      this.newCompany = false;
+    },
     deleteConfirm() {
-        this.deleteModalVisible = false;
-        this.deleteCompany(this.company);
+      this.deleteModalVisible = false;
+      this.deleteCompany(this.company);
     },
     updateCompany() {
       //check fields
@@ -396,13 +543,12 @@ export default {
     },
     showCompanyInfo: function (company) {
       if (this.currentCompanySelected == company) {
-        this.getCompanyById(null)
+        this.getCompanyById(null);
 
         this.currentCompanySelected = undefined;
       } else {
-             this.getCompanyById(company.id)
+        this.getCompanyById(company.id);
         this.currentCompanySelected = company;
-       
       }
     },
   },

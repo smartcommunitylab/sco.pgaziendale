@@ -1,9 +1,9 @@
 <template>
   <div>
-    <nav 
-      class="visible lg:invisible flex fixed w-full items-center justify-between px-6 h-16 bg-primary text-white text-gray-700  z-10 "
+    <nav
+      class="visible lg:invisible flex fixed w-full items-center justify-between px-6 h-16 bg-primary text-white text-gray-700 z-10"
     >
-      <div class="flex items-center" v-if="page && page.back==false">
+      <div class="flex items-center" v-if="page && page.back == false">
         <button class="mr-2" aria-label="Open Menu" @click="drawer">
           <svg
             fill="none"
@@ -19,7 +19,7 @@
         </button>
         <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
       </div>
-      <div class="flex items-center" v-if="page && page.back==true">
+      <div class="flex items-center" v-if="page && page.back == true">
         <button class="mr-2" aria-label="Open Menu" @click="backPage">
           <!-- <svg
             fill="none"
@@ -32,17 +32,15 @@
           >
             <path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"></path>
           </svg> -->
-          <back-icon/>
+          <back-icon />
         </button>
         <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
       </div>
-           <div class="flex items-center" v-if="page">
-              <span class="text-xl">{{page.title}}</span>
-            </div>
+      <div class="flex items-center" v-if="page">
+        <span class="text-xl">{{ page.title }}</span>
+      </div>
       <div class="flex items-center">
-        <div
-          class="hidden md:block md:flex md:justify-between md:bg-transparent"
-        >
+        <div class="hidden md:block md:flex md:justify-between md:bg-transparent">
           <router-link to="/info">
             <button
               title="Info"
@@ -53,14 +51,15 @@
             </button>
           </router-link>
           <!-- <router-link to="/contatti"> -->
-            <button @click="contacts()"
-              title="Contatti" 
-              class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
-            >
-              <pencil-outline-icon />
+          <button
+            @click="contacts()"
+            title="Contatti"
+            class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
+          >
+            <pencil-outline-icon />
 
-              <span>Contatti</span>
-            </button>
+            <span>Contatti</span>
+          </button>
           <!-- </router-link> -->
           <!-- <router-link to="/credits">
             <button
@@ -96,13 +95,10 @@
         </div>
       </transition>
       <aside
-        class="shadow-xl  transform top-0 left-0 w-64 bg-primary text-white fixed h-full overflow-auto ease-in-out transition-all duration-300 z-30"
+        class="shadow-xl transform top-0 left-0 w-64 bg-primary text-white fixed h-full overflow-auto ease-in-out transition-all duration-300 z-30"
         :class="isOpen ? 'translate-x-0' : '-translate-x-full'"
       >
-        <span
-          @click="isOpen = false"
-          class="flex w-full items-center p-4 border-b"
-        >
+        <span @click="isOpen = false" class="flex w-full items-center p-4 border-b">
           <img
             src="@/assets/images/pgaziendale.png"
             alt="Logo"
@@ -121,17 +117,18 @@
             >
           </router-link>
 
-          <router-link to="/campagne" v-if="auth" >
+          <router-link to="/campagne" v-if="auth">
             <span
               @click="isOpen = false"
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page &&  page.title === 'Campagne'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              :class="{ active: page && page.title === 'Campagne' }"
               ><span class="mr-2">
                 <list-campaigns-icon />
               </span>
               <span>Campagne</span></span
             >
           </router-link>
-          <router-link to="/info" :class="{active:page &&  page.title === 'Info'}">
+          <router-link to="/info" :class="{ active: page && page.title === 'Info' }">
             <span
               @click="isOpen = false"
               class="flex items-center p-4 hover:bg-white hover:text-primary"
@@ -142,15 +139,15 @@
             ></router-link
           >
           <!-- <router-link to="/contatti" :class="{active:page && page.title === 'Contatti'}"> -->
-            <span @click="contacts()"
-              
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
-            >
-              <span class="mr-2">
-                <pencil-outline-icon />
-              </span>
-              <span>Contatti</span></span
-            >
+          <span
+            @click="contacts()"
+            class="flex items-center p-4 hover:bg-white hover:text-primary"
+          >
+            <span class="mr-2">
+              <pencil-outline-icon />
+            </span>
+            <span>Contatti</span></span
+          >
           <!-- </router-link> -->
           <router-link to="/" v-on:click.native="onLogout" v-if="auth">
             <span
@@ -167,7 +164,7 @@
           <router-link to="/campagne" v-on:click.native="indietro">
             <span
               @click="isOpen = false"
-              class="flex items-center p-4 hover:bg-white hover:text-primary  m-2 border-white border-2 rounded"
+              class="flex items-center p-4 hover:bg-white hover:text-primary m-2 border-white border-2 rounded"
               ><span class="mr-2">
                 <arrow-left-icon />
               </span>
@@ -177,7 +174,9 @@
           <router-link :to="{ name: 'campagna', params: { id: campagna.id } }">
             <span
               @click="isOpen = false"
-              class="flex items-center p-4 hover:bg-white hover:text-primary " :class="{active:page && page.title === 'Campagna'}"><span class="mr-2">
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              :class="{ active: page && page.title === 'Campagna' }"
+              ><span class="mr-2">
                 <campaign-icon />
               </span>
               <span>Campagna</span></span
@@ -189,7 +188,7 @@
           >
             <span
               @click="isOpen = false"
-              class="flex items-center p-4 hover:bg-white hover:text-primary" 
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
                 <chart-bar-icon />
               </span>
@@ -215,16 +214,17 @@
               ><span class="mr-2">
                 <send-request-icon />
               </span>
-              <span>Invia Richiesta</span></span
+              <span>Richiedi Supporto</span></span
             >
           </router-link> -->
-              <span
-              @click="sendRequest()"
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
-              ><span class="mr-2">
-                <send-request-icon />
-              </span>
-              <span>Invia Richiesta</span></span>
+          <span
+            @click="sendRequest()"
+            class="flex items-center p-4 hover:bg-white hover:text-primary"
+            ><span class="mr-2">
+              <send-request-icon />
+            </span>
+            <span>Richiedi Supporto</span></span
+          >
           <router-link :to="{ name: 'privacy', params: { id: campagna.id } }">
             <span
               @click="isOpen = false"
@@ -250,19 +250,17 @@
         </div>
       </aside>
     </nav>
-     <nav 
-      class="invisible lg:visible flex fixed w-full items-center justify-between px-6 h-16 bg-primary text-white text-gray-700  z-10 "
+    <nav
+      class="invisible lg:visible flex fixed w-full items-center justify-between px-6 h-16 bg-primary text-white text-gray-700 z-10"
     >
       <div class="flex items-center">
         <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
       </div>
-           <div class="flex items-center" v-if="page">
-              <span class="text-xl">{{page.title}}</span>
-            </div>
+      <div class="flex items-center" v-if="page">
+        <span class="text-xl">{{ page.title }}</span>
+      </div>
       <div class="flex items-center">
-        <div
-          class="hidden md:block md:flex md:justify-between md:bg-transparent"
-        >
+        <div class="hidden md:block md:flex md:justify-between md:bg-transparent">
           <router-link to="/info">
             <button
               title="Info"
@@ -273,16 +271,17 @@
             </button>
           </router-link>
           <!-- <router-link to="/contatti"> -->
-            <button @click="contacts()"
-              title="Contatti"
-              class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
-            >
-              <pencil-outline-icon />
+          <button
+            @click="contacts()"
+            title="Contatti"
+            class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
+          >
+            <pencil-outline-icon />
 
-              <span>Contatti</span>
-            </button>
+            <span>Contatti</span>
+          </button>
           <!-- </router-link> -->
-                    <!-- <router-link to="/credits">
+          <!-- <router-link to="/credits">
             <button
               title="Credits"
               class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
@@ -295,12 +294,9 @@
         </div>
       </div>
       <aside
-        class="transform top-0 left-0 w-64 bg-primary text-white fixed h-full  ease-in-out transition-all duration-300 z-30"
+        class="transform top-0 left-0 w-64 bg-primary text-white fixed h-full ease-in-out transition-all duration-300 z-30"
       >
-        <span
-          
-          class="flex w-full items-center p-4 "
-        >
+        <span class="flex w-full items-center p-4">
           <img
             src="@/assets/images/pgaziendale.png"
             alt="Logo"
@@ -309,9 +305,7 @@
         </span>
         <div v-if="!campagna">
           <router-link to="/" v-on:click.native="onLogin" v-if="!auth">
-            <span
-              
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+            <span class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
                 <login-icon />
               </span>
@@ -321,8 +315,8 @@
 
           <router-link to="/campagne" v-if="auth">
             <span
-              
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page &&  page.title === 'Campagne'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              :class="{ active: page && page.title === 'Campagne' }"
               ><span class="mr-2">
                 <list-campaigns-icon />
               </span>
@@ -331,8 +325,8 @@
           </router-link>
           <router-link to="/info">
             <span
-             
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Info'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              :class="{ active: page && page.title === 'Info' }"
               ><span class="mr-2">
                 <info-outline-icon />
               </span>
@@ -340,17 +334,18 @@
             ></router-link
           >
           <!-- <router-link to="/contatti"> -->
-            <span @click="contacts()"
-              
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Contatti'}"
-            >
-              <span class="mr-2">
-                <pencil-outline-icon />
-              </span>
-              <span>Contatti</span></span
-            >
+          <span
+            @click="contacts()"
+            class="flex items-center p-4 hover:bg-white hover:text-primary"
+            :class="{ active: page && page.title === 'Contatti' }"
+          >
+            <span class="mr-2">
+              <pencil-outline-icon />
+            </span>
+            <span>Contatti</span></span
+          >
           <!-- </router-link> -->
-                    <!-- <router-link to="/credits">
+          <!-- <router-link to="/credits">
             <button
               title="Credits"
               class="flex items-center p-3 font-medium mr-2 text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400"
@@ -361,9 +356,7 @@
             </button>
           </router-link> -->
           <router-link to="/" v-on:click.native="onLogout" v-if="auth">
-            <span
-              @
-              class="flex items-center p-4 hover:bg-white hover:text-primary"
+            <span @ class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
                 <logout-icon />
               </span>
@@ -385,7 +378,8 @@
           <router-link :to="{ name: 'campagna', params: { id: campagna.id } }">
             <span
               @
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Campagna'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              :class="{ active: page && page.title === 'Campagna' }"
               ><span class="mr-2">
                 <campaign-icon />
               </span>
@@ -397,8 +391,8 @@
             v-if="campagna.userInCampaign"
           >
             <span
-              
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Le mie performance'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              :class="{ active: page && page.title === 'Le mie performance' }"
               ><span class="mr-2">
                 <chart-bar-icon />
               </span>
@@ -408,7 +402,8 @@
           <router-link :to="{ name: 'rules', params: { id: campagna.id } }">
             <span
               @
-              class="flex items-center p-4 hover:bg-white hover:text-primary"  :class="{active:page.title === 'Regolamento'}"
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              :class="{ active: page.title === 'Regolamento' }"
               ><span class="mr-2">
                 <rules-icon />
               </span>
@@ -424,19 +419,21 @@
               ><span class="mr-2">
                 <send-request-icon />
               </span>
-              <span>Invia Richiesta</span></span
+              <span>Richiedi Supporto</span></span
             >
           </router-link> -->
-              <span
-              @click="sendRequest()"
-              class="flex items-center p-4 hover:bg-white hover:text-primary" 
-              ><span class="mr-2">
-                <send-request-icon />
-              </span>
-              <span>Invia Richiesta</span></span>
+          <span
+            @click="sendRequest()"
+            class="flex items-center p-4 hover:bg-white hover:text-primary"
+            ><span class="mr-2">
+              <send-request-icon />
+            </span>
+            <span>Richiedi Supporto</span></span
+          >
           <router-link :to="{ name: 'privacy', params: { id: campagna.id } }">
-            <span         
-              class="flex items-center p-4 hover:bg-white hover:text-primary" :class="{active:page && page.title === 'Privacy'}"
+            <span
+              class="flex items-center p-4 hover:bg-white hover:text-primary"
+              :class="{ active: page && page.title === 'Privacy' }"
               ><span class="mr-2">
                 <privacy-icon />
               </span>
@@ -445,9 +442,7 @@
           </router-link>
           <div v-if="campagna.userInCampaign">
             <div @click="leaveCampaign">
-              <span
-                @
-                class="flex items-center p-4 hover:bg-white hover:text-primary"
+              <span @ class="flex items-center p-4 hover:bg-white hover:text-primary"
                 ><span class="mr-2">
                   <unsubscribe-icon />
                 </span>
@@ -470,22 +465,23 @@
         name="unsub"
         action=""
         v-on:submit.prevent=""
-        class="bg-white form flex flex-col p-6 relative lg:rounded-xl justify-center "
+        class="bg-white form flex flex-col p-6 relative lg:rounded-xl justify-center"
       >
-        <div
-          class="flex flex-col md:flex-row  mt-3 justify-stretch lg:flex-col"
-        >
+        <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
           <span>
-            Sei sicuro di voler cancellare l'iscrizione?
+            Sei sicuro di voler cancellare l'iscrizione?<br />
+            Una volta confermata la cancellazione dalla campagna Il Partecipante non potrà
+            più accumulare i Km in bici e riceverà dalla propria azienda soltanto gli
+            incentivi maturati nel periodo di partecipazione
           </span>
           <button
-            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
+            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3 flex-1"
             @click="confirmLeave"
           >
             Conferma
           </button>
           <button
-            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3  flex-1"
+            class="mt-6 bg-primary hover:bg-blue-500 text-white font-semibold p-3 flex-1"
             @click="modalUnsubscribeShowing = false"
           >
             Chiudi
@@ -512,15 +508,42 @@ export default {
     cardModal: CardModal,
   },
   methods: {
-    sendRequest: function() {
-      window.location.href = "mailto:help@aziende.playngo.it?subject=Richiesta informazioni "+this.campagna.title+"&body="+this.campagna.title;
-
+    sendRequest: function () {
+      for (var i = 0; i < this.user.roles.length; i++) {
+        if (this.user.roles[i].role == "ROLE_APP_USER") {
+          for (var k = 0; k < this.user.roles[i].subscriptions.length; k++) {
+            if (this.user.roles[i].subscriptions[k].campaign == this.campagna.id) {
+              var codePartecipation = this.user.roles[i].subscriptions[k].key;
+              var userCompany = this.user.roles[i].companyId?this.user.roles[i].companyId:"Non definito";
+              var userLocation = this.user.roles[i].locations?this.user.roles[i].locations:"Non definito";
+            }
+          }
+        }
+      }
+      window.location.href =
+        "mailto:help-aziende@playngo.it?subject=Richiesta informazioni&body=" +
+        "Id utente :" +
+        this.user.id +
+        "%0d%0a" +
+        "Codice partecipazione: " +
+        codePartecipation +
+        "%0d%0a" +
+        "Azienda :" +
+        userCompany +
+        "%0d%0a" +
+        "Location :" +
+        userLocation +
+        "%0d%0a" +
+        "Campagna :" +
+        this.campagna.title +
+        "%0d%0a";
     },
-    contacts: function() {
+    contacts: function () {
       this.isOpen = false;
-       window.location.href = "mailto:info@aziende.playngo.it?subject=Richiesta informazioni&body=Sarei interessato ad avere ulteriori notizie sul progetto";
+      window.location.href =
+        "mailto:info-aziende@playngo.it?subject=Richiesta informazioni&body=Sarei interessato ad avere ulteriori notizie sul progetto";
     },
-    confirmLeave: function() {
+    confirmLeave: function () {
       DataApi.unsubrscribeCampaign(this.campagna.id).then(
         (res) => {
           //change campaign in store (subscribed)
@@ -531,8 +554,7 @@ export default {
           EventBus.$emit(
             "snack-open",
             "Cancellazione Effettuata",
-            "Sei stato rimosso con successo dalla campagna " +
-              this.campagna.title,
+            "Sei stato rimosso con successo dalla campagna " + this.campagna.title,
             0
           );
 
@@ -610,16 +632,18 @@ export default {
     page() {
       return this.$store.getters.page;
     },
+    user() {
+      return this.$store.getters.user;
+    },
   },
 };
 </script>
 <style scoped>
-.active{
-      color: #0f70b7;
-      background-color: #fff;
+.active {
+  color: #0f70b7;
+  background-color: #fff;
 }
 card-modal {
-    background-color: rgba(0, 0, 0, 0.7);
-
+  background-color: rgba(0, 0, 0, 0.7);
 }
 </style>

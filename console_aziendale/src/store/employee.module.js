@@ -31,13 +31,6 @@ const actions = {
     getEmployee({ commit }, employee) {
         if (employee){
         commit('getEmployee', employee)
-        // employeeService.getEmployeeById(companyId,employeeId).then(
-        //     employee => commit('getEmployeeByIdSuccess', employee),
-        //     error => {
-        //         commit('getAllFailure', error);
-        //         dispatch('alert/error', error, { root: true });
-        //     }
-        // );
         }
         else {
             commit('removeActualEmployee'); 
@@ -48,7 +41,7 @@ const actions = {
         employeeService.addEmployee(companyId,employee).then(
             employee => commit('addEmployeeSuccess', employee),
             error => {
-                commit('getAllFailure', error);
+                commit('addEmployeeFailure', error);
                 dispatch('alert/error', error, { root: true });
             }
         );

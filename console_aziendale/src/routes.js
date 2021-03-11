@@ -1,25 +1,29 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Aziende from "./Pagine/Aziende.vue"
-import Azienda from "./Pagine/Azienda.vue"
-import Login from "./Pagine/Login.vue"
-import Home from "./Pagine/Home.vue"
-import Locations from "./Pagine/Locations.vue"
-import Stats from "./Pagine/Stats.vue"
-import GestioneDipendenti from "./Pagine/GestioneDipendenti.vue"
-import GestioneCampagne from "./Pagine/GestioneCampagne.vue"
+import Aziende from "./Pagine/Azienda/Aziende.vue"
+import Azienda from "./Pagine/Azienda/Azienda.vue"
+import Login from "./Pagine/Login/Login.vue"
+import Locations from "./Pagine/Location/Locations.vue"
+import Stats from "./Pagine/Stat/Stats.vue"
+import GestioneDipendenti from "./Pagine/Employee/Employees.vue"
+import GestioneCampagne from "./Pagine/Campagna/Campaigns.vue"
 import NotFound from "./Pagine/NotFound.vue"
+import ResetPwd from "./Pagine/Login/ResetPwd.vue"
 Vue.use(Router);
 const routes = [
     {
       path: '/',
-      name: 'homepage',
-      component: Home
+      redirect: '/login' 
     },
     {
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/resetPwd',
+      name: 'resetpwd',
+      component: ResetPwd
     },
     
     {
@@ -72,7 +76,7 @@ const routes = [
       const authRequired = !publicPages.includes(to.path);
       const loggedIn = localStorage.getItem('user');
     
-      if (authRequired && !loggedIn) {
+      if (authRequired && !loggedIn && to.name!='resetpwd') {
         return next('/login');
       }
     

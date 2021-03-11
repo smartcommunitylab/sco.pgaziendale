@@ -36,10 +36,12 @@
         </button>
         <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
       </div>
-           <div class="flex items-center" v-if="page">
+           <div class="m-auto" v-if="page">
               <span class="text-xl">{{page.title}}</span>
             </div>
-      <transition
+      <div class="profile-button">
+        <profile-manager />
+      </div>      <transition
         enter-class="opacity-0"
         enter-active-class="ease-out transition-medium"
         enter-to-class="opacity-100"
@@ -70,9 +72,7 @@
         <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
         </span>
         <div>
-          <div v-if="role=='ROLE_ADMIN'&&adminCompany!=null">
-            {{adminCompany.item.name}}
-          </div>
+         <profilo-header></profilo-header>
           <router-link to="/aziende" v-if="role=='ROLE_ADMIN'&&adminCompany==null">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
@@ -82,7 +82,7 @@
               <span>Gestione Aziende</span></span
             >
           </router-link>
-          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)">
+          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)||(role=='ROLE_MOBILITY_MANAGER'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -91,7 +91,7 @@
               <span>Profilo Azienda</span></span
             >
           </router-link>
-          <router-link to="/locations" v-if="role==('ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&& actualCompany!=null)">
+          <router-link to="/locations" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&& actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -100,7 +100,7 @@
               <span>Gestione Sedi</span></span
             >
           </router-link>
-          <router-link to="/dipendenti" v-if="role==('ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
+          <router-link to="/dipendenti" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_ADMIN'&&actualCompany!=null)|| (role=='ROLE_MOBILITY_MANAGER'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -146,8 +146,11 @@
       <div class="flex items-center">
         <img src="@/assets/images/pgaziendale.png" alt="Logo" class="h-auto w-12" />
       </div>
-      <div class="flex items-center" v-if="page">
+      <div class="m-auto" v-if="page">
         <span class="text-xl">{{page.title}}</span>
+      </div>
+      <div class="profile-button">
+        <profile-manager />
       </div>
       <div class="flex items-center">
         <div
@@ -173,7 +176,7 @@
               <span>Gestione Aziende</span></span
             >
           </router-link>
-          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)">
+          <router-link to="/azienda" v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)||(role=='ROLE_MOBILITY_MANAGER'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -182,7 +185,7 @@
               <span>Profilo Azienda</span></span
             >
           </router-link>
-          <router-link to="/locations" v-if="role==('ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
+          <router-link to="/locations" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -191,7 +194,7 @@
               <span>Gestione Sedi</span></span
             >
           </router-link>
-          <router-link to="/dipendenti" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)">
+          <router-link to="/dipendenti" v-if="(role=='ROLE_ADMIN'&& adminCompany!=null)|| (role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null)|| (role=='ROLE_MOBILITY_MANAGER'&&actualCompany!=null)">
             <span
               class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -236,11 +239,12 @@
 
 <script>
 import { mapState,mapActions } from 'vuex'
-import ProfiloHeader from '../components/ProfiloHeader.vue'
+import ProfiloHeader from './ProfiloHeader.vue'
+import ProfileManager from './ProfileManager.vue'
 export default {
-  name: "Header",
+  name: "MenuHeader",
   components: {
-      ProfiloHeader
+      ProfiloHeader,ProfileManager
   },
   data: function() {
     return { isOpen: true };
@@ -248,7 +252,8 @@ export default {
     computed: {
         ...mapState('account', ['status','user','role']),
         ...mapState('navigation', ['page']),
-        ...mapState('company',['adminCompany','actualCompany'])
+        ...mapState('company',['adminCompany','actualCompany']),
+          
     },
   methods: {
     drawer() {
@@ -263,4 +268,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.profile-button {
+  position: absolute;
+    right: 50px;
+}</style>
