@@ -5,7 +5,11 @@ export const companyService = {
     getCompanyById,
     addCompany,
     updateCompany,
-    deleteCompany
+    deleteCompany,
+    getUsers,
+    addUser,
+    updateUser,
+    deleteUser
 };
 //get all the companies
 function getAllCompanies() {
@@ -54,7 +58,7 @@ function addCompany(company){
 function updateCompany(company){
     return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+company.id,company).then(
         res => {
-            if (res && res.data && res.data) {
+            if (res && res.data) {
                 return Promise.resolve(res.data);
             }
             else return Promise.reject(null);
@@ -77,6 +81,65 @@ function deleteCompany(company){
 
     )
 }
+//get administrators
+function getUsers(company){
+    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+company.id+'/'+process.env.VUE_APP_USERS_API).then(
+        res => {
+            if (res) {
+                if (res && res.data ) {
+                return Promise.resolve(res.data);
+                }
+                 else return Promise.reject(null);
+
+            }
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+
+function addUser(companyId, user) {
+    return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_USERS_API, user).then(
+        res => {
+            if (res && res.data && res.data) {
+                return Promise.resolve(res.data);
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+// update an old company
+function updateUser(companyId, user) {
+    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_USERS_API + '/' + user.id, user).then(
+        res => {
+            if (res && res.data) {
+                return Promise.resolve(res.data);
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+// update an old company
+function deleteUser(companyId, user) {
+    return axios.delete(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_USERS_API + '/' + user.username).then(
+        res => {
+            if (res) {
+                return Promise.resolve(user.id);
+            }
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+
 
 
 

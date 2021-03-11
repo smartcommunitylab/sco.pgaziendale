@@ -3,15 +3,15 @@
     <div class="bg-green-300 lg:w-4/6 mx-2 my-2">
       <h1>Profilo azienda</h1>
       <profilo-azienda></profilo-azienda>
-      <gestione-azienda></gestione-azienda>
+      <gestione-azienda v-if="adminCompany && adminCompany.item"></gestione-azienda>
     </div>
   </div>
 </template>
 
 <script>
 import { mapActions, mapState } from "vuex";
-import ProfiloAzienda from "../components/ProfiloAzienda.vue";
-import GestioneAzienda from "../components/GestioneAzienda.vue";
+import ProfiloAzienda from "./ProfiloAzienda.vue";
+import GestioneAzienda from "./GestioneAzienda.vue";
 export default {
   name: "Azienda",
   components: {
@@ -22,21 +22,23 @@ export default {
     return {};
   },
   created() {
+    this.changePage({title: 'Profilo azienda',
+                route: '/azienda'})
     //check actualCompany otherwise get it by id
     if (!this.actualCompany) {
       //get company Id from profile
-      this.setDefaultCompany();
+      this.setDefaultCompany(this.user);
       //this.actualCompany = this.getCompanyById(this.role)
     }
   },
   computed: {
-    ...mapState("company", ["actualCompany"]),
-    ...mapState("account", ["role"]),
+    ...mapState("company", ["adminCompany","actualCompany"]),
+    ...mapState("account", ["role","user"]),
   },
   methods: {
     ...mapActions("company", { getCompanyById: "getCompanyById" }),
-        ...mapActions("account", { setDefaultCompany: "setDefaultCompany" })
-
+        ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
+        ...mapActions("navigation", { changePage: "changePage" })
   },
 };
 </script>

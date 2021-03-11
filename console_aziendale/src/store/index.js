@@ -8,6 +8,7 @@ import { company } from './company.module';
 import { location } from './location.module';
 import { employee } from './employee.module';
 import { alert } from './alert.module';
+import { loader } from './loader.module';
 
 Vue.use(Vuex);
 
@@ -19,6 +20,7 @@ export const store = new Vuex.Store({
         company,
         location,
         alert,
-        employee
+        employee,
+        loader
     }
 });

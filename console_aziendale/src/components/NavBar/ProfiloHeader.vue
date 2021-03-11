@@ -5,7 +5,7 @@
 
             <span>{{adminCompany.item.name}}</span>
               <button @click="resetCompany">
-                 <span class="mr-2">
+                 <span class="img-exit-profile">
                 <logout-icon />
               </span>
               </button>
@@ -14,7 +14,7 @@
                 Amministratore
               </div>
           </div>
-           <div v-if="role=='ROLE_COMPANY_ADMIN'&&actualCompany!=null">
+           <div v-if="(role=='ROLE_COMPANY_ADMIN' || role== 'ROLE_MOBILITY_MANAGER')&&actualCompany!=null && actualCompany.item!=null" >
             {{actualCompany.item.name}}
           </div>
           </div>
@@ -31,9 +31,6 @@ export default {
         ...mapState('company',['adminCompany','actualCompany'])
     },
   methods: {
-    drawer() {
-      this.isOpen = !this.isOpen;
-    },
     resetCompany() {
       this.resetCompanyAdmin();
     },
@@ -50,5 +47,10 @@ export default {
     width: 80%;
     border-radius: 8px;
 
+}
+.img-exit-profile {
+margin: 2px 4px;
+      vertical-align: middle;
+    display: inline-block;
 }
 </style>

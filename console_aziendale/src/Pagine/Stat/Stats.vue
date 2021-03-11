@@ -207,12 +207,16 @@ export default {
     if (this.sendFilter.azienda) this.getAllLocations(this.sendFilter.azienda);
   },
   mounted() {
+    this.changePage({title: 'Statistiche',
+                route: '/stats'})
     this.buildChart;
   },
   methods: {
     ...mapActions("campaign", { getAllCampaigns: "getAll" }),
     ...mapActions("company", { getAllCompanies: "getAll" }),
     ...mapActions("location", { getAllLocations: "getAll" }),
+                ...mapActions("navigation", { changePage: "changePage" }),
+
     getFirstCompany(user) {
       return user.roles.find(function (role) {
         return role.role == "ROLE_COMPANY_ADMIN";
