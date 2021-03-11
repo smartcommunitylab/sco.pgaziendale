@@ -159,7 +159,7 @@ public class LocationResourceITest {
     	loc.setAddress("address");
     	loc.setCity("city");
     	loc.setCountry("country");
-    	loc.setLatitute(1d);
+    	loc.setLatitude(1d);
     	loc.setLongitude(1d);
     	loc.setProvince("province");
     	loc.setRadius(1d);
