@@ -102,10 +102,12 @@ public class UserResource {
         log.debug("REST request to save User : {}", userDTO);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
 
+    	Optional<User> old = null;
         if (userDTO.getId() != null) {
             throw new BadRequestAlertException("A new user cannot already have an ID");
             // Lowercase the user login before comparing with database
-        } else if (userRepository.findOneByUsernameIgnoreCase(userDTO.getUsername().toLowerCase()).isPresent()) {
+        } else if ((old = userRepository.findOneByUsernameIgnoreCase(userDTO.getUsername().toLowerCase())).isPresent()) {
+        	userDTO.setId(old.get().getId());
         	User newUser = userService.updateUser(userDTO, companyId).orElse(null);
             return ResponseEntity.ok(newUser);
         } else {

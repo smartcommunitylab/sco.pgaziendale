@@ -71,6 +71,7 @@ public class PGApp {
 	 */
 	public PGApp cleanPassword() {
 		this.password = null;
+		this.endpoint = null;
 		return this;
 	}
 	/**
