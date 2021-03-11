@@ -19,11 +19,53 @@
                 ></span
               >
             </div>
+        <button  type="button"
+          class="btn-close"
+          aria-label="Close modal"
+           @click="changingPwd=!changingPwd">
+          Cambia password
+        </button>
+        <div v-if="changingPwd"> 
+                <label class="pwd-label" for="first_name">Vecchia Password</label>
+                <input
+                  type="password"
+                  name="companyLogo"
+                  id="companyLogo"
+                  placeholder="Vecchia password *"
+  v-model="oldPassword"
+                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 pwd-input"
+                />
+                <label class="pwd-label" for="first_name">Nuova Password</label>
+                <input
+                  type="password"
+                  name="companyLogo"
+                  id="companyLogo"
+                  placeholder="Nuova password *"
+  v-model="newPassword"
+                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 pwd-input"
+                />
+                                <label class="pwd-label" for="first_name">Ripeti nuova Password</label>
+                <input
+                  type="password"
+                  name="companyLogo"
+                  id="companyLogo"
+                  placeholder="Nuova password *"
+                  v-model="newPassword2"
+                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 pwd-input"
+                />
+
+        </div>
           </div>
         </div>
       </template>
 
       <template v-slot:footer>
+          <button  type="button"
+          class="btn-close"
+          aria-label="Close modal"
+           @click="changePwd()">
+          Salve
+        </button>
         <button
           type="button"
           class="btn-close"
@@ -37,8 +79,8 @@
   </div>
 </template>
 <script>
-import Modal from "../Modal.vue";
-import { mapState } from "vuex";
+import Modal from "@/components/Modal.vue";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "ProfileManager",
@@ -47,10 +89,22 @@ export default {
   data: function () {
     return {
       profileSetting: false,
+      changingPwd:false,
+      oldPassword:"",
+      newPassword:"",
+      newPassword2:""
     };
   },
   computed: {
     ...mapState("account", ["status", "user", "role"]),
+  },
+  methods: {
+    ...mapActions("account",["changePassword"]),
+    changePwd() {
+      // visible edit pwd
+      this.changePassword({oldPassword:this.oldPassword,newPassword:this.newPassword});
+    }
+    
   },
 };
 </script>
@@ -65,5 +119,13 @@ export default {
 .role {
   color: black;
 
+}
+.pwd-label{
+    display: inline-block;
+    width: 40%;
+    color: black;
+}
+.pwd-input{
+  color:black;
 }
 </style>
