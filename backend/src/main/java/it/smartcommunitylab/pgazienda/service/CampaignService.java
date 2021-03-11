@@ -38,6 +38,7 @@ import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
+import it.smartcommunitylab.pgazienda.web.rest.errors.RepeatingSubscriptionException;
 
 /**
  * @author raman
@@ -54,6 +55,8 @@ public class CampaignService {
 	private EmployeeRepository employeeRepo;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private TrackingDataService trackingDataService;
 	
 	/**
 	 * List of all companies, paginated
@@ -101,8 +104,9 @@ public class CampaignService {
 	 * @param key
 	 * @param companyCode
 	 * @param campaignId
+	 * @throws RepeatingSubscriptionException 
 	 */
-	public void subscribe(String key, String companyCode, String campaignId) {
+	public void subscribe(String key, String companyCode, String campaignId) throws RepeatingSubscriptionException {
 		// find user
 		User user = userService.getUserWithAuthorities().orElse(null);
 		if (user == null) throw new IllegalArgumentException("Invalid user");
@@ -117,6 +121,13 @@ public class CampaignService {
 			Employee employee = employeeRepo.findOneByCompanyIdAndCode(company.getId(), key).orElse(null);
 			if (employee == null ) throw new IllegalArgumentException("Invalid user key");
 			if (employee.getCampaigns() == null) employee.setCampaigns(new LinkedList<>());
+			
+			// TODO check
+			boolean hasCampaignData = trackingDataService.hasCampaignData(user.getPlayerId(), campaignId);
+			if (hasCampaignData) {
+				throw new RepeatingSubscriptionException("Previous subscription exists: " + campaignId +", "+user.getPlayerId());
+			}
+			
 			if (!employee.getCampaigns().contains(campaignId)) {
 				employee.getCampaigns().add(campaignId);
 				employeeRepo.save(employee);

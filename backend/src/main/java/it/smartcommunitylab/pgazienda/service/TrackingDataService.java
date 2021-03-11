@@ -249,6 +249,12 @@ public class TrackingDataService {
 		}
 	}
 	
+	public boolean hasCampaignData(String playerId, String campaignId) {
+		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId);
+		DayStat stat = template.findOne(Query.query(criteria), DayStat.class);
+		return stat != null;
+	}
+	
 	public static class TrackingDataRequestDTO {
 		private List<String> playerId;
 		private String from, to;
