@@ -10,14 +10,18 @@ spring:
   mail:
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
-    host: ${MAIL_HOST} 
+    host: ${MAIL_HOST}
     port: ${MAIL_PORT}
     protocol: ${MAIL_PROTOCOL}
-    from: ${MAIL_FROM}    
+    from: ${MAIL_FROM}
     baseurl: ${MAIL_BASEURL}
+    properties:
+      mail:
+        smtps:
+          localhost: ${MAIL_LOCALHOST:}
   messages:
     basename: i18n/messages
-    
+
 management:
    server:
       port: ${MANAGEMENT_PORT:7878}

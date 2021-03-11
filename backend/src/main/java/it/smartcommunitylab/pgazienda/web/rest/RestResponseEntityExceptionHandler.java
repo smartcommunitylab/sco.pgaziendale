@@ -30,6 +30,7 @@ import it.smartcommunitylab.pgazienda.service.InvalidPasswordException;
 import it.smartcommunitylab.pgazienda.service.UsernameAlreadyUsedException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.AccountResourceException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.BadRequestAlertException;
+import it.smartcommunitylab.pgazienda.web.rest.errors.RepeatingSubscriptionException;
 
 /**
  * @author raman
@@ -64,6 +65,13 @@ public class RestResponseEntityExceptionHandler
       Exception ex, WebRequest request) {
         return handleExceptionInternal(ex, new ErrorMsg("Incorrect data: " + ex.getMessage()), 
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(RepeatingSubscriptionException.class)
+    protected ResponseEntity<Object> handleRepeatingSubscription(
+      Exception ex, WebRequest request) {
+        return handleExceptionInternal(ex, new ErrorMsg("Repeating subscription"), 
+          new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

@@ -18,6 +18,7 @@ package it.smartcommunitylab.pgazienda.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class PGAppService {
 	
 
 	public List<PGApp> getApps() {
-		return repo.findAll();
+		return repo.findAll().stream().map(app -> app.cleanPassword()).collect(Collectors.toList());
 	}
 
 	public Optional<PGApp> getApp(String id) {

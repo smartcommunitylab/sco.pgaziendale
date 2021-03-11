@@ -42,6 +42,7 @@ import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.service.CampaignService;
 import it.smartcommunitylab.pgazienda.service.CompanyService;
 import it.smartcommunitylab.pgazienda.service.UserService;
+import it.smartcommunitylab.pgazienda.web.rest.errors.RepeatingSubscriptionException;
 
 /**
  * @author raman
@@ -68,6 +69,9 @@ public class CampaignResource {
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
 	public ResponseEntity<Campaign> createCampaign(@Valid @RequestBody Campaign campaign) {
     	log.debug("Creating a campaign {} ", campaign);
+    	if(campaignService.getCampaign(campaign.getId()).isPresent()) {
+    		throw new IllegalArgumentException("A campaign with the specified ID already exists");
+    	}
     	return ResponseEntity.ok(campaignService.saveCampaign(campaign));
 	}
 
@@ -188,7 +192,7 @@ public class CampaignResource {
      * @return
      */
     @PutMapping("/campaigns/{campaignId:.*}/subscribe/{companyCode}/{key}")
-	public ResponseEntity<Void> subscribeCampaign(@PathVariable String campaignId, @PathVariable String companyCode, @PathVariable String key) {
+	public ResponseEntity<Void> subscribeCampaign(@PathVariable String campaignId, @PathVariable String companyCode, @PathVariable String key) throws RepeatingSubscriptionException {
     	log.debug("Subscriving to campaign {} / {} / {}", campaignId, companyCode, key);
     	campaignService.subscribe(key, companyCode, campaignId);
     	return ResponseEntity.ok(null);
