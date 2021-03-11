@@ -226,104 +226,16 @@
         </div>
       </transition>
       <div v-if="allEmployees && allEmployees.items && allEmployees.items.length > 0">
-          <generic-table
-        :data="allEmployees.items"
-        :columns="gridColumns"
-        :header="headerColumns"
-        :method="showEmployeeInfo"
-      >
-      </generic-table>
-        <!-- <table class="table-auto rounded relative w-full">
-          <thead class="text-center justify-between">
-            <tr class="truncate px-2 flex border-b border-background text-center">
-              <th class="w-1/5">Nome</th>
-
-              <th class="w-1/5">Cognome</th>
-
-              <th class="w-1/5">Email</th>
-              <th class="w-1/5">Codice</th>
-              <th class="w-1/5"></th>
-            </tr>
-          </thead>
-          <tbody class="bg-white text-center justify-between" v-if="allEmployees">
-            <template v-for="employee in allEmployees.items">
-              <template
-                v-if="
-                  (selectedHq == 0 || employee.idSede == selectedHq) &&
-                  (selectedCampaign == 0 || isEmployeeInCampaign(employee))
-                "
-              >
-                <tr
-                  class="text-center m-auto truncate px-2 select-none cursor-pointer flex items-center border-b border-background hover:bg-background transition ease-in duration-100"
-                  :key="employee.id"
-                  tag="tr"
-                  :id="employee.id"
-                  @click="showEmployeeInfo(employee)"
-                >
-                  <td class="w-1/5">
-                    <p class="text-gray-800 text-sm font-semibold text-center">
-                      {{ employee.name }}
-                    </p>
-                  </td>
-                  <td class="w-1/5">
-                    <p class="text-gray-800 text-sm font-semibold text-center">
-                      {{ employee.surname }}
-                    </p>
-                  </td>
-
-                  <td class="w-1/5">
-                    <p class="text-gray-800 text-sm font-semibold text-center truncate">
-                      {{ employee.companyEmail }}
-                    </p>
-                  </td>
-                  <td class="w-1/5">
-                    <p class="text-gray-800 text-sm font-semibold text-center">
-                      {{ employee.code }}
-                    </p>
-                  </td>
-                  <td class="flex items-end w-1/5 pr-12">
-                    <eye-icon />
-                  </td></tr
-              ></template>
-            </template>
-          </tbody>
-        </table> -->
+        <generic-table
+          :data="allEmployees.items"
+          :columns="gridColumns"
+          :header="headerColumns"
+          :method="showEmployeeInfo"
+        >
+        </generic-table>
       </div>
       <div v-else class="text-center">Non ci sono dipendenti</div>
       <div class="flex flex-row justify-center py-4">
-        <!-- <div class="px-2">
-          <select
-            class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
-            v-model="selectedHq"
-            required
-          >
-            <option value="0" selected disabled hidden
-              >Seleziona una sede</option
-            >
-            <template v-for="hq in filter_hqs">
-              <option :key="hq.id" :value="hq.id">{{ hq.address }}</option>
-            </template>
-          </select>
-        </div> -->
-
-        <!-- <div class="px-2">
-          <select
-            class="focus:border-primary border-2 p-2 mb-2 md:mb-0 lg:mb-2  md:mr-2 lg:mr-0 appearance-none "
-            v-model="selectedCampaign"
-            required
-          >
-            <option value="0" selected disabled hidden
-              >Seleziona una Campagna</option
-            >
-            <template v-for="campaign in filter_campaigns">
-              <template v-if="hasCampaignNotEnded(campaign)">
-                <option :key="campaign.id" :value="campaign.id">{{
-                  campaign.title
-                }}</option></template
-              >
-            </template>
-          </select>
-        </div> -->
 
         <div class="px-2">
           <button
@@ -485,9 +397,6 @@ import Modal from "@/components/Modal.vue";
 import EventBus from "@/components/eventBus";
 import { required } from "vuelidate/lib/validators";
 import GenericTable from "@/components/GenericTable.vue"
-// import { employees } from "../tmp-data/employees.js";
-// import { headquarters } from "../tmp-data/hqs.js";
-// import { campaigns } from "../tmp-data/campaigns.js";
 export default {
   components: { ProfiloEmployee, Modal,GenericTable },
   name: "Dipendenti",
@@ -544,6 +453,7 @@ export default {
     EventBus.$on("EDIT_EMPLOYEE", (employee) => {
       this.editModalVisible = true;
       this.employee = employee.item;
+      this.copyFormValues();
       this.popup = {
         title: "Modifica",
       };
@@ -577,6 +487,7 @@ export default {
     showModal(title) {
       this.editModalVisible = true;
       this.newEmployee = true;
+      this.initEmployee();
       this.popup = {
         title: title,
       };
@@ -589,6 +500,17 @@ export default {
     closeDeleteModal() {
       this.deleteModalVisible = false;
     },
+        initEmployee() {
+      this.employee={};
+         this.name= "";
+      this.surname= "";
+      this.code= "";
+      this.companyEmail= "";
+      },
+      copyFormValues() {
+      for (const [key] of Object.entries(this.employee)) {
+        this[key]=this.employee[key]}
+},
     createEmployee() {
       this.employee = {
         name: this.name,

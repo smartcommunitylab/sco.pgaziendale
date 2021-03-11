@@ -139,10 +139,10 @@ export default {
     }
   },
   methods: {
-        ...mapActions("account", {resetPasswordInit:"resetPasswordInit",resetPasswordFinish:"resetPasswordInit"}),
+        ...mapActions("account", {resetPasswordInit:"resetPasswordInit",resetPasswordFinish:"resetPasswordFinish"}),
 
       back() {
-                this.$router.push('login');
+        this.$router.push('login');
       },
     switchVisibilityFirst() {
       this.passwordFieldTypeFirst =
@@ -153,7 +153,7 @@ export default {
         this.passwordFieldTypeSecond === "password" ? "text" : "password";
     },
     setPwd() {
-      this.resetPasswordFinish({key:this.key,newPassword:this.username});
+      this.resetPasswordFinish({key:this.key,newPassword:this.passwordSecond});
     },
     resetInit() {
       this.resetPasswordInit(this.username);

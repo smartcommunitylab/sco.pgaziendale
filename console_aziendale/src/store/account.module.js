@@ -6,7 +6,11 @@ const state = user
     ? { status: { loggedIn: true }, user, role: userService.getRole(user), home: userService.getHome(userService.getRole(user)) }
     : { status: {}, user: null, role: null, home: null };
 
-
+function isCompanyAdmin(role){
+    if (role==='ROLE_COMPANY_ADMIN')
+    return true
+    return false
+}
 const actions = {
     login({ dispatch, commit }, { username, password }) {
         commit('loginRequest', { username });
@@ -21,10 +25,18 @@ const actions = {
                         commit('roleUser', role);
                         var page = userService.getHome(role);
                         commit('homeUser', page);
-                        dispatch('navigation/changePage', page, { root: true });
                         var userCompanies = userService.getCompanies(user);
-                        if (userCompanies.length > 0)
-                            dispatch('company/getCompanyById', userCompanies[0], { root: true }); router.push(page.route);
+                        if (userCompanies.length > 0){
+                            dispatch('company/getCompanyById', userCompanies[0], { root: true });
+                            if (isCompanyAdmin(role))
+                            {
+                            dispatch('company/initCompanyAdmin', userCompanies[0], { root: true }); 
+                            dispatch('campaign/getAll',userCompanies[0], { root: true });
+                            }
+                            
+                        }
+                        dispatch('navigation/changePage', page, { root: true });
+                        router.push(page.route);
                     })
                 },
                 error => {
@@ -70,7 +82,7 @@ const actions = {
     },
     resetPasswordFinish({ commit, dispatch },{key,newPassword}){
         commit('resetPasswordFinish');
-        userService.changePassword(key,newPassword).then(function(){
+        userService.resetPasswordFinish(key,newPassword).then(function(){
             commit('resetPasswordFinishSuccess');
             dispatch('alert/success', "Password cambiata con successo", { root: true });
 
@@ -78,7 +90,8 @@ const actions = {
             commit('cresetPasswordFinishFailure', error);
             dispatch('alert/error', error, { root: true });
         })
-    }
+    },
+
 };
 
 const mutations = {

@@ -1,56 +1,16 @@
 <template>
   <div class="flex flex-col lg:flex-row">
-    <div
-      class="lg:w-4/6 mx-2 my-2 flex flex-col bg-white"
-      v-if="allLocations && allLocations.items && allLocations.items.length > 0"
-    >
-      <generic-table
-        :data="allLocations.items"
-        :columns="gridColumns"
-        :header="headerColumns"
-        :method="showLocationInfo"
-      >
-      </generic-table>
-      <!-- <table class="shadow-lg rounded relative w-full">
-        <thead class="text-center justify-between">
-          <tr class="truncate px-2 flex border-b border-background text-center">
-            <th class="w-1/2">Cittá</th>
-
-            <th class="w-1/2">Indirizzo</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white" v-if="allLocations && allLocations.items">
-          <template v-for="location in allLocations.items">
-            <tr
-              class="select-none cursor-pointer flex border-b border-background hover:bg-background transition ease-in duration-100"
-              :key="location.id"
-              tag="tr"
-              @click="showLocationInfo(location)"
-              :id="location.id"
-            >
-              <td class="w-1/2">
-                <p class="text-gray-800 text-sm font-semibold text-center">
-                  {{ location.city }}
-                </p>
-              </td>
-              <td class="w-1/2">
-                <p class="text-gray-800 text-sm font-semibold text-center">
-                  {{ location.address }}{{ location.streetNumber }}
-                </p>
-              </td>
-
-              <td class="w-1/6">
-                <pencil-outline-icon />
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table> -->
- 
-    </div>
-             <div v-else>
-                Non ci sono Sedi
-              </div>
+    <div class="bg-green-300 lg:w-4/6 mx-2 my-2 pb-16 relative">
+      <div v-if="allLocations && allLocations.items && allLocations.items.length > 0">
+        <generic-table
+          :data="allLocations.items"
+          :columns="gridColumns"
+          :header="headerColumns"
+          :method="showLocationInfo"
+        >
+        </generic-table>
+      </div>
+      <div v-else class="text-center">Non ci sono Sedi</div>
 
       <div class="ml-auto pt-4 pr-4 absolute right-0">
         <button
@@ -59,9 +19,11 @@
         >
           <add-icon class="add-icon" />
         </button>
-      </div>    
-      <profilo-location v-if="actualLocation" />
-     <modal v-show="deleteModalVisible">
+      </div>
+    </div>
+
+    <profilo-location v-if="actualLocation" />
+    <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Sede </template>
       <template v-slot:body> Sei sicuro di voler cancellare la sede? </template>
       <template v-slot:footer>
@@ -89,20 +51,20 @@
         <form action="" id="addLocation">
           <div class="mb-4 flex flex-wrap justify-between">
             <div class="field-group mb-4 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.code.$error }">
-                <label class="field-label" for="first_name">Codice </label>
+              <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
+                <label class="field-label" for="first_name">Identificativo </label>
                 <input
                   type="text"
                   name="campaignCode"
-                  placeholder="Codice *"
-                  v-model.trim="$v.code.$model"
+                  placeholder="Identificativo *"
+                  v-model.trim="$v.id.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                   id="campaignCode"
                 />
               </div>
-              <div v-if="$v.code.$error">
-                <div class="error" v-if="!$v.code.required">
-                  Il campo Code e' richiesto.
+              <div v-if="$v.id.$error">
+                <div class="error" v-if="!$v.id.required">
+                  Il campo Identificativo e' richiesto.
                 </div>
               </div>
             </div>
@@ -229,9 +191,47 @@
               </div>
             </div>
             <div class="field-group mb-6 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.country.$error }">
+                <label class="field-label" for="password">Stato</label>
+                <input
+                  type="text"
+                  name="campaignCountry"
+                  id=""
+                  required
+                  placeholder="Stato *"
+                  v-model.trim="$v.country.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.country.$error">
+                <div class="error" v-if="!$v.country.required">
+                  Il campo Stato e' richiesto.
+                </div>
+              </div>
+            </div>
+            <div class="field-group mb-6 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.radius.$error }">
+                <label class="field-label" for="password">Raggio</label>
+                <input
+                  type="text"
+                  name="campaignRadius"
+                  id=""
+                  required
+                  placeholder="Raggio *"
+                  v-model.trim="$v.radius.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                />
+              </div>
+              <div v-if="$v.radius.$error">
+                <div class="error" v-if="!$v.radius.required">
+                  Il campo Raggio e' richiesto.
+                </div>
+              </div>
+            </div>
+            <div class="field-group mb-6 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.latitude.$error }"
+                :class="{ 'form-group--error': $v.latitute.$error }"
               >
                 <label class="field-label" for="password">Latitudine</label>
                 <input
@@ -240,12 +240,12 @@
                   id=""
                   required
                   placeholder="Mezzi *"
-                  v-model.trim="$v.latitude.$model"
+                  v-model.trim="$v.latitute.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.latitude.$error">
-                <div class="error" v-if="!$v.latitude.required">
+              <div v-if="$v.latitute.$error">
+                <div class="error" v-if="!$v.latitute.required">
                   Il campo Latitudine e' richiesto.
                 </div>
               </div>
@@ -272,7 +272,7 @@
                 </div>
               </div>
             </div>
-             <div class="field-group mb-6 w-full">
+            <div class="field-group mb-6 w-full">
               <div
                 class="form-group"
                 :class="{ 'form-group--error': $v.nonWorking.$error }"
@@ -294,7 +294,7 @@
                 </div>
               </div>
             </div>
-                        <div class="field-group mb-6 w-full">
+            <div class="field-group mb-6 w-full">
               <div
                 class="form-group"
                 :class="{ 'form-group--error': $v.nonWorkingDays.$error }"
@@ -316,7 +316,6 @@
                 </div>
               </div>
             </div>
-            
           </div>
         </form>
       </template>
@@ -350,7 +349,7 @@ import ProfiloLocation from "./ProfiloLocation.vue";
 import { mapState, mapActions } from "vuex";
 import GenericTable from "@/components/GenericTable.vue";
 import { required } from "vuelidate/lib/validators";
-import Modal from '@/components/Modal.vue'
+import Modal from "@/components/Modal.vue";
 import EventBus from "@/components/eventBus";
 
 export default {
@@ -365,25 +364,26 @@ export default {
       popup: {
         title: "",
       },
-            code: "",
+      id: "",
       address: "",
       streetNumber: "",
       zip: "",
       city: "",
       province: "",
       region: "",
-      latitude: "",
-      longitude: "",
-       nonWorkingDays:[],
-    nonWorking:[],
-    deleteModalVisible:false,
-    editModalVisible:false,
-          submitStatus: null,
-
+      latitute: 0,
+      longitude: 0,
+      country: "",
+      radius: 200,
+      nonWorkingDays: [],
+      nonWorking: [],
+      deleteModalVisible: false,
+      editModalVisible: false,
+      submitStatus: null,
     };
   },
   validations: {
-    code: {
+    id: {
       required,
     },
     address: {
@@ -404,7 +404,13 @@ export default {
     region: {
       required,
     },
-    latitude: {
+    country: {
+      required,
+    },
+    radius: {
+      required,
+    },
+    latitute: {
       required,
     },
     longitude: {
@@ -422,9 +428,11 @@ export default {
   },
   mounted() {
     this.changePage({ title: "Lista sedi", route: "/locations" });
-     EventBus.$on("EDIT_LOCATION", (location) => {
+    EventBus.$on("EDIT_LOCATION", (location) => {
       this.editModalVisible = true;
       this.location = location.item;
+            this.copyFormValues();
+
       this.popup = {
         title: "Modifica",
       };
@@ -448,7 +456,7 @@ export default {
       selectActualLocation: "selectActualLocation",
       addLocationCall: "addLocation",
       updateLocationCall: "updateLocation",
-      deleteLocation:"deleteLocation"
+      deleteLocation: "deleteLocation",
     }),
     ...mapActions("navigation", { changePage: "changePage" }),
 
@@ -462,6 +470,7 @@ export default {
     showModal(title) {
       this.editModalVisible = true;
       this.newLocation = true;
+      this.initLocation();
       this.popup = {
         title: title,
       };
@@ -473,19 +482,43 @@ export default {
     closeDeleteModal() {
       this.deleteModalVisible = false;
     },
+            initLocation() {
+ this.id="";
+       this.address="";
+       this.streetNumber="";
+       this.zip="";
+       this.city="";
+       this.province="";
+       this.region="";
+       this.latitute= 0;
+       this.longitude= 0;
+       this.country="";
+       this.radius=200;
+       this.nonWorkingDays=[];
+       this.nonWorking=[];
+      },
+      copyFormValues() {
+      for (const [key] of Object.entries(this.location)) {
+        this[key]=this.location[key]}
+},
+
     createLocation() {
       this.location = {
-        code: this.code,
+        id: this.id,
         address: this.address,
-        number: this.number,
-        cap: this.cap,
+        streetNumber: this.streetNumber,
+        zip: this.zip,
         city: this.city,
         province: this.province,
         region: this.region,
-        latitute: this.latitute,
-        longitude: this.longitude,
-        nonWorkingDays:this.nonWorkingDays,
-        nonWorking:this.nonWorking
+        latitute: Number.parseFloat(this.latitute),
+        longitude: Number.parseFloat(this.longitude),
+        // nonWorkingDays:this.nonWorkingDays,
+        // nonWorking:this.nonWorking
+        nonWorkingDays: [],
+        nonWorking: [],
+        country: this.country,
+        radius: Number.parseInt(this.radius),
       };
     },
     saveLocation() {
@@ -517,7 +550,10 @@ export default {
     },
     deleteConfirm() {
       this.deleteModalVisible = false;
-      this.deleteLocation(this.location);
+      this.deleteLocation({
+        companyId: this.actualCompany.item.id,
+        locationId: this.actualLocation.item.id,
+      });
     },
     updateLocation() {
       //check fields
