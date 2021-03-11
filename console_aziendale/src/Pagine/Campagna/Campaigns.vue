@@ -285,6 +285,7 @@ export default {
       editModalVisible: false,
       deleteModalVisible: false,
       currentCampaignSelected: undefined,
+      id:"",
       logo: "",
       title: "",
       description: "",
@@ -302,6 +303,9 @@ export default {
     };
   },
   validations: {
+    id: {
+      required
+    },
     logo: {
       required,
     },
@@ -431,6 +435,7 @@ export default {
     },
     initCampaign() {
       this.campaign={};
+      this.id="";
         this.logo="";
       this.title="";
       this.description="";
@@ -449,6 +454,7 @@ export default {
 },
     createCampaign() {
       this.campaign = {
+        id:this.id,
         logo: this.logo,
         title: this.title,
         description: this.description,
