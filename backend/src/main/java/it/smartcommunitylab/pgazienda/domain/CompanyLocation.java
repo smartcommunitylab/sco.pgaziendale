@@ -17,6 +17,7 @@
 package it.smartcommunitylab.pgazienda.domain;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -31,8 +32,9 @@ public class CompanyLocation {
 	@NotNull
 	private String address, streetNumber, zip, city, province, region, country;
 	@NotNull
-	private Double latitute, longitude, radius;
+	private Double latitude, longitude, radius;
 	private List<Integer> nonWorking;
+	private Set<String> nonWorkingDays;
 	/**
 	 * @return the id
 	 */
@@ -130,16 +132,16 @@ public class CompanyLocation {
 		this.country = country;
 	}
 	/**
-	 * @return the latitute
+	 * @return the latitude
 	 */
-	public Double getLatitute() {
-		return latitute;
+	public Double getLatitude() {
+		return latitude;
 	}
 	/**
-	 * @param latitute the latitute to set
+	 * @param latitude the latitude to set
 	 */
-	public void setLatitute(Double latitute) {
-		this.latitute = latitute;
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
 	}
 	/**
 	 * @return the longitude
@@ -203,6 +205,17 @@ public class CompanyLocation {
 			return false;
 		return true;
 	}
-	
-	
+	/**
+	 * @return the nonWorkingDays
+	 */
+	public Set<String> getNonWorkingDays() {
+		return nonWorkingDays;
+	}
+	/**
+	 * @param nonWorkingDays the nonWorkingDays to set
+	 */
+	public void setNonWorkingDays(Set<String> nonWorkingDays) {
+		this.nonWorkingDays = nonWorkingDays;
+	}
+
 }

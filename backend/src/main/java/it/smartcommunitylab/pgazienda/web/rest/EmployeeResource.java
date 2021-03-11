@@ -16,6 +16,7 @@
 
 package it.smartcommunitylab.pgazienda.web.rest;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,8 +34,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Employee;
@@ -108,5 +113,11 @@ public class EmployeeResource {
     	return ResponseEntity.ok(companyService.findEmployees(companyId, location, pageable));
 	}
 
+    @PostMapping("/companies/{companyId}/employees/csv")
+    public ResponseEntity<Void> uploadEmployees(@PathVariable String companyId, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws Exception {
+    	log.debug("import csv empoloyees {}", companyId);
+    	companyService.importEmployees(companyId, file.getInputStream());
+    	return ResponseEntity.ok(null);
+    }
     
 }
