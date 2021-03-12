@@ -367,7 +367,12 @@ showRegolamento:function() {
             );
           },
           (err) => {
-            if (err.status== 409){
+                if (err.response) {
+      console.log(err.response.data);
+      console.log(err.response.status);
+      console.log(err.response.headers);
+    }
+            if (err.response.status== 409){
               EventBus.$emit(
               "snack-open",
               "Errore",
