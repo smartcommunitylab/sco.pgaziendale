@@ -100,5 +100,27 @@ public class TrackingDataResource {
     	return ResponseEntity.ok(dataService.getUserCampaignData(users.get(0).getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks));
 	}
 
+    /**
+     * Read all company locations
+     * @param companyId
+     * @return
+     */
+    @GetMapping("/campaigns/{campaignId}/stats/{employeeId:.*}/exist")
+	public ResponseEntity<Boolean> hasEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId) {
+    	log.debug("Read user stats {} / {}", campaignId, employeeId);
+    	
+    	Employee employee = employeeRepo.findById(employeeId).orElse( null);
+    	if (employee == null) throw new IllegalArgumentException("Invalid employee: "+ employeeId);
+    	
+    	if (!userService.isInCompanyRole(employee.getCompanyId(), Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	
+    	Optional<Company> company = companyRepo.findById(employee.getCompanyId());
+    	if (company.isEmpty())  throw new IllegalArgumentException("Invalid company: "+ employee.getCompanyId());
+    	
+    	List<User> users = userService.getUserByEmployeeCode(campaignId, company.get().getCode(), employee.getCode());
+    	if (users == null || users.isEmpty()) throw new IllegalArgumentException("Invalid employee - no subscription: "+ employeeId);
+    	
+    	return ResponseEntity.ok(dataService.hasCampaignData(users.get(0).getPlayerId(), campaignId));
+	}
 
 }

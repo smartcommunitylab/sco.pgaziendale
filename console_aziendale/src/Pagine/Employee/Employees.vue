@@ -343,22 +343,22 @@
             <div class="field-group mb-6 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.companyEmail.$error }"
+                :class="{ 'form-group--error': $v.location.$error }"
               >
-                <label class="field-label" for="password">Email </label>
+                <label class="field-label" for="password">Sede </label>
                 <input
                   type="text"
-                  name="employeeEmail"
+                  name="employeeLocation"
                   id=""
                   required
                   placeholder="Email *"
-                  v-model.trim="$v.companyEmail.$model"
+                  v-model.trim="$v.location.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.companyEmail.$error">
-                <div class="error" v-if="!$v.companyEmail.required">
-                  Il campo email e' richiesto.
+              <div v-if="$v.location.$error">
+                <div class="error" v-if="!$v.location.required">
+                  Il campo Sede e' richiesto.
                 </div>
               </div>
             </div>
@@ -402,8 +402,8 @@ export default {
   name: "Dipendenti",
   data: function () {
     return {
-      gridColumns: ["name", "surname","companyEmail","code"],
-      headerColumns: ["Nome", "Cognome","Email","Codice"],
+      gridColumns: ["name", "surname","location","code"],
+      headerColumns: ["Nome", "Cognome","Sede","Codice"],
       editModalVisible: false,
       deleteModalVisible: false,
       currentEmployeeSelected: undefined,
@@ -411,7 +411,7 @@ export default {
       name: "",
       surname: "",
       code: "",
-      companyEmail: "",
+      location: "",
       employees: [],
       popup: {
         title: "",
@@ -437,7 +437,7 @@ export default {
     code: {
       required,
     },
-    companyEmail: {
+    location: {
       required,
     },
   },
@@ -505,7 +505,7 @@ export default {
          this.name= "";
       this.surname= "";
       this.code= "";
-      this.companyEmail= "";
+      this.location= "";
       },
       copyFormValues() {
       for (const [key] of Object.entries(this.employee)) {
@@ -516,7 +516,7 @@ export default {
         name: this.name,
         surname: this.surname,
         code: this.code,
-        companyEmail: this.companyEmail,
+        location: this.location,
       };
     },
     saveEmployee() {
