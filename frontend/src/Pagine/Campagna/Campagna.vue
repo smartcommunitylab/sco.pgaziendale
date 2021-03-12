@@ -51,7 +51,7 @@
         <div
           class="flex-none bg-secondary text-white pr-20 sm:pr-48 m-2 sm:pt-2 text-right md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/4 md:m-auto rounded-md md:shadow-lg lg:m-auto"
         >
-          <p class="font-semibold text-6xl -mb-4">{{ (co2_saved).toFixed(2) }}g</p>
+          <p class="font-semibold text-6xl -mb-4">{{ co2_saved.toFixed(2) }}g</p>
           <p class="font-semibold text-lg pb-2">CO2 salvata</p>
         </div>
         <div
@@ -94,7 +94,6 @@
         <rules-icon class="pr-1" /> Leggi il regolamento
       </router-link>
     </div>
-   
 
     <div v-if="companies && companies.length && campagna.userInCampaign">
       <div class="flex flex-col pt-8">
@@ -222,11 +221,13 @@
               <p v-show="show_policy" class="text-gray-600 text-xs">
                 Ho letto e compreso
                 <router-link :to="{ name: 'privacy', params: { id: campagna.id } }">
-<a href="" class="underline text-primary"
-                  >l'informativa sul trattamento dei dati personali</a></router-link>.   
-                , acconsento al trattamento dei miei dati personali come in essa indicato
-                e sono consapevole che i dati relativi ai miei spostamenti casa-lavoro
-                saranno comunicati mensilmente in forma aggregata al mio datore di lavoro
+                  <a href="" class="underline text-primary"
+                    >l'informativa sul trattamento dei dati personali</a
+                  ></router-link
+                >. , acconsento al trattamento dei miei dati personali come in essa
+                indicato e sono consapevole che i dati relativi ai miei spostamenti
+                casa-lavoro saranno comunicati mensilmente in forma aggregata al mio
+                datore di lavoro
               </p>
             </label>
           </div>
@@ -245,10 +246,12 @@
                 >Regolamento*</span
               >
               <p v-show="show_regolamento" class="text-gray-600 text-xs">
-                Dichiaro di aver preso visione e di accettare integralmente il           <router-link :to="{ name: 'rules', params: { id: campagna.id } }">
-<a href="" class="underline text-primary"
-                  >Regolamento
-                della campagna {{this.campagna.title}}</a></router-link>.   
+                Dichiaro di aver preso visione e di accettare integralmente il
+                <router-link :to="{ name: 'rules', params: { id: campagna.id } }">
+                  <a href="" class="underline text-primary"
+                    >Regolamento della campagna {{ this.campagna.title }}</a
+                  ></router-link
+                >.
               </p>
             </label>
           </div>
@@ -317,10 +320,9 @@ export default {
     showPolicy: function () {
       this.show_policy = !this.show_policy;
     },
-showRegolamento:function() {
-        this.show_regolamento = !this.show_regolamento;
-
-},
+    showRegolamento: function () {
+      this.show_regolamento = !this.show_regolamento;
+    },
     confirm: function () {
       let loader = this.$loading.show({
         canCancel: false,
@@ -367,15 +369,15 @@ showRegolamento:function() {
             );
           },
           (err) => {
-            if (err.status== 409){
+            if (err.response && err.response.status == 409) {
+              this.modalSubscribeShowing = false;
               EventBus.$emit(
-              "snack-open",
-              "Errore",
-              "Impossibile effettuare l'iscrizione. Il codice utente risulta giá utilizzato in precedenza." ,
-              2
-            );
-            }
-            EventBus.$emit("snack-open");
+                "snack-open",
+                "Errore",
+                "Impossibile effettuare l'iscrizione. Il codice utente risulta giá utilizzato in precedenza.",
+                2
+              );
+            } else EventBus.$emit("snack-open");
             console.log(err);
             loader.hide();
           }
@@ -457,6 +459,4 @@ showRegolamento:function() {
 };
 </script>
 
-<style scope>
-
-</style>
+<style scope></style>
