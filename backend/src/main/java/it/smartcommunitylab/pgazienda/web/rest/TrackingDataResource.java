@@ -105,7 +105,7 @@ public class TrackingDataResource {
      * @param companyId
      * @return
      */
-    @GetMapping("/campaigns/{campaignId}/stats/{employeeId:.*}.exist")
+    @GetMapping("/campaigns/{campaignId}/stats/{employeeId:.*}/exist")
 	public ResponseEntity<Boolean> hasEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId) {
     	log.debug("Read user stats {} / {}", campaignId, employeeId);
     	
