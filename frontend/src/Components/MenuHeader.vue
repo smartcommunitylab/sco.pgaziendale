@@ -523,8 +523,8 @@ export default {
       }
       window.location.href =
         "mailto:help-aziende@playngo.it?subject=Richiesta informazioni&body=" +
-        "Id utente :" +
-        this.user.id +
+        "***NON CANCELLARE***%0d%0aId utente :" +
+        this.user.playerId +
         "%0d%0a" +
         "Codice partecipazione: " +
         codePartecipation +
@@ -537,7 +537,7 @@ export default {
         "%0d%0a" +
         "Campagna :" +
         this.campagna.title +
-        "%0d%0a";
+        "%0d%0a************%0d%0aSCRIVI QUI LA TUA RICHIESTA DI SUPPORTO%0d%0a";
     },
     contacts: function () {
       this.isOpen = false;
