@@ -367,6 +367,14 @@ showRegolamento:function() {
             );
           },
           (err) => {
+            if (err.status== 409){
+              EventBus.$emit(
+              "snack-open",
+              "Errore",
+              "Impossibile effettuare l'iscrizione. Il codice utente risulta giá utilizzato in precedenza." ,
+              2
+            );
+            }
             EventBus.$emit("snack-open");
             console.log(err);
             loader.hide();
