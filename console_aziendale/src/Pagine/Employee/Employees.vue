@@ -284,7 +284,7 @@
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <form action="" id="addEmployee">
-          <div class="mb-4 flex flex-wrap justify-between">
+          <div class="mb-20 flex flex-wrap justify-between">
             <div class="field-group mb-4 w-full">
               <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
                 <label class="field-label" for="first_name">Nome </label>

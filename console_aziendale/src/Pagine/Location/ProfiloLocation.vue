@@ -43,22 +43,18 @@
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
-            <email-icon /> {{ actualLocation.item.latitute }}
+            <gps-icon /> {{ actualLocation.item.latitude }}{{ actualLocation.item.longitude }}
           </p>
-          <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
-            <phone-icon /> {{ actualLocation.item.longitude }}
-          </p>
+
            <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
-            <phone-icon /> {{ actualLocation.item.nonWorking }}
+            <calendar-remove-icon /> {{ actualLocation.item.nonWorking }}
           </p>
                      <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
-            <phone-icon /> {{ actualLocation.item.nonWorkingDays }}
+            <calendar-remove-icon /> {{ actualLocation.item.nonWorkingDays }}
           </p>
         </div>
       </div>

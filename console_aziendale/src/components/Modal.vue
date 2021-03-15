@@ -110,7 +110,7 @@
   .modal-body {
     position: relative;
     padding: 20px 10px;
-    max-height: calc(100vh - 210px);
+    max-height: calc(100vh - 310px);
     overflow-y: auto;
   }
 
