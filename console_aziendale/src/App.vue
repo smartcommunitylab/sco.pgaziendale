@@ -8,11 +8,12 @@
       >
       {{ alert.message }}
     </div>
-    <router-view
+    <router-view class=" min-h-screen "
       :class="{
-        'lg:pl-64 pt-16 lg:pt-16': account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd',
+        'lg:pl-64 pt-16 lg:pt-16 padding-bottom': account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd',
       }"
     />
+      <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
   </div>
 </template>
 
@@ -20,10 +21,11 @@
 import MenuHeader from "./components/NavBar/MenuHeader.vue";
 import { mapActions, mapState } from "vuex";
 import Loader from "./components/Loader";
+import Footer from "@/components/Footer"
 // import httpClient from './utils/httpClient';
 export default {
   name: "App",
-  components: { "menu-header": MenuHeader,Loader },
+  components: { "menu-header": MenuHeader,Loader,"app-footer":Footer },
   computed: {
     ...mapState({
       account: (state) => state.account,
@@ -59,6 +61,7 @@ export default {
 </script>
 
 <style scoped>
+
 .closebtn {
   margin-left: 15px;
   color: white;

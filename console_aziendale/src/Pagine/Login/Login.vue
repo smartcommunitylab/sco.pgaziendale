@@ -9,10 +9,10 @@
 
       <title>Login</title>
     </head>
-    <body class="bg-primary h-screen w-screen font-sans">
-      <div class="container mx-auto h-full flex justify-center items-center">
+    <body class="bg-primary h-screen w-screen font-sans relative">
+      <div class="container mx-auto h-full flex justify-center items-center padding-bottom">
         <div class="w-1/3">
-          <img src="@/assets/images/pgaziendale.png" alt="Logo" />
+          <img src="@/assets/images/pgaziendale.png" alt="Logo" class="max-h-60 m-auto"/>
 
           <h1 class="font-hairline mb-6 text-center text-white text-3xl">
             Entra in Aziende Play&Go
@@ -94,14 +94,19 @@
           </div>
         </div>
       </div>
+            <app-footer class="bottom-0"/>
     </body>
   </html>
 </template>
 
 <script>
 import { mapState, mapActions } from "vuex";
+import Footer from "@/components/Footer"
 
 export default {
+  components: {
+    "app-footer":Footer
+  },
   data() {
     return {
       username: "",
