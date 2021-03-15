@@ -634,9 +634,8 @@ export default {
       console.log(this.fileUploaded);
       this.modalImportEmployeesOpen = false;
       var formData = new FormData();
-      formData.append("image", this.fileUploaded.item(0));
-
-      this.importData(this.actualCompany.id, formData);
+      formData.append("file", this.fileUploaded.item(0));
+      this.importData({companyId:this.actualCompany.item.id, file:formData});
     },
     removeFile: function () {
       this.fileUploaded = null;

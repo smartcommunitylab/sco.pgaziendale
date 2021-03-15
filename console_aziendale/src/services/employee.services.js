@@ -16,8 +16,8 @@ function importEmployees(companyId,file) {
         }
     }).then(
         res => {
-            if (res && res.data && res.data.content) {
-                return Promise.resolve(res.data.content);
+            if (res   ) {
+                return Promise.resolve(res);
             }
             else return Promise.reject(null);
         }, err => {
