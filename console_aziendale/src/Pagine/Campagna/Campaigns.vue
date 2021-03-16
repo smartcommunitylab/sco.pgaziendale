@@ -50,6 +50,24 @@
       <template v-slot:body>
         <form action="" id="addCampaign">
           <div class="mb-20 flex flex-wrap justify-between">
+                        <div class="field-group mb-4 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
+                <label class="field-label" for="first_name">Id </label>
+                <input
+                  type="text"
+                  name="campaignId"
+                  placeholder="Id *"
+                  v-model.trim="$v.id.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                  id="campaignLogo"
+                />
+              </div>
+              <div v-if="$v.logo.$error">
+                <div class="error" v-if="!$v.id.required">
+                  Il campo Id e' richiesto.
+                </div>
+              </div>
+            </div>
             <div class="field-group mb-4 w-full">
               <div class="form-group" :class="{ 'form-group--error': $v.logo.$error }">
                 <label class="field-label" for="first_name">Logo </label>

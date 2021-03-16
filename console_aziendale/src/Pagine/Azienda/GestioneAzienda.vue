@@ -14,7 +14,7 @@
       
       <div class="ml-auto pt-4 pr-4">
         <button
-          @click="showUser('Aggiungi utente')"
+          @click="showModal('Aggiungi utente')"
           class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
         >
           <add-icon class="add-icon" />

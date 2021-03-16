@@ -2,15 +2,33 @@
   export default {
     name: 'modal',
     methods: {
-      close() {
-        this.$emit('close');
-      },
+        toggleBodyClass(addRemoveClass, className) {
+    const el = document.body;
+
+    if (addRemoveClass === 'addClass') {
+      el.classList.add(className);
+    } else {
+      el.classList.remove(className);
+    }
+  },
+  show() {
+    console.log('modal mounted');
+  this.toggleBodyClass('addClass', 'modal-show');
     },
+        close() {
+          this.$emit('close');
+          console.log('modal detroyed');
+          this.toggleBodyClass('removeClass', 'modal-hide');
+      },
+},
+
+
+
   };
 </script>
 <template>
   <transition name="modal-fade">
-    <div class="modal-backdrop">
+    <div class="modal-backdrop" v-init="show">
       <div class="modal w-1/2 z-50 m-0 absolute top-20"
         role="dialog"
         aria-labelledby="modalTitle"
@@ -79,7 +97,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    
+    z-index: 9999;
   }
 
   .modal {
@@ -110,8 +128,9 @@
   .modal-body {
     position: relative;
     padding: 20px 10px;
-    max-height: calc(100vh - 310px);
-    overflow-y: auto;
+    max-height: calc(100vh - 210px);
+    overflow-y: scroll;
+    padding: 1.25em;
   }
 
   .btn-close {
@@ -130,4 +149,5 @@
     border: 1px solid #4AAE9B;
     border-radius: 2px;
   }
+  
 </style>

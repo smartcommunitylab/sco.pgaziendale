@@ -57,6 +57,11 @@ Vue.component('delete-icon',Delete);
 Vue.component('account-cog-icon',AccountCog);
 Vue.component('gps-icon',CrosshairsGps);
 Vue.component('calendar-remove-icon',CalendarRemove);
+Vue.directive('init', {
+  bind: function(el, binding, vnode) {
+    vnode.context[binding.arg] = binding.value;
+  }
+});
 axios.defaults.showLoader = true;
 
 axios.interceptors.request.use(
