@@ -3,10 +3,10 @@
 
     <div class="container mx-auto h-full flex justify-center items-center">
       <div class="w-1/3">
-        <img src="@/assets/images/pgaziendale.png" alt="Logo" />
+        <img src="@/assets/images/pgaziendale.png" alt="Logo" class="max-h-40 m-auto" />
 
         <h1 class="font-hairline mb-6 text-center text-white text-3xl">Reset Password</h1>
-        <div class="relative border-teal p-8 border-t-12 bg-white mb-6 rounded-lg shadow-lg">
+        <div class="relative border-teal p-4 border-t-12 bg-white mb-6 rounded-lg shadow-lg">
                 <div class="backButton" @click="back">
         <back-icon/>
     </div>
@@ -115,12 +115,20 @@
         </div>
       </div>
     </div>
+            <app-footer />
+
   </div>
+
 </template>
 
 <script>
 import {mapActions} from 'vuex';
+import Footer from "@/components/Footer"
+
 export default {
+    components: {
+    "app-footer":Footer
+  },
   data() {
     return {
       step: 1,

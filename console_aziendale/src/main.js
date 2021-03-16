@@ -23,6 +23,8 @@ import Eye from "vue-material-design-icons/Eye";
 import EyeOff from "vue-material-design-icons/EyeOff";
 import Delete from "vue-material-design-icons/Delete";
 import AccountCog from "vue-material-design-icons/AccountCog";
+import CrosshairsGps from "vue-material-design-icons/CrosshairsGps";
+import CalendarRemove from "vue-material-design-icons/CalendarRemove";
 import axios from 'axios'
 import {router} from "./routes.js"
 import { store } from './store'
@@ -47,12 +49,19 @@ Vue.component('email-icon', Email);
 Vue.component('phone-icon', Phone);
 Vue.component('add-icon', Add);
 Vue.component('add-employee', AddEmployess);
-Vue.component('import-icon',Import)
-Vue.component('dots-h-icon',DotsHorizzontal)
-Vue.component('eye-icon',Eye)
-Vue.component('eye-off-icon',EyeOff)
-Vue.component('delete-icon',Delete)
-Vue.component('account-cog-icon',AccountCog)
+Vue.component('import-icon',Import);
+Vue.component('dots-h-icon',DotsHorizzontal);
+Vue.component('eye-icon',Eye);
+Vue.component('eye-off-icon',EyeOff);
+Vue.component('delete-icon',Delete);
+Vue.component('account-cog-icon',AccountCog);
+Vue.component('gps-icon',CrosshairsGps);
+Vue.component('calendar-remove-icon',CalendarRemove);
+Vue.directive('init', {
+  bind: function(el, binding, vnode) {
+    vnode.context[binding.arg] = binding.value;
+  }
+});
 axios.defaults.showLoader = true;
 
 axios.interceptors.request.use(

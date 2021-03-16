@@ -14,7 +14,7 @@
       
       <div class="ml-auto pt-4 pr-4">
         <button
-          @click="showUser('Aggiungi utente')"
+          @click="showModal('Aggiungi utente')"
           class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
         >
           <add-icon class="add-icon" />
@@ -26,7 +26,7 @@
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <form action="" id="addUser">
-          <div class="mb-4 flex flex-wrap justify-between">
+          <div class="mb-20 flex flex-wrap justify-between">
             <div class="field-group mb-4 w-full">
               <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
                 <label class="field-label" for="first_name">Nome </label>

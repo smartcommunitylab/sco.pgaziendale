@@ -39,6 +39,7 @@ const actions = {
             companyService.getCompanyById(companyId).then(
                 company => {
                     commit('chooseCompanyAdmin', company);
+                    dispatch('getUsers',company.item);
                     dispatch('alert/success', "Azienda selezionata", { root: true });
                 },
                 error => {
@@ -63,6 +64,7 @@ const actions = {
     },
     chooseCompanyAdmin({ commit, dispatch }, company){
         commit('choooseCompanyAdmin', company);
+        dispatch('getUsers',company.item);
         dispatch('alert/success', "Azienda selezionata", { root: true });
     },
     resetCompanyAdmin({ commit, dispatch }){
@@ -154,7 +156,7 @@ const actions = {
 
 const mutations = {
     choooseCompanyAdmin(state,company) {
-    state.adminCompany=company;
+        state.adminCompany=company;
     },
     resetCompanyAdmin(state) {
         state.adminCompany=null;
