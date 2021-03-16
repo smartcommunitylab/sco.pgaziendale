@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col lg:flex-row">
-    <div class="bg-green-300 lg:w-4/6 mx-2 my-2 p-8">
+    <div class="bg-green-300 lg:w-full mx-2 my-2 p-8">
       <profilo-azienda></profilo-azienda>
       <gestione-azienda v-if="adminCompany && adminCompany.item"></gestione-azienda>
     </div>
