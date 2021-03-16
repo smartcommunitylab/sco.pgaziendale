@@ -129,6 +129,7 @@
     position: relative;
     padding: 20px 10px;
     max-height: calc(100vh - 210px);
+    min-height: 200px;
     overflow-y: scroll;
     padding: 1.25em;
   }

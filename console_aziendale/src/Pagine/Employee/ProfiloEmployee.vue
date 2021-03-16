@@ -25,14 +25,14 @@
             class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
             v-bind:style="{ backgroundImage: 'url(' + actualEmployee.item.logo + ')' }"
           ></div> -->
-          <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualEmployee.item.name }}</h1>
+          <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualEmployee.item.name }} {{ actualEmployee.item.surname }}</h1>
           <div
             class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
           ></div>
           <p
             class="pt-4 text-base font-bold flex items-center justify-center lg:justify-start"
           >
-            <address-icon />{{ actualEmployee.item.surname }}
+            <address-icon />{{ actualEmployee.item.location }}
           </p>
           <!-- <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
@@ -42,14 +42,9 @@
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
-            <email-icon /> {{ actualEmployee.item.companyEmail }}
+            <email-icon /> {{ actualEmployee.item.code }}
           </p>
           <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
-            <phone-icon /> {{ actualEmployee.item.code }}
-          </p>
-           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
             <phone-icon /> {{ actualEmployee.item.campaigns }}
