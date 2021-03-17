@@ -186,7 +186,7 @@ public class UserService {
                 if (companyId != null) {
                     // check roles: only the company roles are applicable
                     List<UserRole> roles = userDTO.getRoles().stream().filter((r -> companyId.equals(r.getCompanyId()))).collect(Collectors.toList());
-                    user.setRoles(mergeRoles(roles, user.getRoles()));
+                    user.setRoles(mergeRoles(companyId, roles, user.getRoles()));
                     if (user.getRoles().isEmpty()) throw new IllegalArgumentException("Empty company roles");
                 }
                 
@@ -263,27 +263,33 @@ public class UserService {
     }
 
     /**
-	 * @param roles
-	 * @param roles2
+	 * @param companyId 
+     * @param newRoles
+	 * @param oldRoles
 	 * @return
 	 */
-	private List<UserRole> mergeRoles(List<UserRole> roles, List<UserRole> roles2)
+	private List<UserRole> mergeRoles(String companyId, List<UserRole> newRoles, List<UserRole> oldRoles)
 	{
-		if (roles == null || roles.isEmpty()) return roles2;
-		if (roles2 == null || roles2.isEmpty()) return roles;
+		List<UserRole> extraRoles = oldRoles.stream().filter(r -> !companyId.equals(r.getCompanyId())).collect(Collectors.toList());
+		if (newRoles == null || newRoles.isEmpty()) return extraRoles;
+		if (oldRoles == null || oldRoles.isEmpty()) return newRoles;
 		final Map<String, UserRole> map = new HashMap<>();
-		roles.forEach(r -> map.put(r.key(), r));
-		roles2.forEach(r -> {
+		newRoles.forEach(r -> map.put(r.key(), r));
+		oldRoles.forEach(r -> {
 			String key = r.key();
-			if (map.containsKey(key)) {
+
+			// keep roles of other companies or global roles
+			if (!companyId.equals(r.getCompanyId())) {
+				map.put(key, r);
+
+			// merge locations	
+			} else if (map.containsKey(key)) {
 				UserRole toMerge = map.get(key);
 				if (r.getLocations() != null) {
 					Set<String> set =  new HashSet<>(r.getLocations());
 					if (toMerge.getLocations() != null) set.addAll(toMerge.getLocations());
 					toMerge.setLocations(new LinkedList<>(set));
 				}
-			} else {
-				map.put(key, r);
 			}
 		});
 		return new LinkedList<>(map.values());
