@@ -4,7 +4,7 @@
     <modal v-show="profileSetting">
       <template v-slot:header> Account</template>
       <template v-slot:body>
-        <div class="mb-4 flex flex-wrap justify-between">
+        <div class="mb-20 flex flex-wrap justify-between">
           <div class="field-group mb-4 w-full">
             <div class="name">Nome: {{ user.name }} {{ user.surname }}</div>
             <div class="username">Nome utente: {{ user.username }}</div>

@@ -15,15 +15,15 @@
             <pencil-outline-icon />
           </button>
         </div>
-		<div class="p-4 md:p-12 text-center lg:text-left">
-		<div class=" pt-8 lg:pt-0"> <img :src="actualCampaign.item.logo"/></div>
-		<div class="text-xl font-bold pt-8 lg:pt-0">{{actualCampaign.item.title}}</div>
-			<div class="text-xl   pt-8 lg:pt-0">{{actualCampaign.item.description}}</div>
-			<div class="text-xl   pt-8 lg:pt-0">{{actualCampaign.item.from}}</div>
-			<div class="text-xl  pt-8 lg:pt-0">{{actualCampaign.item.to}}</div>
-			<div class="text-xl  pt-8 lg:pt-0" v-html="actualCampaign.item.rules"></div>
-            <div class="text-xl  pt-8 lg:pt-0"  v-html="actualCampaign.item.privacy"></div>
-            <div class="text-xl pt-8 lg:pt-0">{{actualCampaign.item.means}}</div>
+		<div v-if="actualCampaign.item" class="p-4 md:p-12 text-center lg:text-left">
+		<div class=" pt-8 lg:pt-0" v-if="actualCampaign.item.logo"> <img :src="actualCampaign.item.logo"/></div>
+		<div class="text-xl font-bold pt-8 lg:pt-0" v-if="actualCampaign.item.logo">{{actualCampaign.item.title}}</div>
+			<div class="text-xl   pt-8 lg:pt-0" v-if="actualCampaign.item.description">{{actualCampaign.item.description}}</div>
+			<div class="text-xl   pt-8 lg:pt-0" v-if="actualCampaign.item.from">{{actualCampaign.item.from}}</div>
+			<div class="text-xl  pt-8 lg:pt-0" v-if="actualCampaign.item.to">{{actualCampaign.item.to}}</div>
+			<div class="text-xl  pt-8 lg:pt-0" v-if="actualCampaign.item.rules" v-html="actualCampaign.item.rules"></div>
+      <div class="text-xl  pt-8 lg:pt-0"  v-if="actualCampaign.item.privacy" v-html="actualCampaign.item.privacy"></div>
+        <div class="text-xl pt-8 lg:pt-0" v-if="actualCampaign.item.means">{{getListOfMeans()}}</div>
 
 
 			
@@ -35,6 +35,7 @@
 <script>
 import { mapState } from 'vuex';
 import EventBus from '@/components/eventBus'
+import  {campaignService}  from '../../services';
 
 export default {
     name:"ProfiloCampagna",
@@ -48,6 +49,9 @@ export default {
 
     },
     methods: {
+      getListOfMeans() {
+        return campaignService.getTextOfMeans(this.actualCampaign.item.means);
+      },
 	deleteCampaign() {
 		EventBus.$emit("DELETE_CAMPAIGN",this.actualCampaign);
 	},
