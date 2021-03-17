@@ -30,7 +30,8 @@ import {router} from "./routes.js"
 import { store } from './store'
 import './assets/styles/index.css';
 import Vuelidate from 'vuelidate'
-
+import { VueEditor } from "vue2-editor";
+Vue.component('vue-editor',VueEditor);
 Vue.config.productionTip = false
 Vue.component('pencil-outline-icon', PencilOutlineIcon);
 Vue.component('back-icon',Back);
