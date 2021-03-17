@@ -49,7 +49,7 @@
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <form action="" id="addLocation">
-          <div class="mb-4 flex flex-wrap justify-between">
+          <div class="mb-20 flex flex-wrap justify-between">
             <div class="field-group mb-4 w-full">
               <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
                 <label class="field-label" for="first_name">Identificativo </label>
@@ -231,7 +231,7 @@
             <div class="field-group mb-6 w-full">
               <div
                 class="form-group"
-                :class="{ 'form-group--error': $v.latitute.$error }"
+                :class="{ 'form-group--error': $v.latitude.$error }"
               >
                 <label class="field-label" for="password">Latitudine</label>
                 <input
@@ -240,12 +240,12 @@
                   id=""
                   required
                   placeholder="Mezzi *"
-                  v-model.trim="$v.latitute.$model"
+                  v-model.trim="$v.latitude.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
               </div>
-              <div v-if="$v.latitute.$error">
-                <div class="error" v-if="!$v.latitute.required">
+              <div v-if="$v.latitude.$error">
+                <div class="error" v-if="!$v.latitude.required">
                   Il campo Latitudine e' richiesto.
                 </div>
               </div>
@@ -357,8 +357,8 @@ export default {
   components: { ProfiloLocation, GenericTable, Modal },
   data: function () {
     return {
-      gridColumns: ["city", "address"],
-      headerColumns: ["Cittá", "Indirizzo"],
+      gridColumns: ["id","city", "address"],
+      headerColumns: ["Identificativo","Cittá", "Indirizzo"],
       newLocation: false,
       location: {},
       popup: {
@@ -371,7 +371,7 @@ export default {
       city: "",
       province: "",
       region: "",
-      latitute: 0,
+      latitude: 0,
       longitude: 0,
       country: "",
       radius: 200,
@@ -410,7 +410,7 @@ export default {
     radius: {
       required,
     },
-    latitute: {
+    latitude: {
       required,
     },
     longitude: {
@@ -490,7 +490,7 @@ export default {
        this.city="";
        this.province="";
        this.region="";
-       this.latitute= 0;
+       this.latitude= 0;
        this.longitude= 0;
        this.country="";
        this.radius=200;
@@ -511,7 +511,7 @@ export default {
         city: this.city,
         province: this.province,
         region: this.region,
-        latitute: Number.parseFloat(this.latitute),
+        latitude: Number.parseFloat(this.latitude),
         longitude: Number.parseFloat(this.longitude),
         // nonWorkingDays:this.nonWorkingDays,
         // nonWorking:this.nonWorking

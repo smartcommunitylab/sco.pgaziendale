@@ -9,47 +9,6 @@
           :method="showCompanyInfo"
         >
         </generic-table>
-        <!-- <table class="shadow-lg rounded relative w-full">
-        <thead class="text-center justify-between">
-          <tr class="truncate px-2 flex border-b border-background text-center">
-            <th class="w-1/6">Logo</th>
-
-            <th class="w-4/6">Nome</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white" v-if="allCompanies">
-          <template v-for="company in allCompanies.items">
-            <tr
-              class="select-none cursor-pointer flex border-b border-background hover:bg-background transition ease-in duration-100"
-              :key="company.id"
-              tag="tr"
-              @dblclick="goToCompany(company.name)"
-              @click="showCompanyInfo(company)"
-              :id="company.id"
-            >
-              <td class="flex items-center align-middle w-1/6">
-                <span class="m-auto" v-if="company.logo">
-                  <img 
-                    class="hidden mr-1 md:mr-2 md:inline-block h-8 w-8 rounded-sm object-cover"
-                    :src="company.logo"
-                    alt=""
-                  />
-                </span>
-              </td>
-              <td class="flex items-center text-center align-middle w-4/6">
-                <span class="m-auto">
-                  <p class="text-gray-800 text-sm font-semibold">
-                    {{ company.name }}
-                  </p>
-                </span>
-              </td>
-              <td class="w-1/6">
-                <eye-icon />
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table> -->
       </div>
       <div v-else>Non ci sono Aziende</div>
 
@@ -67,7 +26,7 @@
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <form action="" id="addAzienda">
-          <div class="mb-4 flex flex-wrap justify-between">
+          <div class="mb-20 flex flex-wrap justify-between">
             <div class="field-group mb-4 w-full">
               <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
                 <label class="field-label" for="first_name">Nome </label>
@@ -354,7 +313,7 @@ export default {
   data: function () {
     return {
       gridColumns: ["name", "code"],
-      headerColumns: ["Nome", "Codice"],
+      headerColumns: ["Nome", "Codice Azienda"],
       editModalVisible: false,
       deleteModalVisible: false,
       currentCompanySelected: undefined,

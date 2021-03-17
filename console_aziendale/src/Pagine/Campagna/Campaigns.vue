@@ -49,7 +49,23 @@
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <form action="" id="addCampaign">
-          <div class="mb-4 flex flex-wrap justify-between">
+          <div class="mb-20 flex flex-wrap justify-between">
+            <div class="field-group mb-4 w-full">
+              <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
+                <label class="field-label" for="first_name">Id </label>
+                <input
+                  type="text"
+                  name="campaignId"
+                  placeholder="Id *"
+                  v-model.trim="$v.id.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                  id="campaignLogo"
+                />
+              </div>
+              <div v-if="$v.logo.$error">
+                <div class="error" v-if="!$v.id.required">Il campo Id e' richiesto.</div>
+              </div>
+            </div>
             <div class="field-group mb-4 w-full">
               <div class="form-group" :class="{ 'form-group--error': $v.logo.$error }">
                 <label class="field-label" for="first_name">Logo </label>
@@ -108,19 +124,50 @@
                 </div>
               </div>
             </div>
-
             <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.from.$error }">
+              <div
+                class="form-group flex"
+                :class="{ 'form-group--error': $v.from.$error }"
+              >
                 <label class="field-label" for="password">Da </label>
-                <input
-                  type="text"
-                  name="campaignFrom"
-                  id=""
-                  required
-                  placeholder="Da *"
-                  v-model.trim="$v.from.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
+                <VueTailwindPicker
+                  :theme="{
+                    background: '#1A202C',
+                    text: 'text-white',
+                    border: 'border-gray-700',
+                    currentColor: 'text-gray-200',
+                    navigation: {
+                      background: 'bg-gray-800',
+                      hover: 'hover:bg-gray-700',
+                      focus: 'bg-gray-700',
+                    },
+                    picker: {
+                      rounded: 'rounded-md',
+                      selected: {
+                        background: 'bg-teal-400',
+                        border: 'border-teal-400',
+                        hover: 'hover:border-teal-400',
+                      },
+                      holiday: 'text-red-400',
+                      weekend: 'text-green-400',
+                      event: 'bg-blue-500',
+                    },
+                    event: {
+                      border: 'border-gray-700',
+                    },
+                  }"
+                  @change="(v) => ($v.from.$model = v)"
+                >
+                  <input
+                    type="text"
+                    name="campaignFrom"
+                    id=""
+                    required
+                    placeholder="Da *"
+                    v-model.trim="$v.from.$model"
+                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                  />
+                </VueTailwindPicker>
               </div>
               <div v-if="$v.from.$error">
                 <div class="error" v-if="!$v.from.required">
@@ -129,17 +176,46 @@
               </div>
             </div>
             <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.to.$error }">
+              <div class="form-group flex" :class="{ 'form-group--error': $v.to.$error }">
                 <label class="field-label" for="password">A </label>
-                <input
-                  type="text"
-                  name="campaignTo"
-                  id=""
-                  required
-                  placeholder="A *"
-                  v-model.trim="$v.to.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
+                <VueTailwindPicker
+                  :theme="{
+                    background: '#1A202C',
+                    text: 'text-white',
+                    border: 'border-gray-700',
+                    currentColor: 'text-gray-200',
+                    navigation: {
+                      background: 'bg-gray-800',
+                      hover: 'hover:bg-gray-700',
+                      focus: 'bg-gray-700',
+                    },
+                    picker: {
+                      rounded: 'rounded-md',
+                      selected: {
+                        background: 'bg-teal-400',
+                        border: 'border-teal-400',
+                        hover: 'hover:border-teal-400',
+                      },
+                      holiday: 'text-red-400',
+                      weekend: 'text-green-400',
+                      event: 'bg-blue-500',
+                    },
+                    event: {
+                      border: 'border-gray-700',
+                    },
+                  }"
+                  @change="(v) => ($v.to.$model = v)"
+                >
+                  <input
+                    type="text"
+                    name="campaignTo"
+                    id=""
+                    required
+                    placeholder="A *"
+                    v-model.trim="$v.to.$model"
+                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                  />
+                </VueTailwindPicker>
               </div>
               <div v-if="$v.to.$error">
                 <div class="error" v-if="!$v.to.required">Il campo a e' richiesto.</div>
@@ -148,34 +224,20 @@
             <div class="field-group mb-6 w-full">
               <div class="form-group" :class="{ 'form-group--error': $v.rules.$error }">
                 <label class="field-label" for="password">Regole</label>
-                <input
-                  type="text"
-                  name="campaignRules"
-                  id=""
-                  required
-                  placeholder="Regole *"
-                  v-model.trim="$v.rules.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
+                <vue-editor v-model="$v.rules.$model"></vue-editor>
+              
               </div>
               <div v-if="$v.rules.$error">
                 <div class="error" v-if="!$v.rules.required">
-                  Il campo privacy e' richiesto.
+                  Il campo Regole e' richiesto.
                 </div>
               </div>
             </div>
             <div class="field-group mb-6 w-full">
               <div class="form-group" :class="{ 'form-group--error': $v.privacy.$error }">
                 <label class="field-label" for="password">Privacy</label>
-                <input
-                  type="text"
-                  name="campaignPrivacy"
-                  id=""
-                  required
-                  placeholder="Privacy *"
-                  v-model.trim="$v.privacy.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
+                <vue-editor v-model="$v.privacy.$model"></vue-editor>
+             
               </div>
               <div v-if="$v.privacy.$error">
                 <div class="error" v-if="!$v.privacy.required">
@@ -183,22 +245,27 @@
                 </div>
               </div>
             </div>
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.means.$error }">
-                <label class="field-label" for="password">Mezzi</label>
-                <input
-                  type="text"
-                  name="campaignMeans"
-                  id=""
-                  required
-                  placeholder="Mezzi *"
-                  v-model.trim="$v.means.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.means.$error">
-                <div class="error" v-if="!$v.means.required">
-                  Il campo Mezzi e' richiesto.
+            <div class="block">
+              <span class="text-gray-700">Mezzi</span>
+              <div class="field-group mb-6 w-full">
+                <div class="form-group" :class="{ 'form-group--error': $v.means.$error }">
+                  <div v-for="mean in arrayMeans" v-bind:key="mean.value">
+                    <label class="inline-flex items-center">
+                      <input
+                        type="checkbox"
+                        class="form-checkbox"
+                        v-model.trim="$v.means.$model"
+                        :value="mean.value"
+                      />
+                      <span class="ml-2">{{mean.text}}</span>
+                    </label>
+                  </div>
+                 
+                </div>
+                <div v-if="$v.means.$error">
+                  <div class="error" v-if="!$v.means.required">
+                    Il campo Mezzi e' richiesto.
+                  </div>
                 </div>
               </div>
             </div>
@@ -221,18 +288,16 @@
                 </div>
               </div>
             </div>
-                        <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.application.$error }">
+            <div class="field-group mb-6 w-full">
+              <div
+                class="form-group"
+                :class="{ 'form-group--error': $v.application.$error }"
+              >
                 <label class="field-label" for="password">Applicazione</label>
-                <input
-                  type="text"
-                  name="campaignApplication"
-                  id=""
-                  required
-                  placeholder="Applicazione *"
-                  v-model.trim="$v.application.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
+                  <select class="form-select mt-1 block w-full" v-model.trim="$v.application.$model">
+                    <option v-for="app in applications" :key="app.id" :value="app.id">{{app.name}}</option>
+
+  </select>
               </div>
               <div v-if="$v.application.$error">
                 <div class="error" v-if="!$v.application.required">
@@ -275,17 +340,22 @@ import EventBus from "@/components/eventBus";
 import { required } from "vuelidate/lib/validators";
 import Modal from "@/components/Modal.vue";
 import GenericTable from "@/components/GenericTable.vue";
+import VueTailwindPicker from "vue-tailwind-picker";
+import { campaignService } from '../../services';
+
 export default {
-  components: { ProfiloCampagna, Modal, GenericTable },
+  components: { ProfiloCampagna, Modal, GenericTable, VueTailwindPicker },
   name: "GestioneCampagne",
   data: function () {
     return {
       gridColumns: ["title", "from", "to", "active"],
       headerColumns: ["Nome", "Inizio", "Fine", "Status"],
+      arrayMeans: [],
+      applications:[],
       editModalVisible: false,
       deleteModalVisible: false,
       currentCampaignSelected: undefined,
-      id:"",
+      id: "",
       logo: "",
       title: "",
       description: "",
@@ -294,8 +364,8 @@ export default {
       rules: "",
       privacy: "",
       means: [],
-      active:false,
-      application:"",
+      active: false,
+      application: "",
       popup: {
         title: "",
       },
@@ -304,7 +374,7 @@ export default {
   },
   validations: {
     id: {
-      required
+      required,
     },
     logo: {
       required,
@@ -331,17 +401,21 @@ export default {
       required,
     },
     active: {
-      required
+      required,
     },
     application: {
-      required
-    }
+      required,
+    },
   },
   computed: {
     ...mapState("company", ["actualCompany", "adminCompany"]),
     ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
   },
   mounted: function () {
+    campaignService.getApplications().then(res=> {
+       this.applications=res;
+    })
+    this.arrayMeans=campaignService.getArrayMeans();
     this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
     // this.campaigns = campaigns;
     if (this.adminCompany) {
@@ -352,7 +426,7 @@ export default {
     }
     if (!this.adminCompany && !this.actualCompany) {
       this.getAllCampaigns(null);
-      }
+    }
     EventBus.$on("EDIT_CAMPAIGN", (campaign) => {
       this.editModalVisible = true;
       this.campaign = campaign.item;
@@ -420,7 +494,7 @@ export default {
       this.editModalVisible = true;
       this.newCampaign = true;
       this.campaign = {};
-      this.newValues();
+      this.initCampaign();
       this.popup = {
         title: title,
       };
@@ -434,27 +508,27 @@ export default {
       this.deleteModalVisible = false;
     },
     initCampaign() {
-      this.campaign={};
-      this.id="";
-        this.logo="";
-      this.title="";
-      this.description="";
-      this.from="";
-      this.to="";
-      this.rules="";
-      this.privacy="";
-      this.means=[]
-      this.active=false;
-      this.application="";
-      
-  },
+      this.campaign = {};
+      this.id = "";
+      this.logo = "";
+      this.title = "";
+      this.description = "";
+      this.from = "";
+      this.to = "";
+      this.rules = "";
+      this.privacy = "";
+      this.means = [];
+      this.active = false;
+      this.application = "";
+    },
     copyFormValues() {
       for (const [key] of Object.entries(this.campaign)) {
-        this[key]=this.campaign[key]}
-},
+        this[key] = this.campaign[key];
+      }
+    },
     createCampaign() {
       this.campaign = {
-        id:this.id,
+        id: this.id,
         logo: this.logo,
         title: this.title,
         description: this.description,
@@ -462,9 +536,9 @@ export default {
         to: this.to,
         rules: this.rules,
         privacy: this.privacy,
-        means: [],
-        active:this.active,
-        application:this.application
+        means: this.means,
+        active: this.active,
+        application: this.application,
       };
     },
 

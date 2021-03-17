@@ -83,11 +83,11 @@ export default {
       }
 </script>
 <style scoped>
-body {
+/* body {
   font-family: Helvetica Neue, Arial, sans-serif;
   font-size: 14px;
   color: #444;
-}
+} */
 
 table {
   border: 2px solid #42b983;
