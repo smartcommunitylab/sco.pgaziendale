@@ -41,7 +41,7 @@ const actions = {
         campaignService.updateCampaign(companyId,campaign).then(
             campaign => {
             commit('updateCampaignSuccess', campaign);
-            dispatch('alert/success', "Dipendente modificato con successo", { root: true });
+            dispatch('alert/success', "Campagna modificato con successo", { root: true });
         },
             error => {
                 commit('updateCampaignFailure', error);
@@ -49,12 +49,12 @@ const actions = {
             }
         );
     },
-    deleteCampaign({ commit, dispatch }, {companyId,campaign}) {
+    deleteCampaign({ commit, dispatch }, {companyId,campaignId}) {
         commit('deleteCampaign');
-        campaignService.deleteCampaign(companyId, campaign).then(
+        campaignService.deleteCampaign(companyId, campaignId).then(
             campaignId => {
                 commit('deleteCampaignSuccess', campaignId);
-                dispatch('alert/success', "Dipendente cancellato con successo", { root: true });
+                dispatch('alert/success', "Campagna cancellata con successo", { root: true });
 
             },
             error => {

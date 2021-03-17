@@ -57,6 +57,7 @@
             <phone-icon /> {{ actualCompany.item.contactPhone }}
           </p>
         </div>
+        <div class="w-full flex">
         <button
           v-if="!adminCompany && actualCompany && role == 'ROLE_ADMIN'"
           type="button"
@@ -66,7 +67,8 @@
         >
           Diventa amministratore
         </button>
-        <span v-if="adminCompany" class="btn-admin"> Sei amministratore </span>
+        <button v-if="adminCompany && $route.name !== 'azienda'" class="btn-admin"> Sei amministratore </button>
+        </div>
       </div>
     </div>
   </div>
@@ -105,12 +107,14 @@ export default {
 
 <style scoped>
 .btn-admin {
-  border: none;
-  font-size: 20px;
-  padding: 20px;
-  cursor: pointer;
-  font-weight: bold;
-  color: #4aae9b;
-  background: transparent;
+border: none;
+    font-size: 20px;
+    padding: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    background: #5ab45f;
+    border-radius: 26px;
+
 }
 </style>
