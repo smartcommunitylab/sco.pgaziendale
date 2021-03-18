@@ -31,6 +31,12 @@ import { store } from './store'
 import './assets/styles/index.css';
 import Vuelidate from 'vuelidate'
 import { VueEditor } from "vue2-editor";
+import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
+import 'leaflet/dist/leaflet.css';
+
+Vue.component('l-map', LMap);
+Vue.component('l-tile-layer', LTileLayer);
+Vue.component('l-marker', LMarker);
 Vue.component('vue-editor',VueEditor);
 Vue.config.productionTip = false
 Vue.component('pencil-outline-icon', PencilOutlineIcon);
