@@ -33,6 +33,8 @@ const actions = {
                             dispatch('company/initCompanyAdmin', userCompanies[0], { root: true }); 
                             dispatch('campaign/getAll',userCompanies[0], { root: true });
                             }
+                            dispatch('employee/getAll', userCompanies[0], { root: true });
+
                             
                         }
                         dispatch('navigation/changePage', page, { root: true });

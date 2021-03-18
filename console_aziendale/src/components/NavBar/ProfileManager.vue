@@ -8,7 +8,8 @@
           <div class="field-group mb-4 w-full">
             <div class="name">Nome: {{ user.name }} {{ user.surname }}</div>
             <div class="username">Nome utente: {{ user.username }}</div>
-            <div class="role"> Ruoli:
+            <div class="role">
+              Ruoli:
               <span v-for="role in user.roles" :key="JSON.stringify(role)"
                 ><label v-if="role.role == 'ROLE_COMPANY_ADMIN'"
                   >AMMINISTRATORE AZIENDALE</label
@@ -19,53 +20,116 @@
                 ></span
               >
             </div>
-        <button  type="button"
-          class="btn-close"
-          aria-label="Close modal"
-           @click="changingPwd=!changingPwd">
-          Cambia password
-        </button>
-        <div v-if="changingPwd"> 
-                <label class="pwd-label" for="first_name">Vecchia Password</label>
+            <button
+              type="button"
+              class="btn-close"
+              aria-label="Close modal"
+              @click="changingPwd = !changingPwd"
+            >
+              Cambia password
+            </button>
+            <div v-if="changingPwd">
+              <label class="pwd-label " for="first_name">Vecchia Password</label>
+              <div class="relative">
                 <input
-                  type="password"
+                  :type="passwordFieldTypeFirst"
                   name="companyLogo"
                   id="companyLogo"
                   placeholder="Vecchia password *"
-  v-model="oldPassword"
-                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 pwd-input"
+                  v-model="oldPassword"
+                  class="block appearance-none w-full bg-white pwd-input border border-grey-light hover:border-grey px-2 py-2 rounded shadow"
                 />
-                <label class="pwd-label" for="first_name">Nuova Password</label>
+                <div
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 pwd-input"
+                >
+                  <eye-off-icon
+                    @click="switchVisibility('passwordFieldTypeFirst')"
+                    :class="{
+                      block: passwordFieldTypeFirst == 'password',
+                      hidden: passwordFieldTypeFirst != 'text',
+                    }"
+                  />
+                  <eye-icon
+                    @click="switchVisibility('passwordFieldTypeFirst')"
+                    :class="{
+                      block: passwordFieldTypeFirst != 'password',
+                      hidden: passwordFieldTypeFirst == 'text',
+                    }"
+                  />
+                </div>
+              </div>
+              <label class="pwd-label" for="first_name">Nuova Password</label>
+              <div class="relative">
                 <input
-                  type="password"
+                  :type="passwordFieldTypeSecond"
                   name="companyLogo"
                   id="companyLogo"
                   placeholder="Nuova password *"
-  v-model="newPassword"
-                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 pwd-input"
+                  v-model="newPassword"
+                  class="block appearance-none w-full bg-white pwd-input border border-grey-light hover:border-grey px-2 py-2 rounded shadow"
                 />
-                                <label class="pwd-label" for="first_name">Ripeti nuova Password</label>
+                <div
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 pwd-input"
+                >
+                <eye-off-icon
+                  @click="switchVisibility('passwordFieldTypeSecond')"
+                  :class="{
+                    block: passwordFieldTypeSecond == 'password',
+                    hidden: passwordFieldTypeSecond != 'text',
+                  }"
+                />
+                <eye-icon
+                  @click="switchVisibility('passwordFieldTypeSecond')"
+                  :class="{
+                    block: passwordFieldTypeSecond != 'password',
+                    hidden: passwordFieldTypeSecond == 'text',
+                  }"
+                />
+                </div>
+              </div>
+              <label class="pwd-label" for="first_name">Ripeti nuova Password</label>
+              <div class="relative">
                 <input
-                  type="password"
+                  :type="passwordFieldTypeThird"
                   name="companyLogo"
                   id="companyLogo"
                   placeholder="Nuova password *"
                   v-model="newPassword2"
-                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 pwd-input"
+                  class="block appearance-none w-full bg-white pwd-input border border-grey-light hover:border-grey px-2 py-2 rounded shadow"
                 />
-
-        </div>
+                <div
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 pwd-input"
+                >
+                <eye-off-icon
+                  @click="switchVisibility('passwordFieldTypeThird')"
+                  :class="{
+                    block: passwordFieldTypeThird == 'password',
+                    hidden: passwordFieldTypeThird != 'text',
+                  }"
+                />
+                <eye-icon
+                  @click="switchVisibility('passwordFieldTypeThird')"
+                  :class="{
+                    block: passwordFieldTypeThird != 'password',
+                    hidden: passwordFieldTypeThird == 'text',
+                  }"
+                />
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn-close"
+                aria-label="Close modal"
+                @click="changePwd()"
+              >
+                Salva
+              </button>
+            </div>
           </div>
         </div>
       </template>
 
       <template v-slot:footer>
-          <button  type="button"
-          class="btn-close"
-          aria-label="Close modal"
-           @click="changePwd()">
-          Salve
-        </button>
         <button
           type="button"
           class="btn-close"
@@ -89,22 +153,30 @@ export default {
   data: function () {
     return {
       profileSetting: false,
-      changingPwd:false,
-      oldPassword:"",
-      newPassword:"",
-      newPassword2:""
+      changingPwd: false,
+      oldPassword: "",
+      newPassword: "",
+      newPassword2: "",
+      passwordFieldTypeFirst: "password",
+      passwordFieldTypeSecond: "password",
+      passwordFieldTypeThird: "password",
     };
   },
   computed: {
     ...mapState("account", ["status", "user", "role"]),
   },
   methods: {
-    ...mapActions("account",["changePassword"]),
+    ...mapActions("account", ["changePassword"]),
     changePwd() {
       // visible edit pwd
-      this.changePassword({oldPassword:this.oldPassword,newPassword:this.newPassword});
-    }
-    
+      this.changePassword({
+        oldPassword: this.oldPassword,
+        newPassword: this.newPassword,
+      });
+    },
+    switchVisibility(id) {
+      this[id] = this[id] === "password" ? "text" : "password";
+    },
   },
 };
 </script>
@@ -114,18 +186,18 @@ export default {
 }
 .username {
   color: black;
-
 }
 .role {
   color: black;
-
 }
-.pwd-label{
-    display: inline-block;
-    width: 40%;
-    color: black;
+.pwd-label {
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+  color: black;
+  margin-top: 10px;
 }
-.pwd-input{
-  color:black;
+.pwd-input {
+  color: black;
 }
 </style>

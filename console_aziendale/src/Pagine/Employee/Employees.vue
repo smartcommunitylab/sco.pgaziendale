@@ -446,10 +446,6 @@ export default {
                 route: '/dipendenti'})
     if (this.actualCompany && this.actualCompany.item)
       this.getAllEmployees(this.actualCompany.item.id);
-    // this.employees = employees;
-    // console.log(this.$refs["infobox"].$el.getBoundingClientRect());
-    // this.filter_hqs = null;
-    // this.filter_campaigns = null;
     EventBus.$on("EDIT_EMPLOYEE", (employee) => {
       this.editModalVisible = true;
       this.employee = employee.item;
