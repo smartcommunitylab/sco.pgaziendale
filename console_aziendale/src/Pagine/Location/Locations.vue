@@ -278,7 +278,18 @@
                 :class="{ 'form-group--error': $v.nonWorking.$error }"
               >
                 <label class="field-label" for="password">Giorni NON lavorativi</label>
-                <input
+                <div v-for="day in arrayDays" v-bind:key="day.value">
+                  <label class="inline-flex items-center">
+                    <input
+                      type="checkbox"
+                      class="form-checkbox"
+                      v-model.trim="$v.nonWorking.$model"
+                      :value="day.value"
+                    />
+                    <span class="ml-2">{{ day.text }}</span>
+                  </label>
+                </div>
+                <!-- <input
                   type="text"
                   name="campaignNonWorking"
                   id=""
@@ -286,7 +297,7 @@
                   placeholder="Giorni NON lavorativi *"
                   v-model.trim="$v.nonWorking.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
+                /> -->
               </div>
               <div v-if="$v.nonWorking.$error">
                 <div class="error" v-if="!$v.nonWorking.required">
@@ -300,15 +311,33 @@
                 :class="{ 'form-group--error': $v.nonWorkingDays.$error }"
               >
                 <label class="field-label" for="password">Giorni di chiusura</label>
-                <input
-                  type="text"
-                  name="campaignNonWorkingDays"
-                  id=""
-                  required
-                  placeholder="Giorni di chiusura *"
-                  v-model.trim="$v.nonWorkingDays.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
+                <div v-for="day in $v.nonWorkingDays.$model" :key="day" class="flex justify-center items-center m-1 font-medium py-1 px-2 bg-white rounded-full text-indigo-100 bg-indigo-700 border border-indigo-700 ">
+            <div class="text-xs font-normal leading-none max-w-full flex-initial">{{day}}</div>
+            <div class="flex flex-auto flex-row-reverse" @click="removeDay(day)">
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x cursor-pointer hover:text-indigo-400 rounded-full w-4 h-4 ml-2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </div>
+            </div>
+        </div>
+                <div class="relative">
+                  <input
+                    type="text"
+                    name="campaignNonWorkingDays"
+                    id=""
+                    required
+                    placeholder="Giorno di chiusura *"
+                    v-model.trim="$v.newNonWorkingDay.$model"
+                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+                  />
+                  <div
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                  >
+                    <eye-off-icon @click="addDays($v.newNonWorkingDay.$model)" />
+                  </div>
+                </div>
               </div>
               <div v-if="$v.nonWorkingDays.$error">
                 <div class="error" v-if="!$v.nonWorkingDays.required">
@@ -351,14 +380,14 @@ import GenericTable from "@/components/GenericTable.vue";
 import { required } from "vuelidate/lib/validators";
 import Modal from "@/components/Modal.vue";
 import EventBus from "@/components/eventBus";
-
+import { locationService } from "../../services";
 export default {
   name: "Locations",
   components: { ProfiloLocation, GenericTable, Modal },
   data: function () {
     return {
-      gridColumns: ["id","city", "address"],
-      headerColumns: ["Identificativo","Cittá", "Indirizzo"],
+      gridColumns: ["id", "city", "address"],
+      headerColumns: ["Identificativo", "Cittá", "Indirizzo"],
       newLocation: false,
       location: {},
       popup: {
@@ -375,6 +404,7 @@ export default {
       longitude: 0,
       country: "",
       radius: 200,
+      arrayDays: [],
       nonWorkingDays: [],
       nonWorking: [],
       deleteModalVisible: false,
@@ -416,6 +446,8 @@ export default {
     longitude: {
       required,
     },
+    newNonWorkingDay: {
+    },
     nonWorkingDays: {
       required,
     },
@@ -427,11 +459,12 @@ export default {
     this.loadLocations();
   },
   mounted() {
+    this.arrayDays = locationService.getArrayDays();
     this.changePage({ title: "Lista sedi", route: "/locations" });
     EventBus.$on("EDIT_LOCATION", (location) => {
       this.editModalVisible = true;
       this.location = location.item;
-            this.copyFormValues();
+      this.copyFormValues();
 
       this.popup = {
         title: "Modifica",
@@ -459,7 +492,12 @@ export default {
       deleteLocation: "deleteLocation",
     }),
     ...mapActions("navigation", { changePage: "changePage" }),
-
+    addDays(day) {
+      this.nonWorkingDays.push(day);
+    },
+    removeDay(day) {
+      this.nonWorkingDays = this.nonWorkingDays.filter((elem) => elem != day);
+    },
     loadLocations() {
       if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
     },
@@ -482,25 +520,26 @@ export default {
     closeDeleteModal() {
       this.deleteModalVisible = false;
     },
-            initLocation() {
- this.id="";
-       this.address="";
-       this.streetNumber="";
-       this.zip="";
-       this.city="";
-       this.province="";
-       this.region="";
-       this.latitude= 0;
-       this.longitude= 0;
-       this.country="";
-       this.radius=200;
-       this.nonWorkingDays=[];
-       this.nonWorking=[];
-      },
-      copyFormValues() {
+    initLocation() {
+      this.id = "";
+      this.address = "";
+      this.streetNumber = "";
+      this.zip = "";
+      this.city = "";
+      this.province = "";
+      this.region = "";
+      this.latitude = 0;
+      this.longitude = 0;
+      this.country = "";
+      this.radius = 200;
+      this.nonWorkingDays = [];
+      this.nonWorking = [];
+    },
+    copyFormValues() {
       for (const [key] of Object.entries(this.location)) {
-        this[key]=this.location[key]}
-},
+        this[key] = this.location[key];
+      }
+    },
 
     createLocation() {
       this.location = {
@@ -514,9 +553,9 @@ export default {
         latitude: Number.parseFloat(this.latitude),
         longitude: Number.parseFloat(this.longitude),
         // nonWorkingDays:this.nonWorkingDays,
-        // nonWorking:this.nonWorking
-        nonWorkingDays: [],
-        nonWorking: [],
+        nonWorking: this.nonWorking,
+        nonWorkingDays: this.nonWorkingDays,
+        //nonWorking: [],
         country: this.country,
         radius: Number.parseInt(this.radius),
       };
