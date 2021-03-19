@@ -21,11 +21,7 @@
           </button>
         </div>
         <div class="p-4 md:p-12 text-center lg:text-left" >
-          <!-- Image for mobile view-->
-          <!-- <div
-            class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
-            v-bind:style="{ backgroundImage: 'url(' + actualLocation.item.logo + ')' }"
-          ></div> -->
+          
           <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualLocation.item.id }}</h1>
           <div
             class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
@@ -35,11 +31,7 @@
           >
             <address-icon />{{ actualLocation.item.address }} {{ actualLocation.item.streetNumber }} {{ actualLocation.item.zip }} {{ actualLocation.item.city }}
           </p>
-          <!-- <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
-            <web-icon /> {{ actualLocation.item.web }}
-          </p> -->
+
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
