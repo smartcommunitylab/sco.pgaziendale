@@ -351,10 +351,8 @@ export default {
         region: this.region,
         latitude: Number.parseFloat(this.latitude),
         longitude: Number.parseFloat(this.longitude),
-        // nonWorkingDays:this.nonWorkingDays,
         nonWorking: this.nonWorking,
         nonWorkingDays: this.nonWorkingDays,
-        //nonWorking: [],
         country: this.country,
         radius: Number.parseInt(this.radius),
       };
