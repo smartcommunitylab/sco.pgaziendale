@@ -88,7 +88,7 @@ import EventBus from "@/components/eventBus";
 export default {
   data() {
     return {
- employee: {},
+      employee: {},
       name: "",
       surname: "",
       code: "",
@@ -116,15 +116,17 @@ export default {
         this[key] = employee[key];
       }
     },
-        initEmployee() {
+    initEmployee() {
       this.employee={};
-         this.name= "";
+      this.id="";
+       this.name= "";
       this.surname= "";
       this.code= "";
       this.location= "";
       },
     createEmployee() {
       this.employee = {
+        id:this.id,
         name: this.name,
         surname: this.surname,
         code: this.code,

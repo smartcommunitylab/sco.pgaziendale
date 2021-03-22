@@ -255,7 +255,7 @@
       </div>
     </div>
     <!-- <infobox ref="infobox" /> -->
-    <profilo-employee v-if="actualEmployee"></profilo-employee>
+    <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
 
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Dipendente </template>
@@ -412,7 +412,6 @@ export default {
     closeModal() {
       this.editModalVisible = false;
       this.newEmployee = false;
-      this.$v.$reset();
     },
     closeDeleteModal() {
       this.deleteModalVisible = false;

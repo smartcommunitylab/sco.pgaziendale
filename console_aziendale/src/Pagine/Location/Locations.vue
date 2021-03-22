@@ -22,7 +22,7 @@
       </div>
     </div>
 
-    <profilo-location v-if="actualLocation" />
+    <profilo-location v-if="actualLocation && actualLocation.item" />
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Sede </template>
       <template v-slot:body> Sei sicuro di voler cancellare la sede? </template>
