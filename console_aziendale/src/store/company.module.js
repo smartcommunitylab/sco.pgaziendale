@@ -40,7 +40,7 @@ const actions = {
             companyService.getCompanyById(companyId).then(
                 company => {
                     commit('chooseCompanyAdmin', company);
-                    dispatch('getUsers', company.item);
+                    dispatch('getUsers', company);
                     dispatch('alert/success', "Azienda selezionata", { root: true });
                 },
                 error => {
