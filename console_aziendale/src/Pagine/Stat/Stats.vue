@@ -1,17 +1,9 @@
 <template>
   <div>
     Statistiche
-    <!-- based on the profile, build the correct charts -->
     <div class="flex flex-col lg:flex-row">
       <div class="mx-2 my-2 flex flex-col lg:w-4/6 bg-white p-2">
         Grafici
-        <!-- <em v-if="allCampaigns.loading">Loading users...</em>
-        <span v-if="allCampaigns.error" class="text-danger">ERROR: {{allCampaigns.error}}</span>
-        <ul v-if="allCampaigns.items">
-          <li v-for="campaign in allCampaigns.items" :key="campaign.id">
-                {{campaign}}
-          </li>
-        </ul> -->
         <div id="chart_container" class="">
           <canvas ref="canvas" class="p-4"></canvas>
         </div>
