@@ -18,6 +18,7 @@ package it.smartcommunitylab.pgazienda.web.rest;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -32,7 +33,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
@@ -106,6 +109,13 @@ public class LocationResource {
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.readlocations(companyId));
 	}
+
+    @PostMapping("/companies/{companyId}/locations/csv")
+    public ResponseEntity<Void> uploadLocations(@PathVariable String companyId, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws Exception {
+    	log.debug("import csv locations {}", companyId);
+    	companyService.importLocations(companyId, file.getInputStream());
+    	return ResponseEntity.ok(null);
+    }
 
     
 }
