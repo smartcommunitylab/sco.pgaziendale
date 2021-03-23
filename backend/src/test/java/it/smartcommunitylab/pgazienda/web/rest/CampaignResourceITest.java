@@ -270,7 +270,7 @@ public class CampaignResourceITest {
 		assertThat(e.getCampaigns()).contains(obj.getId());
 		
         restMockMvc.perform(
-                delete("/api/campaigns/{campaignId}/unsubscribe/{companyCode}/{key}", obj.getId(), company.getCode(), e.getCode()))
+                delete("/api/campaigns/{campaignId}/unsubscribe", obj.getId()))
                 .andExpect(status().isOk());
         
         user = userRepository.findById(user.getId()).orElse(null);
@@ -339,7 +339,7 @@ public class CampaignResourceITest {
 
 
         restMockMvc.perform(
-                get("/api/campaigns/me"))
+                get("/api/campaigns/user/me"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$", hasSize(1)));

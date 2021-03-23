@@ -30,7 +30,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -87,6 +89,21 @@ public class CompanyService {
 		DW.put("domenica", 7);
 		DW.put("dom", 7);
 	}
+	
+	@PostConstruct
+	public void init() {
+		companyRepo.findAll().forEach(c -> {
+			List<CompanyLocation> locs = c.getLocations();
+			if (locs != null) {
+				List<CompanyLocation> filtered = locs.stream().filter(l -> l.getId() != null).collect(Collectors.toList());
+				if (filtered.size() != locs.size()) {
+					c.setLocations(filtered);
+					companyRepo.save(c);
+				}
+			} 
+		});
+	}
+	
 	
 	/**
 	 * List of all companies, paginated
