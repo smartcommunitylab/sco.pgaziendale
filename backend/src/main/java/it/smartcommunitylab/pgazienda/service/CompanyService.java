@@ -170,6 +170,9 @@ public class CompanyService {
 	 * @return
 	 */
 	public CompanyLocation createLocation(String companyId, CompanyLocation location) {
+		if (location.getId() == null) {
+			throw new IllegalArgumentException("Empty location ID");
+		}
 		companyRepo.findById(companyId).ifPresent(company -> {
 			if (company.getLocations() == null) company.setLocations(Collections.singletonList(location));
 			else {
@@ -188,6 +191,9 @@ public class CompanyService {
 	 * @return
 	 */
 	public CompanyLocation updateLocation(String companyId, CompanyLocation location) {
+		if (location.getId() == null) {
+			throw new IllegalArgumentException("Empty location ID");
+		}
 		companyRepo.findById(companyId).ifPresent(company -> {
 			if (company.getLocations() != null) {
 				int idx = company.getLocations().indexOf(location);
@@ -207,7 +213,7 @@ public class CompanyService {
 	public void deleteLocation(String companyId, String locationId) {
 		companyRepo.findById(companyId).ifPresent(company -> {
 			if (company.getLocations() != null) {
-				company.getLocations().removeIf(l -> l.getId().equals(locationId));
+				company.getLocations().removeIf(l -> l.getId() == null && locationId == null || l.getId().equals(locationId));
 				companyRepo.save(company);
 			}
 		});		
