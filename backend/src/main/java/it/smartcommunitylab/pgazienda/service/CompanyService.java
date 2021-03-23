@@ -21,8 +21,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -57,6 +63,30 @@ public class CompanyService {
 	private CompanyRepository companyRepo;
 	@Autowired
 	private EmployeeRepository employeeRepo;
+	private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	
+	private static final Map<String, Integer> DW = new LinkedHashMap<>();
+	static {
+		DW.put("lunedi", 1);
+		DW.put("lunedì", 1);
+		DW.put("lun", 1);
+		DW.put("martedi", 2);
+		DW.put("martedì", 2);
+		DW.put("mar", 2);
+		DW.put("mercoledi", 3);
+		DW.put("mercoledì", 3);
+		DW.put("mer", 3);
+		DW.put("giovedi", 4);
+		DW.put("giovedì", 4);
+		DW.put("gio", 4);
+		DW.put("venerdi", 5);
+		DW.put("venerdì", 5);
+		DW.put("gven", 5);
+		DW.put("sabato", 6);
+		DW.put("sab", 6);
+		DW.put("domenica", 7);
+		DW.put("dom", 7);
+	}
 	
 	/**
 	 * List of all companies, paginated
@@ -288,9 +318,9 @@ public class CompanyService {
 		IOUtils.copy(inputStream, baos);
 		byte[] bytes = baos.toByteArray();
 		try {
-			lines = readCSV(new ByteArrayInputStream(bytes), ',');
+			lines = readCSV(new ByteArrayInputStream(bytes), ',', 4);
 		} catch (Exception e) {
-			lines = readCSV(new ByteArrayInputStream(bytes), ';');
+			lines = readCSV(new ByteArrayInputStream(bytes), ';', 4);
 		}
 		lines.forEach(l -> {
 			Employee existing = employeeRepo.findOneByCompanyIdAndCode(companyId, l[2]).orElse(null);
@@ -311,9 +341,10 @@ public class CompanyService {
 		});
 	}
 
-	private List<String[]> readCSV(InputStream is, char separator) throws Exception {
+	private List<String[]> readCSV(InputStream is, char separator, int columns) throws Exception {
 		CSVParser parser = new CSVParserBuilder()
 			    .withSeparator(separator)
+			    .withIgnoreLeadingWhiteSpace(true)
 			    .build();
 		
 		CSVReader csvReader = new CSVReaderBuilder(new InputStreamReader(is))
@@ -322,10 +353,112 @@ public class CompanyService {
 			    .build();
 		
 		List<String[]> list = csvReader.readAll();
-		if (list.size() > 0 && list.get(0).length != 4) {
+		if (list.size() > 0 && list.get(0).length != columns) {
 			throw new IllegalArgumentException("Invalid CSV format");
 		}
 		
 		return list;
 	}
+	
+	public void importLocations(String companyId, InputStream inputStream) throws Exception {
+		List<String[]> lines = null;
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		IOUtils.copy(inputStream, baos);
+		byte[] bytes = baos.toByteArray();
+		try {
+			lines = readCSV(new ByteArrayInputStream(bytes), ',', 13);
+		} catch (Exception e) {
+			lines = readCSV(new ByteArrayInputStream(bytes), ';', 13);
+		}
+		int i = 0;
+		List<CompanyLocation> locations = new LinkedList<>();
+		for (String[] l : lines) {
+			CompanyLocation loc = new CompanyLocation();
+			loc.setId(stringValue(l[0], i+1, 0, true));
+			loc.setAddress(stringValue(l[1], i+1, 1, true));
+			loc.setStreetNumber(stringValue(l[2], i+1, 2, false));
+			loc.setZip(stringValue(l[3], i+1, 3, true));
+			loc.setCity(stringValue(l[4], i+1, 4, true));
+			loc.setProvince(stringValue(l[5], i+1, 5, true));
+			loc.setRegion(stringValue(l[6], i+1, 6, true));
+			loc.setCountry(stringValue(l[7], i+1, 7, false));
+
+			Double radius = doubeValue(l[8], i+1, 8, false);
+			if (radius == null) radius = 200d; 
+			loc.setRadius(radius);
+			loc.setLatitude(doubeValue(l[9], i+1, 9, true));
+			loc.setLongitude(doubeValue(l[10], i+1, 10, true));
+
+			// check non-working days
+			String nwDoW = stringValue(l[11], i + 1, 11, false);
+			if (nwDoW.length() > 0) {
+				loc.setNonWorking(new LinkedList<>());
+				String[] days = nwDoW.toLowerCase().split(",");
+				for (String d: days) {
+					if (DW.containsKey(d.trim())) {
+						loc.getNonWorking().add(DW.get(d.trim()));
+					} else {
+						throw new ImportDataException(i + 1, 11);
+					}
+				}
+			}
+			// check exception days
+			String nwDays = stringValue(l[12], i + 1, 12, false);
+			if (nwDays.length() > 0) {
+				loc.setNonWorkingDays(new HashSet<>());
+				String[] days = nwDays.toLowerCase().split(",");
+				for (String d: days) {
+					LocalDate date = null;
+					try {
+						date = LocalDate.parse(d.trim());
+					} catch (Exception e) {
+						try {
+							date = LocalDate.parse(d.trim(), dateFormatter );
+						} catch (Exception e1) {
+							throw new ImportDataException(i + 1, 11);
+						}
+					}
+					loc.getNonWorkingDays().add(date.toString());
+				}
+			}
+			locations.add(loc);
+			i++;
+		}
+		if (locations.size() > 0) {
+			Company c = companyRepo.findById(companyId).orElse(null);
+			if (c != null) {
+				c.setLocations(locations);
+				companyRepo.save(c);
+			}
+		}
+	}
+	
+	/**
+	 * @param trim
+	 * @param i
+	 * @param j
+	 * @param b
+	 * @return
+	 */
+	private Double doubeValue(String v, int row, int col, boolean required) throws ImportDataException {
+		if (StringUtils.isEmpty(v)) {
+			if (required) throw new ImportDataException(row, col);
+			else return null;
+		} else {
+			try {
+				return Double.parseDouble(v.trim());
+			} catch (NumberFormatException e) {
+				throw new ImportDataException(row, col);
+			}
+		}
+	}
+
+	private String stringValue(String v, int row, int col, boolean required) throws ImportDataException {
+		if (StringUtils.isEmpty(v)) {
+			if (required) throw new ImportDataException(row, col);
+			else return "";
+		} else return v.trim();
+	}
+	
 }

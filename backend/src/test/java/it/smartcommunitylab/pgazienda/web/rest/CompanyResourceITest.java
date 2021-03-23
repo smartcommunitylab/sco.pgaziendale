@@ -161,7 +161,6 @@ public class CompanyResourceITest {
                 .andExpect(jsonPath("$.name").value(c.getName()));
     }
 
-    
     @Test
     public void testReadCompanies() throws Exception {
         restMockMvc.perform(
