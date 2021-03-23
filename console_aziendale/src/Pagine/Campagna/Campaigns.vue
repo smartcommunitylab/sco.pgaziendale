@@ -3,7 +3,7 @@
     <div class="bg-green-300 lg:w-4/6 mx-2 my-2 pb-16 relative">
       <div v-if="allCampaigns && allCampaigns.items && allCampaigns.items.length > 0">
         <generic-table
-          :data="allCampaigns.items"
+          :data.sync="allCampaigns.items"
           :columns="gridColumns"
           :header="headerColumns"
           :method="showCampaignInfo"
@@ -72,6 +72,30 @@
         </p>
       </template>
     </modal>
+    <modal v-show="associateCampaignModalVisible">
+      <template v-slot:header> {{ popup.title }} </template>
+      <template v-slot:body>
+        <associate-form />
+      </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn-close"
+          @click="saveAssociation"
+          aria-label="Close modal"
+        >
+          Salva
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+      </template>
+    </modal>
   </div>
 </template>
 
@@ -82,15 +106,16 @@ import EventBus from "@/components/eventBus";
 import Modal from "@/components/Modal.vue";
 import GenericTable from "@/components/GenericTable.vue";
 import CampaignForm from "./CampaignForm.vue";
+import AssociateForm from "./AssociateForm.vue";
  
 export default {
-  components: { ProfiloCampagna, Modal, GenericTable ,CampaignForm},
+  components: { ProfiloCampagna, Modal, GenericTable ,CampaignForm, AssociateForm},
   name: "GestioneCampagne",
   data: function () {
     return {
       gridColumns: ["title", "from", "to", "active"],
       headerColumns: ["Nome", "Inizio", "Fine", "Status"],
-
+      associateCampaignModalVisible:false,
       editModalVisible: false,
       deleteModalVisible: false,
       currentCampaignSelected: undefined,
@@ -105,6 +130,7 @@ export default {
   computed: {
     ...mapState("company", ["actualCompany", "adminCompany"]),
     ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
+    ...mapState("account", ["role"]),
   },
   mounted: function () {
 
@@ -135,7 +161,7 @@ export default {
       };
     });
     EventBus.$on("OK_CAMPAIGN_FORM", (campaign) => {
-if (this.newCampaign) {
+        if (this.newCampaign) {
           this.addCampaignCall({
             companyId: this.adminCompany ? this.actualCompany.item.id : null,
             campaign: campaign,
@@ -207,15 +233,24 @@ if (this.newCampaign) {
       return moment(date).format("DD MM YYYY");
     },
     showModal(title) {
-      this.editModalVisible = true;
-      this.newCampaign = true;
-      EventBus.$emit("NEW_CAMPAIGN_FORM");
+      if (this.role == 'ROLE_ADMIN' && !this.adminCompany)
+      {
+        this.editModalVisible = true;
+        this.newCampaign = true;
+        EventBus.$emit("NEW_CAMPAIGN_FORM");
       this.popup = {
         title: title,
       };
+      }
+      else {
+        console.log('associa campagna ad azienda');
+        this.associateCampaignModalVisible=true;
+        EventBus.$emit("ASSOCIATE_CAMPAIGN_FORM");
+      }
     },
     closeModal() {
       this.editModalVisible = false;
+      this.associateCampaignModalVisible = false;
       this.newCampaign = false;
     },
     closeDeleteModal() {
@@ -224,6 +259,9 @@ if (this.newCampaign) {
     saveCampaign() {
       //check fields
       EventBus.$emit("CHECK_CAMPAIGN_FORM");
+    },
+    saveAssociation() {
+
     },
     // saveCampaign() {
     //   //check fields

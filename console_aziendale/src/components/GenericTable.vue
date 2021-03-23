@@ -31,6 +31,16 @@ export default {
           // filterKey: String,
           method:Function
         },
+        watch: {
+  data: {
+    // the callback will be called immediately after the start of the observation
+    immediate: true, 
+    handler (val, oldVal) {
+      console.log(val);
+      console.log(oldVal)
+    }
+  }
+},
         data: function() {
           var sortOrders = {};
           this.columns.forEach(function(key) {
