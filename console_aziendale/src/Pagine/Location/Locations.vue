@@ -22,7 +22,7 @@
       </div>
     </div>
 
-    <profilo-location v-if="actualLocation" />
+    <profilo-location v-if="actualLocation && actualLocation.item" />
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Sede </template>
       <template v-slot:body> Sei sicuro di voler cancellare la sede? </template>
@@ -48,7 +48,7 @@
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
-        <location-form/>
+        <location-form />
       </template>
       <template v-slot:footer>
         <button
@@ -81,10 +81,10 @@ import { mapState, mapActions } from "vuex";
 import GenericTable from "@/components/GenericTable.vue";
 import Modal from "@/components/Modal.vue";
 import EventBus from "@/components/eventBus";
-import LocationForm from "./LocationForm.vue"
+import LocationForm from "./LocationForm.vue";
 export default {
   name: "Locations",
-  components: { ProfiloLocation, GenericTable, Modal,LocationForm },
+  components: { ProfiloLocation, GenericTable, Modal, LocationForm },
   data: function () {
     return {
       gridColumns: ["id", "city", "address"],
@@ -94,13 +94,13 @@ export default {
       popup: {
         title: "",
       },
-      
+
       deleteModalVisible: false,
       editModalVisible: false,
       submitStatus: null,
     };
   },
-  
+
   created() {
     this.loadLocations();
   },
@@ -108,7 +108,7 @@ export default {
     this.changePage({ title: "Lista sedi", route: "/locations" });
     EventBus.$on("EDIT_LOCATION", (location) => {
       this.editModalVisible = true;
-      EventBus.$emit("EDIT_LOCATION_FORM",location.item);
+      EventBus.$emit("EDIT_LOCATION_FORM", location.item);
 
       this.popup = {
         title: "Modifica",
@@ -122,32 +122,30 @@ export default {
       };
     });
     EventBus.$on("OK_LOCATION_FORM", (location) => {
-        
-        if (this.newLocation) {
-          this.addLocationCall({
-            companyId: this.actualCompany.item.id,
-            location: location,
-          });
-        } else {
-          this.updateLocationCall({
-            companyId: this.actualCompany.item.id,
-            location: location,
-          });
-          
-    }
-    this.editModalVisible = false;
-          this.newLocation = false;
-          });
-        EventBus.$on("NO_LOCATION_FORM", () => {
-        this.submitStatus = "ERROR";
+      if (this.newLocation) {
+        this.addLocationCall({
+          companyId: this.actualCompany.item.id,
+          location: location,
+        });
+      } else {
+        this.updateLocationCall({
+          companyId: this.actualCompany.item.id,
+          location: location,
+        });
+      }
+      this.editModalVisible = false;
+      this.newLocation = false;
+    });
+    EventBus.$on("NO_LOCATION_FORM", () => {
+      this.submitStatus = "ERROR";
     });
   },
-   beforeDestroy () {
-    EventBus.$off('NO_LOCATION_FORM');
-    EventBus.$off('OK_LOCATION_FORM');
-    EventBus.$off('DELETE_LOCATION');
-    EventBus.$off('EDIT_LOCATION');
- },
+  beforeDestroy() {
+    EventBus.$off("NO_LOCATION_FORM");
+    EventBus.$off("OK_LOCATION_FORM");
+    EventBus.$off("DELETE_LOCATION");
+    EventBus.$off("EDIT_LOCATION");
+  },
   computed: {
     ...mapState("location", ["allLocations", "actualLocation"]),
     ...mapState("company", ["actualCompany"]),
@@ -186,12 +184,9 @@ export default {
       this.deleteModalVisible = false;
     },
 
-
-
-    
     saveLocation() {
       //check fields
-		EventBus.$emit("CHECK_LOCATION_FORM");
+      EventBus.$emit("CHECK_LOCATION_FORM");
     },
     deleteConfirm() {
       this.deleteModalVisible = false;

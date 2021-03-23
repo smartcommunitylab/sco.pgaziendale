@@ -62,17 +62,19 @@ function update(user) {
     )
 }
 function getRole(user) {
+    var role='';
     for (var i = 0; i < user.roles.length; i++) {
         if (user.roles[i].role == 'ROLE_ADMIN') {
-            return 'ROLE_ADMIN';
+            role='ROLE_ADMIN';
         }
-        if (user.roles[i].role == 'ROLE_COMPANY_ADMIN') {
-            return 'ROLE_COMPANY_ADMIN';
+        if (user.roles[i].role == 'ROLE_COMPANY_ADMIN' && role!='ROLE_ADMIN') {
+            role='ROLE_COMPANY_ADMIN';
         }
-        if (user.roles[i].role == 'ROLE_MOBILITY_MANAGER') {
-            return 'ROLE_MOBILITY_MANAGER';
+        if (user.roles[i].role == 'ROLE_MOBILITY_MANAGER'&& (role!='ROLE_ADMIN'|| role!='ROLE_COMPANY_ADMIN')) {
+            role='ROLE_MOBILITY_MANAGER';
         }
     }
+    return role;
 }
 
 function getCompanies(user) {

@@ -7,7 +7,9 @@ export const campaignService = {
     deleteCampaign,
     getTextOfMeans,
     getArrayMeans,
-    getApplications
+    getApplications,
+    getAllCompaniesOfCampaign,
+    getPublicCampaigns
 };
 const arrayMeans= [
     { value: "bike", text: "Bici" },
@@ -32,6 +34,33 @@ function getAllCampaigns(companyId = null) {
                 return Promise.resolve(res.data);
                 return Promise.resolve(res.data.content);
                 
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+function getPublicCampaigns() {
+    return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_PUBLIC_CAMPAIGNS_API).then(
+        res => {
+            if (res && res.data && res.data.content) {
+                return Promise.resolve(res.data.content);                
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+
+}
+function getAllCompaniesOfCampaign(campaignId) {
+    return axios.get(process.env.VUE_APP_BASE_URL+ process.env.VUE_APP_COMPANIES_API + '/' +process.env.VUE_APP_COMPANIES_IN_CAMPAIGN_API+ '/' +campaignId ).then(
+        res => {
+            if (res && res.data) {
+                return Promise.resolve(res.data);                
             }
             else return Promise.reject(null);
         }, err => {
@@ -92,7 +121,6 @@ function deleteCampaign( companyId = null, campaignId) {
 
     )
 }
-
 // get all the applications present
 function getApplications() {
     return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_APPS_API ).then(
@@ -114,6 +142,9 @@ function getArrayMeans() {
 function getTextOfMeans(means) {
     var returnText="";
     means.forEach(element => {
+        if (arrayMeans.filter(e=> {
+            return e.value == element
+        }).length>0)
         returnText+=" "+arrayMeans.filter(e=> {
             return e.value == element
         })[0].text

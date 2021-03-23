@@ -31,8 +31,8 @@
           ></div>
           <p
             class="pt-4 text-base font-bold flex items-center justify-center lg:justify-start"
-          >
-            <address-icon />{{ actualEmployee.item.location }}
+           v-if="actualEmployee.item.location">
+            <address-icon />Sede: {{ actualEmployee.item.location }}
           </p>
           <!-- <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
@@ -41,13 +41,13 @@
           </p> -->
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
-            <email-icon /> {{ actualEmployee.item.code }}
+           v-if="actualEmployee.item.code" >
+            <code-icon /> Codice: {{ actualEmployee.item.code }}
           </p>
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
-            <phone-icon /> {{ actualEmployee.item.campaigns }}
+           v-if="actualEmployee.item.campaigns">
+            <list-campaigns-icon /> Campagne: {{ actualEmployee.item.campaigns }}
           </p>
         </div>
       </div>

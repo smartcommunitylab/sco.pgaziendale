@@ -3,7 +3,7 @@
     <div class="bg-green-300 lg:w-4/6 mx-2 my-2 pb-16 relative">
       <div v-if="allCampaigns && allCampaigns.items && allCampaigns.items.length > 0">
         <generic-table
-          :data="allCampaigns.items"
+          :data.sync="allCampaigns.items"
           :columns="gridColumns"
           :header="headerColumns"
           :method="showCampaignInfo"
@@ -22,7 +22,7 @@
       </div>
     </div>
     <!-- <infobox /> -->
-    <profilo-campagna v-if="actualCampaign" />
+    <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Campagna </template>
       <template v-slot:body> Sei sicuro di voler cancellare la campagna? </template>
@@ -48,265 +48,7 @@
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
-        <form action="" id="addCampaign">
-          <div class="mb-20 flex flex-wrap justify-between">
-            <div class="field-group mb-4 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
-                <label class="field-label" for="first_name">Id </label>
-                <input
-                  type="text"
-                  name="campaignId"
-                  placeholder="Id *"
-                  v-model.trim="$v.id.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                  id="campaignLogo"
-                />
-              </div>
-              <div v-if="$v.logo.$error">
-                <div class="error" v-if="!$v.id.required">Il campo Id e' richiesto.</div>
-              </div>
-            </div>
-            <div class="field-group mb-4 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.logo.$error }">
-                <label class="field-label" for="first_name">Logo </label>
-                <input
-                  type="text"
-                  name="campaignLogo"
-                  placeholder="Logo *"
-                  v-model.trim="$v.logo.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                  id="campaignLogo"
-                />
-              </div>
-              <div v-if="$v.logo.$error">
-                <div class="error" v-if="!$v.logo.required">
-                  Il campo Logo e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-4 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.title.$error }">
-                <label class="field-label" for="first_name">Titolo </label>
-                <input
-                  type="text"
-                  name="campaignTitle"
-                  placeholder="Titolo *"
-                  v-model.trim="$v.title.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                  id="campaignTitle"
-                />
-              </div>
-              <div v-if="$v.title.$error">
-                <div class="error" v-if="!$v.title.required">
-                  Il campo titolo e' richiesto.
-                </div>
-              </div>
-            </div>
-
-            <div class="field-group mb-4 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.description.$error }"
-              >
-                <label class="field-label" for="first_name">Descrizione</label>
-                <input
-                  type="text"
-                  name="campaignDescription"
-                  id="campaignDescription"
-                  placeholder="Descrizione *"
-                  v-model.trim="$v.description.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.description.$error">
-                <div class="error" v-if="!$v.description.required">
-                  Il campo descrizione e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div
-                class="form-group flex"
-                :class="{ 'form-group--error': $v.from.$error }"
-              >
-                <label class="field-label" for="password">Da </label>
-                <VueTailwindPicker
-                  :theme="{
-                    background: '#1A202C',
-                    text: 'text-white',
-                    border: 'border-gray-700',
-                    currentColor: 'text-gray-200',
-                    navigation: {
-                      background: 'bg-gray-800',
-                      hover: 'hover:bg-gray-700',
-                      focus: 'bg-gray-700',
-                    },
-                    picker: {
-                      rounded: 'rounded-md',
-                      selected: {
-                        background: 'bg-teal-400',
-                        border: 'border-teal-400',
-                        hover: 'hover:border-teal-400',
-                      },
-                      holiday: 'text-red-400',
-                      weekend: 'text-green-400',
-                      event: 'bg-blue-500',
-                    },
-                    event: {
-                      border: 'border-gray-700',
-                    },
-                  }"
-                  @change="(v) => ($v.from.$model = v)"
-                >
-                  <input
-                    type="text"
-                    name="campaignFrom"
-                    id=""
-                    required
-                    placeholder="Da *"
-                    v-model.trim="$v.from.$model"
-                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                  />
-                </VueTailwindPicker>
-              </div>
-              <div v-if="$v.from.$error">
-                <div class="error" v-if="!$v.from.required">
-                  Il campo da e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div class="form-group flex" :class="{ 'form-group--error': $v.to.$error }">
-                <label class="field-label" for="password">A </label>
-                <VueTailwindPicker
-                  :theme="{
-                    background: '#1A202C',
-                    text: 'text-white',
-                    border: 'border-gray-700',
-                    currentColor: 'text-gray-200',
-                    navigation: {
-                      background: 'bg-gray-800',
-                      hover: 'hover:bg-gray-700',
-                      focus: 'bg-gray-700',
-                    },
-                    picker: {
-                      rounded: 'rounded-md',
-                      selected: {
-                        background: 'bg-teal-400',
-                        border: 'border-teal-400',
-                        hover: 'hover:border-teal-400',
-                      },
-                      holiday: 'text-red-400',
-                      weekend: 'text-green-400',
-                      event: 'bg-blue-500',
-                    },
-                    event: {
-                      border: 'border-gray-700',
-                    },
-                  }"
-                  @change="(v) => ($v.to.$model = v)"
-                >
-                  <input
-                    type="text"
-                    name="campaignTo"
-                    id=""
-                    required
-                    placeholder="A *"
-                    v-model.trim="$v.to.$model"
-                    class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                  />
-                </VueTailwindPicker>
-              </div>
-              <div v-if="$v.to.$error">
-                <div class="error" v-if="!$v.to.required">Il campo a e' richiesto.</div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.rules.$error }">
-                <label class="field-label" for="password">Regole</label>
-                <vue-editor v-model="$v.rules.$model"></vue-editor>
-              
-              </div>
-              <div v-if="$v.rules.$error">
-                <div class="error" v-if="!$v.rules.required">
-                  Il campo Regole e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.privacy.$error }">
-                <label class="field-label" for="password">Privacy</label>
-                <vue-editor v-model="$v.privacy.$model"></vue-editor>
-             
-              </div>
-              <div v-if="$v.privacy.$error">
-                <div class="error" v-if="!$v.privacy.required">
-                  Il campo privacy e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="block">
-              <span class="text-gray-700">Mezzi</span>
-              <div class="field-group mb-6 w-full">
-                <div class="form-group" :class="{ 'form-group--error': $v.means.$error }">
-                  <div v-for="mean in arrayMeans" v-bind:key="mean.value">
-                    <label class="inline-flex items-center">
-                      <input
-                        type="checkbox"
-                        class="form-checkbox"
-                        v-model.trim="$v.means.$model"
-                        :value="mean.value"
-                      />
-                      <span class="ml-2">{{mean.text}}</span>
-                    </label>
-                  </div>
-                 
-                </div>
-                <div v-if="$v.means.$error">
-                  <div class="error" v-if="!$v.means.required">
-                    Il campo Mezzi e' richiesto.
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.active.$error }">
-                <label class="field-label" for="password">Attiva</label>
-                <input
-                  type="checkbox"
-                  name="campaignActive"
-                  id=""
-                  required
-                  placeholder="Attiva *"
-                  v-model.trim="$v.active.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.active.$error">
-                <div class="error" v-if="!$v.active.required">
-                  Il campo Attiva e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.application.$error }"
-              >
-                <label class="field-label" for="password">Applicazione</label>
-                  <select class="form-select mt-1 block w-full" v-model.trim="$v.application.$model">
-                    <option v-for="app in applications" :key="app.id" :value="app.id">{{app.name}}</option>
-
-  </select>
-              </div>
-              <div v-if="$v.application.$error">
-                <div class="error" v-if="!$v.application.required">
-                  Il campo Applicazione e' richiesto.
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
+        <campaign-form />
       </template>
       <template v-slot:footer>
         <button
@@ -330,6 +72,30 @@
         </p>
       </template>
     </modal>
+    <modal v-show="associateCampaignModalVisible">
+      <template v-slot:header> {{ popup.title }} </template>
+      <template v-slot:body>
+        <associate-form />
+      </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn-close"
+          @click="saveAssociation"
+          aria-label="Close modal"
+        >
+          Salva
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+      </template>
+    </modal>
   </div>
 </template>
 
@@ -337,85 +103,37 @@
 import { mapState, mapActions } from "vuex";
 import ProfiloCampagna from "./ProfiloCampaign.vue";
 import EventBus from "@/components/eventBus";
-import { required } from "vuelidate/lib/validators";
 import Modal from "@/components/Modal.vue";
 import GenericTable from "@/components/GenericTable.vue";
-import VueTailwindPicker from "vue-tailwind-picker";
-import { campaignService } from '../../services';
-
+import CampaignForm from "./CampaignForm.vue";
+import AssociateForm from "./AssociateForm.vue";
+ 
 export default {
-  components: { ProfiloCampagna, Modal, GenericTable, VueTailwindPicker },
+  components: { ProfiloCampagna, Modal, GenericTable ,CampaignForm, AssociateForm},
   name: "GestioneCampagne",
   data: function () {
     return {
       gridColumns: ["title", "from", "to", "active"],
       headerColumns: ["Nome", "Inizio", "Fine", "Status"],
-      arrayMeans: [],
-      applications:[],
+      associateCampaignModalVisible:false,
       editModalVisible: false,
       deleteModalVisible: false,
       currentCampaignSelected: undefined,
-      id: "",
-      logo: "",
-      title: "",
-      description: "",
-      from: "",
-      to: "",
-      rules: "",
-      privacy: "",
-      means: [],
-      active: false,
-      application: "",
+    
       popup: {
         title: "",
       },
       submitStatus: null,
     };
   },
-  validations: {
-    id: {
-      required,
-    },
-    logo: {
-      required,
-    },
-    title: {
-      required,
-    },
-    description: {
-      required,
-    },
-    from: {
-      required,
-    },
-    to: {
-      required,
-    },
-    rules: {
-      required,
-    },
-    privacy: {
-      required,
-    },
-    means: {
-      required,
-    },
-    active: {
-      required,
-    },
-    application: {
-      required,
-    },
-  },
+ 
   computed: {
     ...mapState("company", ["actualCompany", "adminCompany"]),
     ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
+    ...mapState("account", ["role"]),
   },
   mounted: function () {
-    campaignService.getApplications().then(res=> {
-       this.applications=res;
-    })
-    this.arrayMeans=campaignService.getArrayMeans();
+
     this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
     // this.campaigns = campaigns;
     if (this.adminCompany) {
@@ -427,10 +145,10 @@ export default {
     if (!this.adminCompany && !this.actualCompany) {
       this.getAllCampaigns(null);
     }
-    EventBus.$on("EDIT_CAMPAIGN", (campaign) => {
+ EventBus.$on("EDIT_CAMPAIGN", (campaign) => {
       this.editModalVisible = true;
-      this.campaign = campaign.item;
-      this.copyFormValues();
+      EventBus.$emit("EDIT_CAMPAIGN_FORM", campaign.item);
+
       this.popup = {
         title: "Modifica",
       };
@@ -442,6 +160,30 @@ export default {
         title: "Cancella",
       };
     });
+    EventBus.$on("OK_CAMPAIGN_FORM", (campaign) => {
+        if (this.newCampaign) {
+          this.addCampaignCall({
+            companyId: this.adminCompany ? this.actualCompany.item.id : null,
+            campaign: campaign,
+          });
+        } else {
+          this.updateCampaignCall({
+            companyId: this.adminCompany ? this.actualCompany.item.id : null,
+            campaign: campaign,
+          });
+        }
+      this.editModalVisible = false;
+      this.newCampaign = false;
+    });
+    EventBus.$on("NO_CAMPAIGN_FORM", () => {
+      this.submitStatus = "ERROR";
+    });
+  },
+  beforeDestroy() {
+    EventBus.$off("NO_CAMPAIGN_FORM");
+    EventBus.$off("OK_CAMPAIGN_FORM");
+    EventBus.$off("DELETE_CAMPAIGN");
+    EventBus.$off("EDIT_CAMPAIGN");
   },
 
   methods: {
@@ -491,82 +233,61 @@ export default {
       return moment(date).format("DD MM YYYY");
     },
     showModal(title) {
-      this.editModalVisible = true;
-      this.newCampaign = true;
-      this.campaign = {};
-      this.initCampaign();
+      if (this.role == 'ROLE_ADMIN' && !this.adminCompany)
+      {
+        this.editModalVisible = true;
+        this.newCampaign = true;
+        EventBus.$emit("NEW_CAMPAIGN_FORM");
       this.popup = {
         title: title,
       };
+      }
+      else {
+        console.log('associa campagna ad azienda');
+        this.associateCampaignModalVisible=true;
+        EventBus.$emit("ASSOCIATE_CAMPAIGN_FORM");
+      }
     },
     closeModal() {
       this.editModalVisible = false;
+      this.associateCampaignModalVisible = false;
       this.newCampaign = false;
-      this.$v.$reset();
     },
     closeDeleteModal() {
       this.deleteModalVisible = false;
     },
-    initCampaign() {
-      this.campaign = {};
-      this.id = "";
-      this.logo = "";
-      this.title = "";
-      this.description = "";
-      this.from = "";
-      this.to = "";
-      this.rules = "";
-      this.privacy = "";
-      this.means = [];
-      this.active = false;
-      this.application = "";
-    },
-    copyFormValues() {
-      for (const [key] of Object.entries(this.campaign)) {
-        this[key] = this.campaign[key];
-      }
-    },
-    createCampaign() {
-      this.campaign = {
-        id: this.id,
-        logo: this.logo,
-        title: this.title,
-        description: this.description,
-        from: this.from,
-        to: this.to,
-        rules: this.rules,
-        privacy: this.privacy,
-        means: this.means,
-        active: this.active,
-        application: this.application,
-      };
-    },
-
     saveCampaign() {
       //check fields
-      this.$v.$touch();
-      if (this.$v.$invalid) {
-        this.submitStatus = "ERROR";
-        return;
-      } else {
-        this.createCampaign();
-        this.submitStatus = "SUCCESS";
-        if (this.newCampaign) {
-          this.addCampaignCall({
-            companyId: this.adminCompan ? this.actualCompany.item.id : null,
-            campaign: this.campaign,
-          });
-        } else {
-          this.updateCampaignCall({
-            companyId: this.adminCompan ? this.actualCompany.item.id : null,
-            campaign: this.campaign,
-          });
-        }
-        this.$v.$reset();
-      }
-      this.editModalVisible = false;
-      this.newCampaign = false;
+      EventBus.$emit("CHECK_CAMPAIGN_FORM");
     },
+    saveAssociation() {
+
+    },
+    // saveCampaign() {
+    //   //check fields
+    //   this.$v.$touch();
+    //   if (this.$v.$invalid) {
+    //     this.submitStatus = "ERROR";
+    //     return;
+    //   } else {
+    //     this.createCampaign();
+    //     this.submitStatus = "SUCCESS";
+    //     if (this.newCampaign) {
+    //       this.addCampaignCall({
+    //         companyId: this.adminCompan ? this.actualCompany.item.id : null,
+    //         campaign: this.campaign,
+    //       });
+    //     } else {
+    //       this.updateCampaignCall({
+    //         companyId: this.adminCompan ? this.actualCompany.item.id : null,
+    //         campaign: this.campaign,
+    //       });
+    //     }
+    //     this.$v.$reset();
+    //   }
+    //   this.editModalVisible = false;
+    //   this.newCampaign = false;
+    // },
     deleteConfirm() {
       this.deleteModalVisible = false;
       this.deleteCampaignCall({

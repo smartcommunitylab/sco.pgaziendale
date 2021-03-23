@@ -2,7 +2,7 @@
   <div class="flex flex-col lg:flex-row">
     <div class="bg-green-300 lg:w-full mx-2 my-2 p-8">
       <profilo-azienda></profilo-azienda>
-      <gestione-azienda v-if="adminCompany && adminCompany.item"></gestione-azienda>
+      <gestione-azienda v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)"></gestione-azienda>
     </div>
   </div>
 </template>

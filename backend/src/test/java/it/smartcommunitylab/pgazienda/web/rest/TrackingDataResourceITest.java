@@ -60,6 +60,7 @@ import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
+import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
@@ -94,6 +95,8 @@ public class TrackingDataResourceITest {
     private EmployeeRepository employeeRepo;
     @Autowired
     private UserRepository userRepository;
+	@Autowired
+	private DayStatRepository dayStatRepo;
 
     @Autowired
     private TrackingDataService trackingService;
@@ -115,6 +118,7 @@ public class TrackingDataResourceITest {
     	campaignRepo.deleteAll();
     	companyRepo.deleteAll();
     	employeeRepo.deleteAll();
+    	dayStatRepo.deleteAll();
     	userRepository.findAll().stream().filter(u -> u.getUsername().equalsIgnoreCase("login@example.com")).forEach(u -> {
         	userRepository.delete(u);
     	});
