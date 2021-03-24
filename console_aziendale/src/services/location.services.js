@@ -4,8 +4,23 @@ export const locationService = {
     getAllLocations,
     addLocation,
     updateLocation,
-    deleteLocation
+    deleteLocation,
+    getArrayDays
 };
+
+const arrayDays= [
+    { value: 1, text: "Lunedi" },
+    { value: 2, text: "Martedì" },
+    { value: 3, text: "Mercoledì" },
+    { value: 4, text: "Giovedì" },
+    { value: 5, text: "Venerdì" },
+    { value: 6, text: "Sabato" },
+    { value: 7, text: "Domenica" }
+]
+
+function getArrayDays() {
+    return arrayDays;
+}
 //get all the companies
 function getAllLocations(companyId) {
     return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+ '/' + companyId + '/' +process.env.VUE_APP_LOCATIONS_API ).then(

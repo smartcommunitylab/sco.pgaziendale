@@ -165,6 +165,13 @@ public class CompanyService {
 			old.setLogo(company.getLogo());
 			old.setName(company.getName());
 			old.setWeb(company.getWeb());
+			old.setCity(company.getCity());
+			old.setCountry(company.getCountry());
+			old.setProvince(company.getProvince());
+			old.setRegion(company.getRegion());
+			old.setStreetNumber(company.getStreetNumber());
+			old.setZip(company.getZip());
+			
 			return Optional.of(companyRepo.save(old));
 		}
 		return Optional.empty();

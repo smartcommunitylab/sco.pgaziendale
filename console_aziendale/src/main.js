@@ -25,12 +25,20 @@ import Delete from "vue-material-design-icons/Delete";
 import AccountCog from "vue-material-design-icons/AccountCog";
 import CrosshairsGps from "vue-material-design-icons/CrosshairsGps";
 import CalendarRemove from "vue-material-design-icons/CalendarRemove";
+import Code from "vue-material-design-icons/FormTextboxPassword";
+
 import axios from 'axios'
 import {router} from "./routes.js"
 import { store } from './store'
 import './assets/styles/index.css';
 import Vuelidate from 'vuelidate'
 import { VueEditor } from "vue2-editor";
+import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
+import 'leaflet/dist/leaflet.css';
+
+Vue.component('l-map', LMap);
+Vue.component('l-tile-layer', LTileLayer);
+Vue.component('l-marker', LMarker);
 Vue.component('vue-editor',VueEditor);
 Vue.config.productionTip = false
 Vue.component('pencil-outline-icon', PencilOutlineIcon);
@@ -58,6 +66,7 @@ Vue.component('delete-icon',Delete);
 Vue.component('account-cog-icon',AccountCog);
 Vue.component('gps-icon',CrosshairsGps);
 Vue.component('calendar-remove-icon',CalendarRemove);
+Vue.component('code-icon',Code);
 Vue.directive('init', {
   bind: function(el, binding, vnode) {
     vnode.context[binding.arg] = binding.value;
