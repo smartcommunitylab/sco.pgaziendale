@@ -165,7 +165,7 @@
                     <button
                       class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
                     >
-                      <a href="/files/example.csv" download>Scarica file di esempio</a>
+                      <a href="/files/exampleEmployee.csv" download>Scarica file di esempio</a>
                     </button>
                     <template v-if="fileUploaded != null"
                       ><div class="pt-2">
