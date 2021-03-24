@@ -193,8 +193,8 @@ const mutations = {
             state.allCompanies = { items: [] }
         state.allCompanies.items.push(company)
     },
-    addCompanyFailure(state, error) {
-        state.actualCompany = { error };
+    addCompanyFailure() {
+        // state.actualCompany = { error };
     },
     updateCompany(state) {
         state.actualCompany = { loading: true };
@@ -207,8 +207,8 @@ const mutations = {
                 return company.id == element.id ? company : element
             })
     },
-    updateCompanyFailure(state, error) {
-        state.actualCompany = { error };
+    updateCompanyFailure() {
+        // state.actualCompany = { error };
     },
     deleteCompany(state) {
         state.actualCompany = { loading: true };

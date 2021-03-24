@@ -148,15 +148,6 @@
                 />
                 <label for="mm">Mobility Manager</label>
                 
-                <!-- <input
-                  type="text"
-                  name="role"
-                  id=""
-                  required
-                  placeholder="Ruoli *"
-                  v-model.trim="$v.roles.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                /> -->
               </div>
               <div v-if="$v.roles.$error">
                 <div class="error" v-if="!$v.username.required">
