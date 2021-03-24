@@ -110,7 +110,7 @@ export default {
     this.getAllCompanies();
     EventBus.$on("EDIT_COMPANY", (company) => {
       this.editModalVisible = true;
-      EventBus.$emit("EDIT_EMPLOYEE_FORM", company.item);
+      EventBus.$emit("EDIT_COMPANY_FORM", company.item);
       this.popup = {
         title: "Modifica",
       };

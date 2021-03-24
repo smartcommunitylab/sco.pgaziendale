@@ -207,7 +207,7 @@ export default {
     ...mapActions("campaign", { getAllCampaigns: "getAll" }),
     ...mapActions("company", { getAllCompanies: "getAll" }),
     ...mapActions("location", { getAllLocations: "getAll" }),
-                ...mapActions("navigation", { changePage: "changePage" }),
+    ...mapActions("navigation", { changePage: "changePage" }),
 
     getFirstCompany(user) {
       return user.roles.find(function (role) {

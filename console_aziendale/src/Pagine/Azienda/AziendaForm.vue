@@ -293,7 +293,7 @@ export default {
   methods: {
 
   copyFormValues(company) {
-      for (const [key] of Object.entries(this.company)) {
+      for (const [key] of Object.entries(company)) {
         this[key] = company[key];
       }
     },
