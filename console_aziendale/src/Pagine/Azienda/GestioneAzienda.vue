@@ -50,122 +50,7 @@
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
-        <form action="" id="addUser">
-          <div class="mb-20 flex flex-wrap justify-between">
-            <div class="field-group mb-4 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
-                <label class="field-label" for="first_name">Nome </label>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Nome *"
-                  v-model.trim="$v.name.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                  id="name"
-                />
-              </div>
-              <div v-if="$v.name.$error">
-                <div class="error" v-if="!$v.name.required">
-                  Il campo nome e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-4 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.surname.$error }">
-                <label class="field-label" for="first_name">Cognome </label>
-                <input
-                  type="text"
-                  name="surname"
-                  placeholder="Cognome *"
-                  v-model.trim="$v.surname.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                  id="surname"
-                />
-              </div>
-              <div v-if="$v.surname.$error">
-                <div class="error" v-if="!$v.surname.required">
-                  Il campo cognome e' richiesto.
-                </div>
-              </div>
-            </div>
-
-            <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.username.$error }"
-              >
-                <label class="field-label" for="password">Username </label>
-                <input
-                  type="text"
-                  name="username"
-                  id=""
-                  required
-                  placeholder="Username *"
-                  v-model.trim="$v.username.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.username.$error">
-                <div class="error" v-if="!$v.username.required">
-                  Il campo username e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.phone.$error }">
-                <label class="field-label" for="phone">Telefono </label>
-                <input
-                  type="text"
-                  name="phone"
-                  id=""
-                  required
-                  placeholder="Telefono *"
-                  v-model.trim="$v.phone.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.phone.$error">
-                <div class="error" v-if="!$v.phone.required">
-                  Il campo telefono e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.roles.$error }">
-                <label class="field-label" for="password">Ruoli </label>
-                <input
-                  type="checkbox"
-                  id="aa"
-                  value="ROLE_COMPANY_ADMIN"
-                  v-model="roles"
-                />
-                <label for="aa">Amministratore Aziendale</label>
-                <input
-                  type="checkbox"
-                  id="mm"
-                  value="ROLE_MOBILITY_MANAGER"
-                  v-model="roles"
-                />
-                <label for="mm">Mobility Manager</label>
-                
-                <!-- <input
-                  type="text"
-                  name="role"
-                  id=""
-                  required
-                  placeholder="Ruoli *"
-                  v-model.trim="$v.roles.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                /> -->
-              </div>
-              <div v-if="$v.roles.$error">
-                <div class="error" v-if="!$v.username.required">
-                  Il campo ruoli e' richiesto.
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
+        <user-form />
       </template>
       <template v-slot:footer>
         <button
@@ -217,54 +102,31 @@
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
-import { required } from "vuelidate/lib/validators";
 import Modal from "@/components/Modal.vue";
+import UserForm from './UserForm.vue';
+import EventBus from "@/components/eventBus";
 
 export default {
   name: "GestioneAzienda",
-  components: { Modal },
+  components: { Modal, UserForm },
   data() {
     return {
       submitStatus: null,
       company: null,
       editModalVisible: false,
       deleteModalVisible: false,
-      user: null,
-      id:"",
-      playerId:"",
-      resetDate:"",
-      activated:true,
-      name: "",
-      surname: "",
-      mail: "",
-      phone: "",
+      
       popup: {
         title: "",
       },
-      roles: [],
+
     };
   },
   computed: {
     ...mapState("company", ["adminCompany", "adminCompanyUsers"]),
     ...mapState("campaign", ["allCampaigns"]),
   },
-  validations: {
-    name: {
-      required,
-    },
-    surname: {
-      required,
-    },
-    username: {
-      required,
-    },
-    phone: {
-      required,
-    },
-    roles: {
-      required,
-    },
-  },
+  
   methods: {
     ...mapActions("company", {
       getCompanyById: "getCompanyById",
@@ -272,8 +134,10 @@ export default {
       addUserCall: "addUser",
       updateUserCall: "updateUser",
       deleteUserCall: "deleteUser",
+      getAllCompanies: "getAll",
     }),
     ...mapActions("campaign", { getAllCampaigns: "getAll" }),
+    ...mapActions("navigation", { changePage: "changePage" }),
     showModal(title) {
       this.editModalVisible = true;
       this.newUser = true;
@@ -286,65 +150,39 @@ export default {
       this.editModalVisible = false;
       this.$v.$reset();
     },
-    createUser() {
-      this.user = {
-        id:this.id,
-        playerId:this.playerId,
-        activated:this.activated,
-        resetDate:this.resetDate,
-        name: this.name,
-        surname: this.surname,
-        username: this.username,
-        phone:this.phone,
-        roles: this.roles.map((elem) => {
-          return {
-            companyId: this.adminCompany.item.id,
-            locations: null,
-            role: elem,
-            subscriptions: null,
-          };
-        }),
-      };
-    },
+
     saveUser() {
       //check fields
       // eslint-disable-next-line no-constant-condition
       // console.log("submit!");
-      console.log(this.roles);
-      this.$v.$touch();
-      if (this.$v.$invalid) {
-        this.submitStatus = "ERROR";
-        return;
-      } else {
-        this.createUser();
-        this.submitStatus = "SUCCESS";
-        if (this.newUser) {
-          this.addUserCall({ companyId: this.adminCompany.item.id, user: this.user });
-        } else {
-          this.updateUserCall({ companyId: this.adminCompany.item.id, user: this.user });
-        }
-        this.$v.$reset();
-      }
-      this.editModalVisible = false;
-      this.newUser = false;
+      EventBus.$emit("CHECK_USER_FORM");
+      // console.log(this.roles);
+      // this.$v.$touch();
+      // if (this.$v.$invalid) {
+      //   this.submitStatus = "ERROR";
+      //   return;
+      // } else {
+      //   this.createUser();
+      //   this.submitStatus = "SUCCESS";
+      //   if (this.newUser) {
+      //     this.addUserCall({ companyId: this.adminCompany.item.id, user: this.user });
+      //   } else {
+      //     this.updateUserCall({ companyId: this.adminCompany.item.id, user: this.user });
+      //   }
+      //   this.$v.$reset();
+      // }
+      // this.editModalVisible = false;
+      // this.newUser = false;
     },
     editUser(user) {
       this.editModalVisible = true;
       this.user = user;
-      this.copyValues();
+      EventBus.$emit("EDIT_USER_FORM", user);
       this.popup = {
         title: "Modifica",
       };
     },
-    copyValues() {
-      for (const [key] of Object.entries(this.user)) {
-        if (key!='roles')
-        this[key] = this.user[key];
-        else {
-          this['roles']=this.user['roles'].map((elem)=>elem.role)
-        }
-      }
-    },
+
     deleteUser(user) {
       this.deleteModalVisible = true;
       this.user = user;
@@ -366,6 +204,28 @@ export default {
       this.getUsers(this.adminCompany.item);
       this.getAllCampaigns(this.adminCompany.item.id);
     }
+    this.changePage({ title: "Lista aziende", route: "/aziende" });
+    // this.getAllCompanies();
+
+
+    EventBus.$on("OK_USER_FORM", (user) => {
+        if (this.newUser) {
+          this.addUserCall({ companyId: this.adminCompany.item.id, user: user });
+        } else {
+          this.updateUserCall({ companyId: this.adminCompany.item.id, user: user });
+      }
+      this.editModalVisible = false;
+      this.newUser = false;
+    });
+    EventBus.$on("NO_USER_FORM", () => {
+      this.submitStatus = "ERROR";
+    });
+  },
+  beforeDestroy() {
+    EventBus.$off("NO_USER_FORM");
+    EventBus.$off("OK_USER_FORM");
+    EventBus.$off("DELETE_USER");
+    EventBus.$off("EDIT_USER");
   },
 };
 </script>

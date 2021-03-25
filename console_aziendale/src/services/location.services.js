@@ -5,7 +5,8 @@ export const locationService = {
     addLocation,
     updateLocation,
     deleteLocation,
-    getArrayDays
+    getArrayDays,
+    importLocations
 };
 
 const arrayDays= [
@@ -20,6 +21,24 @@ const arrayDays= [
 
 function getArrayDays() {
     return arrayDays;
+}
+
+function importLocations(companyId,file) {
+    return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_LOCATIONS_API + '/' + process.env.VUE_APP_CSV_API, file, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    }).then(
+        res => {
+            if (res   ) {
+                return Promise.resolve(res);
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
 }
 //get all the companies
 function getAllLocations(companyId) {
