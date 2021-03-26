@@ -35,6 +35,9 @@ import Vuelidate from 'vuelidate'
 import { VueEditor } from "vue2-editor";
 import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
 import 'leaflet/dist/leaflet.css';
+import moment from 'moment'
+
+Vue.prototype.moment = moment
 
 Vue.component('l-map', LMap);
 Vue.component('l-tile-layer', LTileLayer);
