@@ -235,7 +235,7 @@ import EventBus from "@/components/eventBus";
 export default {
   data() {
     return {
- company: {},
+      company: {},
       id:"",
       name: "",
       code: "",
