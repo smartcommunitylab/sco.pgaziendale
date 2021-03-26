@@ -21,7 +21,6 @@
         </button>
       </div>
     </div>
-    <!-- <infobox /> -->
     <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Campagna </template>

@@ -67,7 +67,7 @@
                   name="employeeLocation"
                   id=""
                   required
-                  placeholder="Email *"
+                  placeholder="Sede *"
                   v-model.trim="$v.location.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />

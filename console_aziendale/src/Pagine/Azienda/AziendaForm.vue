@@ -183,6 +183,9 @@
                 <div class="error" v-if="!$v.contactEmail.required">
                   Il campo email e' richiesto.
                 </div>
+                 <div class="error" v-if="!$v.contactEmail.email">
+                  Il campo email non risulta valido.
+                </div>
               </div>
             </div>
             <div class="field-group mb-6 w-full">
@@ -226,7 +229,7 @@
         </form>
 </template>
 <script>
-import { required } from "vuelidate/lib/validators";
+import { required,email } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
 
 export default {
@@ -279,6 +282,7 @@ export default {
     },
     contactEmail: {
       required,
+      email
     },
     contactPhone: {
       required,
