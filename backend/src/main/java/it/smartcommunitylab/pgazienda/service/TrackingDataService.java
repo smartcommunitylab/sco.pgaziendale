@@ -135,7 +135,7 @@ public class TrackingDataService {
 							LocationDTO ldto = new LocationDTO();
 							ldto.setLat(l.getLatitude());
 							ldto.setLng(l.getLongitude());
-							ldto.setRad(l.getRadius());
+							ldto.setRad(l.getRadius() / 1000);
 							return ldto;
 						}).collect(Collectors.toList()));
 						
