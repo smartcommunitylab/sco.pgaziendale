@@ -12,6 +12,8 @@
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                   id="companyName"
                 />
+                                <info-box :msg="'Nome dell\'azienda'" />
+
               </div>
               <div v-if="$v.name.$error">
                 <div class="error" v-if="!$v.name.required">
@@ -30,6 +32,8 @@
                   v-model.trim="$v.code.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                 />
+                                                <info-box :msg="'Codice dell\'azienda'" />
+
               </div>
               <div v-if="$v.code.$error">
                 <div class="error" v-if="!$v.code.required">
@@ -231,8 +235,12 @@
 <script>
 import { required,email } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
+import InfoBox from"@/components/InfoBox.vue";
 
 export default {
+  components: {
+    "info-box":InfoBox
+  },
   data() {
     return {
       company: {},

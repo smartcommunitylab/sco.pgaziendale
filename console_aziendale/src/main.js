@@ -26,6 +26,7 @@ import AccountCog from "vue-material-design-icons/AccountCog";
 import CrosshairsGps from "vue-material-design-icons/CrosshairsGps";
 import CalendarRemove from "vue-material-design-icons/CalendarRemove";
 import Code from "vue-material-design-icons/FormTextboxPassword";
+import Help from "vue-material-design-icons/HelpCircle";
 
 import axios from 'axios'
 import {router} from "./routes.js"
@@ -70,6 +71,7 @@ Vue.component('account-cog-icon',AccountCog);
 Vue.component('gps-icon',CrosshairsGps);
 Vue.component('calendar-remove-icon',CalendarRemove);
 Vue.component('code-icon',Code);
+Vue.component('help-icon',Help);
 Vue.directive('init', {
   bind: function(el, binding, vnode) {
     vnode.context[binding.arg] = binding.value;
