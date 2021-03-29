@@ -12,6 +12,7 @@
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
             id="campaignCode"
           />
+                    <info-box :msg="'Codice univoco della sede'" />
         </div>
         <div v-if="$v.id.$error">
           <div class="error" v-if="!$v.id.required">
@@ -52,7 +53,7 @@
         </div>
         <div v-if="$v.streetNumber.$error">
           <div class="error" v-if="!$v.streetNumber.required">
-            Il campo number e' richiesto.
+            Il campo Numero e' richiesto.
           </div>
         </div>
       </div>
@@ -162,10 +163,15 @@
             v-model.trim="$v.radius.$model"
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
           />
+                              <info-box :msg="'Distanza in metri all\'interno di cui i viaggi dei dipendenti risultano essere validi'" />
+
         </div>
         <div v-if="$v.radius.$error">
           <div class="error" v-if="!$v.radius.required">
             Il campo Raggio e' richiesto.
+          </div>
+                    <div class="error" v-if="!$v.radius.numeric">
+            Il campo Raggio non risulta essere un numero.
           </div>
         </div>
       </div>
@@ -181,6 +187,8 @@
             v-model.trim="$v.latitude.$model"
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
           />
+                                        <info-box :msg="'Latitudine in gradi'" />
+
         </div>
         <div v-if="$v.latitude.$error">
           <div class="error" v-if="!$v.latitude.required">
@@ -200,6 +208,7 @@
             v-model.trim="$v.longitude.$model"
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
           />
+          <info-box :msg="'Longitudine in gradi'" />
         </div>
         <div v-if="$v.longitude.$error">
           <div class="error" v-if="!$v.longitude.required">
@@ -210,16 +219,24 @@
       <div class="field-group mb-6 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.nonWorking.$error }">
           <label class="field-label" for="password">Giorni NON lavorativi</label>
+          <input
+            
+            class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2"
+          />
+                    <info-box :msg="'I giorni della settimana in cui la sede chiude'"  />
+          <div class="container">
           <div v-for="day in arrayDays" v-bind:key="day.value">
+            <div class="field-label" />
             <label class="inline-flex items-center">
               <input
                 type="checkbox"
-                class="form-checkbox"
+                class=" inline-flexform-checkbox"
                 v-model.trim="$v.nonWorking.$model"
                 :value="day.value"
               />
               <span class="ml-2">{{ day.text }}</span>
             </label>
+          </div>
           </div>
         </div>
         <div v-if="$v.nonWorking.$error">
@@ -234,10 +251,17 @@
           :class="{ 'form-group--error': $v.nonWorkingDays.$error }"
         >
           <label class="field-label" for="password">Giorni di chiusura</label>
+                    <input
+            
+            class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2"
+          />
+                                          <info-box :msg="'I giorni della settimana in cui la sede chiude'"  />
+
+         <div>
           <div
             v-for="day in $v.nonWorkingDays.$model"
             :key="day"
-            class="flex justify-center items-center m-1 font-medium py-1 px-2 bg-white rounded-full text-indigo-100 bg-indigo-700 border border-indigo-700"
+            class="inline-flex  justify-center items-center m-1 font-medium py-1 px-2 bg-white rounded-full text-indigo-100 bg-indigo-700 border border-indigo-700"
           >
             <div class="text-xs font-normal leading-none max-w-full flex-initial">
               {{ day }}
@@ -262,8 +286,13 @@
               </div>
             </div>
           </div>
+         </div>
           <div class="relative ">
-            <input
+            <VueTailwindPicker 
+            :start-from-monday="true"
+                  @change.self="(v) => ($v.newNonWorkingDay.$model = v)"
+                >
+                   <input
               type="text"
               name="campaignNonWorkingDays"
               id=""
@@ -272,6 +301,18 @@
               v-model.trim="$v.newNonWorkingDay.$model"
               class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 w-full"
             />
+                </VueTailwindPicker>
+<!--             
+            <input
+              type="text"
+              name="campaignNonWorkingDays"
+              id=""
+              required
+              placeholder="Giorno di chiusura *"
+              v-model.trim="$v.newNonWorkingDay.$model"
+              class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 w-full"
+            /> -->
+
             <div
               class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
             >
@@ -289,11 +330,17 @@
   </form>
 </template>
 <script>
-import { required } from "vuelidate/lib/validators";
+import { required,numeric } from "vuelidate/lib/validators";
 import { locationService } from "../../services";
 import EventBus from "@/components/eventBus";
+import InfoBox from "@/components/InfoBox.vue";
+import VueTailwindPicker from "vue-tailwind-picker";
 
 export default {
+    components: {
+    InfoBox,
+    VueTailwindPicker
+  },
   data() {
     return {
       location: {},
@@ -314,8 +361,17 @@ export default {
     };
   },
   methods: {
+    stopTheEvent (event) {
+      console.log(event)
+       event.stopPropagation() 
+    },
     addDays(day) {
+      if (!this.nonWorkingDays.includes(day))
       this.nonWorkingDays.push(day);
+      else {
+        //giorno gia' inserito
+        console.log("giorno gia' inserito")
+      }
     },
     removeDay(day) {
       this.nonWorkingDays = this.nonWorkingDays.filter((elem) => elem != day);
@@ -412,6 +468,7 @@ export default {
     },
     radius: {
       required,
+      numeric
     },
     latitude: {
       required,
@@ -429,4 +486,10 @@ export default {
   },
 };
 </script>
-<style scoped></style>
+<style scoped>
+.tooltip-day{
+transform: translateY(0px);}
+.container {
+  position: relative;
+top: -30px;
+}</style>

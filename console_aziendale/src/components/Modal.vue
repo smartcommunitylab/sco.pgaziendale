@@ -103,15 +103,18 @@
   .modal {
     background: #FFFFFF;
     box-shadow: 2px 2px 20px 1px;
-    overflow-x: auto;
+    overflow-x: visible;
     display: flex;
     flex-direction: column;
+    /* text-align: center; */
   }
 
   .modal-header,
   .modal-footer {
-    padding: 15px;
-    display: flex;
+    /* padding: 15px; */
+    /* display: flex; */
+    text-align: center;
+    z-index: 9;
   }
 
   .modal-header {
@@ -131,6 +134,7 @@
     max-height: calc(100vh - 210px);
     min-height: 200px;
     overflow-y: scroll;
+    overflow-x: visible;
     padding: 1.25em;
   }
 

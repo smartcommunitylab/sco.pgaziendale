@@ -66,11 +66,11 @@ const actions = {
     chooseCompanyAdmin({ commit, dispatch }, company) {
         commit('choooseCompanyAdmin', company);
         dispatch('getUsers', company.item);
-        dispatch('alert/success', "Azienda selezionata", { root: true });
+        dispatch('alert/success', "Azienda selezionata. Ora sei Amministratore", { root: true });
     },
     resetCompanyAdmin({ commit, dispatch }) {
         commit('resetCompanyAdmin');
-        dispatch('alert/success', "Azienda deselezionata", { root: true });
+        dispatch('alert/success', "Azienda deselezionata. Non sei piú amministratore", { root: true });
     },
     updateCompany({ commit, dispatch }, company) {
         commit('updateCompany');

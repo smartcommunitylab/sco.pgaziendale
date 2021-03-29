@@ -65,6 +65,8 @@
                     }"
                   />
                 </div>
+                         <info-box :msg="'Inserisci un url che contiene il logo dell\'azienda'" />
+
               </div>
               <label class="pwd-label" for="first_name">Nuova Password</label>
               <div class="relative">
@@ -157,10 +159,10 @@
 <script>
 import Modal from "@/components/Modal.vue";
 import { mapActions, mapState } from "vuex";
-
+import InfoBox from "@/components/InfoBox.vue";
 export default {
   name: "ProfileManager",
-  components: { Modal },
+  components: { Modal,InfoBox },
 
   data: function () {
     return {

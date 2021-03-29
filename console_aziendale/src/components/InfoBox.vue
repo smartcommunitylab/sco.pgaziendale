@@ -37,9 +37,10 @@ export default {
 
 <style lang="css">
 .tooltip {
-  position: fixed;
+  position: absolute;
   display: inline-block;
   transform: translateY(8px);
+  z-index: 9;
 }
 .tooltip span {
   position: fixed;
