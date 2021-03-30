@@ -50,6 +50,7 @@ import com.google.common.collect.Multimaps;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
+import it.smartcommunitylab.pgazienda.domain.Constants;
 import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.DayStat.Distances;
 import it.smartcommunitylab.pgazienda.domain.Employee;
@@ -61,6 +62,7 @@ import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
+import it.smartcommunitylab.pgazienda.util.LimitsUtils;
 
 /**
  * @author raman
@@ -71,9 +73,7 @@ public class TrackingDataService {
 
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
 	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
-	private static final Object GROUPBY_DAY = "day";
-	private static final Object GROUPBY_MONTH = "month";
-
+	
 	@Autowired
 	private RestTemplate restTemplate;
 	
@@ -214,39 +214,63 @@ public class TrackingDataService {
 	 * @param withTracks (to inlcude tracks or not, applicable for day aggregation only)
 	 * @return
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public List<DayStat> getUserCampaignData(String playerId, String campaignId, LocalDate from, LocalDate to, String groupBy, Boolean withTracks) {
+	public List<DayStat> getUserCampaignData(String playerId, String campaignId, LocalDate from, LocalDate to, String groupBy, Boolean withTracks, Boolean noLimits) {
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+
 		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString()).gte(from.toString());
-		if (GROUPBY_DAY.equals(groupBy)) {
+		List<DayStat> res = null;
+		if (Constants.AGG_DAY.equals(groupBy)) {
 			Query q = Query.query(criteria);
 			if (!withTracks) q.fields().exclude("tracks");
-			return template.find(q, DayStat.class);
-		} else if (GROUPBY_MONTH.equals(groupBy)){
-			Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-			if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
-			MatchOperation filterOperation = Aggregation.match(criteria);
-	    	GroupOperation groupByOperation = Aggregation.group(groupBy)
-	    			.sum("co2saved").as("co2saved")
-	    			.sum("trackCount").as("trackCount")
-	    			.sum("distances.bike").as("bike");
-	    	
-	    	for (String mean: campaign.getMeans()) groupByOperation = groupByOperation.sum("distances." + mean).as(mean);
-	    	
-	    	Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
-	    	AggregationResults<Map> aggResult = template.aggregate(aggregation, DayStat.class, Map.class);
-	    	return aggResult.getMappedResults().stream().map(m -> {
-	    		DayStat stat = new DayStat();
-	    		stat.setCampaign(campaignId);
-	    		stat.setPlayerId(playerId);
-	    		stat.setCo2saved((double)m.getOrDefault("co2saved", 0d));
-	    		stat.setMonth((String) m.get("_id"));
-	    		stat.setDistances(Distances.fromMap(m));
-	    		stat.setTrackCount((Integer) m.getOrDefault("trackCount", 0));
-	    		return stat;
-	    	}).collect(Collectors.toList());
+			res = template.find(q, DayStat.class);
+		} else if (Constants.AGG_MONTH.equals(groupBy)){
+			res = doAggregation(playerId, campaignId, groupBy, campaign, criteria);
+		} else if (Constants.AGG_TOTAL.equals(groupBy)){
+			res = doAggregation(playerId, campaignId, "campaign", campaign, criteria);
+			res.forEach(ds -> ds.setMonth(null));
 		} else {
 			throw new IllegalArgumentException("Incorrect grouping");
 		}
+		if (!Boolean.TRUE.equals(noLimits)) {
+			LimitsUtils.applyLimits(res, groupBy, campaign);
+		} 
+		return res;
+	}
+
+
+
+	/**
+	 * @param playerId
+	 * @param campaignId
+	 * @param groupBy
+	 * @param campaign
+	 * @param criteria
+	 * @return
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private List<DayStat> doAggregation(String playerId, String campaignId, String groupBy, Campaign campaign,
+			Criteria criteria) {
+		MatchOperation filterOperation = Aggregation.match(criteria);
+		GroupOperation groupByOperation = Aggregation.group(groupBy)
+				.sum("co2saved").as("co2saved")
+				.sum("trackCount").as("trackCount")
+				.sum("distances.bike").as("bike");
+		
+		for (String mean: campaign.getMeans()) groupByOperation = groupByOperation.sum("distances." + mean).as(mean);
+		
+		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
+		AggregationResults<Map> aggResult = template.aggregate(aggregation, DayStat.class, Map.class);
+		return aggResult.getMappedResults().stream().map(m -> {
+			DayStat stat = new DayStat();
+			stat.setCampaign(campaignId);
+			stat.setPlayerId(playerId);
+			stat.setCo2saved((double)m.getOrDefault("co2saved", 0d));
+			stat.setMonth((String) m.get("_id"));
+			stat.setDistances(Distances.fromMap(m));
+			stat.setTrackCount((Integer) m.getOrDefault("trackCount", 0));
+			return stat;
+		}).collect(Collectors.toList());
 	}
 	
 	public boolean hasCampaignData(String playerId, String campaignId) {
