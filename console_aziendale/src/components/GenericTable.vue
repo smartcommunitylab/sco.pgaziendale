@@ -31,6 +31,16 @@ export default {
           // filterKey: String,
           method:Function
         },
+        watch: {
+  data: {
+    // the callback will be called immediately after the start of the observation
+    immediate: true, 
+    handler (val, oldVal) {
+      console.log(val);
+      console.log(oldVal)
+    }
+  }
+},
         data: function() {
           var sortOrders = {};
           this.columns.forEach(function(key) {
@@ -83,11 +93,11 @@ export default {
       }
 </script>
 <style scoped>
-body {
+/* body {
   font-family: Helvetica Neue, Arial, sans-serif;
   font-size: 14px;
   color: #444;
-}
+} */
 
 table {
   border: 2px solid #42b983;

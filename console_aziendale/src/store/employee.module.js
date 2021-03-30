@@ -10,7 +10,10 @@ const actions = {
         commit('importEmployees');
         employeeService.importEmployees(companyId,file)
             .then(
-                employees => commit('importEmployeesSuccess', employees),
+                () => {commit('importEmployeesSuccess');
+                dispatch('alert/success', "Dipendenti importati  con successo", { root: true });
+                dispatch('getAll',companyId);
+                        },
                 error => {
                     commit('importEmployeesFailure', error);
                     dispatch('alert/error', error, { root: true });
@@ -76,6 +79,15 @@ const actions = {
 };
 
 const mutations = {
+    importEmployees() {
+
+    },
+    importEmployeesSuccess(){
+
+    },
+    importEmployeesFailure() {
+
+    },
     removeActualEmployee(state) {
         state.actualEmployee=null;
     },

@@ -18,6 +18,7 @@ const actions = {
         userService.login(username, password)
             .then(
                 token => {
+                    //todo reset old values
                     commit('loginSuccess', token);
                     userService.getAccount().then(user => {
                         commit('userLogged', user);
@@ -33,6 +34,8 @@ const actions = {
                             dispatch('company/initCompanyAdmin', userCompanies[0], { root: true }); 
                             dispatch('campaign/getAll',userCompanies[0], { root: true });
                             }
+                            dispatch('employee/getAll', userCompanies[0], { root: true });
+
                             
                         }
                         dispatch('navigation/changePage', page, { root: true });
@@ -41,7 +44,7 @@ const actions = {
                 },
                 error => {
                     commit('loginFailure', error);
-                    dispatch('alert/error', error, { root: true });
+                    dispatch('alert/error', "Errore nell'accesso alla console.", { root: true });
                 }
             );
     },
@@ -66,7 +69,7 @@ const actions = {
 
         } ,function(error){
             commit('changePasswordFailure', error);
-            dispatch('alert/error', error, { root: true });
+            dispatch('alert/error', "Errore, verificare la password e riprovare.", { root: true });
         })
     },
     resetPasswordInit({ commit, dispatch },username){
@@ -77,7 +80,7 @@ const actions = {
 
         } ,function(error){
             commit('resetPasswordInitFailure', error);
-            dispatch('alert/error', error, { root: true });
+            dispatch('alert/error', "Errore nella reimpostazione della password.", { root: true });
         })
     },
     resetPasswordFinish({ commit, dispatch },{key,newPassword}){
@@ -88,7 +91,7 @@ const actions = {
 
         } ,function(error){
             commit('cresetPasswordFinishFailure', error);
-            dispatch('alert/error', error, { root: true });
+            dispatch('alert/error',"Errore nella reimpostazione della password." , { root: true });
         })
     },
 

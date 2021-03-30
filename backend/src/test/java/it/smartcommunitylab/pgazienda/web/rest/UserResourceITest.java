@@ -173,7 +173,7 @@ public class UserResourceITest {
         restUserMockMvc.perform(post("/api/companies/{companyId}/users", COMPANY_ID)
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(managedUserVM)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isOk());
 
         // Validate the User in the database
         assertPersistedUsers(users -> assertThat(users).hasSize(databaseSizeBeforeCreate));

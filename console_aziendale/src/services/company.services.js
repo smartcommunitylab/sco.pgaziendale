@@ -114,7 +114,7 @@ function addUser(companyId, user) {
 }
 // update an old company
 function updateUser(companyId, user) {
-    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_USERS_API + '/' + user.id, user).then(
+    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_USERS_API , user).then(
         res => {
             if (res && res.data) {
                 return Promise.resolve(res.data);

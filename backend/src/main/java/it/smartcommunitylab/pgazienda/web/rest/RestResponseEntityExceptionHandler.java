@@ -16,6 +16,9 @@
 
 package it.smartcommunitylab.pgazienda.web.rest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import it.smartcommunitylab.pgazienda.service.ImportDataException;
 import it.smartcommunitylab.pgazienda.service.InvalidPasswordException;
 import it.smartcommunitylab.pgazienda.service.UsernameAlreadyUsedException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.AccountResourceException;
@@ -81,6 +85,15 @@ public class RestResponseEntityExceptionHandler
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
+    @ExceptionHandler(ImportDataException.class)
+    protected ResponseEntity<Object> handleImportError(
+    		ImportDataException ex, WebRequest request) {
+    	Map<String, Object> errorData =new HashMap<>();
+    	errorData.put("col", ex.getCol());
+    	errorData.put("row", ex.getRow());
+        return handleExceptionInternal(ex, new ErrorMsg("Incorrect imported data row "+ex.getRow()+", col " + ex.getCol(), errorData), 
+          new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
 
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<Object> handleSecurity(
@@ -113,10 +126,16 @@ public class RestResponseEntityExceptionHandler
     
     public static class ErrorMsg {
     	public String message;
+    	public Map<String, Object> errorData;
 
 		public ErrorMsg(String message) {
 			super();
 			this.message = message;
+		}
+		public ErrorMsg(String message, Map<String, Object> errorData) {
+			super();
+			this.message = message;
+			this.errorData = errorData;
 		}
 
 		public ErrorMsg() {

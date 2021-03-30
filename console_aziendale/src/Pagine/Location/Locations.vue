@@ -11,7 +11,16 @@
         </generic-table>
       </div>
       <div v-else class="text-center">Non ci sono Sedi</div>
-
+      <div class="flex flex-row justify-center py-4">
+        <div class="px-2">
+          <button
+            @click="modalImportLocationsOpen = true"
+            class="inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+          >
+            Importa CSV
+          </button>
+        </div>
+      </div>
       <div class="ml-auto pt-4 pr-4 absolute right-0">
         <button
           @click="showModal('Aggiungi sede')"
@@ -22,7 +31,7 @@
       </div>
     </div>
 
-    <profilo-location v-if="actualLocation" />
+    <profilo-location v-if="actualLocation && actualLocation.item" />
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Sede </template>
       <template v-slot:body> Sei sicuro di voler cancellare la sede? </template>
@@ -48,276 +57,7 @@
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
-        <form action="" id="addLocation">
-          <div class="mb-4 flex flex-wrap justify-between">
-            <div class="field-group mb-4 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
-                <label class="field-label" for="first_name">Identificativo </label>
-                <input
-                  type="text"
-                  name="campaignCode"
-                  placeholder="Identificativo *"
-                  v-model.trim="$v.id.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                  id="campaignCode"
-                />
-              </div>
-              <div v-if="$v.id.$error">
-                <div class="error" v-if="!$v.id.required">
-                  Il campo Identificativo e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-4 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.address.$error }">
-                <label class="field-label" for="first_name">Indirizzo </label>
-                <input
-                  type="text"
-                  name="campaignAddress"
-                  placeholder="Indirizzo *"
-                  v-model.trim="$v.address.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                  id="campaignTitle"
-                />
-              </div>
-              <div v-if="$v.address.$error">
-                <div class="error" v-if="!$v.address.required">
-                  Il campo indirizzo e' richiesto.
-                </div>
-              </div>
-            </div>
-
-            <div class="field-group mb-4 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.streetNumber.$error }"
-              >
-                <label class="field-label" for="first_name">Numero</label>
-                <input
-                  type="text"
-                  name="campaignstreetNumber"
-                  id="campaignstreetNumber"
-                  placeholder="Number *"
-                  v-model.trim="$v.streetNumber.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.streetNumber.$error">
-                <div class="error" v-if="!$v.streetNumber.required">
-                  Il campo number e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.zip.$error }">
-                <label class="field-label" for="password">CAP </label>
-                <input
-                  type="text"
-                  name="campaignZip"
-                  id=""
-                  required
-                  placeholder="CAP *"
-                  v-model.trim="$v.zip.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.zip.$error">
-                <div class="error" v-if="!$v.zip.required">
-                  Il campo CAP e' richiesto.
-                </div>
-              </div>
-            </div>
-
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.city.$error }">
-                <label class="field-label" for="password">Cittá </label>
-                <input
-                  type="text"
-                  name="campaignCity"
-                  id=""
-                  required
-                  placeholder="Cittá *"
-                  v-model.trim="$v.city.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.city.$error">
-                <div class="error" v-if="!$v.city.required">
-                  Il campo Cittá e' richiesto.
-                </div>
-              </div>
-            </div>
-
-            <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.province.$error }"
-              >
-                <label class="field-label" for="password">Provincia</label>
-                <input
-                  type="text"
-                  name="campaignProvince"
-                  id=""
-                  required
-                  placeholder="Provincia *"
-                  v-model.trim="$v.province.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.province.$error">
-                <div class="error" v-if="!$v.province.required">
-                  Il campo Provincia e' richiesto.
-                </div>
-              </div>
-            </div>
-
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.region.$error }">
-                <label class="field-label" for="password">Regione</label>
-                <input
-                  type="text"
-                  name="campaignRegion"
-                  id=""
-                  required
-                  placeholder="Regione *"
-                  v-model.trim="$v.region.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.region.$error">
-                <div class="error" v-if="!$v.region.required">
-                  Il campo Regione e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.country.$error }">
-                <label class="field-label" for="password">Stato</label>
-                <input
-                  type="text"
-                  name="campaignCountry"
-                  id=""
-                  required
-                  placeholder="Stato *"
-                  v-model.trim="$v.country.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.country.$error">
-                <div class="error" v-if="!$v.country.required">
-                  Il campo Stato e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div class="form-group" :class="{ 'form-group--error': $v.radius.$error }">
-                <label class="field-label" for="password">Raggio</label>
-                <input
-                  type="text"
-                  name="campaignRadius"
-                  id=""
-                  required
-                  placeholder="Raggio *"
-                  v-model.trim="$v.radius.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.radius.$error">
-                <div class="error" v-if="!$v.radius.required">
-                  Il campo Raggio e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.latitute.$error }"
-              >
-                <label class="field-label" for="password">Latitudine</label>
-                <input
-                  type="text"
-                  name="campaignMeans"
-                  id=""
-                  required
-                  placeholder="Mezzi *"
-                  v-model.trim="$v.latitute.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.latitute.$error">
-                <div class="error" v-if="!$v.latitute.required">
-                  Il campo Latitudine e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.longitude.$error }"
-              >
-                <label class="field-label" for="password">Longitudine</label>
-                <input
-                  type="text"
-                  name="campaignLongitude"
-                  id=""
-                  required
-                  placeholder="Longitudine *"
-                  v-model.trim="$v.longitude.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.longitude.$error">
-                <div class="error" v-if="!$v.longitude.required">
-                  Il campo Longitudine e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.nonWorking.$error }"
-              >
-                <label class="field-label" for="password">Giorni NON lavorativi</label>
-                <input
-                  type="text"
-                  name="campaignNonWorking"
-                  id=""
-                  required
-                  placeholder="Giorni NON lavorativi *"
-                  v-model.trim="$v.nonWorking.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.nonWorking.$error">
-                <div class="error" v-if="!$v.nonWorking.required">
-                  Il campo Giorni NON lavorativi e' richiesto.
-                </div>
-              </div>
-            </div>
-            <div class="field-group mb-6 w-full">
-              <div
-                class="form-group"
-                :class="{ 'form-group--error': $v.nonWorkingDays.$error }"
-              >
-                <label class="field-label" for="password">Giorni di chiusura</label>
-                <input
-                  type="text"
-                  name="campaignNonWorkingDays"
-                  id=""
-                  required
-                  placeholder="Giorni di chiusura *"
-                  v-model.trim="$v.nonWorkingDays.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-                />
-              </div>
-              <div v-if="$v.nonWorkingDays.$error">
-                <div class="error" v-if="!$v.nonWorkingDays.required">
-                  Il campo Giorni di chiusura e' richiesto.
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
+        <location-form />
       </template>
       <template v-slot:footer>
         <button
@@ -341,6 +81,114 @@
         </p>
       </template>
     </modal>
+    <transition
+        enter-active-class="transition duration-300 ease-out transform"
+        enter-class="scale-95 opacity-0"
+        enter-to-class="scale-100 opacity-100"
+        leave-active-class="transition duration-150 ease-in transform"
+        leave-class="scale-100 opacity-100"
+        leave-to-class="scale-95 opacity-0"
+      >
+        <div
+          class="fixed z-10 inset-0 overflow-y-auto shadow-md"
+          v-if="modalImportLocationsOpen"
+        >
+          <div
+            class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+          >
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span
+              class="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+              >&#8203;</span
+            >
+
+            <div
+              class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-headline"
+            >
+              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                  <div
+                    class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
+                  >
+                    <import-icon id="import-icon" />
+                  </div>
+                  <div class="mt-3 text-center sm:mt-0 sm:ml-4">
+                    <h3
+                      class="text-lg leading-6 font-medium text-gray-900 text-left"
+                      id="modal-headline"
+                    >
+                      Importa sedi
+                    </h3>
+                    <button
+                      class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+                    >
+                      <a href="/files/exampleLocations.csv" download>Scarica file di esempio</a>
+                    </button>
+                    <template v-if="fileUploaded != null"
+                      ><div class="pt-2">
+                        <span class="text-left text-lg"> {{ fileName }} </span
+                        ><span @click="removeFile()" class="text-danger cursor-pointer">
+                          rimuovi</span
+                        >
+                      </div></template
+                    >
+                    <template v-else>
+                      <div class="mt-2">
+                        <div
+                          class="p-12 border-gray-300 border-dashed border-8 border-primary"
+                          :class="inDragArea ? ' bg-primary_light' : 'bg-background'"
+                          @dragover.prevent="dragover"
+                          @dragleave.prevent="dragleave"
+                          @drop.prevent="drop"
+                        >
+                          <input
+                            type="file"
+                            name="fileUploader"
+                            id="fileUploader"
+                            class="w-px h-px opacity-0 overflow-hidden absolute"
+                            @change="onFileUploaderChange"
+                            ref="file"
+                            accept=".csv"
+                          />
+
+                          <label for="fileUploader" class="block cursor-pointer">
+                            <div>
+                              Trascina qui il file
+                              <span class="font-semibold">.csv</span> oppure
+                              <span class="text-primary">clicca qui</span> per caricarlo
+                            </div>
+                          </label>
+                        </div>
+                      </div></template
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  @click="importLocations"
+                  class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+                >
+                  Importa sedi
+                </button>
+                <button
+                  @click="modalImportLocationsOpen = false"
+                  class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-danger rounded shadow ripple hover:shadow-lg focus:outline-none"
+                >
+                  Annulla
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
   </div>
 </template>
 
@@ -348,81 +196,30 @@
 import ProfiloLocation from "./ProfiloLocation.vue";
 import { mapState, mapActions } from "vuex";
 import GenericTable from "@/components/GenericTable.vue";
-import { required } from "vuelidate/lib/validators";
 import Modal from "@/components/Modal.vue";
 import EventBus from "@/components/eventBus";
-
+import LocationForm from "./LocationForm.vue";
 export default {
   name: "Locations",
-  components: { ProfiloLocation, GenericTable, Modal },
+  components: { ProfiloLocation, GenericTable, Modal, LocationForm },
   data: function () {
     return {
-      gridColumns: ["city", "address"],
-      headerColumns: ["Cittá", "Indirizzo"],
+      gridColumns: ["id", "city", "address"],
+      headerColumns: ["Identificativo", "Cittá", "Indirizzo"],
       newLocation: false,
-      location: {},
+      location: null,
       popup: {
         title: "",
       },
-      id: "",
-      address: "",
-      streetNumber: "",
-      zip: "",
-      city: "",
-      province: "",
-      region: "",
-      latitute: 0,
-      longitude: 0,
-      country: "",
-      radius: 200,
-      nonWorkingDays: [],
-      nonWorking: [],
+      modalImportLocationsOpen: false,
       deleteModalVisible: false,
       editModalVisible: false,
       submitStatus: null,
+      fileUploaded: null,
+      inDragArea: false,
     };
   },
-  validations: {
-    id: {
-      required,
-    },
-    address: {
-      required,
-    },
-    streetNumber: {
-      required,
-    },
-    zip: {
-      required,
-    },
-    city: {
-      required,
-    },
-    province: {
-      required,
-    },
-    region: {
-      required,
-    },
-    country: {
-      required,
-    },
-    radius: {
-      required,
-    },
-    latitute: {
-      required,
-    },
-    longitude: {
-      required,
-    },
-    nonWorkingDays: {
-      required,
-    },
-    nonWorking: {
-      required,
-    },
-  },
+
   created() {
     this.loadLocations();
   },
@@ -430,8 +227,7 @@ export default {
     this.changePage({ title: "Lista sedi", route: "/locations" });
     EventBus.$on("EDIT_LOCATION", (location) => {
       this.editModalVisible = true;
-      this.location = location.item;
-            this.copyFormValues();
+      EventBus.$emit("EDIT_LOCATION_FORM", location.item);
 
       this.popup = {
         title: "Modifica",
@@ -444,11 +240,38 @@ export default {
         title: "Cancella",
       };
     });
+    EventBus.$on("OK_LOCATION_FORM", (location) => {
+      if (this.newLocation) {
+        this.addLocationCall({
+          companyId: this.actualCompany.item.id,
+          location: location,
+        });
+      } else {
+        this.updateLocationCall({
+          companyId: this.actualCompany.item.id,
+          location: location,
+        });
+      }
+      this.editModalVisible = false;
+      this.newLocation = false;
+    });
+    EventBus.$on("NO_LOCATION_FORM", () => {
+      this.submitStatus = "ERROR";
+    });
+  },
+  beforeDestroy() {
+    EventBus.$off("NO_LOCATION_FORM");
+    EventBus.$off("OK_LOCATION_FORM");
+    EventBus.$off("DELETE_LOCATION");
+    EventBus.$off("EDIT_LOCATION");
   },
   computed: {
     ...mapState("location", ["allLocations", "actualLocation"]),
     ...mapState("company", ["actualCompany"]),
     ...mapState("account", ["role"]),
+        fileName() {
+      return this.fileUploaded.item(0).name;
+    },
   },
   methods: {
     ...mapActions("location", {
@@ -457,6 +280,7 @@ export default {
       addLocationCall: "addLocation",
       updateLocationCall: "updateLocation",
       deleteLocation: "deleteLocation",
+      importData: "importLocations",
     }),
     ...mapActions("navigation", { changePage: "changePage" }),
 
@@ -470,7 +294,7 @@ export default {
     showModal(title) {
       this.editModalVisible = true;
       this.newLocation = true;
-      this.initLocation();
+      EventBus.$emit("NEW_LOCATION_FORM");
       this.popup = {
         title: title,
       };
@@ -482,71 +306,10 @@ export default {
     closeDeleteModal() {
       this.deleteModalVisible = false;
     },
-            initLocation() {
- this.id="";
-       this.address="";
-       this.streetNumber="";
-       this.zip="";
-       this.city="";
-       this.province="";
-       this.region="";
-       this.latitute= 0;
-       this.longitude= 0;
-       this.country="";
-       this.radius=200;
-       this.nonWorkingDays=[];
-       this.nonWorking=[];
-      },
-      copyFormValues() {
-      for (const [key] of Object.entries(this.location)) {
-        this[key]=this.location[key]}
-},
 
-    createLocation() {
-      this.location = {
-        id: this.id,
-        address: this.address,
-        streetNumber: this.streetNumber,
-        zip: this.zip,
-        city: this.city,
-        province: this.province,
-        region: this.region,
-        latitute: Number.parseFloat(this.latitute),
-        longitude: Number.parseFloat(this.longitude),
-        // nonWorkingDays:this.nonWorkingDays,
-        // nonWorking:this.nonWorking
-        nonWorkingDays: [],
-        nonWorking: [],
-        country: this.country,
-        radius: Number.parseInt(this.radius),
-      };
-    },
     saveLocation() {
       //check fields
-      // eslint-disable-next-line no-constant-condition
-      // console.log("submit!");
-      this.$v.$touch();
-      if (this.$v.$invalid) {
-        this.submitStatus = "ERROR";
-        return;
-      } else {
-        this.createLocation();
-        if (this.newLocation) {
-          this.addLocationCall({
-            companyId: this.actualCompany.item.id,
-            location: this.location,
-          });
-        } else {
-          this.updateLocationCall({
-            companyId: this.actualCompany.item.id,
-            location: this.location,
-          });
-        }
-        this.$v.$reset();
-      }
-
-      this.editModalVisible = false;
-      this.newLocation = false;
+      EventBus.$emit("CHECK_LOCATION_FORM");
     },
     deleteConfirm() {
       this.deleteModalVisible = false;
@@ -555,13 +318,44 @@ export default {
         locationId: this.actualLocation.item.id,
       });
     },
-    updateLocation() {
-      //check fields
-      // eslint-disable-next-line no-constant-condition
-      if (true) {
-        this.updateLocationCall(this.location);
-        this.editModalVisible = false;
-      }
+    // updateLocation() {
+    //   //check fields
+    //   // eslint-disable-next-line no-constant-condition
+    //   if (true) {
+    //     this.updateLocationCall(this.location);
+    //     this.editModalVisible = false;
+    //   }
+    // },
+     onFileUploaderChange: function () {
+      console.log(this.$refs["file"]);
+      this.fileUploaded = this.$refs["file"].files;
+    },
+    removeUploadedFile: function () {
+      this.fileUploaded = null;
+    },
+
+    dragover: function () {
+      this.inDragArea = true;
+    },
+    dragleave: function () {
+      this.inDragArea = false;
+    },
+    drop: function (event) {
+      event.preventDefault();
+      this.inDragArea = false;
+
+      this.$refs["file"].files = event.dataTransfer.files;
+      this.onFileUploaderChange();
+    },
+    importLocations: function () {
+      console.log(this.fileUploaded);
+      this.modalImportLocationsOpen = false;
+      var formData = new FormData();
+      formData.append("file", this.fileUploaded.item(0));
+      this.importData({ companyId: this.actualCompany.item.id, file: formData });
+    },
+    removeFile: function () {
+      this.fileUploaded = null;
     },
   },
 };

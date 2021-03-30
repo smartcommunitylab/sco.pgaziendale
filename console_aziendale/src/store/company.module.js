@@ -3,7 +3,8 @@ import { companyService } from '../services';
 const state = {
     allCompanies: null,
     actualCompany: null,
-    adminCompany:null,
+    adminCompany: null,
+    adminCompanyUsers: null
 };
 
 const actions = {
@@ -19,26 +20,27 @@ const actions = {
             );
     },
     getCompanyById({ commit, dispatch }, companyId) {
-        if (companyId){
-        commit('getCompanyById');
-        companyService.getCompanyById(companyId).then(
-            company => commit('getCompanyByIdSuccess', company),
-            error => {
-                commit('getAllFailure', error);
-                dispatch('alert/error', error, { root: true });
-            }
-        );
+        if (companyId) {
+            commit('getCompanyById');
+            companyService.getCompanyById(companyId).then(
+                company => commit('getCompanyByIdSuccess', company),
+                error => {
+                    commit('getAllFailure', error);
+                    dispatch('alert/error', error, { root: true });
+                }
+            );
         }
         else {
-            commit('removeActualCompany'); 
+            commit('removeActualCompany');
         }
     },
     initCompanyAdmin({ commit, dispatch }, companyId) {
-        if (companyId){
+        if (companyId) {
             commit('initCompanyAdmin');
             companyService.getCompanyById(companyId).then(
                 company => {
                     commit('chooseCompanyAdmin', company);
+                    dispatch('getUsers', company);
                     dispatch('alert/success', "Azienda selezionata", { root: true });
                 },
                 error => {
@@ -46,10 +48,10 @@ const actions = {
                     dispatch('alert/error', error, { root: true });
                 }
             );
-            }
-            else {
-                commit('removeActualCompany'); 
-            }
+        }
+        else {
+            commit('removeActualCompany');
+        }
     },
     addCompany({ commit, dispatch }, company) {
         commit('addCompany');
@@ -61,21 +63,24 @@ const actions = {
             }
         );
     },
-    chooseCompanyAdmin({ commit, dispatch }, company){
+    chooseCompanyAdmin({ commit, dispatch }, company) {
         commit('choooseCompanyAdmin', company);
-        dispatch('alert/success', "Azienda selezionata", { root: true });
+        dispatch('getUsers', company.item);
+        dispatch('campaign/removeActualCampaign',null, {root: true});
+        dispatch('alert/success', "Azienda selezionata. Ora sei Amministratore", { root: true });
     },
-    resetCompanyAdmin({ commit, dispatch }){
+    resetCompanyAdmin({ commit, dispatch }) {
         commit('resetCompanyAdmin');
-        dispatch('alert/success', "Azienda deselezionata", { root: true });
+        dispatch('campaign/removeActualCampaign',null, {root: true});
+        dispatch('alert/success', "Azienda deselezionata. Non sei piú amministratore", { root: true });
     },
     updateCompany({ commit, dispatch }, company) {
         commit('updateCompany');
         companyService.updateCompany(company).then(
             company => {
-            commit('updateCompanySuccess', company);
-            dispatch('alert/success', "Azienda modificata con successo", { root: true });
-        },
+                commit('updateCompanySuccess', company);
+                dispatch('alert/success', "Azienda modificata con successo", { root: true });
+            },
             error => {
                 commit('getAllFailure', error);
                 dispatch('alert/error', error, { root: true });
@@ -96,7 +101,7 @@ const actions = {
             }
         );
     },
-    getUsers({ commit, dispatch },company){
+    getUsers({ commit, dispatch }, company) {
         commit('users');
         companyService.getUsers(company).then(
             users => {
@@ -110,12 +115,12 @@ const actions = {
             }
         );
     },
-    addUser({ commit, dispatch },{companyId,user}){
+    addUser({ commit, dispatch }, { companyId, user }) {
         commit('addUser');
-        companyService.addUser(companyId,user).then(
+        companyService.addUser(companyId, user).then(
             user => {
                 commit('addUserSuccess', user)
-                dispatch('alert/success', "Utente creato con successo", { root: true });
+                dispatch('alert/success', "Utente creato con successo. É stata inviata un'email di conferma all'indirizzo indicato.", { root: true });
             },
             error => {
                 commit('addUserFailure', error);
@@ -123,22 +128,22 @@ const actions = {
             }
         );
     },
-    updateUser({ commit, dispatch },{companyId,user}){
+    updateUser({ commit, dispatch }, { companyId, user }) {
         commit('updateUser');
-        companyService.updateUser(companyId,user).then(
+        companyService.updateUser(companyId, user).then(
             user => {
-            commit('updateUserSuccess', user);
-            dispatch('alert/success', "Utente modificato con successo", { root: true });
-        },
+                commit('updateUserSuccess', user);
+                dispatch('alert/success', "Utente modificato con successo", { root: true });
+            },
             error => {
                 commit('updateUserFailure', error);
                 dispatch('alert/error', error, { root: true });
             }
         );
     },
-    deleteUser({ commit, dispatch },{companyId,user}){
+    deleteUser({ commit, dispatch }, { companyId, user }) {
         commit('deleteUser');
-        companyService.deleteUser(companyId,user).then(
+        companyService.deleteUser(companyId, user).then(
             userId => {
                 commit('deleteUserSuccess', userId);
                 dispatch('alert/success', "Utente cancellato con successo", { root: true });
@@ -153,15 +158,15 @@ const actions = {
 };
 
 const mutations = {
-    choooseCompanyAdmin(state,company) {
-    state.adminCompany=company;
+    choooseCompanyAdmin(state, company) {
+        state.adminCompany = company;
     },
     resetCompanyAdmin(state) {
-        state.adminCompany=null;
-        state.actualCompany=null;
-            },
+        state.adminCompany = null;
+        state.actualCompany = null;
+    },
     removeActualCompany(state) {
-        state.actualCompany=null;
+        state.actualCompany = null;
     },
     getAllCompanies(state) {
         state.allCompanies = { loading: true };
@@ -190,8 +195,8 @@ const mutations = {
             state.allCompanies = { items: [] }
         state.allCompanies.items.push(company)
     },
-    addCompanyFailure(state, error) {
-        state.actualCompany = { error };
+    addCompanyFailure() {
+        // state.actualCompany = { error };
     },
     updateCompany(state) {
         state.actualCompany = { loading: true };
@@ -200,12 +205,12 @@ const mutations = {
         state.actualCompany = { item: company };
         //update allCompanies
         if (state.allCompanies.items)
-        state.allCompanies.items= state.allCompanies.items.map(function(element){
-              return company.id==element.id?  company : element
-        })
+            state.allCompanies.items = state.allCompanies.items.map(function (element) {
+                return company.id == element.id ? company : element
+            })
     },
-    updateCompanyFailure(state, error) {
-        state.actualCompany = { error };
+    updateCompanyFailure() {
+        // state.actualCompany = { error };
     },
     deleteCompany(state) {
         state.actualCompany = { loading: true };
@@ -213,22 +218,21 @@ const mutations = {
     deleteCompanySuccess(state, company) {
         state.actualCompany = null;
         if (state.allCompanies.items)
-        state.allCompanies.items= state.allCompanies.items.filter(function(element){
-            return company.id!=element.id
-        })
+            state.allCompanies.items = state.allCompanies.items.filter(function (element) {
+                return company.id != element.id
+            })
     },
     deleteCompanyFailure(state, error) {
         state.actualCompany = { error };
     },
     users(state) {
-        state.adminCompany.item.users = { loading: true };
+        state.adminCompanyUsers = { loading: true };
     },
     usersSuccess(state, users) {
-        if (state.adminCompany.item)
-        {
+        // if (state.adminCompanyUsers) {
             //check types and add to admin company
             // build arrays with
-            state.adminCompany.item.users=users;
+            state.adminCompanyUsers= { items: users };
             // for (var i=0; i<users.length; i++){
             //     if (users[i].roles.filter(function(role) { return role.role === 'ROLE_COMPANY_ADMIN'; }).length > 0) {
             //         state.adminCompany.item.administrators.push(users[i])
@@ -237,50 +241,66 @@ const mutations = {
             //         state.adminCompany.item.managers.push(users[i])
             //     }
             // }
-        }
+        // }
     },
     usersFailure(state, error) {
-        state.adminCompany.item.users = { error };
+        state.adminCompanyUsers.items = { error };
     },
-    addUser(state) {
-        state.adminCompany.item.users = { loading: true };
+    addUser() {
+        // state.adminCompanyUsers.items = { loading: true };
     },
     addUserSuccess(state, user) {
-        if (!state.adminCompany.item.users)
-        state.adminCompany.item.users = []
-        state.adminCompany.item.users.push(user)
+        if (!state.adminCompanyUsers.items)
+            state.adminCompanyUsers.items = []
+        state.adminCompanyUsers.items.push(user);
+        console.log(state.adminCompanyUsers.items);
+
     },
-    addUserFailure(state, error) {
-        state.adminCompany.item.users = { error };
+    addUserFailure() {
+        // state.adminCompanyUsers.items = { error };
     },
-    updateUser(state) {
-        state.adminCompany.item.users = { loading: true };
+    updateUser() {
+        // state.adminCompanyUsers.items = { loading: true };
     },
     updateUserSuccess(state, user) {
         // state.actualEmployee = { item: employee };
         //update allEmployees
-        if (state.adminCompany.item.users)
-        state.adminCompany.item.users= state.adminCompany.item.users.map(function(element){
-              return user.id==element.id?  user : element
-        })
+        if (state.adminCompanyUsers.items)
+            state.adminCompanyUsers.items = state.adminCompanyUsers.items.map(function (element) {
+                return user.id == element.id ? user : element
+            })
     },
-    updateEmployeeFailure(state, error) {
-        state.adminCompany.item.users = { error };
+    updateUserFailure() {
+        // state.adminCompanyUsers.items = { error };
     },
-    deleteEmployee(state) {
-        state.adminCompany.item.users = { loading: true };
+    // deleteEmployee(state) {
+    //     state.adminCompanyUsers.items = { loading: true };
+    // },
+    // deleteEmployeeSuccess(state, userId) {
+    //     // state.actualEmployee = null;
+    //     if (state.adminCompanyUsers.items)
+    //     state.adminCompanyUsers.items= state.adminCompanyUsers.items.filter(function(element){
+    //         return userId!=element.id
+    //     })
+    // },
+    // deleteEmployeeFailure(state, error) {
+    //     state.adminCompanyUsers.items = { error };
+    // },
+    deleteUser() {
+        // state.adminCompanyUsers.items = { loading: true };
     },
-    deleteEmployeeSuccess(state, userId) {
+    deleteUserSuccess(state, userId) {
         // state.actualEmployee = null;
-        if (state.adminCompany.item.users)
-        state.adminCompany.item.users= state.adminCompany.item.users.filter(function(element){
-            return userId!=element.id
-        })
+        if (state.adminCompanyUsers.items)
+            state.adminCompanyUsers.items = state.adminCompanyUsers.items.filter(function (element) {
+                return userId != element.id
+            })
+        console.log(state.adminCompanyUsers.items);
     },
-    deleteEmployeeFailure(state, error) {
-        state.adminCompany.item.users = { error };
+    deleteUserFailure() {
+        // state.adminCompanyUsers.items = { error };
     },
-  
+
 
 };
 

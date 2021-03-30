@@ -34,8 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.PGAziendaApp;
@@ -139,6 +141,19 @@ public class LocationResourceITest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$", hasSize(1)));
     }
+    
+    @Test
+    public void testImportLocations() throws Exception {
+    	
+    	MockMultipartFile file = new MockMultipartFile("file", "sedi.csv", "text/plain", getClass().getResourceAsStream("/sedi.csv"));
+        
+    	restMockMvc.perform(
+    			MockMvcRequestBuilders.multipart("/api/companies/{companyId}/locations/csv", company.getId())
+                .file(file))
+            .andExpect(status().is(200));
+    }
+    
+
 
 
     private Company testCompany() {

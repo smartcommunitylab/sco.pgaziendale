@@ -7,12 +7,14 @@
       >
         <div class="w-full">
           <button
+            v-show="$route.name !== 'azienda'"
             @click="deleteAzienda"
             class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
           >
             <delete-icon />
           </button>
           <button
+            v-if="role == 'ROLE_ADMIN'"
             @click="editAzienda"
             class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
           >
@@ -23,7 +25,6 @@
           class="p-4 md:p-12 text-center lg:text-left"
           v-if="actualCompany && actualCompany.item"
         >
-          <!-- Image for mobile view-->
           <div
             class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
             v-bind:style="{ backgroundImage: 'url(' + actualCompany.item.logo + ')' }"
@@ -33,44 +34,48 @@
             class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
           ></div>
           <p
-            class="pt-4 text-base font-bold flex items-center justify-center lg:justify-start"
+            class="pt-4 text-base font-bold flex items-center  lg:justify-start"
           >
-            <address-icon />{{ actualCompany.item.address }}{{ actualCompany.item.number }}{{ actualCompany.item.city }}{{ actualCompany.item.province }}{{ actualCompany.item.cap }}
+            <address-icon /> <span class="detail-company">{{ actualCompany.item.address }}{{ actualCompany.item.number
+            }}{{ actualCompany.item.city }}{{ actualCompany.item.province
+            }}{{ actualCompany.item.cap }}</span>
           </p>
-         
+
           <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center  lg:justify-start"
           >
-            <web-icon /> {{ actualCompany.item.web }}
-          </p>
-          <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
-            <email-icon /> {{ actualCompany.item.contactEmail }}
+            <web-icon /> <a  class="link-web" :href="actualCompany.item.web" v-if="actualCompany.item.web">{{ actualCompany.item.web }}</a><span class="detail-company" v-else>Non é presente</span>
           </p>
           <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center  lg:justify-start"
           >
-            <phone-icon /> {{ actualCompany.item.contactPhone }}
+            <email-icon /> <a class="link-web" :href="`mailto:${actualCompany.item.contactEmail}`">{{ actualCompany.item.contactEmail }}</a>
+          </p>
+          <p
+            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center lg:justify-start"
+          >
+            <phone-icon /> <span class="detail-company">{{ actualCompany.item.contactPhone }}</span>
           </p>
         </div>
+        <div class="w-full flex">
         <button
-          v-if="!adminCompany && actualCompany && role=='ROLE_ADMIN'"
+          v-if="!adminCompany && actualCompany && role == 'ROLE_ADMIN'"
           type="button"
-          class="btn-admin"
+          class="btn-admin m-auto"
           @click="chooseCompanyAdmin"
           aria-label="Close modal"
         >
           Diventa amministratore
         </button>
-        <span v-if="adminCompany" class="btn-admin "> Sei amministratore </span>
+        <button v-if="adminCompany && $route.name !== 'azienda'" class="btn-admin m-auto"> Sei amministratore </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
- import EventBus from "@/components/eventBus"
+import EventBus from "@/components/eventBus";
 export default {
   name: "ProfiloAzienda",
   data() {
@@ -79,7 +84,8 @@ export default {
 
   computed: {
     ...mapState("company", ["adminCompany", "actualCompany"]),
-...mapState("account", ["role"])  },
+    ...mapState("account", ["role"]),
+  },
   methods: {
     ...mapActions("company", {
       getCompanyById: "getCompanyById",
@@ -100,12 +106,25 @@ export default {
 </script>
 
 <style scoped>
- .btn-admin {
-    border: none;
+.btn-admin {
+border: none;
     font-size: 20px;
     padding: 20px;
     cursor: pointer;
     font-weight: bold;
-    color: #4AAE9B;
-    background: transparent;
-  }</style>
+    color: white;
+    background: #5ab45f;
+    border-radius: 26px;
+
+}
+.detail-company{
+  margin: 4px 8px;
+  font-size: medium;
+}
+.link-web{
+    margin: 4px 8px;
+  font-size: medium;
+  text-decoration: underline;
+  color: #5ab45f;;
+}
+</style>
