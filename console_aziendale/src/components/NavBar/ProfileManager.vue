@@ -65,6 +65,8 @@
                     }"
                   />
                 </div>
+                         <info-box :msg="'Inserisci un url che contiene il logo dell\'azienda'" />
+
               </div>
               <label class="pwd-label" for="first_name">Nuova Password</label>
               <div class="relative">
@@ -99,6 +101,7 @@
               <div class="relative">
                 <input
                   :type="passwordFieldTypeThird"
+                  :class="{ 'password-different': passwordDifferent }"
                   name="companyLogo"
                   id="companyLogo"
                   placeholder="Nuova password *"
@@ -123,6 +126,9 @@
                     }"
                   />
                 </div>
+              </div>
+              <div v-if="passwordDifferent">
+                <div class="error">Le due password non coincidono</div>
               </div>
               <button
                 type="button"
@@ -153,10 +159,10 @@
 <script>
 import Modal from "@/components/Modal.vue";
 import { mapActions, mapState } from "vuex";
-
+import InfoBox from "@/components/InfoBox.vue";
 export default {
   name: "ProfileManager",
-  components: { Modal },
+  components: { Modal,InfoBox },
 
   data: function () {
     return {
@@ -168,6 +174,7 @@ export default {
       passwordFieldTypeFirst: "password",
       passwordFieldTypeSecond: "password",
       passwordFieldTypeThird: "password",
+      passwordDifferent:false
     };
   },
   computed: {
@@ -176,11 +183,15 @@ export default {
   methods: {
     ...mapActions("account", ["changePassword"]),
     changePwd() {
+          //check if equal
+      if (this.newPassword === this.newPassword2) {
+        this.passwordDifferent = false;
       // visible edit pwd
       this.changePassword({
         oldPassword: this.oldPassword,
         newPassword: this.newPassword,
       });
+      } else this.passwordDifferent = true;
     },
     switchVisibility(id) {
       this[id] = this[id] === "password" ? "text" : "password";
@@ -207,5 +218,13 @@ export default {
 }
 .pwd-input {
   color: black;
+}
+.password-different {
+  /* color: red; */
+  animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+.error {
+  color: red;
+  text-align: center;
 }
 </style>

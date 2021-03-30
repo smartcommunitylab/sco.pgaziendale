@@ -7,7 +7,9 @@ const state = {
 };
 
 const actions = {
-    
+    removeActualCampaign({commit}){
+        commit('removeActualCampaign');
+    },
     getAll({ commit, dispatch }, id) {
         commit('getAllCampaigns');
 

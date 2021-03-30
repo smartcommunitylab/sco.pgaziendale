@@ -254,7 +254,6 @@
         </button>
       </div>
     </div>
-    <!-- <infobox ref="infobox" /> -->
     <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
 
     <modal v-show="deleteModalVisible">

@@ -34,40 +34,40 @@
             class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
           ></div>
           <p
-            class="pt-4 text-base font-bold flex items-center justify-center lg:justify-start"
+            class="pt-4 text-base font-bold flex items-center  lg:justify-start"
           >
-            <address-icon />{{ actualCompany.item.address }}{{ actualCompany.item.number
+            <address-icon /> <span class="detail-company">{{ actualCompany.item.address }}{{ actualCompany.item.number
             }}{{ actualCompany.item.city }}{{ actualCompany.item.province
-            }}{{ actualCompany.item.cap }}
+            }}{{ actualCompany.item.cap }}</span>
           </p>
 
           <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center  lg:justify-start"
           >
-            <web-icon /> {{ actualCompany.item.web }}
+            <web-icon /> <a  class="link-web" :href="actualCompany.item.web" v-if="actualCompany.item.web">{{ actualCompany.item.web }}</a><span class="detail-company" v-else>Non é presente</span>
           </p>
           <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center  lg:justify-start"
           >
-            <email-icon /> {{ actualCompany.item.contactEmail }}
+            <email-icon /> <a class="link-web" :href="`mailto:${actualCompany.item.contactEmail}`">{{ actualCompany.item.contactEmail }}</a>
           </p>
           <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center lg:justify-start"
           >
-            <phone-icon /> {{ actualCompany.item.contactPhone }}
+            <phone-icon /> <span class="detail-company">{{ actualCompany.item.contactPhone }}</span>
           </p>
         </div>
         <div class="w-full flex">
         <button
           v-if="!adminCompany && actualCompany && role == 'ROLE_ADMIN'"
           type="button"
-          class="btn-admin"
+          class="btn-admin m-auto"
           @click="chooseCompanyAdmin"
           aria-label="Close modal"
         >
           Diventa amministratore
         </button>
-        <button v-if="adminCompany && $route.name !== 'azienda'" class="btn-admin"> Sei amministratore </button>
+        <button v-if="adminCompany && $route.name !== 'azienda'" class="btn-admin m-auto"> Sei amministratore </button>
         </div>
       </div>
     </div>
@@ -116,5 +116,15 @@ border: none;
     background: #5ab45f;
     border-radius: 26px;
 
+}
+.detail-company{
+  margin: 4px 8px;
+  font-size: medium;
+}
+.link-web{
+    margin: 4px 8px;
+  font-size: medium;
+  text-decoration: underline;
+  color: #5ab45f;;
 }
 </style>

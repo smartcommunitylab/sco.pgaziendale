@@ -21,7 +21,6 @@
         </button>
       </div>
     </div>
-    <!-- <infobox /> -->
     <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Campagna </template>
@@ -244,6 +243,9 @@ export default {
       }
       else {
         console.log('associa campagna ad azienda');
+        this.popup = {
+        title: "Campagne pubbliche",
+      };
         this.associateCampaignModalVisible=true;
         EventBus.$emit("ASSOCIATE_CAMPAIGN_FORM");
       }

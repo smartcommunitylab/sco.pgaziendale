@@ -50,6 +50,9 @@ public class Campaign {
 	private List<String> means = new LinkedList<>();
 	
 	private String rules, privacy;
+	
+	private List<Limit> limits; 
+	
 	/**
 	 * @return the id
 	 */
@@ -182,6 +185,87 @@ public class Campaign {
 	public void setPrivacy(String privacy) {
 		this.privacy = privacy;
 	}
+	
+	/**
+	 * @return the limits
+	 */
+	public List<Limit> getLimits() {
+		if (limits == null) {
+			limits = new LinkedList<>();
+			limits.add(new Limit(Constants.AGG_DAY, Constants.MEAN.bike.toString(), 20d)); 
+			limits.add(new Limit(Constants.AGG_MONTH, Constants.MEAN.bike.toString(), 250d));
+		}
+		return limits;
+	}
+	/**
+	 * @param limits the limits to set
+	 */
+	public void setLimits(List<Limit> limits) {
+		this.limits = limits;
+	}
 
+
+
+	public static class Limit {
+		private String span;
+		private String mean;
+		private Double value;
+		
+		
+		/**
+		 * 
+		 */
+		public Limit() {
+			super();
+		}
+		/**
+		 * @param span
+		 * @param mean
+		 * @param value
+		 */
+		public Limit(String span, String mean, Double value) {
+			super();
+			this.span = span;
+			this.mean = mean;
+			this.value = value;
+		}
+		/**
+		 * @return the span
+		 */
+		public String getSpan() {
+			return span;
+		}
+		/**
+		 * @param span the span to set
+		 */
+		public void setSpan(String span) {
+			this.span = span;
+		}
+		/**
+		 * @return the mean
+		 */
+		public String getMean() {
+			return mean;
+		}
+		/**
+		 * @param mean the mean to set
+		 */
+		public void setMean(String mean) {
+			this.mean = mean;
+		}
+		/**
+		 * @return the value
+		 */
+		public Double getValue() {
+			return value;
+		}
+		/**
+		 * @param value the value to set
+		 */
+		public void setValue(Double value) {
+			this.value = value;
+		}
+		
+	}
 	
 }

@@ -29,10 +29,10 @@
         {{ actualCampaign.item.description }}
       </div>
       <div class="text-xl pt-8 lg:pt-0" v-if="actualCampaign.item.from">
-        {{ actualCampaign.item.from }}
+        {{ moment(actualCampaign.item.from).format('DD-MM-YYYY') }}
       </div>
       <div class="text-xl pt-8 lg:pt-0" v-if="actualCampaign.item.to">
-        {{ actualCampaign.item.to }}
+        {{ moment(actualCampaign.item.to).format('DD-MM-YYYY') }}
       </div>
       <div
         class="text-xl pt-8 lg:pt-0"
@@ -45,9 +45,10 @@
         v-html="actualCampaign.item.privacy"
       ></div>
       <div class="text-xl pt-8 lg:pt-0" v-if="actualCampaign.item.means">
-        {{ getListOfMeans() }}
+        <span>Lista mezzi campagna</span>{{ getListOfMeans() }}
       </div>
       <div class="text-xl pt-8 lg:pt-0" v-if="actualCampaign.item.companies">
+        <div>Lista aziende associate alla campagna</div>
        <div v-for="company in actualCampaign.item.companies" :key="company.id">
          {{company.name}}
        </div>
