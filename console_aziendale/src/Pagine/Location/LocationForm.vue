@@ -366,7 +366,7 @@ export default {
        event.stopPropagation() 
     },
     addDays(day) {
-      if (!this.nonWorkingDays.includes(day))
+      if (!this.nonWorkingDays || !this.nonWorkingDays.includes(day))
       this.nonWorkingDays.push(day);
       else {
         //giorno gia' inserito

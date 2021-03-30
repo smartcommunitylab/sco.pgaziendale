@@ -243,6 +243,9 @@ export default {
       }
       else {
         console.log('associa campagna ad azienda');
+        this.popup = {
+        title: "Campagne pubbliche",
+      };
         this.associateCampaignModalVisible=true;
         EventBus.$emit("ASSOCIATE_CAMPAIGN_FORM");
       }

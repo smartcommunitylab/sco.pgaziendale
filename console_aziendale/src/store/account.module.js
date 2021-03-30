@@ -18,6 +18,7 @@ const actions = {
         userService.login(username, password)
             .then(
                 token => {
+                    //todo reset old values
                     commit('loginSuccess', token);
                     userService.getAccount().then(user => {
                         commit('userLogged', user);

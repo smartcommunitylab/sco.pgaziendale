@@ -1,12 +1,15 @@
 <template>
   <div>
-    Campagne pubbliche
     <div v-if="publicCampaigns && publicCampaigns.items">
       <div v-for="campaign in publicCampaigns.items" :key="campaign.id">
-        <div v-if="publicCampaigns && publicCampaigns.items.length > 0">
-          {{ campaign.title }}
-          <button v-if="isAssociated(campaign)" @click="disassocia(campaign)">Disassocia</button>
-          <button v-else @click="associa(campaign)">Associa</button>
+        <div class="flex items-center justify-center" v-if="publicCampaigns && publicCampaigns.items.length > 0">
+          <div class="w-1/2">{{ campaign.title }}</div>
+          <button  type="button"
+                class="w-1/2 btn-close"
+                aria-label="Close modal" v-if="isAssociated(campaign)" @click="disassocia(campaign)">Disassocia</button>
+          <button  type="button"
+                class="w-1/2 btn-close"
+                aria-label="Close modal" v-else @click="associa(campaign)">Associa</button>
         </div>
       </div>
     </div>
