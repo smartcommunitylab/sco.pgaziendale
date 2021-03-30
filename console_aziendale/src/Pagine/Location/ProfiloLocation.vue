@@ -55,14 +55,16 @@
               </l-popup>
             </l-marker>
           </l-map>
-          <p
+          <div
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
+          v-if="(actualLocation.item.nonWorking && actualLocation.item.nonWorking[0]!=0)">
             <calendar-remove-icon />Giorni della settimana non lavorativi: <div v-html="getNonWorking(actualLocation.item.nonWorking)"></div>
-          <p
+          </div>
+          <div
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
+           v-if="actualLocation.item.nonWorkingDays">
             <calendar-remove-icon /> Giorni non lavorativi: <div v-html="getNonWorkingDays(actualLocation.item.nonWorkingDays)"></div>
+          </div>
         </div>
       </div>
       <div></div>
@@ -118,6 +120,7 @@ export default {
     },
     getNonWorking(days){
       var returnDays="";
+      if (days)
       days.forEach(element => {
               returnDays+=locationService.getDayByInt(element)+ "<br>";
 
@@ -126,6 +129,7 @@ export default {
     } ,
 getNonWorkingDays(days){
         var returnDays="";
+        if (days)
       days.forEach(element => {
               returnDays+=element+ "<br>";
 
