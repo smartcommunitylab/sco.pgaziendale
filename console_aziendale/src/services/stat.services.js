@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const userService = {
+export const statService = {
     getStat
 
 };
