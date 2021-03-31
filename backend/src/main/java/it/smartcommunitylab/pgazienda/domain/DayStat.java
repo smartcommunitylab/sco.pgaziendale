@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 
+import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
+
 /**
  * @author raman
  *
@@ -275,6 +277,28 @@ public class DayStat {
 			distances.setCar(map.getOrDefault("car", 0d));
 			distances.setWalk(map.getOrDefault("walk", 0d));
 			return distances;
+		}
+		
+		public Double meanValue(MEAN mean) {
+			switch(mean) {
+			case bike: return getBike();
+			case boat: return getBoat();
+			case bus: return getBus();
+			case car: return getCar();
+			case train: return getTrain();
+			case walk: return getWalk();
+			}
+			return null;
+		}
+		public void updateValue(MEAN mean, Double value) {
+			switch(mean) {
+			case bike: setBike(value); break;
+			case boat: setBoat(value); break;
+			case bus: setBus(value); break;
+			case car: setCar(value); break;
+			case train: setTrain(value); break;
+			case walk: setWalk(value); break;
+			}
 		}
 	}
 	

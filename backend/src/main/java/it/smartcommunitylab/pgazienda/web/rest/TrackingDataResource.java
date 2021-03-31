@@ -66,12 +66,12 @@ public class TrackingDataResource {
      * @return
      */
     @GetMapping("/campaigns/{campaignId}/stats/me")
-	public ResponseEntity<List<DayStat>> getMyStats(@PathVariable String campaignId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks) {
+	public ResponseEntity<List<DayStat>> getMyStats(@PathVariable String campaignId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) {
     	log.debug("Read proper stats {}", campaignId);
     	if (from == null) from = LocalDate.now().toString();
     	if (to == null) to = LocalDate.now().toString();
     	
-    	return ResponseEntity.ok(dataService.getUserCampaignData(userService.getUserWithAuthorities().get().getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks));
+    	return ResponseEntity.ok(dataService.getUserCampaignData(userService.getUserWithAuthorities().get().getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks, noLimits));
 	}
 
 
@@ -81,7 +81,7 @@ public class TrackingDataResource {
      * @return
      */
     @GetMapping("/campaigns/{campaignId}/stats/{employeeId:.*}")
-	public ResponseEntity<List<DayStat>> getEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks) {
+	public ResponseEntity<List<DayStat>> getEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) {
     	log.debug("Read user stats {} / {}", campaignId, employeeId);
     	if (from == null) from = LocalDate.now().toString();
     	if (to == null) to = LocalDate.now().toString();
@@ -97,7 +97,7 @@ public class TrackingDataResource {
     	List<User> users = userService.getUserByEmployeeCode(campaignId, company.get().getCode(), employee.getCode());
     	if (users == null || users.isEmpty()) throw new IllegalArgumentException("Invalid employee - no subscription: "+ employeeId);
     	
-    	return ResponseEntity.ok(dataService.getUserCampaignData(users.get(0).getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks));
+    	return ResponseEntity.ok(dataService.getUserCampaignData(users.get(0).getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks, noLimits));
 	}
 
     /**
