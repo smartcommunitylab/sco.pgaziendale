@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div v-if="publicCampaigns && publicCampaigns.items">
-      <div v-for="campaign in publicCampaigns.items" :key="campaign.id">
-        <div class="flex items-center justify-center" v-if="publicCampaigns && publicCampaigns.items.length > 0">
+    <div v-if="campaigns ">
+      <div v-for="campaign in campaigns" :key="campaign.id">
+        <div class="flex items-center justify-center" v-if="campaigns && campaigns.length > 0">
           <div class="w-1/2">{{ campaign.title }}</div>
           <button  type="button"
                 class="w-1/2 btn-close"
@@ -18,11 +18,14 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import EventBus from "@/components/eventBus";
+import {campaignService} from "../../services/campaign.services"
 
 export default {
   components: {},
   data() {
-    return {};
+    return {
+      campaigns:[]
+    };
   },
   computed: {
     ...mapState("company", ["actualCompany", "adminCompany"]),
@@ -33,7 +36,7 @@ export default {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
       getPublicCampaigns: "getPublicCampaigns",
-      getCampaignCall: "getCampaign",
+      getAllCompaniesOfCampaignCall: "getAllCompaniesOfCampaign",
       addCampaignCall: "addCampaign",
       updateCampaignCall: "updateCampaign",
       deleteCampaignCall: "deleteCampaign",
@@ -60,8 +63,12 @@ export default {
   mounted() {
     EventBus.$on("ASSOCIATE_CAMPAIGN_FORM", () => {
       //get all public
-      this.getAllCampaigns(this.adminCompany.item.id);
-      this.getPublicCampaigns();
+       this.getAllCampaigns(this.adminCompany.item.id);
+       campaignService.getAllCampaigns().then(campaigns=>{
+         this.campaigns=campaigns;
+       })
+      // this.getAllCampaigns(this.adminCompany.item.id);
+      // this.getPublicCampaigns();
       //show the set withouth the already subscribed
     });
   },

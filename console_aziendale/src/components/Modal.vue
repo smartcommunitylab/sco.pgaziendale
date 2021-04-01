@@ -59,7 +59,7 @@
             Body
           </slot>
         </section>
-        <footer class="modal-footer">
+        <div class="modal-footer">
           <slot name="footer">
             Footer
 
@@ -72,7 +72,7 @@
               Chiudi
             </button>
           </slot>
-        </footer>
+        </div>
       </div>
     </div>
   </transition>
