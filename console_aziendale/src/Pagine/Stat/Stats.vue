@@ -73,7 +73,22 @@
             
           </select>
         </div>
-        <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col" v-if="role=='ROLE_COMPANY_ADMIN'">
+                 <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col" v-if="role!='ROLE_ADMIN'" >
+          <label for="sub_select">Cosa?</label>
+              <div class="flex flex-col items-center justify-center ">
+        <div class="flex flex-col">
+            <label class="inline-flex items-center mt-3">
+                <input type="radio" class="form-radio h-5 w-5 text-primary" value="sede" v-model="what" @change="changeWhat('sede')"><span class="ml-2 text-gray-700">Sede</span>
+            </label>
+
+            <label class="inline-flex items-center mt-3">
+                <input type="radio" class="form-radio h-5 w-5 text-primary" value="dipendente" v-model="what" @change="changeWhat('dipendente')"><span class="ml-2 text-gray-700">Dipendente</span>
+            </label>
+        </div>
+        
+              </div>
+         </div>
+        <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col" v-if="role=='ROLE_COMPANY_ADMIN' && what=='sede'">
           <label for="sub_select">Seleziona una sede</label>
           <select
             class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
@@ -96,7 +111,7 @@
              </template>
           </select>
         </div>
-        <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"  v-if="allEmployees &&allEmployees.items && role!='ROLE_ADMIN'">
+        <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"  v-if="allEmployees &&allEmployees.items && role!='ROLE_ADMIN' && what=='dipendente'">
           <label for="sub_select">Seleziona un dipendente</label>
           <select
             class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
@@ -257,10 +272,12 @@ export default {
     return {
       checkin: "",
       span:"total",
+      what:"sede",
       selectedCompany:"",
       selectedCampaign:"",
       selectedEmployee:"",
       selectedMonth:{},
+
       // azienda:"",
       // sede:"",
       // dal:"",
