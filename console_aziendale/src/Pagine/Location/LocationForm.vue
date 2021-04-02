@@ -175,6 +175,33 @@
           </div>
         </div>
       </div>
+      <l-map
+            ref="myMap"
+            @ready="initMap()"
+            @click="addMarker"
+            :zoom="zoom"
+            :center="center"
+            :options="mapOptions"
+            style="height: 350px; width: 100%"
+          >
+            <l-tile-layer :url="url" :attribution="attribution" />
+            <l-marker :lat-lng.sync="marker"
+             v-if="selectedPosition"
+              @click="addMarker"
+              :draggable="true"
+              >
+              <l-popup>
+                <div>
+                  La tua sede
+                </div>
+              </l-popup>
+            </l-marker>
+            <l-circle
+      :lat-lng.sync="marker"
+      :radius="radius"
+      :color="'red'"
+    />
+          </l-map>
       <div class="field-group mb-6 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.latitude.$error }">
           <label class="field-label" for="password">Latitudine</label>
@@ -335,6 +362,7 @@ import { locationService } from "../../services";
 import EventBus from "@/components/eventBus";
 import InfoBox from "@/components/InfoBox.vue";
 import VueTailwindPicker from "vue-tailwind-picker";
+import { latLng } from "leaflet";
 
 export default {
     components: {
@@ -358,7 +386,25 @@ export default {
       nonWorkingDays: [],
       nonWorking: [],
       arrayDays: [],
+      zoom: 13,
+      url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      attribution:
+        '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      currentZoom: 11.5,
+      showParagraph: false,
+      mapOptions: {
+        zoomSnap: 0.5,
+      },
+      selectedPosition:false
     };
+  },
+  computed: {
+    center() {
+      return latLng(
+        this.latitude,
+        this.longitude
+      );
+    },
   },
   methods: {
     stopTheEvent (event) {
@@ -415,9 +461,20 @@ export default {
         radius: Number.parseInt(this.radius),
       };
     },
+        initMap() {
+
+    },
+    addMarker(event) {
+      this.selectedPosition=true;
+      this.marker = event.latlng;
+      this.latitude=event.latlng.lat;
+      this.longitude=event.latlng.lng;
+      this.$refs.myMap.mapObject.invalidateSize(); 
+    }
   },
   mounted() {
     this.arrayDays = locationService.getArrayDays();
+this.$refs.myMap.mapObject.invalidateSize();
     EventBus.$on("EDIT_LOCATION_FORM", location => {
         this.copyFormValues(location);
     });

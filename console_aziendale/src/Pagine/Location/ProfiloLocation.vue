@@ -99,13 +99,7 @@ export default {
         this.actualLocation.item.latitude,
         this.actualLocation.item.longitude
       );
-    },
-    withPopup() {
-      return latLng(
-        this.actualLocation.item.latitude,
-        this.actualLocation.item.longitude
-      );
-    },
+    }
   },
   methods: {
     ...mapActions("location", { changeActualLocation: "changeActualLocation" }),
