@@ -16,12 +16,19 @@
 
 package it.smartcommunitylab.pgazienda.service;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,11 +53,13 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
+import com.opencsv.CSVWriter;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Constants;
+import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
 import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.DayStat.Distances;
 import it.smartcommunitylab.pgazienda.domain.Employee;
@@ -92,6 +101,17 @@ public class TrackingDataService {
 
 	@Autowired
 	private MongoTemplate template;
+
+	@PostConstruct
+	public void init() {
+		dayStatRepo.findByEmptyLimitedDistances().forEach(ds -> {
+			Campaign campaign = campaignRepo.findById(ds.getCampaign()).orElse(null);
+			if (campaign != null) {
+				ds.setLimitedDistances(LimitsUtils.applyLimits(ds.getDistances(), Constants.AGG_DAY, campaign));
+				dayStatRepo.save(ds);
+			}
+		});
+	}	
 	
 	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*2)
 	public void synchronizeApps() {
@@ -154,10 +174,10 @@ public class TrackingDataService {
 						HttpEntity<TrackingDataRequestDTO> entity = new HttpEntity<>(request, headers);
 
 						List<TrackingData> list = restTemplate.exchange(a.getEndpoint(), HttpMethod.POST, entity, resp).getBody();
-						ImmutableListMultimap<String, TrackingData> multimap = Multimaps.index(list, track -> track.getPlayerId());
+						ImmutableListMultimap<String, TrackingData> playerMap = Multimaps.index(list, track -> track.getPlayerId());
 
-						multimap.keySet().forEach(key -> {
-							List<TrackingData> playerList = multimap.get(key);
+						playerMap.keySet().forEach(key -> {
+							List<TrackingData> playerList = playerMap.get(key);
 							logger.info("Received data for player: " + key +" - " + playerList.size()+ " entities");
 
 							DayStat stat = new DayStat();
@@ -167,6 +187,8 @@ public class TrackingDataService {
 							stat.setDate(LocalDate.now().toString());
 							stat.setTrackCount(playerList.size());
 							stat.setDistances(Distances.fromMap(playerList.stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance())))));
+							stat.setLimitedDistances(LimitsUtils.applyLimits(stat.getDistances(), Constants.AGG_DAY, campaign));
+							
 							stat.setTracks(playerList);
 							stat.setCo2saved(stat.computeCO2());
 							stat.setMonth(LocalDate.now().format(MONTH_PATTERN));
@@ -225,20 +247,287 @@ public class TrackingDataService {
 			if (!withTracks) q.fields().exclude("tracks");
 			res = template.find(q, DayStat.class);
 		} else if (Constants.AGG_MONTH.equals(groupBy)){
-			res = doAggregation(playerId, campaignId, groupBy, campaign, criteria);
+			res = doAggregation(campaign, criteria, noLimits);
 		} else if (Constants.AGG_TOTAL.equals(groupBy)){
-			res = doAggregation(playerId, campaignId, "campaign", campaign, criteria);
-			res.forEach(ds -> ds.setMonth(null));
+			res = doAggregation(campaign, criteria, noLimits);
+			if (!Boolean.TRUE.equals(noLimits)) {
+				LimitsUtils.applyLimits(res, groupBy, campaign);
+			} 
+			final DayStat total = new DayStat();
+			total.setCampaign(campaignId);
+			total.setPlayerId(playerId);
+			total.setCo2saved(0d);
+			total.setTrackCount(0);
+			res.forEach(ds -> {
+				total.setCo2saved(total.getCo2saved() + (ds.getCo2saved() == null ? 0d: ds.getCo2saved()));
+				total.setTrackCount(total.getTrackCount() + (ds.getTrackCount() == null ? 0: ds.getTrackCount()));
+				total.getDistances().mergeDistances(ds.getDistances());
+			});
+			return Collections.singletonList(total);
 		} else {
 			throw new IllegalArgumentException("Incorrect grouping");
 		}
 		if (!Boolean.TRUE.equals(noLimits)) {
 			LimitsUtils.applyLimits(res, groupBy, campaign);
 		} 
+		res.forEach(stat -> {
+			stat.setCampaign(campaignId);
+		});
 		return res;
 	}
 
+	/**
+	 * Create company stats for every single employee within given period
+	 * @param writer
+	 * @param campaignId
+	 * @param companyId
+	 * @param from
+	 * @param to
+	 */
+	public void createEmployeeStats(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) {
+		Company company = companyRepo.findById(companyId).orElse(null);
+		if (company == null) throw new IllegalArgumentException("Invalid company: " + companyId);
+		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
 
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		String header = "Nome;Cognome;CodiceSede;ViaggiValidi";
+		for (int i = 0; i < campaign.getMeans().size(); i++) header += ";KmTotValidi_" + campaign.getMeans().get(i);
+		
+		csvWriter.writeNext(header.split(";"));
+		stats.forEach(ds -> {
+			List<Employee> employees = findCompanyEmployees(ds.getPlayerId(), campaignId, company.getCode(), companyId);
+			if (employees == null) return;
+			// filter company employee: should be only one for playerId
+			Employee employee = employees.stream().filter(e -> e.getCompanyId().equals(companyId)).findFirst().orElse(null);
+			if (employee == null) return;
+			
+			String[] rec = new String[4 + campaign.getMeans().size()];
+			rec[0] = employee.getName();
+			rec[1] = employee.getSurname();
+			rec[2] = employee.getLocation();
+			rec[3] = ds.getTrackCount() == null ? "0": ds.getTrackCount().toString();
+			for (int i = 0; i < campaign.getMeans().size(); i++) {
+				Double mv = ds.getDistances().meanValue(MEAN.valueOf(campaign.getMeans().get(i)));
+				if (mv == null) mv = 0d;
+				rec[i + 4] = mv.toString();
+			}
+			csvWriter.writeNext(rec);
+		});
+		try {
+			csvWriter.close();
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Create company stats for each location
+	 * @param writer
+	 * @param campaignId
+	 * @param companyId
+	 * @param from
+	 * @param to
+	 */
+	public void createLocationStats(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) {
+		Company company = companyRepo.findById(companyId).orElse(null);
+		if (company == null) throw new IllegalArgumentException("Invalid company: " + companyId);
+		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		String header = "Indentificativo;Indirizzo;Numero;CAP;Comune;Provincia;ViaggiValidi";
+		for (int i = 0; i < campaign.getMeans().size(); i++) header += ";KmTotValidi_" + campaign.getMeans().get(i);
+		
+		csvWriter.writeNext(header.split(";"));
+		
+		Map<String, List<DayStat>> locationStats = stats.stream().map(ds -> {
+			List<Employee> employees = findCompanyEmployees(ds.getPlayerId(), campaignId, company.getCode(), companyId);
+			if (employees == null) return ds;
+			// filter company employee: should be only one for playerId
+			Employee employee = employees.stream().filter(e -> e.getCompanyId().equals(companyId)).findFirst().orElse(null);
+			if (employee == null) return ds;
+			// trick to pass location for aggregation
+			ds.setCompany(employee.getLocation());
+			return ds;
+		}).filter(ds -> ds.getCompany() != null).collect(Collectors.groupingBy(DayStat::getCompany));
+		
+		locationStats.keySet().forEach(locationId -> {
+			CompanyLocation location = company.getLocations().stream().filter(l -> locationId.equals(l.getId())).findFirst().orElse(null);
+			if (location == null) return;
+			
+			String[] rec = new String[7 + campaign.getMeans().size()];
+			rec[0] = locationId;
+			rec[1] = location.getAddress();
+			rec[2] = location.getStreetNumber();
+			rec[3] = location.getZip();
+			rec[4] = location.getCity();
+			rec[5] = location.getProvince();
+			
+			Distances d = new Distances();
+			int totalTrips = 0;
+			for (DayStat ds: locationStats.get(locationId)) {
+				d.mergeDistances(ds.getDistances());
+				totalTrips += (ds.getTrackCount() == null ? 0 : ds.getTrackCount());
+			}
+			
+			rec[6] = ""+totalTrips;
+			for (int i = 0; i < campaign.getMeans().size(); i++) {
+				Double mv = d.meanValue(MEAN.valueOf(campaign.getMeans().get(i)));
+				if (mv == null) mv = 0d;
+				rec[i + 7] = mv.toString();
+			}
+			csvWriter.writeNext(rec);
+		});
+
+
+		try {
+			csvWriter.close();
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}	
+	
+	
+	public void createCampaignStats(Writer writer, String campaignId, LocalDate from, LocalDate to) {
+		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		String header = "Azienda;ViaggiValidi";
+		for (int i = 0; i < campaign.getMeans().size(); i++) header += ";KmTotValidi_" + campaign.getMeans().get(i);
+		
+		csvWriter.writeNext(header.split(";"));
+		
+		final List<DayStat> newStats = new LinkedList<>();
+		final Map<String, Company> companyCache = new HashMap<>();
+		stats.forEach(ds -> {
+			List<Employee> employees = findEmployees(ds.getPlayerId(), campaignId, companyCache);
+			if (employees != null) {
+				employees.forEach(e -> {
+					DayStat newDs = new DayStat();
+					newDs.setDistances(DayStat.Distances.copy(ds.getDistances()));
+					newDs.setCompany(e.getCompanyId());
+					newDs.setTrackCount(ds.getTrackCount());
+					newStats.add(newDs);
+				});
+			}
+			
+		});
+		
+		
+		Map<String, List<DayStat>> companyStats = newStats.stream().filter(ds -> ds.getCompany() != null).collect(Collectors.groupingBy(DayStat::getCompany));
+				
+		
+		companyStats.keySet().forEach(companyId -> {
+			Company company = companyRepo.findById(companyId).orElse(null);
+			if (company == null) return;
+			
+			String[] rec = new String[2 + campaign.getMeans().size()];
+			rec[0] = company.getName();
+			Distances d = new Distances();
+			int totalTrips = 0;
+			for (DayStat ds: companyStats.get(companyId)) {
+				d.mergeDistances(ds.getDistances());
+				totalTrips += (ds.getTrackCount() == null ? 0 : ds.getTrackCount());
+			}
+			
+			rec[1] = ""+totalTrips;
+			for (int i = 0; i < campaign.getMeans().size(); i++) {
+				Double mv = d.meanValue(MEAN.valueOf(campaign.getMeans().get(i)));
+				if (mv == null) mv = 0d;
+				rec[i + 2] = mv.toString();
+			}
+			csvWriter.writeNext(rec);
+		});
+
+
+		try {
+			csvWriter.close();
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}	
+	/**
+	 * Find employees prefiltered for specified company
+	 * @param playerId
+	 * @param campaignId
+	 * @param companyCode
+	 * @param companyId
+	 * @return
+	 */
+	private List<Employee> findCompanyEmployees(String playerId, String campaignId, String companyCode, String companyId) {
+		User user = userRepo.findByPlayerId(playerId).orElse(null);
+		if (user != null && user.getRoles() != null) {
+			final List<Employee> res = new LinkedList<>();
+			user.getRoles().forEach(r -> {
+				if (r.getSubscriptions() != null) {
+					r.getSubscriptions().stream()
+					.filter(s -> s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(companyCode))
+					.forEach(s -> {
+						Employee e = employeeRepo.findOneByCompanyIdAndCode(companyId, s.getKey()).orElse(null);
+						if (e != null) res.add(e);
+					});
+				}
+			});
+			return res;
+		}
+		return Collections.emptyList();
+	}
+	
+	private List<Employee> findEmployees(String playerId, String campaignId, Map<String, Company> companyCache) {
+		User user = userRepo.findByPlayerId(playerId).orElse(null);
+		if (user != null && user.getRoles() != null) {
+			final List<Employee> res = new LinkedList<>();
+			user.getRoles().forEach(r -> {
+				if (r.getSubscriptions() != null) {
+					r.getSubscriptions().stream()
+					.filter(s -> s.getCampaign().equals(campaignId))
+					.forEach(s -> {
+						Company company = companyCache.getOrDefault(s.getCompanyCode(), companyRepo.findOneByCode(s.getCompanyCode()).orElse(null));
+						companyCache.put(s.getCompanyCode(), company);
+						if (company != null) {
+							Employee e = employeeRepo.findOneByCompanyIdAndCode(company.getId(), s.getKey()).orElse(null);
+							if (e != null) res.add(e);
+						}
+					});
+				}
+			});
+			return res;
+		}
+		return Collections.emptyList();
+	}
+
+	public List<DayStat> doPlayerAggregation(String campaignId, LocalDate from, LocalDate to) {
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+
+		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
+		if (from != null) {
+			criteria = criteria.gte(from.toString());
+		}		
+		List<DayStat> aggregation = doAggregation(campaign, criteria, false);
+		final Map<String, List<DayStat>> playerStatMap = aggregation.stream().collect(Collectors.groupingBy(DayStat::getPlayerId));
+		return playerStatMap.keySet().stream().map(playerId -> {
+			List<DayStat> playerStats = playerStatMap.get(playerId);
+			LimitsUtils.applyLimits(playerStats, Constants.AGG_MONTH, campaign);
+			DayStat res = new DayStat();
+			res.setCampaign(campaignId);
+			res.setPlayerId(playerId);
+			res.setCo2saved(0d);
+			res.setTrackCount(0);
+			playerStats.forEach(ds -> {
+				res.setCo2saved(res.getCo2saved() + (ds.getCo2saved() == null ? 0d: ds.getCo2saved()));
+				res.setTrackCount(res.getTrackCount() + (ds.getTrackCount() == null ? 0: ds.getTrackCount()));
+				res.getDistances().mergeDistances(ds.getDistances());
+			});
+			return res;
+		}).collect(Collectors.toList());
+	}
+	
 
 	/**
 	 * @param playerId
@@ -249,24 +538,23 @@ public class TrackingDataService {
 	 * @return
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private List<DayStat> doAggregation(String playerId, String campaignId, String groupBy, Campaign campaign,
-			Criteria criteria) {
+	private List<DayStat> doAggregation(Campaign campaign, Criteria criteria, Boolean noLimits) {
 		MatchOperation filterOperation = Aggregation.match(criteria);
-		GroupOperation groupByOperation = Aggregation.group(groupBy)
+		String src = Boolean.TRUE.equals(noLimits) ? "distances" : "limitedDistances";
+		GroupOperation groupByOperation = Aggregation.group("playerId", Constants.AGG_MONTH)
 				.sum("co2saved").as("co2saved")
 				.sum("trackCount").as("trackCount")
-				.sum("distances.bike").as("bike");
+				.sum(src + ".bike").as("bike");
 		
-		for (String mean: campaign.getMeans()) groupByOperation = groupByOperation.sum("distances." + mean).as(mean);
+		for (String mean: campaign.getMeans()) groupByOperation = groupByOperation.sum(src + "." + mean).as(mean);
 		
 		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
 		AggregationResults<Map> aggResult = template.aggregate(aggregation, DayStat.class, Map.class);
 		return aggResult.getMappedResults().stream().map(m -> {
 			DayStat stat = new DayStat();
-			stat.setCampaign(campaignId);
-			stat.setPlayerId(playerId);
-			stat.setCo2saved((double)m.getOrDefault("co2saved", 0d));
-			stat.setMonth((String) m.get("_id"));
+			stat.setCo2saved(((Number)m.getOrDefault("co2saved", 0d)).doubleValue());
+			stat.setMonth((String)((Map) m.get("_id")).get(Constants.AGG_MONTH));
+			stat.setPlayerId((String)((Map) m.get("_id")).get("playerId"));
 			stat.setDistances(Distances.fromMap(m));
 			stat.setTrackCount((Integer) m.getOrDefault("trackCount", 0));
 			return stat;

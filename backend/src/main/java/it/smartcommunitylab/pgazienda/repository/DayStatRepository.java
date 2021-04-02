@@ -31,6 +31,9 @@ public interface DayStatRepository  extends MongoRepository<DayStat, String> {
 
 	public List<DayStat> findByPlayerIdAndCampaign(String playerId, String campaign);
 
+	@Query("{limitedDistances: null}")
+	public List<DayStat> findByEmptyLimitedDistances();
+
 	@Query("{playerId:?0, campaign:?1, date : {$gte:?2 , $lt: ?3}}")
 	public List<DayStat> findByPlayerIdAndCampaignAndPeriod(String playerId, String campaign, String from, String to);
 

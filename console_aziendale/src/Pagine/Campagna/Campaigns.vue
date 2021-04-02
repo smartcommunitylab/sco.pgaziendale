@@ -188,7 +188,7 @@ export default {
   methods: {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
-      getCampaignCall: "getCampaign",
+      getAllCompaniesOfCampaignCall: "getAllCompaniesOfCampaign",
       addCampaignCall: "addCampaign",
       updateCampaignCall: "updateCampaign",
       deleteCampaignCall: "deleteCampaign",
@@ -197,11 +197,11 @@ export default {
 
     showCampaignInfo: function (campaign) {
       if (this.currentCampaignSelected == campaign) {
-        this.getCampaignCall(null);
+        this.getAllCompaniesOfCampaignCall(null);
 
         this.currentCampaignSelected = undefined;
       } else {
-        this.getCampaignCall(campaign);
+        this.getAllCompaniesOfCampaignCall(campaign);
         this.currentCampaignSelected = campaign;
       }
     },

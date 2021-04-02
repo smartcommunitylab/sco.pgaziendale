@@ -16,14 +16,18 @@
 
 package it.smartcommunitylab.pgazienda.web.rest;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -99,7 +103,36 @@ public class TrackingDataResource {
     	
     	return ResponseEntity.ok(dataService.getUserCampaignData(users.get(0).getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks, noLimits));
 	}
-
+    
+    @GetMapping("/campaigns/{campaignId}/stats/csv/employee/{companyId:.*}")
+    public void getCompanyCsv(@PathVariable String campaignId, @PathVariable String companyId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException {
+        log.debug("REST request to export company employee report");
+    	response.setContentType("text/csv;charset=utf-8");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	dataService.createEmployeeStats(response.getWriter(), campaignId, companyId, fromDate, toDate);
+    }
+    @GetMapping("/campaigns/{campaignId}/stats/csv/location/{companyId:.*}")
+    public void getLocationCsv(@PathVariable String campaignId, @PathVariable String companyId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException {
+        log.debug("REST request to export company location report");
+    	response.setContentType("text/csv;charset=utf-8");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	dataService.createLocationStats(response.getWriter(), campaignId, companyId, fromDate, toDate);
+    }
+    
+    @GetMapping("/campaigns/{campaignId}/stats/csv")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+    public void getCampaignCsv(@PathVariable String campaignId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException {
+        log.debug("REST request to export campaign report");
+    	response.setContentType("text/csv;charset=utf-8");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	dataService.createCampaignStats(response.getWriter(), campaignId, fromDate, toDate);
+    }
+        
     /**
      * Read all company locations
      * @param companyId

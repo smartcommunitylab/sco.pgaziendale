@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import moment from "moment";
 export const campaignService = {
     getAllCampaigns,
     addCampaign,
@@ -9,7 +9,8 @@ export const campaignService = {
     getArrayMeans,
     getApplications,
     getAllCompaniesOfCampaign,
-    getPublicCampaigns
+    getPublicCampaigns,
+    getMonthsForCampaign
 };
 const arrayMeans= [
     { value: "bike", text: "Bici" },
@@ -20,6 +21,17 @@ const arrayMeans= [
     { value: "boat", text: "Barca" },
   ]
 //get all campaigns of the company, if companyId null get all the campaigns
+function getMonthsForCampaign(campaign) {
+    var dateStart = moment(campaign.from);
+var dateEnd = moment(campaign.to);
+var timeValues = [];
+
+while (dateEnd > dateStart || dateStart.format('M') === dateEnd.format('M')) {
+   timeValues.push({id:timeValues.length,name: dateStart.format('MMMM')});
+   dateStart.add(1,'month');
+}
+return timeValues;
+}
 function getAllCampaigns(companyId = null) {
     console.log(process.env.VUE_APP_BASE_URL);
     var url = process.env.VUE_APP_BASE_URL;
