@@ -109,6 +109,7 @@ public class TrackingDataServiceTest {
     	
 		User user = new User();
 		user.setPlayerId("test");
+        user.setUsername("test@example.com");
 		Subscription s = new Subscription();
 		s.setCompanyCode(company.getCode());
 		s.setCampaign(campaign.getId());
@@ -134,7 +135,7 @@ public class TrackingDataServiceTest {
     	StringWriter writer = new StringWriter();
     	tds.createEmployeeStats(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
     	assertEquals("\"Nome\";\"Cognome\";\"CodiceSede\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
-    			+ "\"First\";\"Last\";\"test location\";\"45\";\"500.0\"", writer.toString().trim());
+    			+ "\"First\";\"Last\";\"testlocation\";\"45\";\"500.0\"", writer.toString().trim());
     }
 
     @Test
