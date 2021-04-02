@@ -9,6 +9,7 @@ import { location } from './location.module';
 import { employee } from './employee.module';
 import { alert } from './alert.module';
 import { loader } from './loader.module';
+import { stat } from './stat.module';
 
 Vue.use(Vuex);
 
@@ -21,6 +22,7 @@ export const store = new Vuex.Store({
         location,
         alert,
         employee,
-        loader
+        loader,
+        stat
     }
 });

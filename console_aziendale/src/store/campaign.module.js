@@ -34,18 +34,18 @@ const actions = {
                 }
             );
     },
-    getCampaign({ commit, dispatch }, campaign) {
+    getAllCompaniesOfCampaign({ commit, dispatch }, campaign) {
         if (campaign) {
-            commit('getCampaign');
+            commit('getAllCompaniesOfCampaign');
             campaignService.getAllCompaniesOfCampaign(campaign.id)
                 .then(
                     companies => {
                         //add companies to campaign
                         campaign["companies"] = companies;
-                        commit('getCampaignSuccess', campaign)
+                        commit('getAllCompaniesOfCampaignSuccess', campaign)
                     },
                     error => {
-                        commit('getCampaignFailure', error);
+                        commit('getAllCompaniesOfCampaignFailure', error);
                         dispatch('alert/error', error, { root: true });
                     }
                 );
@@ -144,13 +144,13 @@ const mutations = {
     removeActualCampaign(state) {
         state.actualCampaign = null;
     },
-    getCampaign(state) {
+    getAllCompaniesOfCampaign(state) {
         state.actualCampaign = { loading: true };
     },
-    getCampaignSuccess(state, campaign) {
+    getAllCompaniesOfCampaignSuccess(state, campaign) {
         state.actualCampaign = { item: campaign };
     },
-    getCampaignFailure(state, error) {
+    getAllCompaniesOfCampaignFailure(state, error) {
         state.actualCampaign = { error };
     },
 
