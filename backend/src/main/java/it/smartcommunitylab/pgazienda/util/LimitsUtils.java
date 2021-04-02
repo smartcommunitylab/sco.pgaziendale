@@ -79,6 +79,23 @@ public class LimitsUtils {
 		}
 	}
 
+	public static Distances applyLimits(Distances distances, String span, Campaign campaign) {
+		if (campaign.getLimits() == null || campaign.getLimits().size() == 0) return distances;
+		
+		Distances res = Distances.copy(distances);
+		
+		for (Limit l : campaign.getLimits()) {
+			if (l.getSpan().equals(span)) {
+				Double value = distances.meanValue(MEAN.valueOf(l.getMean()));
+				if (value != null && value > l.getValue()) {
+					res.updateValue(MEAN.valueOf(l.getMean()), l.getValue());
+				}
+			}
+		}
+		
+		return res;
+	}
+	
 	/**
 	 * 
 	 * @param distances
