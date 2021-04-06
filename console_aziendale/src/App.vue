@@ -80,14 +80,17 @@ export default {
 .alert {
   padding: 20px;
   color: white;
-  position: absolute;
+  position: fixed;
+    position: fixed; /* or absolute */
+  top: 50%;
   margin: 10px;
       left: 50%;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, -50%);
     z-index: 999;
+  border-radius: 25px;
 }
 .alert-success {
-  background-color: #17a2b8;
+  background-color: rgba(15, 112, 183);
 }
 .alert-danger {
   background-color: #dc3545;

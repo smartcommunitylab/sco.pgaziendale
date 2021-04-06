@@ -12,7 +12,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="entry in filteredData"  :key="entry.id" @click="method(entry)">
+          <tr v-for="entry in filteredData"  :key="entry.id" @click="method(entry)" >
             <td v-for="key in columns" :key="key" class="p-2">
               {{entry[key]}}
             </td>
@@ -117,6 +117,7 @@ th {
 
 td {
   background-color: #f9f9f9;
+  cursor: pointer;
 }
 
 th,
