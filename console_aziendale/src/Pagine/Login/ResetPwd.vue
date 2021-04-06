@@ -19,7 +19,7 @@
               <input
                 type="text"
                 class="block appearance-none w-full bg-white border border-grey-light hover:border-grey px-2 py-2 rounded shadow"
-                placeholder="Il tuo username"
+                placeholder="Il tuo username\email"
                 v-model="username"
                 name="username"
                 id="username"
@@ -108,7 +108,7 @@
                 type="button"
                 @click="resetInit"
               >
-                Invia email di reset
+                Invia Email per il Recupero
               </button>
               <button
                 v-if="step == 2"
