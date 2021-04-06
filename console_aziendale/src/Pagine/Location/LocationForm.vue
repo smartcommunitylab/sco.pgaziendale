@@ -185,6 +185,7 @@
             style="height: 350px; width: 100%"
           >
             <l-tile-layer :url="url" :attribution="attribution" />
+            <v-geosearch :options="geosearchOptions" ></v-geosearch>
             <l-marker :lat-lng.sync="marker"
              v-if="selectedPosition"
               @click="addMarker"
@@ -196,7 +197,7 @@
                 </div>
               </l-popup>
             </l-marker>
-            <l-circle
+            <l-circle v-if="selectedPosition"
       :lat-lng.sync="marker"
       :radius="radius"
       :color="'red'"
@@ -363,14 +364,21 @@ import EventBus from "@/components/eventBus";
 import InfoBox from "@/components/InfoBox.vue";
 import VueTailwindPicker from "vue-tailwind-picker";
 import { latLng } from "leaflet";
-
+import { OpenStreetMapProvider } from 'leaflet-geosearch';
+import GeoSearch from '@/components/Geosearch.vue'
 export default {
     components: {
     InfoBox,
-    VueTailwindPicker
+    VueTailwindPicker,
+    "v-geosearch": GeoSearch
   },
   data() {
     return {
+      geosearchOptions: { 
+        provider: new OpenStreetMapProvider(),
+        showMarker: false,
+        autoClose: true
+      },
       location: {},
       id: "",
       address: "",
@@ -379,8 +387,8 @@ export default {
       city: "",
       province: "",
       region: "",
-      latitude: 0,
-      longitude: 0,
+      latitude:  41.902782,
+      longitude:  12.496366,
       country: "",
       radius: 200,
       nonWorkingDays: [],
@@ -395,7 +403,8 @@ export default {
       mapOptions: {
         zoomSnap: 0.5,
       },
-      selectedPosition:false
+      selectedPosition:false,
+      marker: latLng (41.902782,12.496366)
     };
   },
   computed: {
@@ -437,8 +446,8 @@ export default {
       this.city = "";
       this.province = "";
       this.region = "";
-      this.latitude = 0;
-      this.longitude = 0;
+      this.latitude =  41.902782;
+      this.longitude = 12.496366;
       this.country = "";
       this.radius = 200;
       this.nonWorkingDays = [];
@@ -461,8 +470,10 @@ export default {
         radius: Number.parseInt(this.radius),
       };
     },
-        initMap() {
-
+    initMap() {
+      setTimeout(() => {
+        this.$refs.myMap.mapObject.invalidateSize();
+      }, 250);
     },
     addMarker(event) {
       this.selectedPosition=true;
@@ -474,12 +485,13 @@ export default {
   },
   mounted() {
     this.arrayDays = locationService.getArrayDays();
-this.$refs.myMap.mapObject.invalidateSize();
     EventBus.$on("EDIT_LOCATION_FORM", location => {
         this.copyFormValues(location);
+        this.initMap();
     });
      EventBus.$on("NEW_LOCATION_FORM", () => {
          this.initLocation()
+         this.initMap();
     });
     EventBus.$on("CHECK_LOCATION_FORM", () => {
       this.$v.$touch();
