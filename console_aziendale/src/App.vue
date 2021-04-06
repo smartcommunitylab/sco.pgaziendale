@@ -2,12 +2,11 @@
   <div id="app">
     <Loader v-if="loading" />
     <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
-    <div v-if="alert.message" :class="`alert ${alert.type}`">
-      <span class="closebtn" onclick="this.parentElement.style.display='none';"
-        >&times;</span
-      >
+    <transition name="fade">
+      <div v-if="alert.message" :class="`alert ${alert.type}`">
       {{ alert.message }}
     </div>
+    </transition>
     <router-view class=" min-h-screen "
       :class="{
         'lg:pl-64 pt-16 lg:pt-16 padding-bottom': account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd',
@@ -34,7 +33,9 @@ export default {
     ...mapState("loader", ["loading"]),
       currentRouteName() {
         return this.$route.name;
-    }
+    },
+    ...mapState('account', ['status']),
+    ...mapState('alert', ['message'])
   },
   created() {
     console.log("account" + this.account);
@@ -47,9 +48,13 @@ export default {
 
   },
   watch: {
-    account(newCount, oldCount) {
-      // Our fancy notification (2).
+    // eslint-disable-next-line no-unused-vars
+    status(newCount, oldCount) {
       console.log(JSON.stringify(newCount) + JSON.stringify(oldCount));
+    },
+    message(newAlert,oldAlert){
+      console.log(JSON.stringify(newAlert) + JSON.stringify(oldAlert));
+      setTimeout(()=>this.clearAlert(),2500)
     },
     // eslint-disable-next-line no-unused-vars
     $route(to, from) {
