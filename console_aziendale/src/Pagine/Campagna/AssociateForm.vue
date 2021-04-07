@@ -28,6 +28,7 @@ export default {
     };
   },
   computed: {
+        ...mapState("account", ["role"]),
     ...mapState("company", ["actualCompany", "adminCompany"]),
     ...mapState("campaign", ["allCampaigns", "actualCampaign", "publicCampaigns"]),
   },
@@ -44,11 +45,22 @@ export default {
       createCompanyCampaign:"createCompanyCampaign"
     }),
     disassocia(campaign) {
-        this.deleteCompanyCampaign({companyId:this.adminCompany.item.id,campaign:campaign});
-        this.$emit('update:allCampaigns.items', this.allCampaigns.items)
+            if (this.role == 'ROLE_ADMIN' && this.adminCompany && this.adminCompany.item)
+
+{        this.deleteCompanyCampaign({companyId:this.adminCompany.item.id,campaign:campaign});
+}       else {
+  this.deleteCompanyCampaign({companyId:this.actualCompany.item.id,campaign:campaign});
+} this.$emit('update:allCampaigns.items', this.allCampaigns.items)
     },
     associa(campaign) {
+                  if (this.role == 'ROLE_ADMIN' && this.adminCompany && this.adminCompany.item)
+
+{  
         this.createCompanyCampaign({companyId:this.adminCompany.item.id,campaign:campaign});
+} else {
+          this.createCompanyCampaign({companyId:this.actualCompany.item.id,campaign:campaign});
+
+}
         this.$emit('update:allCampaigns.items', this.allCampaigns.items)
 
     },
@@ -63,12 +75,23 @@ export default {
   mounted() {
     EventBus.$on("ASSOCIATE_CAMPAIGN_FORM", () => {
       //get all public
-       this.getAllCampaigns(this.adminCompany.item.id);
+      if (this.role == 'ROLE_ADMIN' && this.adminCompany && this.adminCompany.item)
+{       
+      this.getAllCampaigns(this.adminCompany.item.id);
        campaignService.getAllCampaigns().then(campaigns=>{
          this.campaigns=campaigns;
        })
-      // this.getAllCampaigns(this.adminCompany.item.id);
-      // this.getPublicCampaigns();
+       }
+      else {
+
+        if (this.actualCompany && this.actualCompany.item)
+        {
+          this.getAllCampaigns(this.actualCompany.item.id);
+        campaignService.getPublicCampaigns().then(campaigns=>{
+         this.campaigns=campaigns;
+       })}
+      }
+
       //show the set withouth the already subscribed
     });
   },
