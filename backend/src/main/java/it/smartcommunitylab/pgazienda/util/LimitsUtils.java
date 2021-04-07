@@ -164,4 +164,48 @@ public class LimitsUtils {
 		}
 		return dist;
 	}
+
+	/**
+	 * @param dayDist
+	 * @param currMonthAgg
+	 * @param totalAgg
+	 * @param campaign
+	 * @return
+	 */
+	public static Distances applyLimits(Distances dayDist, List<DayStat> currMonthAgg, List<DayStat> totalAgg, Campaign campaign) {
+		Distances dayLimited = applyLimits(dayDist, Constants.AGG_DAY, campaign);
+		Distances month = null;
+		if (currMonthAgg == null || currMonthAgg.isEmpty()) {
+			month = Distances.copy(dayLimited);
+		}
+		else {
+			month = currMonthAgg.get(0).getDistances();
+			month.mergeDistances(dayLimited);
+		}
+		Distances total = Distances.copy(dayLimited);
+		if (totalAgg != null && !totalAgg.isEmpty()) {
+			totalAgg.forEach(ds -> total.mergeDistances(ds.getDistances()));
+		}
+
+		for (Limit l : campaign.getLimits()) {
+			if (l.getSpan().equals(Constants.AGG_MONTH)) {
+				MEAN mean = MEAN.valueOf(l.getMean());
+				Double meanValue = month.meanValue(mean);
+				Double dayValue = dayLimited.meanValue(mean);
+				Double newValue = Math.min(dayValue, l.getValue() - meanValue + dayValue);
+				dayLimited.updateValue(mean, newValue);
+			}
+		}
+		for (Limit l : campaign.getLimits()) {
+			if (l.getSpan().equals(Constants.AGG_TOTAL)) {
+				MEAN mean = MEAN.valueOf(l.getMean());
+				Double meanValue = total.meanValue(mean);
+				Double dayValue = dayLimited.meanValue(mean);
+				Double newValue = Math.min(dayValue, l.getValue() - meanValue + dayValue);
+				dayLimited.updateValue(mean, newValue);
+			}
+		}
+		
+		return dayLimited;
+	}
 }
