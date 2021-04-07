@@ -45,7 +45,7 @@ const actions = {
             // commit('chooseCompanyAdmin');
             companyService.getCompanyById(companyId).then(
                 company => {
-                    commit('choooseCompanyAdmin', company);
+                    commit('choooseCompanyAdmin', {item:company});
                     dispatch('getUsers', company);
                     dispatch('alert/success', "Azienda selezionata", { root: true });
                 },
