@@ -5,11 +5,12 @@
 </template>
 
 <script>
+// fix problem with search and click on the item
 import { GeoSearchControl } from 'leaflet-geosearch';
 export default {
   props: {
     options: {
-      required: true,
+      required: true
     },
   },
   name: 'v-geosearch',

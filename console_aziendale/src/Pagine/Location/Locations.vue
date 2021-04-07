@@ -228,7 +228,6 @@ export default {
     EventBus.$on("EDIT_LOCATION", (location) => {
       this.editModalVisible = true;
       EventBus.$emit("EDIT_LOCATION_FORM", location.item);
-
       this.popup = {
         title: "Modifica",
       };
