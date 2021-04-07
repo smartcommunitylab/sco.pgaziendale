@@ -24,6 +24,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.URI;
@@ -186,6 +187,90 @@ public class TrackingDataResourceITest {
                 .andExpect(jsonPath("$", hasSize(1)));
 
     }
+    
+    @Test
+    @WithMockUser(username = "admin", authorities = Constants.ROLE_ADMIN)
+    public void testStats() throws Exception {
+    	Campaign obj = testCampaign();
+    	obj = campaignRepo.save(obj);
+    
+    	Company company = testCompany();
+    	company.setCampaigns(Collections.singletonList(obj.getId()));
+    	company = companyRepo.save(company);
+    	
+    	Employee e = testEmployee(company);
+    	e.setCampaigns(Collections.singletonList(obj.getId()));
+    	e = employeeRepo.save(e);
+    	
+    	User user = testUser();
+		Subscription s = new Subscription();
+		s.setCompanyCode(company.getCode());
+		s.setCampaign(obj.getId());
+		s.setKey(e.getCode());
+		UserRole role = UserRole.createAppUserRole(s);
+		user.setRoles(Collections.singletonList(role));
+    	userRepository.save(user);
+    	
+		List<TrackingData> trackingData = new LinkedList<>();
+		TrackingData td = new TrackingData();
+		td.setDistance(100d);
+		td.setMode("bike");
+		td.setStartedAt(LocalDate.now().toString());
+		td.setPlayerId(user.getPlayerId());
+		td.setTrackId("12345667789");
+		trackingData.add(td);
+		
+    	mockServer.expect(requestTo(new URI("http://endpoint")))
+        .andExpect(method(HttpMethod.POST))
+        .andRespond(withStatus(HttpStatus.OK)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(new ObjectMapper().writeValueAsString(trackingData)));
+    	
+    	
+    	trackingService.synchronizeApps();
+    	
+        restMockMvc.perform(
+                get("/api/campaigns/{campaignId}/stats/{employeeId}", obj.getId(), e.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+
+        restMockMvc.perform(
+                get("/api/campaigns/{campaignId}/stats/{employeeId}/exist", obj.getId(), e.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
+
+        restMockMvc.perform(
+                get("/api/campaigns/{campaignId}/stats/{employeeId}?groupBy=month", obj.getId(), e.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+
+        restMockMvc.perform(
+                get("/api/campaigns/{campaignId}/stats/{employeeId}?groupBy=total", obj.getId(), e.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+
+        restMockMvc.perform(
+                get("/api/campaigns/{campaignId}/stats/csv/employee/{companyId}", obj.getId(), company.getId()))
+                .andExpect(status().isOk());
+        restMockMvc.perform(
+                get("/api/campaigns/{campaignId}/stats/csv/location/{companyId}", obj.getId(), company.getId()))
+                .andExpect(status().isOk());
+        restMockMvc.perform(
+                get("/api/campaigns/{campaignId}/stats/csv", obj.getId()))
+                .andExpect(status().isOk());
+        
+        restMockMvc.perform(
+                get("/api/campaigns/{campaignId}/agg", obj.getId(), company.getId()))
+                .andExpect(status().isOk());
+        restMockMvc.perform(
+                get("/api/campaigns/{campaignId}/agg/{companyId}", obj.getId(), company.getId()))
+                .andExpect(status().isOk());
+        restMockMvc.perform(
+                get("/api/campaigns/{campaignId}/agg/{companyId}/{locationId}", obj.getId(), company.getId(), "testlocation"))
+                .andExpect(status().isOk());
+        
+
+    }
 
 	/**
 	 * @param company
@@ -195,6 +280,7 @@ public class TrackingDataResourceITest {
 		Employee e = new Employee();
     	e.setCode("1234");
     	e.setCompanyId(company.getId());
+    	e.setLocation("testlocation");
 		return e;
 	}
     
