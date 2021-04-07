@@ -29,7 +29,7 @@
 <template>
   <transition name="modal-fade">
     <div class="modal-backdrop" v-init="show">
-      <div class="modal w-1/2 z-50 m-0 absolute top-20"
+      <div class="modal w-2/3 z-50 m-0 absolute top-20"
         role="dialog"
         aria-labelledby="modalTitle"
         aria-describedby="modalDescription"

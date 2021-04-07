@@ -52,8 +52,9 @@ const actions = {
         userService.logout();
         commit('logout');
         dispatch('alert/success', "Utente uscito con successo", { root: true });
-        dispatch('company/getCompanyById', null, { root: true });
-        dispatch('company/resetCompanyAdmin', null, { root: true });
+        dispatch('company/logout', null, { root: true });
+        // dispatch('company/getCompanyById', null, { root: true });
+        // dispatch('company/resetCompanyAdmin', null, { root: true });
         router.push('/login');
     },
     setDefaultCompany({ dispatch }, user) {

@@ -340,11 +340,11 @@ public class DayStat {
 			if (res.getWalk()==  null) res.setWalk(0d);
 			
 			res.setBike(res.getBike()   + (src.getBike()  == null ? 0d : src.getBike()));
-			res.setBoat(src.getBoat()   + (src.getBoat()  == null ? 0d : src.getBoat()));
-			res.setBus(src.getBus()     + (src.getBus()   == null ? 0d : src.getBus()));
-			res.setCar(src.getCar()     + (src.getCar()   == null ? 0d : src.getCar()));
-			res.setTrain(src.getTrain() + (src.getTrain() == null ? 0d : src.getTrain()));
-			res.setWalk(src.getWalk()   + (src.getWalk()  == null ? 0d : src.getWalk()));
+			res.setBoat(res.getBoat()   + (src.getBoat()  == null ? 0d : src.getBoat()));
+			res.setBus(res.getBus()     + (src.getBus()   == null ? 0d : src.getBus()));
+			res.setCar(res.getCar()     + (src.getCar()   == null ? 0d : src.getCar()));
+			res.setTrain(res.getTrain() + (src.getTrain() == null ? 0d : src.getTrain()));
+			res.setWalk(res.getWalk()   + (src.getWalk()  == null ? 0d : src.getWalk()));
 			
 		}
 	}

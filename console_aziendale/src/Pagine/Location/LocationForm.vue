@@ -175,6 +175,34 @@
           </div>
         </div>
       </div>
+      <l-map
+            ref="myMap"
+            @ready="initMap()"
+            @click="addMarker"
+            :zoom="zoom"
+            :center="center"
+            :options="mapOptions"
+            style="height: 350px; width: 100%"
+          >
+            <l-tile-layer :url="url" :attribution="attribution" />
+            <v-geosearch :options="geosearchOptions" ></v-geosearch>
+            <l-marker :lat-lng.sync="marker"
+             v-if="selectedPosition"
+              @click="addMarker"
+              :draggable="true"
+              >
+              <l-popup>
+                <div>
+                  La tua sede
+                </div>
+              </l-popup>
+            </l-marker>
+            <l-circle v-if="selectedPosition"
+      :lat-lng.sync="marker"
+      :radius="radius"
+      :color="'red'"
+    />
+          </l-map>
       <div class="field-group mb-6 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.latitude.$error }">
           <label class="field-label" for="password">Latitudine</label>
@@ -335,14 +363,22 @@ import { locationService } from "../../services";
 import EventBus from "@/components/eventBus";
 import InfoBox from "@/components/InfoBox.vue";
 import VueTailwindPicker from "vue-tailwind-picker";
-
+import { latLng } from "leaflet";
+import { OpenStreetMapProvider } from 'leaflet-geosearch';
+import GeoSearch from '@/components/Geosearch.vue'
 export default {
     components: {
     InfoBox,
-    VueTailwindPicker
+    VueTailwindPicker,
+    "v-geosearch": GeoSearch
   },
   data() {
     return {
+      geosearchOptions: { 
+        provider: new OpenStreetMapProvider(),
+        showMarker: false,
+        autoClose: true
+      },
       location: {},
       id: "",
       address: "",
@@ -351,14 +387,33 @@ export default {
       city: "",
       province: "",
       region: "",
-      latitude: 0,
-      longitude: 0,
+      latitude:  41.902782,
+      longitude:  12.496366,
       country: "",
       radius: 200,
       nonWorkingDays: [],
       nonWorking: [],
       arrayDays: [],
+      zoom: 13,
+      url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      attribution:
+        '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      currentZoom: 11.5,
+      showParagraph: false,
+      mapOptions: {
+        zoomSnap: 0.5,
+      },
+      selectedPosition:false,
+      marker: latLng (41.902782,12.496366)
     };
+  },
+  computed: {
+    center() {
+      return latLng(
+        this.latitude,
+        this.longitude
+      );
+    },
   },
   methods: {
     stopTheEvent (event) {
@@ -391,8 +446,8 @@ export default {
       this.city = "";
       this.province = "";
       this.region = "";
-      this.latitude = 0;
-      this.longitude = 0;
+      this.latitude =  41.902782;
+      this.longitude = 12.496366;
       this.country = "";
       this.radius = 200;
       this.nonWorkingDays = [];
@@ -415,14 +470,28 @@ export default {
         radius: Number.parseInt(this.radius),
       };
     },
+    initMap() {
+      setTimeout(() => {
+        this.$refs.myMap.mapObject.invalidateSize();
+      }, 250);
+    },
+    addMarker(event) {
+      this.selectedPosition=true;
+      this.marker = event.latlng;
+      this.latitude=event.latlng.lat;
+      this.longitude=event.latlng.lng;
+      this.$refs.myMap.mapObject.invalidateSize(); 
+    }
   },
   mounted() {
     this.arrayDays = locationService.getArrayDays();
     EventBus.$on("EDIT_LOCATION_FORM", location => {
         this.copyFormValues(location);
+        this.initMap();
     });
      EventBus.$on("NEW_LOCATION_FORM", () => {
          this.initLocation()
+         this.initMap();
     });
     EventBus.$on("CHECK_LOCATION_FORM", () => {
       this.$v.$touch();

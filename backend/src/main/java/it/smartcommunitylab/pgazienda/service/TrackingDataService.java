@@ -107,7 +107,7 @@ public class TrackingDataService {
 		dayStatRepo.findByEmptyLimitedDistances().forEach(ds -> {
 			Campaign campaign = campaignRepo.findById(ds.getCampaign()).orElse(null);
 			if (campaign != null) {
-				ds.setLimitedDistances(LimitsUtils.applyLimits(ds.getDistances(), Constants.AGG_DAY, campaign));
+				limitDistances(campaign, ds.getPlayerId(), ds);
 				dayStatRepo.save(ds);
 			}
 		});
@@ -187,11 +187,12 @@ public class TrackingDataService {
 							stat.setDate(LocalDate.now().toString());
 							stat.setTrackCount(playerList.size());
 							stat.setDistances(Distances.fromMap(playerList.stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance())))));
-							stat.setLimitedDistances(LimitsUtils.applyLimits(stat.getDistances(), Constants.AGG_DAY, campaign));
-							
 							stat.setTracks(playerList);
 							stat.setCo2saved(stat.computeCO2());
 							stat.setMonth(LocalDate.now().format(MONTH_PATTERN));
+
+							limitDistances(campaign, key, stat);
+
 							DayStat old = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(key, campaign.getId(), company.getId(), stat.getDate());
 							if (old != null) {
 								stat.setId(old.getId());
@@ -206,6 +207,20 @@ public class TrackingDataService {
 				});
 			});
 		});
+	}
+
+	/**
+	 * @param campaign
+	 * @param playerId
+	 * @param stat
+	 */
+	public void limitDistances(Campaign campaign, String playerId, DayStat stat) {
+		Criteria criteria = Criteria.where("playerId").is(playerId).and("date").lt(stat.getDate());
+		List<DayStat> totalAgg = doAggregation(campaign, criteria, false, false);
+		criteria = Criteria.where("playerId").is(playerId).and("date").lt(stat.getDate()).gte(LocalDate.parse(stat.getDate()).withDayOfMonth(1).toString());
+		List<DayStat> currMonthAgg = doAggregation(campaign, criteria, true, false);
+		stat.setLimitedDistances(LimitsUtils.applyLimits(stat.getDistances(), currMonthAgg, totalAgg, campaign));
+		System.err.println(stat.getDistances().getBike() +" -> "+ stat.getLimitedDistances().getBike());
 	}
 	
 	/**
@@ -246,34 +261,129 @@ public class TrackingDataService {
 			Query q = Query.query(criteria);
 			if (!withTracks) q.fields().exclude("tracks");
 			res = template.find(q, DayStat.class);
-		} else if (Constants.AGG_MONTH.equals(groupBy)){
-			res = doAggregation(campaign, criteria, noLimits);
-		} else if (Constants.AGG_TOTAL.equals(groupBy)){
-			res = doAggregation(campaign, criteria, noLimits);
 			if (!Boolean.TRUE.equals(noLimits)) {
+				res.forEach(ds -> ds.setDistances(ds.getLimitedDistances()));
 				LimitsUtils.applyLimits(res, groupBy, campaign);
 			} 
-			final DayStat total = new DayStat();
-			total.setCampaign(campaignId);
-			total.setPlayerId(playerId);
-			total.setCo2saved(0d);
-			total.setTrackCount(0);
-			res.forEach(ds -> {
-				total.setCo2saved(total.getCo2saved() + (ds.getCo2saved() == null ? 0d: ds.getCo2saved()));
-				total.setTrackCount(total.getTrackCount() + (ds.getTrackCount() == null ? 0: ds.getTrackCount()));
-				total.getDistances().mergeDistances(ds.getDistances());
-			});
-			return Collections.singletonList(total);
+		} else if (Constants.AGG_MONTH.equals(groupBy)){
+			res = doAggregation(campaign, criteria, true, noLimits);
+		} else if (Constants.AGG_TOTAL.equals(groupBy)){
+			res = doAggregation(campaign, criteria, false, noLimits);
 		} else {
 			throw new IllegalArgumentException("Incorrect grouping");
-		}
-		if (!Boolean.TRUE.equals(noLimits)) {
-			LimitsUtils.applyLimits(res, groupBy, campaign);
 		} 
 		res.forEach(stat -> {
 			stat.setCampaign(campaignId);
 		});
 		return res;
+	}
+	
+	/**
+	 * Collect campaign statistics
+	 * @param campaignId
+	 * @param groupBy
+	 * @param from
+	 * @param to
+	 * @param noLimits
+	 * @return
+	 */
+	public List<DayStat> createCampaignStats(String campaignId, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) {
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
+		if (from != null) criteria = criteria.gte(from.toString());
+
+		return extractStats(groupBy, noLimits, campaign, criteria);		
+	}
+
+	/**
+	 * Collect company statistics
+	 * @param campaignId
+	 * @param groupBy
+	 * @param from
+	 * @param to
+	 * @param noLimits
+	 * @return
+	 */
+	public List<DayStat> createCompanyStats(String campaignId, String companyId, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) {
+		Company company = companyRepo.findById(companyId).orElse(null);
+		if (company == null) throw new IllegalArgumentException("Invalid company: " + companyId);
+
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
+		if (from != null) criteria = criteria.gte(from.toString());
+		
+		List<String> users = userRepo.findByCampaignAndCompany(campaignId, company.getCode()).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+		criteria = criteria.and("playerId").in(users);
+		return extractStats(groupBy, noLimits, campaign, criteria);		
+	}
+
+	/**
+	 * Collect location statistics
+	 * @param campaignId
+	 * @param groupBy
+	 * @param from
+	 * @param to
+	 * @param noLimits
+	 * @return
+	 */
+	public List<DayStat> createCompanyLocationStats(String campaignId, String companyId, String location, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) {
+		Company company = companyRepo.findById(companyId).orElse(null);
+		if (company == null) throw new IllegalArgumentException("Invalid company: " + companyId);
+
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
+		if (from != null) criteria = criteria.gte(from.toString());
+		
+		Set<String> employeeKeys = employeeRepo.findByCompanyIdAndLocation(companyId, location).stream().map(e -> e.getCode()).collect(Collectors.toSet());
+		
+		List<String> users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, company.getCode(), employeeKeys).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+		criteria = criteria.and("playerId").in(users);
+		return extractStats(groupBy, noLimits, campaign, criteria);		
+	}
+	/**
+	 * @param groupBy
+	 * @param noLimits
+	 * @param campaign
+	 * @param group
+	 * @param criteria
+	 * @return
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private List<DayStat> extractStats(String groupBy, Boolean noLimits, Campaign campaign, Criteria criteria) {
+		String group = Constants.AGG_TOTAL.equals(groupBy) ? "campaign": Constants.AGG_MONTH.equals(groupBy) ? "month" : "date";
+
+		MatchOperation filterOperation = Aggregation.match(criteria);
+		String src = Boolean.TRUE.equals(noLimits) ? "distances" : "limitedDistances";
+		
+		GroupOperation groupByOperation = Aggregation.group(group)
+				.sum("co2saved").as("co2saved")
+				.sum("trackCount").as("trackCount");
+		
+		for (String mean: campaign.getMeans()) groupByOperation = groupByOperation.sum(src + "." + mean).as(mean);
+		
+		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
+		AggregationResults<Map> aggResult = template.aggregate(aggregation, DayStat.class, Map.class);
+		return aggResult.getMappedResults().stream().map(m -> {
+			DayStat stat = new DayStat();
+			stat.setCo2saved(((Number)m.getOrDefault("co2saved", 0d)).doubleValue());
+			stat.setDistances(Distances.fromMap(m));
+			stat.setTrackCount((Integer) m.getOrDefault("trackCount", 0));
+			if (Constants.AGG_DAY.equals(groupBy)) {
+				stat.setDate((String)m.get("_id"));
+				stat.setMonth(LocalDate.parse(stat.getDate()).format(MONTH_PATTERN));
+			}
+			if (Constants.AGG_MONTH.equals(groupBy)) {
+				stat.setMonth((String)m.get("_id"));
+			}
+			return stat;
+		}).sorted((a,b) -> {
+			if (a.getDate() != null) return a.getDate().compareTo(b.getDate());
+			if (a.getMonth() != null) return a.getMonth().compareTo(b.getMonth());
+			return 0;
+		}).collect(Collectors.toList());
 	}
 
 	/**
@@ -284,7 +394,7 @@ public class TrackingDataService {
 	 * @param from
 	 * @param to
 	 */
-	public void createEmployeeStats(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) {
+	public void createEmployeeStatsCSV(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) {
 		Company company = companyRepo.findById(companyId).orElse(null);
 		if (company == null) throw new IllegalArgumentException("Invalid company: " + companyId);
 		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
@@ -330,7 +440,7 @@ public class TrackingDataService {
 	 * @param from
 	 * @param to
 	 */
-	public void createLocationStats(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) {
+	public void createLocationStatsCSV(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) {
 		Company company = companyRepo.findById(companyId).orElse(null);
 		if (company == null) throw new IllegalArgumentException("Invalid company: " + companyId);
 		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
@@ -391,7 +501,7 @@ public class TrackingDataService {
 	}	
 	
 	
-	public void createCampaignStats(Writer writer, String campaignId, LocalDate from, LocalDate to) {
+	public void createCampaignStatsCVS(Writer writer, String campaignId, LocalDate from, LocalDate to) {
 		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
@@ -509,22 +619,11 @@ public class TrackingDataService {
 		if (from != null) {
 			criteria = criteria.gte(from.toString());
 		}		
-		List<DayStat> aggregation = doAggregation(campaign, criteria, false);
+		List<DayStat> aggregation = doAggregation(campaign, criteria, false, false);
 		final Map<String, List<DayStat>> playerStatMap = aggregation.stream().collect(Collectors.groupingBy(DayStat::getPlayerId));
 		return playerStatMap.keySet().stream().map(playerId -> {
 			List<DayStat> playerStats = playerStatMap.get(playerId);
-			LimitsUtils.applyLimits(playerStats, Constants.AGG_MONTH, campaign);
-			DayStat res = new DayStat();
-			res.setCampaign(campaignId);
-			res.setPlayerId(playerId);
-			res.setCo2saved(0d);
-			res.setTrackCount(0);
-			playerStats.forEach(ds -> {
-				res.setCo2saved(res.getCo2saved() + (ds.getCo2saved() == null ? 0d: ds.getCo2saved()));
-				res.setTrackCount(res.getTrackCount() + (ds.getTrackCount() == null ? 0: ds.getTrackCount()));
-				res.getDistances().mergeDistances(ds.getDistances());
-			});
-			return res;
+			return playerStats.get(0);
 		}).collect(Collectors.toList());
 	}
 	
@@ -538,13 +637,15 @@ public class TrackingDataService {
 	 * @return
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private List<DayStat> doAggregation(Campaign campaign, Criteria criteria, Boolean noLimits) {
+	private List<DayStat> doAggregation(Campaign campaign, Criteria criteria, boolean byMonth, Boolean noLimits) {
 		MatchOperation filterOperation = Aggregation.match(criteria);
 		String src = Boolean.TRUE.equals(noLimits) ? "distances" : "limitedDistances";
-		GroupOperation groupByOperation = Aggregation.group("playerId", Constants.AGG_MONTH)
+		
+		GroupOperation groupByOperation = byMonth ? Aggregation.group("playerId", Constants.AGG_MONTH) : Aggregation.group("playerId");
+		
+		groupByOperation =	groupByOperation
 				.sum("co2saved").as("co2saved")
-				.sum("trackCount").as("trackCount")
-				.sum(src + ".bike").as("bike");
+				.sum("trackCount").as("trackCount");
 		
 		for (String mean: campaign.getMeans()) groupByOperation = groupByOperation.sum(src + "." + mean).as(mean);
 		
@@ -553,8 +654,12 @@ public class TrackingDataService {
 		return aggResult.getMappedResults().stream().map(m -> {
 			DayStat stat = new DayStat();
 			stat.setCo2saved(((Number)m.getOrDefault("co2saved", 0d)).doubleValue());
-			stat.setMonth((String)((Map) m.get("_id")).get(Constants.AGG_MONTH));
-			stat.setPlayerId((String)((Map) m.get("_id")).get("playerId"));
+			if (byMonth) {
+				stat.setMonth((String)((Map) m.get("_id")).get(Constants.AGG_MONTH));
+				stat.setPlayerId((String)((Map) m.get("_id")).get("playerId"));
+			} else {
+				stat.setPlayerId((String)m.get("_id"));
+			}
 			stat.setDistances(Distances.fromMap(m));
 			stat.setTrackCount((Integer) m.getOrDefault("trackCount", 0));
 			return stat;

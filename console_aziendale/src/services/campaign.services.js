@@ -27,12 +27,12 @@ var dateEnd = moment(campaign.to);
 var timeValues = [];
 
 while (dateEnd > dateStart || dateStart.format('M') === dateEnd.format('M')) {
-   timeValues.push({id:timeValues.length,name: dateStart.format('MMMM')});
+   timeValues.push({id:timeValues.length,name: dateStart.format('MMMM'), value:dateStart.format('YYYY-MM-DD') });
    dateStart.add(1,'month');
 }
 return timeValues;
 }
-function getAllCampaigns(companyId = null) {
+function getAllCampaigns(companyId = null) { 
     console.log(process.env.VUE_APP_BASE_URL);
     var url = process.env.VUE_APP_BASE_URL;
     if (companyId)

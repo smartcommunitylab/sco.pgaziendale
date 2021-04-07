@@ -8,6 +8,12 @@ const state = {
 };
 
 const actions = {
+    logout({commit, dispatch}) {
+    commit('logout');
+    commit('removeActualCompany');
+    commit('resetCompanyAdmin');
+    dispatch('campaign/removeActualCampaign',null, {root: true});
+    },
     getAll({ commit, dispatch }) {
         commit('getAllCompanies');
         companyService.getAllCompanies()
