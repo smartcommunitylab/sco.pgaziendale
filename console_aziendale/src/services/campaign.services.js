@@ -57,7 +57,7 @@ function getAllCampaigns(companyId = null) {
 function getPublicCampaigns() {
     return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_PUBLIC_CAMPAIGNS_API).then(
         res => {
-            if (res && res.data && res.data.content) {
+            if (res && res.data ) {
                 return Promise.resolve(res.data.content);                
             }
             else return Promise.reject(null);

@@ -42,15 +42,15 @@ const actions = {
     },
     initCompanyAdmin({ commit, dispatch }, companyId) {
         if (companyId) {
-            commit('initCompanyAdmin');
+            // commit('chooseCompanyAdmin');
             companyService.getCompanyById(companyId).then(
                 company => {
-                    commit('chooseCompanyAdmin', company);
+                    commit('choooseCompanyAdmin', {item:company});
                     dispatch('getUsers', company);
                     dispatch('alert/success', "Azienda selezionata", { root: true });
                 },
                 error => {
-                    commit('initCompanyAdminFailure', error);
+                    // commit('chooseCompanyAdminFailure', error);
                     dispatch('alert/error', error, { root: true });
                 }
             );
@@ -165,6 +165,7 @@ const actions = {
 
 const mutations = {
     choooseCompanyAdmin(state, company) {
+        console.log("choooseCompanyAdmin"+company);
         state.adminCompany = company;
     },
     resetCompanyAdmin(state) {

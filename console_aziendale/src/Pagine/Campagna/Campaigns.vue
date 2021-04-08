@@ -77,21 +77,14 @@
         <associate-form />
       </template>
       <template v-slot:footer>
-        <button
-          type="button"
-          class="btn-close"
-          @click="saveAssociation"
-          aria-label="Close modal"
-        >
-          Salva
-        </button>
+
         <button
           type="button"
           class="btn-close"
           @click="closeModal"
           aria-label="Close modal"
         >
-          Annulla
+          Chiudi
         </button>
       </template>
     </modal>
@@ -135,10 +128,12 @@ export default {
 
     this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
     // this.campaigns = campaigns;
-    if (this.adminCompany) {
+    console.log(this.adminCompany)
+    if (this.adminCompany && this.adminCompany.item) {
       this.getAllCampaigns(this.adminCompany.item.id);
     }
-    if (this.actualCompany) {
+    console.log(this.actualCompany)
+    if (this.actualCompany && this.actualCompany.item) {
       this.getAllCampaigns(this.actualCompany.item.id);
     }
     if (!this.adminCompany && !this.actualCompany) {
@@ -205,14 +200,7 @@ export default {
         this.currentCampaignSelected = campaign;
       }
     },
-    // getMeans: function (index) {
-    //   let toRtn = "";
 
-    //   this.allCampaigns.items[index]["means"].map((el) => {
-    //     toRtn += el + " - ";
-    //   });
-    //   return toRtn.slice(0, -3);
-    // },
     getStatus: function (status) {
       let toRtn = "";
       if (status) {
@@ -262,34 +250,8 @@ export default {
       //check fields
       EventBus.$emit("CHECK_CAMPAIGN_FORM");
     },
-    saveAssociation() {
 
-    },
-    // saveCampaign() {
-    //   //check fields
-    //   this.$v.$touch();
-    //   if (this.$v.$invalid) {
-    //     this.submitStatus = "ERROR";
-    //     return;
-    //   } else {
-    //     this.createCampaign();
-    //     this.submitStatus = "SUCCESS";
-    //     if (this.newCampaign) {
-    //       this.addCampaignCall({
-    //         companyId: this.adminCompan ? this.actualCompany.item.id : null,
-    //         campaign: this.campaign,
-    //       });
-    //     } else {
-    //       this.updateCampaignCall({
-    //         companyId: this.adminCompan ? this.actualCompany.item.id : null,
-    //         campaign: this.campaign,
-    //       });
-    //     }
-    //     this.$v.$reset();
-    //   }
-    //   this.editModalVisible = false;
-    //   this.newCampaign = false;
-    // },
+   
     deleteConfirm() {
       this.deleteModalVisible = false;
       this.deleteCampaignCall({

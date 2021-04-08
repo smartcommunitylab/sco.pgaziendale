@@ -18,6 +18,22 @@ function saveFile(filename,stats){
     }
 }
 const actions = {
+    getCampaignStat({ commit,dispatch },{campaignId,from,to,groupBy}) {
+        commit('getCampaignStat');
+
+        statService.getCampaignStat(campaignId,from,to,groupBy)
+            .then(
+                statistics => {
+                    commit('getCampaignStatSuccess', statistics);
+                    dispatch('alert/success', "Recuperate le statistiche della campagna.", { root: true });
+
+                },
+                error => {
+                    commit('getCampaignStatFailure', error);
+                    dispatch('alert/error', "Errore nel recupero delle statistiche.", { root: true });
+                }
+            );
+    },
     getCampaignCsv({ commit,dispatch },{campaignId,from,to}) {
         commit('getCampaignCsv');
 
@@ -74,14 +90,25 @@ const actions = {
 };
 
 const mutations = {
+    getCampaignStat() {
+        state.stat = { loading: true };
+
+    },
+    getCampaignStatSuccess(state,statistics){
+        state.stat = { items: statistics };
+    },
+    getCampaignStatFailure(state,error) {
+        state.stat = { error };
+
+    },
     getCampaignCsv() {
         state.stat = { loading: true };
 
     },
-    getCampaignCsvSuccess(stats){
+    getCampaignCsvSuccess(state,stats){
         state.stat = { items: stats };
     },
-    getCampaignCsvFailure(error) {
+    getCampaignCsvFailure(state,error) {
         state.stat = { error };
 
     },
@@ -89,10 +116,10 @@ const mutations = {
         state.stat = { loading: true };
 
     },
-    getCompanyCsvSuccess(stats){
+    getCompanyCsvSuccess(state,stats){
         state.stat = { items: stats };
     },
-    getCompanyCsvFailure(error) {
+    getCompanyCsvFailure(state,error) {
         state.stat = { error };
 
     },
@@ -100,10 +127,10 @@ const mutations = {
         state.stat = { loading: true };
 
     },
-    getLocationCsvSuccess(stats){
+    getLocationCsvSuccess(state,stats){
         state.stat = { items: stats };
     },
-    getLocationCsvFailure(error) {
+    getLocationCsvFailure(state,error) {
         state.stat = { error };
 
     },

@@ -3,7 +3,7 @@
     Statistiche
     <div class="flex flex-col lg:flex-row">
       <div class="mx-2 my-2 flex flex-col lg:w-4/6 bg-white p-2">
-        Grafici
+        Grafici <div v-if="stat">{{stat.items}}</div>
         <div id="chart_container" class="">
           <canvas ref="canvas" class="p-4"></canvas>
         </div>
@@ -577,7 +577,7 @@ export default {
     ...mapActions("location", { getAllLocations: "getAllLocations" }),
     ...mapActions("navigation", { changePage: "changePage" }),
     ...mapActions("employee", { getAllEmployees: "getAll" }),
-    ...mapActions("stat", { getCampaignCsv:"getCampaignCsv",getCompanyCsv:"getCompanyCsv",getLocationCsv:"getLocationCsv"}),
+    ...mapActions("stat", { getCampaignCsv:"getCampaignCsv",getCompanyCsv:"getCompanyCsv",getLocationCsv:"getLocationCsv",getCampaignStat:"getCampaignStat"}),
     getFirstCompany(user) {
       return user.roles.find(function (role) {
         return role.role == "ROLE_COMPANY_ADMIN";
@@ -622,11 +622,12 @@ export default {
     },
     showStat(){
       console.log("getStat and show values");
+      this.getCampaignStat({campaignId:this.selectedCampaign.id,from:this.selectedMonth?this.selectedMonth.value:null,to:null})
     },
     exportCsv(){
       console.log("export csv");
       //check values and choose the right call
-      if (this.role=='ROLE_ADMIN'&&this.adminCompany==null) {
+      if (this.role=='ROLE_ADMIN'&&this.adminCompany==null || !this.selectedCompany) {
         //get stat for companies
         this.getCampaignCsv({campaignId:this.selectedCampaign.id,from:this.selectedMonth?this.selectedMonth.value:null,to:null})
       } else {
