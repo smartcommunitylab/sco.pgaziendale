@@ -143,20 +143,22 @@ public class TrackingDataResource {
     }
 
     @GetMapping("/campaigns/{campaignId}/agg/{companyId:.*}")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
     public ResponseEntity<List<DayStat>>  getCompanyStats(@PathVariable String campaignId, @PathVariable String companyId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException {
         log.debug("REST request to export campaign report");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+
     	return ResponseEntity.ok(dataService.createCompanyStats(campaignId, companyId, groupBy, fromDate, toDate, noLimits));
     }
 
     @GetMapping("/campaigns/{campaignId}/agg/{companyId}/{locationId:.*}")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
     public ResponseEntity<List<DayStat>>  getLocationStats(@PathVariable String campaignId, @PathVariable String companyId, @PathVariable String locationId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException {
         log.debug("REST request to export campaign report");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(dataService.createCompanyLocationStats(campaignId, companyId, locationId, groupBy, fromDate, toDate, noLimits));
     }
     
