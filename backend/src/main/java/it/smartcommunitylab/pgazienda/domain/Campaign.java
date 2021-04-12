@@ -192,8 +192,8 @@ public class Campaign {
 	public List<Limit> getLimits() {
 		if (limits == null) {
 			limits = new LinkedList<>();
-			limits.add(new Limit(Constants.AGG_DAY, Constants.MEAN.bike.toString(), 20d)); 
-			limits.add(new Limit(Constants.AGG_MONTH, Constants.MEAN.bike.toString(), 250d));
+			limits.add(new Limit(Constants.AGG_DAY, Constants.MEAN.bike.toString(), 20000d)); 
+			limits.add(new Limit(Constants.AGG_MONTH, Constants.MEAN.bike.toString(), 250000d));
 		}
 		return limits;
 	}

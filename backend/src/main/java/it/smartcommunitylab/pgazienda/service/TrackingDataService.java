@@ -104,7 +104,7 @@ public class TrackingDataService {
 
 	@PostConstruct
 	public void init() {
-		dayStatRepo.findByEmptyLimitedDistances().forEach(ds -> {
+		dayStatRepo.findAll().forEach(ds -> {
 			Campaign campaign = campaignRepo.findById(ds.getCampaign()).orElse(null);
 			if (campaign != null) {
 				limitDistances(campaign, ds.getPlayerId(), ds);
@@ -169,7 +169,7 @@ public class TrackingDataService {
 						headers.add("Accept", "application/json");
 						headers.add("Content-Type", "application/json");
 						
-						logger.info("Styncronizing app campaign company data: " + new ObjectMapper().writeValueAsString(request));
+						logger.info("Syncronizing app campaign company data: " + new ObjectMapper().writeValueAsString(request));
 
 						HttpEntity<TrackingDataRequestDTO> entity = new HttpEntity<>(request, headers);
 
