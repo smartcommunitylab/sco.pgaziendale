@@ -18,10 +18,10 @@ function saveFile(filename,stats){
     }
 }
 const actions = {
-    getCampaignStat({ commit,dispatch },{campaignId,from,to,groupBy}) {
+    getCampaignStat({ commit,dispatch },{campaignId,from,to,groupBy,noLimits}) {
         commit('getCampaignStat');
 
-        statService.getCampaignStat(campaignId,from,to,groupBy)
+        statService.getCampaignStat(campaignId,from,to,groupBy,noLimits)
             .then(
                 statistics => {
                     commit('getCampaignStatSuccess', statistics);
@@ -30,6 +30,56 @@ const actions = {
                 },
                 error => {
                     commit('getCampaignStatFailure', error);
+                    dispatch('alert/error', "Errore nel recupero delle statistiche.", { root: true });
+                }
+            );
+    },
+
+
+    getCompanyStat({ commit,dispatch },{campaignId,companyId,from,to,groupBy,noLimits}) {
+        commit('getCompanyStat');
+
+        statService.getCompanyStat(campaignId,companyId,from,to,groupBy,noLimits)
+            .then(
+                statistics => {
+                    commit('getCompanyStatSuccess', statistics);
+                    dispatch('alert/success', "Recuperate le statistiche della azienda.", { root: true });
+
+                },
+                error => {
+                    commit('getCompanyStatFailure', error);
+                    dispatch('alert/error', "Errore nel recupero delle statistiche.", { root: true });
+                }
+            );
+    },
+    getEmployeeStat({ commit,dispatch },{campaignId,employeeId,from,to,groupBy, withTracks,noLimits}) {
+        commit('getCompanyStat');
+
+        statService.getEmployeeStat(campaignId,employeeId,from,to,groupBy,withTracks,noLimits)
+            .then(
+                statistics => {
+                    commit('getEmployeeStatSuccess', statistics);
+                    dispatch('alert/success', "Recuperate le statistiche del dipendente.", { root: true });
+
+                },
+                error => {
+                    commit('getEmployeeStatFailure', error);
+                    dispatch('alert/error', "Errore nel recupero delle statistiche.", { root: true });
+                }
+            );
+    },
+    getLocationStat({ commit,dispatch },{campaignId,companyId,locationId,from,to,groupBy,noLimits}) {
+        commit('getLocationStat');
+
+        statService.getLocationStat(campaignId,companyId,locationId,from,to,groupBy,noLimits)
+            .then(
+                statistics => {
+                    commit('getLocationStatSuccess', statistics);
+                    dispatch('alert/success', "Recuperate le statistiche della sede.", { root: true });
+
+                },
+                error => {
+                    commit('getLocationStatFailure', error);
                     dispatch('alert/error', "Errore nel recupero delle statistiche.", { root: true });
                 }
             );
@@ -92,14 +142,39 @@ const actions = {
 const mutations = {
     getCampaignStat() {
         state.stat = { loading: true };
-
     },
     getCampaignStatSuccess(state,statistics){
         state.stat = { items: statistics };
     },
     getCampaignStatFailure(state,error) {
         state.stat = { error };
-
+    },
+    getCompanyStat() {
+        state.stat = { loading: true };
+    },
+    getCompanyStatSuccess(state,statistics){
+        state.stat = { items: statistics };
+    },
+    getCompanyStatFailure(state,error) {
+        state.stat = { error };
+    },
+    getEmployeeStat() {
+        state.stat = { loading: true };
+    },
+    getEmployeeStatSuccess(state,statistics){
+        state.stat = { items: statistics };
+    },
+    getEmployeeStatFailure(state,error) {
+        state.stat = { error };
+    },
+    getLocationStat() {
+        state.stat = { loading: true };
+    },
+    getLocationStatSuccess(state,statistics){
+        state.stat = { items: statistics };
+    },
+    getLocationStatFailure(state,error) {
+        state.stat = { error };
     },
     getCampaignCsv() {
         state.stat = { loading: true };
@@ -114,7 +189,6 @@ const mutations = {
     },
     getCompanyCsv() {
         state.stat = { loading: true };
-
     },
     getCompanyCsvSuccess(state,stats){
         state.stat = { items: stats };
