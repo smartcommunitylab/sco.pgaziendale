@@ -169,7 +169,7 @@ public class TrackingDataService {
 						headers.add("Accept", "application/json");
 						headers.add("Content-Type", "application/json");
 						
-						logger.info("Styncronizing app campaign company data: " + new ObjectMapper().writeValueAsString(request));
+						logger.info("Syncronizing app campaign company data: " + new ObjectMapper().writeValueAsString(request));
 
 						HttpEntity<TrackingDataRequestDTO> entity = new HttpEntity<>(request, headers);
 
