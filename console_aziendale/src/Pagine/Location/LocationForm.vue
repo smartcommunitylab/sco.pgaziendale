@@ -1,6 +1,16 @@
 <template>
   <form action="" id="addLocation">
     <div class="mb-20 flex flex-wrap justify-between">
+      <template>
+        <div style="width: 100%; height: 500px">
+          <geolocation-selector
+            v-model="locationSelected"
+            :key="key"
+            :radius="radius"
+            v-on:poschanged="locationChanged"
+          />
+        </div>
+      </template>
       <div class="field-group mb-4 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
           <label class="field-label" for="first_name">Identificativo </label>
@@ -12,7 +22,7 @@
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
             id="campaignCode"
           />
-                    <info-box :msg="'Codice univoco della sede'" />
+          <info-box :msg="'Codice univoco della sede'" />
         </div>
         <div v-if="$v.id.$error">
           <div class="error" v-if="!$v.id.required">
@@ -163,14 +173,15 @@
             v-model.trim="$v.radius.$model"
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
           />
-                              <info-box :msg="'Distanza in metri all\'interno di cui i viaggi dei dipendenti risultano essere validi'" />
-
+          <info-box
+            :msg="'Distanza in metri all\'interno di cui i viaggi dei dipendenti risultano essere validi'"
+          />
         </div>
         <div v-if="$v.radius.$error">
           <div class="error" v-if="!$v.radius.required">
             Il campo Raggio e' richiesto.
           </div>
-                    <div class="error" v-if="!$v.radius.numeric">
+          <div class="error" v-if="!$v.radius.numeric">
             Il campo Raggio non risulta essere un numero.
           </div>
         </div>
@@ -187,8 +198,7 @@
             v-model.trim="$v.latitude.$model"
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
           />
-                                        <info-box :msg="'Latitudine in gradi'" />
-
+          <info-box :msg="'Latitudine in gradi'" />
         </div>
         <div v-if="$v.latitude.$error">
           <div class="error" v-if="!$v.latitude.required">
@@ -219,24 +229,21 @@
       <div class="field-group mb-6 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.nonWorking.$error }">
           <label class="field-label" for="password">Giorni NON lavorativi</label>
-          <input
-            
-            class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2"
-          />
-                    <info-box :msg="'I giorni della settimana in cui la sede chiude'"  />
+          <input class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2" />
+          <info-box :msg="'I giorni della settimana in cui la sede chiude'" />
           <div class="container">
-          <div v-for="day in arrayDays" v-bind:key="day.value">
-            <div class="field-label" />
-            <label class="inline-flex items-center">
-              <input
-                type="checkbox"
-                class=" inline-flexform-checkbox"
-                v-model.trim="$v.nonWorking.$model"
-                :value="day.value"
-              />
-              <span class="ml-2">{{ day.text }}</span>
-            </label>
-          </div>
+            <div v-for="day in arrayDays" v-bind:key="day.value">
+              <div class="field-label" />
+              <label class="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  class="inline-flexform-checkbox"
+                  v-model.trim="$v.nonWorking.$model"
+                  :value="day.value"
+                />
+                <span class="ml-2">{{ day.text }}</span>
+              </label>
+            </div>
           </div>
         </div>
         <div v-if="$v.nonWorking.$error">
@@ -251,58 +258,55 @@
           :class="{ 'form-group--error': $v.nonWorkingDays.$error }"
         >
           <label class="field-label" for="password">Giorni di chiusura</label>
-                    <input
-            
-            class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2"
-          />
-                                          <info-box :msg="'I giorni della settimana in cui la sede chiude'"  />
+          <input class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2" />
+          <info-box :msg="'I giorni della settimana in cui la sede chiude'" />
 
-         <div>
-          <div
-            v-for="day in $v.nonWorkingDays.$model"
-            :key="day"
-            class="inline-flex  justify-center items-center m-1 font-medium py-1 px-2 bg-white rounded-full text-indigo-100 bg-indigo-700 border border-indigo-700"
-          >
-            <div class="text-xs font-normal leading-none max-w-full flex-initial">
-              {{ day }}
-            </div>
-            <div class="flex flex-auto flex-row-reverse" @click="removeDay(day)">
-              <div>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="100%"
-                  height="100%"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="feather feather-x cursor-pointer hover:text-indigo-400 rounded-full w-4 h-4 ml-2"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+          <div>
+            <div
+              v-for="day in $v.nonWorkingDays.$model"
+              :key="day"
+              class="inline-flex justify-center items-center m-1 font-medium py-1 px-2 bg-white rounded-full text-indigo-100 bg-indigo-700 border border-indigo-700"
+            >
+              <div class="text-xs font-normal leading-none max-w-full flex-initial">
+                {{ day }}
+              </div>
+              <div class="flex flex-auto flex-row-reverse" @click="removeDay(day)">
+                <div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="100%"
+                    height="100%"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="feather feather-x cursor-pointer hover:text-indigo-400 rounded-full w-4 h-4 ml-2"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
-         </div>
-          <div class="relative ">
-            <VueTailwindPicker 
-            :start-from-monday="true"
-                  @change.self="(v) => ($v.newNonWorkingDay.$model = v)"
-                >
-                   <input
-              type="text"
-              name="campaignNonWorkingDays"
-              id=""
-              required
-              placeholder="Giorno di chiusura *"
-              v-model.trim="$v.newNonWorkingDay.$model"
-              class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 w-full"
-            />
-                </VueTailwindPicker>
-<!--             
+          <div class="relative">
+            <VueTailwindPicker
+              :start-from-monday="true"
+              @change.self="(v) => ($v.newNonWorkingDay.$model = v)"
+            >
+              <input
+                type="text"
+                name="campaignNonWorkingDays"
+                id=""
+                required
+                placeholder="Giorno di chiusura *"
+                v-model.trim="$v.newNonWorkingDay.$model"
+                class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 w-full"
+              />
+            </VueTailwindPicker>
+            <!--             
             <input
               type="text"
               name="campaignNonWorkingDays"
@@ -330,20 +334,20 @@
   </form>
 </template>
 <script>
-import { required,numeric } from "vuelidate/lib/validators";
+import { required, numeric } from "vuelidate/lib/validators";
 import { locationService } from "../../services";
 import EventBus from "@/components/eventBus";
 import InfoBox from "@/components/InfoBox.vue";
 import VueTailwindPicker from "vue-tailwind-picker";
-
+import GeoLocationSelectorMapVue from "@/components/GeoLocationSelectorMap.vue";
 export default {
-    components: {
+  components: {
     InfoBox,
-    VueTailwindPicker
+    VueTailwindPicker,
+    "geolocation-selector": GeoLocationSelectorMapVue,
   },
   data() {
     return {
-      location: {},
       id: "",
       address: "",
       streetNumber: "",
@@ -351,39 +355,72 @@ export default {
       city: "",
       province: "",
       region: "",
-      latitude: 0,
-      longitude: 0,
+      latitude: 41.902782,
+      longitude: 12.496366,
       country: "",
       radius: 200,
       nonWorkingDays: [],
       nonWorking: [],
       arrayDays: [],
+      zoom: 13,
+      url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      attribution:
+        '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      currentZoom: 11.5,
+      showParagraph: false,
+      mapOptions: {
+        zoomSnap: 0.5,
+      },
+      selectedPosition: false,
+      key: 1,
+      locationSelected: {},
     };
   },
+  computed: {
+
+  },
   methods: {
-    stopTheEvent (event) {
-      console.log(event)
-       event.stopPropagation() 
+    locationChanged(input) {
+      console.log(input);
+      this.locationSelected = input.address;
+      this.latitude = this.locationSelected.pos.lat;
+      this.longitude = this.locationSelected.pos.lng;
+      if (this.locationSelected && this.locationSelected.structuredValue)
+        this.changeParamForm(this.locationSelected.structuredValue);
+    },
+    changeParamForm(structuredValue) {
+
+
+      if (structuredValue.road) this.address = structuredValue.road;
+      if (structuredValue.house_number) this.streetNumber = structuredValue.house_number;
+      if (structuredValue.city) this.city = structuredValue.city;
+      if (structuredValue.country) this.country = structuredValue.country;
+      if (structuredValue.postcode) this.zip = structuredValue.postcode;
+      if (structuredValue.state) this.region = structuredValue.state;
+      if (structuredValue.county) this.region = structuredValue.county;
+    },
+    stopTheEvent(event) {
+      console.log(event);
+      event.stopPropagation();
     },
     addDays(day) {
-      if (this.nonWorkingDays==null)
-      this.nonWorkingDays=[];
-      if ( !this.nonWorkingDays.includes(day))
-      this.nonWorkingDays.push(day);
+      if (this.nonWorkingDays == null) this.nonWorkingDays = [];
+      if (!this.nonWorkingDays.includes(day)) this.nonWorkingDays.push(day);
       else {
         //giorno gia' inserito
-        console.log("giorno gia' inserito")
+        console.log("giorno gia' inserito");
       }
     },
     removeDay(day) {
       this.nonWorkingDays = this.nonWorkingDays.filter((elem) => elem != day);
     },
-        copyFormValues(location) {
+    copyFormValues(location) {
       for (const [key] of Object.entries(location)) {
         this[key] = location[key];
       }
+      this.createLocation();
     },
-        initLocation() {
+    initLocation() {
       this.id = "";
       this.address = "";
       this.streetNumber = "";
@@ -391,15 +428,15 @@ export default {
       this.city = "";
       this.province = "";
       this.region = "";
-      this.latitude = 0;
-      this.longitude = 0;
+      this.latitude = 41.902782;
+      this.longitude = 12.496366;
       this.country = "";
       this.radius = 200;
       this.nonWorkingDays = [];
       this.nonWorking = [];
     },
-      createLocation() {
-      this.location = {
+    createLocation() {
+      this.locationSelected = {
         id: this.id,
         address: this.address,
         streetNumber: this.streetNumber,
@@ -418,11 +455,11 @@ export default {
   },
   mounted() {
     this.arrayDays = locationService.getArrayDays();
-    EventBus.$on("EDIT_LOCATION_FORM", location => {
-        this.copyFormValues(location);
+    EventBus.$on("EDIT_LOCATION_FORM", (location) => {
+      this.copyFormValues(location);
     });
-     EventBus.$on("NEW_LOCATION_FORM", () => {
-         this.initLocation()
+    EventBus.$on("NEW_LOCATION_FORM", () => {
+      this.initLocation();
     });
     EventBus.$on("CHECK_LOCATION_FORM", () => {
       this.$v.$touch();
@@ -432,17 +469,17 @@ export default {
       } else {
         //   generate event ok
         this.createLocation();
-        EventBus.$emit("OK_LOCATION_FORM",this.location);
+        EventBus.$emit("OK_LOCATION_FORM", this.locationSelected);
         this.$v.$reset();
       }
     });
   },
 
- beforeDestroy () {
-    EventBus.$off('CHECK_LOCATION_FORM');
-    EventBus.$off('NEW_LOCATION_FORM');
-    EventBus.$off('EDIT_LOCATION_FORM');
- },
+  beforeDestroy() {
+    EventBus.$off("CHECK_LOCATION_FORM");
+    EventBus.$off("NEW_LOCATION_FORM");
+    EventBus.$off("EDIT_LOCATION_FORM");
+  },
   validations: {
     id: {
       required,
@@ -470,7 +507,7 @@ export default {
     },
     radius: {
       required,
-      numeric
+      numeric,
     },
     latitude: {
       required,
@@ -489,9 +526,11 @@ export default {
 };
 </script>
 <style scoped>
-.tooltip-day{
-transform: translateY(0px);}
+.tooltip-day {
+  transform: translateY(0px);
+}
 .container {
   position: relative;
-top: -30px;
-}</style>
+  top: -30px;
+}
+</style>

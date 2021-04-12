@@ -34,7 +34,9 @@ import { store } from './store'
 import './assets/styles/index.css';
 import Vuelidate from 'vuelidate'
 import { VueEditor } from "vue2-editor";
-import { LMap, LTileLayer, LMarker,LPopup } from 'vue2-leaflet';
+import { LMap, LTileLayer, LMarker,LPopup,LCircle} from 'vue2-leaflet';
+// import VGeosearch from 'vue2-leaflet-geosearch';
+
 import 'leaflet/dist/leaflet.css';
 import { Icon }  from 'leaflet'
 delete Icon.Default.prototype._getIconUrl;
@@ -53,6 +55,8 @@ Vue.component('l-tile-layer', LTileLayer);
 Vue.component('l-marker', LMarker);
 Vue.component('vue-editor',VueEditor);
 Vue.component('l-popup',LPopup);
+Vue.component('l-circle',LCircle);
+// Vue.component('v-geosearch',VGeosearch);
 Vue.config.productionTip = false
 Vue.component('pencil-outline-icon', PencilOutlineIcon);
 Vue.component('back-icon',Back);

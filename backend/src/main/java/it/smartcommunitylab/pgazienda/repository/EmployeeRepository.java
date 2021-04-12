@@ -35,5 +35,7 @@ public interface EmployeeRepository  extends MongoRepository<Employee, String> {
 	public Page<Employee> findByCompanyIdAndLocation(String id, String location, Pageable pageable);
 	public Optional<Employee> findOneByCompanyIdAndCode(String id, String key);
 	public List<Employee> findByCompanyIdAndCampaigns(String companyId, String campaignId);
-	
+
+	public List<Employee> findByCompanyIdAndLocation(String id, String location);
+
 }

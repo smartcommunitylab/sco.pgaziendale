@@ -47,7 +47,17 @@
             style="height: 350px; width: 100%"
           >
             <l-tile-layer :url="url" :attribution="attribution" />
-            <l-marker :lat-lng="withPopup">
+            <l-circle
+              v-if="actualLocation.item.latitude && actualLocation.item.longitude"
+              :lat-lng.sync="center"
+              :radius="actualLocation.item.radius"
+              :color="'red'"
+            />
+            <l-marker
+              v-if="actualLocation.item.latitude && actualLocation.item.longitude"
+              visible
+              :lat-lng="center"
+            >
               <l-popup>
                 <div>
                   {{ actualLocation.item.id }}
@@ -57,13 +67,19 @@
           </l-map>
           <div
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          v-if="(actualLocation.item.nonWorking && actualLocation.item.nonWorking[0]!=0)">
-            <calendar-remove-icon />Giorni della settimana non lavorativi: <div v-html="getNonWorking(actualLocation.item.nonWorking)"></div>
+            v-if="
+              actualLocation.item.nonWorking && actualLocation.item.nonWorking[0] != 0
+            "
+          >
+            <calendar-remove-icon />Giorni della settimana non lavorativi:
+            <div v-html="getNonWorking(actualLocation.item.nonWorking)"></div>
           </div>
           <div
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-           v-if="actualLocation.item.nonWorkingDays">
-            <calendar-remove-icon /> Giorni non lavorativi: <div v-html="getNonWorkingDays(actualLocation.item.nonWorkingDays)"></div>
+            v-if="actualLocation.item.nonWorkingDays"
+          >
+            <calendar-remove-icon /> Giorni non lavorativi:
+            <div v-html="getNonWorkingDays(actualLocation.item.nonWorkingDays)"></div>
           </div>
         </div>
       </div>
@@ -76,7 +92,7 @@ import { mapState, mapActions } from "vuex";
 import EventBus from "../../components/eventBus";
 import { latLng } from "leaflet";
 import { locationService } from "../../services";
- 
+
 export default {
   name: "ProfiloLocation",
   data() {
@@ -100,12 +116,6 @@ export default {
         this.actualLocation.item.longitude
       );
     },
-    withPopup() {
-      return latLng(
-        this.actualLocation.item.latitude,
-        this.actualLocation.item.longitude
-      );
-    },
   },
   methods: {
     ...mapActions("location", { changeActualLocation: "changeActualLocation" }),
@@ -115,27 +125,24 @@ export default {
     editLocation() {
       EventBus.$emit("EDIT_LOCATION", this.actualLocation);
     },
-    initMap() {
-
-    },
-    getNonWorking(days){
-      var returnDays="";
+    initMap() {},
+    getNonWorking(days) {
+      var returnDays = "";
       if (days)
-      days.forEach(element => {
-              returnDays+=locationService.getDayByInt(element)+ "<br>";
-
-      });
+        days.forEach((element) => {
+          returnDays += locationService.getDayByInt(element) + "<br>";
+        });
       return returnDays;
-    } ,
-getNonWorkingDays(days){
-        var returnDays="";
-        if (days)
-      days.forEach(element => {
-              returnDays+=element+ "<br>";
-
-      });
+    },
+    getNonWorkingDays(days) {
+      var returnDays = "";
+      if (days)
+        days.forEach((element) => {
+          returnDays += element + "<br>";
+        });
       return returnDays;
-}  },
+    },
+  },
 };
 </script>
 

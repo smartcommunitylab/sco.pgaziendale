@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col lg:flex-row">
-    <div class="bg-green-300 lg:w-4/6 mx-2 my-2 pb-16 relative">
+    <div class="bg-green-300 lg:w-3/6 mx-2 my-2 pb-16 relative">
       <div v-if="allLocations && allLocations.items && allLocations.items.length > 0">
         <generic-table
           :data="allLocations.items"
@@ -228,7 +228,6 @@ export default {
     EventBus.$on("EDIT_LOCATION", (location) => {
       this.editModalVisible = true;
       EventBus.$emit("EDIT_LOCATION_FORM", location.item);
-
       this.popup = {
         title: "Modifica",
       };

@@ -45,7 +45,6 @@ import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
-import it.smartcommunitylab.pgazienda.util.LimitsUtils;
 
 /**
  * @author raman
@@ -109,6 +108,7 @@ public class TrackingDataServiceTest {
     	
 		User user = new User();
 		user.setPlayerId("test");
+        user.setUsername("test@example.com");
 		Subscription s = new Subscription();
 		s.setCompanyCode(company.getCode());
 		s.setCampaign(campaign.getId());
@@ -132,15 +132,15 @@ public class TrackingDataServiceTest {
     @Test
     public void testCompanyCSV() {
     	StringWriter writer = new StringWriter();
-    	tds.createEmployeeStats(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
+    	tds.createEmployeeStatsCSV(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
     	assertEquals("\"Nome\";\"Cognome\";\"CodiceSede\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
-    			+ "\"First\";\"Last\";\"test location\";\"45\";\"500.0\"", writer.toString().trim());
+    			+ "\"First\";\"Last\";\"testlocation\";\"45\";\"500.0\"", writer.toString().trim());
     }
 
     @Test
     public void testLocationCSV() {
     	StringWriter writer = new StringWriter();
-    	tds.createLocationStats(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
+    	tds.createLocationStatsCSV(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
     	assertEquals("\"Indentificativo\";\"Indirizzo\";\"Numero\";\"CAP\";\"Comune\";\"Provincia\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
     			+ "\"testlocation\";\"someaddress\";\"1\";\"123456\";\"somecity\";\"someprovince\";\"45\";\"500.0\"", writer.toString().trim());
     }
@@ -148,11 +148,61 @@ public class TrackingDataServiceTest {
     @Test
     public void testGlobalCSV() {
     	StringWriter writer = new StringWriter();
-    	tds.createCampaignStats(writer, campaign.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
-    	System.err.println(writer.toString().trim());
-//    	assertEquals("\"Indentificativo\";\"Indirizzo\";\"Numero\";\"CAP\";\"Comune\";\"Provincia\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
-//    			+ "\"testlocation\";\"someaddress\";\"1\";\"123456\";\"somecity\";\"someprovince\";\"45\";\"500.0\"", writer.toString().trim());
+    	tds.createCampaignStatsCVS(writer, campaign.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
+    	assertEquals("\"Azienda\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
+    			+ "\"test company\";\"45\";\"500.0\"", writer.toString().trim());
     }
+
+    @Test
+    public void testGlobalStats() {
+    	List<DayStat> stats = tds.createCampaignStats(campaign.getId(), Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(1, stats.size());
+    	assertEquals(500d, stats.get(0).getDistances().getBike());
+    	
+    	stats = tds.createCampaignStats(campaign.getId(), Constants.AGG_MONTH, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(2, stats.size());
+    	assertEquals(250d, stats.get(0).getDistances().getBike());
+
+    	stats = tds.createCampaignStats(campaign.getId(), Constants.AGG_DAY, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(45, stats.size());
+    	assertEquals(0d, stats.get(30).getDistances().getBike());
+    }
+    
+    @Test
+    public void testCompanyStats() {
+    	List<DayStat> stats = tds.createCompanyStats(campaign.getId(), company.getId(), Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(1, stats.size());
+    	assertEquals(500d, stats.get(0).getDistances().getBike());
+    	
+    	stats = tds.createCompanyStats(campaign.getId(), company.getId(), Constants.AGG_MONTH, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(2, stats.size());
+    	assertEquals(250d, stats.get(0).getDistances().getBike());
+
+    	stats = tds.createCompanyStats(campaign.getId(), company.getId(), Constants.AGG_DAY, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(45, stats.size());
+    	assertEquals(0d, stats.get(30).getDistances().getBike());
+    }
+    
+    @Test
+    public void testLocationStats() {
+    	List<DayStat> stats = tds.createCompanyLocationStats(campaign.getId(), company.getId(), "testlocation", Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(1, stats.size());
+    	assertEquals(500d, stats.get(0).getDistances().getBike());
+    	
+    	stats = tds.createCompanyLocationStats(campaign.getId(), company.getId(), "testlocation", Constants.AGG_MONTH, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(2, stats.size());
+    	assertEquals(250d, stats.get(0).getDistances().getBike());
+
+    	stats = tds.createCompanyLocationStats(campaign.getId(), company.getId(), "testlocation", Constants.AGG_DAY, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(45, stats.size());
+    	assertEquals(0d, stats.get(30).getDistances().getBike());
+    	
+    	stats = tds.createCompanyLocationStats(campaign.getId(), company.getId(), "testlocation2", Constants.AGG_DAY, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(0, stats.size());
+
+    }
+
+    
 	/**
 	 * 
 	 */
@@ -166,7 +216,7 @@ public class TrackingDataServiceTest {
 			ds.setTrackCount(1);
 			ds.setMonth(date.format(monthFormatter));
 			ds.setDate(date.toString());
-			ds.setLimitedDistances(LimitsUtils.applyLimits(ds.getDistances(), Constants.AGG_DAY, campaign));
+			tds.limitDistances(campaign, "test", ds);
 			dayStatRepo.save(ds);
 			
 			date = date.plusDays(1);
