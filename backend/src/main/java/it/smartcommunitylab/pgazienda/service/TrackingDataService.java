@@ -104,7 +104,7 @@ public class TrackingDataService {
 
 	@PostConstruct
 	public void init() {
-		dayStatRepo.findByEmptyLimitedDistances().forEach(ds -> {
+		dayStatRepo.findAll().forEach(ds -> {
 			Campaign campaign = campaignRepo.findById(ds.getCampaign()).orElse(null);
 			if (campaign != null) {
 				limitDistances(campaign, ds.getPlayerId(), ds);
