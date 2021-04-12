@@ -255,7 +255,8 @@ public class TrackingDataService {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
 
-		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString()).gte(from.toString());
+		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString());
+		if (from != null) criteria = criteria.gte(from.toString());
 		List<DayStat> res = null;
 		if (Constants.AGG_DAY.equals(groupBy)) {
 			Query q = Query.query(criteria);
