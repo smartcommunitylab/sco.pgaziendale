@@ -510,24 +510,13 @@ export default {
       (this.role == "ROLE_ADMIN" && this.adminCompany != null) ||
       (this.role == "ROLE_MOBILITY_MANAGER" && this.actualCompany != null)
     ) {
-      // var company = this.getFirstCompany(this.user);
-      // if (company) this.selectedCompany = company;
-      //       this.getAllCampaigns(this.selectedCompany);
+     
       this.selectedCompany = this.adminCompany
         ? this.adminCompany.item
         : this.actualCompany.item;
       this.getAllCampaigns(this.selectedCompany.id);
     }
-    // if (this.role == "ROLE_COMPANY_ADMIN") {
-    //   var company = this.getFirstCompany(this.user);
-    //   if (company) this.azienda = company.companyId;
-    // }
-    // //get all the campaigns, if azienda is set, filter by it
-    // this.getAllCampaigns(this.azienda);
 
-    // if (this.role == "ROLE_ADMIN") {
-    //   this.getAllCompanies();
-    //   }
     if (this.selectedCompany) {
       this.getAllLocations(this.selectedCompany.id);
       this.getAllEmployees(this.selectedCompany.id);
@@ -535,16 +524,8 @@ export default {
   },
   mounted() {
     this.changePage({ title: "Statistiche", route: "/stats" });
-    // this.buildChart;
   },
-  // watch: {
-  //   stat () {
-  //     // Our fancy notification (2).
-  //     console.log(this.stat)
-  //     if (this.stat && this.stat.items)
-  //     this.buildChart(this.stat.items)
-  //   }
-  // },
+
   methods: {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
@@ -631,7 +612,7 @@ export default {
       console.log("getStat and show values");
       //
       //check values and choose the right call
-      if (this.role === "ROLE_ADMIN") {
+      if (this.role == "ROLE_ADMIN" && this.adminCompany == null) {
         if (this.adminCompany == null && !this.selectedCompany) {
           this.selection={
             type:"getCampaignStat",
