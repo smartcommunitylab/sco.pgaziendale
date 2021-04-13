@@ -154,7 +154,11 @@
           </div>
           <div
             class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
-            v-if="role == 'ROLE_COMPANY_ADMIN' && what == 'sede'"
+            
+            v-if=" (role == 'ROLE_COMPANY_ADMIN' ||
+              (role == 'ROLE_ADMIN' && adminCompany != null) ||
+              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null))
+             && what == 'sede'"
           >
             <label for="sub_select">Seleziona una sede</label>
             <select
@@ -604,6 +608,9 @@ export default {
         changeGroupBy(event) {
       console.log(event);
       console.log(event.target.value);
+    },
+    changeWhat(what) {
+      this.what=what;
     },
     loadMeans(campaign){
       this.means=campaignService.getMeansForCampaign(campaign);
