@@ -1,12 +1,13 @@
 <template>
   <div>
-    Statistiche
     <div class="flex flex-col lg:flex-row">
       <div class="mx-2 my-2 flex flex-col lg:w-4/6 bg-white p-2">
         Grafici
-        <div v-if="stat">{{ stat.items }}</div>
-        <div id="chart_container" class="">
-          <canvas ref="canvas" class="p-4"></canvas>
+        <div v-if="stat">
+          <chart  :selection="selection" />
+        </div>
+        <div v-else>
+          Seleziona i parametri corretti per il grafico da visualizzare
         </div>
       </div>
 
@@ -181,7 +182,9 @@
             v-if="
               allEmployees &&
               allEmployees.items &&
-              (role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)||(role=='ROLE_MOBILITY_MANAGER'&&actualCompany!=null)) &&
+              (role == 'ROLE_COMPANY_ADMIN' ||
+                (role == 'ROLE_ADMIN' && adminCompany != null) ||
+                (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)) &&
               what == 'dipendente'
             "
           >
@@ -249,76 +252,48 @@
               </option>
             </select>
           </div>
-          <!-- <div class="flex flex-col mt-3 justify-stretch">
-          <div class="flex flex-col mt-3 justify-stretch w-full">
-            <label for="sub_select">Dal</label>
-
-            <VueTailwindPicker
-              :theme="{
-                background: '#1A202C',
-                text: 'text-white',
-                border: 'border-gray-700',
-                currentColor: 'text-gray-200',
-                navigation: {
-                  background: 'bg-gray-800',
-                  hover: 'hover:bg-gray-700',
-                  focus: 'bg-gray-700',
-                },
-                picker: {
-                  rounded: 'rounded-md',
-                  selected: {
-                    background: 'bg-teal-400',
-                    border: 'border-teal-400',
-                    hover: 'hover:border-teal-400',
-                  },
-                  holiday: 'text-red-400',
-                  weekend: 'text-green-400',
-                  event: 'bg-blue-500',
-                },
-                event: {
-                  border: 'border-gray-700',
-                },
-              }"
-              @change="(v) => (checkin = v)"
+           <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
+            
+           v-if="means">
+            <label for="sub_select">Seleziona un mezzo</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="mean"
+              v-model="selectedMean"
+              @change="changeMean($event)"
+              required
             >
-              <input type="text" class="text-primary w-full" v-model="checkin" />
-            </VueTailwindPicker>
+              <option disabled value="">Seleziona un mezzo</option>
+              <option v-for="mean in means" :value="mean.value" :key="mean.value">
+                {{ mean.text }}
+              </option>
+            </select>
           </div>
-          <div class="flex flex-col mt-3 justify-stretch w-full">
-            <label for="sub_select">Al</label>
-
-            <VueTailwindPicker
-              :theme="{
-                background: '#1A202C',
-                text: 'text-white',
-                border: 'border-gray-700',
-                currentColor: 'text-gray-200',
-                navigation: {
-                  background: 'bg-gray-800',
-                  hover: 'hover:bg-gray-700',
-                  focus: 'bg-gray-700',
-                },
-                picker: {
-                  rounded: 'rounded-md',
-                  selected: {
-                    background: 'bg-teal-400',
-                    border: 'border-teal-400',
-                    hover: 'hover:border-teal-400',
-                  },
-                  holiday: 'text-red-400',
-                  weekend: 'text-green-400',
-                  event: 'bg-blue-500',
-                },
-                event: {
-                  border: 'border-gray-700',
-                },
-              }"
-              @change="(v) => (checkin = v)"
+                     <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
+            
+           v-if="means">
+            <label for="sub_select">Raggruppa per</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="employee"
+              v-model="selectedGroupBy"
+              @change="changeGroupBy($event)"
+              required
             >
-              <input type="text" v-model="checkin" class="text-primary w-full" />
-            </VueTailwindPicker>
+              <option disabled value="">Seleziona un raggruppamento</option>
+              <option  value="month" >
+                Mese
+              </option>
+              <option  value="day" >
+                Giorno
+              </option>
+            </select>
           </div>
-        </div> -->
+         
           <div class="flex-row">
             <button
               type="button"
@@ -391,17 +366,7 @@
               >Azienda selezionata:
               {{ adminCompany ? adminCompany.item.name : actualCompany.item.name }}</label
             >
-            <!-- <select
-            class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
-            name="sub_select"
-            id="company"
-            v-model="selectedCompany"
-            @change="changeCompany($event)"
-            required
-          >
-            <option selected value="">{{adminCompany?adminCompany.item.name:actualCompany.item.name}}</option>
-            
-          </select> -->
+
           </div>
           <div
             class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
@@ -436,49 +401,7 @@
               </div>
             </div>
           </div>
-          <!-- <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col" v-if="role=='ROLE_COMPANY_ADMIN' && what=='sede'">
-          <label for="sub_select">Seleziona una sede</label>
-          <select
-            class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
-            name="sub_select"
-            id="campaign"
-            v-model="selectedSede"
-            @change="changeSede($event)"
-            required
-          >
-            <option disabled value="">Seleziona una sede</option>
-             <template v-if="allLocations">
-
-            <option
-              v-for="location in allLocations.items"
-              :value="location"
-              :key="location.id"
-            >
-             {{ location.id }} {{ location.address }} {{ location.streetNumber }}
-            </option>
-             </template>
-          </select>
-        </div> -->
-          <!-- <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"  v-if="allEmployees &&allEmployees.items && role!='ROLE_ADMIN' && what=='dipendente'">
-          <label for="sub_select">Seleziona un dipendente</label>
-          <select
-            class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
-            name="sub_select"
-            id="employee"
-            v-model="selectedEmployee"
-            @change="changeEmployee($event)"
-            required
-          >
-            <option disabled value="">Seleziona un dipendente</option>
-            <option
-              v-for="employee in allEmployees.items"
-              :value="employee"
-              :key="employee.id"
-            >
-              {{ employee.name }} {{ employee.surname }}
-            </option>
-          </select>
-        </div> -->
+          
           <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
             <label for="sub_select">Visualizzazione</label>
             <div class="flex flex-col items-center justify-center">
@@ -524,76 +447,6 @@
               </option>
             </select>
           </div>
-          <!-- <div class="flex flex-col mt-3 justify-stretch">
-          <div class="flex flex-col mt-3 justify-stretch w-full">
-            <label for="sub_select">Dal</label>
-
-            <VueTailwindPicker
-              :theme="{
-                background: '#1A202C',
-                text: 'text-white',
-                border: 'border-gray-700',
-                currentColor: 'text-gray-200',
-                navigation: {
-                  background: 'bg-gray-800',
-                  hover: 'hover:bg-gray-700',
-                  focus: 'bg-gray-700',
-                },
-                picker: {
-                  rounded: 'rounded-md',
-                  selected: {
-                    background: 'bg-teal-400',
-                    border: 'border-teal-400',
-                    hover: 'hover:border-teal-400',
-                  },
-                  holiday: 'text-red-400',
-                  weekend: 'text-green-400',
-                  event: 'bg-blue-500',
-                },
-                event: {
-                  border: 'border-gray-700',
-                },
-              }"
-              @change="(v) => (checkin = v)"
-            >
-              <input type="text" class="text-primary w-full" v-model="checkin" />
-            </VueTailwindPicker>
-          </div>
-          <div class="flex flex-col mt-3 justify-stretch w-full">
-            <label for="sub_select">Al</label>
-
-            <VueTailwindPicker
-              :theme="{
-                background: '#1A202C',
-                text: 'text-white',
-                border: 'border-gray-700',
-                currentColor: 'text-gray-200',
-                navigation: {
-                  background: 'bg-gray-800',
-                  hover: 'hover:bg-gray-700',
-                  focus: 'bg-gray-700',
-                },
-                picker: {
-                  rounded: 'rounded-md',
-                  selected: {
-                    background: 'bg-teal-400',
-                    border: 'border-teal-400',
-                    hover: 'hover:border-teal-400',
-                  },
-                  holiday: 'text-red-400',
-                  weekend: 'text-green-400',
-                  event: 'bg-blue-500',
-                },
-                event: {
-                  border: 'border-gray-700',
-                },
-              }"
-              @change="(v) => (checkin = v)"
-            >
-              <input type="text" v-model="checkin" class="text-primary w-full" />
-            </VueTailwindPicker>
-          </div>
-        </div> -->
           <button
             type="button"
             class="btn-close flex"
@@ -612,11 +465,13 @@
 import moment from "moment";
 import { mapState, mapActions } from "vuex";
 import { campaignService } from "../../services/campaign.services";
+import Chart from "./Chart.vue"
+
 
 export default {
-  // components: {
-  //   VueTailwindPicker,
-  // },
+  components: {
+    Chart
+  },
   data() {
     return {
       tabActive: "charts",
@@ -628,12 +483,12 @@ export default {
       selectedEmployee: "",
       selectedSede: "",
       selectedMonth: {},
+      selectedMean: {},
+      selectedGroupBy:"month",
       endMonthValue: "",
-      // azienda:"",
-      // sede:"",
-      // dal:"",
-      // al:"",
       months: [],
+      means:[],
+      selection:{}
     };
   },
   computed: {
@@ -680,8 +535,16 @@ export default {
   },
   mounted() {
     this.changePage({ title: "Statistiche", route: "/stats" });
-    this.buildChart;
+    // this.buildChart;
   },
+  // watch: {
+  //   stat () {
+  //     // Our fancy notification (2).
+  //     console.log(this.stat)
+  //     if (this.stat && this.stat.items)
+  //     this.buildChart(this.stat.items)
+  //   }
+  // },
   methods: {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
@@ -707,10 +570,10 @@ export default {
     },
     buildChart(stats) {
       console.log(stats);
-      //   this.labels = this.buildLabels(stats);
-      //   let ctx = this.$refs.canvas;
-      //   let config = this.buildConfig(this.labels);
-      //   if (ctx && config) this.chart = new Chart(ctx, config);
+      this.labels = this.buildLabels(stats);
+      let ctx = this.$refs.canvas;
+      let config = this.buildConfig(this.labels);
+      if (ctx && config) this.chart = new Chart(ctx, config);
     },
     changeCampaign(event) {
       //get new data for the new campaign
@@ -718,6 +581,7 @@ export default {
       console.log(event.target.value);
       if (this.selectedCampaign)
         this.getAllCompaniesOfCampaignCall(this.selectedCampaign);
+      this.loadMeans(this.selectedCampaign);
     },
     changeCompany(event) {
       //get new data for the new campaign
@@ -752,64 +616,100 @@ export default {
           .add(1, "months")
           .format("YYYY-MM-DD");
     },
+    changeMean(event) {
+      console.log(event);
+
+    },
+        changeGroupBy(event) {
+      console.log(event);
+      console.log(event.target.value);
+    },
+    loadMeans(campaign){
+      this.means=campaignService.getMeansForCampaign(campaign);
+    },
     showStat() {
       console.log("getStat and show values");
       //
       //check values and choose the right call
       if (this.role === "ROLE_ADMIN") {
         if (this.adminCompany == null && !this.selectedCompany) {
+          this.selection={
+            type:"getCampaignStat",
+            campaignId: this.selectedCampaign.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            mean: this.selectedMean,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          }
           this.getCampaignStat({
             campaignId: this.selectedCampaign.id,
             from: this.selectedMonth ? this.selectedMonth.value : null,
             to: this.selectedMonth ? this.endMonthValue : null,
-            groupBy: "month",
+            groupBy: this.selectedGroupBy,
             noLimits: false,
           });
           return;
         } else {
+            this.selection={
+            type:"getCompanyStat",
+            campaignId: this.selectedCampaign.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            mean: this.selectedMean,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          }
           this.getCompanyStat({
             campaignId: this.selectedCampaign.id,
             companyId: this.selectedCompany.id,
             from: this.selectedMonth ? this.selectedMonth.value : null,
             to: this.selectedMonth ? this.endMonthValue : null,
-            groupBy: "month",
+            groupBy: this.selectedGroupBy,
             noLimits: false,
           });
         }
       } else {
         //AA
         if (this.what === "dipendente") {
+                    this.selection={
+            type:"getEmployeeStat",
+            campaignId: this.selectedCampaign.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            mean: this.selectedMean,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          }
           this.getEmployeeStat({
             campaignId: this.selectedCampaign.id,
             employeeId: this.selectedEmployee.id,
             from: this.selectedMonth ? this.selectedMonth.value : null,
             to: this.selectedMonth ? this.endMonthValue : null,
-            groupBy: "month",
+            groupBy: this.selectedGroupBy,
             noLimits: false,
           });
         } else {
+                    this.selection={
+            type:"getLocationStat",
+            campaignId: this.selectedCampaign.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            mean: this.selectedMean,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          }
           this.getLocationStat({
             campaignId: this.selectedCampaign.id,
             companyId: this.selectedCompany.id,
             locationId: this.selectedSede.id,
             from: this.selectedMonth ? this.selectedMonth.value : null,
             to: this.selectedMonth ? this.endMonthValue : null,
-            groupBy: "month",
+            groupBy: this.selectedGroupBy,
             noLimits: false,
           });
         }
       }
-      // if ((this.role=='ROLE_ADMIN'&&this.adminCompany==null && !this.selectedCompany)||((this.adminCompany==null && !this.selectedCompany))) {
-      //   //get stat for companies
-      //   this.getCampaignStat({campaignId:this.selectedCampaign.id,from:this.selectedMonth?this.selectedMonth.value:null,to:this.selectedMonth?this.endMonthValue:null})
-      // } else {
-      //   //get stat for employee
-      //   if (this.what=='dipendente')
-      //   this.getCompanyStat({campaignId:this.selectedCampaign.id,from:this.selectedMonth?this.selectedMonth.value:null,to:this.selectedMonth?this.endMonthValue:null})
-      //   //get stat for locations
-      //   else         this.getLocationStat({campaignId:this.selectedCampaign.id,from:this.selectedMonth?this.selectedMonth.value:null,to:this.selectedMonth?this.endMonthValue:null})
-
-      // }
     },
     exportCsv() {
       console.log("export csv");
