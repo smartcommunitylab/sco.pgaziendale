@@ -22,6 +22,7 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,7 @@ import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
+import it.smartcommunitylab.pgazienda.domain.Campaign.Limit;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
@@ -83,6 +85,12 @@ public class TrackingDataServiceTest {
     	campaign.setActive(true);
     	campaign.setMeans(Collections.singletonList(MEAN.bike.toString()));
     	campaign.setId("biketowork");
+    	
+		LinkedList<Limit> limits = new LinkedList<>();
+		limits.add(new Limit(Constants.AGG_DAY, Constants.MEAN.bike.toString(), 20d)); 
+		limits.add(new Limit(Constants.AGG_MONTH, Constants.MEAN.bike.toString(), 250d));
+		campaign.setLimits(limits);
+    	
     	campaign = campaignRepo.save(campaign);
     	
     	company = new Company();
@@ -134,7 +142,7 @@ public class TrackingDataServiceTest {
     	StringWriter writer = new StringWriter();
     	tds.createEmployeeStatsCSV(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
     	assertEquals("\"Nome\";\"Cognome\";\"CodiceSede\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
-    			+ "\"First\";\"Last\";\"testlocation\";\"45\";\"500.0\"", writer.toString().trim());
+    			+ "\"First\";\"Last\";\"testlocation\";\"45\";\"0.5\"", writer.toString().trim());
     }
 
     @Test
@@ -142,15 +150,15 @@ public class TrackingDataServiceTest {
     	StringWriter writer = new StringWriter();
     	tds.createLocationStatsCSV(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
     	assertEquals("\"Indentificativo\";\"Indirizzo\";\"Numero\";\"CAP\";\"Comune\";\"Provincia\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
-    			+ "\"testlocation\";\"someaddress\";\"1\";\"123456\";\"somecity\";\"someprovince\";\"45\";\"500.0\"", writer.toString().trim());
+    			+ "\"testlocation\";\"someaddress\";\"1\";\"123456\";\"somecity\";\"someprovince\";\"45\";\"0.5\"", writer.toString().trim());
     }
 
     @Test
     public void testGlobalCSV() {
     	StringWriter writer = new StringWriter();
-    	tds.createCampaignStatsCVS(writer, campaign.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
+    	tds.createCampaignStatsCSV(writer, campaign.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
     	assertEquals("\"Azienda\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
-    			+ "\"test company\";\"45\";\"500.0\"", writer.toString().trim());
+    			+ "\"test company\";\"45\";\"0.5\"", writer.toString().trim());
     }
 
     @Test
