@@ -148,7 +148,7 @@ public class TrackingDataServiceTest {
     @Test
     public void testGlobalCSV() {
     	StringWriter writer = new StringWriter();
-    	tds.createCampaignStatsCVS(writer, campaign.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
+    	tds.createCampaignStatsCSV(writer, campaign.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
     	assertEquals("\"Azienda\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
     			+ "\"test company\";\"45\";\"500.0\"", writer.toString().trim());
     }

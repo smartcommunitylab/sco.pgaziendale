@@ -130,7 +130,7 @@ public class TrackingDataResource {
     	response.setContentType("text/csv;charset=utf-8");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
-    	dataService.createCampaignStatsCVS(response.getWriter(), campaignId, fromDate, toDate);
+    	dataService.createCampaignStatsCSV(response.getWriter(), campaignId, fromDate, toDate);
     }
 
     @GetMapping("/campaigns/{campaignId}/agg")
