@@ -16,14 +16,18 @@
 
 package it.smartcommunitylab.pgazienda.web.rest;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,12 +70,12 @@ public class TrackingDataResource {
      * @return
      */
     @GetMapping("/campaigns/{campaignId}/stats/me")
-	public ResponseEntity<List<DayStat>> getMyStats(@PathVariable String campaignId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks) {
+	public ResponseEntity<List<DayStat>> getMyStats(@PathVariable String campaignId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) {
     	log.debug("Read proper stats {}", campaignId);
     	if (from == null) from = LocalDate.now().toString();
     	if (to == null) to = LocalDate.now().toString();
     	
-    	return ResponseEntity.ok(dataService.getUserCampaignData(userService.getUserWithAuthorities().get().getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks));
+    	return ResponseEntity.ok(dataService.getUserCampaignData(userService.getUserWithAuthorities().get().getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks, noLimits));
 	}
 
 
@@ -81,9 +85,9 @@ public class TrackingDataResource {
      * @return
      */
     @GetMapping("/campaigns/{campaignId}/stats/{employeeId:.*}")
-	public ResponseEntity<List<DayStat>> getEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks) {
+	public ResponseEntity<List<DayStat>> getEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) {
     	log.debug("Read user stats {} / {}", campaignId, employeeId);
-    	if (from == null) from = LocalDate.now().toString();
+//    	if (from == null) from = LocalDate.now().toString();
     	if (to == null) to = LocalDate.now().toString();
     	
     	Employee employee = employeeRepo.findById(employeeId).orElse( null);
@@ -97,9 +101,67 @@ public class TrackingDataResource {
     	List<User> users = userService.getUserByEmployeeCode(campaignId, company.get().getCode(), employee.getCode());
     	if (users == null || users.isEmpty()) throw new IllegalArgumentException("Invalid employee - no subscription: "+ employeeId);
     	
-    	return ResponseEntity.ok(dataService.getUserCampaignData(users.get(0).getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks));
+    	return ResponseEntity.ok(dataService.getUserCampaignData(users.get(0).getPlayerId(), campaignId, from == null ? null : LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks, noLimits));
 	}
+    
+    @GetMapping("/campaigns/{campaignId}/stats/csv/employee/{companyId:.*}")
+    public void getCompanyCsv(@PathVariable String campaignId, @PathVariable String companyId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException {
+        log.debug("REST request to export company employee report");
+    	response.setContentType("text/csv;charset=utf-8");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	dataService.createEmployeeStatsCSV(response.getWriter(), campaignId, companyId, fromDate, toDate);
+    }
+    @GetMapping("/campaigns/{campaignId}/stats/csv/location/{companyId:.*}")
+    public void getLocationCsv(@PathVariable String campaignId, @PathVariable String companyId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException {
+        log.debug("REST request to export company location report");
+    	response.setContentType("text/csv;charset=utf-8");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	dataService.createLocationStatsCSV(response.getWriter(), campaignId, companyId, fromDate, toDate);
+    }
+    
+    @GetMapping("/campaigns/{campaignId}/stats/csv")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+    public void getCampaignCsv(@PathVariable String campaignId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException {
+        log.debug("REST request to export campaign report");
+    	response.setContentType("text/csv;charset=utf-8");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	dataService.createCampaignStatsCSV(response.getWriter(), campaignId, fromDate, toDate);
+    }
 
+    @GetMapping("/campaigns/{campaignId}/agg")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+    public ResponseEntity<List<DayStat>>  getCampaignStats(@PathVariable String campaignId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException {
+        log.debug("REST request to export campaign report");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	return ResponseEntity.ok(dataService.createCampaignStats(campaignId, groupBy, fromDate, toDate, noLimits));
+    }
+
+    @GetMapping("/campaigns/{campaignId}/agg/{companyId:.*}")
+    public ResponseEntity<List<DayStat>>  getCompanyStats(@PathVariable String campaignId, @PathVariable String companyId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException {
+        log.debug("REST request to export campaign report");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+
+    	return ResponseEntity.ok(dataService.createCompanyStats(campaignId, companyId, groupBy, fromDate, toDate, noLimits));
+    }
+
+    @GetMapping("/campaigns/{campaignId}/agg/{companyId}/{locationId:.*}")
+    public ResponseEntity<List<DayStat>>  getLocationStats(@PathVariable String campaignId, @PathVariable String companyId, @PathVariable String locationId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException {
+        log.debug("REST request to export campaign report");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	return ResponseEntity.ok(dataService.createCompanyLocationStats(campaignId, companyId, locationId, groupBy, fromDate, toDate, noLimits));
+    }
+    
     /**
      * Read all company locations
      * @param companyId

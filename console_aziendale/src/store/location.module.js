@@ -6,6 +6,20 @@ const state = {
 };
 
 const actions = {
+    importLocations({ commit, dispatch },{companyId,file}) {
+        commit('importLocations');
+        locationService.importLocations(companyId,file)
+            .then(
+                () => {commit('importLocationsSuccess');
+                dispatch('alert/success', "Sedi importate con successo", { root: true });
+                dispatch('getAll',companyId);
+                        },
+                error => {
+                    commit('importLocationsFailure', error);
+                    dispatch('alert/error', error, { root: true });
+                }
+            );
+    },
     getAllLocations({ commit },companyId) {
         commit('getAllLocations');
 
@@ -69,6 +83,15 @@ const actions = {
 };
 
 const mutations = {
+    importLocations() {
+
+    },
+    importLocationsSuccess(){
+
+    },
+    importLocationsFailure() {
+
+    },
     getAllLocations(state) {
         state.allLocations = { loading: true };
     },

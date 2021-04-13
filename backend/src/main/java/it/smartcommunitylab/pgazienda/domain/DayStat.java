@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 
+import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
+
 /**
  * @author raman
  *
@@ -37,6 +39,7 @@ public class DayStat {
 	private Integer trackCount;
 	
 	private Distances distances = new Distances();
+	private Distances limitedDistances = null;
 	private List<TrackingData> tracks = new LinkedList<>();
 	/**
 	 * @return the id
@@ -173,6 +176,20 @@ public class DayStat {
 		this.company = company;
 	}
 
+	/**
+	 * @return the limitedDistances
+	 */
+	public Distances getLimitedDistances() {
+		return limitedDistances;
+	}
+	/**
+	 * @param limitedDistances the limitedDistances to set
+	 */
+	public void setLimitedDistances(Distances limitedDistances) {
+		this.limitedDistances = limitedDistances;
+	}
+
+
 
 
 	public static class Distances {
@@ -262,6 +279,17 @@ public class DayStat {
 			this.boat = boat;
 		}
 
+		public static Distances copy(Distances src) {
+			Distances res = new Distances();
+			res.setBike(src.getBike());
+			res.setBoat(src.getBoat());
+			res.setBus(src.getBus());
+			res.setCar(src.getCar());
+			res.setTrain(src.getTrain());
+			res.setWalk(src.getWalk());
+			return res;
+		}
+		
 		/**
 		 * @param collect
 		 * @return
@@ -276,6 +304,49 @@ public class DayStat {
 			distances.setWalk(map.getOrDefault("walk", 0d));
 			return distances;
 		}
+		
+		public Double meanValue(MEAN mean) {
+			switch(mean) {
+			case bike: return getBike();
+			case boat: return getBoat();
+			case bus: return getBus();
+			case car: return getCar();
+			case train: return getTrain();
+			case walk: return getWalk();
+			}
+			return null;
+		}
+		public void updateValue(MEAN mean, Double value) {
+			switch(mean) {
+			case bike: setBike(value); break;
+			case boat: setBoat(value); break;
+			case bus: setBus(value); break;
+			case car: setCar(value); break;
+			case train: setTrain(value); break;
+			case walk: setWalk(value); break;
+			}
+		}
+		
+		/**
+		 * @param src
+		 */
+		public void mergeDistances(Distances src) {
+			Distances res = this;
+			if (res.getBike()==  null) res.setBike(0d);
+			if (res.getBoat()==  null) res.setBoat(0d);
+			if (res.getBus()==   null) res.setBus(0d);
+			if (res.getCar()==   null) res.setCar(0d);
+			if (res.getTrain()== null) res.setTrain(0d);
+			if (res.getWalk()==  null) res.setWalk(0d);
+			
+			res.setBike(res.getBike()   + (src.getBike()  == null ? 0d : src.getBike()));
+			res.setBoat(res.getBoat()   + (src.getBoat()  == null ? 0d : src.getBoat()));
+			res.setBus(res.getBus()     + (src.getBus()   == null ? 0d : src.getBus()));
+			res.setCar(res.getCar()     + (src.getCar()   == null ? 0d : src.getCar()));
+			res.setTrain(res.getTrain() + (src.getTrain() == null ? 0d : src.getTrain()));
+			res.setWalk(res.getWalk()   + (src.getWalk()  == null ? 0d : src.getWalk()));
+			
+		}
 	}
-	
+
 }

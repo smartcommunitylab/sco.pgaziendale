@@ -1,14 +1,47 @@
 import axios from "axios";
-
+import moment from "moment";
 export const campaignService = {
     getAllCampaigns,
     addCampaign,
     updateCampaign,
-    deleteCampaign
+    deleteCampaign,
+    getTextOfMeans,
+    getArrayMeans,
+    getApplications,
+    getAllCompaniesOfCampaign,
+    getPublicCampaigns,
+    getMonthsForCampaign,
+    getMeansForCampaign
 };
-
+const arrayMeans= [
+    { value: "bike", text: "Bici" },
+    { value: "car", text: "Auto" },
+    { value: "train", text: "Treno" },
+    { value: "walk", text: "Piedi" },
+    { value: "bus", text: "Autobus" },
+    { value: "boat", text: "Barca" },
+  ]
 //get all campaigns of the company, if companyId null get all the campaigns
-function getAllCampaigns(companyId = null) {
+function getMonthsForCampaign(campaign) {
+    var dateStart = moment(campaign.from);
+var dateEnd = moment(campaign.to);
+var timeValues = [];
+
+while (dateEnd > dateStart || dateStart.format('M') === dateEnd.format('M')) {
+   timeValues.push({id:timeValues.length,name: dateStart.format('MMMM'), value:dateStart.format('YYYY-MM-DD') });
+   dateStart.add(1,'month');
+}
+return timeValues;
+}
+function getMeansForCampaign(campaign) {
+var means = [];
+    for (var i=0;i<campaign.means.length;i++){
+        //add ite
+        means.push(arrayMeans.find(function(elem){return elem.value == campaign.means[i]}))
+    }
+return means;
+}
+function getAllCampaigns(companyId = null) { 
     console.log(process.env.VUE_APP_BASE_URL);
     var url = process.env.VUE_APP_BASE_URL;
     if (companyId)
@@ -22,6 +55,33 @@ function getAllCampaigns(companyId = null) {
                 return Promise.resolve(res.data);
                 return Promise.resolve(res.data.content);
                 
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+function getPublicCampaigns() {
+    return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_PUBLIC_CAMPAIGNS_API).then(
+        res => {
+            if (res && res.data ) {
+                return Promise.resolve(res.data.content);                
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+
+}
+function getAllCompaniesOfCampaign(campaignId) {
+    return axios.get(process.env.VUE_APP_BASE_URL+ process.env.VUE_APP_COMPANIES_API + '/' +process.env.VUE_APP_COMPANIES_IN_CAMPAIGN_API+ '/' +campaignId ).then(
+        res => {
+            if (res && res.data) {
+                return Promise.resolve(res.data);                
             }
             else return Promise.reject(null);
         }, err => {
@@ -66,21 +126,52 @@ function updateCampaign( companyId = null, campaign) {
     )
 }
 // update an old campaign
-function deleteCampaign( companyId = null, campaign) {
+function deleteCampaign( companyId = null, campaignId) {
     var url = process.env.VUE_APP_BASE_URL;
     if (companyId)
-        url = url + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_ALL_CAMPAIGNS_API + '/'+ campaign.id
-    else url = url + process.env.VUE_APP_ALL_CAMPAIGNS_API + '/'+ campaign.id
+        url = url + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_ALL_CAMPAIGNS_API + '/'+ campaignId
+    else url = url + process.env.VUE_APP_ALL_CAMPAIGNS_API + '/'+ campaignId
     return axios.delete(url).then(
         res => {
             if (res) {
-                return Promise.resolve(campaign.id);
+                return Promise.resolve(campaignId);
             }
         }, err => {
             return Promise.reject(err);
         }
 
     )
+}
+// get all the applications present
+function getApplications() {
+    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_APPS_API ).then(
+        res => {
+            if (res && res.data) {
+                return Promise.resolve(res.data);                
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+function getArrayMeans() {
+    return arrayMeans;
+}
+//get list of means and return string of means using arraymeans
+function getTextOfMeans(means) {
+    var returnText="";
+    means.forEach(element => {
+        if (arrayMeans.filter(e=> {
+            return e.value == element
+        }).length>0)
+        returnText+=" "+arrayMeans.filter(e=> {
+            return e.value == element
+        })[0].text
+        
+    });
+    return returnText;
 }
 
 

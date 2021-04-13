@@ -12,7 +12,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="entry in filteredData"  :key="entry.id" @click="method(entry)">
+          <tr v-for="entry in filteredData"  :key="entry.id" @click="method(entry)" >
             <td v-for="key in columns" :key="key" class="p-2">
               {{entry[key]}}
             </td>
@@ -31,6 +31,16 @@ export default {
           // filterKey: String,
           method:Function
         },
+        watch: {
+  data: {
+    // the callback will be called immediately after the start of the observation
+    immediate: true, 
+    handler (val, oldVal) {
+      console.log(val);
+      console.log(oldVal)
+    }
+  }
+},
         data: function() {
           var sortOrders = {};
           this.columns.forEach(function(key) {
@@ -83,11 +93,11 @@ export default {
       }
 </script>
 <style scoped>
-body {
+/* body {
   font-family: Helvetica Neue, Arial, sans-serif;
   font-size: 14px;
   color: #444;
-}
+} */
 
 table {
   border: 2px solid #42b983;
@@ -107,6 +117,7 @@ th {
 
 td {
   background-color: #f9f9f9;
+  cursor: pointer;
 }
 
 th,

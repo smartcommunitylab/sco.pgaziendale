@@ -23,6 +23,7 @@
             class="mr-auto"
             @click.native="changeGroup()"
             v-bind:_options="[
+              { name: 'total', view_name: 'Totali', default: false },
               { name: 'month', view_name: 'Mesi', default: true },
               { name: 'day', view_name: 'Giorni', default: false },
             ]"
@@ -221,11 +222,15 @@ export default {
         stats.forEach((elem) => {
           label.push(moment(elem.month, "YYYY-MM").format("MMMM"));
         });
-      } else {
+      } else if (this.groupBy == "day"){
         stats.forEach((elem) => {
           label.push(moment(elem.date, "YYYY-MM-DD").format("DD/MM"));
-        });
-      }
+        }) 
+      }else {
+          stats.forEach(() => {
+          label.push("Totali");
+        }) 
+        }
       return label;
     },
     buildChart(stats) {

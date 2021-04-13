@@ -2,11 +2,15 @@ import { campaignService } from '../services';
 
 const state = {
     allCampaigns: null,
-    actualCampaign:null
+    actualCampaign: null,
+    publicCampaigns: null
 };
 
 const actions = {
-    getAll({ commit,dispatch },id) {
+    removeActualCampaign({commit}){
+        commit('removeActualCampaign');
+    },
+    getAll({ commit, dispatch }, id) {
         commit('getAllCampaigns');
 
         campaignService.getAllCampaigns(id)
@@ -17,18 +21,42 @@ const actions = {
                     dispatch('alert/error', error, { root: true });
                 }
             );
-    }, 
-    getCampaign({ commit }, campaign) {
-        if (campaign){
-        commit('getCampaign', campaign)
+    },
+    getPublicCampaigns({ commit, dispatch }) {
+        commit('getPublicCampaigns');
+
+        campaignService.getPublicCampaigns()
+            .then(
+                campaigns => commit('getPublicCampaignsSuccess', campaigns),
+                error => {
+                    commit('getPublicCampaignsFailure', error);
+                    dispatch('alert/error', error, { root: true });
+                }
+            );
+    },
+    getAllCompaniesOfCampaign({ commit, dispatch }, campaign) {
+        if (campaign) {
+            commit('getAllCompaniesOfCampaign');
+            campaignService.getAllCompaniesOfCampaign(campaign.id)
+                .then(
+                    companies => {
+                        //add companies to campaign
+                        campaign["companies"] = companies;
+                        commit('getAllCompaniesOfCampaignSuccess', campaign)
+                    },
+                    error => {
+                        commit('getAllCompaniesOfCampaignFailure', error);
+                        dispatch('alert/error', error, { root: true });
+                    }
+                );
         }
         else {
-            commit('removeActualCampaign'); 
+            commit('removeActualCampaign');
         }
     },
-    addCampaign({ commit, dispatch },{companyId,campaign}) {
+    addCampaign({ commit, dispatch }, { companyId, campaign }) {
         commit('addCampaign');
-        campaignService.addCampaign(companyId,campaign).then(
+        campaignService.addCampaign(companyId, campaign).then(
             campaign => commit('addCampaignSuccess', campaign),
             error => {
                 commit('addCampaignFailure', error);
@@ -36,25 +64,25 @@ const actions = {
             }
         );
     },
-    updateCampaign({ commit, dispatch },{companyId,campaign}) {
+    updateCampaign({ commit, dispatch }, { companyId, campaign }) {
         commit('updateCampaign');
-        campaignService.updateCampaign(companyId,campaign).then(
+        campaignService.updateCampaign(companyId, campaign).then(
             campaign => {
-            commit('updateCampaignSuccess', campaign);
-            dispatch('alert/success', "Dipendente modificato con successo", { root: true });
-        },
+                commit('updateCampaignSuccess', campaign);
+                dispatch('alert/success', "Campagna modificato con successo", { root: true });
+            },
             error => {
                 commit('updateCampaignFailure', error);
                 dispatch('alert/error', error, { root: true });
             }
         );
     },
-    deleteCampaign({ commit, dispatch }, {companyId,campaign}) {
+    deleteCampaign({ commit, dispatch }, { companyId, campaignId }) {
         commit('deleteCampaign');
-        campaignService.deleteCampaign(companyId, campaign).then(
+        campaignService.deleteCampaign(companyId, campaignId).then(
             campaignId => {
                 commit('deleteCampaignSuccess', campaignId);
-                dispatch('alert/success', "Dipendente cancellato con successo", { root: true });
+                dispatch('alert/success', "Campagna cancellata con successo", { root: true });
 
             },
             error => {
@@ -62,7 +90,35 @@ const actions = {
                 dispatch('alert/error', error, { root: true });
             }
         );
-    }
+    },
+    deleteCompanyCampaign({ commit, dispatch }, { companyId, campaign }) {
+        commit('deleteCompanyCampaign');
+        campaignService.deleteCampaign(companyId, campaign.id).then(
+            campaignId => {
+                commit('deleteCompanyCampaignSuccess', campaignId);
+                dispatch('alert/success', "Campagna cancellata con successo", { root: true });
+
+            },
+            error => {
+                commit('deleteCompanyCampaignFailure', error);
+                dispatch('alert/error', error, { root: true });
+            }
+        );
+    },
+    createCompanyCampaign({ commit, dispatch }, { companyId, campaign }) {
+        commit('createCompanyCampaign');
+        campaignService.updateCampaign(companyId, campaign).then(
+            () => {
+                commit('createCompanyCampaignSuccess', campaign);
+                dispatch('alert/success', "Campagna cancellata con successo", { root: true });
+
+            },
+            error => {
+                commit('createCompanyCampaignFailure', error);
+                dispatch('alert/error', error, { root: true });
+            }
+        );
+    },
 };
 
 const mutations = {
@@ -75,13 +131,27 @@ const mutations = {
     getAllFailure(state, error) {
         state.allCampaigns = { error };
     },
+    getPublicCampaigns(state) {
 
-    removeActualCampaign(state) {
-        state.actualCampaign=null;
+        state.publicCampaigns = { loading: true };
     },
-
-    getCampaign(state, campaign) {
+    getPublicCampaignsSuccess(state, campaigns) {
+        state.publicCampaigns = { items: campaigns };
+    },
+    getPublicCampaignsFailure(state, error) {
+        state.publicCampaigns = { error };
+    },
+    removeActualCampaign(state) {
+        state.actualCampaign = null;
+    },
+    getAllCompaniesOfCampaign(state) {
+        state.actualCampaign = { loading: true };
+    },
+    getAllCompaniesOfCampaignSuccess(state, campaign) {
         state.actualCampaign = { item: campaign };
+    },
+    getAllCompaniesOfCampaignFailure(state, error) {
+        state.actualCampaign = { error };
     },
 
     addCampaign(state) {
@@ -103,9 +173,9 @@ const mutations = {
         state.actualCampaign = { item: campaign };
         //update allCampaigns
         if (state.allCampaigns.items)
-        state.allCampaigns.items= state.allCampaigns.items.map(function(element){
-              return campaign.id==element.id?  campaign : element
-        })
+            state.allCampaigns.items = state.allCampaigns.items.map(function (element) {
+                return campaign.id == element.id ? campaign : element
+            })
     },
     updateCampaignFailure(state, error) {
         state.actualCampaign = { error };
@@ -116,12 +186,36 @@ const mutations = {
     deleteCampaignSuccess(state, campaignId) {
         state.actualCampaign = null;
         if (state.allCampaigns.items)
-        state.allCampaigns.items= state.allCampaigns.items.filter(function(element){
-            return campaignId!=element.id
-        })
+            state.allCampaigns.items = state.allCampaigns.items.filter(function (element) {
+                return campaignId != element.id
+            })
     },
     deleteCampaignFailure(state, error) {
         state.actualCampaign = { error };
+    },
+
+    deleteCompanyCampaign() {
+    },
+    deleteCompanyCampaignSuccess(state, campaignId) {
+        if (state.allCampaigns.items)
+            state.allCampaigns.items = state.allCampaigns.items.filter(function (element) {
+                return campaignId != element.id
+            })
+    },
+    deleteCompanyCampaignailure() {
+        // state.actualCampaign = { error };
+    },
+    createCompanyCampaign() {
+        // state.actualCampaign = { loading: true };
+    },
+    createCompanyCampaignSuccess(state, campaign) {
+        if (!state.allCampaigns.items)
+            state.allCampaigns = { items: [] }
+        state.allCampaigns.items.push(campaign)
+       
+    },
+    createCompanyCampaignFailure() {
+        // state.actualCampaign = { error };
     },
 };
 

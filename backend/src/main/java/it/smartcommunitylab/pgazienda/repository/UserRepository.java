@@ -37,6 +37,8 @@ public interface UserRepository  extends MongoRepository<User, String> {
 
 	Optional<User> findByUsername(String username);
 
+	Optional<User> findByPlayerId(String playerId);
+
 	Optional<User> findOneByActivationKey(String key);
 
 	Optional<User> findOneByResetKey(String key);
@@ -53,5 +55,8 @@ public interface UserRepository  extends MongoRepository<User, String> {
 	
 	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1, key:{$in:?2}}}}")
 	List<User> findByCampaignAndCompanyAndEmployeeCode(String campaign, String companyCode, Set<String> keys);
+
+	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1}}}")
+	List<User> findByCampaignAndCompany(String campaign, String companyCode);
 	
 }

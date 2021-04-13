@@ -1,156 +1,460 @@
 <template>
   <div>
-    Statistiche
-    <!-- based on the profile, build the correct charts -->
     <div class="flex flex-col lg:flex-row">
       <div class="mx-2 my-2 flex flex-col lg:w-4/6 bg-white p-2">
         Grafici
-        <!-- <em v-if="allCampaigns.loading">Loading users...</em>
-        <span v-if="allCampaigns.error" class="text-danger">ERROR: {{allCampaigns.error}}</span>
-        <ul v-if="allCampaigns.items">
-          <li v-for="campaign in allCampaigns.items" :key="campaign.id">
-                {{campaign}}
-          </li>
-        </ul> -->
-        <div id="chart_container" class="">
-          <canvas ref="canvas" class="p-4"></canvas>
+        <div v-if="stat">
+          <chart  :selection="selection" />
+        </div>
+        <div v-else>
+          Seleziona i parametri corretti per il grafico da visualizzare
         </div>
       </div>
+
       <div
-        class="mx-2 my-2 flex flex-col lg:w-2/6 text-white p-2 bg-primary rounded-xl border-2 h-full"
+        class="mx-2 my-2 flex flex-col lg:w-2/6 bg-white p-2 text-primary rounded-xl border-2 h-full"
       >
-        <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
-          <label for="sub_select">Seleziona una campagna</label>
-          <select
-            class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
-            name="sub_select"
-            id="campaign"
-            v-model="selectedCampaign"
-            @change="changeCampaign($event)"
-            required
-          >
-            <option disabled value="">Seleziona una campagna</option>
-            <option
-              v-for="campaign in allCampaigns.items"
-              :key="campaign.id"
-              :value="campaign"
+        <ul class="list-reset flex border-b">
+          <li class="-mb-px mr-1">
+            <a
+              class="bg-white inline-block py-2 px-4 font-semibold"
+              :class="{
+                'border-l border-t border-r rounded-t text-blue-dark':
+                  tabActive == 'charts',
+                'text-blue hover:text-blue-darker': tabActive != 'charts',
+              }"
+              href="#"
+              @click="tabActive = 'charts'"
+              >Grafici</a
             >
-              {{ campaign.title }}
-            </option>
-          </select>
+          </li>
+          <li class="mr-1">
+            <a
+              class="bg-white inline-block py-2 px-4 font-semibold"
+              :class="{
+                'border-l border-t border-r rounded-t ': tabActive == 'csv',
+                'text-blue hover:text-blue-darker': tabActive != 'csv',
+              }"
+              href="#"
+              @click="tabActive = 'csv'"
+              >CSV</a
+            >
+          </li>
+        </ul>
+        <div
+          class="mx-2 my-2 flex flex-col text-white p-2 bg-primary rounded-xl border-2 h-full"
+          v-if="tabActive == 'charts'"
+        >
+          <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
+            <label for="sub_select">Seleziona una campagna</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="campaign"
+              v-model="selectedCampaign"
+              @change="changeCampaign($event)"
+              required
+            >
+              <option disabled value="">Seleziona una campagna</option>
+              <option
+                v-for="campaign in allCampaigns.items"
+                :key="campaign.id"
+                :value="campaign"
+              >
+                {{ campaign.title }}
+              </option>
+            </select>
+          </div>
+          <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col text-white bg-primary"
+            v-if="role == 'ROLE_ADMIN' && adminCompany == null"
+          >
+            <label for="sub_select">Seleziona una azienda</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="company"
+              v-model="selectedCompany"
+              @change="changeCompany($event)"
+              required
+            >
+              <option disabled value="">Seleziona una azienda</option>
+              <template
+                v-if="
+                  actualCampaign && actualCampaign.item && actualCampaign.item.companies
+                "
+              >
+                <option
+                  v-for="company in actualCampaign.item.companies"
+                  :key="company.id"
+                  :value="company"
+                >
+                  {{ company.name }}
+                </option>
+              </template>
+            </select>
+          </div>
+          <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col text-white bg-primary"
+            v-if="
+              role == 'ROLE_COMPANY_ADMIN' ||
+              (role == 'ROLE_ADMIN' && adminCompany != null) ||
+              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+            "
+          >
+            <label for="sub_select">Seleziona una azienda</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="company"
+              v-model="selectedCompany"
+              @change="changeCompany($event)"
+              required
+            >
+              <option
+                selected
+                :value="adminCompany ? adminCompany.item : actualCompany.item"
+              >
+                {{ adminCompany ? adminCompany.item.name : actualCompany.item.name }}
+              </option>
+            </select>
+          </div>
+          <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
+            v-if="
+              role == 'ROLE_COMPANY_ADMIN' ||
+              (role == 'ROLE_ADMIN' && adminCompany != null) ||
+              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+            "
+          >
+            <label for="sub_select">Cosa?</label>
+            <div class="flex flex-col items-center justify-center">
+              <div class="flex flex-col">
+                <label class="inline-flex items-center mt-3">
+                  <input
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value="sede"
+                    v-model="what"
+                    @change="changeWhat('sede')"
+                  /><span class="ml-2 text-gray-700">Sede</span>
+                </label>
+
+                <label class="inline-flex items-center mt-3">
+                  <input
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value="dipendente"
+                    v-model="what"
+                    @change="changeWhat('dipendente')"
+                  /><span class="ml-2 text-gray-700">Dipendente</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
+            v-if="role == 'ROLE_COMPANY_ADMIN' && what == 'sede'"
+          >
+            <label for="sub_select">Seleziona una sede</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="campaign"
+              v-model="selectedSede"
+              @change="changeSede($event)"
+              required
+            >
+              <option disabled value="">Seleziona una sede</option>
+              <template v-if="allLocations">
+                <option
+                  v-for="location in allLocations.items"
+                  :value="location"
+                  :key="location.id"
+                >
+                  {{ location.id }} {{ location.address }} {{ location.streetNumber }}
+                </option>
+              </template>
+            </select>
+          </div>
+          <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
+            v-if="
+              allEmployees &&
+              allEmployees.items &&
+              (role == 'ROLE_COMPANY_ADMIN' ||
+                (role == 'ROLE_ADMIN' && adminCompany != null) ||
+                (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)) &&
+              what == 'dipendente'
+            "
+          >
+            <label for="sub_select">Seleziona un dipendente</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="employee"
+              v-model="selectedEmployee"
+              @change="changeEmployee($event)"
+              required
+            >
+              <option disabled value="">Seleziona un dipendente</option>
+              <option
+                v-for="employee in allEmployees.items"
+                :value="employee"
+                :key="employee.id"
+              >
+                {{ employee.name }} {{ employee.surname }}
+              </option>
+            </select>
+          </div>
+          <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
+            <label for="sub_select">Visualizzazione</label>
+            <div class="flex flex-col items-center justify-center">
+              <div class="flex flex-col">
+                <label class="inline-flex items-center mt-3">
+                  <input
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value="month"
+                    v-model="span"
+                    @change="changeSpan('month')"
+                  /><span class="ml-2 text-gray-700">Mese</span>
+                </label>
+
+                <label class="inline-flex items-center mt-3">
+                  <input
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value="total"
+                    v-model="span"
+                    @change="changeSpan('total')"
+                  /><span class="ml-2 text-gray-700">Totale</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
+            v-if="span == 'month'"
+          >
+            <label for="sub_select">Seleziona un mese</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="employee"
+              v-model="selectedMonth"
+              @change="changeMonth($event)"
+              required
+            >
+              <option disabled value="">Seleziona un mese</option>
+              <option v-for="month in months" :value="month" :key="month.id">
+                {{ month.name }}
+              </option>
+            </select>
+          </div>
+           <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
+            
+           v-if="means">
+            <label for="sub_select">Seleziona un mezzo</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="mean"
+              v-model="selectedMean"
+              @change="changeMean($event)"
+              required
+            >
+              <option disabled value="">Seleziona un mezzo</option>
+              <option v-for="mean in means" :value="mean.value" :key="mean.value">
+                {{ mean.text }}
+              </option>
+            </select>
+          </div>
+                     <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
+            
+           v-if="means">
+            <label for="sub_select">Raggruppa per</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="employee"
+              v-model="selectedGroupBy"
+              @change="changeGroupBy($event)"
+              required
+            >
+              <option disabled value="">Seleziona un raggruppamento</option>
+              <option  value="month" >
+                Mese
+              </option>
+              <option  value="day" >
+                Giorno
+              </option>
+            </select>
+          </div>
+         
+          <div class="flex-row">
+            <button
+              type="button"
+              class="btn-close flex"
+              @click="showStat"
+              aria-label="Close modal"
+            >
+              Mostra statistica
+            </button>
+          </div>
         </div>
         <div
-          class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
-          v-if="role == 'ROLE_ADMIN'"
+          class="mx-2 my-2 flex flex-col text-white p-2 bg-primary rounded-xl border-2 h-full"
+          v-if="tabActive == 'csv'"
+        >
+          <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
+            <label for="sub_select">Seleziona una campagna</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="campaign"
+              v-model="selectedCampaign"
+              @change="changeCampaign($event)"
+              required
+            >
+              <option disabled value="">Seleziona una campagna</option>
+              <option
+                v-for="campaign in allCampaigns.items"
+                :key="campaign.id"
+                :value="campaign"
+              >
+                {{ campaign.title }}
+              </option>
+            </select>
+          </div>
+          <!-- <div
+          class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col text-white bg-primary "
+          v-if="role=='ROLE_ADMIN' && adminCompany==null"
         >
           <label for="sub_select">Seleziona una azienda</label>
           <select
-            class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
+            class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
             name="sub_select"
-            id="campaign"
-            v-model="showFilter.selectedCompany"
+            id="company"
+            v-model="selectedCompany"
             @change="changeCompany($event)"
             required
           >
             <option disabled value="">Seleziona una azienda</option>
+            <template v-if="actualCampaign && actualCampaign.item && actualCampaign.item.companies">
             <option
-              v-for="company in allCompanies.items"
+              v-for="company in actualCampaign.item.companies"
               :value="company"
               :key="company.id"
             >
               {{ company.name }}
             </option>
+            </template>
           </select>
-        </div>
-        <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
-          <label for="sub_select">Seleziona una sede</label>
-          <select
-            class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none"
-            name="sub_select"
-            id="campaign"
-            v-model="showFilter.selectedSede"
-            @change="changeSede($event)"
-            required
+        </div> -->
+          <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col text-white bg-primary"
+            v-if="
+              role == 'ROLE_COMPANY_ADMIN' ||
+              (role == 'ROLE_ADMIN' && adminCompany != null) ||
+              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+            "
           >
-            <option disabled value="">Seleziona una sede</option>
-            <option
-              v-for="location in allLocations.items"
-              :value="location"
-              :key="location.id"
+            <label for="sub_select"
+              >Azienda selezionata:
+              {{ adminCompany ? adminCompany.item.name : actualCompany.item.name }}</label
             >
-              {{ location.address }}
-            </option>
-          </select>
-        </div>
-        <div class="flex flex-col mt-3 justify-stretch">
-          <div class="flex flex-col mt-3 justify-stretch w-full">
-            <label for="sub_select">Dal</label>
 
-            <VueTailwindPicker
-              :theme="{
-                background: '#1A202C',
-                text: 'text-white',
-                border: 'border-gray-700',
-                currentColor: 'text-gray-200',
-                navigation: {
-                  background: 'bg-gray-800',
-                  hover: 'hover:bg-gray-700',
-                  focus: 'bg-gray-700',
-                },
-                picker: {
-                  rounded: 'rounded-md',
-                  selected: {
-                    background: 'bg-teal-400',
-                    border: 'border-teal-400',
-                    hover: 'hover:border-teal-400',
-                  },
-                  holiday: 'text-red-400',
-                  weekend: 'text-green-400',
-                  event: 'bg-blue-500',
-                },
-                event: {
-                  border: 'border-gray-700',
-                },
-              }"
-              @change="(v) => (checkin = v)"
-            >
-              <input type="text" class="text-primary w-full" v-model="checkin" />
-            </VueTailwindPicker>
           </div>
-          <div class="flex flex-col mt-3 justify-stretch w-full">
-            <label for="sub_select">Al</label>
+          <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
+            v-if="
+              role == 'ROLE_COMPANY_ADMIN' ||
+              (role == 'ROLE_ADMIN' && adminCompany != null) ||
+              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+            "
+          >
+            <label for="sub_select">Cosa?</label>
+            <div class="flex flex-col items-center justify-center">
+              <div class="flex flex-col">
+                <label class="inline-flex items-center mt-3">
+                  <input
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value="sede"
+                    v-model="what"
+                    @change="changeWhat('sede')"
+                  /><span class="ml-2 text-gray-700">Sede</span>
+                </label>
 
-            <VueTailwindPicker
-              :theme="{
-                background: '#1A202C',
-                text: 'text-white',
-                border: 'border-gray-700',
-                currentColor: 'text-gray-200',
-                navigation: {
-                  background: 'bg-gray-800',
-                  hover: 'hover:bg-gray-700',
-                  focus: 'bg-gray-700',
-                },
-                picker: {
-                  rounded: 'rounded-md',
-                  selected: {
-                    background: 'bg-teal-400',
-                    border: 'border-teal-400',
-                    hover: 'hover:border-teal-400',
-                  },
-                  holiday: 'text-red-400',
-                  weekend: 'text-green-400',
-                  event: 'bg-blue-500',
-                },
-                event: {
-                  border: 'border-gray-700',
-                },
-              }"
-              @change="(v) => (checkin = v)"
-            >
-              <input type="text" v-model="checkin" class="text-primary w-full" />
-            </VueTailwindPicker>
+                <label class="inline-flex items-center mt-3">
+                  <input
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value="dipendente"
+                    v-model="what"
+                    @change="changeWhat('dipendente')"
+                  /><span class="ml-2 text-gray-700">Dipendente</span>
+                </label>
+              </div>
+            </div>
           </div>
+          
+          <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
+            <label for="sub_select">Visualizzazione</label>
+            <div class="flex flex-col items-center justify-center">
+              <div class="flex flex-col">
+                <label class="inline-flex items-center mt-3">
+                  <input
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value="month"
+                    v-model="span"
+                    @change="changeSpan('month')"
+                  /><span class="ml-2 text-gray-700">Mese</span>
+                </label>
+
+                <label class="inline-flex items-center mt-3">
+                  <input
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value="total"
+                    v-model="span"
+                    @change="changeSpan('total')"
+                  /><span class="ml-2 text-gray-700">Totale</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
+            v-if="span == 'month'"
+          >
+            <label for="sub_select">Seleziona un mese</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="employee"
+              v-model="selectedMonth"
+              @change="changeMonth($event)"
+              required
+            >
+              <option disabled value="">Seleziona un mese</option>
+              <option v-for="month in months" :value="month" :key="month.id">
+                {{ month.name }}
+              </option>
+            </select>
+          </div>
+          <button
+            type="button"
+            class="btn-close flex"
+            @click="exportCsv"
+            aria-label="Close modal"
+          >
+            Esporta CSV
+          </button>
         </div>
       </div>
     </div>
@@ -158,65 +462,107 @@
 </template>
 
 <script>
+import moment from "moment";
 import { mapState, mapActions } from "vuex";
-import VueTailwindPicker from "vue-tailwind-picker";
+import { campaignService } from "../../services/campaign.services";
+import Chart from "./Chart.vue"
+
+
 export default {
   components: {
-    VueTailwindPicker,
+    Chart
   },
   data() {
     return {
+      tabActive: "charts",
       checkin: "",
-      showFilter: {
-        selectedCampaign: null,
-        azienda: null,
-        sede: null,
-        period: {
-          dal: null,
-          al: null,
-        },
-      },
-      sendFilter: {
-        selectedCampaign: null,
-        azienda: null,
-        sede: null,
-        period: {
-          dal: null,
-          al: null,
-        },
-      },
+      span: "total",
+      what: "sede",
+      selectedCompany: "",
+      selectedCampaign: "",
+      selectedEmployee: "",
+      selectedSede: "",
+      selectedMonth: {},
+      selectedMean: {},
+      selectedGroupBy:"month",
+      endMonthValue: "",
+      months: [],
+      means:[],
+      selection:{}
     };
   },
   computed: {
     ...mapState("account", ["status", "user", "role"]),
-    ...mapState("campaign", ["allCampaigns"]),
-    ...mapState("company", ["allCompanies"]),
+    ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
+    ...mapState("company", ["allCompanies", "adminCompany", "actualCompany"]),
     ...mapState("location", ["allLocations"]),
+    ...mapState("employee", ["allEmployees"]),
+    ...mapState("stat", ["stat"]),
   },
   created() {
     //default company if AA
-    this.sendFilter.azienda = null;
-    if (this.role == "ROLE_COMPANY_ADMIN") {
-      var company = this.getFirstCompany(this.user);
-      if (company) this.sendFilter.azienda = company.companyId;
+    //this.selectedCompany = null;
+    if (this.role == "ROLE_ADMIN" && this.adminCompany == null) {
+      //get all campaigns
+      this.getAllCampaigns();
+    } else if (
+      this.role == "ROLE_COMPANY_ADMIN" ||
+      (this.role == "ROLE_ADMIN" && this.adminCompany != null) ||
+      (this.role == "ROLE_MOBILITY_MANAGER" && this.actualCompany != null)
+    ) {
+      // var company = this.getFirstCompany(this.user);
+      // if (company) this.selectedCompany = company;
+      //       this.getAllCampaigns(this.selectedCompany);
+      this.selectedCompany = this.adminCompany
+        ? this.adminCompany.item
+        : this.actualCompany.item;
+      this.getAllCampaigns(this.selectedCompany.id);
     }
-    //get all the campaigns, if azienda is set, filter by it
-    this.getAllCampaigns(this.sendFilter.azienda);
+    // if (this.role == "ROLE_COMPANY_ADMIN") {
+    //   var company = this.getFirstCompany(this.user);
+    //   if (company) this.azienda = company.companyId;
+    // }
+    // //get all the campaigns, if azienda is set, filter by it
+    // this.getAllCampaigns(this.azienda);
 
-    if (this.role == "ROLE_ADMIN") this.getAllCompanies();
-    if (this.sendFilter.azienda) this.getAllLocations(this.sendFilter.azienda);
+    // if (this.role == "ROLE_ADMIN") {
+    //   this.getAllCompanies();
+    //   }
+    if (this.selectedCompany) {
+      this.getAllLocations(this.selectedCompany.id);
+      this.getAllEmployees(this.selectedCompany.id);
+    }
   },
   mounted() {
-    this.changePage({title: 'Statistiche',
-                route: '/stats'})
-    this.buildChart;
+    this.changePage({ title: "Statistiche", route: "/stats" });
+    // this.buildChart;
   },
+  // watch: {
+  //   stat () {
+  //     // Our fancy notification (2).
+  //     console.log(this.stat)
+  //     if (this.stat && this.stat.items)
+  //     this.buildChart(this.stat.items)
+  //   }
+  // },
   methods: {
-    ...mapActions("campaign", { getAllCampaigns: "getAll" }),
+    ...mapActions("campaign", {
+      getAllCampaigns: "getAll",
+      getAllCompaniesOfCampaignCall: "getAllCompaniesOfCampaign",
+    }),
     ...mapActions("company", { getAllCompanies: "getAll" }),
-    ...mapActions("location", { getAllLocations: "getAll" }),
-                ...mapActions("navigation", { changePage: "changePage" }),
-
+    ...mapActions("location", { getAllLocations: "getAllLocations" }),
+    ...mapActions("navigation", { changePage: "changePage" }),
+    ...mapActions("employee", { getAllEmployees: "getAll" }),
+    ...mapActions("stat", {
+      getCampaignCsv: "getCampaignCsv",
+      getCompanyCsv: "getCompanyCsv",
+      getLocationCsv: "getLocationCsv",
+      getCampaignStat: "getCampaignStat",
+      getCompanyStat: "getCompanyStat",
+      getEmployeeStat: "getEmployeeStat",
+      getLocationStat: "getLocationStat",
+    }),
     getFirstCompany(user) {
       return user.roles.find(function (role) {
         return role.role == "ROLE_COMPANY_ADMIN";
@@ -224,25 +570,178 @@ export default {
     },
     buildChart(stats) {
       console.log(stats);
-      //   this.labels = this.buildLabels(stats);
-      //   let ctx = this.$refs.canvas;
-      //   let config = this.buildConfig(this.labels);
-      //   if (ctx && config) this.chart = new Chart(ctx, config);
+      this.labels = this.buildLabels(stats);
+      let ctx = this.$refs.canvas;
+      let config = this.buildConfig(this.labels);
+      if (ctx && config) this.chart = new Chart(ctx, config);
     },
     changeCampaign(event) {
       //get new data for the new campaign
       console.log(event);
-      console.log(event.target.value)
+      console.log(event.target.value);
+      if (this.selectedCampaign)
+        this.getAllCompaniesOfCampaignCall(this.selectedCampaign);
+      this.loadMeans(this.selectedCampaign);
     },
     changeCompany(event) {
       //get new data for the new campaign
       console.log(event);
-      console.log(event.target.value)
+      console.log(event.target.value);
+      if (this.selectedCompany) this.getAllEmployees(this.selectedCompany.id);
     },
     changeSede(event) {
       //get new data for the new campaign
       console.log(event);
-      console.log(event.target.value)
+      console.log(event.target.value);
+    },
+    changeEmployee(event) {
+      //get new data for the new campaign
+      console.log(event);
+      console.log(event.target.value);
+    },
+    changeSpan(span) {
+      if (span == "month") {
+        if (this.selectedCampaign)
+          this.months = campaignService.getMonthsForCampaign(this.selectedCampaign);
+      } else {
+        // reset selectedmonth
+        this.selectedMonth = {};
+        this.endMonthValue = "";
+      }
+    },
+    changeMonth(event) {
+      console.log(event);
+      if (this.selectedMonth.value)
+        this.endMonthValue = moment(this.selectedMonth.value, "YYYY-MM-DD")
+          .add(1, "months")
+          .format("YYYY-MM-DD");
+    },
+    changeMean(event) {
+      console.log(event);
+
+    },
+        changeGroupBy(event) {
+      console.log(event);
+      console.log(event.target.value);
+    },
+    loadMeans(campaign){
+      this.means=campaignService.getMeansForCampaign(campaign);
+    },
+    showStat() {
+      console.log("getStat and show values");
+      //
+      //check values and choose the right call
+      if (this.role === "ROLE_ADMIN") {
+        if (this.adminCompany == null && !this.selectedCompany) {
+          this.selection={
+            type:"getCampaignStat",
+            campaignId: this.selectedCampaign.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            mean: this.selectedMean,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          }
+          this.getCampaignStat({
+            campaignId: this.selectedCampaign.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          });
+          return;
+        } else {
+            this.selection={
+            type:"getCompanyStat",
+            campaignId: this.selectedCampaign.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            mean: this.selectedMean,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          }
+          this.getCompanyStat({
+            campaignId: this.selectedCampaign.id,
+            companyId: this.selectedCompany.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          });
+        }
+      } else {
+        //AA
+        if (this.what === "dipendente") {
+                    this.selection={
+            type:"getEmployeeStat",
+            campaignId: this.selectedCampaign.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            mean: this.selectedMean,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          }
+          this.getEmployeeStat({
+            campaignId: this.selectedCampaign.id,
+            employeeId: this.selectedEmployee.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          });
+        } else {
+                    this.selection={
+            type:"getLocationStat",
+            campaignId: this.selectedCampaign.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            mean: this.selectedMean,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          }
+          this.getLocationStat({
+            campaignId: this.selectedCampaign.id,
+            companyId: this.selectedCompany.id,
+            locationId: this.selectedSede.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            groupBy: this.selectedGroupBy,
+            noLimits: false,
+          });
+        }
+      }
+    },
+    exportCsv() {
+      console.log("export csv");
+      //check values and choose the right call
+      if (
+        (this.role == "ROLE_ADMIN" && this.adminCompany == null) ||
+        !this.selectedCompany
+      ) {
+        //get stat for companies
+        this.getCampaignCsv({
+          campaignId: this.selectedCampaign.id,
+          from: this.selectedMonth ? this.selectedMonth.value : null,
+          to: this.selectedMonth ? this.endMonthValue : null,
+        });
+      } else {
+        //get stat for employee
+        if (this.what == "dipendente")
+          this.getCompanyCsv({
+            campaignId: this.selectedCampaign.id,
+            companyId: this.selectedCompany.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+          });
+        //get stat for locations
+        else
+          this.getLocationCsv({
+            campaignId: this.selectedCampaign.id,
+            companyId: this.selectedCompany.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+          });
+      }
     },
   },
 };
