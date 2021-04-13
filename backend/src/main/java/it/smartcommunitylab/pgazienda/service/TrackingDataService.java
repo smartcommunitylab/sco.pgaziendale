@@ -102,7 +102,7 @@ public class TrackingDataService {
 	@Autowired
 	private MongoTemplate template;
 
-	@PostConstruct
+//	@PostConstruct
 	public void init() {
 		dayStatRepo.findByEmptyLimitedDistances().forEach(ds -> {
 			Campaign campaign = campaignRepo.findById(ds.getCampaign()).orElse(null);
@@ -169,7 +169,7 @@ public class TrackingDataService {
 						headers.add("Accept", "application/json");
 						headers.add("Content-Type", "application/json");
 						
-						logger.info("Styncronizing app campaign company data: " + new ObjectMapper().writeValueAsString(request));
+						logger.info("Syncronizing app campaign company data: " + new ObjectMapper().writeValueAsString(request));
 
 						HttpEntity<TrackingDataRequestDTO> entity = new HttpEntity<>(request, headers);
 
@@ -255,7 +255,8 @@ public class TrackingDataService {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
 
-		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString()).gte(from.toString());
+		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString());
+		if (from != null) criteria = criteria.gte(from.toString());
 		List<DayStat> res = null;
 		if (Constants.AGG_DAY.equals(groupBy)) {
 			Query q = Query.query(criteria);
@@ -421,6 +422,7 @@ public class TrackingDataService {
 			for (int i = 0; i < campaign.getMeans().size(); i++) {
 				Double mv = ds.getDistances().meanValue(MEAN.valueOf(campaign.getMeans().get(i)));
 				if (mv == null) mv = 0d;
+				mv = mv / 1000;
 				rec[i + 4] = mv.toString();
 			}
 			csvWriter.writeNext(rec);
@@ -487,6 +489,7 @@ public class TrackingDataService {
 			for (int i = 0; i < campaign.getMeans().size(); i++) {
 				Double mv = d.meanValue(MEAN.valueOf(campaign.getMeans().get(i)));
 				if (mv == null) mv = 0d;
+				mv = mv / 1000;
 				rec[i + 7] = mv.toString();
 			}
 			csvWriter.writeNext(rec);
@@ -501,7 +504,7 @@ public class TrackingDataService {
 	}	
 	
 	
-	public void createCampaignStatsCVS(Writer writer, String campaignId, LocalDate from, LocalDate to) {
+	public void createCampaignStatsCSV(Writer writer, String campaignId, LocalDate from, LocalDate to) {
 		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
@@ -549,6 +552,7 @@ public class TrackingDataService {
 			for (int i = 0; i < campaign.getMeans().size(); i++) {
 				Double mv = d.meanValue(MEAN.valueOf(campaign.getMeans().get(i)));
 				if (mv == null) mv = 0d;
+				mv = mv / 1000;
 				rec[i + 2] = mv.toString();
 			}
 			csvWriter.writeNext(rec);

@@ -87,7 +87,7 @@ public class TrackingDataResource {
     @GetMapping("/campaigns/{campaignId}/stats/{employeeId:.*}")
 	public ResponseEntity<List<DayStat>> getEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) {
     	log.debug("Read user stats {} / {}", campaignId, employeeId);
-    	if (from == null) from = LocalDate.now().toString();
+//    	if (from == null) from = LocalDate.now().toString();
     	if (to == null) to = LocalDate.now().toString();
     	
     	Employee employee = employeeRepo.findById(employeeId).orElse( null);
@@ -101,7 +101,7 @@ public class TrackingDataResource {
     	List<User> users = userService.getUserByEmployeeCode(campaignId, company.get().getCode(), employee.getCode());
     	if (users == null || users.isEmpty()) throw new IllegalArgumentException("Invalid employee - no subscription: "+ employeeId);
     	
-    	return ResponseEntity.ok(dataService.getUserCampaignData(users.get(0).getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks, noLimits));
+    	return ResponseEntity.ok(dataService.getUserCampaignData(users.get(0).getPlayerId(), campaignId, from == null ? null : LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks, noLimits));
 	}
     
     @GetMapping("/campaigns/{campaignId}/stats/csv/employee/{companyId:.*}")
@@ -130,7 +130,7 @@ public class TrackingDataResource {
     	response.setContentType("text/csv;charset=utf-8");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
-    	dataService.createCampaignStatsCVS(response.getWriter(), campaignId, fromDate, toDate);
+    	dataService.createCampaignStatsCSV(response.getWriter(), campaignId, fromDate, toDate);
     }
 
     @GetMapping("/campaigns/{campaignId}/agg")
