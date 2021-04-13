@@ -44,11 +44,11 @@
            v-if="actualEmployee.item.code" >
             <code-icon /> Codice: {{ actualEmployee.item.code }}
           </p>
-          <p
+          <div
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
            v-if="actualEmployee.item.campaigns">
-            <list-campaigns-icon /> Campagne: {{ actualEmployee.item.campaigns }}
-          </p>
+            <list-campaigns-icon /> Campagne: <br><div v-html="getCampaings(actualEmployee.item.campaigns)"/>
+          </div>
         </div>
       </div>
       <div></div>
@@ -73,7 +73,14 @@ export default {
 	},
 	editEmployee() {
 		EventBus.$emit("EDIT_EMPLOYEE",this.actualEmployee);
-	}
+	},
+  getCampaings(campaigns) {
+    var returnCampaigns="";
+    campaigns.forEach(element => {
+      returnCampaigns+="<div>"+element+" </div>";
+    });
+    return returnCampaigns;
+  }
   },
 };
 </script>
