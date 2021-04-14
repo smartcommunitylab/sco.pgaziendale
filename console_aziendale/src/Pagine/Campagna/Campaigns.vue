@@ -11,7 +11,7 @@
         </generic-table>
       </div>
 
-      <div v-else class="text-center">Non ci sono campagne</div>
+      <div v-else class="empty-list">Non ci sono campagne</div>
       <div class="ml-auto pt-4 pr-4 absolute right-0">
         <button
           @click="showModal('Aggiungi campagna')"

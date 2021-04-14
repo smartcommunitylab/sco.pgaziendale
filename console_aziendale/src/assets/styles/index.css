@@ -14,3 +14,9 @@ body {
   font-size: 14px;
   color: #444;
 }
+.empty-list{
+  font-size: large;
+    margin-top: 20px;
+    font-weight: bold;
+    text-align:center;
+}

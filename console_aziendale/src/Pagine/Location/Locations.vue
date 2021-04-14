@@ -10,7 +10,7 @@
         >
         </generic-table>
       </div>
-      <div v-else class="text-center">Non ci sono Sedi</div>
+      <div v-else class="empty-list">Non ci sono Sedi</div>
       <div class="flex flex-row justify-center py-4">
         <div class="px-2">
           <button

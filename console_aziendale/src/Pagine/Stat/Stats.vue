@@ -2,11 +2,10 @@
   <div>
     <div class="flex flex-col lg:flex-row">
       <div class="mx-2 my-2 flex flex-col lg:w-4/6 bg-white p-2">
-        Grafici
         <div v-if="stat">
           <chart  :selection="selection" />
         </div>
-        <div v-else>
+        <div v-else class="empty-list">
           Seleziona i parametri corretti per il grafico da visualizzare
         </div>
       </div>
@@ -154,7 +153,11 @@
           </div>
           <div
             class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
-            v-if="role == 'ROLE_COMPANY_ADMIN' && what == 'sede'"
+            
+            v-if=" (role == 'ROLE_COMPANY_ADMIN' ||
+              (role == 'ROLE_ADMIN' && adminCompany != null) ||
+              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null))
+             && what == 'sede'"
           >
             <label for="sub_select">Seleziona una sede</label>
             <select
@@ -510,24 +513,13 @@ export default {
       (this.role == "ROLE_ADMIN" && this.adminCompany != null) ||
       (this.role == "ROLE_MOBILITY_MANAGER" && this.actualCompany != null)
     ) {
-      // var company = this.getFirstCompany(this.user);
-      // if (company) this.selectedCompany = company;
-      //       this.getAllCampaigns(this.selectedCompany);
+     
       this.selectedCompany = this.adminCompany
         ? this.adminCompany.item
         : this.actualCompany.item;
       this.getAllCampaigns(this.selectedCompany.id);
     }
-    // if (this.role == "ROLE_COMPANY_ADMIN") {
-    //   var company = this.getFirstCompany(this.user);
-    //   if (company) this.azienda = company.companyId;
-    // }
-    // //get all the campaigns, if azienda is set, filter by it
-    // this.getAllCampaigns(this.azienda);
 
-    // if (this.role == "ROLE_ADMIN") {
-    //   this.getAllCompanies();
-    //   }
     if (this.selectedCompany) {
       this.getAllLocations(this.selectedCompany.id);
       this.getAllEmployees(this.selectedCompany.id);
@@ -535,16 +527,8 @@ export default {
   },
   mounted() {
     this.changePage({ title: "Statistiche", route: "/stats" });
-    // this.buildChart;
   },
-  // watch: {
-  //   stat () {
-  //     // Our fancy notification (2).
-  //     console.log(this.stat)
-  //     if (this.stat && this.stat.items)
-  //     this.buildChart(this.stat.items)
-  //   }
-  // },
+
   methods: {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
@@ -624,6 +608,9 @@ export default {
       console.log(event);
       console.log(event.target.value);
     },
+    changeWhat(what) {
+      this.what=what;
+    },
     loadMeans(campaign){
       this.means=campaignService.getMeansForCampaign(campaign);
     },
@@ -631,7 +618,7 @@ export default {
       console.log("getStat and show values");
       //
       //check values and choose the right call
-      if (this.role === "ROLE_ADMIN") {
+      if (this.role == "ROLE_ADMIN" && this.adminCompany == null) {
         if (this.adminCompany == null && !this.selectedCompany) {
           this.selection={
             type:"getCampaignStat",
