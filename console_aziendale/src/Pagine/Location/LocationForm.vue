@@ -11,7 +11,7 @@
           />
         </div>
       </template>
-      <div class="field-group mb-4 w-full">
+      <div class="field-group mt-4 mb-4 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
           <label class="field-label" for="first_name">Identificativo </label>
           <input
