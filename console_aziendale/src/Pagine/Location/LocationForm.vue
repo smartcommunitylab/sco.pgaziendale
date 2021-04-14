@@ -261,7 +261,7 @@
           <input class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2" />
           <info-box :msg="'I giorni della settimana in cui la sede chiude'" />
 
-          <div>
+          <div v-if="nonWorkingDays && nonWorkingDays.length>0">
             <div
               v-for="day in $v.nonWorkingDays.$model"
               :key="day"
@@ -291,6 +291,11 @@
               </div>
             </div>
           </div>
+          <div v-else>
+            Non sono presenti giorni di chiusura per questa sede
+          </div>
+          <div class="flex">
+          <label class="field-label"> Seleziona il giorno:</label>
           <div class="relative">
             <VueTailwindPicker
               :start-from-monday="true"
@@ -306,22 +311,13 @@
                 class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 w-full"
               />
             </VueTailwindPicker>
-            <!--             
-            <input
-              type="text"
-              name="campaignNonWorkingDays"
-              id=""
-              required
-              placeholder="Giorno di chiusura *"
-              v-model.trim="$v.newNonWorkingDay.$model"
-              class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 w-full"
-            /> -->
 
             <div
               class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
             >
               <add-icon @click="addDays($v.newNonWorkingDay.$model)" />
             </div>
+          </div>
           </div>
         </div>
         <div v-if="$v.nonWorkingDays.$error">
