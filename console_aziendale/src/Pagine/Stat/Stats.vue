@@ -297,10 +297,10 @@
             </select>
           </div>
          
-          <div class="flex-row">
+          <div class="">
             <button
               type="button"
-              class="btn-close flex"
+              class="btn-stat"
               @click="showStat"
               aria-label="Close modal"
             >
@@ -452,7 +452,7 @@
           </div>
           <button
             type="button"
-            class="btn-close flex"
+            class="btn-stat"
             @click="exportCsv"
             aria-label="Close modal"
           >
@@ -733,4 +733,15 @@ export default {
   },
 };
 </script>
-<style scoped></style>
+<style scoped>
+.btn-stat{
+      border: none;
+    font-size: 20px;
+    padding: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    background: transparent;
+    text-align: center;
+    width:100%;
+}</style>

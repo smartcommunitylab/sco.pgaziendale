@@ -22,7 +22,7 @@
         <div class="p-4 md:p-12 text-center lg:text-left" >
           <!-- Image for mobile view-->
           <!-- <div
-            class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
+            class="block rounded-full shadow-xl mx-auto  h-48 w-48 bg-cover bg-center"
             v-bind:style="{ backgroundImage: 'url(' + actualEmployee.item.logo + ')' }"
           ></div> -->
           <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualEmployee.item.name }} {{ actualEmployee.item.surname }}</h1>
