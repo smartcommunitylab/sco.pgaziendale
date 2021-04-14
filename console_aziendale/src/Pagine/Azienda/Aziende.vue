@@ -10,7 +10,7 @@
         >
         </generic-table>
       </div>
-      <div v-else>Non ci sono Aziende</div>
+      <div v-else class="empty-list">Non ci sono Aziende</div>
 
       <div class="ml-auto pt-4 pr-4 absolute right-0">
         <button

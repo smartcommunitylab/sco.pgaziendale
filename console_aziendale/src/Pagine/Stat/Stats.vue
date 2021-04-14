@@ -2,11 +2,10 @@
   <div>
     <div class="flex flex-col lg:flex-row">
       <div class="mx-2 my-2 flex flex-col lg:w-4/6 bg-white p-2">
-        Grafici
         <div v-if="stat">
           <chart  :selection="selection" />
         </div>
-        <div v-else>
+        <div v-else class="empty-list">
           Seleziona i parametri corretti per il grafico da visualizzare
         </div>
       </div>
