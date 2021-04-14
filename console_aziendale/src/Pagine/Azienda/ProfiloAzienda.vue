@@ -26,7 +26,7 @@
           v-if="actualCompany && actualCompany.item"
         >
           <div
-            class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
+            class="block rounded-full shadow-xl mx-auto  h-48 w-48 bg-cover bg-center"
             v-bind:style="{ backgroundImage: 'url(' + actualCompany.item.logo + ')' }"
           ></div>
           <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualCompany.item.name }}</h1>
