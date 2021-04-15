@@ -1,9 +1,9 @@
 import { statService } from '../services';
 
 const state = {
-    stat:null
+    stat: null
 };
-function saveFile(filename,stats){
+function saveFile(filename, stats) {
     var pom = document.createElement('a');
     pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(stats));
     pom.setAttribute('download', filename);
@@ -18,10 +18,16 @@ function saveFile(filename,stats){
     }
 }
 const actions = {
-    getCampaignStat({ commit,dispatch },{campaignId,from,to,groupBy,noLimits}) {
+    resetStat({ commit }) {
+        commit('resetStat');
+    },
+    logout({ commit }) {
+        commit("removeStat");
+    },
+    getCampaignStat({ commit, dispatch }, { campaignId, from, to, groupBy, noLimits }) {
         commit('getCampaignStat');
 
-        statService.getCampaignStat(campaignId,from,to,groupBy,noLimits)
+        statService.getCampaignStat(campaignId, from, to, groupBy, noLimits)
             .then(
                 statistics => {
                     commit('getCampaignStatSuccess', statistics);
@@ -36,10 +42,10 @@ const actions = {
     },
 
 
-    getCompanyStat({ commit,dispatch },{campaignId,companyId,from,to,groupBy,noLimits}) {
+    getCompanyStat({ commit, dispatch }, { campaignId, companyId, from, to, groupBy, noLimits }) {
         commit('getCompanyStat');
 
-        statService.getCompanyStat(campaignId,companyId,from,to,groupBy,noLimits)
+        statService.getCompanyStat(campaignId, companyId, from, to, groupBy, noLimits)
             .then(
                 statistics => {
                     commit('getCompanyStatSuccess', statistics);
@@ -52,10 +58,10 @@ const actions = {
                 }
             );
     },
-    getEmployeeStat({ commit,dispatch },{campaignId,employeeId,from,to,groupBy, withTracks,noLimits}) {
+    getEmployeeStat({ commit, dispatch }, { campaignId, employeeId, from, to, groupBy, withTracks, noLimits }) {
         commit('getCompanyStat');
 
-        statService.getEmployeeStat(campaignId,employeeId,from,to,groupBy,withTracks,noLimits)
+        statService.getEmployeeStat(campaignId, employeeId, from, to, groupBy, withTracks, noLimits)
             .then(
                 statistics => {
                     commit('getEmployeeStatSuccess', statistics);
@@ -68,10 +74,10 @@ const actions = {
                 }
             );
     },
-    getLocationStat({ commit,dispatch },{campaignId,companyId,locationId,from,to,groupBy,noLimits}) {
+    getLocationStat({ commit, dispatch }, { campaignId, companyId, locationId, from, to, groupBy, noLimits }) {
         commit('getLocationStat');
 
-        statService.getLocationStat(campaignId,companyId,locationId,from,to,groupBy,noLimits)
+        statService.getLocationStat(campaignId, companyId, locationId, from, to, groupBy, noLimits)
             .then(
                 statistics => {
                     commit('getLocationStatSuccess', statistics);
@@ -84,14 +90,14 @@ const actions = {
                 }
             );
     },
-    getCampaignCsv({ commit,dispatch },{campaignId,from,to}) {
+    getCampaignCsv({ commit, dispatch }, { campaignId, from, to }) {
         commit('getCampaignCsv');
 
-        statService.getCampaignCsv(campaignId,from,to)
+        statService.getCampaignCsv(campaignId, from, to)
             .then(
                 stats => {
                     commit('getCampaignCsvSuccess', stats);
-                    saveFile('campaign.csv',stats);
+                    saveFile('campaign.csv', stats);
                     dispatch('alert/success', "Recuperate le statistiche della campagna.", { root: true });
 
                 },
@@ -101,14 +107,14 @@ const actions = {
                 }
             );
     },
-    getCompanyCsv({ commit,dispatch },{campaignId, companyId,from,to}) {
+    getCompanyCsv({ commit, dispatch }, { campaignId, companyId, from, to }) {
         commit('getCompanyCsv');
 
-        statService.getCompanyCsv(campaignId, companyId,from,to)
+        statService.getCompanyCsv(campaignId, companyId, from, to)
             .then(
                 stats => {
                     commit('getCompanyCsvSuccess', stats);
-                    saveFile('company.csv',stats);
+                    saveFile('company.csv', stats);
                     dispatch('alert/success', "Recuperate le statistiche della campagna.", { root: true });
 
                 },
@@ -118,14 +124,14 @@ const actions = {
                 }
             );
     },
-    getLocationCsv({ commit,dispatch },{campaignId, companyId,from,to}) {
+    getLocationCsv({ commit, dispatch }, { campaignId, companyId, from, to }) {
         commit('getLocationCsv');
 
-        statService.getLocationCsv(campaignId, companyId,from,to)
+        statService.getLocationCsv(campaignId, companyId, from, to)
             .then(
                 stats => {
                     commit('getLocationCsvSuccess', stats);
-                    saveFile('location.csv',stats);
+                    saveFile('location.csv', stats);
                     dispatch('alert/success', "Recuperate le statistiche della campagna.", { root: true });
 
                 },
@@ -135,80 +141,86 @@ const actions = {
                 }
             );
     }
-    
+
 
 };
 
 const mutations = {
-    getCampaignStat() {
+    getCampaignStat(state) {
         state.stat = { loading: true };
     },
-    getCampaignStatSuccess(state,statistics){
+    getCampaignStatSuccess(state, statistics) {
         state.stat = { items: statistics };
     },
-    getCampaignStatFailure(state,error) {
+    getCampaignStatFailure(state, error) {
         state.stat = { error };
     },
-    getCompanyStat() {
+    getCompanyStat(state) {
         state.stat = { loading: true };
     },
-    getCompanyStatSuccess(state,statistics){
+    removeStat(state) {
+        state.stat = null;
+    },
+    getCompanyStatSuccess(state, statistics) {
         state.stat = { items: statistics };
     },
-    getCompanyStatFailure(state,error) {
+    getCompanyStatFailure(state, error) {
         state.stat = { error };
     },
-    getEmployeeStat() {
+    getEmployeeStat(state) {
         state.stat = { loading: true };
     },
-    getEmployeeStatSuccess(state,statistics){
+    getEmployeeStatSuccess(state, statistics) {
         state.stat = { items: statistics };
     },
-    getEmployeeStatFailure(state,error) {
+    getEmployeeStatFailure(state, error) {
         state.stat = { error };
     },
-    getLocationStat() {
+    getLocationStat(state) {
         state.stat = { loading: true };
     },
-    getLocationStatSuccess(state,statistics){
+    getLocationStatSuccess(state, statistics) {
         state.stat = { items: statistics };
     },
-    getLocationStatFailure(state,error) {
+    getLocationStatFailure(state, error) {
         state.stat = { error };
     },
-    getCampaignCsv() {
+    getCampaignCsv(state) {
         state.stat = { loading: true };
 
     },
-    getCampaignCsvSuccess(state,stats){
+    getCampaignCsvSuccess(state, stats) {
         state.stat = { items: stats };
     },
-    getCampaignCsvFailure(state,error) {
+    getCampaignCsvFailure(state, error) {
         state.stat = { error };
 
     },
-    getCompanyCsv() {
+    getCompanyCsv(state) {
         state.stat = { loading: true };
     },
-    getCompanyCsvSuccess(state,stats){
+    getCompanyCsvSuccess(state, stats) {
         state.stat = { items: stats };
     },
-    getCompanyCsvFailure(state,error) {
+    getCompanyCsvFailure(state, error) {
         state.stat = { error };
 
     },
-    getLocationCsv() {
+    getLocationCsv(state) {
         state.stat = { loading: true };
 
     },
-    getLocationCsvSuccess(state,stats){
+    getLocationCsvSuccess(state, stats) {
         state.stat = { items: stats };
     },
-    getLocationCsvFailure(state,error) {
+    getLocationCsvFailure(state, error) {
         state.stat = { error };
 
     },
-   
+    resetStat(state) {
+        state.stat = null;
+    }
+
 };
 
 export const stat = {

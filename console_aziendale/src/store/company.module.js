@@ -8,11 +8,11 @@ const state = {
 };
 
 const actions = {
-    logout({commit, dispatch}) {
-    commit('logout');
-    commit('removeActualCompany');
-    commit('resetCompanyAdmin');
-    dispatch('campaign/removeActualCampaign',null, {root: true});
+    logout({ commit }) {
+        commit('removeActualCompany');
+        commit('resetCompanyAdmin');
+        commit('removeAllCompany');
+        commit('resetadminCompanyUsers');
     },
     getAll({ commit, dispatch }) {
         commit('getAllCompanies');
@@ -45,7 +45,7 @@ const actions = {
             // commit('chooseCompanyAdmin');
             companyService.getCompanyById(companyId).then(
                 company => {
-                    commit('choooseCompanyAdmin', {item:company});
+                    commit('choooseCompanyAdmin', { item: company });
                     dispatch('getUsers', company);
                     dispatch('alert/success', "Azienda selezionata", { root: true });
                 },
@@ -72,12 +72,12 @@ const actions = {
     chooseCompanyAdmin({ commit, dispatch }, company) {
         commit('choooseCompanyAdmin', company);
         dispatch('getUsers', company.item);
-        dispatch('campaign/removeActualCampaign',null, {root: true});
+        dispatch('campaign/removeActualCampaign', null, { root: true });
         dispatch('alert/success', "Azienda selezionata. Ora sei Amministratore", { root: true });
     },
     resetCompanyAdmin({ commit, dispatch }) {
         commit('resetCompanyAdmin');
-        dispatch('campaign/removeActualCampaign',null, {root: true});
+        dispatch('campaign/removeActualCampaign', null, { root: true });
         dispatch('alert/success', "Azienda deselezionata. Non sei piú amministratore", { root: true });
     },
     updateCompany({ commit, dispatch }, company) {
@@ -165,7 +165,7 @@ const actions = {
 
 const mutations = {
     choooseCompanyAdmin(state, company) {
-        console.log("choooseCompanyAdmin"+company);
+        console.log("choooseCompanyAdmin" + company);
         state.adminCompany = company;
     },
     resetCompanyAdmin(state) {
@@ -236,19 +236,9 @@ const mutations = {
         state.adminCompanyUsers = { loading: true };
     },
     usersSuccess(state, users) {
-        // if (state.adminCompanyUsers) {
-            //check types and add to admin company
-            // build arrays with
-            state.adminCompanyUsers= { items: users };
-            // for (var i=0; i<users.length; i++){
-            //     if (users[i].roles.filter(function(role) { return role.role === 'ROLE_COMPANY_ADMIN'; }).length > 0) {
-            //         state.adminCompany.item.administrators.push(users[i])
-            //     }
-            //     if (users[i].roles.filter(function(role) { return role.role === 'ROLE_MOBILITY_MANAGER'; }).length > 0) {
-            //         state.adminCompany.item.managers.push(users[i])
-            //     }
-            // }
-        // }
+
+        state.adminCompanyUsers = { items: users };
+
     },
     usersFailure(state, error) {
         state.adminCompanyUsers.items = { error };
@@ -270,7 +260,6 @@ const mutations = {
         // state.adminCompanyUsers.items = { loading: true };
     },
     updateUserSuccess(state, user) {
-        // state.actualEmployee = { item: employee };
         //update allEmployees
         if (state.adminCompanyUsers.items)
             state.adminCompanyUsers.items = state.adminCompanyUsers.items.map(function (element) {
@@ -280,19 +269,7 @@ const mutations = {
     updateUserFailure() {
         // state.adminCompanyUsers.items = { error };
     },
-    // deleteEmployee(state) {
-    //     state.adminCompanyUsers.items = { loading: true };
-    // },
-    // deleteEmployeeSuccess(state, userId) {
-    //     // state.actualEmployee = null;
-    //     if (state.adminCompanyUsers.items)
-    //     state.adminCompanyUsers.items= state.adminCompanyUsers.items.filter(function(element){
-    //         return userId!=element.id
-    //     })
-    // },
-    // deleteEmployeeFailure(state, error) {
-    //     state.adminCompanyUsers.items = { error };
-    // },
+
     deleteUser() {
         // state.adminCompanyUsers.items = { loading: true };
     },
@@ -307,6 +284,12 @@ const mutations = {
     deleteUserFailure() {
         // state.adminCompanyUsers.items = { error };
     },
+    removeAllCompany(state){
+        state.allCompanies = null;
+    },
+   resetadminCompanyUsers(state){
+    state.adminCompanyUsers=null;
+   }
 
 
 };
