@@ -32,6 +32,7 @@
     </div>
 
     <profilo-location v-if="actualLocation && actualLocation.item" />
+    <div v-else class="select-element"> Seleziona una sede per visualizzare i dettagli</div>
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Sede </template>
       <template v-slot:body> Sei sicuro di voler cancellare la sede? </template>

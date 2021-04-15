@@ -255,6 +255,7 @@
       </div>
     </div>
     <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
+    <div v-else class="select-element"> Seleziona un dipendente per visualizzare i dettagli</div>
 
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Dipendente </template>

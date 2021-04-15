@@ -22,6 +22,7 @@
       </div>
     </div>
     <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
+        <div v-else class="select-element"> Seleziona una campagna per visualizzare i dettagli</div>
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Campagna </template>
       <template v-slot:body> Sei sicuro di voler cancellare la campagna? </template>
