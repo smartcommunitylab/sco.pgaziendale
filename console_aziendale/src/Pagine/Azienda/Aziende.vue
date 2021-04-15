@@ -22,6 +22,7 @@
       </div>
     </div>
     <profilo-azienda v-if="actualCompany"></profilo-azienda>
+    <div v-else class="select-element"> Seleziona un'azienda per visualizzare i dettagli</div>
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>

@@ -31,7 +31,6 @@ export default {
   },
   watch: {
     stat() {
-      // Our fancy notification (2).
       console.log(this.stat);
       if (this.stat && this.stat.items) this.fillData();
     },

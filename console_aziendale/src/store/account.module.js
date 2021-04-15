@@ -12,6 +12,7 @@ function isCompanyAdmin(role){
     return false
 }
 const actions = {
+
     login({ dispatch, commit }, { username, password }) {
         commit('loginRequest', { username });
 
@@ -53,8 +54,10 @@ const actions = {
         commit('logout');
         dispatch('alert/success', "Utente uscito con successo", { root: true });
         dispatch('company/logout', null, { root: true });
-        // dispatch('company/getCompanyById', null, { root: true });
-        // dispatch('company/resetCompanyAdmin', null, { root: true });
+        dispatch('campaign/logout', null, { root: true });
+        dispatch('employee/logout', null, { root: true });
+        dispatch('location/logout', null, { root: true });
+        dispatch('stat/logout', null, { root: true });
         router.push('/login');
     },
     setDefaultCompany({ dispatch }, user) {
@@ -99,6 +102,7 @@ const actions = {
 };
 
 const mutations = {
+
     loginRequest(state, user) {
         state.status = { loggingIn: true };
         state.user = user;

@@ -7,6 +7,9 @@ const state = {
 };
 
 const actions = {
+    logout({commit}){
+        commit('removeActualCampaign');
+    },
     removeActualCampaign({commit}){
         commit('removeActualCampaign');
     },
