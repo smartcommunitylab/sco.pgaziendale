@@ -77,7 +77,12 @@ const actions = {
     },
     resetCompanyAdmin({ commit, dispatch }) {
         commit('resetCompanyAdmin');
-        dispatch('campaign/removeActualCampaign', null, { root: true });
+        //dispatch('campaign/removeActualCampaign', null, { root: true });
+        // dispatch('company/logout', null, { root: true });
+        dispatch('campaign/logout', null, { root: true });
+        dispatch('employee/logout', null, { root: true });
+        dispatch('location/logout', null, { root: true });
+        dispatch('stat/logout', null, { root: true });
         dispatch('alert/success', "Azienda deselezionata. Non sei piú amministratore", { root: true });
     },
     updateCompany({ commit, dispatch }, company) {

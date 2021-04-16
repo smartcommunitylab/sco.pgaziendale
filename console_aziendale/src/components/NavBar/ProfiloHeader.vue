@@ -33,6 +33,7 @@ export default {
   methods: {
     resetCompany() {
       this.resetCompanyAdmin();
+      this.$router.push("/aziende");
     },
      ...mapActions('company', ['resetCompanyAdmin'])
   },
