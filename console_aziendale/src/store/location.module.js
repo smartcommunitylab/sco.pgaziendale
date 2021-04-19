@@ -57,11 +57,11 @@ const actions = {
             }
         );
     },
-    updateLocation({ commit, dispatch }, { companyId, location }) {
+    updateLocation({ commit, dispatch }, { companyId, location,oldLocation }) {
         commit('updateLocation');
-        locationService.updateLocation(companyId, location).then(
+        locationService.updateLocation(companyId, location,oldLocation).then(
             location => {
-                commit('updateLocationSuccess', location);
+                commit('updateLocationSuccess', {location, oldLocation});
                 dispatch('alert/success', "Sede modificata con successo", { root: true });
             },
             error => {
@@ -130,12 +130,12 @@ const mutations = {
     updateLocation(state) {
         state.actualLocation = { loading: true };
     },
-    updateLocationSuccess(state, location) {
+    updateLocationSuccess(state, {location, oldLocation}) {
         state.actualLocation = { item: location };
         //update allLocations
         if (state.allLocations.items)
             state.allLocations.items = state.allLocations.items.map(function (element) {
-                return location.id == element.id ? location : element
+                return oldLocation.id == element.id ? location : element
             })
     },
     updateLocationFailure(state, error) {

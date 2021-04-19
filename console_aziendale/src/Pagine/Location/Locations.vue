@@ -218,6 +218,7 @@ export default {
       submitStatus: null,
       fileUploaded: null,
       inDragArea: false,
+      oldLocation:null
     };
   },
 
@@ -229,6 +230,7 @@ export default {
     EventBus.$on("EDIT_LOCATION", (location) => {
       this.editModalVisible = true;
       EventBus.$emit("EDIT_LOCATION_FORM", location.item);
+      this.oldLocation=location.item;
       this.popup = {
         title: "Modifica",
       };
@@ -250,6 +252,7 @@ export default {
         this.updateLocationCall({
           companyId: this.actualCompany.item.id,
           location: location,
+          oldLocation:this.oldLocation
         });
       }
       this.editModalVisible = false;

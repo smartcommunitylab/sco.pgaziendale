@@ -4,7 +4,7 @@
     class="w-full lg:w-1/2 rounded-lg lg:rounded-l-lg lg:rounded-r-none bg-white opacity-75 mx-6 lg:mx-0"
     v-if="actualCampaign"
   >
-    <div class="w-full">
+    <div class="w-full" v-if="role == 'ROLE_ADMIN' && adminCompany == null">
       <button
         @click="deleteCampaign"
         class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
@@ -78,6 +78,9 @@ export default {
   },
   computed: {
     ...mapState("campaign", ["actualCampaign"]),
+    ...mapState("account", [ "role"]),
+        ...mapState("company", [ "adminCompany"]),
+
   },
   methods: {
     getListOfMeans() {

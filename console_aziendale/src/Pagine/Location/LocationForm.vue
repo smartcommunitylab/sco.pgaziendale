@@ -21,8 +21,10 @@
             v-model.trim="$v.id.$model"
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
             id="campaignCode"
+            :disabled="$v.id.$model!=''"
           />
-          <info-box :msg="'Codice univoco della sede'" />
+          <info-box v-if="$v.id.$model==''" :msg="'Codice univoco della sede'" />
+          <info-box v-else :msg="'Non é possibile cambiare identificativo sede una volta creato'" />
         </div>
         <div v-if="$v.id.$error">
           <div class="error" v-if="!$v.id.required">

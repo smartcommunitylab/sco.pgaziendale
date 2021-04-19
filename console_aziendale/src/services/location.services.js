@@ -75,8 +75,8 @@ function addLocation(companyId, location) {
     )
 }
 // update an old company
-function updateLocation(companyId, location) {
-    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_LOCATIONS_API + '/' + location.id, location).then(
+function updateLocation(companyId, location,oldLocation) {
+    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_LOCATIONS_API + '/' + oldLocation.id, location).then(
         res => {
             if (res && res.data) {
                 return Promise.resolve(res.data);
