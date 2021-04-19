@@ -11,7 +11,10 @@
                   v-model.trim="$v.id.$model"
                   class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
                   id="campaignLogo"
+                  :disabled="$v.id.$model!=''"
                 />
+                <info-box v-if="$v.id.$model==''" :msg="'Codice univoco della campagna'" />
+                <info-box v-else :msg="'Non é possibile cambiare identificativo sede una volta creato'" />
               </div>
               <div v-if="$v.logo.$error">
                 <div class="error" v-if="!$v.id.required">Il campo Id e' richiesto.</div>
@@ -266,9 +269,9 @@ import { required } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
 import VueTailwindPicker from "vue-tailwind-picker";
 import { campaignService } from '../../services';
-
+import InfoBox from '@/components/InfoBox.vue'
 export default {
-  components: {VueTailwindPicker},
+  components: {VueTailwindPicker,InfoBox},
   data() {
     return {
       arrayMeans: [],

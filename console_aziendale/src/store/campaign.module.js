@@ -7,10 +7,12 @@ const state = {
 };
 
 const actions = {
-    logout({commit}){
+    logout({ commit }) {
         commit('removeActualCampaign');
+        commit('removeallCampaign');
+        commit('removepublicCampaigns');
     },
-    removeActualCampaign({commit}){
+    removeActualCampaign({ commit }) {
         commit('removeActualCampaign');
     },
     getAll({ commit, dispatch }, id) {
@@ -215,11 +217,17 @@ const mutations = {
         if (!state.allCampaigns.items)
             state.allCampaigns = { items: [] }
         state.allCampaigns.items.push(campaign)
-       
+
     },
     createCompanyCampaignFailure() {
         // state.actualCampaign = { error };
     },
+    removeallCampaign(state) {
+        state.allCampaigns = null;
+    },
+    removepublicCampaigns(state) {
+        state.publicCampaigns = null;
+    }
 };
 
 export const campaign = {

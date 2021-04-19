@@ -151,13 +151,16 @@ export default {
         if (key!='roles')
         this[key] = user[key];
         else {
-          this['roles']=user['roles'].map((elem)=>elem.role)
+          for (var i=0;i<user['roles'].length;i++){
+          if (user['roles'][i].companyId==this.adminCompany.item.id)
+          this['roles'].push(user['roles'][i].role);
+          }
         }
       }
     },
     initUser() {
+      //clean form
       this.user={};
-this.id="";
       this.playerId="";
       this.resetDate="";
       this.activated=true;
@@ -170,7 +173,7 @@ this.id="";
     },
     createUser() {
       this.user = {
-        id:this.id,
+        id:this.id?this.id:null,
         playerId:this.playerId,
         activated:this.activated,
         resetDate:this.resetDate,

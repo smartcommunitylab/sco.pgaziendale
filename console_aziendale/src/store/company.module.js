@@ -77,7 +77,12 @@ const actions = {
     },
     resetCompanyAdmin({ commit, dispatch }) {
         commit('resetCompanyAdmin');
-        dispatch('campaign/removeActualCampaign', null, { root: true });
+        //dispatch('campaign/removeActualCampaign', null, { root: true });
+        // dispatch('company/logout', null, { root: true });
+        dispatch('campaign/logout', null, { root: true });
+        dispatch('employee/logout', null, { root: true });
+        dispatch('location/logout', null, { root: true });
+        dispatch('stat/logout', null, { root: true });
         dispatch('alert/success', "Azienda deselezionata. Non sei piú amministratore", { root: true });
     },
     updateCompany({ commit, dispatch }, company) {
@@ -125,7 +130,7 @@ const actions = {
         commit('addUser');
         companyService.addUser(companyId, user).then(
             user => {
-                commit('addUserSuccess', user)
+                commit('addUserSuccess', {user,companyId})
                 dispatch('alert/success', "Utente creato con successo. É stata inviata un'email di conferma all'indirizzo indicato.", { root: true });
             },
             error => {
@@ -138,7 +143,7 @@ const actions = {
         commit('updateUser');
         companyService.updateUser(companyId, user).then(
             user => {
-                commit('updateUserSuccess', user);
+                commit('updateUserSuccess', {user,companyId});
                 dispatch('alert/success', "Utente modificato con successo", { root: true });
             },
             error => {
@@ -246,7 +251,8 @@ const mutations = {
     addUser() {
         // state.adminCompanyUsers.items = { loading: true };
     },
-    addUserSuccess(state, user) {
+    addUserSuccess(state, {user,companyId}) {
+        console.log(companyId);
         if (!state.adminCompanyUsers.items)
             state.adminCompanyUsers.items = []
         state.adminCompanyUsers.items.push(user);
@@ -259,11 +265,13 @@ const mutations = {
     updateUser() {
         // state.adminCompanyUsers.items = { loading: true };
     },
-    updateUserSuccess(state, user) {
+    updateUserSuccess(state, {user,companyId}) {
+        console.log(companyId);
         //update allEmployees
         if (state.adminCompanyUsers.items)
             state.adminCompanyUsers.items = state.adminCompanyUsers.items.map(function (element) {
-                return user.id == element.id ? user : element
+                //get correct user
+                return (user.id == element.id) ? user : element
             })
     },
     updateUserFailure() {

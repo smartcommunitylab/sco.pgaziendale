@@ -128,16 +128,15 @@ export default {
   mounted: function () {
 
     this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
-    // this.campaigns = campaigns;
     console.log(this.adminCompany)
     if (this.adminCompany && this.adminCompany.item) {
       this.getAllCampaigns(this.adminCompany.item.id);
     }
-    console.log(this.actualCompany)
-    if (this.actualCompany && this.actualCompany.item) {
+    console.log(this.adminCompany)
+    if (this.adminCompany && this.adminCompany.item) {
       this.getAllCampaigns(this.actualCompany.item.id);
     }
-    if (!this.adminCompany && !this.actualCompany) {
+    if (!this.adminCompany ) {
       this.getAllCampaigns(null);
     }
  EventBus.$on("EDIT_CAMPAIGN", (campaign) => {

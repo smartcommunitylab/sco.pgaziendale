@@ -15,9 +15,9 @@
               <span>{{ user.name }}</span
               ><span> {{ user.surname }} </span><span>{{ user.username }} </span
               ><span v-for="role in user.roles" :key="JSON.stringify(role)"
-                ><label v-if="role.role == 'ROLE_COMPANY_ADMIN'"
+                ><label v-if="role.role == 'ROLE_COMPANY_ADMIN' && role.companyId ==adminCompany.item.id"
                   >AMMINISTRATORE AZIENDALE</label
-                ><label v-if="role.role == 'ROLE_MOBILITY_MANAGER'"
+                ><label v-if="role.role == 'ROLE_MOBILITY_MANAGER' && role.companyId ==adminCompany.item.id"
                   >MOBILITY MANAGER</label
                 ></span
               >
@@ -119,7 +119,7 @@ export default {
       company: null,
       editModalVisible: false,
       deleteModalVisible: false,
-
+      newUser:true,
       popup: {
         title: "",
       },
@@ -144,42 +144,22 @@ export default {
     showModal(title) {
       this.editModalVisible = true;
       this.newUser = true;
-      // this.role = role;
+      EventBus.$emit("NEW_USER_FORM");
       this.popup = {
         title: title,
       };
     },
     closeModal() {
       this.editModalVisible = false;
-      this.$v.$reset();
     },
 
     saveUser() {
-      //check fields
-      // eslint-disable-next-line no-constant-condition
-      // console.log("submit!");
       EventBus.$emit("CHECK_USER_FORM");
-      // console.log(this.roles);
-      // this.$v.$touch();
-      // if (this.$v.$invalid) {
-      //   this.submitStatus = "ERROR";
-      //   return;
-      // } else {
-      //   this.createUser();
-      //   this.submitStatus = "SUCCESS";
-      //   if (this.newUser) {
-      //     this.addUserCall({ companyId: this.adminCompany.item.id, user: this.user });
-      //   } else {
-      //     this.updateUserCall({ companyId: this.adminCompany.item.id, user: this.user });
-      //   }
-      //   this.$v.$reset();
-      // }
-      // this.editModalVisible = false;
-      // this.newUser = false;
     },
     editUser(user) {
       this.editModalVisible = true;
       this.user = user;
+      this.newUser =false;
       EventBus.$emit("EDIT_USER_FORM", user);
       this.popup = {
         title: "Modifica",
@@ -208,8 +188,6 @@ export default {
       this.getAllCampaigns(this.adminCompany.item.id);
     }
     this.changePage({ title: "Lista aziende", route: "/aziende" });
-    // this.getAllCompanies();
-
     EventBus.$on("OK_USER_FORM", (user) => {
       if (this.newUser) {
         this.addUserCall({ companyId: this.adminCompany.item.id, user: user });
