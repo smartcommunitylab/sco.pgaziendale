@@ -259,7 +259,7 @@
         >
           <label class="field-label" for="password">Giorni di chiusura</label>
           <input class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2" />
-          <info-box :msg="'I giorni della settimana in cui la sede chiude'" />
+          <info-box :msg="'Giorni di chiusara aziendali'" />
 
           <div v-if="nonWorkingDays && nonWorkingDays.length>0">
             <div
