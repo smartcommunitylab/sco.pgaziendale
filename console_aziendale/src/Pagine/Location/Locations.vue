@@ -205,8 +205,8 @@ export default {
   components: { ProfiloLocation, GenericTable, Modal, LocationForm },
   data: function () {
     return {
-      gridColumns: ["id", "city", "address"],
-      headerColumns: ["Identificativo", "Cittá", "Indirizzo"],
+      gridColumns: ["id", "city", "address","streetNumber"],
+      headerColumns: ["Identificativo", "Cittá", "Indirizzo","Numero"],
       newLocation: false,
       location: null,
       popup: {
