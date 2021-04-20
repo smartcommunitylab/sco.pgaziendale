@@ -11,16 +11,28 @@
       >
         <div v-for="user in adminCompanyUsers.items" v-bind:key="user.id">
           <div class="user">
-            <div>
-              <span>{{ user.name }}</span
-              ><span> {{ user.surname }} </span><span>{{ user.username }} </span
-              ><span v-for="role in user.roles" :key="JSON.stringify(role)"
-                ><label v-if="role.role == 'ROLE_COMPANY_ADMIN' && role.companyId ==adminCompany.item.id"
-                  >AMMINISTRATORE AZIENDALE</label
-                ><label v-if="role.role == 'ROLE_MOBILITY_MANAGER' && role.companyId ==adminCompany.item.id"
-                  >MOBILITY MANAGER</label
-                ></span
-              >
+            <div class="w-full">
+              <div class="flex">
+              <div class="title-header">Dati:</div> <div>{{ user.name }}</div
+              ><div> {{ user.surname }} </div><div>{{ user.username }} </div>
+              </div>
+              <div class="flex">
+                <div class="title-header">Ruoli:</div><div v-for="role in user.roles" :key="JSON.stringify(role)"
+                  ><label class="mr-2	"
+                    v-if="
+                      role.role == 'ROLE_COMPANY_ADMIN' &&
+                      role.companyId == adminCompany.item.id
+                    "
+                    >AMMINISTRATORE AZIENDALE</label
+                  ><label class="mr-2	"
+                    v-if="
+                      role.role == 'ROLE_MOBILITY_MANAGER' &&
+                      role.companyId == adminCompany.item.id
+                    "
+                    >MOBILITY MANAGER</label
+                  ></div
+                >
+              </div>
             </div>
             <div class="buttons">
               <button
@@ -119,7 +131,7 @@ export default {
       company: null,
       editModalVisible: false,
       deleteModalVisible: false,
-      newUser:true,
+      newUser: true,
       popup: {
         title: "",
       },
@@ -159,7 +171,7 @@ export default {
     editUser(user) {
       this.editModalVisible = true;
       this.user = user;
-      this.newUser =false;
+      this.newUser = false;
       EventBus.$emit("EDIT_USER_FORM", user);
       this.popup = {
         title: "Modifica",
@@ -216,7 +228,7 @@ export default {
   font-size: large;
 }
 .user {
-  height: 50px;
+  height: 100%;
   border: solid 1px;
   line-height: 50px;
   padding: 8px;
@@ -227,5 +239,10 @@ export default {
 }
 .buttons {
   margin-left: auto;
+  min-width: 130px;
+}
+.title-header{
+  font-weight: bold;
+  width: 50px;
 }
 </style>
