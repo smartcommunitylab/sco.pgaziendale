@@ -2,8 +2,49 @@
   <div>
     <div class="flex flex-col lg:flex-row">
       <div class="mx-2 my-2 flex flex-col lg:w-4/6 bg-white p-2">
-        <div v-if="stat ">
-          <chart :selection="selection" />
+        <div v-if="stat">
+          <div
+            class="mx-2 my-2 flex flex-col bg-white p-2 text-primary rounded-xl border-2 h-full"
+          >
+            <ul class="list-reset flex">
+              <li class="-mb-px mr-1">
+                <a
+                  class="bg-white inline-block py-2 px-4 font-semibold"
+                  :class="{
+                    'border-l border-t border-r rounded-t text-blue-dark':
+                      tabWhatActive == 'draw',
+                    'text-blue hover:text-blue-darker': tabWhatActive != 'draw',
+                  }"
+                  href="#"
+                  @click="tabWhatActive = 'draw'"
+                  >Grafico</a
+                >
+              </li>
+              <li class="mr-1">
+                <a
+                  class="bg-white inline-block py-2 px-4 font-semibold"
+                  :class="{
+                    'border-l border-t border-r rounded-t ': tabWhatActive == 'table',
+                    'text-blue hover:text-blue-darker': tabWhatActive != 'table',
+                  }"
+                  href="#"
+                  @click="tabWhatActive = 'table'"
+                  >Tabella</a
+                >
+              </li>
+            </ul>
+            <div v-if="tabWhatActive == 'draw'">
+              <chart :selection="selection" />
+            </div>
+            <div v-if="tabWhatActive == 'table'">
+              <generic-table
+                :data.sync="dataStat"
+                :columns.sync="gridColumns"
+                :header.sync="headerColumns"
+              >
+              </generic-table>
+            </div>
+          </div>
         </div>
         <div v-else class="empty-list">
           Seleziona i parametri corretti per il grafico da visualizzare
@@ -24,7 +65,7 @@
               }"
               href="#"
               @click="tabActive = 'charts'"
-              >Grafici</a
+              >Visualizza</a
             >
           </li>
           <li class="mr-1">
@@ -36,7 +77,7 @@
               }"
               href="#"
               @click="tabActive = 'csv'"
-              >CSV</a
+              >Esporta</a
             >
           </li>
         </ul>
@@ -215,6 +256,23 @@
             </select>
           </div>
           <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
+            <label for="sub_select">Cosa vuoi visualizzare</label>
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="campaign"
+              v-model="selectedType"
+              @change="changeType($event)"
+              required
+            >
+              <option disabled value="">Seleziona un tipo di dato</option>
+              <option value="km_valid">Chilometri validi</option>
+              <option value="km_true">Chilometri effettivi</option>
+              <option value="co2saved">CO2 salvata</option>
+              <option value="trackCount">Numero di viaggi</option>
+            </select>
+          </div>
+          <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
             <label for="sub_select">Visualizzazione</label>
             <div class="flex flex-col items-center justify-center">
               <div class="flex flex-col">
@@ -301,9 +359,9 @@
           </div>
 
           <div class="">
-                          <div class="selection-invalid" v-if="!selectionStatIsValid()">
-                Selezionare i parametri corretti
-              </div>
+            <div class="selection-invalid" v-if="!selectionStatIsValid()">
+              Selezionare i parametri corretti
+            </div>
             <button
               type="button"
               class="btn-stat"
@@ -311,7 +369,6 @@
               aria-label="Close modal"
               :disabled="!selectionStatIsValid()"
             >
-
               Mostra statistica
             </button>
           </div>
@@ -434,9 +491,9 @@
               </option>
             </select>
           </div>
-             <div class="selection-invalid" v-if="!selectionCsvIsValid()">
-                Selezionare i parametri corretti
-              </div>
+          <div class="selection-invalid" v-if="!selectionCsvIsValid()">
+            Selezionare i parametri corretti
+          </div>
           <button
             type="button"
             class="btn-stat"
@@ -457,13 +514,16 @@ import moment from "moment";
 import { mapState, mapActions } from "vuex";
 import { campaignService } from "../../services/campaign.services";
 import Chart from "./Chart.vue";
+import GenericTable from "@/components/GenericTable.vue";
 
 export default {
   components: {
     Chart,
+    GenericTable,
   },
   data() {
     return {
+      tabWhatActive: "table",
       tabActive: "charts",
       checkin: "",
       span: "total",
@@ -474,11 +534,16 @@ export default {
       selectedSede: "",
       selectedMonth: "",
       selectedMean: "",
+      selectedType: "",
       selectedGroupBy: "",
       endMonthValue: "",
+      statData: [],
       months: [],
       means: [],
       selection: {},
+      gridColumns: [],
+      headerColumns: [],
+      dataStat: [],
     };
   },
   computed: {
@@ -504,7 +569,7 @@ export default {
         ? this.adminCompany.item
         : this.actualCompany.item;
       this.getAllCampaigns(this.selectedCompany.id);
-      this.what="sede";
+      this.what = "sede";
     }
 
     if (this.selectedCompany) {
@@ -516,7 +581,12 @@ export default {
     this.changePage({ title: "Statistiche", route: "/stats" });
     this.resetStat();
   },
-
+  watch: {
+    stat() {
+      console.log(this.stat);
+      if (this.stat && this.stat.items) this.buildTable();
+    },
+  },
   methods: {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
@@ -534,12 +604,13 @@ export default {
       getCompanyStat: "getCompanyStat",
       getEmployeeStat: "getEmployeeStat",
       getLocationStat: "getLocationStat",
-      resetStat:"resetStat"
+      resetStat: "resetStat",
     }),
     selectionStatIsValid() {
       if (!this.selectedCampaign) return false;
       if (!this.selectedMean) return false;
       if (!this.selectedGroupBy) return false;
+      if (!this.selectedType) return false;
       if (this.what === "dipendente" && !this.selectedEmployee) return false;
       if (this.what === "sede" && !this.selectedSede) return false;
       if (this.span === "month" && !this.selectedMonth) return false;
@@ -587,6 +658,10 @@ export default {
       console.log(event);
       console.log(event.target.value);
     },
+    changeType(event) {
+      console.log(event);
+      console.log(event.target.value);
+    },
     changeEmployee(event) {
       //get new data for the new campaign
       console.log(event);
@@ -622,9 +697,56 @@ export default {
     loadMeans(campaign) {
       this.means = campaignService.getMeansForCampaign(campaign);
     },
+    buildHeaderBodyTable() {
+      this.headerColumns=[];
+      this.gridColumns=[];
+      //check selection for header
+      if (this.selectedGroupBy == "month") {
+        this.headerColumns.push("Mese");
+        this.gridColumns.push("month");
+      } else {
+        this.headerColumns.push("Giorno");
+        this.gridColumns.push("date");
+      }
+      switch (this.selection.selectedType) {
+        case "km_valid":
+          this.headerColumns.push("Distanza");
+          this.gridColumns.push("distance");
+          break;
+        case "km_true":
+          this.headerColumns.push("Distanza");
+          this.gridColumns.push("distance");
+          break;
+        case "co2saved":
+          this.headerColumns.push("Grammi");
+          this.gridColumns.push("co2saved");
+          break;
+        case "trackCount":
+          this.headerColumns.push("Viaggi");
+          this.gridColumns.push("trackCount");
+          break;
+        default:
+          break;
+      }
+    },
+    buildTable() {
+      this.buildHeaderBodyTable();
+      this.buildStat();
+    },
+    format(string, span) {
+      if (span == "date") return moment(string).format("DD-MM-YYYY");
+      if (span == "month") return moment(string).format("MM-YYYY");
+    },
+    buildStat() {
+      this.dataStat=[];
+      //simplify dataStat
+      for (var i = 0; i < this.stat.items.length; i++) {
+        //take the distance of the mean
+        this.dataStat.push({co2saved:this.stat.items[i].co2saved,trackCount:this.stat.items[i].trackCount,date:this.format(this.stat.items[i].date,"date"),month:this.format(this.stat.items[i].month,"month"),distance:this.stat.items[i].distances[this.selection.mean]/1000})
+      }
+    },
     showStat() {
       console.log("getStat and show values");
-      //
       //check values and choose the right call
       this.resetStat();
       if (this.role == "ROLE_ADMIN" && this.adminCompany == null) {
@@ -636,14 +758,14 @@ export default {
             to: this.selectedMonth ? this.endMonthValue : null,
             mean: this.selectedMean.value,
             groupBy: this.selectedGroupBy,
-            noLimits: false,
+            selectedType: this.selectedType,
           };
           this.getCampaignStat({
             campaignId: this.selectedCampaign.id,
             from: this.selectedMonth ? this.selectedMonth.value : null,
             to: this.selectedMonth ? this.endMonthValue : null,
             groupBy: this.selectedGroupBy,
-            noLimits: false,
+            noLimits: this.selectedType == "km_true" ? true : false,
           });
           return;
         } else {
@@ -654,7 +776,7 @@ export default {
             to: this.selectedMonth ? this.endMonthValue : null,
             mean: this.selectedMean.value,
             groupBy: this.selectedGroupBy,
-            noLimits: false,
+            selectedType: this.selectedType,
           };
           this.getCompanyStat({
             campaignId: this.selectedCampaign.id,
@@ -662,7 +784,7 @@ export default {
             from: this.selectedMonth ? this.selectedMonth.value : null,
             to: this.selectedMonth ? this.endMonthValue : null,
             groupBy: this.selectedGroupBy,
-            noLimits: false,
+            noLimits: this.selectedType == "km_true" ? true : false,
           });
         }
       } else {
@@ -675,7 +797,7 @@ export default {
             to: this.selectedMonth ? this.endMonthValue : null,
             mean: this.selectedMean.value,
             groupBy: this.selectedGroupBy,
-            noLimits: false,
+            selectedType: this.selectedType,
           };
           this.getEmployeeStat({
             campaignId: this.selectedCampaign.id,
@@ -683,7 +805,7 @@ export default {
             from: this.selectedMonth ? this.selectedMonth.value : null,
             to: this.selectedMonth ? this.endMonthValue : null,
             groupBy: this.selectedGroupBy,
-            noLimits: false,
+            noLimits: this.selectedType == "km_true" ? true : false,
           });
         } else {
           this.selection = {
@@ -693,7 +815,7 @@ export default {
             to: this.selectedMonth ? this.endMonthValue : null,
             mean: this.selectedMean.value,
             groupBy: this.selectedGroupBy,
-            noLimits: false,
+            selectedType: this.selectedType,
           };
           this.getLocationStat({
             campaignId: this.selectedCampaign.id,
@@ -702,7 +824,7 @@ export default {
             from: this.selectedMonth ? this.selectedMonth.value : null,
             to: this.selectedMonth ? this.endMonthValue : null,
             groupBy: this.selectedGroupBy,
-            noLimits: false,
+            noLimits: this.selectedType == "km_true" ? true : false,
           });
         }
       }
@@ -758,12 +880,12 @@ export default {
   margin-top: 8px;
 }
 .selection-invalid {
-    height: 50px;
-    color: #D8000C;
-    background-color: #FFD2D2;
-    border-radius: 8px;
-    line-height: 50px;
-    text-align: center;
+  height: 50px;
+  color: #d8000c;
+  background-color: #ffd2d2;
+  border-radius: 8px;
+  line-height: 50px;
+  text-align: center;
 }
 button:disabled,
 button[disabled] {
