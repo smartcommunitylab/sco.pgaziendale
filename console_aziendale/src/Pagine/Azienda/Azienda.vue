@@ -60,8 +60,7 @@ export default {
     };
   },
   created() {
-    this.changePage({title: 'Profilo azienda',
-                route: '/azienda'})
+
     //check actualCompany otherwise get it by id
     if (!this.actualCompany) {
       //get company Id from profile
@@ -70,6 +69,8 @@ export default {
     }
   },
   mounted() {
+        this.changePage({title: 'Profilo azienda',
+                route: '/azienda'})
         EventBus.$on("EDIT_COMPANY", (company) => {
       this.editModalVisible = true;
       EventBus.$emit("EDIT_COMPANY_FORM", company.item);

@@ -199,7 +199,6 @@ export default {
       this.getUsers(this.adminCompany.item);
       this.getAllCampaigns(this.adminCompany.item.id);
     }
-    this.changePage({ title: "Lista aziende", route: "/aziende" });
     EventBus.$on("OK_USER_FORM", (user) => {
       if (this.newUser) {
         this.addUserCall({ companyId: this.adminCompany.item.id, user: user });
