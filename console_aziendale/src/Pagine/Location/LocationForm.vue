@@ -2,7 +2,7 @@
   <form action="" id="addLocation">
     <div class="mb-20 flex flex-wrap justify-between">
       <template>
-        <div style="width: 100%; height: 500px">
+        <div class="map-style">
           <geolocation-selector
             v-model="locationSelected"
             :key="key"
@@ -21,10 +21,13 @@
             v-model.trim="$v.id.$model"
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
             id="campaignCode"
-            :disabled="$v.id.$model!=''"
+            :disabled="edit"
           />
-          <info-box v-if="$v.id.$model==''" :msg="'Codice univoco della sede'" />
-          <info-box v-else :msg="'Non é possibile cambiare identificativo sede una volta creato'" />
+          <info-box v-if="$v.id.$model == ''" :msg="'Codice univoco della sede'" />
+          <info-box
+            v-else
+            :msg="'Non é possibile cambiare identificativo sede una volta creato'"
+          />
         </div>
         <div v-if="$v.id.$error">
           <div class="error" v-if="!$v.id.required">
@@ -263,7 +266,7 @@
           <input class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2" />
           <info-box :msg="'Giorni di chiusara aziendali'" />
 
-          <div v-if="nonWorkingDays && nonWorkingDays.length>0">
+          <div v-if="nonWorkingDays && nonWorkingDays.length > 0">
             <div
               v-for="day in $v.nonWorkingDays.$model"
               :key="day"
@@ -293,33 +296,31 @@
               </div>
             </div>
           </div>
-          <div v-else>
-            Non sono presenti giorni di chiusura per questa sede
-          </div>
+          <div v-else>Non sono presenti giorni di chiusura per questa sede</div>
           <div class="flex">
-          <label class="field-label"> Seleziona il giorno:</label>
-          <div class="relative">
-            <VueTailwindPicker
-              :start-from-monday="true"
-              @change.self="(v) => ($v.newNonWorkingDay.$model = v)"
-            >
-              <input
-                type="text"
-                name="campaignNonWorkingDays"
-                id=""
-                required
-                placeholder="Giorno di chiusura *"
-                v-model.trim="$v.newNonWorkingDay.$model"
-                class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 w-full"
-              />
-            </VueTailwindPicker>
+            <label class="field-label"> Seleziona il giorno:</label>
+            <div class="relative">
+              <VueTailwindPicker
+                :start-from-monday="true"
+                @change.self="(v) => ($v.newNonWorkingDay.$model = v)"
+              >
+                <input
+                  type="text"
+                  name="campaignNonWorkingDays"
+                  id=""
+                  required
+                  placeholder="Giorno di chiusura *"
+                  v-model.trim="$v.newNonWorkingDay.$model"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 w-full"
+                />
+              </VueTailwindPicker>
 
-            <div
-              class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-            >
-              <add-icon @click="addDays($v.newNonWorkingDay.$model)" />
+              <div
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+              >
+                <add-icon @click="addDays($v.newNonWorkingDay.$model)" />
+              </div>
             </div>
-          </div>
           </div>
         </div>
         <div v-if="$v.nonWorkingDays.$error">
@@ -372,11 +373,10 @@ export default {
       selectedPosition: false,
       key: 1,
       locationSelected: {},
+      edit: false,
     };
   },
-  computed: {
-
-  },
+  computed: {},
   methods: {
     locationChanged(input) {
       console.log(input);
@@ -387,8 +387,6 @@ export default {
         this.changeParamForm(this.locationSelected.structuredValue);
     },
     changeParamForm(structuredValue) {
-
-
       if (structuredValue.road) this.address = structuredValue.road;
       if (structuredValue.house_number) this.streetNumber = structuredValue.house_number;
       if (structuredValue.city) this.city = structuredValue.city;
@@ -454,9 +452,11 @@ export default {
   mounted() {
     this.arrayDays = locationService.getArrayDays();
     EventBus.$on("EDIT_LOCATION_FORM", (location) => {
+      this.edit = true;
       this.copyFormValues(location);
     });
     EventBus.$on("NEW_LOCATION_FORM", () => {
+      this.edit = false;
       this.initLocation();
     });
     EventBus.$on("CHECK_LOCATION_FORM", () => {
@@ -530,5 +530,10 @@ export default {
 .container {
   position: relative;
   top: -30px;
+}
+.map-style {
+  width: 80%;
+  height: 500px;
+  margin: auto;
 }
 </style>
