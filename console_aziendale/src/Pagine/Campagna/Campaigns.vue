@@ -125,18 +125,24 @@ export default {
     ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
     ...mapState("account", ["role"]),
   },
-  mounted: function () {
-
-    this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
-    console.log(this.adminCompany)
-    if (this.adminCompany && this.adminCompany.item) {
-      this.getAllCampaigns(this.adminCompany.item.id);
-    }
-    console.log(this.adminCompany)
+  watch: {
+    adminCompany() {
     if (this.adminCompany && this.adminCompany.item) {
       this.getAllCampaigns(this.actualCompany.item.id);
     }
-    if (!this.adminCompany ) {
+    },
+  },
+  mounted: function () {
+    this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
+    // console.log(this.adminCompany)
+    // if (this.adminCompany && this.adminCompany.item) {
+    //   this.getAllCampaigns(this.adminCompany.item.id);
+    // }
+    // console.log(this.adminCompany)
+    if (this.adminCompany && this.adminCompany.item) {
+      this.getAllCampaigns(this.actualCompany.item.id);
+    }
+    if (this.role == "ROLE_ADMIN" && this.adminCompany == null ) {
       this.getAllCampaigns(null);
     }
  EventBus.$on("EDIT_CAMPAIGN", (campaign) => {

@@ -257,6 +257,8 @@ import EventBus from "@/components/eventBus";
 import VueTailwindPicker from "vue-tailwind-picker";
 import { campaignService } from "../../services";
 import InfoBox from "@/components/InfoBox.vue";
+import {mapState} from "vuex";
+
 export default {
   components: { VueTailwindPicker, InfoBox },
   data() {
@@ -348,10 +350,15 @@ export default {
       };
     },
   },
+    computed: {
+    ...mapState("account", ["status", "user", "role"]),
+  },
   mounted() {
+    if (this.role.role == 'ROLE_COMPANY_ADMIN'){
     campaignService.getApplications().then((res) => {
       this.applications = res;
     });
+    }
     this.arrayMeans = campaignService.getArrayMeans();
 
     EventBus.$on("EDIT_CAMPAIGN_FORM", (campaign) => {
