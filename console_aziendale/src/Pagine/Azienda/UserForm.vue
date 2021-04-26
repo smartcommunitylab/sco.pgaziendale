@@ -83,8 +83,8 @@
           <label class="field-label" for="password">Ruoli </label>
           <input type="checkbox" id="aa" value="ROLE_COMPANY_ADMIN" v-model="roles" />
           <label for="aa">Amministratore Aziendale</label>
-          <input type="checkbox" id="mm" value="ROLE_MOBILITY_MANAGER" v-model="roles" />
-          <label for="mm">Mobility Manager</label>
+          <!-- <input type="checkbox" id="mm" value="ROLE_MOBILITY_MANAGER" v-model="roles" />
+          <label for="mm">Mobility Manager</label> -->
         </div>
         <div v-if="$v.roles.$error">
           <div class="error" v-if="!$v.roles.required">

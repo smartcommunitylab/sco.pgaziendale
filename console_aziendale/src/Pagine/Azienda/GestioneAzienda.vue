@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      Utenti
+      <div class="text-center">UTENTI</div>
       <div
         v-if="
           adminCompanyUsers &&
@@ -13,25 +13,32 @@
           <div class="user">
             <div class="w-full">
               <div class="flex">
-              <div class="title-header">Dati:</div> <div>{{ user.name }}</div
-              ><div> {{ user.surname }} </div><div>{{ user.username }} </div>
+                <div ><span class="title-header"> Nome: </span><span>{{ user.name }}</span></div>
+                <div ><span class="title-header"> Cognome: </span><span>{{ user.surname }}</span></div>
               </div>
               <div class="flex">
-                <div class="title-header">Ruoli:</div><div v-for="role in user.roles" :key="JSON.stringify(role)"
-                  ><label class="mr-2	"
+                                <div ><span class="title-header"> Username:</span><span>{{ user.username }}</span></div>
+              </div>
+              <div class="flex">
+                <div class="title-header">Ruoli:</div>
+                <div v-for="role in user.roles" :key="JSON.stringify(role)">
+                  <label
+                    class="mr-2"
                     v-if="
                       role.role == 'ROLE_COMPANY_ADMIN' &&
                       role.companyId == adminCompany.item.id
                     "
                     >AMMINISTRATORE AZIENDALE</label
-                  ><label class="mr-2	"
+                  >
+                  <label
+                    class="mr-2"
                     v-if="
                       role.role == 'ROLE_MOBILITY_MANAGER' &&
                       role.companyId == adminCompany.item.id
                     "
                     >MOBILITY MANAGER</label
-                  ></div
-                >
+                  >
+                </div>
               </div>
             </div>
             <div class="buttons">
@@ -240,8 +247,8 @@ export default {
   margin-left: auto;
   min-width: 130px;
 }
-.title-header{
+.title-header {
   font-weight: bold;
-  width: 50px;
+  margin: 0px 8px;
 }
 </style>
