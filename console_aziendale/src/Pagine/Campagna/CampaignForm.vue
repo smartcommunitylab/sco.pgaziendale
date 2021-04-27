@@ -231,10 +231,11 @@
         </div>
       </div>
       <div class="field-group mb-6 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.application.$error }">
+        <div             class="flex flex-row"
+ :class="{ 'form-group--error': $v.application.$error }">
           <label class="field-label" for="password">Applicazione</label>
           <select
-            class="form-select mt-1 block w-full"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-none mr-2 w-40"
             v-model.trim="$v.application.$model"
           >
             <option v-for="app in applications" :key="app.id" :value="app.id">
@@ -354,7 +355,7 @@ export default {
     ...mapState("account", ["status", "user", "role"]),
   },
   mounted() {
-    if (this.role.role == 'ROLE_COMPANY_ADMIN'){
+    if (this.role == 'ROLE_ADMIN' && this.adminCompany == null){
     campaignService.getApplications().then((res) => {
       this.applications = res;
     });

@@ -177,7 +177,7 @@
                     value="sede"
                     v-model="what"
                     @change="changeWhat('sede')"
-                  /><span class="ml-2 text-gray-700">Sede</span>
+                  /><span class="ml-2 text-gray-700">Sedi</span>
                 </label>
 
                 <label class="inline-flex items-center mt-3">
@@ -187,7 +187,7 @@
                     value="dipendente"
                     v-model="what"
                     @change="changeWhat('dipendente')"
-                  /><span class="ml-2 text-gray-700">Dipendente</span>
+                  /><span class="ml-2 text-gray-700">Dipendenti</span>
                 </label>
               </div>
             </div>
@@ -429,7 +429,7 @@
                     value="sede"
                     v-model="what"
                     @change="changeWhat('sede')"
-                  /><span class="ml-2 text-gray-700">Sede</span>
+                  /><span class="ml-2 text-gray-700">Sedi</span>
                 </label>
 
                 <label class="inline-flex items-center mt-3">
@@ -439,7 +439,7 @@
                     value="dipendente"
                     v-model="what"
                     @change="changeWhat('dipendente')"
-                  /><span class="ml-2 text-gray-700">Dipendente</span>
+                  /><span class="ml-2 text-gray-700">Dipendenti</span>
                 </label>
               </div>
             </div>
