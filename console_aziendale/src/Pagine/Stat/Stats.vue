@@ -212,6 +212,9 @@
             >
               <option disabled value="">Seleziona una sede</option>
               <template v-if="allLocations">
+              <option
+                value="all"
+              > Tutte le sedi </option>
                 <option
                   v-for="location in allLocations.items"
                   :value="location"
@@ -244,6 +247,10 @@
               :disabled="!selectedCampaign"
             >
               <option disabled value="">Seleziona un dipendente</option>
+               <option
+                value="all"
+                
+              > Tutti i dipendenti </option>
               <option
                 v-for="employee in allEmployees.items"
                 :value="employee"
@@ -789,7 +796,7 @@ export default {
         }
       } else {
         //AA
-        if (this.what === "dipendente") {
+        if (this.what === "dipendente" && this.selectedEmployee.id!="all") {
           this.selection = {
             type: "getEmployeeStat",
             campaignId: this.selectedCampaign.id,
@@ -808,6 +815,7 @@ export default {
             noLimits: this.selectedType == "km_true" ? true : false,
           });
         } else {
+          if  (this.selectedSede.id!="all"){
           this.selection = {
             type: "getLocationStat",
             campaignId: this.selectedCampaign.id,
@@ -826,6 +834,27 @@ export default {
             groupBy: this.selectedGroupBy,
             noLimits: this.selectedType == "km_true" ? true : false,
           });
+        }
+        }
+        if (this.selectedEmployee.id!="all" || this.this.selectedSede.id=="all"){
+          this.selection = {
+            type: "getCompanyStat",
+            campaignId: this.selectedCampaign.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            mean: this.selectedMean.value,
+            groupBy: this.selectedGroupBy,
+            selectedType: this.selectedType,
+          };
+          this.getCompanyStat({
+            campaignId: this.selectedCampaign.id,
+            companyId: this.selectedCompany.id,
+            from: this.selectedMonth ? this.selectedMonth.value : null,
+            to: this.selectedMonth ? this.endMonthValue : null,
+            groupBy: this.selectedGroupBy,
+            noLimits: this.selectedType == "km_true" ? true : false,
+          });
+
         }
       }
     },
