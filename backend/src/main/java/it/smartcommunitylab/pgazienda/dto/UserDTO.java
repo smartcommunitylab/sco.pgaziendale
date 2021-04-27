@@ -26,6 +26,7 @@ public class UserDTO {
 
 	private String name;
 	private String surname;
+	private String phone;
 	private String companyCode;
 	private String username;
 	private String role;
@@ -115,6 +116,18 @@ public class UserDTO {
 	 */
 	public void setLocations(List<String> locations) {
 		this.locations = locations;
+	}
+	/**
+	 * @return the phone
+	 */
+	public String getPhone() {
+		return phone;
+	}
+	/**
+	 * @param phone the phone to set
+	 */
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 	
 }

@@ -76,6 +76,7 @@ public class AdminService {
 				user = new User();
 				user.setName(u.getName());
 				user.setSurname(u.getSurname());
+				user.setPhone(u.getPhone());
 				user.setUsername(u.getUsername());
 				user.setPassword(u.getPassword());
 				String companyId = companyService.findByCode(u.getCompanyCode()).orElse(null).getId();

@@ -13,7 +13,7 @@
 	<artifactId>pgazienda</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>PlayGoAziendale</name>
-	<description>Play&amp;Go Aziendale Backend</description>
+	<description>Play&amp;Go Aziende Backend</description>
 
 	<properties>
 		<java.version>11</java.version>

@@ -56,7 +56,7 @@ public class SwaggerConfig {
 
 	@Bean
 	public Docket api() {
-		Docket docket = new Docket(DocumentationType.SWAGGER_2).groupName("Play and Go Aziendale")
+		Docket docket = new Docket(DocumentationType.SWAGGER_2).groupName("Play and Go Aziende")
 				.apiInfo(apiInfo())
 					.securityContexts(Arrays.asList(securityContext()))
 					.securitySchemes(Arrays.asList(apiKey()))
