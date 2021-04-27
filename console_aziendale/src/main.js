@@ -35,6 +35,8 @@ import './assets/styles/index.css';
 import Vuelidate from 'vuelidate'
 import { VueEditor } from "vue2-editor";
 import { LMap, LTileLayer, LMarker,LPopup,LCircle} from 'vue2-leaflet';
+
+
 // import VGeosearch from 'vue2-leaflet-geosearch';
 
 import 'leaflet/dist/leaflet.css';
@@ -95,7 +97,6 @@ axios.defaults.showLoader = true;
 axios.interceptors.request.use(
   (config) => {
     let token = localStorage.getItem('token');
-
     if (token) {
       config.headers['Authorization'] = 'Bearer '+ token;
     }
