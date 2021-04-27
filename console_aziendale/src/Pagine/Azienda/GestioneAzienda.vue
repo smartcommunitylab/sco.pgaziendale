@@ -13,8 +13,9 @@
           <div class="user">
             <div class="w-full">
               <div class="flex">
-                <div ><span class="title-header"> Nome: </span><span>{{ user.name }}</span></div>
-                <div ><span class="title-header"> Cognome: </span><span>{{ user.surname }}</span></div>
+                <div ><span class="title-header" v-if="user.name"> Nome: </span><span>{{ user.name }}</span></div>
+                <div ><span class="title-header" v-if="user.surname"> Cognome: </span><span>{{ user.surname }}</span></div>
+                <div ><span class="title-header" v-if="user.phone"> Telefono: </span><span>{{ user.phone }}</span></div>
               </div>
               <div class="flex">
                                 <div ><span class="title-header"> Username:</span><span>{{ user.username }}</span></div>

@@ -31,6 +31,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import it.smartcommunitylab.pgazienda.service.ImportDataException;
 import it.smartcommunitylab.pgazienda.service.InvalidPasswordException;
+import it.smartcommunitylab.pgazienda.service.UserAnotherOrgException;
 import it.smartcommunitylab.pgazienda.service.UsernameAlreadyUsedException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.AccountResourceException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.BadRequestAlertException;
@@ -57,6 +58,12 @@ public class RestResponseEntityExceptionHandler
       Exception ex, WebRequest request) {
         return handleExceptionInternal(ex, new ErrorMsg("Login already in use"), 
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+    @ExceptionHandler(UserAnotherOrgException.class)
+    protected ResponseEntity<Object> handleLoginAnotherOrg(
+      Exception ex, WebRequest request) {
+        return handleExceptionInternal(ex, new ErrorMsg("User exists in another company"), 
+          new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
     @ExceptionHandler(AccountResourceException.class)
     protected ResponseEntity<Object> handleAccountError(

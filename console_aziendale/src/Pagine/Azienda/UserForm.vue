@@ -134,7 +134,7 @@ export default {
         console.log(value);
         //check user is present
         if (
-          this.adminCompanyUsers.items.find((ele) => {
+          this.id == null && this.adminCompanyUsers.items.find((ele) => {
             console.log(ele.username == this.username);
             return ele.username == this.username;
           })
