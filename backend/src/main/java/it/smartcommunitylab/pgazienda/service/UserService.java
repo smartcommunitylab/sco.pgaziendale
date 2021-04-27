@@ -130,6 +130,7 @@ public class UserService {
         user.setUsername(userDTO.getUsername().toLowerCase());
         user.setName(userDTO.getName());
         user.setSurname(userDTO.getSurname());
+        user.setPhone(userDTO.getPhone());
         String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
         user.setPassword(encryptedPassword);
         user.setResetKey(RandomUtil.generateResetKey());
@@ -155,6 +156,7 @@ public class UserService {
         user.setUsername(userDTO.getUsername().toLowerCase());
         user.setName(userDTO.getName());
         user.setSurname(userDTO.getSurname());
+        user.setPhone(userDTO.getPhone());
         String encryptedPassword = passwordEncoder.encode(userDTO.getPassword());
         user.setPassword(encryptedPassword);
         user.setResetKey(RandomUtil.generateResetKey());
@@ -181,6 +183,7 @@ public class UserService {
                 user.setUsername(userDTO.getUsername().toLowerCase());
                 user.setName(userDTO.getName());
                 user.setSurname(userDTO.getSurname());
+                user.setPhone(userDTO.getPhone());
                 if (!StringUtils.isEmpty(userDTO.getPlayerId())) user.setPlayerId(userDTO.getPlayerId());
 
                 if (companyId != null) {
@@ -248,7 +251,7 @@ public class UserService {
      * @param userDTO user to update.
      * @return updated user.
      */
-    public Optional<User> updateUser(String id, String name, String surname) {
+    public Optional<User> updateUser(String id, String name, String surname, String phone) {
         return Optional.of(userRepository
             .findById(id))
             .filter(Optional::isPresent)
@@ -256,6 +259,7 @@ public class UserService {
             .map(user -> {
                 user.setName(name);
                 user.setSurname(surname);
+                user.setPhone(phone);
                 userRepository.save(user);
                 log.debug("Changed Information for User: {}", user);
                 return user;
