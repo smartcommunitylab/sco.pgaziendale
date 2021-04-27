@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      Utenti
+      <div class="text-center">UTENTI</div>
       <div
         v-if="
           adminCompanyUsers &&
@@ -11,16 +11,35 @@
       >
         <div v-for="user in adminCompanyUsers.items" v-bind:key="user.id">
           <div class="user">
-            <div>
-              <span>{{ user.name }}</span
-              ><span> {{ user.surname }} </span><span>{{ user.username }} </span
-              ><span v-for="role in user.roles" :key="JSON.stringify(role)"
-                ><label v-if="role.role == 'ROLE_COMPANY_ADMIN'"
-                  >AMMINISTRATORE AZIENDALE</label
-                ><label v-if="role.role == 'ROLE_MOBILITY_MANAGER'"
-                  >MOBILITY MANAGER</label
-                ></span
-              >
+            <div class="w-full">
+              <div class="flex">
+                <div ><span class="title-header"> Nome: </span><span>{{ user.name }}</span></div>
+                <div ><span class="title-header"> Cognome: </span><span>{{ user.surname }}</span></div>
+              </div>
+              <div class="flex">
+                                <div ><span class="title-header"> Username:</span><span>{{ user.username }}</span></div>
+              </div>
+              <div class="flex">
+                <div class="title-header">Ruoli:</div>
+                <div v-for="role in user.roles" :key="JSON.stringify(role)">
+                  <label
+                    class="mr-2"
+                    v-if="
+                      role.role == 'ROLE_COMPANY_ADMIN' &&
+                      role.companyId == adminCompany.item.id
+                    "
+                    >AMMINISTRATORE AZIENDALE</label
+                  >
+                  <label
+                    class="mr-2"
+                    v-if="
+                      role.role == 'ROLE_MOBILITY_MANAGER' &&
+                      role.companyId == adminCompany.item.id
+                    "
+                    >MOBILITY MANAGER</label
+                  >
+                </div>
+              </div>
             </div>
             <div class="buttons">
               <button
@@ -119,7 +138,7 @@ export default {
       company: null,
       editModalVisible: false,
       deleteModalVisible: false,
-
+      newUser: true,
       popup: {
         title: "",
       },
@@ -144,42 +163,22 @@ export default {
     showModal(title) {
       this.editModalVisible = true;
       this.newUser = true;
-      // this.role = role;
+      EventBus.$emit("NEW_USER_FORM");
       this.popup = {
         title: title,
       };
     },
     closeModal() {
       this.editModalVisible = false;
-      this.$v.$reset();
     },
 
     saveUser() {
-      //check fields
-      // eslint-disable-next-line no-constant-condition
-      // console.log("submit!");
       EventBus.$emit("CHECK_USER_FORM");
-      // console.log(this.roles);
-      // this.$v.$touch();
-      // if (this.$v.$invalid) {
-      //   this.submitStatus = "ERROR";
-      //   return;
-      // } else {
-      //   this.createUser();
-      //   this.submitStatus = "SUCCESS";
-      //   if (this.newUser) {
-      //     this.addUserCall({ companyId: this.adminCompany.item.id, user: this.user });
-      //   } else {
-      //     this.updateUserCall({ companyId: this.adminCompany.item.id, user: this.user });
-      //   }
-      //   this.$v.$reset();
-      // }
-      // this.editModalVisible = false;
-      // this.newUser = false;
     },
     editUser(user) {
       this.editModalVisible = true;
       this.user = user;
+      this.newUser = false;
       EventBus.$emit("EDIT_USER_FORM", user);
       this.popup = {
         title: "Modifica",
@@ -207,9 +206,6 @@ export default {
       this.getUsers(this.adminCompany.item);
       this.getAllCampaigns(this.adminCompany.item.id);
     }
-    this.changePage({ title: "Lista aziende", route: "/aziende" });
-    // this.getAllCompanies();
-
     EventBus.$on("OK_USER_FORM", (user) => {
       if (this.newUser) {
         this.addUserCall({ companyId: this.adminCompany.item.id, user: user });
@@ -222,12 +218,16 @@ export default {
     EventBus.$on("NO_USER_FORM", () => {
       this.submitStatus = "ERROR";
     });
+    // EventBus.$on("USER_EXISTS", () => {
+    //   this.submitStatus = "ERROR";
+    // });
   },
   beforeDestroy() {
     EventBus.$off("NO_USER_FORM");
     EventBus.$off("OK_USER_FORM");
     EventBus.$off("DELETE_USER");
     EventBus.$off("EDIT_USER");
+    // EventBus.$off("USER_EXISTS");
   },
 };
 </script>
@@ -238,7 +238,7 @@ export default {
   font-size: large;
 }
 .user {
-  height: 50px;
+  height: 100%;
   border: solid 1px;
   line-height: 50px;
   padding: 8px;
@@ -249,5 +249,10 @@ export default {
 }
 .buttons {
   margin-left: auto;
+  min-width: 130px;
+}
+.title-header {
+  font-weight: bold;
+  margin: 0px 8px;
 }
 </style>

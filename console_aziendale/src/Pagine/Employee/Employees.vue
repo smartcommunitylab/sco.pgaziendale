@@ -234,7 +234,7 @@
         >
         </generic-table>
       </div>
-      <div v-else class="text-center">Non ci sono dipendenti</div>
+      <div v-else class="empty-list">Non ci sono dipendenti</div>
       <div class="flex flex-row justify-center py-4">
         <div class="px-2">
           <button
@@ -255,6 +255,7 @@
       </div>
     </div>
     <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
+    <div v-else class="select-element"> Seleziona un dipendente per visualizzare i dettagli</div>
 
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Dipendente </template>

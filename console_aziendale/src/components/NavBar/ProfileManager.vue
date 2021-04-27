@@ -15,18 +15,24 @@
               <div class="w-full text-right">{{ user.username }}</div>
             </div>
             <div class="role flex flex-row">
-               <div class="font-bold">Ruoli:</div>
-               <div class="w-full">
-              <div class="w-full text-right" v-for="role in user.roles" :key="JSON.stringify(role)"
-                ><label v-if="role.role == 'ROLE_COMPANY_ADMIN'"
-                  >AMMINISTRATORE AZIENDALE</label
-                ><label v-if="role.role == 'ROLE_MOBILITY_MANAGER'"
-                  >MOBILITY MANAGER</label
-                ><label v-if="role.role == 'ROLE_ADMIN'"
-                  >AMMINISTRATORE DEL SISTEMA</label
-                ></div
-              >
-               </div>
+              <div class="font-bold">Ruoli:</div>
+              <div class="w-full">
+                <div
+                  class="w-full text-right"
+                  v-for="role in user.roles"
+                  :key="JSON.stringify(role)"
+                >
+                  <label v-if="role.role == 'ROLE_COMPANY_ADMIN'"
+                    >AMMINISTRATORE AZIENDALE</label
+                  >
+                    <label v-if="role.role == 'ROLE_MOBILITY_MANAGER'"
+                    >MOBILITY MANAGER</label
+                  >
+                  <label v-if="role.role == 'ROLE_ADMIN'"
+                    >AMMINISTRATORE DEL SISTEMA</label
+                  >
+                </div>
+              </div>
             </div>
             <button
               type="button"
@@ -65,8 +71,7 @@
                     }"
                   />
                 </div>
-                         <info-box :msg="'Inserisci un url che contiene il logo dell\'azienda'" />
-
+                <info-box :msg="'Inserisci un url che contiene il logo dell\'azienda'" />
               </div>
               <label class="pwd-label" for="first_name">Nuova Password</label>
               <div class="relative">
@@ -162,7 +167,7 @@ import { mapActions, mapState } from "vuex";
 import InfoBox from "@/components/InfoBox.vue";
 export default {
   name: "ProfileManager",
-  components: { Modal,InfoBox },
+  components: { Modal, InfoBox },
 
   data: function () {
     return {
@@ -174,7 +179,7 @@ export default {
       passwordFieldTypeFirst: "password",
       passwordFieldTypeSecond: "password",
       passwordFieldTypeThird: "password",
-      passwordDifferent:false
+      passwordDifferent: false,
     };
   },
   computed: {
@@ -183,14 +188,14 @@ export default {
   methods: {
     ...mapActions("account", ["changePassword"]),
     changePwd() {
-          //check if equal
+      //check if equal
       if (this.newPassword === this.newPassword2) {
         this.passwordDifferent = false;
-      // visible edit pwd
-      this.changePassword({
-        oldPassword: this.oldPassword,
-        newPassword: this.newPassword,
-      });
+        // visible edit pwd
+        this.changePassword({
+          oldPassword: this.oldPassword,
+          newPassword: this.newPassword,
+        });
       } else this.passwordDifferent = true;
     },
     switchVisibility(id) {

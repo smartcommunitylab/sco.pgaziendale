@@ -33,7 +33,7 @@ admin:
 
 # SWAGGER
 swagger:
-   title: Play&Go Aziendale API
+   title: Play&Go Aziende API
    description: API for the company management and user association
    version: 1.0.0
    license: Apache License, Version 2.0

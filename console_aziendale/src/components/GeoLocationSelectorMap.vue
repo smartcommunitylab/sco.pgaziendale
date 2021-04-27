@@ -1,6 +1,7 @@
 <template>
   <l-map
     ref="map"
+    class="map-style"
     @click="onMapClick"
     @ready="initMap()"
     :zoom="zoom"
@@ -68,7 +69,8 @@ export default {
         animateZoom: true,
         showMarker: false,
         autoClose: true,
-        style: 'bar'
+        style: 'bar',
+        searchLabel: 'Inserisci l\'indirizzo'
       },
       userLocation: {},
       position: {},
@@ -193,3 +195,9 @@ export default {
   },
 };
 </script>
+<style scoped>
+.map-style{
+    border: solid 1px;
+    border-radius: 8px;
+}
+</style>

@@ -33,18 +33,19 @@
           </p>
 
           <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+            class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
           >
             <gps-icon /> Coordinate: {{ actualLocation.item.latitude }},
             {{ actualLocation.item.longitude }}
           </p>
+          <div class="mt-4">
           <l-map
             ref="myMap"
             @ready="initMap()"
             :zoom="zoom"
             :center="center"
             :options="mapOptions"
-            style="height: 350px; width: 100%"
+            class="map-style"
           >
             <l-tile-layer :url="url" :attribution="attribution" />
             <l-circle
@@ -65,8 +66,9 @@
               </l-popup>
             </l-marker>
           </l-map>
+          </div>
           <div
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+            class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
             v-if="
               actualLocation.item.nonWorking && actualLocation.item.nonWorking[0] != 0
             "
@@ -75,7 +77,7 @@
             <div v-html="getNonWorking(actualLocation.item.nonWorking)"></div>
           </div>
           <div
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+            class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
             v-if="actualLocation.item.nonWorkingDays"
           >
             <calendar-remove-icon /> Giorni non lavorativi:
@@ -92,6 +94,7 @@ import { mapState, mapActions } from "vuex";
 import EventBus from "../../components/eventBus";
 import { latLng } from "leaflet";
 import { locationService } from "../../services";
+import moment from "moment";
 
 export default {
   name: "ProfiloLocation",
@@ -138,7 +141,7 @@ export default {
       var returnDays = "";
       if (days)
         days.forEach((element) => {
-          returnDays += element + "<br>";
+          returnDays += moment(element).format('DD-MM-YYYY') + "<br>";
         });
       return returnDays;
     },
@@ -146,4 +149,12 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.map-style{
+      height: 350px;
+    width: 100%;
+    position: relative;
+    border: solid 1px;
+    border-radius: 8px;
+    }
+    </style>

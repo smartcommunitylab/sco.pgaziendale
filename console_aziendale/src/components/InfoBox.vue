@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="tooltip" @click="cahngeVisibility()">
+  <div class="tooltip" v-on:mouseover="isActive = true" v-on:mouseleave="isActive = false" >
     <help-icon />
     <transition name="fade">
       <div v-if="isActive">
@@ -84,3 +84,6 @@ export default {
   opacity: 0;
 }
 </style>
+
+
+

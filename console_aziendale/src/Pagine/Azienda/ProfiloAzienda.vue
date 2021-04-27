@@ -26,48 +26,69 @@
           v-if="actualCompany && actualCompany.item"
         >
           <div
-            class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
+            class="block rounded-full shadow-xl mx-auto h-48 w-48 bg-cover bg-center"
             v-bind:style="{ backgroundImage: 'url(' + actualCompany.item.logo + ')' }"
           ></div>
           <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualCompany.item.name }}</h1>
           <div
             class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
           ></div>
-          <p
-            class="pt-4 text-base font-bold flex items-center  lg:justify-start"
-          >
-            <address-icon /> <span class="detail-company">{{ actualCompany.item.address }}{{ actualCompany.item.number
-            }}{{ actualCompany.item.city }}{{ actualCompany.item.province
-            }}{{ actualCompany.item.cap }}</span>
-          </p>
+          <div class="pt-4 text-base font-bold items-center lg:justify-start">
+            <div class="flex">
+              <address-icon />
+              <span class="detail-company">{{ actualCompany.item.address }}</span>
+              <span class="detail-company">{{ actualCompany.item.streetNumber }} </span>
+            </div>
+            <div class="flex">
+              <span class="w-6"></span>
+              <span class="detail-company">{{ actualCompany.item.city }}</span>
+              <span class="detail-company">{{ actualCompany.item.province }}</span>
+              <span class="detail-company">{{ actualCompany.item.zip }}</span>
+            </div>
+          </div>
 
           <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center  lg:justify-start"
+            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center lg:justify-start"
           >
-            <web-icon /> <a  class="link-web" :href="actualCompany.item.web" v-if="actualCompany.item.web">{{ actualCompany.item.web }}</a><span class="detail-company" v-else>Non é presente</span>
-          </p>
-          <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center  lg:justify-start"
-          >
-            <email-icon /> <a class="link-web" :href="`mailto:${actualCompany.item.contactEmail}`">{{ actualCompany.item.contactEmail }}</a>
+            <web-icon />
+            <a
+              class="link-web"
+              :href="actualCompany.item.web"
+              v-if="actualCompany.item.web"
+              >{{ actualCompany.item.web }}</a
+            ><span class="detail-company" v-else>Non é presente</span>
           </p>
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center lg:justify-start"
           >
-            <phone-icon /> <span class="detail-company">{{ actualCompany.item.contactPhone }}</span>
+            <email-icon />
+            <a class="link-web" :href="`mailto:${actualCompany.item.contactEmail}`">{{
+              actualCompany.item.contactEmail
+            }}</a>
+          </p>
+          <p
+            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center lg:justify-start"
+          >
+            <phone-icon />
+            <span class="detail-company">{{ actualCompany.item.contactPhone }}</span>
           </p>
         </div>
         <div class="w-full flex">
-        <button
-          v-if="!adminCompany && actualCompany && role == 'ROLE_ADMIN'"
-          type="button"
-          class="btn-admin m-auto"
-          @click="chooseCompanyAdmin"
-          aria-label="Close modal"
-        >
-          Diventa amministratore
-        </button>
-        <button v-if="adminCompany && $route.name !== 'azienda'" class="btn-admin m-auto"> Sei amministratore </button>
+          <button
+            v-if="!adminCompany && actualCompany && role == 'ROLE_ADMIN'"
+            type="button"
+            class="btn-admin m-auto"
+            @click="chooseCompanyAdmin"
+            aria-label="Close modal"
+          >
+            Diventa amministratore
+          </button>
+          <button
+            v-if="adminCompany && $route.name !== 'azienda'"
+            class="btn-admin m-auto"
+          >
+            Sei amministratore
+          </button>
         </div>
       </div>
     </div>
@@ -107,24 +128,23 @@ export default {
 
 <style scoped>
 .btn-admin {
-border: none;
-    font-size: 20px;
-    padding: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    color: white;
-    background: #5ab45f;
-    border-radius: 26px;
-
+  border: none;
+  font-size: 20px;
+  padding: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  background: #5ab45f;
+  border-radius: 26px;
 }
-.detail-company{
+.detail-company {
   margin: 4px 8px;
   font-size: medium;
 }
-.link-web{
-    margin: 4px 8px;
+.link-web {
+  margin: 4px 8px;
   font-size: medium;
   text-decoration: underline;
-  color: #5ab45f;;
+  color: #5ab45f;
 }
 </style>

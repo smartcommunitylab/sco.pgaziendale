@@ -10,7 +10,7 @@
         >
         </generic-table>
       </div>
-      <div v-else>Non ci sono Aziende</div>
+      <div v-else class="empty-list">Non ci sono Aziende</div>
 
       <div class="ml-auto pt-4 pr-4 absolute right-0">
         <button
@@ -22,6 +22,7 @@
       </div>
     </div>
     <profilo-azienda v-if="actualCompany"></profilo-azienda>
+    <div v-else class="select-element"> Seleziona un'azienda per visualizzare i dettagli</div>
     <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
@@ -122,7 +123,7 @@ export default {
         title: "Cancella",
       };
     });
-        EventBus.$on("OK_COMPANY_FORM", (company) => {
+    EventBus.$on("OK_COMPANY_FORM", (company) => {
         if (this.newCompany) {
           this.addCompanyCall(company);
         } else {
@@ -168,46 +169,13 @@ export default {
       this.deleteModalVisible = false;
     },
    
-
-    
     saveCompany() {
-      //check fields
-      // eslint-disable-next-line no-constant-condition
-      // console.log("submit!");
             EventBus.$emit("CHECK_COMPANY_FORM");
-
-      // this.$v.$touch();
-      // if (this.$v.$invalid) {
-      //   this.submitStatus = "ERROR";
-      //   return;
-      // } else {
-      //   this.createCompany();
-      //   if (this.newCompany) {
-      //     this.addCompanyCall(this.company);
-      //   } else {
-      //     this.updateCompanyCall(this.company);
-      //   }
-      //   this.$v.$reset();
-      // }
-
-      // this.editModalVisible = false;
-      // this.newCompany = false;
     },
     deleteConfirm() {
       this.deleteModalVisible = false;
       this.deleteCompany(this.company);
     },
-    // updateCompany() {
-    //   //check fields
-    //   // eslint-disable-next-line no-constant-condition
-    //   if (true) {
-    //     this.updateCompanyCall(this.company);
-    //     this.editModalVisible = false;
-    //   }
-    // },
-    // goToCompany: function (companyName) {
-    //   this.$router.push("/azienda/" + companyName);
-    // },
     showCompanyInfo: function (company) {
       if (this.currentCompanySelected == company) {
         this.getCompanyById(null);

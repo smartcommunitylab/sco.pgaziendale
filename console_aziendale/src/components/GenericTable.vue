@@ -100,14 +100,26 @@ export default {
 } */
 
 table {
-  border: 2px solid #42b983;
+  /* border: 2px solid #42b983;
   border-radius: 3px;
-  background-color: #fff;
+  background-color: #fff; */
+    border-collapse: collapse;
+  border-radius: 1em;
+  overflow: hidden;
 }
 
 th {
-  background-color: #5ab45f;
+  /* background-color: #5ab45f;
   color: rgba(255, 255, 255, 0.66);
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; */
+    padding: 1em;
+  background: #5ab45f;
+  color: rgba(255, 255, 255, 0.66);
+  border-bottom: 2px solid white; 
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -118,13 +130,16 @@ th {
 td {
   background-color: #f9f9f9;
   cursor: pointer;
+    padding: 1em;
+  background: #ddd;
+  border-bottom: 2px solid white; 
 }
 
-th,
+/* th,
 td {
   min-width: 120px;
   padding: 10px 20px;
-}
+} */
 
 th.active {
   color: #fff;

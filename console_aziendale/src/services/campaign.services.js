@@ -10,7 +10,8 @@ export const campaignService = {
     getApplications,
     getAllCompaniesOfCampaign,
     getPublicCampaigns,
-    getMonthsForCampaign
+    getMonthsForCampaign,
+    getMeansForCampaign
 };
 const arrayMeans= [
     { value: "bike", text: "Bici" },
@@ -31,6 +32,14 @@ while (dateEnd > dateStart || dateStart.format('M') === dateEnd.format('M')) {
    dateStart.add(1,'month');
 }
 return timeValues;
+}
+function getMeansForCampaign(campaign) {
+var means = [];
+    for (var i=0;i<campaign.means.length;i++){
+        //add ite
+        means.push(arrayMeans.find(function(elem){return elem.value == campaign.means[i]}))
+    }
+return means;
 }
 function getAllCampaigns(companyId = null) { 
     console.log(process.env.VUE_APP_BASE_URL);
