@@ -50,12 +50,16 @@
           />
           <info-box :msg="'Il campo username é deve essere un\'email valida'" />
         </div>
+
         <div v-if="$v.username.$error">
           <div class="error" v-if="!$v.username.required">
             Il campo username e' richiesto.
           </div>
           <div class="error" v-if="!$v.username.email">
             Il campo username non risulta valido.
+          </div>
+          <div class="error" v-if="!$v.username.isUnique">
+            Questo username risulta giá registrato
           </div>
         </div>
       </div>
@@ -87,9 +91,7 @@
           <label for="mm">Mobility Manager</label> -->
         </div>
         <div v-if="$v.roles.$error">
-          <div class="error" v-if="!$v.roles.required">
-            Il campo ruoli e' richiesto.
-          </div>
+          <div class="error" v-if="!$v.roles.required">Il campo ruoli e' richiesto.</div>
         </div>
       </div>
     </div>
@@ -99,10 +101,10 @@
 import { required, email } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
 import { mapState } from "vuex";
-import InfoBox from '@/components/InfoBox.vue';
+import InfoBox from "@/components/InfoBox.vue";
 
 export default {
-  components:{InfoBox},
+  components: { InfoBox },
   data() {
     return {
       user: null,
@@ -115,6 +117,7 @@ export default {
       username: "",
       phone: "",
       roles: [],
+      unique: true,
     };
   },
   validations: {
@@ -126,7 +129,20 @@ export default {
     },
     username: {
       required,
-      email
+      email,
+      isUnique(value) {
+        console.log(value);
+        //check user is present
+        if (
+          this.adminCompanyUsers.items.find((ele) => {
+            console.log(ele.username == this.username);
+            return ele.username == this.username;
+          })
+        ) {
+          return false;
+        }
+        return true;
+      },
     },
     phone: {
       required,
@@ -182,6 +198,7 @@ export default {
   },
   computed: {
     ...mapState("company", ["adminCompany"]),
+    ...mapState("company", ["adminCompany", "adminCompanyUsers"]),
   },
   mounted() {
     EventBus.$on("EDIT_USER_FORM", (user) => {
@@ -198,6 +215,7 @@ export default {
       } else {
         //   generate event ok
         this.createUser();
+        this.unique = true;
         EventBus.$emit("OK_USER_FORM", this.user);
         this.$v.$reset();
       }

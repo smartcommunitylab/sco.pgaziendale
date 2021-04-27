@@ -218,12 +218,16 @@ export default {
     EventBus.$on("NO_USER_FORM", () => {
       this.submitStatus = "ERROR";
     });
+    // EventBus.$on("USER_EXISTS", () => {
+    //   this.submitStatus = "ERROR";
+    // });
   },
   beforeDestroy() {
     EventBus.$off("NO_USER_FORM");
     EventBus.$off("OK_USER_FORM");
     EventBus.$off("DELETE_USER");
     EventBus.$off("EDIT_USER");
+    // EventBus.$off("USER_EXISTS");
   },
 };
 </script>
