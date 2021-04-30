@@ -171,7 +171,7 @@ export default {
       this.activated = true;
       this.name = "";
       this.surname = "";
-      this.mail = "";
+      this.username = "";
       this.phone = "";
       this.roles = [];
     },

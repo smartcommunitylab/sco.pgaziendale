@@ -135,7 +135,9 @@ const actions = {
             },
             error => {
                 commit('addUserFailure', error);
-                dispatch('alert/error', error, { root: true });
+                if (error.response && error.response.status == 409)
+                dispatch('alert/error', "Utente giá registrato. Selezionare un altro contatto email", { root: true });
+                else dispatch('alert/error', error, { root: true });
             }
         );
     },
@@ -148,7 +150,9 @@ const actions = {
             },
             error => {
                 commit('updateUserFailure', error);
-                dispatch('alert/error', error, { root: true });
+                if (error.response && error.response.status == 409)
+                dispatch('alert/error', "Utente giá registrato. Selezionare un altro contatto email", { root: true });
+                else dispatch('alert/error', error, { root: true });
             }
         );
     },
