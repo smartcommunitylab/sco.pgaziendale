@@ -40,6 +40,7 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.service.CompanyService;
 import it.smartcommunitylab.pgazienda.service.UserService;
+import it.smartcommunitylab.pgazienda.web.rest.errors.BadRequestAlertException;
 
 /**
  * @author raman
@@ -83,11 +84,15 @@ public class CompanyResource {
      * Create a new company
      * @param company
      * @return
+     * @throws BadRequestAlertException 
      */
     @PostMapping("/companies")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
-	public ResponseEntity<Company> createCompany(@Valid @RequestBody Company company) {
+	public ResponseEntity<Company> createCompany(@Valid @RequestBody Company company) throws BadRequestAlertException {
     	log.debug("Creating company {}", company);
+    	if (company.getId() != null) {
+    		throw new BadRequestAlertException("A new company cannot already have an ID");
+    	}
 		return ResponseEntity.ok(companyService.createCompany(company));
 	}
     /**
