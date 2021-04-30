@@ -132,7 +132,7 @@ export default {
     }),
     initEmployee() {
       this.employee = {};
-      this.id = "";
+      this.id = null;
       this.name = "";
       this.surname = "";
       this.code = "";
