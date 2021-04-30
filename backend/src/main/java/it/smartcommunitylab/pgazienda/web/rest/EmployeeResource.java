@@ -19,6 +19,7 @@ package it.smartcommunitylab.pgazienda.web.rest;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.service.CompanyService;
 import it.smartcommunitylab.pgazienda.service.UserService;
+import it.smartcommunitylab.pgazienda.web.rest.errors.BadRequestAlertException;
 
 /**
  * @author raman
@@ -60,12 +62,16 @@ public class EmployeeResource {
      * Create a new employee
      * @param company
      * @return
+     * @throws BadRequestAlertException 
      */
     @PostMapping("/companies/{companyId}/employees")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN + "\", \""+Constants.ROLE_MOBILITY_MANAGER+"\")")
-	public ResponseEntity<Employee> createEmployee(@PathVariable String companyId, @Valid @RequestBody Employee employee) {
+	public ResponseEntity<Employee> createEmployee(@PathVariable String companyId, @Valid @RequestBody Employee employee) throws BadRequestAlertException {
     	log.debug("Creating a employee {} / {}", companyId, employee);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (employee.getId() != null) {
+    		throw new BadRequestAlertException("A new emplyee cannot already have an ID");
+    	}
     	return ResponseEntity.ok(companyService.createEmployee(companyId, employee));
 	}
 
