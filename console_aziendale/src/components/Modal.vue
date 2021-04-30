@@ -29,7 +29,7 @@
 <template>
   <transition name="modal-fade">
     <div class="modal-backdrop" v-init="show">
-      <div class="modal w-2/3 z-50 m-0 absolute top-20"
+      <div class="modal w-2/3 z-50 m-0 absolute "
         role="dialog"
         aria-labelledby="modalTitle"
         aria-describedby="modalDescription"
@@ -121,6 +121,10 @@
     border-bottom: 1px solid #eeeeee;
     color: #4AAE9B;
     justify-content: space-between;
+    height: 50px;
+    line-height: 50px;
+        font-size: large;
+    font-weight: bold;
   }
 
   .modal-footer {

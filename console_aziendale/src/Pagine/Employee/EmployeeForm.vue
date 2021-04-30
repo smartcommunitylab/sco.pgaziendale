@@ -56,18 +56,19 @@
       </div>
 
       <div class="field-group mb-6 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.location.$error }">
+        <div
+          class="flex flex-col sm:flex-row  mt-3 justify-stretch  "
+          :class="{ 'form-group--error': $v.location.$error }"
+        >
           <label class="field-label" for="password">Sede </label>
-          <input
-            type="text"
-            name="employeeLocation"
-            id=""
-            required
-            placeholder="Sede *"
+          <select
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-none mr-2 w-40"
             v-model.trim="$v.location.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-          <info-box :msg="'Il codice delle sede associata al dipendente'" />
+          >
+            <option v-for="loc in allLocations.items" :key="loc.id" :value="loc.id">
+              {{ loc.id }}
+            </option>
+          </select>
         </div>
 
         <div v-if="$v.location.$error">
@@ -83,6 +84,7 @@
 import { required } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
 import InfoBox from "@/components/InfoBox.vue";
+import { mapState, mapActions } from "vuex";
 
 export default {
   components: {
@@ -95,6 +97,7 @@ export default {
       surname: "",
       code: "",
       location: "",
+      locations: [],
     };
   },
   validations: {
@@ -111,15 +114,25 @@ export default {
       required,
     },
   },
+  computed: {
+    ...mapState("company", ["actualCompany"]),
+    ...mapState("location", ["allLocations", "actualLocation"]),
+  },
   methods: {
+    loadLocations() {
+      if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
+    },
     copyFormValues(employee) {
       for (const [key] of Object.entries(employee)) {
         this[key] = employee[key];
       }
     },
+    ...mapActions("location", {
+      getAllLocations: "getAllLocations",
+    }),
     initEmployee() {
       this.employee = {};
-      this.id = "";
+      this.id = null;
       this.name = "";
       this.surname = "";
       this.code = "";
@@ -136,6 +149,7 @@ export default {
     },
   },
   mounted() {
+    this.loadLocations();
     EventBus.$on("EDIT_EMPLOYEE_FORM", (employee) => {
       this.copyFormValues(employee);
     });

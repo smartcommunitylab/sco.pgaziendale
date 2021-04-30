@@ -1,13 +1,15 @@
 <template>
   <div class="small" v-if="datacollection">
-    <line-chart :chart-data="datacollection"></line-chart>
-    {{ this.selection }}
+    <div class="title">{{title}}</div>
+    <line-chart :chart-data="datacollection" ></line-chart>
   </div>
 </template>
 
 <script>
 import LineChart from "./LineChart.js";
 import { mapState } from "vuex";
+import moment from "moment";
+import { campaignService } from "../../services";
 
 export default {
   components: {
@@ -17,6 +19,8 @@ export default {
   data() {
     return {
       datacollection: null,
+      means: [],
+      title:""
     };
   },
   computed: {
@@ -24,75 +28,82 @@ export default {
     ...mapState("stat", ["stat"]),
   },
   mounted() {
+    this.means = campaignService.getArrayMeans();
     this.fillData();
   },
   watch: {
     stat() {
-      // Our fancy notification (2).
       console.log(this.stat);
       if (this.stat && this.stat.items) this.fillData();
     },
   },
   methods: {
+    format(string, span) {
+      if (span == "date") return moment(string).format("DD-MM-YYYY");
+      if (span == "month") return moment(string).format("MM-YYYY");
+    },
+    createTitle() {
+      var title="";
+      switch (this.selection.selectedType) {
+        case "km_valid":
+          title="Km validi"
+          break;
+        case "km_true":
+          title="Km effettivi"
+          break;
+        case "co2saved":
+          title="CO2 salvata"
+          break;
+                  case "trackCount":
+          title="Numero di viaggi"
+          break;
+        default:
+          break;
+      }
+
+      return title;
+    },
     fillData() {
-      //check stats and selection and build data
-      //   console.log(this.selection)
-      // this.datacollection = {
-      //   labels: ["label a", "label b"],
-      //   datasets: []
-      // }
-      // for (var i=0; i<this.stat.items.length;i++){
-      // }
-      //         this.datacollection.datasets.push({
-
-      //       label: this.stat.items[i].month,
-      //       backgroundColor: '#f87979',
-      //       data: [this.stat.items[i].distances["bikes"]]
-
-      //         })
-
-      // }
       var labels = [];
       var data = [];
-      var span =''
-      if (this.selection.groupBy=='month')
-       span = "month";
-      else span="date"
-      var mean = this.selection.mean;
-      if (this.stat && this.stat.items) {
-        for (var i = 0; i < this.stat.items.length; i++) {
-          labels.push(this.stat.items[i][span]);
-          data.push(this.stat.items[i].distances[mean]);
+      var span = "";
+      if (this.selection.groupBy == "month") span = "month";
+      else span = "date";
+      var mean = this.means.find((el) => {
+        return el.value == this.selection.mean;
+      });
+      this.title=this.createTitle();
+      if (this.stat && this.stat.items && mean) {
+        if (
+          this.selection.selectedType == "km_valid" ||
+          this.selection.selectedType == "km_true"
+        )
+          {
+          for (let i = 0; i < this.stat.items.length; i++) {
+          labels.push(this.format(this.stat.items[i][span], span));
+          data.push(this.stat.items[i].distances[mean.value]/1000);
         }
+          }
+        else {
+          for (let i = 0; i < this.stat.items.length; i++) {
+          labels.push(this.format(this.stat.items[i][span], span));
+          data.push(this.stat.items[i][this.selection.selectedType]);
+
+        }
+        } 
+
         this.datacollection = {
           labels: labels,
           datasets: [
             {
-              label: mean,
+              label: mean ? mean.text : "",
               backgroundColor: "#f87979",
               data: data,
             },
           ],
         };
       }
-      // this.datacollection = {
-      //   labels: [this.getRandomInt(), this.getRandomInt()],
-      //   datasets: [
-      //     {
-      //       label: 'Data One',
-      //       backgroundColor: '#f87979',
-      //       data: [this.getRandomInt(), this.getRandomInt()]
-      //     }, {
-      //       label: 'Data One',
-      //       backgroundColor: '#f87979',
-      //       data: [this.getRandomInt(), this.getRandomInt()]
-      //     }
-      //   ]
-      // }
     },
-    //   getRandomInt () {
-    //     return Math.floor(Math.random() * (50 - 5 + 1)) + 5
-    //   }
   },
 };
 </script>
@@ -101,5 +112,10 @@ export default {
 .small {
   max-width: 600px;
   margin: 20px auto;
+}
+.title{
+      text-align: center;
+    font-size: x-large;
+    font-weight: bold;
 }
 </style>

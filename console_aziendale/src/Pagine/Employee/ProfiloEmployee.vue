@@ -20,11 +20,6 @@
           </button>
         </div>
         <div class="p-4 md:p-12 text-center lg:text-left" >
-          <!-- Image for mobile view-->
-          <!-- <div
-            class="block rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
-            v-bind:style="{ backgroundImage: 'url(' + actualEmployee.item.logo + ')' }"
-          ></div> -->
           <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualEmployee.item.name }} {{ actualEmployee.item.surname }}</h1>
           <div
             class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
@@ -34,21 +29,16 @@
            v-if="actualEmployee.item.location">
             <address-icon />Sede: {{ actualEmployee.item.location }}
           </p>
-          <!-- <p
-            class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
-            <web-icon /> {{ actualEmployee.item.web }}
-          </p> -->
           <p
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
            v-if="actualEmployee.item.code" >
             <code-icon /> Codice: {{ actualEmployee.item.code }}
           </p>
-          <p
+          <div
             class="pt-2 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
            v-if="actualEmployee.item.campaigns">
-            <list-campaigns-icon /> Campagne: {{ actualEmployee.item.campaigns }}
-          </p>
+            <list-campaigns-icon /> <span class="mr-1">Campagne:</span><div v-html="getCampaings(actualEmployee.item.campaigns)"/>
+          </div>
         </div>
       </div>
       <div></div>
@@ -73,7 +63,14 @@ export default {
 	},
 	editEmployee() {
 		EventBus.$emit("EDIT_EMPLOYEE",this.actualEmployee);
-	}
+	},
+  getCampaings(campaigns) {
+    var returnCampaigns=" ";
+    campaigns.forEach(element => {
+      returnCampaigns+="<div> "+element+" </div>";
+    });
+    return returnCampaigns;
+  }
   },
 };
 </script>

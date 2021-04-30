@@ -11,7 +11,7 @@
         </generic-table>
       </div>
 
-      <div v-else class="text-center">Non ci sono campagne</div>
+      <div v-else class="empty-list">Non ci sono campagne</div>
       <div class="ml-auto pt-4 pr-4 absolute right-0">
         <button
           @click="showModal('Aggiungi campagna')"
@@ -22,6 +22,7 @@
       </div>
     </div>
     <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
+        <div v-else class="select-element"> Seleziona una campagna per visualizzare i dettagli</div>
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Campagna </template>
       <template v-slot:body> Sei sicuro di voler cancellare la campagna? </template>
@@ -124,19 +125,24 @@ export default {
     ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
     ...mapState("account", ["role"]),
   },
-  mounted: function () {
-
-    this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
-    // this.campaigns = campaigns;
-    console.log(this.adminCompany)
+  watch: {
+    adminCompany() {
     if (this.adminCompany && this.adminCompany.item) {
-      this.getAllCampaigns(this.adminCompany.item.id);
-    }
-    console.log(this.actualCompany)
-    if (this.actualCompany && this.actualCompany.item) {
       this.getAllCampaigns(this.actualCompany.item.id);
     }
-    if (!this.adminCompany && !this.actualCompany) {
+    },
+  },
+  mounted: function () {
+    this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
+    // console.log(this.adminCompany)
+    // if (this.adminCompany && this.adminCompany.item) {
+    //   this.getAllCampaigns(this.adminCompany.item.id);
+    // }
+    // console.log(this.adminCompany)
+    if (this.adminCompany && this.adminCompany.item) {
+      this.getAllCampaigns(this.actualCompany.item.id);
+    }
+    if (this.role == "ROLE_ADMIN" && this.adminCompany == null ) {
       this.getAllCampaigns(null);
     }
  EventBus.$on("EDIT_CAMPAIGN", (campaign) => {

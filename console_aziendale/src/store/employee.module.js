@@ -6,6 +6,10 @@ const state = {
 };
 
 const actions = {
+    logout({commit}){
+commit("removeActualEmployee");
+commit("removeAllEmployees");
+    },
     importEmployees({ commit, dispatch },{companyId,file}) {
         commit('importEmployees');
         employeeService.importEmployees(companyId,file)
@@ -90,6 +94,9 @@ const mutations = {
     },
     removeActualEmployee(state) {
         state.actualEmployee=null;
+    },
+    removeAllEmployees(state) {
+        state.allEmployees = null;
     },
     getAllEmployees(state) {
         state.allEmployees = { loading: true };

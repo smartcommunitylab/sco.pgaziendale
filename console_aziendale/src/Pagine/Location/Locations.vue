@@ -10,7 +10,7 @@
         >
         </generic-table>
       </div>
-      <div v-else class="text-center">Non ci sono Sedi</div>
+      <div v-else class="empty-list">Non ci sono Sedi</div>
       <div class="flex flex-row justify-center py-4">
         <div class="px-2">
           <button
@@ -32,6 +32,7 @@
     </div>
 
     <profilo-location v-if="actualLocation && actualLocation.item" />
+    <div v-else class="select-element"> Seleziona una sede per visualizzare i dettagli</div>
     <modal v-show="deleteModalVisible">
       <template v-slot:header> Cancella Sede </template>
       <template v-slot:body> Sei sicuro di voler cancellare la sede? </template>
@@ -204,8 +205,8 @@ export default {
   components: { ProfiloLocation, GenericTable, Modal, LocationForm },
   data: function () {
     return {
-      gridColumns: ["id", "city", "address"],
-      headerColumns: ["Identificativo", "Cittá", "Indirizzo"],
+      gridColumns: ["id", "city", "address","streetNumber"],
+      headerColumns: ["Identificativo", "Cittá", "Indirizzo","Numero"],
       newLocation: false,
       location: null,
       popup: {
@@ -217,6 +218,7 @@ export default {
       submitStatus: null,
       fileUploaded: null,
       inDragArea: false,
+      oldLocation:null
     };
   },
 
@@ -228,6 +230,7 @@ export default {
     EventBus.$on("EDIT_LOCATION", (location) => {
       this.editModalVisible = true;
       EventBus.$emit("EDIT_LOCATION_FORM", location.item);
+      this.oldLocation=location.item;
       this.popup = {
         title: "Modifica",
       };
@@ -249,6 +252,7 @@ export default {
         this.updateLocationCall({
           companyId: this.actualCompany.item.id,
           location: location,
+          oldLocation:this.oldLocation
         });
       }
       this.editModalVisible = false;

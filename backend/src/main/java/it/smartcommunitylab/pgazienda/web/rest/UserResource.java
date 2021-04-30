@@ -18,6 +18,8 @@ package it.smartcommunitylab.pgazienda.web.rest;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -37,8 +39,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.User;
+import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.service.MailService;
+import it.smartcommunitylab.pgazienda.service.UserAnotherOrgException;
 import it.smartcommunitylab.pgazienda.service.UserService;
 import it.smartcommunitylab.pgazienda.service.UsernameAlreadyUsedException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.BadRequestAlertException;
@@ -107,6 +111,10 @@ public class UserResource {
             throw new BadRequestAlertException("A new user cannot already have an ID");
             // Lowercase the user login before comparing with database
         } else if ((old = userRepository.findOneByUsernameIgnoreCase(userDTO.getUsername().toLowerCase())).isPresent()) {
+        	Set<String> companyRoles = old.get().companyRoles().stream().map(r -> r.getCompanyId()).collect(Collectors.toSet());
+        	if (companyRoles.size() > 1 || companyRoles.size() == 1 && !companyRoles.contains(companyId)) {
+        		throw new UserAnotherOrgException();
+        	}
         	userDTO.setId(old.get().getId());
         	User newUser = userService.updateUser(userDTO, companyId).orElse(null);
             return ResponseEntity.ok(newUser);

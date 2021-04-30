@@ -17,13 +17,16 @@
 package it.smartcommunitylab.pgazienda.domain;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,7 +47,7 @@ public class User extends AbstractAuditingEntity {
     
     private String playerId;
     
-	private String name, surname;
+	private String name, surname, phone;
 
 	private List<UserRole> roles = new LinkedList<>();
 	
@@ -99,6 +102,18 @@ public class User extends AbstractAuditingEntity {
 	 */
 	public String getSurname() {
 		return surname;
+	}
+	/**
+	 * @return the phone
+	 */
+	public String getPhone() {
+		return phone;
+	}
+	/**
+	 * @param phone the phone to set
+	 */
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 	/**
 	 * @param surname the surname to set
@@ -195,6 +210,15 @@ public class User extends AbstractAuditingEntity {
 		if (roles == null) return Optional.empty();
 		return roles.stream().filter(r -> r.getRole().equals(role)).findFirst();
 	}
+	public boolean hasCompanyRole(String companyId) {
+		if (roles == null) return false;
+		return roles.stream().anyMatch(r -> companyId.equalsIgnoreCase(r.getCompanyId()));
+	}
+	public List<UserRole> companyRoles() {
+		if (roles == null) return Collections.emptyList();
+		return roles.stream().filter(r -> !StringUtils.isEmpty(r.getCompanyId())).collect(Collectors.toList());
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

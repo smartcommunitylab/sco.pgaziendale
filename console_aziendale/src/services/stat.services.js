@@ -10,7 +10,7 @@ export const statService = {
     getEmployeeStat
 
 };
-function getCampaignStat(campaignId, from, to,groupBy,noLimits){
+function getCampaignStat(campaignId, from, to,groupBy,noLimits=false){
     // var fromParam= from?('?from='+from):''
     // var toParam=''
     // if (fromParam)
@@ -38,7 +38,7 @@ function getCampaignStat(campaignId, from, to,groupBy,noLimits){
     )
 }
 
-function getCompanyStat(campaignId,companyId, from, to,groupBy,noLimits){
+function getCompanyStat(campaignId,companyId, from, to,groupBy,noLimits=false){
     return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_CAMPAIGNS_API+'/'+campaignId+'/agg/'+ companyId,{
         params: {
             ...(from ? { from: from} : {}),
@@ -58,7 +58,7 @@ function getCompanyStat(campaignId,companyId, from, to,groupBy,noLimits){
 
     )
 }
-function getLocationStat(campaignId,companyId,locationId, from, to,groupBy,noLimits){
+function getLocationStat(campaignId,companyId,locationId, from, to,groupBy,noLimits=false){
     return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_CAMPAIGNS_API+'/'+campaignId+'/agg/'+companyId+'/'+locationId ,{
         params: {
             ...(from ? { from: from} : {}),
@@ -78,7 +78,7 @@ function getLocationStat(campaignId,companyId,locationId, from, to,groupBy,noLim
 
     )
 }
-function getEmployeeStat(campaignId, employeeId, from, to, groupBy, withTracks,noLimits) {
+function getEmployeeStat(campaignId, employeeId, from, to, groupBy, withTracks=false,noLimits=false) {
         
     return  axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_CAMPAIGNS_API+'/'+campaignId+'/stats/'+employeeId,
         {
@@ -89,7 +89,17 @@ function getEmployeeStat(campaignId, employeeId, from, to, groupBy, withTracks,n
                 ...(withTracks ? { withTracks: withTracks} : {}),
                 ...(noLimits?{ noLimits: noLimits} : {})
             }
-        })
+        }).then(
+            res => {
+                if (res && res.data ) {
+                    return Promise.resolve(res.data);
+                }
+                else return Promise.reject(null);
+            }, err => {
+                return Promise.reject(err);
+            }
+    
+        )
 }
 
 
