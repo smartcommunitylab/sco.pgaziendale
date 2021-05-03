@@ -213,7 +213,7 @@
               <option disabled value="">Seleziona una sede</option>
               <template v-if="allLocations">
               <option
-                value="all"
+                :value="{id: 'all'}"
               > Tutte le sedi </option>
                 <option
                   v-for="location in allLocations.items"
@@ -248,7 +248,7 @@
             >
               <option disabled value="">Seleziona un dipendente</option>
                <option
-                value="all"
+                :value="{id: 'all'}"
                 
               > Tutti i dipendenti </option>
               <option
@@ -836,7 +836,7 @@ export default {
           });
         }
         }
-        if (this.selectedEmployee.id!="all" || this.this.selectedSede.id=="all"){
+        if (this.selectedEmployee.id!="all" || this.selectedSede.id=="all"){
           this.selection = {
             type: "getCompanyStat",
             campaignId: this.selectedCampaign.id,

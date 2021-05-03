@@ -389,4 +389,19 @@ public class UserService {
 		return false;
 	}
 
+	/**
+	 * @param campaignId
+	 */
+	public void cleanSubscriptions(String campaignId) {
+		List<User> users = userRepository.findByCampaignIn(Collections.singletonList(campaignId));
+		users.forEach(u -> {
+			u.getRoles().forEach(r -> {
+				if (r.getSubscriptions() != null) {
+					r.setSubscriptions(r.getSubscriptions().stream().filter(s -> !s.getCampaign().equals(campaignId)).collect(Collectors.toList()));
+				}
+			});
+		});
+		userRepository.saveAll(users);
+	}
+
 }

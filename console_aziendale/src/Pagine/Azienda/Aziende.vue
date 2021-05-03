@@ -130,7 +130,7 @@ export default {
           this.updateCompanyCall(company);
       }
       this.editModalVisible = false;
-      this.newEmployee = false;
+      this.newCompany = false;
     });
     EventBus.$on("NO_COMPANY_FORM", () => {
       this.submitStatus = "ERROR";

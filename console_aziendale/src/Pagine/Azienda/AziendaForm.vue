@@ -252,7 +252,7 @@ export default {
   data() {
     return {
       company: {},
-      id: "",
+      id: null,
       name: "",
       code: "",
       address: "",
@@ -319,7 +319,7 @@ export default {
     },
     initCompany() {
       this.company = {};
-      this.id = "";
+      this.id = null;
       this.name = "";
       this.code = "";
       this.address = "";

@@ -11,7 +11,7 @@
             v-model.trim="$v.id.$model"
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
             id="campaignLogo"
-            :disabled="$v.id.$model != ''"
+            :disabled="edit"
           />
           <info-box v-if="$v.id.$model == ''" :msg="'Codice univoco della campagna'" />
           <info-box
@@ -278,6 +278,7 @@ export default {
       means: [],
       active: false,
       application: "",
+      edit: false
     };
   },
   validations: {
@@ -363,9 +364,12 @@ export default {
     this.arrayMeans = campaignService.getArrayMeans();
 
     EventBus.$on("EDIT_CAMPAIGN_FORM", (campaign) => {
+            this.edit = true;
       this.copyFormValues(campaign);
     });
     EventBus.$on("NEW_CAMPAIGN_FORM", () => {
+            this.edit = false;
+
       this.initCampaign();
     });
     EventBus.$on("CHECK_CAMPAIGN_FORM", () => {
