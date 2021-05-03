@@ -188,6 +188,19 @@ public class CampaignService {
 	public Campaign saveCampaign(Campaign campaign) {
 		return campaignRepo.save(campaign);
 	}
+	
+	/**
+	 * @param campaignId
+	 * @return
+	 */
+	public Campaign resetCampaign(String campaignId) {
+		userService.cleanSubscriptions(campaignId);
+		List<Employee> employees = employeeRepo.findByCampaigns(campaignId);
+		employees.forEach(e -> e.getCampaigns().remove(campaignId));
+		employeeRepo.saveAll(employees);
+		trackingDataService.cleanCampaign(campaignId);
+		return getCampaign(campaignId).orElse(null);
+	}
 
 	/**
 	 * @param campaignId
@@ -210,4 +223,5 @@ public class CampaignService {
 		});
 		return campaignRepo.findById(campaignId).orElse(null);
 	}
+
 }

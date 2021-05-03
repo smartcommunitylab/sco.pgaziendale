@@ -98,6 +98,19 @@ public class CampaignResource {
     	campaign.setId(campaignId);
     	return ResponseEntity.ok(campaignService.saveCampaign(campaign));
 	}
+    
+    /**
+     * Reset campaign: user campaign data, subscription
+     * @param company
+     * @return
+     */
+    @PutMapping("/campaigns/{campaignId}/reset")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public ResponseEntity<Campaign> resetCampaign( @PathVariable String campaignId) {
+    	log.debug("Resetting a campaign {}", campaignId);
+    	return ResponseEntity.ok(campaignService.resetCampaign(campaignId));
+	}
+    
     /**
      * Delete a campaign
      * @param campaignId
