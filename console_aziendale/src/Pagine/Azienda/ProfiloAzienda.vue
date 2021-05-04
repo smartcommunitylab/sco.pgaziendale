@@ -25,10 +25,12 @@
           class="p-4 md:p-12 text-center lg:text-left"
           v-if="actualCompany && actualCompany.item"
         >
-          <div
+          <div v-if="actualCompany.item.logo"
             class="block rounded-full shadow-xl mx-auto h-48 w-48 bg-cover bg-center"
             v-bind:style="{ backgroundImage: 'url(' + actualCompany.item.logo + ')' }"
           ></div>
+          <div v-else class="mt-10">
+          </div>
           <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualCompany.item.name }}</h1>
           <div
             class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
