@@ -26,7 +26,7 @@
           v-if="actualCompany && actualCompany.item"
         >
           <div v-if="actualCompany.item.logo"
-            class="block rounded-full shadow-xl mx-auto h-48 w-48 bg-cover bg-center"
+            class="block rounded-full shadow-xl mx-auto h-48 w-48 bg-contain bg-center bg-no-repeat"
             v-bind:style="{ backgroundImage: 'url(' + actualCompany.item.logo + ')' }"
           ></div>
           <div v-else class="mt-10">
