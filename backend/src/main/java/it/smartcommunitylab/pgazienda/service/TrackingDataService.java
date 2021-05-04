@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -676,6 +674,14 @@ public class TrackingDataService {
 		return stat != null;
 	}
 	
+
+	/**
+	 * @param campaignId
+	 */
+	public void cleanCampaign(String campaignId) {
+		dayStatRepo.deleteByCampaign(campaignId);
+	}
+	
 	public static class TrackingDataRequestDTO {
 		private List<String> playerId;
 		private String from, to;
@@ -760,4 +766,5 @@ public class TrackingDataService {
 			this.rad = rad;
 		}
 	}
+
 }
