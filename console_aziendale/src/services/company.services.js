@@ -15,7 +15,7 @@ export const companyService = {
 function getAllCompanies() {
     return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API,{
         params: {
-          pageSize: 1200
+          size: 1200
         }
       }).then(
         res => {
