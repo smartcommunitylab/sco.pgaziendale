@@ -47,7 +47,11 @@ function getAllCampaigns(companyId = null) {
     if (companyId)
         url = url + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_ALL_CAMPAIGNS_API
     else url = url + process.env.VUE_APP_ALL_CAMPAIGNS_API
-    return axios.get(url).then(
+    return axios.get(url,{
+        params: {
+          pageSize: 1200
+        }
+      }).then(
         res => {
             if (res && res.data) {
                 // console.log(res.data)
