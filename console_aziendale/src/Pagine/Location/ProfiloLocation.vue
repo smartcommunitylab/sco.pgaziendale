@@ -70,7 +70,7 @@
           <div
             class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
             v-if="
-              actualLocation.item.nonWorking && actualLocation.item.nonWorking[0] != 0
+              actualLocation.item.nonWorking && actualLocation.item.nonWorking.length>0
             "
           >
             <calendar-remove-icon />Giorni della settimana non lavorativi:
@@ -78,7 +78,7 @@
           </div>
           <div
             class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-            v-if="actualLocation.item.nonWorkingDays"
+            v-if="actualLocation.item.nonWorkingDays  && actualLocation.item.nonWorkingDays.length>0"
           >
             <calendar-remove-icon /> Giorni non lavorativi:
             <div v-html="getNonWorkingDays(actualLocation.item.nonWorkingDays)"></div>
