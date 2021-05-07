@@ -48,7 +48,10 @@ function importLocations(companyId,file) {
 }
 //get all the companies
 function getAllLocations(companyId) {
-    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+ '/' + companyId + '/' +process.env.VUE_APP_LOCATIONS_API ).then(
+    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+ '/' + companyId + '/' +process.env.VUE_APP_LOCATIONS_API,{        params: {
+        pageSize: 1200
+      }
+    } ).then(
         res => {
             if (res && res.data && res.data) {
                 return Promise.resolve(res.data);
