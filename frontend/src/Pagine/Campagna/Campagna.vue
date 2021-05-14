@@ -305,6 +305,10 @@ export default {
     };
   },
   methods: {
+      getLogo: function(src) {
+    console.log(src)
+    return src;
+  },
     leaveCampaign: function () {
       EventBus.$emit("LEAVE_CAMPAIGN");
     },
@@ -404,10 +408,7 @@ export default {
     //   );
     // },
   },
-  getLogo: function(src) {
-    console.log(src)
-    return src;
-  },
+
   created: function () {
     this.$store.dispatch("storePage", { title: "Campagna", back: false });
     let loader = this.$loading.show({
