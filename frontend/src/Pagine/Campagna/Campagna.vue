@@ -5,9 +5,9 @@
       class="align-middle justify-center pt-4 flex flex-col"
     >
       <img
-        v-if="campagna.logo && campagna.logo !==''"
+        v-if="campagna.logo"
         class="object-contain h-48 w-2/3 m-auto"
-        :src="campagna.logo"
+        :src="getLogo(campagna.logo)"
       />
 
       <div v-if="campagna.userInCampaign" class="w-2/6 mx-auto">
@@ -28,7 +28,7 @@
         :class="companies.length >= 3 ? 'justify-start' : 'justify-center'"
       >
         <div v-for="company in companies" v-bind:key="company.id" class="flex-shrink-0">
-          <img class="object-contain h-40 w-full mx-2" v-if="campagna.logo && company.logo!==''" :src="company.logo " />
+          <img class="object-contain h-40 w-full mx-2" :src="getLogo(company.logo)" />
         </div>
       </div>
     </div>
@@ -403,6 +403,10 @@ export default {
     //     }
     //   );
     // },
+  },
+  getLogo: function(src) {
+    console.log(src)
+    return src;
   },
   created: function () {
     this.$store.dispatch("storePage", { title: "Campagna", back: false });
