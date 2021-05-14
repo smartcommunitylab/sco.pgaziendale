@@ -108,8 +108,8 @@
           companies.length >= 3 ? 'justify-start lg:justify-center' : 'justify-center'
         "
       >
-        <div v-for="company in companies" v-bind:key="company.id">
-          <div v-if="company.logo" class="flex-shrink-0">
+        <div v-for="company in logoCompanies" v-bind:key="company.id">
+          <div class="flex-shrink-0">
           <img class="object-contain h-40 w-full mx-2" :src="company.logo" />
           </div>
         </div>
@@ -465,6 +465,11 @@ export default {
     user() {
       return this.$store.getters.user;
     },
+     logoCompanies: function() {
+       return this.companies.filter(function(u) {
+         return u.logo
+     })
+   } // contains only Alex and James
   },
 };
 </script>
