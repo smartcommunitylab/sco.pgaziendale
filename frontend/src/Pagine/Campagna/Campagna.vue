@@ -5,7 +5,7 @@
       class="align-middle justify-center pt-4 flex flex-col"
     >
       <img
-        v-if="campagna.logo"
+        v-if="campagna.logo && campagna.logo !==''"
         class="object-contain h-48 w-2/3 m-auto"
         :src="campagna.logo"
       />
@@ -28,7 +28,7 @@
         :class="companies.length >= 3 ? 'justify-start' : 'justify-center'"
       >
         <div v-for="company in companies" v-bind:key="company.id" class="flex-shrink-0">
-          <img class="object-contain h-40 w-full mx-2" :src="company.logo" />
+          <img class="object-contain h-40 w-full mx-2" v-if="campagna.logo && company.logo!==''" :src="company.logo " />
         </div>
       </div>
     </div>
