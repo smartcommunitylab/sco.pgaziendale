@@ -109,7 +109,9 @@
         "
       >
         <div v-for="company in companies" v-bind:key="company.id" class="flex-shrink-0">
+          <div v-if="company.logo">
           <img class="object-contain h-40 w-full mx-2" :src="company.logo" />
+          </div>
         </div>
       </div>
     </div>
