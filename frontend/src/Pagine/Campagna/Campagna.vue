@@ -4,12 +4,13 @@
       :class="campagna.userInCampaign ? 'flex flex-row' : 'flex flex-col'"
       class="align-middle justify-center pt-4 flex flex-col"
     >
+    <div v-if="campagna.logo">
       <img
         v-if="campagna.logo"
         class="object-contain h-48 w-2/3 m-auto"
-        :src="campagna.logo"
+        :src="getLogo(campagna.logo)"
       />
-
+    </div>
       <div v-if="campagna.userInCampaign" class="w-2/6 mx-auto">
         <div class="">
           <div class="text-sm text-black text-center pb-4">Iscritto con</div>
@@ -28,7 +29,9 @@
         :class="companies.length >= 3 ? 'justify-start' : 'justify-center'"
       >
         <div v-for="company in companies" v-bind:key="company.id" class="flex-shrink-0">
-          <img class="object-contain h-40 w-full mx-2" :src="company.logo" />
+          <div v-if="company.logo">
+            <img class="object-contain h-40 w-full mx-2" :src="getLogo(company.logo)" />
+          </div>
         </div>
       </div>
     </div>
@@ -106,7 +109,9 @@
         "
       >
         <div v-for="company in companies" v-bind:key="company.id" class="flex-shrink-0">
+          <div v-if="company.logo">
           <img class="object-contain h-40 w-full mx-2" :src="company.logo" />
+          </div>
         </div>
       </div>
     </div>
@@ -305,6 +310,10 @@ export default {
     };
   },
   methods: {
+      getLogo: function(src) {
+    console.log(src)
+    return src;
+  },
     leaveCampaign: function () {
       EventBus.$emit("LEAVE_CAMPAIGN");
     },
@@ -404,6 +413,7 @@ export default {
     //   );
     // },
   },
+
   created: function () {
     this.$store.dispatch("storePage", { title: "Campagna", back: false });
     let loader = this.$loading.show({
