@@ -28,7 +28,7 @@
         class="flex flex-row overflow-x-auto pb-4"
         :class="companies.length >= 3 ? 'justify-start' : 'justify-center'"
       >
-        <div v-for="company in companies" v-bind:key="company.id" >
+        <div v-for="company in logoCompanies" v-bind:key="company.id" >
           <div v-if="company.logo" class="flex-shrink-0">
             <img class="object-contain h-40 w-full mx-2" :src="getLogo(company.logo)" />
           </div>
