@@ -467,9 +467,9 @@ export default {
     },
      logoCompanies: function() {
        return this.companies.filter(function(u) {
-         return u.logo
+         return u.logo !== ''
      })
-   } // contains only Alex and James
+   } 
   },
 };
 </script>
