@@ -251,11 +251,11 @@
             </div>
           </div>
         </div>
-        <div v-if="$v.nonWorking.$error">
+        <!-- <div v-if="$v.nonWorking.$error">
           <div class="error" v-if="!$v.nonWorking.required">
             Il campo Giorni NON lavorativi e' richiesto.
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="field-group mb-6 w-full">
         <div
@@ -323,11 +323,11 @@
             </div>
           </div>
         </div>
-        <div v-if="$v.nonWorkingDays.$error">
+        <!-- <div v-if="$v.nonWorkingDays.$error">
           <div class="error" v-if="!$v.nonWorkingDays.required">
             Il campo Giorni di chiusura e' richiesto.
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </form>
@@ -515,11 +515,8 @@ export default {
     },
     newNonWorkingDay: {},
     nonWorkingDays: {
-      required,
     },
-    nonWorking: {
-      required,
-    },
+    nonWorking: {},
   },
 };
 </script>

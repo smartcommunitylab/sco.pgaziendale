@@ -29,7 +29,11 @@ function importEmployees(companyId,file) {
 
 //get all the employee
 function getAllEmployees(companyId) {
-    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_EMPLOYEES_API).then(
+    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_EMPLOYEES_API, {
+        params: {
+          size: 1200
+        }
+      }).then(
         res => {
             if (res && res.data && res.data.content) {
                 return Promise.resolve(res.data.content);

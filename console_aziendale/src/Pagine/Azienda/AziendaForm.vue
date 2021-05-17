@@ -216,7 +216,7 @@
           />
         </div>
         <div v-if="$v.web.$error">
-          <div class="error" v-if="!$v.web.required">Il campo web e' richiesto.</div>
+          <!-- <div class="error" v-if="!$v.web.required">Il campo web e' richiesto.</div> -->
           <div class="error" v-if="!$v.web.url">Il campo web non risulta valido.</div>
         </div>
       </div>
@@ -233,9 +233,9 @@
           />
          <info-box :msg="'Inserisci un url che contiene il logo dell\'azienda'" />
         </div>
-        <div v-if="$v.logo.$error">
+        <!-- <div v-if="$v.logo.$error">
           <div class="error" v-if="!$v.logo.required">Il campo logo e' richiesto.</div>
-        </div>
+        </div> -->
       </div>
     </div>
   </form>
@@ -304,11 +304,9 @@ export default {
       required,
     },
     web: {
-      required,
       url
     },
     logo: {
-      required,
     },
   },
   methods: {

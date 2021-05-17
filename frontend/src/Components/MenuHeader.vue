@@ -515,8 +515,8 @@ export default {
           for (var k = 0; k < this.user.roles[i].subscriptions.length; k++) {
             if (this.user.roles[i].subscriptions[k].campaign == this.campagna.id) {
               var codePartecipation = this.user.roles[i].subscriptions[k].key;
-              var userCompany = this.user.roles[i].companyId?this.user.roles[i].companyId:"Non definito";
-              var userLocation = this.user.roles[i].locations?this.user.roles[i].locations:"Non definito";
+              var userCompany = this.user.roles[i].subscriptions[k].companyCode;
+              // var userLocation = this.user.roles[i].locations?this.user.roles[i].locations:"Non definito";
             }
           }
         }
@@ -531,9 +531,9 @@ export default {
         "%0d%0a" +
         "Azienda :" +
         userCompany +
-        "%0d%0a" +
-        "Location :" +
-        userLocation +
+        // "%0d%0a" +
+        // "Location :" +
+        // userLocation +
         "%0d%0a" +
         "Campagna :" +
         this.campagna.title +
