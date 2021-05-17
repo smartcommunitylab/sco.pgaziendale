@@ -16,6 +16,7 @@
 
 package it.smartcommunitylab.pgazienda.domain;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -121,6 +122,7 @@ public class Employee {
 	 * @return the campaigns
 	 */
 	public List<String> getCampaigns() {
+		if (campaigns == null) campaigns = new LinkedList<>();
 		return campaigns;
 	}
 
