@@ -817,7 +817,7 @@ export default {
           });
           return;
         } else {
-          if  (this.selectedSede.id!="all"){
+          if  (this.selectedSede && this.selectedSede.id!="all"){
           this.selection = {
             type: "getLocationStat",
             campaignId: this.selectedCampaign.id,
