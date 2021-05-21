@@ -785,7 +785,7 @@ export default {
             groupBy: this.selectedGroupBy,
             selectedType: this.selectedType,
           };
-          this.getCompanyStat({
+         this.getCompanyStat({
             campaignId: this.selectedCampaign.id,
             companyId: this.selectedCompany.id,
             from: this.selectedMonth ? this.selectedMonth.value : null,
@@ -793,6 +793,7 @@ export default {
             groupBy: this.selectedGroupBy,
             noLimits: this.selectedType == "km_true" ? true : false,
           });
+          return;
         }
       } else {
         //AA
@@ -806,7 +807,7 @@ export default {
             groupBy: this.selectedGroupBy,
             selectedType: this.selectedType,
           };
-          this.getEmployeeStat({
+         this.getEmployeeStat({
             campaignId: this.selectedCampaign.id,
             employeeId: this.selectedEmployee.id,
             from: this.selectedMonth ? this.selectedMonth.value : null,
@@ -814,6 +815,7 @@ export default {
             groupBy: this.selectedGroupBy,
             noLimits: this.selectedType == "km_true" ? true : false,
           });
+          return;
         } else {
           if  (this.selectedSede.id!="all"){
           this.selection = {
@@ -825,7 +827,7 @@ export default {
             groupBy: this.selectedGroupBy,
             selectedType: this.selectedType,
           };
-          this.getLocationStat({
+         this.getLocationStat({
             campaignId: this.selectedCampaign.id,
             companyId: this.selectedCompany.id,
             locationId: this.selectedSede.id,
@@ -834,9 +836,10 @@ export default {
             groupBy: this.selectedGroupBy,
             noLimits: this.selectedType == "km_true" ? true : false,
           });
+          return;
+          }
         }
-        }
-        if (this.selectedEmployee.id!="all" || this.selectedSede.id=="all"){
+        if (this.selectedEmployee.id=="all" || this.selectedSede.id=="all"){
           this.selection = {
             type: "getCompanyStat",
             campaignId: this.selectedCampaign.id,
@@ -854,7 +857,7 @@ export default {
             groupBy: this.selectedGroupBy,
             noLimits: this.selectedType == "km_true" ? true : false,
           });
-
+        return;
         }
       }
     },
