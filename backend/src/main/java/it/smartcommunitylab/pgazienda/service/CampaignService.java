@@ -122,7 +122,14 @@ public class CampaignService {
 		if (company == null || company.getCampaigns() == null || !company.getCampaigns().contains(campaignId)) throw new IllegalArgumentException("Invalid company");
 		// app user role
 		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
-		// not yet subscribed
+
+		// control key already used
+		List<User> registered = userService.getUserByEmployeeCode(campaignId, companyCode, key);
+		if (registered != null && registered.size() > 0 && !registered.get(0).getId().equals(user.getId())) {
+			throw new IllegalArgumentException("User code already in use: " + campaignId +", " + companyCode + ", " + key);			
+		}
+		
+		;// not yet subscribed
 		if (role == null || role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId))) {
 			Employee employee = employeeRepo.findOneByCompanyIdAndCode(company.getId(), key).orElse(null);
 			if (employee == null ) throw new IllegalArgumentException("Invalid user key");
