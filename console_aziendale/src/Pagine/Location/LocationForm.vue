@@ -354,8 +354,8 @@ export default {
       city: "",
       province: "",
       region: "",
-      latitude: 41.902782,
-      longitude: 12.496366,
+      latitude: "",
+      longitude: "",
       country: "",
       radius: 200,
       nonWorkingDays: [],
@@ -424,8 +424,8 @@ export default {
       this.city = "";
       this.province = "";
       this.region = "";
-      this.latitude = 41.902782;
-      this.longitude = 12.496366;
+      this.latitude = "";
+      this.longitude = "";
       this.country = "";
       this.radius = 200;
       this.nonWorkingDays = [];
