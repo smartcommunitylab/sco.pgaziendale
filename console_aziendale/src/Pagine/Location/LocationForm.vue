@@ -251,11 +251,11 @@
             </div>
           </div>
         </div>
-        <div v-if="$v.nonWorking.$error">
+        <!-- <div v-if="$v.nonWorking.$error">
           <div class="error" v-if="!$v.nonWorking.required">
             Il campo Giorni NON lavorativi e' richiesto.
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="field-group mb-6 w-full">
         <div
@@ -323,11 +323,11 @@
             </div>
           </div>
         </div>
-        <div v-if="$v.nonWorkingDays.$error">
+        <!-- <div v-if="$v.nonWorkingDays.$error">
           <div class="error" v-if="!$v.nonWorkingDays.required">
             Il campo Giorni di chiusura e' richiesto.
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </form>
@@ -354,8 +354,8 @@ export default {
       city: "",
       province: "",
       region: "",
-      latitude: 41.902782,
-      longitude: 12.496366,
+      latitude: "",
+      longitude: "",
       country: "",
       radius: 200,
       nonWorkingDays: [],
@@ -424,8 +424,8 @@ export default {
       this.city = "";
       this.province = "";
       this.region = "";
-      this.latitude = 41.902782;
-      this.longitude = 12.496366;
+      this.latitude = "";
+      this.longitude = "";
       this.country = "";
       this.radius = 200;
       this.nonWorkingDays = [];
@@ -515,11 +515,8 @@ export default {
     },
     newNonWorkingDay: {},
     nonWorkingDays: {
-      required,
     },
-    nonWorking: {
-      required,
-    },
+    nonWorking: {},
   },
 };
 </script>

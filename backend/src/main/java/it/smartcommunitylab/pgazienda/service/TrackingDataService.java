@@ -61,6 +61,7 @@ import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
 import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.DayStat.Distances;
 import it.smartcommunitylab.pgazienda.domain.Employee;
+import it.smartcommunitylab.pgazienda.domain.PGApp;
 import it.smartcommunitylab.pgazienda.domain.TrackingData;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
@@ -115,7 +116,7 @@ public class TrackingDataService {
 	public void synchronizeApps() {
 		appRepo.findAll().forEach(a -> {
 			
-			logger.info("Styncronizing app: " + a.getId());
+			logger.info("Syncronizing app: " + a.getId());
 			
 			final List<Campaign> campaigns = campaignRepo.findByApplication(a.getId()).stream().filter(c -> !c.getFrom().isAfter(LocalDate.now()) && !c.getTo().isBefore(LocalDate.now())).collect(Collectors.toList());
 
@@ -124,87 +125,123 @@ public class TrackingDataService {
 			// Application campaigns
 			campaigns.forEach(campaign -> {
 				// campaign companies
-				logger.info("Styncronizing app campaign: " + campaign.getId());
+				logger.info("Syncronizing app campaign: " + campaign.getId());
 				List<Company> companies = companyRepo.findByCampaign(campaign.getId());
 				companies.forEach(company -> {
-					try {
-						logger.info("Styncronizing app campaign company: " + company.getCode());
-						// company employees subscribed to this campaign 
-						List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(company.getId(), campaign.getId());
-						if (employees.isEmpty()) return;
-						Set<String> codeSet = employees.stream().map(e -> e.getCode()).collect(Collectors.toSet());
-						// users corresponding to this employees
-						List<User>  users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaign.getId(), company.getCode(), codeSet);
-						if (users.isEmpty()) return;
-						List<String> playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
-						logger.info("Styncronizing app campaign company users: " + playerIds);
-
-						LocalDate today = LocalDate.now();
-						TrackingDataRequestDTO request = new TrackingDataRequestDTO();
-						request.setFrom(today.toString());
-						request.setTo(request.getFrom());
-						List<String> means = campaigns.stream().flatMap(c -> c.getMeans().stream()).collect(Collectors.toList());
-						request.setMeans(means);
-						request.setMultimodal(true);
-						request.setPlayerId(playerIds);
-						request.setLocations(company.getLocations().stream()
-						.filter(l -> checkWorking(l, today))
-						.map(l -> {
-							LocationDTO ldto = new LocationDTO();
-							ldto.setLat(l.getLatitude());
-							ldto.setLng(l.getLongitude());
-							ldto.setRad(l.getRadius() / 1000);
-							return ldto;
-						}).collect(Collectors.toList()));
-						
-						ParameterizedTypeReference<List<TrackingData>>  resp = new ParameterizedTypeReference<List<TrackingData>>(){};
-						MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-						String s = a.getId() + ":" + a.getPassword();
-						byte[] b = Base64Utils.encode(s.getBytes());
-						String es = new String(b);
-
-						headers.add("Authorization", "Basic " + es);
-						headers.add("Accept", "application/json");
-						headers.add("Content-Type", "application/json");
-						
-						logger.info("Syncronizing app campaign company data: " + new ObjectMapper().writeValueAsString(request));
-
-						HttpEntity<TrackingDataRequestDTO> entity = new HttpEntity<>(request, headers);
-
-						List<TrackingData> list = restTemplate.exchange(a.getEndpoint(), HttpMethod.POST, entity, resp).getBody();
-						ImmutableListMultimap<String, TrackingData> playerMap = Multimaps.index(list, track -> track.getPlayerId());
-
-						playerMap.keySet().forEach(key -> {
-							List<TrackingData> playerList = playerMap.get(key);
-							logger.info("Received data for player: " + key +" - " + playerList.size()+ " entities");
-
-							DayStat stat = new DayStat();
-							stat.setPlayerId(key);
-							stat.setCampaign(campaign.getId());
-							stat.setCompany(company.getId());
-							stat.setDate(LocalDate.now().toString());
-							stat.setTrackCount(playerList.size());
-							stat.setDistances(Distances.fromMap(playerList.stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance())))));
-							stat.setTracks(playerList);
-							stat.setCo2saved(stat.computeCO2());
-							stat.setMonth(LocalDate.now().format(MONTH_PATTERN));
-
-							limitDistances(campaign, key, stat);
-
-							DayStat old = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(key, campaign.getId(), company.getId(), stat.getDate());
-							if (old != null) {
-								stat.setId(old.getId());
-							}
-							dayStatRepo.save(stat);
-
-						});
-					} catch (Exception e) {
-						logger.error("Error processing campaign/company data: {}/{}", campaign.getId(), company.getId());
-						logger.error(e.getMessage(), e);
-					}	
+					LocalDate today = LocalDate.now();
+					syncCompanyData(a, campaign, company, today, today);	
 				});
 			});
 		});
+	}
+	
+	/**
+	 * Sync company data for specified range of dates
+	 * @param campaignId
+	 * @param companyId
+	 * @param dayFrom
+	 * @param dayTo
+	 */
+	public void syncCompanyData(String campaignId, String companyId, LocalDate dayFrom, LocalDate dayTo) {
+		campaignRepo.findById(campaignId).ifPresent(campaign -> {
+			companyRepo.findById(companyId).ifPresent(company -> {
+				appRepo.findById(campaign.getApplication()).ifPresent(a -> {
+					syncCompanyData(a, campaign, company, dayFrom, dayTo);
+				});
+			});
+		});
+	}
+
+	/**
+	 * @param a
+	 * @param campaigns
+	 * @param campaign
+	 * @param company
+	 * @param day
+	 */
+	private void syncCompanyData(PGApp a, Campaign campaign, Company company, LocalDate dayFrom, LocalDate dayTo) {
+		try {
+
+			logger.info("Syncronizing app campaign company: " + company.getCode());
+			// company employees subscribed to this campaign 
+			List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(company.getId(), campaign.getId());
+			if (employees.isEmpty()) return;
+			Set<String> codeSet = employees.stream().map(e -> e.getCode()).collect(Collectors.toSet());
+			// users corresponding to this employees
+			List<User>  users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaign.getId(), company.getCode(), codeSet);
+			if (users.isEmpty()) return;
+			List<String> playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+			logger.info("Styncronizing app campaign company users: " + playerIds);
+
+			LocalDate d = dayFrom;
+			while (!d.isAfter(dayTo)) {
+				final LocalDate day = d;
+				TrackingDataRequestDTO request = new TrackingDataRequestDTO();
+				request.setFrom(day.toString());
+				request.setTo(request.getFrom());
+				List<String> means = campaign.getMeans();
+				request.setMeans(means);
+				request.setMultimodal(true);
+				request.setPlayerId(playerIds);
+				request.setLocations(company.getLocations().stream()
+				.filter(l -> checkWorking(l, day))
+				.map(l -> {
+					LocationDTO ldto = new LocationDTO();
+					ldto.setLat(l.getLatitude());
+					ldto.setLng(l.getLongitude());
+					ldto.setRad(l.getRadius() / 1000);
+					return ldto;
+				}).collect(Collectors.toList()));
+				
+				ParameterizedTypeReference<List<TrackingData>>  resp = new ParameterizedTypeReference<List<TrackingData>>(){};
+				MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+				String s = a.getId() + ":" + a.getPassword();
+				byte[] b = Base64Utils.encode(s.getBytes());
+				String es = new String(b);
+
+				headers.add("Authorization", "Basic " + es);
+				headers.add("Accept", "application/json");
+				headers.add("Content-Type", "application/json");
+				
+				logger.info("Syncronizing app campaign company data: " + new ObjectMapper().writeValueAsString(request));
+
+				HttpEntity<TrackingDataRequestDTO> entity = new HttpEntity<>(request, headers);
+
+				List<TrackingData> list = restTemplate.exchange(a.getEndpoint(), HttpMethod.POST, entity, resp).getBody();
+				ImmutableListMultimap<String, TrackingData> playerMap = Multimaps.index(list, track -> track.getPlayerId());
+
+				playerMap.keySet().forEach(key -> {
+					List<TrackingData> playerList = playerMap.get(key);
+					logger.info("Received data for player: " + key +" - " + playerList.size()+ " entities");
+
+					DayStat stat = new DayStat();
+					stat.setPlayerId(key);
+					stat.setCampaign(campaign.getId());
+					stat.setCompany(company.getId());
+					stat.setDate(day.toString());
+					stat.setTrackCount(playerList.size());
+					stat.setDistances(Distances.fromMap(playerList.stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance())))));
+					stat.setTracks(playerList);
+					stat.setCo2saved(stat.computeCO2());
+					stat.setMonth(day.format(MONTH_PATTERN));
+
+					limitDistances(campaign, key, stat);
+
+					DayStat old = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(key, campaign.getId(), company.getId(), stat.getDate());
+					if (old != null) {
+						stat.setId(old.getId());
+					}
+					dayStatRepo.save(stat);
+
+				});				
+				d = dayFrom.plusDays(1);
+			}
+			
+
+		} catch (Exception e) {
+			logger.error("Error processing campaign/company data: {}/{}", campaign.getId(), company.getId());
+			logger.error(e.getMessage(), e);
+		}
 	}
 
 	/**

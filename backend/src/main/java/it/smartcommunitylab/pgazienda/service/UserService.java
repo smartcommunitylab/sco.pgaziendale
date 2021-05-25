@@ -136,6 +136,7 @@ public class UserService {
         user.setResetKey(RandomUtil.generateResetKey());
         user.setResetDate(Instant.now());
         user.setActivated(true);
+        user.setPlayerId(userDTO.getPlayerId());
 
         if (companyId != null) {
             // check roles: only the company roles are applicable
@@ -163,6 +164,7 @@ public class UserService {
         user.setResetDate(Instant.now());
         user.setActivated(true);
     	user.setRoles(userDTO.getRoles());
+    	user.setPlayerId(userDTO.getPlayerId());
         
         userRepository.save(user);
         log.debug("Created Information for User: {}", user);

@@ -12,7 +12,7 @@
             class="w-1/2 btn-close"
             aria-label="Close modal"
             v-if="isAssociated(campaign)"
-            @click="disassocia(campaign)"
+            @click="disassociaPopup(campaign)"
           >
             Disassocia
           </button>
@@ -28,18 +28,45 @@
         </div>
       </div>
     </div>
+    <modal v-show="disassociaModalVisible">
+      <template v-slot:header> Disassocia dalla campagna </template>
+      <template v-slot:body>
+        <div class="text-center text-xl	">Sei sicuro di voler procedere con la cancellazione dalla campagna <b>{{disassociaTmpCampaign.title}}</b>?</div>
+      </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn-close"
+          @click="deleteConfirm"
+          aria-label="Close modal"
+        >
+          Conferma
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeDeleteModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+      </template>
+    </modal>
   </div>
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
 import EventBus from "@/components/eventBus";
 import { campaignService } from "../../services/campaign.services";
+import Modal from "@/components/Modal.vue";
 
 export default {
-  components: {},
+  components: {Modal},
   data() {
     return {
+      disassociaTmpCampaign:null,
       campaigns: [],
+      disassociaModalVisible:false
     };
   },
   computed: {
@@ -94,6 +121,19 @@ export default {
         );
       else return false;
     },
+      disassociaPopup(campaign) {
+    this.disassociaModalVisible = true;
+    this.disassociaTmpCampaign=campaign;
+  },
+  closeDeleteModal() {
+      this.disassociaModalVisible = false;
+      this.disassociaTmpCampaign=null;
+  },
+  deleteConfirm() {
+      this.disassociaModalVisible = false;
+      this.disassocia(this.disassociaTmpCampaign);
+      this.disassociaTmpCampaign=null;
+    },
   },
   mounted() {
     EventBus.$on("ASSOCIATE_CAMPAIGN_FORM", () => {
@@ -119,6 +159,7 @@ export default {
   beforeDestroy() {
     EventBus.$off("ASSOCIATE_CAMPAIGN_FORM");
   },
+
 };
 </script>
 <style scoped></style>

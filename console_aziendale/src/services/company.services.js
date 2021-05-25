@@ -13,7 +13,11 @@ export const companyService = {
 };
 //get all the companies
 function getAllCompanies() {
-    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API).then(
+    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API,{
+        params: {
+          size: 1200
+        }
+      }).then(
         res => {
             if (res && res.data && res.data.content) {
                 return Promise.resolve(res.data.content);

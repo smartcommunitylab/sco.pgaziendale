@@ -21,11 +21,15 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import it.smartcommunitylab.pgazienda.Constants;
@@ -46,6 +50,8 @@ import it.smartcommunitylab.pgazienda.web.rest.errors.RepeatingSubscriptionExcep
  */
 @Service
 public class CampaignService {
+
+	private static final Logger logger = LoggerFactory.getLogger(CampaignService.class);
 
 	@Autowired
 	private CompanyRepository companyRepo;
@@ -116,7 +122,14 @@ public class CampaignService {
 		if (company == null || company.getCampaigns() == null || !company.getCampaigns().contains(campaignId)) throw new IllegalArgumentException("Invalid company");
 		// app user role
 		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
-		// not yet subscribed
+
+		// control key already used
+		List<User> registered = userService.getUserByEmployeeCode(campaignId, companyCode, key);
+		if (registered != null && registered.size() > 0 && !registered.get(0).getId().equals(user.getId())) {
+			throw new IllegalArgumentException("User code already in use: " + campaignId +", " + companyCode + ", " + key);			
+		}
+		
+		;// not yet subscribed
 		if (role == null || role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId))) {
 			Employee employee = employeeRepo.findOneByCompanyIdAndCode(company.getId(), key).orElse(null);
 			if (employee == null ) throw new IllegalArgumentException("Invalid user key");
@@ -222,6 +235,34 @@ public class CampaignService {
 			campaignRepo.save(campaign);
 		});
 		return campaignRepo.findById(campaignId).orElse(null);
+	}
+
+	@Scheduled(fixedDelay=1000*60*60*24)
+	public void syncSubscriptions() {
+		List<Company> companies = companyRepo.findAll();
+		companies.forEach(company -> {
+			List<String> campaignIds = company.getCampaigns();
+			Set<String> all = employeeRepo.findByCompanyId(company.getId()).stream().map(e -> e.getCode()).collect(Collectors.toSet());
+			campaignIds.forEach(campaignId -> {
+				Set<String> participating = employeeRepo.findByCompanyIdAndCampaigns(company.getId(), campaignId).stream().map(e -> e.getCode()).collect(Collectors.toSet());
+				all.forEach(code -> {
+					// employee potentially subscribed, but not having campaigns data filled 
+					if (!participating.contains(code)) {
+						List<User> user = userService.getUserByEmployeeCode(campaignId, company.getCode(), code);
+						if (user != null && !user.isEmpty()) {
+							logger.info("Non-sychronized employee found: {}, {}", company.getCode(), code);
+							Optional<Employee> employee = employeeRepo.findOneByCompanyIdAndCode(company.getId(), code);
+							if (employee.isPresent()) {
+								Employee obj = employee.get();
+								obj.getCampaigns().add(campaignId);
+								employeeRepo.save(obj);
+								logger.info("Non-sychronized employee added campaign: {}, {}: {}", company.getCode(), code, campaignId);
+							}
+						}
+					}
+				});
+			});
+		});
 	}
 
 }
