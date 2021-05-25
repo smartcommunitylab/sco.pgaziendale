@@ -234,7 +234,7 @@ public class TrackingDataService {
 					dayStatRepo.save(stat);
 
 				});				
-				d = dayFrom.plusDays(1);
+				d = d.plusDays(1);
 			}
 			
 
