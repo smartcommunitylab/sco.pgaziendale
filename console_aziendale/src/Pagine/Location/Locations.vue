@@ -34,12 +34,14 @@
     <profilo-location v-if="actualLocation && actualLocation.item" />
     <div v-else class="select-element"> Seleziona una sede per visualizzare i dettagli</div>
     <modal v-show="deleteModalVisible">
-      <template v-slot:header> Cancella Sede </template>
-      <template v-slot:body> Sei sicuro di voler cancellare la sede? </template>
+
+      <template v-slot:header> <div class="text-danger">Cancella Sede </div></template>
+      <template v-slot:body> <div class="text-center font-semibold pt-16 text-2xl">Sei sicuro di voler cancellare la sede? </div> </template>
       <template v-slot:footer>
         <button
           type="button"
-          class="btn-close"
+          class="mtmb mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-danger rounded shadow ripple hover:shadow-lg focus:outline-none"
+
           @click="deleteConfirm"
           aria-label="Close modal"
         >
@@ -47,7 +49,8 @@
         </button>
         <button
           type="button"
-          class="btn-close"
+          class="mt-2 mb-2 mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+
           @click="closeDeleteModal"
           aria-label="Close modal"
         >
@@ -56,14 +59,17 @@
       </template>
     </modal>
     <modal v-show="editModalVisible">
-      <template v-slot:header> {{ popup.title }} </template>
+
+      <template v-slot:header > <div class="text-primary">{{ popup.title }} </div></template>
+
       <template v-slot:body>
         <location-form />
       </template>
       <template v-slot:footer>
         <button
           type="button"
-          class="btn-close"
+          class="mt-2 mb-2 mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+
           @click="saveLocation"
           aria-label="Close modal"
         >
@@ -71,7 +77,8 @@
         </button>
         <button
           type="button"
-          class="btn-close"
+          class="mtmb mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-danger rounded shadow ripple hover:shadow-lg focus:outline-none"
+
           @click="closeModal"
           aria-label="Close modal"
         >
