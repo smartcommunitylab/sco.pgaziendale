@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="w-full max-w-4xl flex h-full flex-wrap mx-auto my-32 lg:my-0 lg:mr-16">
+    <div class="w-full max-w-4xl flex h-full flex-wrap mx-auto my-32 lg:my-0 lg:mr-32">
       <div
         id="profile"
         class="min-w-full w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none bg-white opacity-75 mx-6 lg:mx-0"
@@ -8,24 +8,24 @@
         <div class="w-full">
           <button
             @click="deleteLocation"
-            class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
+            class="mr-8 mt-12 float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold lg:mt-12 lg:mr-28 md:mt-20 md:mr-16 rounded inline-flex items-center"
           >
             <delete-icon />
           </button>
           <button
             @click="editLocation"
-            class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
+            class="mt-12 float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold lg:mt-12 px-2 md:mt-20 rounded inline-flex items-center"
           >
-            <pencil-outline-icon />
+            <pencil-outline-icon/>
           </button>
         </div>
-        <div class="p-4 md:p-12 text-center lg:text-left">
-          <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualLocation.item.id }}</h1>
+        <div class="p-4 md:p-12 text-center lg:text-center lg:px-24">
+          <h1 class="px-28 text-3xl font-bold pt-8 md:px-40 lg:pt-0">{{ actualLocation.item.id }}</h1>
           <div
-            class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
           ></div>
           <p
-            class="pt-4 text-base font-bold flex items-center justify-center lg:justify-start"
+            class="pt-4 text-base font-bold flex items-center justify-center "
           >
             <address-icon />Indirizzo: {{ actualLocation.item.address }}
             {{ actualLocation.item.streetNumber }} {{ actualLocation.item.zip }}
@@ -33,7 +33,7 @@
           </p>
 
           <p
-            class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+            class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center"
           >
             <gps-icon /> Coordinate: {{ actualLocation.item.latitude }},
             {{ actualLocation.item.longitude }}
@@ -68,20 +68,18 @@
           </l-map>
           </div>
           <div
-            class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
+            class="pt-4 text-gray-600 text-xs md:text-sm flex items-center justify-center"
             v-if="
               actualLocation.item.nonWorking && actualLocation.item.nonWorking.length>0
             "
           >
             <calendar-remove-icon />Giorni della settimana non lavorativi:
-            <div v-html="getNonWorking(actualLocation.item.nonWorking)"></div>
           </div>
+          <div class="font-bold " v-html="getNonWorking(actualLocation.item.nonWorking)"></div>
           <div
             class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
             v-if="actualLocation.item.nonWorkingDays  && actualLocation.item.nonWorkingDays.length>0"
           >
-            <calendar-remove-icon /> Giorni non lavorativi:
-            <div v-html="getNonWorkingDays(actualLocation.item.nonWorkingDays)"></div>
           </div>
         </div>
       </div>
@@ -130,11 +128,22 @@ export default {
     },
     initMap() {},
     getNonWorking(days) {
-      var returnDays = "";
+      var returnDays = " ";
+      var x = 0;
       if (days)
+      {
         days.forEach((element) => {
-          returnDays += locationService.getDayByInt(element) + "<br>";
+          if(x == 0)
+            {
+              returnDays += "| " + locationService.getDayByInt(element) + " | ";
+              x++;
+            }
+          else
+          {
+            returnDays += "" + locationService.getDayByInt(element) + " | ";
+          }
         });
+      }
       return returnDays;
     },
     getNonWorkingDays(days) {

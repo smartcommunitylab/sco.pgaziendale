@@ -234,7 +234,7 @@
         </div>
       </div>
       </div>
-      <div class="mt-2 lg:grid grid-cols-2 mx-auto gap-x-48 md:DAFARE">
+      <div class="mt-2 lg:grid grid-cols-2 mx-auto gap-x-48">
       <!-- <div class="mx-auto text-center lg:gap-x-48 lg:mx-auto lg:text-center md:grid grid-cols-2 md:gap-x-3"> -->
       <div class="field-group">
         <div class="form-group" :class="{ 'form-group--error': $v.nonWorking.$error }">
@@ -259,7 +259,7 @@
           </div>
         </div> -->
       </div>
-      <div class="field-group mt-6">
+      <div class="field-group mt-6 w-full">
         <b class="mx-auto">Giorni di chiusura</b>
         <div
           class="form-group"
