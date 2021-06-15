@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import Back from "vue-material-design-icons/ArrowLeft";
 import LoginIcon from 'vue-material-design-icons/LoginVariant.vue';
+import LockIcon from 'vue-material-design-icons/Lock.vue'
 import PencilOutlineIcon from 'vue-material-design-icons/PencilOutline.vue';
 import ListCampaingsIcon from 'vue-material-design-icons/FormatListText.vue';
 import LogoutIcon from 'vue-material-design-icons/LogoutVariant.vue';
@@ -62,6 +63,7 @@ Vue.component('l-circle',LCircle);
 Vue.config.productionTip = false
 Vue.component('pencil-outline-icon', PencilOutlineIcon);
 Vue.component('back-icon',Back);
+Vue.component('lock-icon', LockIcon);
 Vue.component('login-icon', LoginIcon);
 Vue.component('info-outline-icon', InformationOutlineIcon);
 Vue.component('logout-icon', LogoutIcon);

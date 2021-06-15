@@ -148,7 +148,7 @@
               aria-modal="true"
               aria-labelledby="modal-headline"
             >
-              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div class="bg-white px-4 pt-5 mr-14 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
                   <div
                     class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
@@ -157,13 +157,13 @@
                   </div>
                   <div class="mt-3 text-center sm:mt-0 sm:ml-4">
                     <h3
-                      class="text-lg leading-6 font-medium text-gray-900 text-left"
+                      class="text-lg leading-6 mb-3 text-gray-900 text-center font-semibold"
                       id="modal-headline"
                     >
                       Importa dipendenti
                     </h3>
                     <button
-                      class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+                      class="mx-2 mb-3 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
                     >
                       <a href="/files/exampleEmployee.csv" download>Scarica file di esempio</a>
                     </button>
@@ -210,7 +210,7 @@
               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   @click="importEmployees"
-                  class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+                  class="mx-2 inline-block px-6 py-2 text-xs mr-20 font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
                 >
                   Importa dipendenti
                 </button>
@@ -226,7 +226,7 @@
         </div>
       </transition>
       <div v-if="allEmployees && allEmployees.items && allEmployees.items.length > 0">
-        <generic-table
+        <generic-table class="text-center"
           :data="allEmployees.items"
           :columns="gridColumns"
           :header="headerColumns"
@@ -258,12 +258,18 @@
     <div v-else class="select-element"> Seleziona un dipendente per visualizzare i dettagli</div>
 
     <modal v-show="deleteModalVisible">
-      <template v-slot:header> Cancella Dipendente </template>
-      <template v-slot:body> Sei sicuro di voler cancellare il dipendente? </template>
+      <template v-slot:header>
+        <div class="text-primary">Cancella Dipendente </div>
+      </template>
+      <template v-slot:body>
+        <div class="text-3xl text-center pt-16">
+          <b> Sei sicuro di voler cancellare il dipendente?</b>
+        </div>
+      </template>
       <template v-slot:footer>
         <button
           type="button"
-          class="btn-close"
+          class="btn-close inline-block px-6 py-2 my-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-danger rounded shadow ripple hover:shadow-lg focus:outline-none"
           @click="deleteConfirm"
           aria-label="Close modal"
         >
@@ -271,7 +277,7 @@
         </button>
         <button
           type="button"
-          class="btn-close"
+          class="btn-close inline-block mx-4 px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
           @click="closeDeleteModal"
           aria-label="Close modal"
         >
@@ -280,14 +286,18 @@
       </template>
     </modal>
     <modal v-show="editModalVisible">
-      <template v-slot:header> {{ popup.title }} </template>
+      <template v-slot:header>
+        <div class="text-primary">
+          {{ popup.title }} 
+        </div> 
+      </template>
       <template v-slot:body>
         <employee-form />
       </template>
       <template v-slot:footer>
         <button
           type="button"
-          class="btn-close"
+          class="inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
           @click="saveEmployee"
           aria-label="Close modal"
         >
@@ -295,7 +305,7 @@
         </button>
         <button
           type="button"
-          class="btn-close"
+          class="inline-block px-6 py-2 mt-2 mb-2 mx-4 mr-1 text-xs font-medium leading-6 text-center text-white uppercase transition bg-danger rounded shadow ripple hover:shadow-lg focus:outline-none"
           @click="closeModal"
           aria-label="Close modal"
         >

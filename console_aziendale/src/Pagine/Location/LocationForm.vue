@@ -83,6 +83,7 @@
             id=""
             required
             placeholder="CAP *"
+            maxlength="5"
             v-model.trim="$v.zip.$model"
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 text-center"
           />

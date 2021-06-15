@@ -16,7 +16,7 @@
           <button
             v-if="role == 'ROLE_ADMIN'"
             @click="editAzienda"
-            class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
+            class="float-right font-bold py-2 px-4 rounded inline-flex items-center"
           >
             <pencil-outline-icon />
           </button>

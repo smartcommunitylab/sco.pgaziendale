@@ -2,7 +2,7 @@
   <div class="flex flex-col lg:flex-row">
     <div class="bg-green-300 w-auto lg:w-3/6 mx-2 my-2 pb-16 relative">
       <div v-if="allLocations && allLocations.items && allLocations.items.length > 0">
-        <generic-table
+        <generic-table class="text-center"
           :data="allLocations.items"
           :columns="gridColumns"
           :header="headerColumns"
@@ -126,22 +126,22 @@
               aria-modal="true"
               aria-labelledby="modal-headline"
             >
-              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div class="bg-white px-4 pt-5 mr-14 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
                   <div
                     class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
                   >
-                    <import-icon id="import-icon" />
+                    <import-icon id="import-icon"/>
                   </div>
                   <div class="mt-3 text-center sm:mt-0 sm:ml-4">
                     <h3
-                      class="text-lg leading-6 font-medium text-gray-900 text-left"
+                      class="text-lg leading-6 font-medium text-gray-900 text-center mb-3 font-semibold"
                       id="modal-headline"
                     >
                       Importa sedi
                     </h3>
                     <button
-                      class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+                      class="mx-2 inline-block mb-3 px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
                     >
                       <a href="/files/exampleLocations.csv" download>Scarica file di esempio</a>
                     </button>
@@ -188,7 +188,7 @@
               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   @click="importLocations"
-                  class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+                  class="mx-2 inline-block mr-24 px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
                 >
                   Importa sedi
                 </button>

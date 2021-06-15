@@ -2,7 +2,7 @@
   <div class="flex flex-col lg:flex-row">
     <div class="bg-green-300 lg:w-3/6 mx-2 my-2 pb-16 relative">
       <div v-if="allCampaigns && allCampaigns.items && allCampaigns.items.length > 0">
-        <generic-table
+        <generic-table class="text-center"
           :data.sync="allCampaigns.items"
           :columns="gridColumns"
           :header="headerColumns"
@@ -73,7 +73,9 @@
       </template>
     </modal>
     <modal v-show="associateCampaignModalVisible">
-      <template v-slot:header> {{ popup.title }} </template>
+      <template v-slot:header>
+        <div class="text-primary"> {{ popup.title }} </div>
+      </template>
       <template v-slot:body>
         <associate-form />
       </template>
@@ -81,7 +83,7 @@
 
         <button
           type="button"
-          class="btn-close"
+          class="bg-primary border-2 border-primary text-white px-6 py-2 mb-2 mt-2 flex-1 mr-2 rounded shadow ripple hover:shadow-lg hover:bg-primary_light hover:border-primary_light focus:outline-none"
           @click="closeModal"
           aria-label="Close modal"
         >

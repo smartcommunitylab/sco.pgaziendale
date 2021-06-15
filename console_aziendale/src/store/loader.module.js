@@ -1,6 +1,6 @@
 const state = {
     loading: false,
-        requestsPending: 0,
+    requestsPending: 0,
 };
 
 const actions = {

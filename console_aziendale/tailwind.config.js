@@ -12,7 +12,10 @@ module.exports = {
       warning:'#ffc107',
       info:'#17a2b8',
       white:"#FFFFFF",
-      background:"#f1f3f4"
+      background:"#f1f3f4",
+      gray: "#778899",
+      black: "#000000",
+      yellow: "#FFFF00",
     }
   },
   variants: {

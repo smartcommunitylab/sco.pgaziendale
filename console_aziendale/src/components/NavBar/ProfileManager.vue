@@ -2,17 +2,19 @@
   <div>
     <account-cog-icon @click="profileSetting = true" />
     <modal v-show="profileSetting">
-      <template v-slot:header> Account</template>
+      <template v-slot:header> 
+        <div class="text-primary">Account</div>
+      </template>
       <template v-slot:body>
-        <div class="mb-20 flex flex-wrap justify-between">
-          <div class="field-group mb-4 w-full">
+        <div class="flex flex-wrap justify-center">
+          <div class="field-group mb-4 pl-2 text-lg mt-3">
             <div class="name flex flex-row">
-              <div class="font-bold">Nome:</div>
-              <div class="w-full text-right">{{ user.name }} {{ user.surname }}</div>
+              <div class="font-bold ">Nome:</div>
+              <div class="w-full text-center pr-6">{{ user.name }} {{ user.surname }}</div>
             </div>
             <div class="username flex flex-row">
               <div class="font-bold">Username:</div>
-              <div class="w-full text-right">{{ user.username }}</div>
+              <div class="w-full text-center pl-24">{{ user.username }}</div>
             </div>
             <div class="role flex flex-row">
               <div class="font-bold">Ruoli:</div>
@@ -36,7 +38,7 @@
             </div>
             <button
               type="button"
-              class="btn-close"
+              class="ml-36  bg-danger border-2 border-danger text-white p-2 mt-6 flex-1 mr-2 rounded shadow ripple hover:shadow-lg focus:outline-none"
               aria-label="Close modal"
               @click="changingPwd = !changingPwd"
             >
@@ -151,7 +153,7 @@
       <template v-slot:footer>
         <button
           type="button"
-          class="btn-close"
+          class="bg-primary border-2 border-primary text-white p-2 mb-3 mt-3 flex-1 mr-2 rounded shadow ripple hover:shadow-lg hover:bg-primary_light hover:border-primary_light focus:outline-none"
           aria-label="Close modal"
           @click="profileSetting = false"
         >

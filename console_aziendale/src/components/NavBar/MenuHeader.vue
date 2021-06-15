@@ -101,7 +101,7 @@
             to="/dipendenti"
             v-if="
               (role == 'ROLE_ADMIN' && adminCompany != null) ||
-              (role == 'ROLE_ADMIN' && actualCompany != null) ||
+              (role == 'ROLE_COMPANY_ADMIN' && actualCompany != null) ||
               (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
             "
           >
@@ -158,7 +158,7 @@
         <profile-manager />
       </div>
       <div class="flex items-center">
-        <div class="hidden md:block md:flex md:justify-between md:bg-transparent"></div>
+        <div class="hidden md:block md:justify-between md:bg-transparent"></div>
       </div>
       <aside
         class="transform top-0 left-0 w-64 bg-primary text-white fixed h-full ease-in-out transition-all duration-300 z-30"
@@ -200,16 +200,17 @@
             to="/locations"
             v-if="
               (role == 'ROLE_ADMIN' && adminCompany != null) ||
-              (role == 'ROLE_COMPANY_ADMIN' && actualCompany != null)
+              (role == 'ROLE_COMPANY_ADMIN' && actualCompany != null) 
             "
           >
             <span class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
-                <sedi-icon />
+                <sedi-icon/>
               </span>
               <span>Gestione Sedi</span></span
             >
           </router-link>
+          <div v-if="allLocations && allLocations.items && allLocations.items.length > 0">
           <router-link
             to="/dipendenti"
             v-if="
@@ -225,17 +226,67 @@
               <span>Gestione Dipendenti</span></span
             >
           </router-link>
-          <router-link
-            to="/gestionecampagne"
-            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
+          </div>
+          <div v-else>
+            <button
+            class="w-full focus:outline-none"
+            @click="redirectAlertEmployees"
+            v-if="
+              (role == 'ROLE_ADMIN' && adminCompany != null) ||
+              (role == 'ROLE_COMPANY_ADMIN' && actualCompany != null) ||
+              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+            "
           >
+            <span class="flex items-center p-4 bg-gray"
+              ><span class="mr-2">
+                <users-icon />
+              </span>
+              <span>Gestione Dipendenti 
+                <button class="pl-6 focus:outline-none"> <lock-icon/> </button>
+              </span>
+            </span>
+          </button>
+          </div>
+          
+
+          <div v-if="allLocations && allLocations.items && allLocations.items.length > 0 
+                     && allEmployees && allEmployees.items && allEmployees.items.length > 0">
+            <router-link
+            to="/gestionecampagne"
+            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
             <span class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
                 <podio-icon />
               </span>
-              <span>Gestione Campagne</span></span
-            ></router-link
-          >
+              <span>Gestione Campagne</span></span>
+            </router-link>
+          </div>
+          <div v-else-if="allLocations.items.length == 0">
+            <button
+            class="w-full focus:outline-none"
+            @click="redirectAlertCampaigns"
+            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
+            <span class="flex items-center p-4 bg-gray"
+              ><span class="mr-2">
+                <podio-icon />
+              </span>
+              <span>Gestione Campagne <button class="pl-6 focus:outline-none"> <lock-icon/> </button> </span></span>
+            </button>
+          </div>
+          <div v-else-if="allEmployees.items.length == 0">
+            <button
+            class="w-full focus:outline-none"
+            @click="redirectAlertCampaigns2"
+            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
+            <span class="flex items-center p-4 bg-gray"
+              ><span class="mr-2">
+                <podio-icon />
+              </span>
+              <span>Gestione Campagne <button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
+            </button>
+          </div>
+
+          
           <router-link
             to="/stats"
             v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
@@ -265,6 +316,7 @@
 import { mapState, mapActions } from "vuex";
 import ProfiloHeader from "./ProfiloHeader.vue";
 import ProfileManager from "./ProfileManager.vue";
+
 export default {
   name: "MenuHeader",
   components: {
@@ -278,6 +330,9 @@ export default {
     ...mapState("account", ["status", "user", "role"]),
     ...mapState("navigation", ["page"]),
     ...mapState("company", ["adminCompany", "actualCompany"]),
+    ...mapState("location", ["allLocations"]),
+    ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
+    ...mapState("employee", ["allEmployees"])
   },
   methods: {
     drawer() {
@@ -285,6 +340,24 @@ export default {
     },
     resetCompany() {
       this.resetCompanyAdmin();
+    },
+    redirectAlertEmployees() {
+      if(confirm("Per accedere alla gestione dei dipendenti, inserire almeno una sede! \nCliccando OK verrai indirizzato alla pagina di gestione delle sedi"))
+      {
+        this.$router.push("/locations"); //da sistemare -> se siamo in Gestione Sedi non entra nel corpo dell'if
+      }
+    },
+    redirectAlertCampaigns() {
+      if(confirm("Per accedere alla gestione delle campagne, inserire almeno una sede! \nCliccando OK verrai indirizzato alla pagina di gestione delle sedi"))
+      {
+        this.$router.push("/locations"); //da sistemare -> se siamo in Gestione Sedi non entra nel corpo dell'if
+      }
+    },
+    redirectAlertCampaigns2() {
+      if(confirm("Per accedere alla gestione delle campagne, inserire almeno un dipendente. \nCliccando OK verrai indirizzato alla pagina di gestione dei dipendenti"))
+      {
+        this.$router.push("/dipendenti"); //da sistemare -> se siamo in Gestione Sedi non entra nel corpo dell'if
+      }
     },
     goHome() {
       if ( this.role == 'ROLE_ADMIN' && this.adminCompany == null) 

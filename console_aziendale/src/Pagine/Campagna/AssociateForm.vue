@@ -3,13 +3,13 @@
     <div v-if="campaigns">
       <div v-for="campaign in campaigns" :key="campaign.id">
         <div
-          class="flex items-center justify-center"
+          class="flex items-center text-left px-96 ml-4"
           v-if="campaigns && campaigns.length > 0"
         >
-          <div class="w-1/2">{{ campaign.title }}</div>
+          <div class="w-1/2 font-bold">{{ campaign.title }}</div>
           <button
             type="button"
-            class="w-1/2 btn-close"
+            class="bg-danger border-2 border-danger text-white p-2 mb-3 mt-3 flex-1 mr-2 rounded shadow ripple hover:shadow-lg focus:outline-none"
             aria-label="Close modal"
             v-if="isAssociated(campaign)"
             @click="disassociaPopup(campaign)"
@@ -18,7 +18,7 @@
           </button>
           <button
             type="button"
-            class="w-1/2 btn-close"
+            class="bg-secondary border-2 border-secondary text-white p-2 mb-3 mt-3 flex-1 mr-2 rounded shadow ripple hover:shadow-lg hover:bg-secondary_light hover:border-secondary_light focus:outline-none"
             aria-label="Close modal"
             v-else
             @click="associa(campaign)"

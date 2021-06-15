@@ -1,7 +1,7 @@
 <template>
   <form action="" id="addEmployee">
-    <div class="mb-20 flex flex-wrap justify-between">
-      <div class="field-group mb-4 w-full">
+    <div class="mb-0">
+      <div class="field-group mb-4 px-96 mx-12">
         <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
           <label class="field-label" for="first_name">Nome </label>
           <input
@@ -9,7 +9,7 @@
             name="employeeName"
             placeholder="Nome *"
             v-model.trim="$v.name.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-3 mt-4 flex-1 mr-2"
             id="employeeName"
           />
         </div>
@@ -17,7 +17,7 @@
           <div class="error" v-if="!$v.name.required">Il campo nome e' richiesto.</div>
         </div>
       </div>
-      <div class="field-group mb-4 w-full">
+      <div class="field-group mb-4 px-96 mx-12">
         <div class="form-group" :class="{ 'form-group--error': $v.surname.$error }">
           <label class="field-label" for="first_name">Cognome </label>
           <input
@@ -25,7 +25,7 @@
             name="employeeSurname"
             placeholder="Cognome *"
             v-model.trim="$v.surname.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-3 flex-1 mr-2"
             id="employeeName"
           />
         </div>
@@ -35,7 +35,7 @@
           </div>
         </div>
       </div>
-      <div class="field-group mb-4 w-full">
+      <div class="field-group mb-4 px-96 mx-12">
         <div class="form-group" :class="{ 'form-group--error': $v.code.$error }">
           <label class="field-label" for="first_name">Codice</label>
           <input
@@ -44,7 +44,7 @@
             id="employeeCode"
             placeholder="Codice *"
             v-model.trim="$v.code.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-3 flex-1 mr-2"
           />
           <info-box
             :msg="'Il codice univoco con cui viene identificato il dipendente a livello di gioco'"
@@ -55,14 +55,14 @@
         </div>
       </div>
 
-      <div class="field-group mb-6 w-full">
+      <div class="field-group mb-4 px-96 mx-12">
         <div
-          class="flex flex-col sm:flex-row  mt-3 justify-stretch  "
+          class="flex flex-col sm:flex-row mt-3 justify-stretch"
           :class="{ 'form-group--error': $v.location.$error }"
         >
           <label class="field-label" for="password">Sede </label>
-          <select
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-none mr-2 w-40"
+          <select required
+            class="focus:border-blue-600 border-2 p-2 flex-none mr-2 w-48"
             v-model.trim="$v.location.$model"
           >
             <option v-for="loc in allLocations.items" :key="loc.id" :value="loc.id">

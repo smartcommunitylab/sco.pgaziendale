@@ -53,7 +53,7 @@ function getAllLocations(companyId) {
       }
     } ).then(
         res => {
-            if (res && res.data && res.data) {
+            if (res && res.data) {
                 return Promise.resolve(res.data);
             }
             else return Promise.reject(null);
