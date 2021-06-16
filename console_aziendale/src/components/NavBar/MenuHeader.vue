@@ -264,7 +264,7 @@
           <div v-else-if="allLocations.items.length == 0">
             <button
             class="w-full focus:outline-none"
-            @click="redirectAlertCampaigns"
+            @click="redirectAlertCampaigns1"
             v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
             <span class="flex items-center p-4 bg-gray"
               ><span class="mr-2">
@@ -287,17 +287,55 @@
           </div>
 
           
-          <router-link
+          <div v-if="(allCampaigns && allCampaigns.items && allCampaigns.items.length > 0) && 
+              ((allEmployees && allEmployees.items && allEmployees.items.length > 0) || (allLocations
+                && allLocations.items && allLocations.items.length > 0))">
+            <router-link
             to="/stats"
             v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
-          >
+            >
             <span class="flex items-center p-4 hover:bg-white hover:text-primary">
               <span class="mr-2">
                 <chart-icon />
               </span>
               <span>Statistiche</span></span
             >
-          </router-link>
+            </router-link>
+          </div>
+          
+          <div v-else-if="(allCampaigns && allCampaigns.items && allCampaigns.items.length == 0) ||
+            ((allEmployees && allEmployees.items && allEmployees.items.length == 0) && (allLocations && 
+            allLocations.items && allLocations.items.length == 0))"> 
+            <div v-if="(allCampaigns.items.length == 0)">
+              <button
+              class="w-full focus:outline-none"
+              @click="redirectAlertStats1"
+              v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
+              <span class="flex items-center p-4 bg-gray"
+              ><span class="mr-2">
+                <chart-icon />
+              </span>
+              <span>Statistiche<button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
+            </button>
+            </div>
+            <div v-else>
+              <button
+              class="w-full focus:outline-none"
+              @click="redirectAlertStats2"
+              v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
+              <span class="flex items-center p-4 bg-gray"
+              ><span class="mr-2">
+                <chart-icon />
+              </span>
+              <span>Statistiche<button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
+              </button>
+            </div>
+            
+          </div>
+          
+          
+
+
           <router-link to="/" v-on:click.native="logout">
             <span class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -342,21 +380,33 @@ export default {
       this.resetCompanyAdmin();
     },
     redirectAlertEmployees() {
-      if(confirm("Per accedere alla gestione dei dipendenti, inserire almeno una sede! \nCliccando OK verrai indirizzato alla pagina di gestione delle sedi"))
+      if(confirm("Per accedere alla gestione dei dipendenti, inserire:\n--> almeno una sede\nCliccando OK verrai indirizzato alla pagina di gestione delle sedi"))
       {
         this.$router.push("/locations"); //da sistemare -> se siamo in Gestione Sedi non entra nel corpo dell'if
       }
     },
-    redirectAlertCampaigns() {
-      if(confirm("Per accedere alla gestione delle campagne, inserire almeno una sede! \nCliccando OK verrai indirizzato alla pagina di gestione delle sedi"))
+    redirectAlertCampaigns1() {
+      if(confirm("Per accedere alla gestione delle campagne, inserire:\n--> almeno una sede \nCliccando OK verrai indirizzato alla pagina di gestione delle sedi"))
       {
         this.$router.push("/locations"); //da sistemare -> se siamo in Gestione Sedi non entra nel corpo dell'if
       }
     },
     redirectAlertCampaigns2() {
-      if(confirm("Per accedere alla gestione delle campagne, inserire almeno un dipendente. \nCliccando OK verrai indirizzato alla pagina di gestione dei dipendenti"))
+      if(confirm("Per accedere alla gestione delle campagne, inserire:\n--> almeno un dipendente \nCliccando OK verrai indirizzato alla pagina di gestione dei dipendenti"))
       {
         this.$router.push("/dipendenti"); //da sistemare -> se siamo in Gestione Sedi non entra nel corpo dell'if
+      }
+    },
+    redirectAlertStats1() {
+      if(confirm("Per accedere alle statistiche, inserire:\n--> associare almeno una campagna \nCliccando OK verrai indirizzato alla pagina di gestione delle campagne"))
+      {
+        this.$router.push("/gestionecampagne"); //da sistemare -> se siamo in Gestione Sedi non entra nel corpo dell'if
+      }
+    },
+    redirectAlertStats2() {
+      if(confirm("Per accedere alle statistiche, inserire:\n--> almeno una sede oppure un dipendente \nCliccando OK verrai indirizzato alla pagina di gestione delle sedi"))
+      {
+        this.$router.push("/locations"); //da sistemare -> se siamo in Gestione Sedi non entra nel corpo dell'if
       }
     },
     goHome() {

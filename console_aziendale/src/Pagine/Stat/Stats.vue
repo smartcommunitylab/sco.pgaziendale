@@ -172,22 +172,44 @@
               <div class="flex flex-col">
                 <label class="inline-flex items-center mt-3">
                   <input
+                    v-if="allLocations && allLocations.items && allLocations.items.length > 0"
                     type="radio"
                     class="form-radio h-5 w-5 text-primary"
                     value="sede"
                     v-model="what"
                     @change="changeWhat('sede')"
-                  /><span class="ml-2 text-gray-700">Sedi</span>
+                  />
+                  <input
+                    v-else
+                    :disabled="true"
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value=""
+                    v-model="what"
+                    @change="changeWhat('sede')"
+                  />
+                  <span class="ml-2 text-gray-700">Sedi</span>
                 </label>
 
                 <label class="inline-flex items-center mt-3">
                   <input
+                    v-if="allEmployees && allEmployees.items && allEmployees.items.length > 0"
                     type="radio"
                     class="form-radio h-5 w-5 text-primary"
                     value="dipendente"
                     v-model="what"
                     @change="changeWhat('dipendente')"
-                  /><span class="ml-2 text-gray-700">Dipendenti</span>
+                  />
+                  <input
+                    v-else-if="allEmployees && allEmployees.items && allEmployees.items.length == 0"
+                    :disabled="true"
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value=""
+                    v-model="what"
+                    @change="changeWhat('dipendente')"
+                  />
+                  <span class="ml-2 text-gray-700">Dipendenti</span>
                 </label>
               </div>
             </div>
@@ -203,6 +225,8 @@
           >
             <label for="sub_select">Seleziona una sede</label>
             <select
+              v-if="allLocations && allLocations.items && allLocations.items.length == 0"
+              :disabled="true"
               class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
               name="sub_select"
               id="campaign"
@@ -211,7 +235,30 @@
               required
             >
               <option disabled value="">Seleziona una sede</option>
-              <template v-if="allLocations">
+              <template>
+              <option
+                :value="{id: 'all'}"
+              > Tutte le sedi </option>
+                <option
+                  v-for="location in allLocations.items"
+                  :value="location"
+                  :key="location.id"
+                >
+                  {{ location.id }} {{ location.address }} {{ location.streetNumber }}
+                </option>
+              </template>
+            </select>
+            <select
+              v-else
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="campaign"
+              v-model="selectedSede"
+              @change="changeSede($event)"
+              required
+            >
+              <option disabled value="">Seleziona una sede</option>
+              <template>
               <option
                 :value="{id: 'all'}"
               > Tutte le sedi </option>
@@ -238,6 +285,32 @@
           >
             <label for="sub_select">Seleziona un dipendente</label>
             <select
+              v-if="allEmployees && allEmployees.items && allEmployees.items.length == 0 || !selectedCampaign"
+              :disabled="true" 
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="employee"
+              v-model="selectedEmployee"
+              @change="changeEmployee($event)"
+              required
+            >
+              <option disabled value="">Seleziona un dipendente</option>
+               <option
+                :value="{id: 'all'}"
+                
+              > Tutti i dipendenti </option>
+              <option
+                v-for="employee in allEmployees.items"
+                :value="employee"
+                :key="employee.id"
+                :disabled="!isSubbscribed(employee)"
+              >
+                {{ employee.name }} {{ employee.surname }}
+                <span v-if="!isSubbscribed(employee)">Non iscritto alla campagna</span>
+              </option>
+            </select>
+            <select
+              v-else
               class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
               name="sub_select"
               id="employee"
@@ -431,22 +504,44 @@
               <div class="flex flex-col">
                 <label class="inline-flex items-center mt-3">
                   <input
+                    v-if="allLocations && allLocations.items && allLocations.items.length > 0"
                     type="radio"
                     class="form-radio h-5 w-5 text-primary"
                     value="sede"
                     v-model="what"
                     @change="changeWhat('sede')"
-                  /><span class="ml-2 text-gray-700">Sedi</span>
+                  />
+                  <input
+                    v-else
+                    :disabled="true"
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value=""
+                    v-model="what"
+                    @change="changeWhat('sede')"
+                  />
+                  <span class="ml-2 text-gray-700">Sedi</span>
                 </label>
 
                 <label class="inline-flex items-center mt-3">
                   <input
+                    v-if="allEmployees && allEmployees.items && allEmployees.items.length > 0"
                     type="radio"
                     class="form-radio h-5 w-5 text-primary"
                     value="dipendente"
                     v-model="what"
                     @change="changeWhat('dipendente')"
-                  /><span class="ml-2 text-gray-700">Dipendenti</span>
+                  />
+                  <input
+                    v-else
+                    :disabled="true"
+                    type="radio"
+                    class="form-radio h-5 w-5 text-primary"
+                    value=""
+                    v-model="what"
+                    @change="changeWhat('dipendente')"
+                  />
+                  <span class="ml-2 text-gray-700">Dipendenti</span>
                 </label>
               </div>
             </div>

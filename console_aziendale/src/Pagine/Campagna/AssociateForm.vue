@@ -29,14 +29,18 @@
       </div>
     </div>
     <modal v-show="disassociaModalVisible">
-      <template v-slot:header> Disassocia dalla campagna </template>
+      <template v-slot:header> 
+        <div class="text-primary">
+        Disassocia dalla campagna 
+        </div>
+      </template>
       <template v-slot:body>
-        <div class="text-center text-xl	">Sei sicuro di voler procedere con la cancellazione dalla campagna <b>{{disassociaTmpCampaign.title}}</b>?</div>
+        <div class="text-2xl text-center pt-16">Sei sicuro di voler procedere con la cancellazione dalla campagna <b>{{disassociaTmpCampaign.title}}</b>?</div>
       </template>
       <template v-slot:footer>
         <button
           type="button"
-          class="btn-close"
+          class="btn-close inline-block px-4 py-2 my-2 mx-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-danger rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
           @click="deleteConfirm"
           aria-label="Close modal"
         >
@@ -44,7 +48,7 @@
         </button>
         <button
           type="button"
-          class="btn-close"
+          class="btn-close inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
           @click="closeDeleteModal"
           aria-label="Close modal"
         >
