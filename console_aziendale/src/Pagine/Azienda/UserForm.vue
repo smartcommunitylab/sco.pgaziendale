@@ -1,9 +1,10 @@
 <template>
   <form action="" id="addUser">
-    <div class="mb-20 flex flex-wrap justify-between">
+    <div class="mx-auto text-center lg:gap-x-48 lg:mx-auto lg:text-center md:grid grid-cols-2 md:gap-x-3">
+    
       <div class="field-group mb-4 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
-          <label class="field-label" for="first_name">Nome </label>
+          <label class="field-label" for="first_name"><b>Nome</b> </label>
           <input
             type="text"
             name="name"
@@ -19,7 +20,7 @@
       </div>
       <div class="field-group mb-4 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.surname.$error }">
-          <label class="field-label" for="first_name">Cognome </label>
+          <label class="field-label" for="first_name"><b>Cognome</b> </label>
           <input
             type="text"
             name="surname"
@@ -38,7 +39,7 @@
 
       <div class="field-group mb-6 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.username.$error }">
-          <label class="field-label" for="password">Username </label>
+          <label class="field-label" for="password"><b>Username</b> </label>
           <input
             type="text"
             name="username"
@@ -65,7 +66,7 @@
       </div>
       <div class="field-group mb-6 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.phone.$error }">
-          <label class="field-label" for="phone">Telefono </label>
+          <label class="field-label" for="phone"><b>Telefono</b> </label>
           <input
             type="text"
             name="phone"
@@ -84,7 +85,7 @@
       </div>
       <div class="field-group mb-6 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.roles.$error }">
-          <label class="field-label" for="password">Ruoli </label>
+          <label class="field-label" for="password"><b>Ruoli</b> </label>
           <input type="checkbox" id="aa" value="ROLE_COMPANY_ADMIN" v-model="roles" />
           <label for="aa">Amministratore Aziendale</label>
           <!-- <input type="checkbox" id="mm" value="ROLE_MOBILITY_MANAGER" v-model="roles" />

@@ -20,33 +20,52 @@
     </div>
     <div v-if="actualCampaign.item" class="p-4 md:p-12 text-center lg:text-left">
       <div class="pt-8 lg:pt-0" v-if="actualCampaign.item.logo">
-        <div class="entry-description">Logo</div>
+        <h1 class="text-2xl text-center font-bold">Logo</h1>
+        <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
         <img :src="actualCampaign.item.logo" />
       </div>
+      
       <div class="text-xl font-bold pt-8 lg:pt-0" v-if="actualCampaign.item.title">
-        <div class="entry-description">Titolo</div>
+        <h1 class="text-2xl text-center font-bold">Titolo</h1>
+        <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
         <div>{{ actualCampaign.item.title }}</div>
       </div>
       <div class="text-xl pt-8 lg:pt-0" v-if="actualCampaign.item.description">
-        <div class="entry-description">Descrizione</div>
+        <h1 class="text-2xl text-center font-bold">Descrizione</h1>
+        <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
         <div>{{ actualCampaign.item.description }}</div>
       </div>
       <div class="text-xl pt-8 lg:pt-0" v-if="actualCampaign.item.from">
-        <div class="entry-description">Periodo</div>
+        <h1 class="text-2xl text-center font-bold">Periodo</h1>
+        <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
 
         Da: {{ moment(actualCampaign.item.from).format("DD-MM-YYYY") }}
       </div>
       <div class="text-xl pt-8 lg:pt-0" v-if="actualCampaign.item.to">
         A: {{ moment(actualCampaign.item.to).format("DD-MM-YYYY") }}
       </div>
-      <div class="entry-description">Regolamento</div>
+      <h1 class="text-2xl text-center font-bold">Regolamento</h1>
+        <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
 
       <div
         class="text-xl pt-8 lg:pt-0"
         v-if="actualCampaign.item.rules"
         v-html="actualCampaign.item.rules"
       ></div>
-      <div class="entry-description">Privacy</div>
+      <h1 class="text-2xl text-center font-bold">Privacy</h1>
+        <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
 
       <div
         class="text-xl pt-8 lg:pt-0"
@@ -54,11 +73,17 @@
         v-html="actualCampaign.item.privacy"
       ></div>
       <div class="text-xl pt-8 lg:pt-0" v-if="actualCampaign.item.means">
-        <div class="entry-description">Mezzi associati alla campagna</div>
+        <h1 class="text-2xl text-center font-bold">Mezzi associati alla campagna</h1>
+        <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
         <div>{{ getListOfMeans() }}</div>
       </div>
       <div class="text-xl pt-8 lg:pt-0" v-if="actualCampaign.item.companies">
-        <div class="entry-description">Aziende che hanno aderito alla campagna</div>
+        <h1 class="text-2xl text-center font-bold">Aziende che hanno aderito alla campagna</h1>
+        <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
         <div v-for="company in actualCampaign.item.companies" :key="company.id">
           {{ company.name }}
         </div>

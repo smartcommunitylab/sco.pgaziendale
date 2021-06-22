@@ -352,11 +352,68 @@
               <option value="trackCount">Numero di viaggi</option>
             </select>
           </div>
+          <!--<div class="flex mt-3 justify-stretch flex-col">
+            <label for="sub_select">Cosa vuoi visualizzare</label>
+            <div class="field-label" />
+              <label class="inline-flex items-center ml-8">
+                <input
+                  type="checkbox"
+                  class="inline-flexform-checkbox"
+                  :value="km_valid"
+                />
+                <span class="ml-2">Chilometri validi</span>
+              </label>
+              <label class="inline-flex items-center ml-8">
+                <input
+                  type="checkbox"
+                  class="inline-flexform-checkbox"
+                  :value="km_true"
+                />
+                <span class="ml-2">Chilometri effettivi</span>
+              </label>
+              <label class="inline-flex items-center ml-8">
+                <input
+                  type="checkbox"
+                  class="inline-flexform-checkbox"
+                  :value="co2saved"
+                />
+                <span class="ml-2">CO2 salvata</span>
+              </label>
+              <label class="inline-flex items-center ml-8">
+                <input
+                  type="checkbox"
+                  class="inline-flexform-checkbox"
+                  :value="trackCount"
+                />
+                <span class="ml-2">Numero di viaggi</span>
+              </label>
+          </div>-->
           <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
             <label for="sub_select">Visualizzazione</label>
-            <div class="flex flex-col items-center justify-center">
-              <div class="flex flex-col">
-                <label class="inline-flex items-center mt-3">
+            <select
+              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+              name="sub_select"
+              id="campaign"
+            >
+              <option value="" class="text-gray">Seleziona uno o tutti i mesi</option>
+              <option
+                type="radio"
+                class="form-radio h-5 w-5 text-primary"
+                :value="month"
+                @change="changeSpan('month')"
+              >
+                <span class="ml-2 text-gray-700">Mese</span>
+              </option>
+              <option
+                type="radio"
+                class="form-radio h-5 w-5 text-primary"
+                :value="total"
+                @change="changeSpan('total')"
+              >
+                <span class="ml-2 text-gray-700">Totale</span>
+              </option>
+            </select>
+            <!--<label class="inline-flex items-center mt-3">
                   <input
                     type="radio"
                     class="form-radio h-5 w-5 text-primary"
@@ -374,9 +431,7 @@
                     v-model="span"
                     @change="changeSpan('total')"
                   /><span class="ml-2 text-gray-700">Totale</span>
-                </label>
-              </div>
-            </div>
+                </label>-->
           </div>
           <div
             class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"

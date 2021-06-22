@@ -5,6 +5,7 @@ import Azienda from "./Pagine/Azienda/Azienda.vue"
 import Login from "./Pagine/Login/Login.vue"
 import Locations from "./Pagine/Location/Locations.vue"
 import Stats from "./Pagine/Stat/Stats.vue"
+import ChooseStat from "./Pagine/Stat/ChooseStat.vue"
 import GestioneDipendenti from "./Pagine/Employee/Employees.vue"
 import GestioneCampagne from "./Pagine/Campagna/Campaigns.vue"
 import NotFound from "./Pagine/NotFound.vue"
@@ -46,6 +47,11 @@ const routes = [
       name: 'stats',
       component: Stats
   },
+  {
+    path: '/ChooseStat',
+    name: 'ChooseStat',
+    component: ChooseStat
+},
   {
     path: '/gestionecampagne',
     name: 'gestionecampagne',

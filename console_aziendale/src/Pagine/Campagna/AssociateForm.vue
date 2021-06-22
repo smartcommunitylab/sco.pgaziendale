@@ -1,46 +1,45 @@
 <template>
   <div>
     <div v-if="campaigns">
-      <div v-for="campaign in campaigns" :key="campaign.id">
+      <div v-for="campaign in campaigns" :key="campaign.id ">
         <div
-          class="flex items-center text-left px-96 ml-4"
+          class="flex items-center justify-center"
           v-if="campaigns && campaigns.length > 0"
         >
-          <div class="w-1/2 font-bold">{{ campaign.title }}</div>
+          <div class="lg:text-2xl md:text-2xl w-1/3 lg:p-8 md:p-4 sm:p-2 text-center">{{ campaign.title }}</div>
           <button
             type="button"
-            class="bg-danger border-2 border-danger text-white p-2 mb-3 mt-3 flex-1 mr-2 rounded shadow ripple hover:shadow-lg focus:outline-none"
-            aria-label="Close modal"
+            class="btn-close"
+            aria-label="Close modal bg-danger"
             v-if="isAssociated(campaign)"
             @click="disassociaPopup(campaign)"
           >
-            Disassocia
+            <div class="w-1/2 text-danger ml-6">Disassocia</div>
           </button>
           <button
             type="button"
-            class="bg-secondary border-2 border-secondary text-white p-2 mb-3 mt-3 flex-1 mr-2 rounded shadow ripple hover:shadow-lg hover:bg-secondary_light hover:border-secondary_light focus:outline-none"
+            class="btn-close"
             aria-label="Close modal"
             v-else
             @click="associa(campaign)"
           >
-            Associa
+            <div class="w-1/2 text-primary ml-6">Associa</div>
           </button>
         </div>
       </div>
     </div>
     <modal v-show="disassociaModalVisible">
-      <template v-slot:header> 
-        <div class="text-primary">
-        Disassocia dalla campagna 
-        </div>
+      <template v-slot:header>
+        <div class="text-danger"> Disassocia dalla campagna</div>
       </template>
       <template v-slot:body>
-        <div class="text-2xl text-center pt-16">Sei sicuro di voler procedere con la cancellazione dalla campagna <b>{{disassociaTmpCampaign.title}}</b>?</div>
+        <div class="text-3xl text-center pt-16">
+          Sei sicuro di voler procedere con la cancellazione dalla campagna <b>{{disassociaTmpCampaign.title}}</b>?</div>
       </template>
       <template v-slot:footer>
         <button
           type="button"
-          class="btn-close inline-block px-4 py-2 my-2 mx-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-danger rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+          class="btn-close text-xs font-medium mx-2 inline-block px-6 py-2 leading-6 text-center text-white transition bg-danger rounded ripple uppercase hover:bg-danger_light hover:shadow-lg focus:outline-none"
           @click="deleteConfirm"
           aria-label="Close modal"
         >
@@ -48,7 +47,7 @@
         </button>
         <button
           type="button"
-          class="btn-close inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+          class="btn-close text-xs font-medium mt-2 mb-2 mx-2 inline-block px-6 py-2 leading-6 text-center text-white transition bg-primary rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
           @click="closeDeleteModal"
           aria-label="Close modal"
         >

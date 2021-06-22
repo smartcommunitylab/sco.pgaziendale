@@ -2,25 +2,33 @@
   <div>
     <account-cog-icon @click="profileSetting = true" />
     <modal v-show="profileSetting">
-      <template v-slot:header> 
-        <div class="text-primary">Account</div>
-      </template>
-      <template v-slot:body>
-        <div class="flex flex-wrap justify-center">
-          <div class="field-group mb-4 pl-2 text-lg mt-3">
-            <div class="name flex flex-row">
-              <div class="font-bold ">Nome:</div>
-              <div class="w-full text-center pr-6">{{ user.name }} {{ user.surname }}</div>
+      <template v-slot:header > <div class="text-primary">Account</div></template>
+      <template v-slot:body> 
+        <div class="mx-auto text-center grid-cols-2">
+        <div class="flex justify-center">
+          <div class="field-group mb-4">
+            <div class="name flex-row">
+              <div class="font-bold">Nome:</div>
+              <div class="ml-2">{{ user.name }} {{ user.surname }}</div>
             </div>
-            <div class="username flex flex-row">
+            <br>
+            <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
+          <br>
+            <div class="username flex-row">
               <div class="font-bold">Username:</div>
-              <div class="w-full text-center pl-24">{{ user.username }}</div>
+              <div class="ml-2">{{ user.username }}</div>
             </div>
-            <div class="role flex flex-row">
+            <br>
+            <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
+          <br>
+            <div class="role  flex-row">
               <div class="font-bold">Ruoli:</div>
-              <div class="w-full">
                 <div
-                  class="w-full text-right"
+                  class="ml-2"
                   v-for="role in user.roles"
                   :key="JSON.stringify(role)"
                 >
@@ -34,18 +42,22 @@
                     >AMMINISTRATORE DEL SISTEMA</label
                   >
                 </div>
-              </div>
-            </div>
+          </div>
+          <br>
+            <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary opacity-80"
+          ></div>
+          <br>
             <button
               type="button"
-              class="ml-36  bg-danger border-2 border-danger text-white p-2 mt-6 flex-1 mr-2 rounded shadow ripple hover:shadow-lg focus:outline-none"
+              class="w-64 btn-close text-xs font-medium mt-2 mb-2 mx-2 inline-block px-6 py-2 leading-6 text-center text-white transition bg-primary rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
               aria-label="Close modal"
               @click="changingPwd = !changingPwd"
             >
               Cambia password
             </button>
             <div v-if="changingPwd">
-              <label class="pwd-label" for="first_name">Vecchia Password</label>
+              <label class="pwd-label" for="first_name"><b>Vecchia Password</b></label>
               <div class="relative">
                 <input
                   :type="passwordFieldTypeFirst"
@@ -75,7 +87,7 @@
                 </div>
                 <info-box :msg="'Inserisci un url che contiene il logo dell\'azienda'" />
               </div>
-              <label class="pwd-label" for="first_name">Nuova Password</label>
+              <label class="pwd-label" for="first_name"><b>Nuova Password</b></label>
               <div class="relative">
                 <input
                   :type="passwordFieldTypeSecond"
@@ -104,7 +116,7 @@
                   />
                 </div>
               </div>
-              <label class="pwd-label" for="first_name">Ripeti nuova Password</label>
+              <label class="pwd-label" for="first_name"><b>Ripeti nuova Password</b></label>
               <div class="relative">
                 <input
                   :type="passwordFieldTypeThird"
@@ -139,12 +151,13 @@
               </div>
               <button
                 type="button"
-                class="btn-close"
+                class="btn-close text-xs font-medium mt-2 mb-2 mx-2 inline-block px-6 py-2 leading-6 text-center text-white transition bg-primary rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
                 aria-label="Close modal"
                 @click="changePwd()"
               >
                 Salva
               </button>
+            </div>
             </div>
           </div>
         </div>
@@ -153,7 +166,7 @@
       <template v-slot:footer>
         <button
           type="button"
-          class="bg-primary border-2 border-primary text-white p-2 mb-3 mt-3 flex-1 mr-2 rounded shadow ripple hover:shadow-lg hover:bg-primary_light hover:border-primary_light focus:outline-none"
+          class="mt-2 mb-2 btn-close text-xs font-medium mx-2 inline-block px-6 py-2 leading-6 text-center text-white transition bg-danger rounded ripple uppercase hover:bg-danger_light hover:shadow-lg focus:outline-none"
           aria-label="Close modal"
           @click="profileSetting = false"
         >

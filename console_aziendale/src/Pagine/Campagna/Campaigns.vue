@@ -73,9 +73,7 @@
       </template>
     </modal>
     <modal v-show="associateCampaignModalVisible">
-      <template v-slot:header>
-        <div class="text-primary"> {{ popup.title }} </div>
-      </template>
+      <template v-slot:header> <div class="text-primary"> {{ popup.title }} </div> </template>
       <template v-slot:body>
         <associate-form />
       </template>
@@ -83,7 +81,7 @@
 
         <button
           type="button"
-          class="bg-primary border-2 border-primary text-white px-6 py-2 mb-2 mt-2 flex-1 mr-2 rounded shadow ripple hover:shadow-lg hover:bg-primary_light hover:border-primary_light focus:outline-none"
+          class="mt-2 mb-2 btn-close text-xs font-medium mx-2 inline-block px-6 py-2 leading-6 text-center text-white transition bg-danger rounded ripple uppercase hover:bg-danger_light hover:shadow-lg focus:outline-none"
           @click="closeModal"
           aria-label="Close modal"
         >
