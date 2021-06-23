@@ -34,6 +34,7 @@ const actions = {
                             {
                             dispatch('company/initCompanyAdmin', userCompanies[0], { root: true }); 
                             dispatch('campaign/getAll',userCompanies[0], { root: true });
+                            dispatch('location/getAllLocations',userCompanies[0], { root: true });
                             }
                             dispatch('employee/getAll', userCompanies[0], { root: true });
 
