@@ -371,7 +371,7 @@
               ((allEmployees && allEmployees.items && allEmployees.items.length > 0) || (allLocations
                 && allLocations.items && allLocations.items.length > 0))">
             <router-link
-            to="/scegliStatistica"
+            to="/ChooseStat"
             v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
             >
             <span class="flex items-center p-4 hover:bg-white hover:text-primary">
