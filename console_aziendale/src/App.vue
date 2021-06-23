@@ -12,7 +12,7 @@
         'lg:pl-64 pt-16 lg:pt-16 padding-bottom': account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd',
       }"
     />
-      <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
+    <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
   </div>
 </template>
 
