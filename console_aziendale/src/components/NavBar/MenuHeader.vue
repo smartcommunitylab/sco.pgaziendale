@@ -97,6 +97,9 @@
               <span>Gestione Sedi</span></span
             >
           </router-link>
+
+          <!-- GESTIONE DIPENDENTI -->
+          <div v-if="allLocations && allLocations.items && allLocations.items.length > 0">
           <router-link
             to="/dipendenti"
             v-if="
@@ -112,28 +115,115 @@
               <span>Gestione Dipendenti</span></span
             >
           </router-link>
-          <router-link
+          </div>
+          <div v-else>
+            <button
+            class="w-full focus:outline-none"
+              @click="alertModalVisibility('noLocationToEmployees','/locations')"
+            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
+            <span class="flex items-center p-4 bg-gray"
+              ><span class="mr-2">
+                <users-icon />
+              </span>
+              <span>Gestione Dipendenti <button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
+            </button>
+          </div>
+
+          <!-- GESTIONE CAMPAGNE -->
+          <div v-if="allLocations && allLocations.items && allLocations.items.length > 0 
+                     && allEmployees && allEmployees.items && allEmployees.items.length > 0">
+            <router-link
             to="/gestionecampagne"
-            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
-          >
+            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
             <span class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
                 <podio-icon />
               </span>
-              <span>Gestione Campagne</span></span
-            ></router-link
-          >
-          <router-link
-            to="/stats"
+              <span>Gestione Campagne</span></span>
+            </router-link>
+          </div>
+          <div v-else-if="allLocations.items.length == 0 && allEmployees.items.length == 0">
+            <button
+            class="w-full focus:outline-none"
+            @click="alertModalVisibility('locZeroEmpZero','/locations')"
+            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
+            <span class="flex items-center p-4 bg-gray"
+              ><span class="mr-2">
+                <podio-icon />
+              </span>
+              <span>Gestione Campagne <button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
+            </button>
+          </div>
+          <div v-else-if="allLocations.items.length == 0 && allEmployees.items.length > 0">
+            <button
+            class="w-full focus:outline-none"
+            @click="alertModalVisibility('locZeroToLocations','/locations')"
+            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
+            <span class="flex items-center p-4 bg-gray"
+              ><span class="mr-2">
+                <podio-icon />
+              </span>
+              <span>Gestione Campagne <button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
+            </button>
+          </div>
+          <div v-else-if="allEmployees.items.length == 0 && allLocations.items.length > 0">
+            <button
+            class="w-full focus:outline-none"
+            @click="alertModalVisibility('empZero','/dipendenti')"
+            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
+            <span class="flex items-center p-4 bg-gray"
+              ><span class="mr-2">
+                <podio-icon />
+              </span>
+              <span>Gestione Campagne<button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
+            </button>
+          </div>
+
+          <!-- STATISTICHE -->
+          <div v-if="(allCampaigns && allCampaigns.items && allCampaigns.items.length > 0) && 
+              ((allEmployees && allEmployees.items && allEmployees.items.length > 0) || (allLocations
+                && allLocations.items && allLocations.items.length > 0))">
+            <router-link
+            to="/ChooseStat"
             v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
-          >
+            >
             <span class="flex items-center p-4 hover:bg-white hover:text-primary">
               <span class="mr-2">
                 <chart-icon />
               </span>
               <span>Statistiche</span></span
             >
-          </router-link>
+            </router-link>
+          </div>
+          <div v-else-if="(allCampaigns && allCampaigns.items && allCampaigns.items.length == 0) ||
+            ((allEmployees && allEmployees.items && allEmployees.items.length == 0) && (allLocations && 
+            allLocations.items && allLocations.items.length == 0))"> 
+            <div v-if="(allCampaigns.items.length == 0)">
+              <button
+              class="w-full focus:outline-none"
+              @click="alertModalVisibility('noStatToCampaign','/gestionecampagne')"
+              v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
+              <span class="flex items-center p-4 bg-gray"
+                ><span class="mr-2">
+                  <chart-icon />
+                </span>
+                <span>Statistiche<button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
+              </button>
+            </div>
+            <div v-else>
+              <button
+              class="w-full focus:outline-none"
+              @click="alertModalVisibility('noStatToLocations','/gestionesedi')"
+              v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'">
+              <span class="flex items-center p-4 bg-gray"
+                ><span class="mr-2">
+                  <chart-icon />
+                </span>
+                <span>Statistiche<button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
+              </button>
+            </div>
+          </div>
+
           <router-link to="/" v-on:click.native="logout">
             <span class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -246,28 +336,6 @@
               </span>
               <span>Gestione Dipendenti <button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
             </button>
-            <!-- <modal v-show="alertModalVisible">
-            <template v-slot:header>
-              <div class="text-danger">
-                Attenzione
-              </div>
-            </template>
-            <template v-slot:body>
-              <div class="text-xl text-center text-black">
-                {{getModalString('noLocationToEmployees')}}
-              </div>
-            </template>
-            <template v-slot:footer>
-              <button
-              type="button"
-              class="btn-close text-xs font-medium mx-2 inline-block px-4 py-2 my-2 leading-6 text-center text-white transition bg-primary rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
-              @click="closeAlertModal()"
-              aria-label="Close modal"
-            >
-              Vai a gestione sedi
-            </button>
-            </template>
-            </modal> -->
           </div>
           
           <!-- GESTIONE CAMPAGNE -->
@@ -294,28 +362,6 @@
               </span>
               <span>Gestione Campagne <button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
             </button>
-            <!-- <modal v-show="alertModalVisible">
-            <template v-slot:header>
-              <div class="text-danger">
-                Attenzione
-              </div>
-            </template>
-            <template v-slot:body>
-              <div class="text-xl text-center text-black">
-                {{getModalString('locZeroEmpZero')}}
-              </div>
-            </template>
-            <template v-slot:footer>
-              <button
-              type="button"
-              class="btn-close text-xs font-medium mx-2 inline-block px-4 py-2 my-2 leading-6 text-center text-white transition bg-primary rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
-              @click="closeAlertModal();"
-              aria-label="Close modal"
-            >
-              vai a gestione sedi
-            </button>
-            </template>
-          </modal> -->
           </div>
 
           <div v-else-if="allLocations.items.length == 0 && allEmployees.items.length > 0">
@@ -329,28 +375,6 @@
               </span>
               <span>Gestione Campagne <button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
             </button>
-            <!-- <modal v-show="alertModalVisible">
-            <template v-slot:header>
-              <div class="text-danger">
-                Attenzione
-              </div>
-            </template>
-            <template v-slot:body>
-              <div class="text-xl text-center text-black">
-                {{getModalString('locZeroToLocations')}}
-              </div>
-            </template>
-            <template v-slot:footer>
-              <button
-              type="button"
-              class="btn-close text-xs font-medium mx-2 inline-block px-4 py-2 my-2 leading-6 text-center text-white transition bg-primary rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
-              @click="closeAlertModal()"
-              aria-label="Close modal"
-            >
-              vai a gestione sedi
-            </button>
-            </template>
-            </modal> -->
           </div>
           
           <div v-else-if="allEmployees.items.length == 0 && allLocations.items.length > 0">
@@ -397,28 +421,6 @@
                 </span>
                 <span>Statistiche<button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
               </button>
-              <!-- <modal v-show="alertModalVisible">
-              <template v-slot:header>
-              <div class="text-danger">
-                Attenzione
-                </div>
-              </template>
-              <template v-slot:body>
-                <div class="text-xl text-center text-black">
-                  {{getModalString('noStatToCampaign')}}
-                </div>
-              </template>
-              <template v-slot:footer>
-                <button
-                type="button"
-                class="btn-close text-xs font-medium mx-2 inline-block px-4 py-2 my-2 leading-6 text-center text-white transition bg-primary rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
-                @click="closeAlertModal()"
-                aria-label="Close modal"
-              >
-                vai a gestione campagne
-              </button>
-              </template>
-              </modal> -->
             </div>
             <div v-else>
               <button
@@ -431,35 +433,11 @@
                 </span>
                 <span>Statistiche<button class="pl-6 focus:outline-none"><lock-icon/> </button> </span></span>
               </button>
-              <!-- <modal v-show="alertModalVisible">
-              <template v-slot:header>
-              <div class="text-danger">
-                Attenzione
-                </div>
-              </template>
-              <template v-slot:body>
-                <div class="text-xl text-center text-black">
-                  {{getModalString('noStatToLocations')}}
-                </div>
-              </template>
-              <template v-slot:footer>
-                <button
-                type="button"
-                class="btn-close text-xs font-medium mx-2 inline-block px-4 py-2 my-2 leading-6 text-center text-white transition bg-primary rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
-                @click="closeAlertModal()"
-                aria-label="Close modal"
-              >
-                vai a gestione sedi
-              </button>
-              </template>
-              </modal> -->
             </div>
             
           </div>
           
           
-
-
           <router-link to="/" v-on:click.native="logout">
             <span class="flex items-center p-4 hover:bg-white hover:text-primary"
               ><span class="mr-2">
@@ -478,7 +456,7 @@
               </div>
             </template>
             <template v-slot:body>
-              <div class="text-xl text-center text-black">
+              <div class="text-2xl text-center text-black mt-12">
                 {{getModalString()}}
               </div>
             </template>
