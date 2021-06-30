@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="w-full max-w-4xl flex h-full flex-wrap mx-auto my-32 lg:my-0 lg:mr-16">
+    <div class="w-full max-w-4xl flex h-full flex-wrap mx-auto my-32 lg:my-0">
       <div
         id="profile"
         class="min-w-full w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none bg-white opacity-75 mx-6 lg:mx-0"
@@ -33,7 +33,7 @@
           </div>
           <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualCompany.item.name }}</h1>
           <div
-            class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
+            class="mx-auto lg:mx-0 w-full pt-3 border-b-2 border-secondary opacity-80"
           ></div>
           <div class="pt-4 text-base font-bold items-center lg:justify-start">
             <div class="flex">

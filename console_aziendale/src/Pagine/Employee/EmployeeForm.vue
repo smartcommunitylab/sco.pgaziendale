@@ -1,15 +1,15 @@
 <template>
   <form action="" id="addEmployee">
-    <div class="mb-0">
-      <div class="field-group mb-4 px-96 mx-12">
+    <div class="mx-auto text-center lg:gap-x-0 lg:mx-auto lg:text-center md:grid grid-cols-2 md:gap-x-3">
+      <div class="field-group mb-4 mx-12">
         <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
-          <label class="field-label" for="first_name">Nome </label>
+          <label class="field-label" for="first_name"><b>Nome</b> </label>
           <input
             type="text"
             name="employeeName"
             placeholder="Nome *"
             v-model.trim="$v.name.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-3 mt-4 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-3 flex-1 mr-2"
             id="employeeName"
           />
         </div>
@@ -17,9 +17,9 @@
           <div class="error" v-if="!$v.name.required">Il campo nome e' richiesto.</div>
         </div>
       </div>
-      <div class="field-group mb-4 px-96 mx-12">
+      <div class="field-group mb-4 mx-12">
         <div class="form-group" :class="{ 'form-group--error': $v.surname.$error }">
-          <label class="field-label" for="first_name">Cognome </label>
+          <label class="field-label" for="first_name"><b>Cognome</b> </label>
           <input
             type="text"
             name="employeeSurname"
@@ -35,9 +35,9 @@
           </div>
         </div>
       </div>
-      <div class="field-group mb-4 px-96 mx-12">
+      <div class="field-group mb-4 mx-12">
         <div class="form-group" :class="{ 'form-group--error': $v.code.$error }">
-          <label class="field-label" for="first_name">Codice</label>
+          <label class="field-label" for="first_name"><b>Codice</b></label>
           <input
             type="text"
             name="employeeCode"
@@ -55,12 +55,11 @@
         </div>
       </div>
 
-      <div class="field-group mb-4 px-96 mx-12">
+      <div class="field-group mb-4 mx-12">
         <div
-          class="flex flex-col sm:flex-row mt-3 justify-stretch"
           :class="{ 'form-group--error': $v.location.$error }"
         >
-          <label class="field-label" for="password">Sede </label>
+          <label class="field-label" for="password"><b>Sede</b> </label>
           <select required
             class="focus:border-blue-600 border-2 p-2 flex-none mr-2 w-48"
             v-model.trim="$v.location.$model"
@@ -83,12 +82,10 @@
 <script>
 import { required } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
-import InfoBox from "@/components/InfoBox.vue";
 import { mapState, mapActions } from "vuex";
 
 export default {
   components: {
-    InfoBox,
   },
   data() {
     return {

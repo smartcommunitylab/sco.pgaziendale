@@ -456,7 +456,7 @@
               </div>
             </template>
             <template v-slot:body>
-              <div class="text-2xl text-center text-black mt-12">
+              <div class="text-xl pt-8 lg:text-3xl text-center text-black lg:mt-8">
                 {{getModalString()}}
               </div>
             </template>

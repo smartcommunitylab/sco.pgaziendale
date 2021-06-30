@@ -2,7 +2,6 @@
   <div>
     <div class="flex flex-col lg:flex-row">
       <div class="mx-2 my-2 flex flex-col lg:w-4/6 bg-white p-2">
-        <div v-if="stat">
           <div
             class="mx-2 my-2 flex flex-col bg-white p-2 text-primary rounded-xl border-2 h-full"
           >
@@ -38,6 +37,7 @@
             </div>
             <div v-if="tabWhatActive == 'table'">
               <generic-table
+                class="text-center"
                 :data.sync="dataStat"
                 :columns.sync="gridColumns"
                 :header.sync="headerColumns"
@@ -45,10 +45,6 @@
               </generic-table>
             </div>
           </div>
-        </div>
-        <div v-else class="empty-list">
-          Seleziona i parametri corretti per il grafico da visualizzare
-        </div>
       </div>
 
       <div
@@ -83,32 +79,41 @@
         </ul>
         <div
           class="mx-2 my-2 flex flex-col text-white p-2 bg-primary rounded-xl border-2 h-full"
-          v-if="tabActive == 'charts'"
-        >
+          v-if="tabActive == 'charts'">
           <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
-            <label for="sub_select">Seleziona una campagna</label>
-            <select
-              class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
-              name="sub_select"
-              id="campaign"
-              v-model="selectedCampaign"
-              @change="changeCampaign($event)"
-              required
+            <button
+              type="button"
+              class="btn-close text-xs font-medium mt-2 mb-2 mx-2 inline-block px-6 py-2 leading-6 text-center text-primary transition bg-white rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
+              aria-label="Close modal"
+              @click="livelloAgg = !livelloAgg"
             >
-              <option disabled value="">Seleziona una campagna</option>
-              <option
-                v-for="campaign in allCampaigns.items"
-                :key="campaign.id"
-                :value="campaign"
+              Livello aggregazione
+            </button>
+            
+
+            <transition name="slide-fade">
+            <div v-if="livelloAgg">
+              <label for="sub_select">Seleziona una campagna</label>
+              <select
+                class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
+                name="sub_select"
+                id="campaign"
+                v-model="selectedCampaign"
+                @change="changeCampaign($event)"
+                required
               >
-                {{ campaign.title }}
-              </option>
-            </select>
-          </div>
-          <div
+                <option disabled value="">Seleziona una campagna</option>
+                <option
+                  v-for="campaign in allCampaigns.items"
+                  :key="campaign.id"
+                  :value="campaign"
+                >
+                  {{ campaign.title }}
+                </option>
+              </select>
+              <div
             class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col text-white bg-primary"
-            v-if="role == 'ROLE_ADMIN' && adminCompany == null"
-          >
+            v-if="role == 'ROLE_ADMIN' && adminCompany == null">
             <label for="sub_select">Seleziona una azienda</label>
             <select
               class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
@@ -190,7 +195,6 @@
                   />
                   <span class="ml-2 text-gray-700">Sedi</span>
                 </label>
-
                 <label class="inline-flex items-center mt-3">
                   <input
                     v-if="allEmployees && allEmployees.items && allEmployees.items.length > 0"
@@ -351,44 +355,25 @@
               <option value="co2saved">CO2 salvata</option>
               <option value="trackCount">Numero di viaggi</option>
             </select>
+          </div>          
+            </div>    
+            </transition>      
           </div>
-          <!--<div class="flex mt-3 justify-stretch flex-col">
-            <label for="sub_select">Cosa vuoi visualizzare</label>
-            <div class="field-label" />
-              <label class="inline-flex items-center ml-8">
-                <input
-                  type="checkbox"
-                  class="inline-flexform-checkbox"
-                  :value="km_valid"
-                />
-                <span class="ml-2">Chilometri validi</span>
-              </label>
-              <label class="inline-flex items-center ml-8">
-                <input
-                  type="checkbox"
-                  class="inline-flexform-checkbox"
-                  :value="km_true"
-                />
-                <span class="ml-2">Chilometri effettivi</span>
-              </label>
-              <label class="inline-flex items-center ml-8">
-                <input
-                  type="checkbox"
-                  class="inline-flexform-checkbox"
-                  :value="co2saved"
-                />
-                <span class="ml-2">CO2 salvata</span>
-              </label>
-              <label class="inline-flex items-center ml-8">
-                <input
-                  type="checkbox"
-                  class="inline-flexform-checkbox"
-                  :value="trackCount"
-                />
-                <span class="ml-2">Numero di viaggi</span>
-              </label>
-          </div>-->
+          <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary"
+          ></div>
           <div class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col">
+            <button
+              type="button"
+              class="btn-close text-xs font-medium mt-2 mb-2 mx-2 inline-block px-6 py-2 leading-6 text-center text-primary transition bg-white rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
+              aria-label="Close modal"
+              @click="unitaTemp = !unitaTemp"
+            >
+              Unità temporale
+            </button>
+            
+            <transition name="slide-fade">
+            <div v-if="unitaTemp">
             <label for="sub_select">Visualizzazione</label>
             <select
               class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
@@ -422,7 +407,6 @@
                     @change="changeSpan('month')"
                   /><span class="ml-2 text-gray-700">Mese</span>
                 </label>
-
                 <label class="inline-flex items-center mt-3">
                   <input
                     type="radio"
@@ -433,6 +417,7 @@
                   /><span class="ml-2 text-gray-700">Totale</span>
                 </label>-->
           </div>
+          </transition>
           <div
             class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
             v-if="span == 'month'"
@@ -453,12 +438,28 @@
               </option>
             </select>
           </div>
+          </div>
+            
+          <div
+            class="mx-auto lg:mr-12 w-full border-b-2 border-secondary"
+          ></div>
           <div
             class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
-            v-if="means"
-          >
-            <label for="sub_select">Seleziona un mezzo</label>
-            <select
+            v-if="means">
+          <button
+              type="button"
+              class="btn-close text-xs font-medium mt-2 mb-2 mx-2 inline-block px-6 py-2 leading-6 text-center text-primary transition bg-white rounded ripple uppercase hover:bg-primary_light hover:shadow-lg focus:outline-none"
+              aria-label="Close modal"
+              @click="colonneDati = !colonneDati"
+              :disabled="!selectedCampaign"              
+            >
+              Colonne dati
+            </button>
+            
+            <transition name="slide-fade">
+            <div v-if="colonneDati">
+              <label for="sub_select">Seleziona un mezzo</label>
+              <select
               class="focus:border-blue-600 border-2 p-2 mb-2 md:mb-0 lg:mb-2 flex-1 md:mr-2 lg:mr-0 appearance-none text-primary bg-white"
               name="sub_select"
               id="mean"
@@ -466,13 +467,13 @@
               @change="changeMean($event)"
               required
               :disabled="!selectedCampaign"
-            >
+              >
               <option disabled value="">Seleziona un mezzo</option>
               <option v-for="mean in means" :value="mean" :key="mean.value">
                 {{ mean.text }}
               </option>
+              
             </select>
-          </div>
           <div
             class="flex flex-col md:flex-row mt-3 justify-stretch lg:flex-col"
             v-if="means"
@@ -492,7 +493,9 @@
               <option value="day">Giorno</option>
             </select>
           </div>
-
+          </div>
+          </transition>
+          </div>
           <div class="">
             <div class="selection-invalid" v-if="!selectionStatIsValid()">
               Selezionare i parametri corretti
@@ -672,7 +675,6 @@ import { mapState, mapActions } from "vuex";
 import { campaignService } from "../../services/campaign.services";
 import Chart from "./Chart.vue";
 import GenericTable from "@/components/GenericTable.vue";
-
 export default {
   components: {
     Chart,
@@ -701,6 +703,10 @@ export default {
       gridColumns: [],
       headerColumns: [],
       dataStat: [],
+      livelloAgg: false,
+      unitaTemp:false,
+      colonneDati:false,
+
     };
   },
   computed: {
@@ -709,7 +715,7 @@ export default {
     ...mapState("company", ["allCompanies", "adminCompany", "actualCompany"]),
     ...mapState("location", ["allLocations"]),
     ...mapState("employee", ["allEmployees"]),
-    ...mapState("stat", ["stat"]),
+    ...mapState("stat", ["stat","configuration"]),
   },
   created() {
     //default company if AA
@@ -728,11 +734,11 @@ export default {
       this.getAllCampaigns(this.selectedCompany.id);
       this.what = "sede";
     }
-
     if (this.selectedCompany) {
       this.getAllLocations(this.selectedCompany.id);
       this.getAllEmployees(this.selectedCompany.id);
     }
+    this.showStatOnLoad();
   },
   mounted() {
     this.changePage({ title: "Statistiche", route: "/stats" });
@@ -886,6 +892,40 @@ export default {
           break;
       }
     },
+    buildHeaderBodyTable1() {
+      this.headerColumns=[];
+      this.gridColumns=[];
+      //check selection for header
+      if (this.configuration.titolo == "Km fatti e utili") {
+        this.headerColumns.push("Dipendenti");
+        this.gridColumns.push("dipendente");//?????
+        this.headerColumns.push("KM percorsi");
+        this.gridColumns.push("distance");
+        this.headerColumns.push("KM utili");
+        this.gridColumns.push("distance");
+      }
+      else if (this.configuration.titolo == "Partecipazione dipendenti") {
+        this.headerColumns.push("Sedi");//?????
+        this.gridColumns.push("sede");
+        this.headerColumns.push("Dipendenti registrati");
+        this.gridColumns.push("dipendente");
+        this.headerColumns.push("Dipendenti iscritti");
+        this.gridColumns.push("dipendente");
+        this.headerColumns.push("Dipendenti attivi");
+        this.gridColumns.push("dipendente");
+      }
+      else if(this.configuration.titolo == "Impatto ambientale"){
+        this.headerColumns.push("Azienda");//?????
+        this.gridColumns.push("company");
+        this.headerColumns.push("Totale viaggi");
+        this.gridColumns.push("trackCount");
+        this.headerColumns.push("KM percorsi");
+        this.gridColumns.push("distance");
+        this.headerColumns.push("Grammi");
+        this.gridColumns.push("co2saved");
+      }
+      this.buildStat();
+    },
     buildTable() {
       this.buildHeaderBodyTable();
       this.buildStat();
@@ -1011,6 +1051,11 @@ export default {
         }
       }
     },
+    showStatOnLoad() {
+      console.log("getStat and show values");
+      //check values and choose the right call
+      this.resetStat();
+    },
     exportCsv() {
       console.log("export csv");
       //check values and choose the right call
@@ -1074,5 +1119,15 @@ button[disabled] {
   border: 1px solid #999999;
   /* background-color: #cccccc; */
   color: #cccccc;
+}
+.slide-fade-enter-active {
+  transition: all .5s ease;
+}
+.slide-fade-leave-active {
+  transition: all .2s ease;
+}
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
 }
 </style>

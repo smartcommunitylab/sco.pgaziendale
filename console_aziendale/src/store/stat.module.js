@@ -1,6 +1,7 @@
 import { statService } from '../services';
 
 const state = {
+    configuration: null,
     stat: null
 };
 function saveFile(filename, stats) {
@@ -18,6 +19,9 @@ function saveFile(filename, stats) {
     }
 }
 const actions = {
+    setStat({commit},conf) {
+        commit('setStat',conf)
+    },
     resetStat({ commit }) {
         commit('resetStat');
     },
@@ -146,6 +150,12 @@ const actions = {
 };
 
 const mutations = {
+    setStat(state,conf) {
+        state.configuration = {
+            titolo: conf.titolo,
+            tipiVis: conf.tipiVis
+        }
+    },
     getCampaignStat(state) {
         state.stat = { loading: true };
     },
