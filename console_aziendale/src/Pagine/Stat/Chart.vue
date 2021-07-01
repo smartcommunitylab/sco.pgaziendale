@@ -54,7 +54,7 @@ export default {
         case "co2saved":
           title="CO2 salvata"
           break;
-                  case "trackCount":
+        case "trackCount":
           title="Numero di viaggi"
           break;
         default:

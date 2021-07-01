@@ -5,19 +5,19 @@
                 <div class="icons-lg"><bike-icon size="200"></bike-icon></div>
                 <div class="icons-sm"><bike-icon size="80"></bike-icon></div>
                     <p class="title">Km fatti e utili</p>
-                    <p class="text">descrizione</p>
+                    <p class="text">Scopri (descrizione da aggiornare)!</p>
             </div>
             <div class="card" @click="clickToStats('impatto')">
                 <div class="icons-lg"><tree-icon size="200"></tree-icon></div>
                 <div class="icons-sm"><tree-icon size="80"></tree-icon></div>
                     <p class="title">Impatto ambientale</p>
-                    <p class="text">descrizione</p>
+                    <p class="text">Scopri (descrizione da aggiornare)!</p>
                 </div>
             <div class="card" @click="clickToStats('dipendenti')">
                 <div class="icons-lg"><human-icon size="200"></human-icon></div>
                 <div class="icons-sm"><human-icon size="80"></human-icon></div>
                     <p class="title">Partecipazione dipendenti</p>
-                    <p class="text">descrizione</p>
+                    <p class="text">Scopri (descrizione da aggiornare)!</p>
             </div>     
         </div>
     </div>
@@ -64,12 +64,13 @@ export default {
 <style scoped>
 .icons-lg {
     padding-top: 10px;
+    overflow-y: hidden;
 }
 
 .icons-sm {
     padding-top: 20px;
 }
-@media (max-width: 768px){
+@media (max-width: 767px){
   .icons-lg {
     display: none;
   }

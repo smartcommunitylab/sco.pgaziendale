@@ -892,7 +892,7 @@ export default {
           break;
       }
     },
-    buildHeaderBodyTable1() {
+    /* buildHeaderBodyTable1() {
       this.headerColumns=[];
       this.gridColumns=[];
       //check selection for header
@@ -925,7 +925,7 @@ export default {
         this.gridColumns.push("co2saved");
       }
       this.buildStat();
-    },
+    }, */
     buildTable() {
       this.buildHeaderBodyTable();
       this.buildStat();
@@ -1124,7 +1124,7 @@ button[disabled] {
   transition: all .5s ease;
 }
 .slide-fade-leave-active {
-  transition: all .2s ease;
+  transition: all .3s ease;
 }
 .slide-fade-enter, .slide-fade-leave-to {
   transform: translateY(-10px);
