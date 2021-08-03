@@ -688,7 +688,7 @@ export default {
       console.log(event);
       if (this.selectedMonth.value)
         this.endMonthValue = moment(this.selectedMonth.value, "YYYY-MM-DD")
-          .add(1, "months")
+          .endOf('month')
           .format("YYYY-MM-DD");
     },
     changeMean(event) {
