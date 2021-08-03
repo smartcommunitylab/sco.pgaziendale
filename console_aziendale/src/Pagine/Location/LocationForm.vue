@@ -11,22 +11,25 @@
           />
         </div>
       </template>
-      <div class="field-group mt-4 mb-4 w-full">
+
+      <div class="lg:grid grid-cols-3 gap-6 lg:text-center lg:ml-40">
+      <div class="field-group mt-8 mb-2">
         <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
-          <label class="field-label" for="first_name">Identificativo </label>
+          <label class="field-label font-bold" for="first_name">Identificativo </label>
+          <info-box v-if="$v.id.$model == ''" :msg="'Codice univoco della sede'" />
+          <info-box
+            v-else
+            :msg="'Non é possibile cambiare identificativo sede una volta creato'"
+          />
           <input
             type="text"
             name="campaignCode"
             placeholder="Identificativo *"
             v-model.trim="$v.id.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
             id="campaignCode"
             :disabled="edit"
-          />
-          <info-box v-if="$v.id.$model == ''" :msg="'Codice univoco della sede'" />
-          <info-box
-            v-else
-            :msg="'Non é possibile cambiare identificativo sede una volta creato'"
           />
         </div>
         <div v-if="$v.id.$error">
@@ -35,15 +38,15 @@
           </div>
         </div>
       </div>
-      <div class="field-group mb-4 w-full">
+      <div class="field-group mt-8 mb-2">
         <div class="form-group" :class="{ 'form-group--error': $v.address.$error }">
-          <label class="field-label" for="first_name">Indirizzo </label>
+          <label class="field-label font-bold" for="first_name">Indirizzo </label>
           <input
             type="text"
             name="campaignAddress"
             placeholder="Indirizzo *"
             v-model.trim="$v.address.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
             id="campaignTitle"
           />
         </div>
@@ -54,16 +57,18 @@
         </div>
       </div>
 
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.streetNumber.$error }">
-          <label class="field-label" for="first_name">Numero</label>
+      <div class="field-group mt-8 mb-2">
+        <div class="form-group font-bold" :class="{ 'form-group--error': $v.streetNumber.$error }">
+          <label class="field-label " for="first_name">Numero</label>
           <input
             type="text"
             name="campaignstreetNumber"
             id="campaignstreetNumber"
             placeholder="Number *"
             v-model.trim="$v.streetNumber.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
+
           />
         </div>
         <div v-if="$v.streetNumber.$error">
@@ -72,9 +77,9 @@
           </div>
         </div>
       </div>
-      <div class="field-group mb-6 w-full">
+      <div class="field-group mb-6">
         <div class="form-group" :class="{ 'form-group--error': $v.zip.$error }">
-          <label class="field-label" for="password">CAP </label>
+          <label class="field-label font-bold" for="password">CAP </label>
           <input
             type="text"
             name="campaignZip"
@@ -82,7 +87,8 @@
             required
             placeholder="CAP *"
             v-model.trim="$v.zip.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
+
           />
         </div>
         <div v-if="$v.zip.$error">
@@ -90,9 +96,9 @@
         </div>
       </div>
 
-      <div class="field-group mb-6 w-full">
+      <div class="field-group mb-6">
         <div class="form-group" :class="{ 'form-group--error': $v.city.$error }">
-          <label class="field-label" for="password">Cittá </label>
+          <label class="field-label font-bold" for="password">Cittá </label>
           <input
             type="text"
             name="campaignCity"
@@ -100,7 +106,8 @@
             required
             placeholder="Cittá *"
             v-model.trim="$v.city.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
+
           />
         </div>
         <div v-if="$v.city.$error">
@@ -108,9 +115,10 @@
         </div>
       </div>
 
-      <div class="field-group mb-6 w-full">
+      <div class="field-group mb-6">
         <div class="form-group" :class="{ 'form-group--error': $v.province.$error }">
-          <label class="field-label" for="password">Provincia</label>
+          <label class="field-label font-bold" for="password">Provincia</label>
+
           <input
             type="text"
             name="campaignProvince"
@@ -118,7 +126,8 @@
             required
             placeholder="Provincia *"
             v-model.trim="$v.province.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
+
           />
         </div>
         <div v-if="$v.province.$error">
@@ -128,9 +137,10 @@
         </div>
       </div>
 
-      <div class="field-group mb-6 w-full">
+      <div class="field-group mb-6">
         <div class="form-group" :class="{ 'form-group--error': $v.region.$error }">
-          <label class="field-label" for="password">Regione</label>
+          <label class="field-label font-bold" for="password">Regione</label>
+
           <input
             type="text"
             name="campaignRegion"
@@ -138,7 +148,8 @@
             required
             placeholder="Regione *"
             v-model.trim="$v.region.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
+
           />
         </div>
         <div v-if="$v.region.$error">
@@ -147,9 +158,10 @@
           </div>
         </div>
       </div>
-      <div class="field-group mb-6 w-full">
+      <div class="field-group mb-6">
         <div class="form-group" :class="{ 'form-group--error': $v.country.$error }">
-          <label class="field-label" for="password">Stato</label>
+          <label class="field-label font-bold" for="password">Stato</label>
+
           <input
             type="text"
             name="campaignCountry"
@@ -157,7 +169,8 @@
             required
             placeholder="Stato *"
             v-model.trim="$v.country.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
+
           />
         </div>
         <div v-if="$v.country.$error">
@@ -166,9 +179,13 @@
           </div>
         </div>
       </div>
-      <div class="field-group mb-6 w-full">
+      <div class="field-group mb-6 ">
         <div class="form-group" :class="{ 'form-group--error': $v.radius.$error }">
-          <label class="field-label" for="password">Raggio</label>
+          <label class="field-label font-bold" for="password">Raggio</label>
+          <info-box
+            :msg="'Distanza in metri all\'interno di cui i viaggi dei dipendenti risultano essere validi'"
+          />
+
           <input
             type="text"
             name="campaignRadius"
@@ -176,10 +193,9 @@
             required
             placeholder="Raggio *"
             v-model.trim="$v.radius.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-          <info-box
-            :msg="'Distanza in metri all\'interno di cui i viaggi dei dipendenti risultano essere validi'"
+
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
+
           />
         </div>
         <div v-if="$v.radius.$error">
@@ -191,9 +207,11 @@
           </div>
         </div>
       </div>
-      <div class="field-group mb-6 w-full">
+      <div class="field-group mb-6">
         <div class="form-group" :class="{ 'form-group--error': $v.latitude.$error }">
-          <label class="field-label" for="password">Latitudine</label>
+          <label class="field-label font-bold" for="password">Latitudine</label>  
+          <info-box :msg="'Latitudine in gradi'" />
+
           <input
             type="text"
             name="campaignMeans"
@@ -201,9 +219,9 @@
             required
             placeholder="Mezzi *"
             v-model.trim="$v.latitude.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
+
           />
-          <info-box :msg="'Latitudine in gradi'" />
         </div>
         <div v-if="$v.latitude.$error">
           <div class="error" v-if="!$v.latitude.required">
@@ -211,9 +229,11 @@
           </div>
         </div>
       </div>
-      <div class="field-group mb-6 w-full">
+      <div class="field-group mb-16">
         <div class="form-group" :class="{ 'form-group--error': $v.longitude.$error }">
-          <label class="field-label" for="password">Longitudine</label>
+          <label class="field-label font-bold" for="password">Longitudine</label>
+          <info-box :msg="'Longitudine in gradi'" />
+
           <input
             type="text"
             name="campaignLongitude"
@@ -221,9 +241,9 @@
             required
             placeholder="Longitudine *"
             v-model.trim="$v.longitude.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
+
           />
-          <info-box :msg="'Longitudine in gradi'" />
         </div>
         <div v-if="$v.longitude.$error">
           <div class="error" v-if="!$v.longitude.required">
@@ -231,15 +251,17 @@
           </div>
         </div>
       </div>
-      <div class="field-group mb-6 w-full">
+    </div>
+    <div class="lg:grid grid-cols-3 gap-6 lg:text-center lg:ml-28">
+
+      <div class="field-group mb-6 ">
         <div class="form-group" :class="{ 'form-group--error': $v.nonWorking.$error }">
-          <label class="field-label" for="password">Giorni NON lavorativi</label>
-          <input class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2" />
-          <info-box :msg="'I giorni della settimana in cui la sede chiude'" />
-          <div class="container">
+          <label class="field-label font-bold" for="password">Giorni NON lavorativi</label>
+          <div class="container text-left mt-10">
+
             <div v-for="day in arrayDays" v-bind:key="day.value">
               <div class="field-label" />
-              <label class="inline-flex items-center">
+              <label class="inline-flex items-center justify-center">
                 <input
                   type="checkbox"
                   class="inline-flexform-checkbox"
@@ -249,22 +271,16 @@
                 <span class="ml-2">{{ day.text }}</span>
               </label>
             </div>
-          </div>
         </div>
-        <!-- <div v-if="$v.nonWorking.$error">
-          <div class="error" v-if="!$v.nonWorking.required">
-            Il campo Giorni NON lavorativi e' richiesto.
-          </div>
-        </div> -->
       </div>
-      <div class="field-group mb-6 w-full">
+      <div class="field-group">
+
         <div
           class="form-group"
           :class="{ 'form-group--error': $v.nonWorkingDays.$error }"
         >
-          <label class="field-label" for="password">Giorni di chiusura</label>
-          <input class="focus:border-blue-600 p-2 mb-2 flex-1 mr-2" />
-          <info-box :msg="'Giorni di chiusara aziendali'" />
+          <label class="field-label font-bold" for="password">Giorni di chiusura</label>
+
 
           <div v-if="nonWorkingDays && nonWorkingDays.length > 0">
             <div
@@ -272,7 +288,7 @@
               :key="day"
               class="inline-flex justify-center items-center m-1 font-medium py-1 px-2 bg-white rounded-full text-indigo-100 bg-indigo-700 border border-indigo-700"
             >
-              <div class="text-xs font-normal leading-none max-w-full flex-initial">
+              <div class="text-xs font-normal leading-none max- flex-initial">
                 {{ day }}
               </div>
               <div class="flex flex-auto flex-row-reverse" @click="removeDay(day)">
@@ -311,7 +327,8 @@
                   required
                   placeholder="Giorno di chiusura *"
                   v-model.trim="$v.newNonWorkingDay.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 w-full"
+                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+
                 />
               </VueTailwindPicker>
 
@@ -321,6 +338,8 @@
                 <add-icon @click="addDays($v.newNonWorkingDay.$model)" />
               </div>
             </div>
+          </div>
+          </div>
           </div>
         </div>
         <!-- <div v-if="$v.nonWorkingDays.$error">

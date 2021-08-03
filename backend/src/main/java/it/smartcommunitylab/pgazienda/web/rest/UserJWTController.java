@@ -17,6 +17,8 @@ package it.smartcommunitylab.pgazienda.web.rest;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -46,6 +48,8 @@ import it.smartcommunitylab.pgazienda.web.rest.vm.LoginVM;
 @RequestMapping("/api")
 public class UserJWTController {
 
+	private static final Logger logger = LoggerFactory.getLogger(UserJWTController.class);
+	
 	@Autowired
     private TokenProvider tokenProvider;
 
@@ -73,12 +77,17 @@ public class UserJWTController {
     @GetMapping("/authenticate/extjwt")
     public ResponseEntity<JWTToken> authorizeExternalJWT(@RequestHeader(name = "Authorization") String token) {
 
-        Authentication authentication = externalUserDetails.externalAuthentication(token);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.createToken(authentication, false);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(JWTFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
-        return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
+        try {
+			Authentication authentication = externalUserDetails.externalAuthentication(token);
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			String jwt = tokenProvider.createToken(authentication, false);
+			HttpHeaders httpHeaders = new HttpHeaders();
+			httpHeaders.add(JWTFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
+			return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
     }
 
     /**
