@@ -16,12 +16,15 @@
 
 package it.smartcommunitylab.pgazienda.web.rest;
 
+import java.time.LocalDate;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,6 +60,13 @@ public class AdminResource {
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
 	public @ResponseBody ResponseEntity<Void> syncTrackingData() {
 		trackingDataService.synchronizeApps();
+		return ResponseEntity.ok(null);
+	}
+
+	@GetMapping("/admin/datasync/{campaignId}/{companyId}/{from}/{to}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public @ResponseBody ResponseEntity<Void> syncCompanyTrackingData(@PathVariable String campaignId, @PathVariable String companyId, @PathVariable String from, @PathVariable String to) {
+		trackingDataService.syncCompanyData(campaignId, companyId, LocalDate.parse(from), LocalDate.parse(to));
 		return ResponseEntity.ok(null);
 	}
 
