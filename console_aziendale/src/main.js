@@ -28,6 +28,14 @@ import CalendarRemove from "vue-material-design-icons/CalendarRemove";
 import Code from "vue-material-design-icons/FormTextboxPassword";
 import Help from "vue-material-design-icons/HelpCircle";
 
+//Import vue-material per usare i componenti
+import VueMaterial from 'vue-material'
+import 'vue-material/dist/vue-material.min.css'
+import 'vue-material/dist/theme/default.css'
+
+Vue.use(VueMaterial)
+//-------------------------
+
 import axios from 'axios'
 import {router} from "./routes.js"
 import { store } from './store'
