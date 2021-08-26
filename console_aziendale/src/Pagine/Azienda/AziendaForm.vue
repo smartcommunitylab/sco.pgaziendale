@@ -68,6 +68,7 @@
         </div>
         <div v-if="$v.streetNumber.$error">
           <div class="error" v-if="!$v.streetNumber.required">Il campo Numero e' richiesto.</div>
+          
         </div>
       </div>
       <div class="field-group mb-4 w-full">
