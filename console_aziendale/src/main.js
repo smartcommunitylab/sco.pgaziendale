@@ -28,10 +28,6 @@ import CalendarRemove from "vue-material-design-icons/CalendarRemove";
 import Code from "vue-material-design-icons/FormTextboxPassword";
 import Help from "vue-material-design-icons/HelpCircle";
 
-//Import vuetify per usare i componenti
-import vuetify from '@/plugins/vuetify' // path to vuetify export
-//-------------------------
-
 import axios from 'axios'
 import {router} from "./routes.js"
 import { store } from './store'
@@ -53,6 +49,7 @@ Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 import moment from 'moment'
+import vuetify from './plugins/vuetify'
 
 Vue.prototype.moment = moment
 
@@ -138,8 +135,8 @@ axios.interceptors.response.use(
 Vue.use(Vuelidate)
 
 new Vue({
-  vuetify,
   render: h => h(App),
   router,
-  store:store,
+  vuetify,
+  store:store
 }).$mount('#app')
