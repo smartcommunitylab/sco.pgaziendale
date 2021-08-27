@@ -60,6 +60,7 @@
 
 import MenuHeader from "./components/NavBar/MenuHeader.vue";
 import { mapActions, mapState } from "vuex";
+
 import Loader from "./components/Loader";
 import Footer from "@/components/Footer"
 export default {
