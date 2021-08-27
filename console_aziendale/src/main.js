@@ -28,12 +28,8 @@ import CalendarRemove from "vue-material-design-icons/CalendarRemove";
 import Code from "vue-material-design-icons/FormTextboxPassword";
 import Help from "vue-material-design-icons/HelpCircle";
 
-//Import vue-material per usare i componenti
-import VueMaterial from 'vue-material'
-import 'vue-material/dist/vue-material.min.css'
-import 'vue-material/dist/theme/default.css'
-
-Vue.use(VueMaterial)
+//Import vuetify per usare i componenti
+import vuetify from '@/plugins/vuetify' // path to vuetify export
 //-------------------------
 
 import axios from 'axios'
@@ -142,6 +138,7 @@ axios.interceptors.response.use(
 Vue.use(Vuelidate)
 
 new Vue({
+  vuetify,
   render: h => h(App),
   router,
   store:store,

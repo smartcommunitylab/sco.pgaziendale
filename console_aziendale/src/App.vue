@@ -1,30 +1,63 @@
 <template>
-  <div id="app">
-    <Loader v-if="loading" />
-    <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
-    <transition name="fade">
-      <div v-if="alert.message" :class="`alert ${alert.type}`">
-      {{ alert.message }}
+  
+    <div id="app">
+      <!-- App.vue -->
+
+    <v-app>
+      <v-navigation-drawer app>
+        <!-- -->
+      </v-navigation-drawer>
+
+      <v-app-bar app>
+        <!-- -->
+      </v-app-bar>
+
+      <!-- Sizes your content based upon application components -->
+      <v-main>
+
+        <!-- Provides the application the proper gutter -->
+        <v-container fluid>
+
+          <!-- If using vue-router -->
+          <router-view></router-view>
+        </v-container>
+      </v-main>
+
+      <v-footer app>
+        <!-- -->
+      </v-footer>
+    </v-app>
+      <!--
+      <Loader v-if="loading" />
+      <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
+      <transition name="fade">
+        <div v-if="alert.message" :class="`alert ${alert.type}`">
+        {{ alert.message }}
+      </div>
+      </transition>
+      <router-view class=" min-h-screen "
+        :class="{
+          'lg:pl-64 pt-16 lg:pt-16 padding-bottom': account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd',
+        }"
+      />
+        <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
+        -->
     </div>
-    </transition>
-    <router-view class=" min-h-screen "
-      :class="{
-        'lg:pl-64 pt-16 lg:pt-16 padding-bottom': account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd',
-      }"
-    />
-      <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
-  </div>
+
 </template>
 
 <script>
-import MenuHeader from "./components/NavBar/MenuHeader.vue";
 import { mapActions, mapState } from "vuex";
+/*
+import MenuHeader from "./components/NavBar/MenuHeader.vue";
+
 import Loader from "./components/Loader";
 import Footer from "@/components/Footer"
+*/
 // import httpClient from './utils/httpClient';
 export default {
   name: "App",
-  components: { "menu-header": MenuHeader,Loader,"app-footer":Footer },
+  /*components: { "menu-header": MenuHeader,Loader,"app-footer":Footer },*/
   computed: {
     ...mapState({
       account: (state) => state.account,
