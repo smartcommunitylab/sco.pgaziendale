@@ -49,6 +49,7 @@
         </div>
         </transition>
         <router-view class="min-h-screen " v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
+        <router-view class="min-h-screen " v-else />
       </v-container>
     </v-main>
 
