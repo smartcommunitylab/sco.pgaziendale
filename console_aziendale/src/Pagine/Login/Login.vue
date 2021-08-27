@@ -17,36 +17,48 @@
           <h1 class="font-hairline mb-6 text-center text-white text-3xl">
             Entra in Aziende Play&Go
           </h1>
+          
           <div class="border-teal p-4  border-t-12 bg-white mb-6 rounded-lg shadow-lg">
             <div class="mb-4">
-              <label class="font-bold block mb-2 text-primary text-center"
+              <label class="font-bold block ml-5 text-primary text-left"
                 >Username</label
               >
-              <input
-                type="text"
-                class="block appearance-none w-full bg-white border border-grey-light hover:border-grey px-2 py-2 rounded shadow"
-                placeholder="Il tuo username"
-                v-model="username"
-                name="username"
-                id="username"
-              />
+              <v-col
+                cols="12"
+              >
+                <v-text-field
+                  label="Username"
+                  placeholder="Il tuo username"
+                  v-model="username"
+                  name="username"
+                  id="username"
+                  solo
+                  hide-details
+                ></v-text-field>
+              </v-col>
             </div>
 
             <div class="mb-4">
-              <label class="font-bold text-primary block mb-2 text-center"
+              <label class="font-bold text-primary block ml-5 text-left"
                 >Password</label
               >
               <div class="relative">
-                <input
-                  :type="passwordFieldType"
-                  class="block appearance-none w-full bg-white border border-grey-light hover:border-grey px-2 py-2 rounded shadow"
-                  placeholder="La tua password"
-                  v-model="password"
-                  name="password"
-                  id="password"
-                />
+                <v-col
+                cols="12"
+                >
+                  <v-text-field
+                    :type="passwordFieldType"
+                    label="Username"
+                    placeholder="La tua password"
+                    v-model="password"
+                    name="password"
+                    id="password"
+                    solo
+                    hide-details
+                  ></v-text-field>
+                </v-col>
                 <div
-                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                  class="absolute inset-y-0 right-0 pr-5 flex items-center text-sm leading-5"
                 >
                   <eye-off-icon
                     @click="switchVisibility"
@@ -65,16 +77,41 @@
                 </div>
               </div>
             </div>
+
+            <v-row class="mb-8">
+              <v-col
+              cols="4"
+              class="p-0"
+              >
+                <v-checkbox
+                  class="px-7 py-0 m-0"
+                  v-model="ex4"
+                  label="Ricordami"
+                  color="primary"
+                  value="primary"
+                  hide-details
+                ></v-checkbox>
+              </v-col>
+              <v-col
+              cols="8"
+              >
+                <p class="pwd-forgot text-right mx-0 px-4" @click="resetPwd">Password dimenticata?</p>
+              </v-col>
+            </v-row>
+            <v-row>
+            </v-row>
+            
             <div class="flex items-center justify-between">
               <div class="form-group w-full">
-                <button
-                  class="bg-blue hover:bg-blue-dark text-white border-primary bg-primary border-solid border-4 font-bold py-2 px-4 rounded text-center w-full"
+                <v-btn
+                  depressed
+                  color="primary"
+                  class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-10 rounded text-center w-full"
                   type="button"
                   @click="handleSubmit"
                 >
                   Login
-                </button>
-                <p class="pwd-forgot text-primary" @click="resetPwd">Password dimenticata?</p>
+                </v-btn>
               </div>
             </div>
           </div>
