@@ -4,6 +4,7 @@
       app
       color="primary"
       dark
+      clipped-left
     >
       <div class="d-flex align-center">
         <v-img
@@ -32,27 +33,27 @@
         target="_blank"
         text
       >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
+        <span class="mr-2">User Settings</span>
+        <v-icon>mdi-setting</v-icon>
       </v-btn>
     </v-app-bar>
 
-    <v-main>
-      <Loader v-if="loading" />
     <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
-    <transition name="fade">
-      <div v-if="alert.message" :class="`alert ${alert.type}`">
-      {{ alert.message }}
-    </div>
-    </transition>
-    <router-view class=" min-h-screen "
-      :class="{
-        'lg:pl-64 pt-16 lg:pt-16 padding-bottom': account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd',
-      }"
-    />
-      <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
-  
+
+    <v-main>
+      <v-container fluid>
+        <Loader v-if="loading" />
+        <transition name="fade">
+          <div v-if="alert.message" :class="`alert ${alert.type}`">
+          {{ alert.message }}
+        </div>
+        </transition>
+        <router-view class="min-h-screen " v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
+      </v-container>
     </v-main>
+
+    <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
+
   </v-app>
 </template>
 
@@ -110,7 +111,6 @@ export default {
 </script>
 
 <style scoped>
-
 .closebtn {
   margin-left: 15px;
   color: white;

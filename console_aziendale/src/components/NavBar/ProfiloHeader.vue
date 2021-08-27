@@ -39,19 +39,6 @@ export default {
   },
 }
 </script>
-<style scoped>
-.container {
-    text-align: center;
-    border: solid 1px white;
-    margin: 10px 20px;
-    padding: 8px;
-    width: 80%;
-    border-radius: 8px;
 
-}
-.img-exit-profile {
-margin: 2px 4px;
-      vertical-align: middle;
-    display: inline-block;
-}
+<style scoped>
 </style>
