@@ -1,11 +1,11 @@
 <template>
   <div class="flex flex-col lg:flex-row">
-    <div class="bg-green-300 lg:w-3/6 mx-2 my-2 pb-16 relative">
+    <div class="">
       <div v-if="allCompanies && allCompanies.items && allCompanies.items.length > 0">
         <generic-table
-          :data="allCompanies.items"
-          :columns="gridColumns"
-          :header="headerColumns"
+          :items="allCompanies.items"
+          :headers="headerColumns"
+          :title="tableTitle"
           :method="showCompanyInfo"
         >
         </generic-table>
@@ -89,8 +89,8 @@ export default {
   name: "Aziende",
   data: function () {
     return {
-      gridColumns: ["name", "code"],
-      headerColumns: ["Nome", "Codice Azienda"],
+      tableTitle: "Aziende",
+      headerColumns: [{text:"Nome", value:"name"}, {text:"Codice Azienda", value:"code"}],
       editModalVisible: false,
       deleteModalVisible: false,
       currentCompanySelected: undefined,
