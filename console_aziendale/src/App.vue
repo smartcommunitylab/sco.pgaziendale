@@ -1,6 +1,44 @@
 <template>
-  <div id="app">
-    <Loader v-if="loading" />
+  <v-app>
+    <v-app-bar
+      app
+      color="primary"
+      dark
+    >
+      <div class="d-flex align-center">
+        <v-img
+          alt="Vuetify Logo"
+          class="shrink mr-2"
+          contain
+          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
+          transition="scale-transition"
+          width="40"
+        />
+
+        <v-img
+          alt="Vuetify Name"
+          class="shrink mt-1 hidden-sm-and-down"
+          contain
+          min-width="100"
+          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
+          width="100"
+        />
+      </div>
+
+      <v-spacer></v-spacer>
+
+      <v-btn
+        href="https://github.com/vuetifyjs/vuetify/releases/latest"
+        target="_blank"
+        text
+      >
+        <span class="mr-2">Latest Release</span>
+        <v-icon>mdi-open-in-new</v-icon>
+      </v-btn>
+    </v-app-bar>
+
+    <v-main>
+      <Loader v-if="loading" />
     <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
     <transition name="fade">
       <div v-if="alert.message" :class="`alert ${alert.type}`">
@@ -13,18 +51,23 @@
       }"
     />
       <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
-  </div>
+  
+    </v-main>
+  </v-app>
 </template>
 
 <script>
+
 import MenuHeader from "./components/NavBar/MenuHeader.vue";
 import { mapActions, mapState } from "vuex";
 import Loader from "./components/Loader";
 import Footer from "@/components/Footer"
-// import httpClient from './utils/httpClient';
 export default {
-  name: "App",
-  components: { "menu-header": MenuHeader,Loader,"app-footer":Footer },
+  name: 'App',
+
+   components: { "menu-header": MenuHeader,Loader,"app-footer":Footer },
+
+
   computed: {
     ...mapState({
       account: (state) => state.account,
