@@ -227,9 +227,9 @@
       </transition>
       <div v-if="allEmployees && allEmployees.items && allEmployees.items.length > 0">
         <generic-table
-          :data="allEmployees.items"
-          :columns="gridColumns"
-          :header="headerColumns"
+          :items="allEmployees.items"
+          :headers="headerColumns"
+          :title="tableTitle"
           :method="showEmployeeInfo"
         >
         </generic-table>
@@ -321,8 +321,8 @@ export default {
   name: "Dipendenti",
   data: function () {
     return {
-      gridColumns: ["name", "surname", "location", "code"],
-      headerColumns: ["Nome", "Cognome", "Sede", "Codice"],
+      tableTitle: "Dipendenti",
+      headerColumns: [{text:"Nome", value:"name"}, {text:"Cognome", value:"surname"}, {text:"Sede", value:"location"}, {text:"Codice", value:"code"}],
       editModalVisible: false,
       deleteModalVisible: false,
       currentEmployeeSelected: undefined,

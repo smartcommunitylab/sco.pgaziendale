@@ -3,9 +3,9 @@
     <div class="bg-green-300 lg:w-3/6 mx-2 my-2 pb-16 relative">
       <div v-if="allCampaigns && allCampaigns.items && allCampaigns.items.length > 0">
         <generic-table
-          :data.sync="allCampaigns.items"
-          :columns="gridColumns"
-          :header="headerColumns"
+          :items.sync="allCampaigns.items"
+          :headers="headerColumns"
+          :title="tableTitle"
           :method="showCampaignInfo"
         >
         </generic-table>
@@ -106,8 +106,8 @@ export default {
   name: "GestioneCampagne",
   data: function () {
     return {
-      gridColumns: ["title", "from", "to", "active"],
-      headerColumns: ["Nome", "Inizio", "Fine", "Status"],
+      tableTitle: "Campagne",
+      headerColumns: [{text:"Nome", value:"title"}, {text:"Inizio", value:"from"}, {text:"Fine", value:"to"}, {text:"Status", value:"active"}],
       associateCampaignModalVisible:false,
       editModalVisible: false,
       deleteModalVisible: false,

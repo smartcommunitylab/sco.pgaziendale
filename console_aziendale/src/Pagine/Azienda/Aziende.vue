@@ -1,49 +1,16 @@
 <template>
   <div class="flex flex-col lg:flex-row">
-    <div class="bg-green-300 lg:w-3/6 mx-2 my-2 pb-16 relative">
+    <div class="">
       <div v-if="allCompanies && allCompanies.items && allCompanies.items.length > 0">
         <generic-table
-          :data="allCompanies.items"
-          :columns="gridColumns"
-          :header="headerColumns"
+          :items="allCompanies.items"
+          :headers="headerColumns"
+          :title="tableTitle"
           :method="showCompanyInfo"
         >
         </generic-table>
       </div>
       <div v-else class="empty-list">Non ci sono Aziende</div>
-      
-      <v-card
-        class="mx-auto"
-        max-width="400"
-        tile
-      >
-        <v-list-item>
-          <v-list-item-content>
-            <v-list-item-title>Single-line item</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-
-        <v-list-item two-line>
-          <v-list-item-content>
-            <v-list-item-title>Two-line item</v-list-item-title>
-            <v-list-item-subtitle>Secondary text</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-
-        <v-list-item three-line>
-          <v-list-item-content>
-            <v-list-item-title>Three-line item</v-list-item-title>
-            <v-list-item-subtitle>
-              Secondary line text Lorem ipsum dolor sit amet,
-            </v-list-item-subtitle>
-            <v-list-item-subtitle>
-              consectetur adipiscing elit.
-            </v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-card>
-    
-
       <div class="ml-auto pt-4 pr-4 absolute right-0">
         <button
           @click="showModal('Aggiungi azienda')"
@@ -122,8 +89,8 @@ export default {
   name: "Aziende",
   data: function () {
     return {
-      gridColumns: ["name", "code"],
-      headerColumns: ["Nome", "Codice Azienda"],
+      tableTitle: "Aziende",
+      headerColumns: [{text:"Nome", value:"name"}, {text:"Codice Azienda", value:"code"}],
       editModalVisible: false,
       deleteModalVisible: false,
       currentCompanySelected: undefined,
