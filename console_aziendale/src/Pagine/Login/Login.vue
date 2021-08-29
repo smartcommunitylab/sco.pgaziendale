@@ -27,7 +27,6 @@
                 cols="12"
               >
                 <v-text-field
-                  label="Username"
                   placeholder="Il tuo username"
                   v-model="username"
                   name="username"
@@ -48,7 +47,6 @@
                 >
                   <v-text-field
                     :type="passwordFieldType"
-                    label="Username"
                     placeholder="La tua password"
                     v-model="password"
                     name="password"
@@ -85,7 +83,7 @@
               >
                 <v-checkbox
                   class="px-7 py-0 m-0"
-                  v-model="ex4"
+                  v-model="EventualeVariabile"
                   label="Ricordami"
                   color="primary"
                   value="primary"
@@ -93,9 +91,15 @@
                 ></v-checkbox>
               </v-col>
               <v-col
-              cols="8"
+              cols="2"
+              class="p-0 m-0"
               >
-                <p class="pwd-forgot text-right mx-0 px-4" @click="resetPwd">Password dimenticata?</p>
+              </v-col>
+              <v-col
+              cols="6"
+              class="p-0 m-0"
+              >
+                <p class="pwd-forgot text-right m-0 px-8" @click="resetPwd">Password dimenticata?</p>
               </v-col>
             </v-row>
             <v-row>
@@ -164,7 +168,15 @@ export default {
 <style scoped>
 .pwd-forgot{
   text-align: center;
-  margin: 10px 0px;
-  font-weight: bold;
+  font-style: italic;
+  color: #757575;
+  cursor: pointer;
+  font-weight: 600;
+}
+.eye-off-icon{
+  cursor: pointer;
+}
+.eye-icon{
+  cursor: pointer;
 }
 </style>

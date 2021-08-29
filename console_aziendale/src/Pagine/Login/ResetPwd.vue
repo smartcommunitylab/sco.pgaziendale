@@ -8,38 +8,54 @@
         <div
           class="relative border-teal p-4 border-t-12 bg-white mb-6 rounded-lg shadow-lg"
         >
-          <div class="backButton" @click="back">
+          <!--
+          <div class="backButton m-2" @click="back">
             <back-icon />
           </div>
+          -->
+          <md-button class="md-icon-button m-2" @click="back">
+            <md-icon>home</md-icon>
+          </md-button>
+
+
           <div v-if="step == 1">
             <div class="mb-4">
-              <label class="font-bold block mb-2 text-primary text-center"
+              <label class="font-bold block text-primary mt-6 ml-4 text-left"
                 >Username</label
               >
-              <input
-                type="text"
-                class="block appearance-none w-full bg-white border border-grey-light hover:border-grey px-2 py-2 rounded shadow"
-                placeholder="Il tuo username\email"
-                v-model="username"
-                name="username"
-                id="username"
-              />
+              <v-col
+                cols="12"
+              >
+                <v-text-field
+                  placeholder="Il tuo username"
+                  v-model="username"
+                  name="username"
+                  id="username"
+                  solo
+                  hide-details
+                ></v-text-field>
+              </v-col>
             </div>
           </div>
           <div v-if="step == 2">
             <div class="mb-4">
-              <label class="font-bold text-primary block mb-2 text-center"
+              <label class="font-bold text-primary block mt-6 ml-4 text-left"
                 >New Password</label
               >
               <div class="relative">
-                <input
-                  :type="passwordFieldTypeFirst"
-                  class="block appearance-none w-full bg-white border border-grey-light hover:border-grey px-2 py-2 rounded shadow"
-                  placeholder="La tua password"
-                  v-model="passwordFirst"
-                  name="passwordFirst"
-                  id="passwordFirst"
-                />
+                <v-col
+                cols="12"
+                >
+                  <v-text-field
+                    :type="passwordFieldTypeFirst"
+                    placeholder="La tua password"
+                    v-model="passwordFirst"
+                    name="passwordFirst"
+                    id="passwordFirst"
+                    solo
+                    hide-details
+                  ></v-text-field>
+                </v-col>
                 <div
                   class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
                 >
@@ -62,19 +78,24 @@
               </div>
             </div>
             <div class="mb-4">
-              <label class="font-bold text-primary block mb-2 text-center"
+              <label class="font-bold text-primary block mt-6 ml-4 text-left"
                 >Repeat new password</label
               >
               <div class="relative">
-                <input
-                  :type="passwordFieldTypeSecond"
-                  :class="{ 'password-different': passwordDifferent }"
-                  class="block appearance-none w-full bg-white border border-grey-light hover:border-grey px-2 py-2 rounded shadow"
-                  placeholder="Ripeti la tua password"
-                  v-model="passwordSecond"
-                  name="passwordSecond"
-                  id="passwordSecond"
-                />
+                <v-col
+                cols="12"
+                >
+                  <v-text-field
+                    :type="passwordFieldTypeSecond"
+                    :class="{ 'password-different': passwordDifferent }"
+                    placeholder="Ripeti la tua password"
+                    v-model="passwordSecond"
+                    name="passwordSecond"
+                    id="passwordSecond"
+                    solo
+                    hide-details
+                  ></v-text-field>
+                </v-col>
                 <div
                   class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
                 >
@@ -102,22 +123,26 @@
           </div>
           <div class="flex items-center justify-between">
             <div class="form-group w-full">
-              <button
+            <v-btn
+                depressed
                 v-if="step == 1"
-                class="bg-blue hover:bg-blue-dark text-white border-primary bg-primary border-solid border-4 font-bold py-2 px-4 rounded text-center w-full"
+                color="primary"
+                class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-10 rounded text-center w-full"
                 type="button"
                 @click="resetInit"
               >
                 Invia Email per il Recupero
-              </button>
-              <button
+              </v-btn>
+              <v-btn
+                depressed
                 v-if="step == 2"
-                class="bg-blue hover:bg-blue-dark text-white border-primary bg-primary border-solid border-4 font-bold py-2 px-4 rounded text-center w-full"
+                color="primary"
+                class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-10 rounded text-center w-full"
                 type="button"
                 @click="setPwd"
               >
                 Imposta la nuova password
-              </button>
+              </v-btn>
             </div>
           </div>
         </div>
@@ -200,5 +225,11 @@ export default {
 .error {
   color: red;
   text-align: center;
+}
+.eye-off-icon{
+  cursor: pointer;
+}
+.eye-icon{
+  cursor: pointer;
 }
 </style>
