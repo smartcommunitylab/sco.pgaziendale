@@ -13,14 +13,24 @@
             <back-icon />
           </div>
           -->
-          <md-button class="md-icon-button m-2" @click="back">
-            <md-icon>home</md-icon>
-          </md-button>
+          
+          <v-col
+            cols="12"
+            class="m-0 p-0"
+          >
+            <v-btn
+              icon
+              color=primary
+              @click="back"
+            >
+              <v-icon>mdi-arrow-left</v-icon>
+            </v-btn>
+          </v-col>
 
 
           <div v-if="step == 1">
             <div class="mb-4">
-              <label class="font-bold block text-primary mt-6 ml-4 text-left"
+              <label class="font-bold block text-primary mt-2 ml-4 text-left"
                 >Username</label
               >
               <v-col
@@ -39,82 +49,50 @@
           </div>
           <div v-if="step == 2">
             <div class="mb-4">
-              <label class="font-bold text-primary block mt-6 ml-4 text-left"
-                >New Password</label
+              <label class="font-bold text-primary block mt-2 ml-4 text-left"
+                >Nuova Password</label
               >
               <div class="relative">
                 <v-col
                 cols="12"
                 >
                   <v-text-field
-                    :type="passwordFieldTypeFirst"
-                    placeholder="La tua password"
+                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show1 ? 'text' : 'password'"
+                    class="input-group--focused"
+                    placeholder="Nuova password"
                     v-model="passwordFirst"
                     name="passwordFirst"
                     id="passwordFirst"
                     solo
                     hide-details
+                    @click:append="show1 = !show1"
                   ></v-text-field>
                 </v-col>
-                <div
-                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                >
-                  <eye-off-icon
-                    @click="switchVisibilityFirst"
-                    :class="{
-                      block: passwordFieldTypeFirst == 'password',
-                      hidden: passwordFieldTypeFirst != 'text',
-                    }"
-                  />
-
-                  <eye-icon
-                    @click="switchVisibilityFirst"
-                    :class="{
-                      block: passwordFieldTypeFirst != 'password',
-                      hidden: passwordFieldTypeFirst == 'text',
-                    }"
-                  />
-                </div>
               </div>
             </div>
             <div class="mb-4">
-              <label class="font-bold text-primary block mt-6 ml-4 text-left"
-                >Repeat new password</label
+              <label class="font-bold text-primary block ml-4 text-left"
+                >Ripeti la nuova password</label
               >
               <div class="relative">
                 <v-col
                 cols="12"
                 >
                   <v-text-field
-                    :type="passwordFieldTypeSecond"
+                    :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show2 ? 'text' : 'password'"
+                    class="input-group--focused"
                     :class="{ 'password-different': passwordDifferent }"
-                    placeholder="Ripeti la tua password"
+                    placeholder="Ripeti la password"
                     v-model="passwordSecond"
                     name="passwordSecond"
                     id="passwordSecond"
                     solo
                     hide-details
+                    @click:append="show2 = !show2"
                   ></v-text-field>
                 </v-col>
-                <div
-                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                >
-                  <eye-off-icon
-                    @click="switchVisibilitySecond"
-                    :class="{
-                      block: passwordFieldTypeSecond == 'password',
-                      hidden: passwordFieldTypeSecond != 'text',
-                    }"
-                  />
-
-                  <eye-icon
-                    @click="switchVisibilitySecond"
-                    :class="{
-                      block: passwordFieldTypeSecond != 'password',
-                      hidden: passwordFieldTypeSecond == 'text',
-                    }"
-                  />
-                </div>
               </div>
               <div v-if="passwordDifferent">
                 <div class="error">Le due password non coincidono</div>
@@ -170,6 +148,8 @@ export default {
       passwordFieldTypeFirst: "password",
       passwordFieldTypeSecond: "password",
       passwordDifferent: false,
+      show1: false,
+      show2: false,
     };
   },
   created() {

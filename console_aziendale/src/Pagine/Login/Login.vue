@@ -46,33 +46,18 @@
                 cols="12"
                 >
                   <v-text-field
-                    :type="passwordFieldType"
+                    :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show ? 'text' : 'password'"
+                    class="input-group--focused"
                     placeholder="La tua password"
                     v-model="password"
                     name="password"
                     id="password"
                     solo
                     hide-details
+                    @click:append="show = !show"
                   ></v-text-field>
                 </v-col>
-                <div
-                  class="absolute inset-y-0 right-0 pr-5 flex items-center text-sm leading-5"
-                >
-                  <eye-off-icon
-                    @click="switchVisibility"
-                    :class="{
-                      block: passwordFieldType == 'password',
-                      hidden: passwordFieldType != 'text',
-                    }"
-                  />
-                  <eye-icon
-                    @click="switchVisibility"
-                    :class="{
-                      block: passwordFieldType != 'password',
-                      hidden: passwordFieldType == 'text',
-                    }"
-                  />
-                </div>
               </div>
             </div>
 
@@ -91,15 +76,10 @@
                 ></v-checkbox>
               </v-col>
               <v-col
-              cols="2"
-              class="p-0 m-0"
+              cols="8"
+              class="text-right p-0 m-0"
               >
-              </v-col>
-              <v-col
-              cols="6"
-              class="p-0 m-0"
-              >
-                <p class="pwd-forgot text-right m-0 px-8" @click="resetPwd">Password dimenticata?</p>
+                <span class="pwd-forgot text-right m-0 pr-8" @click="resetPwd">Password dimenticata?</span>
               </v-col>
             </v-row>
             <v-row>
@@ -140,6 +120,7 @@ export default {
       password: "",
       passwordFieldType: "password",
       submitted: false,
+      show: false,
     };
   },
   computed: {
@@ -172,6 +153,13 @@ export default {
   color: #757575;
   cursor: pointer;
   font-weight: 600;
+  text-decoration: underline 0.1em rgba(0, 0, 0, 0);
+  transition: text-decoration-color 500ms;
+  transition: text-color 500ms;
+}
+.pwd-forgot:hover{
+  color: #212121;
+  text-decoration-color: #212121;
 }
 .eye-off-icon{
   cursor: pointer;
