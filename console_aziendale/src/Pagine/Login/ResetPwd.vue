@@ -37,6 +37,7 @@
                 cols="12"
               >
                 <v-text-field
+                  :rules="[rules.required]"
                   placeholder="Il tuo username"
                   v-model="username"
                   name="username"
@@ -59,6 +60,7 @@
                   <v-text-field
                     :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show1 ? 'text' : 'password'"
+                    :rules="[rules.required]"
                     class="input-group--focused"
                     placeholder="Nuova password"
                     v-model="passwordFirst"
@@ -82,6 +84,7 @@
                   <v-text-field
                     :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show2 ? 'text' : 'password'"
+                    :rules="[rules.required]"
                     class="input-group--focused"
                     :class="{ 'password-different': passwordDifferent }"
                     placeholder="Ripeti la password"
@@ -150,6 +153,9 @@ export default {
       passwordDifferent: false,
       show1: false,
       show2: false,
+      rules: {
+          required: value => !!value || 'Campo richiesto.',
+      },
     };
   },
   created() {
@@ -166,14 +172,6 @@ export default {
 
     back() {
       this.$router.push("login");
-    },
-    switchVisibilityFirst() {
-      this.passwordFieldTypeFirst =
-        this.passwordFieldTypeFirst === "password" ? "text" : "password";
-    },
-    switchVisibilitySecond() {
-      this.passwordFieldTypeSecond =
-        this.passwordFieldTypeSecond === "password" ? "text" : "password";
     },
     setPwd() {
       //check if equal
@@ -203,7 +201,8 @@ export default {
   animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 .error {
-  color: red;
+  color: #212121;
+  background: transparent;
   text-align: center;
 }
 .eye-off-icon{
