@@ -57,34 +57,18 @@
                 cols="12"
                 >
                   <v-text-field
-                    :type="passwordFieldTypeFirst"
+                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show1 ? 'text' : 'password'"
+                    class="input-group--focused"
                     placeholder="Nuova password"
                     v-model="passwordFirst"
                     name="passwordFirst"
                     id="passwordFirst"
                     solo
                     hide-details
+                    @click:append="show1 = !show1"
                   ></v-text-field>
                 </v-col>
-                <div
-                  class="absolute inset-y-0 right-0 pr-5 flex items-center text-sm leading-5"
-                >
-                  <eye-off-icon
-                    @click="switchVisibilityFirst"
-                    :class="{
-                      block: passwordFieldTypeFirst == 'password',
-                      hidden: passwordFieldTypeFirst != 'text',
-                    }"
-                  />
-
-                  <eye-icon
-                    @click="switchVisibilityFirst"
-                    :class="{
-                      block: passwordFieldTypeFirst != 'password',
-                      hidden: passwordFieldTypeFirst == 'text',
-                    }"
-                  />
-                </div>
               </div>
             </div>
             <div class="mb-4">
@@ -96,7 +80,9 @@
                 cols="12"
                 >
                   <v-text-field
-                    :type="passwordFieldTypeSecond"
+                    :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show2 ? 'text' : 'password'"
+                    class="input-group--focused"
                     :class="{ 'password-different': passwordDifferent }"
                     placeholder="Ripeti la password"
                     v-model="passwordSecond"
@@ -104,27 +90,9 @@
                     id="passwordSecond"
                     solo
                     hide-details
+                    @click:append="show2 = !show2"
                   ></v-text-field>
                 </v-col>
-                <div
-                  class="absolute inset-y-0 right-0 pr-5 flex items-center text-sm leading-5"
-                >
-                  <eye-off-icon
-                    @click="switchVisibilitySecond"
-                    :class="{
-                      block: passwordFieldTypeSecond == 'password',
-                      hidden: passwordFieldTypeSecond != 'text',
-                    }"
-                  />
-
-                  <eye-icon
-                    @click="switchVisibilitySecond"
-                    :class="{
-                      block: passwordFieldTypeSecond != 'password',
-                      hidden: passwordFieldTypeSecond == 'text',
-                    }"
-                  />
-                </div>
               </div>
               <div v-if="passwordDifferent">
                 <div class="error">Le due password non coincidono</div>
@@ -180,6 +148,8 @@ export default {
       passwordFieldTypeFirst: "password",
       passwordFieldTypeSecond: "password",
       passwordDifferent: false,
+      show1: false,
+      show2: false,
     };
   },
   created() {

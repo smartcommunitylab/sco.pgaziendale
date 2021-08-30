@@ -46,33 +46,18 @@
                 cols="12"
                 >
                   <v-text-field
-                    :type="passwordFieldType"
+                    :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show ? 'text' : 'password'"
+                    class="input-group--focused"
                     placeholder="La tua password"
                     v-model="password"
                     name="password"
                     id="password"
                     solo
                     hide-details
+                    @click:append="show = !show"
                   ></v-text-field>
                 </v-col>
-                <div
-                  class="absolute inset-y-0 right-0 pr-5 flex items-center text-sm leading-5"
-                >
-                  <eye-off-icon
-                    @click="switchVisibility"
-                    :class="{
-                      block: passwordFieldType == 'password',
-                      hidden: passwordFieldType != 'text',
-                    }"
-                  />
-                  <eye-icon
-                    @click="switchVisibility"
-                    :class="{
-                      block: passwordFieldType != 'password',
-                      hidden: passwordFieldType == 'text',
-                    }"
-                  />
-                </div>
               </div>
             </div>
 
@@ -135,6 +120,7 @@ export default {
       password: "",
       passwordFieldType: "password",
       submitted: false,
+      show: false,
     };
   },
   computed: {

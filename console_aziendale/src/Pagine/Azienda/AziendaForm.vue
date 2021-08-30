@@ -1,39 +1,36 @@
 <template>
   <form action="" id="addAzienda">
     <div class="mb-20 flex flex-wrap justify-between">
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
-          <label class="field-label" for="first_name">Nome </label>
-          <input
+      <v-row>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Nome"
+            placeholder="Nome *"
             type="text"
             name="companyName"
-            placeholder="Nome *"
-            v-model.trim="$v.name.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            :rules="[rules.required]"
             id="companyName"
-          />
-        </div>
-        <div v-if="$v.name.$error">
-          <div class="error" v-if="!$v.name.required">Il campo nome e' richiesto.</div>
-        </div>
-      </div>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.code.$error }">
-          <label class="field-label" for="first_name">Codice Azienda</label>
-          <input
+            v-model.trim="$v.name.$model"
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Codice Azienda"
+            placeholder="Codice *"
             type="text"
             name="companyCode"
+            :rules="[rules.required]"
             id="companyCode"
-            placeholder="Codice *"
             v-model.trim="$v.code.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-          <info-box :msg="'Codice univoco dell\'azienda con cui verrá poi identificata nelle campagne'" />
-        </div>
-        <div v-if="$v.code.$error">
-          <div class="error" v-if="!$v.code.required">Il campo codice e' richiesto.</div>
-        </div>
-      </div>
+            outlined
+          ></v-text-field>
+        </v-col>
+      </v-row>
       <div class="field-group mb-4 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.address.$error }">
           <label class="field-label" for="last_name">Indirizzo </label>
@@ -267,6 +264,10 @@ export default {
       contactPhone: "",
       web: "",
       logo: "",
+      rules: {
+          required: value => !!value || 'Campo richiesto.',
+      },
+      emailRules: [ v => !v || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || 'E-mail must be valid'],
     };
   },
   validations: {
