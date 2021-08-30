@@ -13,14 +13,24 @@
             <back-icon />
           </div>
           -->
-          <md-button class="md-icon-button m-2" @click="back">
-            <md-icon>home</md-icon>
-          </md-button>
+          
+          <v-col
+            cols="12"
+            class="m-0 p-0"
+          >
+            <v-btn
+              icon
+              color=primary
+              @click="back"
+            >
+              <v-icon>mdi-arrow-left</v-icon>
+            </v-btn>
+          </v-col>
 
 
           <div v-if="step == 1">
             <div class="mb-4">
-              <label class="font-bold block text-primary mt-6 ml-4 text-left"
+              <label class="font-bold block text-primary mt-2 ml-4 text-left"
                 >Username</label
               >
               <v-col
@@ -39,8 +49,8 @@
           </div>
           <div v-if="step == 2">
             <div class="mb-4">
-              <label class="font-bold text-primary block mt-6 ml-4 text-left"
-                >New Password</label
+              <label class="font-bold text-primary block mt-2 ml-4 text-left"
+                >Nuova Password</label
               >
               <div class="relative">
                 <v-col
@@ -48,7 +58,7 @@
                 >
                   <v-text-field
                     :type="passwordFieldTypeFirst"
-                    placeholder="La tua password"
+                    placeholder="Nuova password"
                     v-model="passwordFirst"
                     name="passwordFirst"
                     id="passwordFirst"
@@ -57,7 +67,7 @@
                   ></v-text-field>
                 </v-col>
                 <div
-                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                  class="absolute inset-y-0 right-0 pr-5 flex items-center text-sm leading-5"
                 >
                   <eye-off-icon
                     @click="switchVisibilityFirst"
@@ -78,8 +88,8 @@
               </div>
             </div>
             <div class="mb-4">
-              <label class="font-bold text-primary block mt-6 ml-4 text-left"
-                >Repeat new password</label
+              <label class="font-bold text-primary block ml-4 text-left"
+                >Ripeti la nuova password</label
               >
               <div class="relative">
                 <v-col
@@ -88,7 +98,7 @@
                   <v-text-field
                     :type="passwordFieldTypeSecond"
                     :class="{ 'password-different': passwordDifferent }"
-                    placeholder="Ripeti la tua password"
+                    placeholder="Ripeti la password"
                     v-model="passwordSecond"
                     name="passwordSecond"
                     id="passwordSecond"
@@ -97,7 +107,7 @@
                   ></v-text-field>
                 </v-col>
                 <div
-                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                  class="absolute inset-y-0 right-0 pr-5 flex items-center text-sm leading-5"
                 >
                   <eye-off-icon
                     @click="switchVisibilitySecond"

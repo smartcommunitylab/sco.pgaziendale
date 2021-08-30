@@ -91,15 +91,10 @@
                 ></v-checkbox>
               </v-col>
               <v-col
-              cols="2"
-              class="p-0 m-0"
+              cols="8"
+              class="text-right p-0 m-0"
               >
-              </v-col>
-              <v-col
-              cols="6"
-              class="p-0 m-0"
-              >
-                <p class="pwd-forgot text-right m-0 px-8" @click="resetPwd">Password dimenticata?</p>
+                <span class="pwd-forgot text-right m-0 pr-8" @click="resetPwd">Password dimenticata?</span>
               </v-col>
             </v-row>
             <v-row>
@@ -172,6 +167,13 @@ export default {
   color: #757575;
   cursor: pointer;
   font-weight: 600;
+  text-decoration: underline 0.1em rgba(0, 0, 0, 0);
+  transition: text-decoration-color 500ms;
+  transition: text-color 500ms;
+}
+.pwd-forgot:hover{
+  color: #212121;
+  text-decoration-color: #212121;
 }
 .eye-off-icon{
   cursor: pointer;
