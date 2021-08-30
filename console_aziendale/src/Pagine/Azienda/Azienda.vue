@@ -36,7 +36,7 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-import ProfiloAzienda from "./ProfiloAzienda.vue";
+import ProfiloAzienda from "./OLD_ProfiloAzienda.vue";
 import GestioneAzienda from "./GestioneAzienda.vue";
 import EventBus from "@/components/eventBus";
 import Modal from "@/components/Modal.vue";

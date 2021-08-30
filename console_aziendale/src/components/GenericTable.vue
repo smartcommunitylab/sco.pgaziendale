@@ -15,7 +15,9 @@
       :headers="headers"
       :items="items"
       :search="search"
-    ></v-data-table>
+      @click:row="method"
+    >
+    </v-data-table>
   </v-card>
 </template>
 
@@ -26,7 +28,7 @@ export default {
     headers: Array,
     title: String,
     // filterKey: String,
-    /*method:Function*/
+    method:Function
   },
   
   watch: {
@@ -41,34 +43,7 @@ export default {
   },
   data() {
     return {
-        search: '',
-    }
-  },
-  computed: {
-    filteredData: function() {
-      var sortKey = this.sortKey;
-      // var filterKey = this.filterKey && this.filterKey.toLowerCase();
-      var order = this.sortOrders[sortKey] || 1;
-      var data = this.data;
-      // if (filterKey) {
-      //   data = data.filter(function(row) {
-      //     return Object.keys(row).some(function(key) {
-      //       return (
-      //         String(row[key])
-      //           .toLowerCase()
-      //           .indexOf(filterKey) > -1
-      //       );
-      //     });
-      //   });
-      // }
-      if (sortKey) {
-        data = data.slice().sort(function(a, b) {
-          a = a[sortKey];
-          b = b[sortKey];
-          return (a === b ? 0 : a > b ? 1 : -1) * order;
-        });
-      }
-      return data;
+      search: '',
     }
   },
   filters: {
@@ -76,12 +51,7 @@ export default {
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
   },
-  methods: {
-    sortBy: function(key) {
-      //find sortkey
-      this.sortKey = key;
-      this.sortOrders[key] = this.sortOrders[key] * -1;
-    }
+  method: {
   }
 }
 </script>
