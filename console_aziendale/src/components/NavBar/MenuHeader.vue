@@ -14,11 +14,8 @@
       </v-list-item>
 
       <v-list-item link>
-        <v-list-item-content>
-          <v-list-item-title class="text-h6">
-            <profilo-header/>
-          </v-list-item-title>
-          <v-list-item-subtitle>sandra_a88@gmail.com</v-list-item-subtitle>
+        <v-list-item-content>        
+          <profilo-header/>
         </v-list-item-content>
       </v-list-item>
     </v-list>

@@ -1,23 +1,17 @@
 <template>
-      <div class="container">
-           <div v-if="role=='ROLE_ADMIN'">
-              <div v-if="adminCompany!=null">
-
-            <span>{{adminCompany.item.name}}</span>
-              <button @click="resetCompany">
-                 <span class="img-exit-profile">
-                <logout-icon />
-              </span>
-              </button>
-              </div>
-              <div v-else>
-                Amministratore
-              </div>
-          </div>
-           <div v-if="(role=='ROLE_COMPANY_ADMIN' || role== 'ROLE_MOBILITY_MANAGER')&&actualCompany!=null && actualCompany.item!=null" >
-            {{actualCompany.item.name}}
-          </div>
-          </div>
+  <div>
+    <div v-if="role=='ROLE_ADMIN'">
+      <div v-if="adminCompany!=null">
+        <v-list-item-title class="text-h6">{{adminCompany.item.name}}</v-list-item-title>
+        <v-list-item-subtitle @click="resetCompany" class="mt-1 linked">Logout</v-list-item-subtitle>
+      </div>
+      <div v-else>
+        <v-list-item-title class="text-h6">
+          Amministratore
+        </v-list-item-title>
+      </div>
+    </div>
+  </div>
 </template>
 <script>
  import { mapActions,mapState } from 'vuex';
@@ -41,4 +35,12 @@ export default {
 </script>
 
 <style scoped>
+.linked{
+  font-style: italic;
+}
+
+.linked:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
 </style>
