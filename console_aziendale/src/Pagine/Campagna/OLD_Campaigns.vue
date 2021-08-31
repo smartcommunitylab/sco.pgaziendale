@@ -1,100 +1,94 @@
 <template>
-  <div>
-    <v-row>
-      <v-col>
-        <v-btn
-          class="fab"
-          fab
-          color="cyan accent-2"
-          @click="showModal('Aggiungi campagna')"
+  <div class="flex flex-col lg:flex-row">
+    <div class="bg-green-300 lg:w-3/6 mx-2 my-2 pb-16 relative">
+      <div v-if="allCampaigns && allCampaigns.items && allCampaigns.items.length > 0">
+        <generic-table
+          :items.sync="allCampaigns.items"
+          :headers="headerColumns"
+          :title="tableTitle"
+          :method="showCampaignInfo"
         >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col :cols="nColsTable_calculator">
-        <div v-if="allCampaigns && allCampaigns.items && allCampaigns.items.length > 0">
-          <generic-table
-            :items.sync="allCampaigns.items"
-            :headers="headerColumns"
-            :title="tableTitle"
-            :method="showCampaignInfo"
-          >
-          </generic-table>
-        </div>
-        <div v-else class="empty-list">Non ci sono Campagne</div>
-      </v-col>
-      <!-- TODO: Profilo Campagna -->
-      <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
-      <!-- TODO: Modale Campagna -->
-      <modal v-show="deleteModalVisible">
-        <template v-slot:header> Cancella Campagna </template>
-        <template v-slot:body> Sei sicuro di voler cancellare la campagna? </template>
-        <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="deleteConfirm"
-            aria-label="Close modal"
-          >
-            Conferma
-          </button>
-          <button
-            type="button"
-            class="btn-close"
-            @click="closeDeleteModal"
-            aria-label="Close modal"
-          >
-            Annulla
-          </button>
-        </template>
-      </modal>
-      <modal v-show="editModalVisible">
-        <template v-slot:header> {{ popup.title }} </template>
-        <template v-slot:body>
-          <campaign-form />
-        </template>
-        <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="saveCampaign"
-            aria-label="Close modal"
-          >
-            Salva
-          </button>
-          <button
-            type="button"
-            class="btn-close"
-            @click="closeModal"
-            aria-label="Close modal"
-          >
-            Annulla
-          </button>
-          <p class="typo__p" v-if="submitStatus === 'ERROR'">
-            Riempire i dati nel modo corretto
-          </p>
-        </template>
-      </modal>
-      <modal v-show="associateCampaignModalVisible">
-        <template v-slot:header> {{ popup.title }} </template>
-        <template v-slot:body>
-          <associate-form />
-        </template>
-        <template v-slot:footer>
+        </generic-table>
+      </div>
 
-          <button
-            type="button"
-            class="btn-close"
-            @click="closeModal"
-            aria-label="Close modal"
-          >
-            Chiudi
-          </button>
-        </template>
-      </modal>
-    </v-row>
+      <div v-else class="empty-list">Non ci sono campagne</div>
+      <div class="ml-auto pt-4 pr-4 absolute right-0">
+        <button
+          @click="showModal('Aggiungi campagna')"
+          class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
+        >
+          <add-icon class="add-icon" />
+        </button>
+      </div>
+    </div>
+    <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
+        <div v-else class="select-element"> Seleziona una campagna per visualizzare i dettagli</div>
+    <modal v-show="deleteModalVisible">
+      <template v-slot:header> Cancella Campagna </template>
+      <template v-slot:body> Sei sicuro di voler cancellare la campagna? </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn-close"
+          @click="deleteConfirm"
+          aria-label="Close modal"
+        >
+          Conferma
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeDeleteModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+      </template>
+    </modal>
+    <modal v-show="editModalVisible">
+      <template v-slot:header> {{ popup.title }} </template>
+      <template v-slot:body>
+        <campaign-form />
+      </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn-close"
+          @click="saveCampaign"
+          aria-label="Close modal"
+        >
+          Salva
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+        <p class="typo__p" v-if="submitStatus === 'ERROR'">
+          Riempire i dati nel modo corretto
+        </p>
+      </template>
+    </modal>
+    <modal v-show="associateCampaignModalVisible">
+      <template v-slot:header> {{ popup.title }} </template>
+      <template v-slot:body>
+        <associate-form />
+      </template>
+      <template v-slot:footer>
+
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeModal"
+          aria-label="Close modal"
+        >
+          Chiudi
+        </button>
+      </template>
+    </modal>
   </div>
 </template>
 
@@ -130,15 +124,6 @@ export default {
     ...mapState("company", ["actualCompany", "adminCompany"]),
     ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
     ...mapState("account", ["role"]),
-    nColsTable_calculator: function() {
-      if(this.actualCampaign){
-        return 8;
-      }else if(this.actualCampaign == null){
-        return 12;
-      }else{
-        return 12;
-      }
-    },
   },
   watch: {
     adminCompany() {

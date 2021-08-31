@@ -14,16 +14,16 @@
     </v-row>
     <v-row>
       <v-col :cols="nColsTable_calculator">
-          <div v-if="allCompanies && allCompanies.items && allCompanies.items.length > 0">
-            <generic-table
-              :items="allCompanies.items"
-              :headers="headerColumns"
-              :title="tableTitle"
-              :method="showCompanyInfo"
-            >
-            </generic-table>
-          </div>
-          <div v-else class="empty-list">Non ci sono Aziende</div>
+        <div v-if="allCompanies && allCompanies.items && allCompanies.items.length > 0">
+          <generic-table
+            :items="allCompanies.items"
+            :headers="headerColumns"
+            :title="tableTitle"
+            :method="showCompanyInfo"
+          >
+          </generic-table>
+        </div>
+        <div v-else class="empty-list">Non ci sono Aziende</div>
       </v-col>
       <profilo-azienda v-if="actualCompany"></profilo-azienda>
       <modal v-show="editModalVisible">
