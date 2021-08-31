@@ -3,6 +3,7 @@
     dark
     padless
     class="justify-center"
+    default
   >
     <v-card
       flat

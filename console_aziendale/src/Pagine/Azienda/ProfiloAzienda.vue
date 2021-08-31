@@ -13,7 +13,6 @@
         <v-card-text>
             <v-list dense>
                 <v-list-item-group
-                    v-model="selectedItem"
                     color="primary"
                 >
                     <v-list-item :href="'http://maps.google.com/?q='+actualCompany.item.address + ' ' + actualCompany.item.streetNumber + ', ' + actualCompany.item.city + ' ' + actualCompany.item.province + ', ' + actualCompany.item.zip" target="_blank">

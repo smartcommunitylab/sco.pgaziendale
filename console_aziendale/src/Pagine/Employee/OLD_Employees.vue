@@ -1,91 +1,6 @@
 <template>
-  <div>
-    <v-row>
-      <v-col>
-        <v-btn
-          class="fab mr-4"
-          fab
-          color="cyan accent-2"
-          @click="showModal('Aggiungi dipendente')"
-        >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-        <v-btn
-          class="fab"
-          fab
-          color="cyan accent-2"
-          @click="modalImportEmployeesOpen = true"
-        >
-          <v-icon>mdi-file-import</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col :cols="nColsTable_calculator">
-        <!-- TODO: Tabella -->
-        <div v-if="allEmployees && allEmployees.items && allEmployees.items.length > 0">
-          <generic-table
-            :items="allEmployees.items"
-            :headers="headerColumns"
-            :title="tableTitle"
-            :method="showEmployeeInfo"
-          >
-          </generic-table>
-        </div>
-      </v-col>
-      <!-- TODO: ProfiloDipendente -->
-      <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
-      <!-- TODO: Modale Dipendente -->
-      <modal v-show="deleteModalVisible">
-        <template v-slot:header> Cancella Dipendente </template>
-        <template v-slot:body> Sei sicuro di voler cancellare il dipendente? </template>
-        <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="deleteConfirm"
-            aria-label="Close modal"
-          >
-            Conferma
-          </button>
-          <button
-            type="button"
-            class="btn-close"
-            @click="closeDeleteModal"
-            aria-label="Close modal"
-          >
-            Annulla
-          </button>
-        </template>
-      </modal>
-      <modal v-show="editModalVisible">
-        <template v-slot:header> {{ popup.title }} </template>
-        <template v-slot:body>
-          <employee-form />
-        </template>
-        <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="saveEmployee"
-            aria-label="Close modal"
-          >
-            Salva
-          </button>
-          <button
-            type="button"
-            class="btn-close"
-            @click="closeModal"
-            aria-label="Close modal"
-          >
-            Annulla
-          </button>
-          <p class="typo__p" v-if="submitStatus === 'ERROR'">
-            Riempire i dati nel modo corretto
-          </p>
-        </template>
-      </modal>
-
+  <div class="flex flex-col lg:flex-row">
+    <div class="lg:w-4/6 mx-2 my-2 flex flex-col bg-white">
       <transition
         enter-active-class="transition duration-300 ease-out transform"
         enter-class="scale-95 opacity-0"
@@ -310,8 +225,87 @@
           </div>
         </div>
       </transition>
+      <div v-if="allEmployees && allEmployees.items && allEmployees.items.length > 0">
+        <generic-table
+          :items="allEmployees.items"
+          :headers="headerColumns"
+          :title="tableTitle"
+          :method="showEmployeeInfo"
+        >
+        </generic-table>
+      </div>
+      <div v-else class="empty-list">Non ci sono dipendenti</div>
+      <div class="flex flex-row justify-center py-4">
+        <div class="px-2">
+          <button
+            @click="modalImportEmployeesOpen = true"
+            class="inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
+          >
+            Importa CSV
+          </button>
+        </div>
+      </div>
+      <div class="ml-auto pt-4 pr-4">
+        <button
+          @click="showModal('Aggiungi dipendente')"
+          class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
+        >
+          <add-icon class="add-icon" />
+        </button>
+      </div>
+    </div>
+    <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
+    <div v-else class="select-element"> Seleziona un dipendente per visualizzare i dettagli</div>
 
-    </v-row>
+    <modal v-show="deleteModalVisible">
+      <template v-slot:header> Cancella Dipendente </template>
+      <template v-slot:body> Sei sicuro di voler cancellare il dipendente? </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn-close"
+          @click="deleteConfirm"
+          aria-label="Close modal"
+        >
+          Conferma
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeDeleteModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+      </template>
+    </modal>
+    <modal v-show="editModalVisible">
+      <template v-slot:header> {{ popup.title }} </template>
+      <template v-slot:body>
+        <employee-form />
+      </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn-close"
+          @click="saveEmployee"
+          aria-label="Close modal"
+        >
+          Salva
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+        <p class="typo__p" v-if="submitStatus === 'ERROR'">
+          Riempire i dati nel modo corretto
+        </p>
+      </template>
+    </modal>
   </div>
 </template>
 
@@ -394,15 +388,6 @@ export default {
     ...mapState("company", ["actualCompany"]),
     fileName() {
       return this.fileUploaded.item(0).name;
-    },
-    nColsTable_calculator: function() {
-      if(this.actualEmployee){
-        return 8;
-      }else if(this.actualEmployee == null){
-        return 12;
-      }else{
-        return 12;
-      }
     },
   },
   methods: {
