@@ -27,6 +27,7 @@
                 cols="12"
               >
                 <v-text-field
+                  :rules="[rules.required]"
                   placeholder="Il tuo username"
                   v-model="username"
                   name="username"
@@ -48,6 +49,7 @@
                   <v-text-field
                     :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show ? 'text' : 'password'"
+                    :rules="[rules.required]"
                     class="input-group--focused"
                     placeholder="La tua password"
                     v-model="password"
@@ -121,6 +123,9 @@ export default {
       passwordFieldType: "password",
       submitted: false,
       show: false,
+      rules: {
+          required: value => !!value || 'Campo richiesto.',
+      },
     };
   },
   computed: {
@@ -138,10 +143,6 @@ export default {
     },
     resetPwd(){
       this.$router.push('resetpwd');
-    },
-    switchVisibility() {
-      this.passwordFieldType =
-        this.passwordFieldType === "password" ? "text" : "password";
     },
   },
 };

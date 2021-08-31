@@ -30,135 +30,105 @@
             outlined
           ></v-text-field>
         </v-col>
-      </v-row>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.address.$error }">
-          <label class="field-label" for="last_name">Indirizzo </label>
-          <input
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Indirizzo"
+            placeholder="Indirizzo *"
             type="text"
             name="companyAddress"
+            :rules="[rules.required]"
             id=""
-            required
-            placeholder="Indirizzo *"
             v-model.trim="$v.address.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.address.$error">
-          <div class="error" v-if="!$v.address.required">
-            Il campo Indirizzo e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.streetNumber.$error }">
-          <label class="field-label" for="last_name">Numero </label>
-          <input
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="3"
+        >
+          <v-text-field
+            label="Numero"
+            placeholder="Numero *"
             type="text"
             name="companyNumber"
+            :rules="[rules.required]"
             id=""
-            required
-            placeholder="Numero *"
             v-model.trim="$v.streetNumber.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.streetNumber.$error">
-          <div class="error" v-if="!$v.streetNumber.required">Il campo Numero e' richiesto.</div>
-          
-        </div>
-      </div>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.city.$error }">
-          <label class="field-label" for="last_name">Cittá </label>
-          <input
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-text-field
+            label="Città"
+            placeholder="Città *"
             type="text"
             name="companyCity"
+            :rules="[rules.required]"
             id=""
-            required
-            placeholder="Cittá *"
             v-model.trim="$v.city.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.city.$error">
-          <div class="error" v-if="!$v.city.required">Il campo Cittá e' richiesto.</div>
-        </div>
-      </div>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.province.$error }">
-          <label class="field-label" for="last_name">Provincia </label>
-          <input
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="2"
+        >
+          <v-text-field
+            label="Provincia"
+            placeholder="Provincia *"
             type="text"
             name="companyProvince"
+            :rules="[rules.required]"
             id=""
-            required
-            placeholder="Provincia *"
             v-model.trim="$v.province.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.province.$error">
-          <div class="error" v-if="!$v.province.required">
-            Il campo Provincia e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.region.$error }">
-          <label class="field-label" for="last_name">Regione </label>
-          <input
-            type="text"
-            name="companyRegion"
-            id=""
-            required
-            placeholder="Regione *"
-            v-model.trim="$v.region.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.region.$error">
-          <div class="error" v-if="!$v.region.required">
-            Il campo Regione e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.country.$error }">
-          <label class="field-label" for="last_name">Stato </label>
-          <input
-            type="text"
-            name="companyCountry"
-            id=""
-            required
-            placeholder="Stato *"
-            v-model.trim="$v.country.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.country.$error">
-          <div class="error" v-if="!$v.country.required">
-            Il campo Stato e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.zip.$error }">
-          <label class="field-label" for="last_name">CAP </label>
-          <input
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-text-field
+            label="CAP"
+            placeholder="CAP *"
             type="text"
             name="companyCap"
+            :rules="[rules.required]"
             id=""
-            required
-            placeholder="CAP *"
             v-model.trim="$v.zip.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.zip.$error">
-          <div class="error" v-if="!$v.zip.required">Il campo CAP e' richiesto.</div>
-        </div>
-      </div>
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Regione"
+            placeholder="Regione *"
+            type="text"
+            name="companyRegion"
+            :rules="[rules.required]"
+            id=""
+            v-model.trim="$v.region.$model"
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Stato"
+            placeholder="Stato *"
+            type="text"
+            name="companyCountry"
+            :rules="[rules.required]"
+            id=""
+            v-model.trim="$v.country.$model"
+            outlined
+          ></v-text-field>
+        </v-col>
+      </v-row>
       <div class="field-group mb-4 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.contactPhone.$error }">
           <label class="field-label" for="email">Telefono</label>
