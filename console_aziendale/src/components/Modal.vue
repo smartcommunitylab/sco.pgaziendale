@@ -63,14 +63,14 @@
           <slot name="footer">
             Footer
 
-            <button
-              type="button"
-              class="btn-green"
+            <v-btn
+              color="blue darken-1"
+              text
               @click="close"
               aria-label="Close modal"
             >
               Chiudi
-            </button>
+            </v-btn>
           </slot>
         </div>
       </div>
@@ -97,7 +97,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
+    z-index: 10;
   }
 
   .modal {
@@ -109,54 +109,51 @@
     /* text-align: center; */
   }
 
-  .modal-header,
-  .modal-footer {
-    /* padding: 15px; */
-    /* display: flex; */
-    text-align: center;
-    z-index: 9;
-  }
-
+    
   .modal-header {
-    border-bottom: 1px solid #eeeeee;
-    color: #4AAE9B;
     justify-content: space-between;
     height: 50px;
-    line-height: 50px;
-        font-size: large;
-    font-weight: bold;
+    line-height: 2rem;
+    font-family: Roboto,sans-serif !important;
+    font-size: 1.5rem !important;
+    font-weight: 400;
+    letter-spacing: normal !important;
+    text-align: left;
+    z-index: 9;
+    padding: 18px;
+    margin-bottom: 12px;
+    margin-left: 20px;
+    margin-right: 20px;
+
   }
 
   .modal-footer {
-    border-top: 1px solid #eeeeee;
     justify-content: flex-end;
+    text-align: right;
+    padding: 16px 24px;
   }
 
   .modal-body {
     position: relative;
-    padding: 20px 10px;
+    margin-left: 20px;
+    padding: 20px;
     max-height: calc(100vh - 210px);
-    min-height: 200px;
     overflow-y: scroll;
     overflow-x: visible;
     padding: 1.25em;
+    scrollbar-width: thin;
   }
-
+  
   .btn-close {
     border: none;
     font-size: 20px;
-    padding: 20px;
     cursor: pointer;
     font-weight: bold;
     color: #4AAE9B;
+    padding: 0px 8px;
+    margin-left: 8px;
     background: transparent;
   }
 
-  .btn-green {
-    color: white;
-    background: #4AAE9B;
-    border: 1px solid #4AAE9B;
-    border-radius: 2px;
-  }
   
 </style>

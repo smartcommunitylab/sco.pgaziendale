@@ -28,7 +28,21 @@
             id="companyCode"
             v-model.trim="$v.code.$model"
             outlined
-          ></v-text-field>
+          >
+            <template v-slot:append>
+              <v-tooltip
+                left
+                nudge-bottom="25px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-icon v-on="on">
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                Codice univoco dell/'azienda con cui verrá poi identificata nelle campagne
+              </v-tooltip>
+            </template>
+          </v-text-field>
         </v-col>
         <v-col
           cols="6"
@@ -39,36 +53,8 @@
             type="text"
             name="companyAddress"
             :rules="[rules.required]"
-            id=""
+            id="companyAddress"
             v-model.trim="$v.address.$model"
-            outlined
-          ></v-text-field>
-        </v-col>
-        <v-col
-          cols="3"
-        >
-          <v-text-field
-            label="Numero"
-            placeholder="Numero *"
-            type="text"
-            name="companyNumber"
-            :rules="[rules.required]"
-            id=""
-            v-model.trim="$v.streetNumber.$model"
-            outlined
-          ></v-text-field>
-        </v-col>
-        <v-col
-          cols="4"
-        >
-          <v-text-field
-            label="Città"
-            placeholder="Città *"
-            type="text"
-            name="companyCity"
-            :rules="[rules.required]"
-            id=""
-            v-model.trim="$v.city.$model"
             outlined
           ></v-text-field>
         </v-col>
@@ -76,13 +62,13 @@
           cols="2"
         >
           <v-text-field
-            label="Provincia"
-            placeholder="Provincia *"
+            label="Numero"
+            placeholder="Numero *"
             type="text"
-            name="companyProvince"
+            name="companyNumber"
             :rules="[rules.required]"
-            id=""
-            v-model.trim="$v.province.$model"
+            id="companyNumber"
+            v-model.trim="$v.streetNumber.$model"
             outlined
           ></v-text-field>
         </v-col>
@@ -95,7 +81,7 @@
             type="text"
             name="companyCap"
             :rules="[rules.required]"
-            id=""
+            id="companyCap"
             v-model.trim="$v.zip.$model"
             outlined
           ></v-text-field>
@@ -104,15 +90,43 @@
           cols="6"
         >
           <v-text-field
-            label="Regione"
-            placeholder="Regione *"
+            label="Città"
+            placeholder="Città *"
             type="text"
-            name="companyRegion"
+            name="companyCity"
             :rules="[rules.required]"
-            id=""
-            v-model.trim="$v.region.$model"
+            id="companyCity"
+            v-model.trim="$v.city.$model"
             outlined
           ></v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-autocomplete
+            label="Provincia"
+            placeholder="Provincia *"
+            name="companyProvince"
+            :rules="[rules.required]"
+            id="companyProvince"
+            v-model.trim="$v.province.$model"
+            :items="listaProvince"
+            outlined
+          ></v-autocomplete>
+        </v-col>
+        <v-col
+          cols="6"
+        > 
+          <v-autocomplete
+            label="Regione"
+            placeholder="Regione *"
+            name="companyRegion"
+            :rules="[rules.required]"
+            id="companyRegion"
+            v-model.trim="$v.region.$model"
+            :items="listaRegioni"
+            outlined
+          ></v-autocomplete>
         </v-col>
         <v-col
           cols="6"
@@ -123,102 +137,108 @@
             type="text"
             name="companyCountry"
             :rules="[rules.required]"
-            id=""
+            id="companyCountry"
             v-model.trim="$v.country.$model"
             outlined
           ></v-text-field>
         </v-col>
-      </v-row>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.contactPhone.$error }">
-          <label class="field-label" for="email">Telefono</label>
-          <input
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Telefono"
+            placeholder="Telefono *"
             type="text"
             name="companyPhone"
-            id=""
-            required
-            placeholder="Telefono *"
+            :rules="[rules.required]"
+            id="companyPhone"
             v-model.trim="$v.contactPhone.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.contactPhone.$error">
-          <div class="error" v-if="!$v.contactPhone.required">
-            Il campo telefono e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-6 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.contactEmail.$error }">
-          <label class="field-label" for="password">Email </label>
-          <input
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="E-mail"
+            placeholder="E-mail *"
             type="text"
             name="companyEmail"
-            id=""
-            required
-            placeholder="Email *"
+            :rules="contactEmailRules"
+            id="companyEmail"
             v-model.trim="$v.contactEmail.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.contactEmail.$error">
-          <div class="error" v-if="!$v.contactEmail.required">
-            Il campo email e' richiesto.
-          </div>
-          <div class="error" v-if="!$v.contactEmail.email">
-            Il campo email non risulta valido.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-6 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.web.$error }">
-          <label class="field-label" for="password">Web </label>
-          <input
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Web"
+            placeholder="Web *"
             type="text"
             name="companyWeb"
-            id=""
-            required
-            placeholder="Web *"
+            :rules="webRules"
+            id="companyWeb"
             v-model.trim="$v.web.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.web.$error">
-          <!-- <div class="error" v-if="!$v.web.required">Il campo web e' richiesto.</div> -->
-          <div class="error" v-if="!$v.web.url">Il campo web non risulta valido.</div>
-        </div>
-      </div>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.logo.$error }">
-          <label class="field-label" for="first_name">Logo Azienda</label>
-          <input
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Logo"
+            placeholder="Logo *"
             type="text"
             name="companyLogo"
+            :rules="[rules.required]"
             id="companyLogo"
-            placeholder="Logo *"
             v-model.trim="$v.logo.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-         <info-box :msg="'Inserisci un url che contiene il logo dell\'azienda'" />
-        </div>
-        <!-- <div v-if="$v.logo.$error">
-          <div class="error" v-if="!$v.logo.required">Il campo logo e' richiesto.</div>
-        </div> -->
-      </div>
+            outlined
+          >
+            <template v-slot:append>
+              <v-tooltip
+                left
+                nudge-bottom="25px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-icon v-on="on">
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                Inserisci un url che contenga il logo dell'azienda
+              </v-tooltip>
+            </template>
+          </v-text-field>
+        </v-col>
+      </v-row>
     </div>
   </form>
 </template>
+
 <script>
 import { required, email,url } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
-import InfoBox from "@/components/InfoBox.vue";
 
 export default {
-  components: {
-    "info-box": InfoBox,
-  },
   data() {
     return {
+      listaProvince: ['AG', 'AL', 'AN', 'AO', 'AR', 'AP', 'AT', 'AV', 'BA', 'BT',
+      'BL', 'BN', 'BG', 'BI', 'BO', 'BZ', 'BS', 'BR', 'CA', 'CL',
+      'CB', 'CE', 'CT', 'CZ', 'CH', 'CO', 'CS', 'CR', 'KR', 'CN',
+      'EN', 'FM', 'FE', 'FI', 'FG', 'FC', 'FR', 'GE', 'GO', 'GR',
+      'IM', 'IS', 'AQ', 'SP', 'LT', 'LE', 'LC', 'LI', 'LO', 'LU', 'MC',
+      'MN', 'MS', 'MT', 'ME', 'MI', 'MO', 'MB', 'NA', 'NO', 'NU',
+      'OR', 'PD', 'PA', 'PR', 'PV', 'PG', 'PU', 'PE', 'PC', 'PI', 'PT',
+      'PN', 'PZ', 'PO', 'RG', 'RA', 'RC', 'RE', 'RI', 'RN', 'RM', 'RO',
+      'SA', 'SS', 'SV', 'SI', 'SR', 'SO', 'SU', 'TA', 'TE', 'TR', 'TO', 'TP',
+      'TN', 'TV', 'TS', 'UD', 'VA', 'VE', 'VB', 'VC', 'VR', 'VV', 'VI', 'VT'
+      ],
+      listaRegioni: ['Abruzzo', 'Basilicata', 'Calabria', 'Campania', 'Emilia-Romagna', 
+      'Friuli-Venezia Giulia', 'Lazio', 'Liguria', 'Lombardia', 'Marche', 'Molise', 'Piemonte', 
+      'Puglia', 'Sardegna', 'Sicilia', 'Toscana', 'Trentino-Alto Adige', 'Umbria', 'Valle d\'Aosta Veneto' 
+      ],
       company: {},
       id: null,
       name: "",
@@ -226,7 +246,7 @@ export default {
       address: "",
       streetNumber: "",
       city: "",
-      province: "",
+      province: 1,
       region: "",
       country: "",
       zip: "",
@@ -234,10 +254,18 @@ export default {
       contactPhone: "",
       web: "",
       logo: "",
+
       rules: {
           required: value => !!value || 'Campo richiesto.',
       },
-      emailRules: [ v => !v || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || 'E-mail must be valid'],
+      contactEmailRules: [
+          v => !!v || 'Campo richiesto.', 
+          v => /.+@.+/.test(v) || 'E-mail non valida.'
+      ],
+      webRules: [ 
+        (v) => !!v || 'Campo richiesto.',
+        (v) => this.isURL(v) || 'URL non valido. Inserire " https:// ". ',
+      ], 
     };
   },
   validations: {
@@ -287,6 +315,19 @@ export default {
         this[key] = company[key];
       }
     },
+
+    isURL(str) {
+      let url;
+
+      try {
+        url = new URL(str);
+      } catch (_) {
+        return false;
+      }
+
+      return url.protocol === "http:" || url.protocol === "https:";
+    },
+
     initCompany() {
       this.company = {};
       this.id = null;
@@ -351,4 +392,8 @@ export default {
   },
 };
 </script>
-<style scoped></style>
+<style scoped>
+
+
+
+</style>
