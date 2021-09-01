@@ -1,79 +1,87 @@
 <template>
   <form action="" id="addUser">
     <div class="mb-20 flex flex-wrap justify-between">
-      <v-row>
-        <v-col
-          cols="7"
-        >
-          <v-text-field
-            label="Nome"
-            placeholder="Nome *"
+      <div class="field-group mb-4 w-full">
+        <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
+          <label class="field-label" for="first_name">Nome </label>
+          <input
             type="text"
             name="name"
-            :rules="[rules.required]"
-            id="name"
+            placeholder="Nome *"
             v-model.trim="$v.name.$model"
-            outlined
-          ></v-text-field>
-        </v-col>
-        <v-col
-          cols="7"
-        >
-          <v-text-field
-            label="Cognome"
-            placeholder="Cognome *"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            id="name"
+          />
+        </div>
+        <div v-if="$v.name.$error">
+          <div class="error" v-if="!$v.name.required">Il campo nome e' richiesto.</div>
+        </div>
+      </div>
+      <div class="field-group mb-4 w-full">
+        <div class="form-group" :class="{ 'form-group--error': $v.surname.$error }">
+          <label class="field-label" for="first_name">Cognome </label>
+          <input
             type="text"
             name="surname"
-            :rules="[rules.required]"
-            id="surname"
+            placeholder="Cognome *"
             v-model.trim="$v.surname.$model"
-            outlined
-          ></v-text-field>
-        </v-col>
-        <v-col
-          cols="7"
-        >
-          <v-text-field
-            label="Username"
-            placeholder="Username *"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            id="surname"
+          />
+        </div>
+        <div v-if="$v.surname.$error">
+          <div class="error" v-if="!$v.surname.required">
+            Il campo cognome e' richiesto.
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group mb-6 w-full">
+        <div class="form-group" :class="{ 'form-group--error': $v.username.$error }">
+          <label class="field-label" for="password">Username </label>
+          <input
             type="text"
             name="username"
-            :rules="userRules"
-            id="username"
+            id=""
+            required
+            placeholder="Username *"
             v-model.trim="$v.username.$model"
-            outlined
-          >
-            <template v-slot:append>
-              <v-tooltip
-                right
-                nudge-right="10px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-icon v-on="on">
-                    mdi-help-circle-outline
-                  </v-icon>
-                </template>
-                Il campo username é deve essere un'email valida
-              </v-tooltip>
-            </template>
-          </v-text-field>
-        </v-col>
-        <v-col
-          cols="7"
-        >
-          <v-text-field
-            label="Telefono"
-            placeholder="Telefono *"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+          />
+          <info-box :msg="'Il campo username é deve essere un\'email valida'" />
+        </div>
+
+        <div v-if="$v.username.$error">
+          <div class="error" v-if="!$v.username.required">
+            Il campo username e' richiesto.
+          </div>
+          <div class="error" v-if="!$v.username.email">
+            Il campo username non risulta valido.
+          </div>
+          <div class="error" v-if="!$v.username.isUnique">
+            Questo username risulta giá registrato
+          </div>
+        </div>
+      </div>
+      <div class="field-group mb-6 w-full">
+        <div class="form-group" :class="{ 'form-group--error': $v.phone.$error }">
+          <label class="field-label" for="phone">Telefono </label>
+          <input
             type="text"
             name="phone"
-            :rules="[rules.required]"
-            id="phone"
+            id=""
+            required
+            placeholder="Telefono *"
             v-model.trim="$v.phone.$model"
-            outlined
-          ></v-text-field>
-        </v-col>
-      </v-row>
-
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+          />
+        </div>
+        <div v-if="$v.phone.$error">
+          <div class="error" v-if="!$v.phone.required">
+            Il campo telefono e' richiesto.
+          </div>
+        </div>
+      </div>
       <div class="field-group mb-6 w-full">
         <div class="form-group" :class="{ 'form-group--error': $v.roles.$error }">
           <label class="field-label" for="password">Ruoli </label>
@@ -93,8 +101,10 @@
 import { required, email } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
 import { mapState } from "vuex";
+import InfoBox from "@/components/InfoBox.vue";
 
 export default {
+  components: { InfoBox },
   data() {
     return {
       user: null,
@@ -108,20 +118,8 @@ export default {
       phone: "",
       roles: [],
       unique: true,
-      rules: {
-          required: value => !!value || 'Campo richiesto.',
-      },
-      provinceRules: [
-        value => this.isInListaProvince(value) || 'Campo richiesto.'
-      ],
-      userRules: [
-          v => !!v || 'Campo richiesto.', 
-          v => this.validateEmail(v) || 'Il campo username non risulta valido.',
-          v => this.isUsernameUnique(v) || 'Questo username risulta giá registrato.'
-      ],
     };
   },
-
   validations: {
     name: {
       required,
@@ -154,25 +152,6 @@ export default {
     },
   },
   methods: {
-    validateEmail(email) 
-    {
-        var re = /\S+@\S+\.\S+/;
-        return re.test(email);
-    },
-    isUsernameUnique(value) {
-      console.log(value);
-      //check user is present
-      if (
-        this.id == null && this.adminCompanyUsers.items.find((ele) => {
-          console.log(ele.username == this.username);
-          return ele.username == this.username;
-        })
-      ) {
-        return false;
-      }
-      return true;
-    },
-
     copyValues(user) {
       for (const [key] of Object.entries(user)) {
         if (key != "roles") this[key] = user[key];

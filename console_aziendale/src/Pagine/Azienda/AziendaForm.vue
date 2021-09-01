@@ -39,7 +39,7 @@
                     mdi-help-circle-outline
                   </v-icon>
                 </template>
-                Codice univoco dell/'azienda con cui verrá poi identificata nelle campagne
+                Codice univoco dell'azienda con cui verrá poi identificata nelle campagne
               </v-tooltip>
             </template>
           </v-text-field>
@@ -262,7 +262,7 @@ export default {
       ],
       contactEmailRules: [
           v => !!v || 'Campo richiesto.', 
-          v => /.+@.+/.test(v) || 'E-mail non valida.'
+          v => this.validateEmail(v) || 'E-mail non valida.'
       ],
       webRules: [ 
         (v) => this.isURL(v) || 'URL non valido. Inserire " https:// ". ',
@@ -328,7 +328,11 @@ export default {
 
       return url.protocol === "http:" || url.protocol === "https:";
     },
-
+    validateEmail(email) 
+    {
+        var re = /\S+@\S+\.\S+/;
+        return re.test(email);
+    },
     isInListaProvince(value){
       return this.listaProvince.includes(value)
     },

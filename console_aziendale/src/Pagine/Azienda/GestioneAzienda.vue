@@ -69,22 +69,22 @@
           <user-form />
         </template>
         <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="saveUser"
-            aria-label="Close modal"
-          >
-            Salva
-          </button>
-          <button
-            type="button"
-            class="btn-close"
+          <v-btn
+            color="primary"
+            text
             @click="closeModal"
-            aria-label="Close modal"
+            class="py-8 ml-8"
           >
             Annulla
-          </button>
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="saveUser"
+            class="py-8 ml-8"
+          >
+            Salva
+          </v-btn>
         </template>
       </modal>
       <modal v-show="deleteModalVisible">
