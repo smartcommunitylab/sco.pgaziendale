@@ -7,27 +7,27 @@
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <azienda-form />
+        <p class="typo__p" v-if="submitStatus === 'ERROR'">
+          Riempire i dati nel modo corretto
+        </p>
       </template>
       <template v-slot:footer>
-        <button
-          type="button"
-          class="btn-close"
-          @click="saveCompany"
-          aria-label="Close modal"
-        >
-          Salva
-        </button>
-        <button
-          type="button"
-          class="btn-close"
+        <v-btn
+          color="blue darken-1"
+          text
           @click="closeModal"
           aria-label="Close modal"
         >
           Annulla
-        </button>
-        <p class="typo__p" v-if="submitStatus === 'ERROR'">
-          Riempire i dati nel modo corretto
-        </p>
+        </v-btn>
+        <v-btn
+          color="blue darken-1"
+          text
+          @click="saveCompany"
+          aria-label="Close modal"
+        >
+          Salva
+        </v-btn>
       </template>
     </modal>
     </div>
