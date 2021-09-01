@@ -32,49 +32,46 @@
           <azienda-form />
         </template>
         <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="saveCompany"
-            aria-label="Close modal"
-          >
-            Salva
-          </button>
-          <button
-            type="button"
-            class="btn-close"
+          <v-btn
+            color="primary"
+            text
             @click="closeModal"
-            aria-label="Close modal"
+            class="py-8 ml-8"
           >
             Annulla
-          </button>
-          <p class="typo__p" v-if="submitStatus === 'ERROR'">
-            Riempire i dati nel modo corretto
-          </p>
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="saveCompany"
+            class="py-8 ml-8"
+          >
+            Salva
+          </v-btn>
         </template>
       </modal>
       <modal v-show="deleteModalVisible">
         <template v-slot:header> Cancella Azienda </template>
         <template v-slot:body>
-          Sei sicuro di voler cancellare l'azienda selezionata?
+          <p class="text-subtitle-1">Sei sicuro di voler cancellare l'azienda selezionata?</p>
         </template>
         <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="deleteConfirm"
-            aria-label="Close modal"
-          >
-            Conferma
-          </button>
-          <button
-            type="button"
-            class="btn-close"
+          <v-btn
+            color="primary"
+            text
             @click="closeDeleteModal"
-            aria-label="Close modal"
+            class="py-8 ml-8"
           >
             Annulla
-          </button>
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="deleteConfirm"
+            class="py-8 ml-8"
+          >
+            Conferma
+          </v-btn>
         </template>
       </modal>
     </v-row>
@@ -220,6 +217,7 @@ export default {
   color: red;
   text-align: center;
 }
+
 @keyframes shake {
   10%,
   90% {

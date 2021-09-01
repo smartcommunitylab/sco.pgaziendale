@@ -36,7 +36,9 @@
     <modal v-show="deleteModalVisible">
 
       <template v-slot:header> <div class="text-danger">Cancella Sede </div></template>
-      <template v-slot:body> <div class="text-center font-semibold pt-16 text-2xl">Sei sicuro di voler cancellare la sede? </div> </template>
+      <template v-slot:body> 
+        <p class="text-subtitle-1">Sei sicuro di voler cancellare la sede?</p>
+      </template>
       <template v-slot:footer>
         <button
           type="button"
@@ -84,9 +86,6 @@
         >
           Annulla
         </button>
-        <p class="typo__p" v-if="submitStatus === 'ERROR'">
-          Riempire i dati nel modo corretto
-        </p>
       </template>
     </modal>
     <transition

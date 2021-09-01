@@ -43,7 +43,7 @@
 
             <button
               type="button"
-              class="btn-close"
+              class="py-8 ml-8"
               @click="close"
               aria-label="Close modal"
             >
@@ -67,6 +67,7 @@
               color="blue darken-1"
               text
               @click="close"
+              class="py-8 ml-8"
               aria-label="Close modal"
             >
               Chiudi
@@ -121,9 +122,7 @@
     text-align: left;
     z-index: 9;
     padding: 18px;
-    margin-bottom: 12px;
-    margin-left: 20px;
-    margin-right: 20px;
+    margin: 20px;
 
   }
 
@@ -140,20 +139,7 @@
     max-height: calc(100vh - 210px);
     overflow-y: scroll;
     overflow-x: visible;
-    padding: 1.25em;
     scrollbar-width: thin;
   }
-  
-  .btn-close {
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    color: #4AAE9B;
-    padding: 0px 8px;
-    margin-left: 8px;
-    background: transparent;
-  }
-
   
 </style>

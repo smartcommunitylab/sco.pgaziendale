@@ -107,7 +107,7 @@
             label="Provincia"
             placeholder="Provincia *"
             name="companyProvince"
-            :rules="[rules.required]"
+            :rules="provinceRules"
             id="companyProvince"
             v-model.trim="$v.province.$model"
             :items="listaProvince"
@@ -192,7 +192,6 @@
             placeholder="Logo *"
             type="text"
             name="companyLogo"
-            :rules="[rules.required]"
             id="companyLogo"
             v-model.trim="$v.logo.$model"
             outlined
@@ -258,12 +257,14 @@ export default {
       rules: {
           required: value => !!value || 'Campo richiesto.',
       },
+      provinceRules: [
+        value => this.isInListaProvince(value) || 'Campo richiesto.'
+      ],
       contactEmailRules: [
           v => !!v || 'Campo richiesto.', 
           v => /.+@.+/.test(v) || 'E-mail non valida.'
       ],
       webRules: [ 
-        (v) => !!v || 'Campo richiesto.',
         (v) => this.isURL(v) || 'URL non valido. Inserire " https:// ". ',
       ], 
     };
@@ -326,6 +327,10 @@ export default {
       }
 
       return url.protocol === "http:" || url.protocol === "https:";
+    },
+
+    isInListaProvince(value){
+      return this.listaProvince.includes(value)
     },
 
     initCompany() {

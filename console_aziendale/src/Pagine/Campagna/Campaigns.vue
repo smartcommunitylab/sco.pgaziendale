@@ -30,7 +30,9 @@
       <!-- TODO: Modale Campagna -->
       <modal v-show="deleteModalVisible">
         <template v-slot:header> Cancella Campagna </template>
-        <template v-slot:body> Sei sicuro di voler cancellare la campagna? </template>
+        <template v-slot:body>
+          <p class="text-subtitle-1">Sei sicuro di voler cancellare la campagna?</p>
+        </template>                  
         <template v-slot:footer>
           <button
             type="button"
@@ -72,9 +74,6 @@
           >
             Annulla
           </button>
-          <p class="typo__p" v-if="submitStatus === 'ERROR'">
-            Riempire i dati nel modo corretto
-          </p>
         </template>
       </modal>
       <modal v-show="associateCampaignModalVisible">

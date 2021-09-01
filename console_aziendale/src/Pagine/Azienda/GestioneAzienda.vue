@@ -85,15 +85,12 @@
           >
             Annulla
           </button>
-          <p class="typo__p" v-if="submitStatus === 'ERROR'">
-            Riempire i dati nel modo corretto
-          </p>
         </template>
       </modal>
       <modal v-show="deleteModalVisible">
         <template v-slot:header> Cancella Utente </template>
         <template v-slot:body>
-          <span>Sei sicuro di voler cancellare l'utente selezionato?</span>
+          <p class="text-subtitle-1">Sei sicuro di voler cancellare l'utente selezionato?</p>
         </template>
         <template v-slot:footer>
           <button

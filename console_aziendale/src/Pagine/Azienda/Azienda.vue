@@ -11,24 +11,21 @@
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <azienda-form />
-        <p class="typo__p" v-if="submitStatus === 'ERROR'">
-          Riempire i dati nel modo corretto
-        </p>
       </template>
       <template v-slot:footer>
         <v-btn
-          color="blue darken-1"
+          color="primary"
           text
           @click="closeModal"
-          aria-label="Close modal"
+          class="py-8 ml-8"
         >
           Annulla
         </v-btn>
         <v-btn
-          color="blue darken-1"
+          color="primary"
           text
           @click="saveCompany"
-          aria-label="Close modal"
+          class="py-8 ml-8"
         >
           Salva
         </v-btn>

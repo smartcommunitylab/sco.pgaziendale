@@ -38,7 +38,9 @@
       <!-- TODO: Modale Dipendente -->
       <modal v-show="deleteModalVisible">
         <template v-slot:header> Cancella Dipendente </template>
-        <template v-slot:body> Sei sicuro di voler cancellare il dipendente? </template>
+        <template v-slot:body>
+          <p class="text-subtitle-1">Sei sicuro di voler cancellare il dipendente?</p>
+        </template>
         <template v-slot:footer>
           <button
             type="button"
@@ -80,9 +82,6 @@
           >
             Annulla
           </button>
-          <p class="typo__p" v-if="submitStatus === 'ERROR'">
-            Riempire i dati nel modo corretto
-          </p>
         </template>
       </modal>
 
