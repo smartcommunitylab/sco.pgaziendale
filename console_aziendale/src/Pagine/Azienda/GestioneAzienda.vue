@@ -1,134 +1,129 @@
 <template>
   <div>
-    <div>
-      <div class="text-center">UTENTI</div>
-      <div
+    <v-row>
+      <v-col>
+        <v-btn
+          class="fab"
+          fab
+          color="cyan accent-2"
+          @click="showModal('Aggiungi utente')"
+        >
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" class="pb-0">
+        <div class="text-h6 mb-0">Utenti</div>
+      </v-col>
+      <v-col
         v-if="
           adminCompanyUsers &&
           adminCompanyUsers.items &&
           adminCompanyUsers.items.length > 0
         "
       >
-        <div v-for="user in adminCompanyUsers.items" v-bind:key="user.id">
-          <div class="user">
-            <div class="w-full">
-              <div class="flex">
-                <div ><span class="title-header" v-if="user.name"> Nome: </span><span>{{ user.name }}</span></div>
-                <div ><span class="title-header" v-if="user.surname"> Cognome: </span><span>{{ user.surname }}</span></div>
-                <div ><span class="title-header" v-if="user.phone"> Telefono: </span><span>{{ user.phone }}</span></div>
+        <v-row>
+          <v-col cols="4" v-for="user in adminCompanyUsers.items" v-bind:key="user.id">
+            <v-card>
+            <v-card-title>{{user.name + " " + user.surname}}</v-card-title>
+            <v-card-subtitle>Username: {{ user.username }}</v-card-subtitle>
+            <v-card-text>
+              <p class="font-weight-bold mb-0">Ruoli:</p>
+              <div v-for="role in user.roles" :key="JSON.stringify(role)">
+                <label
+                  class="mr-2"
+                  v-if="
+                    role.role == 'ROLE_COMPANY_ADMIN' &&
+                    role.companyId == adminCompany.item.id
+                  "
+                  >AMMINISTRATORE AZIENDALE
+                </label>
+                <label
+                  class="mr-2"
+                  v-if="
+                    role.role == 'ROLE_MOBILITY_MANAGER' &&
+                    role.companyId == adminCompany.item.id
+                  "
+                  >MOBILITY MANAGER
+                </label>
               </div>
-              <div class="flex">
-                                <div ><span class="title-header"> Username:</span><span>{{ user.username }}</span></div>
-              </div>
-              <div class="flex">
-                <div class="title-header">Ruoli:</div>
-                <div v-for="role in user.roles" :key="JSON.stringify(role)">
-                  <label
-                    class="mr-2"
-                    v-if="
-                      role.role == 'ROLE_COMPANY_ADMIN' &&
-                      role.companyId == adminCompany.item.id
-                    "
-                    >AMMINISTRATORE AZIENDALE</label
-                  >
-                  <label
-                    class="mr-2"
-                    v-if="
-                      role.role == 'ROLE_MOBILITY_MANAGER' &&
-                      role.companyId == adminCompany.item.id
-                    "
-                    >MOBILITY MANAGER</label
-                  >
-                </div>
-              </div>
-            </div>
-            <div class="buttons">
-              <button
-                @click="deleteUser(user)"
-                class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
-              >
-                <delete-icon />
-              </button>
-              <button
-                @click="editUser(user)"
-                class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
-              >
-                <pencil-outline-icon />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div v-else class="empty-row">Non sono presenti elementi</div>
-
-      <div class="ml-auto pt-4 pr-4">
-        <button
-          @click="showModal('Aggiungi utente')"
-          class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
-        >
-          <add-icon class="add-icon" />
-        </button>
-      </div>
-    </div>
-
-    <modal v-show="editModalVisible">
-      <template v-slot:header> {{ popup.title }} </template>
-      <template v-slot:body>
-        <user-form />
-      </template>
-      <template v-slot:footer>
-        <button
-          type="button"
-          class="btn-close"
-          @click="saveUser"
-          aria-label="Close modal"
-        >
-          Salva
-        </button>
-        <button
-          type="button"
-          class="btn-close"
-          @click="closeModal"
-          aria-label="Close modal"
-        >
-          Annulla
-        </button>
-        <p class="typo__p" v-if="submitStatus === 'ERROR'">
-          Riempire i dati nel modo corretto
-        </p>
-      </template>
-    </modal>
-    <modal v-show="deleteModalVisible">
-      <template v-slot:header> Cancella Utente </template>
-      <template v-slot:body>
-        <span>Sei sicuro di voler cancellare l'utente selezionato?</span>
-      </template>
-      <template v-slot:footer>
-        <button
-          type="button"
-          class="btn-close"
-          @click="deleteConfirm"
-          aria-label="Close modal"
-        >
-          Conferma
-        </button>
-        <button
-          type="button"
-          class="btn-close"
-          @click="closeDeleteModal"
-          aria-label="Close modal"
-        >
-          Annulla
-        </button>
-      </template>
-    </modal>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn icon @click="editUser(user)">
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+              <v-btn icon @click="deleteUser(user)">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
+      
+      <!-- MODALE AGGIUNTA DIPENDENTE -->
+      <modal v-show="editModalVisible">
+        <template v-slot:header> {{ popup.title }} </template>
+        <template v-slot:body>
+          <user-form />
+        </template>
+        <template v-slot:footer>
+          <button
+            type="button"
+            class="btn-close"
+            @click="saveUser"
+            aria-label="Close modal"
+          >
+            Salva
+          </button>
+          <button
+            type="button"
+            class="btn-close"
+            @click="closeModal"
+            aria-label="Close modal"
+          >
+            Annulla
+          </button>
+          <p class="typo__p" v-if="submitStatus === 'ERROR'">
+            Riempire i dati nel modo corretto
+          </p>
+        </template>
+      </modal>
+      <modal v-show="deleteModalVisible">
+        <template v-slot:header> Cancella Utente </template>
+        <template v-slot:body>
+          <span>Sei sicuro di voler cancellare l'utente selezionato?</span>
+        </template>
+        <template v-slot:footer>
+          <button
+            type="button"
+            class="btn-close"
+            @click="deleteConfirm"
+            aria-label="Close modal"
+          >
+            Conferma
+          </button>
+          <button
+            type="button"
+            class="btn-close"
+            @click="closeDeleteModal"
+            aria-label="Close modal"
+          >
+            Annulla
+          </button>
+        </template>
+      </modal>
+      </v-col>
+    </v-row>
   </div>
 </template>
+
 <script>
 import { mapState, mapActions } from "vuex";
+import EventBus from "@/components/eventBus";
 import Modal from "@/components/Modal.vue";
 import UserForm from "./UserForm.vue";
-import EventBus from "@/components/eventBus";
 
 export default {
   name: "GestioneAzienda",

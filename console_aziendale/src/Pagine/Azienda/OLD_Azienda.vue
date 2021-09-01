@@ -1,13 +1,9 @@
 <template>
-  <div>
-    <v-row>
-      <v-col cols="8">
-        <gestione-azienda v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)"></gestione-azienda>
-      </v-col>
-      <profilo-azienda class="profiloAziendaMargin"></profilo-azienda>
-    </v-row>
-    <!-- MODALE MODIFICA DATI PROFILO AZIENDA -->
-    <modal v-show="editModalVisible">
+  <div class="flex flex-col lg:flex-row">
+    <div class="bg-green-300 lg:w-full mx-2 my-2 p-8">
+      <profilo-azienda></profilo-azienda>
+      <gestione-azienda v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)"></gestione-azienda>
+       <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <azienda-form />
@@ -34,7 +30,7 @@
         </p>
       </template>
     </modal>
-
+    </div>
   </div>
 </template>
 
@@ -44,7 +40,7 @@ import ProfiloAzienda from "./ProfiloAzienda.vue";
 import GestioneAzienda from "./GestioneAzienda.vue";
 import EventBus from "@/components/eventBus";
 import Modal from "@/components/Modal.vue";
-import AziendaForm from "./AziendaForm.vue";
+import AziendaForm from "./AziendaForm.vue"
 
 export default {
   name: "Azienda",
@@ -52,7 +48,7 @@ export default {
     ProfiloAzienda,
     GestioneAzienda,
     Modal,
-    AziendaForm,
+    AziendaForm
   },
   data: function () {
     return {
@@ -124,9 +120,5 @@ export default {
 <style>
 .selected {
   @apply bg-background;
-}
-
-.profiloAziendaMargin{
-  margin-top: 124px;
 }
 </style>
