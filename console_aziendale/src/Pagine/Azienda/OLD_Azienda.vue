@@ -1,40 +1,36 @@
 <template>
-  <div>
-    <v-row>
-      <v-col cols="8">
-        <gestione-azienda v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)"></gestione-azienda>
-      </v-col>
-      <profilo-azienda class="profiloAziendaMargin"></profilo-azienda>
-    </v-row>
-    <!-- MODALE MODIFICA DATI PROFILO AZIENDA -->
-    <modal v-show="editModalVisible">
+  <div class="flex flex-col lg:flex-row">
+    <div class="bg-green-300 lg:w-full mx-2 my-2 p-8">
+      <profilo-azienda></profilo-azienda>
+      <gestione-azienda v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)"></gestione-azienda>
+       <modal v-show="editModalVisible">
       <template v-slot:header> {{ popup.title }} </template>
       <template v-slot:body>
         <azienda-form />
-        <p class="typo__p" v-if="submitStatus === 'ERROR'">
-          Riempire i dati nel modo corretto
-        </p>
       </template>
       <template v-slot:footer>
-        <v-btn
-          color="blue darken-1"
-          text
-          @click="closeModal"
-          aria-label="Close modal"
-        >
-          Annulla
-        </v-btn>
-        <v-btn
-          color="blue darken-1"
-          text
+        <button
+          type="button"
+          class="btn-close"
           @click="saveCompany"
           aria-label="Close modal"
         >
           Salva
-        </v-btn>
+        </button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeModal"
+          aria-label="Close modal"
+        >
+          Annulla
+        </button>
+        <p class="typo__p" v-if="submitStatus === 'ERROR'">
+          Riempire i dati nel modo corretto
+        </p>
       </template>
     </modal>
-
+    </div>
   </div>
 </template>
 
@@ -44,7 +40,7 @@ import ProfiloAzienda from "./ProfiloAzienda.vue";
 import GestioneAzienda from "./GestioneAzienda.vue";
 import EventBus from "@/components/eventBus";
 import Modal from "@/components/Modal.vue";
-import AziendaForm from "./AziendaForm.vue";
+import AziendaForm from "./AziendaForm.vue"
 
 export default {
   name: "Azienda",
@@ -52,7 +48,7 @@ export default {
     ProfiloAzienda,
     GestioneAzienda,
     Modal,
-    AziendaForm,
+    AziendaForm
   },
   data: function () {
     return {
@@ -124,9 +120,5 @@ export default {
 <style>
 .selected {
   @apply bg-background;
-}
-
-.profiloAziendaMargin{
-  margin-top: 124px;
 }
 </style>
