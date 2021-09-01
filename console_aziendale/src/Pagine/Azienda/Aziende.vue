@@ -186,7 +186,6 @@ export default {
     },
     
     showCompanyInfo: function (company) {
-      this.nColsTable = 8;
       if (this.currentCompanySelected == company) {
         this.getCompanyById(null);
 

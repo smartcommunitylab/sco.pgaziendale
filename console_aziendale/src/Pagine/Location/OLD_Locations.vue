@@ -1,47 +1,42 @@
 <template>
-  <div>
-    <v-row>
-      <v-col>
-        <v-btn
-          class="fab mr-4"
-          fab
-          color="cyan accent-2"
-          @click="showModal('Aggiungi sede')"
+  <div class="flex flex-col lg:flex-row">
+    <div class="bg-green-300 lg:w-3/6 mx-2 my-2 pb-16 relative">
+      <div v-if="allLocations && allLocations.items && allLocations.items.length > 0">
+        <generic-table
+          :data="allLocations.items"
+          :columns="gridColumns"
+          :header="headerColumns"
+          :method="showLocationInfo"
         >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-        <v-btn
-          class="fab"
-          fab
-          color="cyan accent-2"
-          @click="modalImportLocationsOpen = true"
-        >
-          <v-icon>mdi-file-import</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col :cols="nColsTable_calculator">
-        <div v-if="allLocations && allLocations.items && allLocations.items.length > 0">
-          <generic-table
-            :items="allLocations.items"
-            :headers="headerColumns"
-            :title="tableTitle"
-            :method="showLocationInfo"
+        </generic-table>
+      </div>
+      <div v-else class="empty-list">Non ci sono Sedi</div>
+      <div class="flex flex-row justify-center py-4">
+        <div class="px-2">
+          <button
+            @click="modalImportLocationsOpen = true"
+            class="inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
           >
-          </generic-table>
+            Importa CSV
+          </button>
         </div>
-        <div v-else class="empty-list">Non ci sono Sedi</div>
-      </v-col>
-      <!-- PROFILO LOCATION -->
-      <profilo-location v-if="actualLocation && actualLocation.item"/> 
-      <!-- MODALE LOCATION -->
-      <modal v-show="deleteModalVisible">
+      </div>
+      <div class="ml-auto pt-4 pr-4 absolute right-0">
+        <button
+          @click="showModal('Aggiungi sede')"
+          class="p-0 w-12 h-12 bg-primary rounded-full hover:bg-primary_light active:shadow-lg mouse shadow transition ease-in duration-100 focus:outline-none"
+        >
+          <add-icon class="add-icon" />
+        </button>
+      </div>
+    </div>
+
+    <profilo-location v-if="actualLocation && actualLocation.item" />
+    <div v-else class="select-element"> Seleziona una sede per visualizzare i dettagli</div>
+    <modal v-show="deleteModalVisible">
 
       <template v-slot:header> <div class="text-danger">Cancella Sede </div></template>
-      <template v-slot:body> 
-        <p class="text-subtitle-1">Sei sicuro di voler cancellare la sede?</p>
-      </template>
+      <template v-slot:body> <div class="text-center font-semibold pt-16 text-2xl">Sei sicuro di voler cancellare la sede? </div> </template>
       <template v-slot:footer>
         <button
           type="button"
@@ -89,6 +84,9 @@
         >
           Annulla
         </button>
+        <p class="typo__p" v-if="submitStatus === 'ERROR'">
+          Riempire i dati nel modo corretto
+        </p>
       </template>
     </modal>
     <transition
@@ -199,8 +197,7 @@
           </div>
         </div>
       </transition>
-    </v-row>
-  </div> 
+  </div>
 </template>
 
 <script>
@@ -215,8 +212,8 @@ export default {
   components: { ProfiloLocation, GenericTable, Modal, LocationForm },
   data: function () {
     return {
-      headerColumns: [{text:"Identificativo", value:"id"}, {text:"Cittá", value:"city"}, {text:"Indirizzo", value:"address"}, {text:"Numero", value:"streetNumber"}],
-      tableTitle: "Sedi",
+      gridColumns: ["id", "city", "address","streetNumber"],
+      headerColumns: ["Identificativo", "Cittá", "Indirizzo","Numero"],
       newLocation: false,
       location: null,
       popup: {
@@ -285,13 +282,6 @@ export default {
         fileName() {
       return this.fileUploaded.item(0).name;
     },
-    nColsTable_calculator: function() {
-      if(this.actualLocation != null && this.actualLocation != undefined && this.actualLocation.item != null){
-        return 8;
-      } else{
-        return 12;
-      }
-    },
   },
   methods: {
     ...mapActions("location", {
@@ -308,25 +298,8 @@ export default {
       if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
     },
 
-    showLocationInfo: function (location) {
-      console.log("Questo è il valore di actualLocation:");
-      console.log(this.actualLocation);
-      console.log("Questo è il valore di location:");
-      console.log(location);
-      if (this.actualLocation != null) {
-        if (this.actualLocation.item == location) {
-          this.selectActualLocation(null);
-
-          this.actualLocation = undefined;
-        } else {
-          this.selectActualLocation(location);
-          this.actualLocation = location;
-        }
-      }else{
-        this.selectActualLocation(location);
-        this.actualLocation = location;
-      }
-      
+    showLocationInfo(location) {
+      this.selectActualLocation(location);
     },
     showModal(title) {
       this.editModalVisible = true;

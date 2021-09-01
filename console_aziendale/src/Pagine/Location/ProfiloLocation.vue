@@ -1,93 +1,97 @@
 <template>
-  <div>
-    <div class="w-full max-w-4xl flex h-full flex-wrap mx-auto my-32 lg:my-0 lg:mr-16">
-      <div
-        id="profile"
-        class="min-w-full w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none bg-white opacity-75 mx-6 lg:mx-0"
-      >
-        <div class="w-full">
-          <button
-            @click="deleteLocation"
-            class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
+  <v-col cols="4">
+    <v-card elevation="2">
+        <v-card-title>{{ actualLocation.item.id }}</v-card-title>
+        
+        <!-- TODO: MAPPA GMAP -->
+        <l-map
+          ref="myMap"
+          @ready="initMap()"
+          :zoom="zoom"
+          :center="center"
+          :options="mapOptions"
+          class="map-style"
+        >
+          <l-tile-layer :url="url" :attribution="attribution" />
+          <l-circle
+            v-if="actualLocation.item.latitude && actualLocation.item.longitude"
+            :lat-lng.sync="center"
+            :radius="actualLocation.item.radius"
+            :color="'red'"
+          />
+          <l-marker
+            v-if="actualLocation.item.latitude && actualLocation.item.longitude"
+            visible
+            :lat-lng="center"
           >
-            <delete-icon />
-          </button>
-          <button
-            @click="editLocation"
-            class="float-right bg-grey-light hover:bg-grey text-grey-darkest font-bold py-2 px-4 rounded inline-flex items-center"
-          >
-            <pencil-outline-icon />
-          </button>
-        </div>
-        <div class="p-4 md:p-12 text-center lg:text-left">
-          <h1 class="text-3xl font-bold pt-8 lg:pt-0">{{ actualLocation.item.id }}</h1>
-          <div
-            class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
-          ></div>
-          <p
-            class="pt-4 text-base font-bold flex items-center justify-center lg:justify-start"
-          >
-            <address-icon />Indirizzo: {{ actualLocation.item.address }}
-            {{ actualLocation.item.streetNumber }} {{ actualLocation.item.zip }}
-            {{ actualLocation.item.city }}
-          </p>
+            <l-popup>
+              <div>
+                {{ actualLocation.item.id }}
+              </div>
+            </l-popup>
+          </l-marker>
+        </l-map>
+        <!-- FINE MAPPA GMAP -->
 
-          <p
-            class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-          >
-            <gps-icon /> Coordinate: {{ actualLocation.item.latitude }},
-            {{ actualLocation.item.longitude }}
-          </p>
-          <div class="mt-4">
-          <l-map
-            ref="myMap"
-            @ready="initMap()"
-            :zoom="zoom"
-            :center="center"
-            :options="mapOptions"
-            class="map-style"
-          >
-            <l-tile-layer :url="url" :attribution="attribution" />
-            <l-circle
-              v-if="actualLocation.item.latitude && actualLocation.item.longitude"
-              :lat-lng.sync="center"
-              :radius="actualLocation.item.radius"
-              :color="'red'"
-            />
-            <l-marker
-              v-if="actualLocation.item.latitude && actualLocation.item.longitude"
-              visible
-              :lat-lng="center"
-            >
-              <l-popup>
-                <div>
-                  {{ actualLocation.item.id }}
-                </div>
-              </l-popup>
-            </l-marker>
-          </l-map>
-          </div>
-          <div
-            class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-            v-if="
-              actualLocation.item.nonWorking && actualLocation.item.nonWorking.length>0
-            "
-          >
-            <calendar-remove-icon />Giorni della settimana non lavorativi:
-            <div v-html="getNonWorking(actualLocation.item.nonWorking)"></div>
-          </div>
-          <div
-            class="pt-4 text-gray-600 text-xs lg:text-sm flex items-center justify-center lg:justify-start"
-            v-if="actualLocation.item.nonWorkingDays  && actualLocation.item.nonWorkingDays.length>0"
-          >
-            <calendar-remove-icon /> Giorni non lavorativi:
-            <div v-html="getNonWorkingDays(actualLocation.item.nonWorkingDays)"></div>
-          </div>
-        </div>
-      </div>
-      <div></div>
-    </div>
-  </div>
+        <v-card-text class="pb-0">
+            <v-list dense>
+                <v-list-item-group
+                    color="primary"
+                >
+                    <v-list-item :href="'http://maps.google.com/?q='+actualLocation.item.address + ' ' + actualLocation.item.streetNumber + ', ' + actualLocation.item.city + ', ' + actualLocation.item.zip" target="_blank">
+                        <v-list-item-icon>
+                            <v-icon>mdi-map-marker</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                            <v-list-item-title v-text="actualLocation.item.address + ' ' + actualLocation.item.streetNumber + ', ' + actualLocation.item.city + ', ' + actualLocation.item.zip"></v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item :href="'http://maps.google.com/?q='+actualLocation.item.latitude + ' ' + actualLocation.item.longitude" target="_blank">
+                        <v-list-item-icon>
+                            <v-icon>mdi-crosshairs-gps</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                            <v-list-item-title v-text="actualLocation.item.latitude + '; ' + actualLocation.item.longitude"></v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-icon>
+                            <v-icon>mdi-calendar</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                            <v-list-item-title>Giorni della settimana non lavorativi:
+                              <div v-html="getNonWorking(actualLocation.item.nonWorking)"></div>
+                            </v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-icon>
+                            <v-icon>mdi-calendar</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                            <v-list-item-title>
+                               Giorni non lavorativi:
+                              <div v-html="getNonWorkingDays(actualLocation.item.nonWorkingDays)"></div>
+                            </v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                </v-list-item-group>
+            </v-list>
+        </v-card-text>
+        <v-card-actions>
+            <v-spacer></v-spacer>
+
+            <v-btn icon @click="editLocation">
+                <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+
+            <v-btn icon @click="deleteLocation">
+                <v-icon>mdi-delete</v-icon>
+            </v-btn>
+
+        </v-card-actions>
+    </v-card>
+  </v-col>
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
@@ -151,10 +155,9 @@ export default {
 
 <style scoped>
 .map-style{
-      height: 350px;
-    width: 100%;
-    position: relative;
-    border: solid 1px;
-    border-radius: 8px;
-    }
-    </style>
+  height: 350px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+</style>
