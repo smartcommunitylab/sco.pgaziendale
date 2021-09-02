@@ -64,7 +64,6 @@
             Footer
 
             <v-btn
-              color="blue darken-1"
               text
               @click="close"
               class="py-8 ml-8"

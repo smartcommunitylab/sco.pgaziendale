@@ -14,7 +14,6 @@
       </template>
       <template v-slot:footer>
         <v-btn
-          color="primary"
           text
           @click="closeModal"
           class="py-8 ml-8"

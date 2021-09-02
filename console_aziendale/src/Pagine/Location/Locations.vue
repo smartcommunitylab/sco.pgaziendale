@@ -43,52 +43,46 @@
         <p class="text-subtitle-1">Sei sicuro di voler cancellare la sede?</p>
       </template>
       <template v-slot:footer>
-        <button
-          type="button"
-          class="mtmb mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-danger rounded shadow ripple hover:shadow-lg focus:outline-none"
-
-          @click="deleteConfirm"
-          aria-label="Close modal"
-        >
-          Conferma
-        </button>
-        <button
-          type="button"
-          class="mt-2 mb-2 mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
-
-          @click="closeDeleteModal"
-          aria-label="Close modal"
-        >
-          Annulla
-        </button>
+        <v-btn
+            text
+            @click="closeDeleteModal"
+            class="py-8 ml-8"
+          >
+            Annulla
+          </v-btn>
+          <v-btn
+            color="error"
+            text
+            @click="deleteConfirm"
+            class="py-8 ml-8"
+          >
+            Conferma
+          </v-btn>
       </template>
     </modal>
     <modal v-show="editModalVisible">
 
-      <template v-slot:header > <div class="text-primary">{{ popup.title }} </div></template>
+      <template v-slot:header > {{ popup.title }} </template>
 
       <template v-slot:body>
         <location-form />
       </template>
       <template v-slot:footer>
-        <button
-          type="button"
-          class="mt-2 mb-2 mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
-
-          @click="saveLocation"
-          aria-label="Close modal"
-        >
-          Salva
-        </button>
-        <button
-          type="button"
-          class="mtmb mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-danger rounded shadow ripple hover:shadow-lg focus:outline-none"
-
-          @click="closeModal"
-          aria-label="Close modal"
-        >
-          Annulla
-        </button>
+        <v-btn
+            text
+            @click="closeModal"
+            class="py-8 ml-8"
+          >
+            Annulla
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="saveLocation"
+            class="py-8 ml-8"
+          >
+            Salva
+          </v-btn>
       </template>
     </modal>
     <transition

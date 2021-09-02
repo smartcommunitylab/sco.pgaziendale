@@ -3,7 +3,7 @@
     <div class="mb-20 flex flex-wrap justify-between">
       <v-row>
         <v-col
-          cols="7"
+          cols="6"
         >
           <v-text-field
             label="Nome"
@@ -17,7 +17,7 @@
           ></v-text-field>
         </v-col>
         <v-col
-          cols="7"
+          cols="6"
         >
           <v-text-field
             label="Cognome"
@@ -31,7 +31,7 @@
           ></v-text-field>
         </v-col>
         <v-col
-          cols="7"
+          cols="6"
         >
           <v-text-field
             label="Username"
@@ -59,7 +59,7 @@
           </v-text-field>
         </v-col>
         <v-col
-          cols="7"
+          cols="6"
         >
           <v-text-field
             label="Telefono"
@@ -72,20 +72,25 @@
             outlined
           ></v-text-field>
         </v-col>
+        <v-col cols="12">
+          <v-form>
+            <p class="text-subtitle-1">Ruoli</p>
+            <v-checkbox
+              :rules="roleRules"
+              v-model="roles"
+              label="Amministratore Aziendale"
+              value="ROLE_COMPANY_ADMIN"
+              hide-details
+            ></v-checkbox>
+            <v-checkbox
+              :rules="roleRules"
+              v-model="roles"
+              label="Mobility Manager"
+              value="ROLE_MOBILITY_MANAGER"
+            ></v-checkbox>
+          </v-form>
+        </v-col>        
       </v-row>
-
-      <div class="field-group mb-6 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.roles.$error }">
-          <label class="field-label" for="password">Ruoli </label>
-          <input type="checkbox" id="aa" value="ROLE_COMPANY_ADMIN" v-model="roles" />
-          <label for="aa">Amministratore Aziendale</label>
-          <!-- <input type="checkbox" id="mm" value="ROLE_MOBILITY_MANAGER" v-model="roles" />
-          <label for="mm">Mobility Manager</label> -->
-        </div>
-        <div v-if="$v.roles.$error">
-          <div class="error" v-if="!$v.roles.required">Il campo ruoli e' richiesto.</div>
-        </div>
-      </div>
     </div>
   </form>
 </template>
@@ -106,7 +111,7 @@ export default {
       surname: "",
       username: "",
       phone: "",
-      roles: [],
+      roles: ['ROLE_COMPANY_ADMIN'],
       unique: true,
       rules: {
           required: value => !!value || 'Campo richiesto.',
@@ -220,7 +225,13 @@ export default {
   computed: {
     ...mapState("company", ["adminCompany"]),
     ...mapState("company", ["adminCompany", "adminCompanyUsers"]),
+    roleRules() {
+      return [
+        this.roles.length > 0 || "Seleziona almeno un ruolo."
+      ];
+    },
   },
+  
   mounted() {
     EventBus.$on("EDIT_USER_FORM", (user) => {
       this.copyValues(user);

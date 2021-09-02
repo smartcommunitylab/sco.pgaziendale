@@ -33,7 +33,6 @@
         </template>
         <template v-slot:footer>
           <v-btn
-            color="primary"
             text
             @click="closeModal"
             class="py-8 ml-8"
@@ -51,13 +50,12 @@
         </template>
       </modal>
       <modal v-show="deleteModalVisible">
-        <template v-slot:header> Cancella Azienda </template>
+        <template v-slot:header> <div class="text-danger"> Cancella Azienda </div>  </template>
         <template v-slot:body>
           <p class="text-subtitle-1">Sei sicuro di voler cancellare l'azienda selezionata?</p>
         </template>
         <template v-slot:footer>
           <v-btn
-            color="primary"
             text
             @click="closeDeleteModal"
             class="py-8 ml-8"
@@ -65,7 +63,7 @@
             Annulla
           </v-btn>
           <v-btn
-            color="primary"
+            color="error"
             text
             @click="deleteConfirm"
             class="py-8 ml-8"

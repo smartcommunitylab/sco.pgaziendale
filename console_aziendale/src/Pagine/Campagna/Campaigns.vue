@@ -29,27 +29,26 @@
       <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
       <!-- TODO: Modale Campagna -->
       <modal v-show="deleteModalVisible">
-        <template v-slot:header> Cancella Campagna </template>
+        <template v-slot:header> <div class="text-danger"> Cancella Campagna </div>  </template>
         <template v-slot:body>
           <p class="text-subtitle-1">Sei sicuro di voler cancellare la campagna?</p>
         </template>                  
         <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="deleteConfirm"
-            aria-label="Close modal"
-          >
-            Conferma
-          </button>
-          <button
-            type="button"
-            class="btn-close"
+          <v-btn
+            text
             @click="closeDeleteModal"
-            aria-label="Close modal"
+            class="py-8 ml-8"
           >
             Annulla
-          </button>
+          </v-btn>
+          <v-btn
+            color="error"
+            text
+            @click="deleteConfirm"
+            class="py-8 ml-8"
+          >
+            Conferma
+          </v-btn>
         </template>
       </modal>
       <modal v-show="editModalVisible">
@@ -58,22 +57,21 @@
           <campaign-form />
         </template>
         <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="saveCampaign"
-            aria-label="Close modal"
-          >
-            Salva
-          </button>
-          <button
-            type="button"
-            class="btn-close"
+          <v-btn
+            text
             @click="closeModal"
-            aria-label="Close modal"
+            class="py-8 ml-8"
           >
             Annulla
-          </button>
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="saveCampaign"
+            class="py-8 ml-8"
+          >
+            Salva
+          </v-btn>
         </template>
       </modal>
       <modal v-show="associateCampaignModalVisible">
@@ -82,15 +80,13 @@
           <associate-form />
         </template>
         <template v-slot:footer>
-
-          <button
-            type="button"
-            class="btn-close"
+          <v-btn
+            text
             @click="closeModal"
-            aria-label="Close modal"
+            class="py-8 ml-8"
           >
             Chiudi
-          </button>
+          </v-btn>
         </template>
       </modal>
     </v-row>

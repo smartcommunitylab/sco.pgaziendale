@@ -1,41 +1,35 @@
 <template>
   <div>
-    <v-row v-if="campaigns">
-      <v-col cols="4" v-for="campaign in campaigns" :key="campaign.id">
-        <v-card
+    <div v-if="campaigns">
+      <div v-for="campaign in campaigns" :key="campaign.id">
+        <div
+          class="flex items-center justify-left"
           v-if="campaigns && campaigns.length > 0"
-          class="mx-auto"
-          max-width="344"
         >
-          <v-card-title>
-            {{ campaign.title }}
-          </v-card-title>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="error"
-              plain
-              small
-              v-if="isAssociated(campaign)"
-              @click="disassociaPopup(campaign)"
-              class="py-8 ml-8"
-            >
-              Disassocia
-            </v-btn>
-            <v-btn
-              color="primary"
-              plain
-              small
-              v-else
-              @click="associa(campaign)"
-              class="py-8 ml-8"
-            >
-              Associa
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
+          <div class="Subtitle 1">{{ campaign.title }}</div>
+          <v-btn
+            color="error"
+            plain
+            small
+            v-if="isAssociated(campaign)"
+            @click="disassociaPopup(campaign)"
+            class="py-8 ml-8"
+          >
+            Disassocia
+          </v-btn>
+          <v-btn
+            color="primary"
+            plain
+            small
+            v-else
+            @click="associa(campaign)"
+            class="py-8 ml-8"
+          >
+            Associa
+          </v-btn>
+        </div>
+      </div>
+    </div>
     <modal v-show="disassociaModalVisible">
       <template v-slot:header> <div class="text-danger"> Disassocia dalla campagna </div>  </template>
       <template v-slot:body>
@@ -169,13 +163,4 @@ export default {
 
 };
 </script>
-<style scoped>
-.v-card__title {
-    font-size: 1.00rem;
-    font-weight: 500;
-    letter-spacing: .0125em;
-    line-height: 2rem;
-    word-break: break-all;
-    padding-bottom: 0px;
-}
-</style>
+<style scoped></style>

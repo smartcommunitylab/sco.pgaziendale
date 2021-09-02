@@ -70,7 +70,6 @@
         </template>
         <template v-slot:footer>
           <v-btn
-            color="primary"
             text
             @click="closeModal"
             class="py-8 ml-8"
@@ -88,27 +87,26 @@
         </template>
       </modal>
       <modal v-show="deleteModalVisible">
-        <template v-slot:header> Cancella Utente </template>
+        <template v-slot:header> <div class="text-danger"> Cancella Utente </div> </template>
         <template v-slot:body>
           <p class="text-subtitle-1">Sei sicuro di voler cancellare l'utente selezionato?</p>
         </template>
         <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="deleteConfirm"
-            aria-label="Close modal"
-          >
-            Conferma
-          </button>
-          <button
-            type="button"
-            class="btn-close"
+          <v-btn
+            text
             @click="closeDeleteModal"
-            aria-label="Close modal"
+            class="py-8 ml-8"
           >
             Annulla
-          </button>
+          </v-btn>
+          <v-btn
+            color="error"
+            text
+            @click="deleteConfirm"
+            class="py-8 ml-8"
+          >
+            Conferma
+          </v-btn>
         </template>
       </modal>
       </v-col>

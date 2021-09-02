@@ -37,27 +37,26 @@
       <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
       <!-- TODO: Modale Dipendente -->
       <modal v-show="deleteModalVisible">
-        <template v-slot:header> Cancella Dipendente </template>
+        <template v-slot:header> <div class="text-danger"> Cancella Dipendente </div> </template>
         <template v-slot:body>
           <p class="text-subtitle-1">Sei sicuro di voler cancellare il dipendente?</p>
         </template>
         <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="deleteConfirm"
-            aria-label="Close modal"
-          >
-            Conferma
-          </button>
-          <button
-            type="button"
-            class="btn-close"
+          <v-btn
+            text
             @click="closeDeleteModal"
-            aria-label="Close modal"
+            class="py-8 ml-8"
           >
             Annulla
-          </button>
+          </v-btn>
+          <v-btn
+            color="error"
+            text
+            @click="deleteConfirm"
+            class="py-8 ml-8"
+          >
+            Conferma
+          </v-btn>
         </template>
       </modal>
       <modal v-show="editModalVisible">
@@ -66,22 +65,21 @@
           <employee-form />
         </template>
         <template v-slot:footer>
-          <button
-            type="button"
-            class="btn-close"
-            @click="saveEmployee"
-            aria-label="Close modal"
-          >
-            Salva
-          </button>
-          <button
-            type="button"
-            class="btn-close"
+          <v-btn
+            text
             @click="closeModal"
-            aria-label="Close modal"
+            class="py-8 ml-8"
           >
             Annulla
-          </button>
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="saveEmployee"
+            class="py-8 ml-8"
+          >
+            Salva
+          </v-btn>
         </template>
       </modal>
 
