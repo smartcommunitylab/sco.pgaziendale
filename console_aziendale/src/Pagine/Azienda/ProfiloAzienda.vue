@@ -4,7 +4,7 @@
         <v-card-title>{{ actualCompany.item.name }}</v-card-title>
         
         <v-img
-            v-if="actualCompany.item.logo"
+            v-if="/*existImageURL(actualCompany.item.logo)*/actualCompany.item.logo "
             class="block mx-auto h-48 w-48 bg-contain bg-center bg-no-repeat"
             :style="{ backgroundImage: 'url(' + actualCompany.item.logo + ')' }"
             height="200px"
@@ -101,6 +101,20 @@ export default {
     ...mapActions("company", {
       getCompanyById: "getCompanyById",
       chooseCompanyAdminCall: "chooseCompanyAdmin",
+      /*
+      existImageURL: function(url) {
+        var request = new XMLHttpRequest();
+        request.open("GET", url, true);
+        request.send();
+        request.onload = function() {
+            if (request.status == 200) //if(statusText == OK)
+            {
+                return true;
+            } else {
+                return false;
+            }
+        }
+      }*/
     }),
 
     deleteAzienda() {

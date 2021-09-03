@@ -1,14 +1,14 @@
 <template>
   <v-footer
-    dark
     padless
     class="justify-center"
-    default
   >
+  <v-row>
+    <v-col cols="12" class="p-0 m-0">
     <v-card
       flat
-      tile
-      class="lighten-1 white--text text-center justify-center"
+      dark
+      class="white--text text-center justify-center"
     >
       <v-card-text>
         <v-btn
@@ -34,6 +34,8 @@
         {{ new Date().getFullYear() }} — <strong>Play & Go</strong>
       </v-card-text>
     </v-card>
+    </v-col>
+  </v-row>
   </v-footer>
 </template>
 

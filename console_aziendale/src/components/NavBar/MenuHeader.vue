@@ -26,7 +26,7 @@
       nav
       dense
     >
-      <router-link to="/aziende" v-if="role == 'ROLE_ADMIN' && adminCompany == null">
+      <router-link to="/aziende" v-if="role == 'ROLE_ADMIN' && adminCompany == null" >
         <v-list-item link>
           <v-list-item-icon>
             <v-icon>mdi-factory</v-icon>
@@ -67,7 +67,6 @@
             to="/dipendenti"
             v-if="
               (role == 'ROLE_ADMIN' && adminCompany != null) ||
-              (role == 'ROLE_ADMIN' && actualCompany != null) ||
               (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
             "
           >
