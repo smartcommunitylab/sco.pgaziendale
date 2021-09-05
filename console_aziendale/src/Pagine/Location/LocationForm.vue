@@ -1,367 +1,283 @@
 <template>
   <form action="" id="addLocation">
     <div class="mb-20 flex flex-wrap justify-between">
-      <template>
-        <div class="map-style">
-          <geolocation-selector
-            v-model="locationSelected"
-            :key="key"
-            :radius="radius"
-            v-on:poschanged="locationChanged"
-          />
-        </div>
-      </template>
-
-      <div class="lg:grid grid-cols-3 gap-6 lg:text-center lg:ml-40">
-      <div class="field-group mt-8 mb-2">
-        <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
-          <label class="field-label font-bold" for="first_name">Identificativo </label>
-          <info-box v-if="$v.id.$model == ''" :msg="'Codice univoco della sede'" />
-          <info-box
-            v-else
-            :msg="'Non é possibile cambiare identificativo sede una volta creato'"
-          />
-          <input
+      <v-row>
+        <v-col
+          cols="12"
+        >
+          <div class="map-style">
+            <geolocation-selector
+              v-model="locationSelected"
+              :key="key"
+              :radius="radius"
+              v-on:poschanged="locationChanged"
+            />
+          </div>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-text-field
+            label="Identificativo"
+            placeholder="Identificativo *"
             type="text"
             name="campaignCode"
-            placeholder="Identificativo *"
-            v-model.trim="$v.id.$model"
-
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
+            :rules="[rules.required]"
             id="campaignCode"
+            v-model.trim="$v.id.$model"
+            outlined
+            
             :disabled="edit"
-          />
-        </div>
-        <div v-if="$v.id.$error">
-          <div class="error" v-if="!$v.id.required">
-            Il campo Identificativo e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mt-8 mb-2">
-        <div class="form-group" :class="{ 'form-group--error': $v.address.$error }">
-          <label class="field-label font-bold" for="first_name">Indirizzo </label>
-          <input
+          >
+            <template v-slot:append>
+              <v-tooltip
+                left
+                nudge-bottom="25px"
+                v-if="$v.id.$model == ''"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-icon v-on="on">
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                Codice univoco della sede
+              </v-tooltip>
+            </template>
+          </v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-text-field
+            label="Indirizzo"
+            placeholder="Indirizzo *"
             type="text"
             name="campaignAddress"
-            placeholder="Indirizzo *"
+            :rules="[rules.required]"
+            id="campaignAddress"
             v-model.trim="$v.address.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
-            id="campaignTitle"
-          />
-        </div>
-        <div v-if="$v.address.$error">
-          <div class="error" v-if="!$v.address.required">
-            Il campo indirizzo e' richiesto.
-          </div>
-        </div>
-      </div>
-
-      <div class="field-group mt-8 mb-2">
-        <div class="form-group font-bold" :class="{ 'form-group--error': $v.streetNumber.$error }">
-          <label class="field-label " for="first_name">Numero</label>
-          <input
+            outlined            
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-text-field
+            label="Numero"
+            placeholder="Numero *"
             type="text"
             name="campaignstreetNumber"
+            :rules="[rules.required]"
             id="campaignstreetNumber"
-            placeholder="Number *"
             v-model.trim="$v.streetNumber.$model"
-
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
-
-          />
-        </div>
-        <div v-if="$v.streetNumber.$error">
-          <div class="error" v-if="!$v.streetNumber.required">
-            Il campo Numero e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-6">
-        <div class="form-group" :class="{ 'form-group--error': $v.zip.$error }">
-          <label class="field-label font-bold" for="password">CAP </label>
-          <input
+            outlined            
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-text-field
+            label="CAP"
+            placeholder="CAP *"
             type="text"
             name="campaignZip"
-            id=""
-            required
-            placeholder="CAP *"
+            :rules="[rules.required]"
+            id="campaignZip"
             v-model.trim="$v.zip.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
-
-          />
-        </div>
-        <div v-if="$v.zip.$error">
-          <div class="error" v-if="!$v.zip.required">Il campo CAP e' richiesto.</div>
-        </div>
-      </div>
-
-      <div class="field-group mb-6">
-        <div class="form-group" :class="{ 'form-group--error': $v.city.$error }">
-          <label class="field-label font-bold" for="password">Cittá </label>
-          <input
+            outlined            
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-text-field
+            label="Cittá"
+            placeholder="Cittá *"
             type="text"
             name="campaignCity"
-            id=""
-            required
-            placeholder="Cittá *"
+            :rules="[rules.required]"
+            id="campaignCity"
             v-model.trim="$v.city.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
-
-          />
-        </div>
-        <div v-if="$v.city.$error">
-          <div class="error" v-if="!$v.city.required">Il campo Cittá e' richiesto.</div>
-        </div>
-      </div>
-
-      <div class="field-group mb-6">
-        <div class="form-group" :class="{ 'form-group--error': $v.province.$error }">
-          <label class="field-label font-bold" for="password">Provincia</label>
-
-          <input
-            type="text"
-            name="campaignProvince"
-            id=""
-            required
+            outlined            
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-autocomplete
+            label="Provincia"
             placeholder="Provincia *"
+            name="campaignProvince"
+            :rules="provinceRules"
+            id="campaignProvince"
             v-model.trim="$v.province.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
-
-          />
-        </div>
-        <div v-if="$v.province.$error">
-          <div class="error" v-if="!$v.province.required">
-            Il campo Provincia e' richiesto.
-          </div>
-        </div>
-      </div>
-
-      <div class="field-group mb-6">
-        <div class="form-group" :class="{ 'form-group--error': $v.region.$error }">
-          <label class="field-label font-bold" for="password">Regione</label>
-
-          <input
-            type="text"
-            name="campaignRegion"
-            id=""
-            required
+            :items="listaProvince"
+            outlined
+          ></v-autocomplete>
+        </v-col>
+        <v-col
+          cols="6"
+        > 
+          <v-autocomplete
+            label="Regione"
             placeholder="Regione *"
+            name="campaignRegion"
+            :rules="[rules.required]"
+            id="campaignRegion"
             v-model.trim="$v.region.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
-
-          />
-        </div>
-        <div v-if="$v.region.$error">
-          <div class="error" v-if="!$v.region.required">
-            Il campo Regione e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-6">
-        <div class="form-group" :class="{ 'form-group--error': $v.country.$error }">
-          <label class="field-label font-bold" for="password">Stato</label>
-
-          <input
+            :items="listaRegioni"
+            outlined
+          ></v-autocomplete>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Stato"
+            placeholder="Stato *"
             type="text"
             name="campaignCountry"
-            id=""
-            required
-            placeholder="Stato *"
+            :rules="[rules.required]"
+            id="campaignCountry"
             v-model.trim="$v.country.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
-
-          />
-        </div>
-        <div v-if="$v.country.$error">
-          <div class="error" v-if="!$v.country.required">
-            Il campo Stato e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-6 ">
-        <div class="form-group" :class="{ 'form-group--error': $v.radius.$error }">
-          <label class="field-label font-bold" for="password">Raggio</label>
-          <info-box
-            :msg="'Distanza in metri all\'interno di cui i viaggi dei dipendenti risultano essere validi'"
-          />
-
-          <input
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-text-field
+            label="Raggio"
+            placeholder="Raggio *"
             type="text"
             name="campaignRadius"
-            id=""
-            required
-            placeholder="Raggio *"
+            :rules="raggioRules"
+            id="campaignRadius"
             v-model.trim="$v.radius.$model"
-
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
-
-          />
-        </div>
-        <div v-if="$v.radius.$error">
-          <div class="error" v-if="!$v.radius.required">
-            Il campo Raggio e' richiesto.
-          </div>
-          <div class="error" v-if="!$v.radius.numeric">
-            Il campo Raggio non risulta essere un numero.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-6">
-        <div class="form-group" :class="{ 'form-group--error': $v.latitude.$error }">
-          <label class="field-label font-bold" for="password">Latitudine</label>  
-          <info-box :msg="'Latitudine in gradi'" />
-
-          <input
+            outlined
+          >
+            <template v-slot:append>
+              <v-tooltip
+                bottom
+                nudge-bottom="10"
+                nudge-left="100"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-icon v-on="on">
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                Distanza in metri all'interno di cui i viaggi dei dipendenti risultano essere validi
+              </v-tooltip>
+            </template>
+          </v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-text-field
+            label="Latitudine"
+            placeholder="Latitudine *"
             type="text"
-            name="campaignMeans"
-            id=""
-            required
-            placeholder="Mezzi *"
+            name="campaignLatitude"
+            :rules="[rules.required]"
+            id="campaignLatitude"
             v-model.trim="$v.latitude.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
-
-          />
-        </div>
-        <div v-if="$v.latitude.$error">
-          <div class="error" v-if="!$v.latitude.required">
-            Il campo Latitudine e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-16">
-        <div class="form-group" :class="{ 'form-group--error': $v.longitude.$error }">
-          <label class="field-label font-bold" for="password">Longitudine</label>
-          <info-box :msg="'Longitudine in gradi'" />
-
-          <input
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="4"
+        >
+          <v-text-field
+            label="Longitudine"
+            placeholder="Longitudine *"
             type="text"
             name="campaignLongitude"
-            id=""
-            required
-            placeholder="Longitudine *"
+            :rules="[rules.required]"
+            id="campaignLongitude"
             v-model.trim="$v.longitude.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2 mt-6"
-
-          />
-        </div>
-        <div v-if="$v.longitude.$error">
-          <div class="error" v-if="!$v.longitude.required">
-            Il campo Longitudine e' richiesto.
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="lg:grid grid-cols-3 gap-6 lg:text-center lg:ml-28">
-
-      <div class="field-group mb-6 ">
-        <div class="form-group" :class="{ 'form-group--error': $v.nonWorking.$error }">
-          <label class="field-label font-bold" for="password">Giorni NON lavorativi</label>
-          <div class="container text-left mt-10">
-
-            <div v-for="day in arrayDays" v-bind:key="day.value">
-              <div class="field-label" />
-              <label class="inline-flex items-center justify-center">
-                <input
-                  type="checkbox"
-                  class="inline-flexform-checkbox"
-                  v-model.trim="$v.nonWorking.$model"
-                  :value="day.value"
-                />
-                <span class="ml-2">{{ day.text }}</span>
-              </label>
-            </div>
-        </div>
-      </div>
-      <div class="field-group">
-
-        <div
-          class="form-group"
-          :class="{ 'form-group--error': $v.nonWorkingDays.$error }"
+            outlined
+          ></v-text-field>
+        </v-col>
+        <v-col 
+          cols="4"
         >
-          <label class="field-label font-bold" for="password">Giorni di chiusura</label>
-
-
-          <div v-if="nonWorkingDays && nonWorkingDays.length > 0">
-            <div
-              v-for="day in $v.nonWorkingDays.$model"
-              :key="day"
-              class="inline-flex justify-center items-center m-1 font-medium py-1 px-2 bg-white rounded-full text-indigo-100 bg-indigo-700 border border-indigo-700"
+          <v-form>
+            <p class="text-subtitle-1">Giorni NON lavorativi</p>
+            <div v-for="day in arrayDays" v-bind:key="day.value">
+              <v-checkbox
+                v-model="$v.nonWorking.$model"
+                :label= day.text
+                :value="day.value"
+                hide-details
+              ></v-checkbox>
+            </div>
+          </v-form>
+        </v-col>
+        <v-spacer></v-spacer>
+        <v-col
+          cols="12"
+          sm="6"
+        >
+          <v-menu
+            ref="menu"
+            v-model="menu"
+            :close-on-content-click="false"
+            :return-value.sync="nonWorkingDays"
+            transition="scale-transition"
+            offset-y
+            min-width="auto"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-combobox
+                v-model="nonWorkingDays"
+                multiple
+                chips
+                label="Giorni di chiusura"
+                placeholder="Scegli i giorni di chiusura:"
+                prepend-icon="mdi-calendar"
+                readonly
+                v-bind="attrs"
+                v-on="on"
+              ></v-combobox>
+            </template>
+            <v-date-picker
+              v-model="nonWorkingDays"
+              multiple
+              scrollable
             >
-              <div class="text-xs font-normal leading-none max- flex-initial">
-                {{ day }}
-              </div>
-              <div class="flex flex-auto flex-row-reverse" @click="removeDay(day)">
-                <div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="100%"
-                    height="100%"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="feather feather-x cursor-pointer hover:text-indigo-400 rounded-full w-4 h-4 ml-2"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div v-else>Non sono presenti giorni di chiusura per questa sede</div>
-          <div class="flex">
-            <label class="field-label"> Seleziona il giorno:</label>
-            <div class="relative">
-              <VueTailwindPicker
-                :start-from-monday="true"
-                @change.self="(v) => ($v.newNonWorkingDay.$model = v)"
+              <v-spacer></v-spacer>
+              <v-btn
+                text
+                @click="menu = false"
               >
-                <input
-                  type="text"
-                  name="campaignNonWorkingDays"
-                  id=""
-                  required
-                  placeholder="Giorno di chiusura *"
-                  v-model.trim="$v.newNonWorkingDay.$model"
-                  class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-
-                />
-              </VueTailwindPicker>
-
-              <div
-                class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                Annulla
+              </v-btn>
+              <v-btn
+                text
+                color="primary"
+                @click="$refs.menu.save(nonWorkingDays)"
               >
-                <add-icon @click="addDays($v.newNonWorkingDay.$model)" />
-              </div>
-            </div>
-          </div>
-          </div>
-          </div>
-        </div>
-        <!-- <div v-if="$v.nonWorkingDays.$error">
-          <div class="error" v-if="!$v.nonWorkingDays.required">
-            Il campo Giorni di chiusura e' richiesto.
-          </div>
-        </div> -->
-      </div>
+                Salva
+              </v-btn>
+            </v-date-picker>
+          </v-menu>
+        </v-col>
+      </v-row>
     </div>
   </form>
 </template>
+
 <script>
+
 import { required, numeric } from "vuelidate/lib/validators";
 import { locationService } from "../../services";
 import EventBus from "@/components/eventBus";
-import InfoBox from "@/components/InfoBox.vue";
-import VueTailwindPicker from "vue-tailwind-picker";
 import GeoLocationSelectorMapVue from "@/components/GeoLocationSelectorMap.vue";
+
 export default {
   components: {
-    InfoBox,
-    VueTailwindPicker,
     "geolocation-selector": GeoLocationSelectorMapVue,
   },
   data() {
@@ -380,6 +296,7 @@ export default {
       nonWorkingDays: [],
       nonWorking: [],
       arrayDays: [],
+      menu: false,
       zoom: 13,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
@@ -393,6 +310,30 @@ export default {
       key: 1,
       locationSelected: {},
       edit: false,
+      listaProvince: ['AG', 'AL', 'AN', 'AO', 'AR', 'AP', 'AT', 'AV', 'BA', 'BT',
+      'BL', 'BN', 'BG', 'BI', 'BO', 'BZ', 'BS', 'BR', 'CA', 'CL',
+      'CB', 'CE', 'CT', 'CZ', 'CH', 'CO', 'CS', 'CR', 'KR', 'CN',
+      'EN', 'FM', 'FE', 'FI', 'FG', 'FC', 'FR', 'GE', 'GO', 'GR',
+      'IM', 'IS', 'AQ', 'SP', 'LT', 'LE', 'LC', 'LI', 'LO', 'LU', 'MC',
+      'MN', 'MS', 'MT', 'ME', 'MI', 'MO', 'MB', 'NA', 'NO', 'NU',
+      'OR', 'PD', 'PA', 'PR', 'PV', 'PG', 'PU', 'PE', 'PC', 'PI', 'PT',
+      'PN', 'PZ', 'PO', 'RG', 'RA', 'RC', 'RE', 'RI', 'RN', 'RM', 'RO',
+      'SA', 'SS', 'SV', 'SI', 'SR', 'SO', 'SU', 'TA', 'TE', 'TR', 'TO', 'TP',
+      'TN', 'TV', 'TS', 'UD', 'VA', 'VE', 'VB', 'VC', 'VR', 'VV', 'VI', 'VT'
+      ],
+      listaRegioni: ['Abruzzo', 'Basilicata', 'Calabria', 'Campania', 'Emilia-Romagna', 
+      'Friuli-Venezia Giulia', 'Lazio', 'Liguria', 'Lombardia', 'Marche', 'Molise', 'Piemonte', 
+      'Puglia', 'Sardegna', 'Sicilia', 'Toscana', 'Trentino-Alto Adige', 'Umbria', 'Valle d\'Aosta Veneto' 
+      ],
+      giorniSettimana: [{1:'Lunedì', 2:'Martedì', 3:'Mercoledì', 4:'Giovedì', 5:'Venerdì', 6:'Sabato', 7:'Domenica'}
+      ],
+      rules: {
+        required: value => !!value || 'Campo richiesto.',
+      },
+      raggioRules: [
+          v => !!v || 'Campo richiesto.', 
+          v => !isNaN(v) || 'Il campo Raggio deve contenere un valore numerico.'
+      ],
     };
   },
   computed: {},

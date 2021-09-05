@@ -189,7 +189,7 @@
         >
           <v-text-field
             label="Logo"
-            placeholder="Logo *"
+            placeholder="Logo"
             type="text"
             name="companyLogo"
             id="companyLogo"

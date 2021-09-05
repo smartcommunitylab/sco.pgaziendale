@@ -1,88 +1,95 @@
 <template>
   <form action="" id="addEmployee">
     <div class="mb-20 flex flex-wrap justify-between">
-      <v-row>
-        <v-col
-          cols="6"
-        >
-          <v-text-field
-            label="Nome"
-            placeholder="Nome *"
+      <div class="field-group mb-4 w-full">
+        <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
+          <label class="field-label" for="first_name">Nome </label>
+          <input
             type="text"
             name="employeeName"
-            :rules="[rules.required]"
-            id="employeeName"
+            placeholder="Nome *"
             v-model.trim="$v.name.$model"
-            outlined
-          ></v-text-field>
-        </v-col>
-        <v-col
-          cols="6"
-        >
-          <v-text-field
-            label="Cognome"
-            placeholder="Cognome *"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            id="employeeName"
+          />
+        </div>
+        <div v-if="$v.name.$error">
+          <div class="error" v-if="!$v.name.required">Il campo nome e' richiesto.</div>
+        </div>
+      </div>
+      <div class="field-group mb-4 w-full">
+        <div class="form-group" :class="{ 'form-group--error': $v.surname.$error }">
+          <label class="field-label" for="first_name">Cognome </label>
+          <input
             type="text"
             name="employeeSurname"
-            :rules="[rules.required]"
-            id="employeeSurname"
+            placeholder="Cognome *"
             v-model.trim="$v.surname.$model"
-            outlined
-          ></v-text-field>
-        </v-col>
-        <v-col
-          cols="6"
-        >
-          <v-text-field
-            label="Codice"
-            placeholder="Codice *"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            id="employeeName"
+          />
+        </div>
+        <div v-if="$v.surname.$error">
+          <div class="error" v-if="!$v.surname.required">
+            Il campo Cognome e' richiesto.
+          </div>
+        </div>
+      </div>
+      <div class="field-group mb-4 w-full">
+        <div class="form-group" :class="{ 'form-group--error': $v.code.$error }">
+          <label class="field-label" for="first_name">Codice</label>
+          <input
             type="text"
             name="employeeCode"
-            :rules="[rules.required]"
             id="employeeCode"
+            placeholder="Codice *"
             v-model.trim="$v.code.$model"
-            outlined
-          >
-            <template v-slot:append>
-              <v-tooltip
-                bottom
-                nudge-bottom="10px"
-                nudge-left="100px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-icon v-on="on">
-                    mdi-help-circle-outline
-                  </v-icon>
-                </template>
-                Il codice univoco con cui viene identificato il dipendente a livello di gioco
-              </v-tooltip>
-            </template>
-          </v-text-field>
-        </v-col>
-        <v-col
-          cols="6"
-        > 
-          <v-autocomplete
-            label="Sede"
-            placeholder="Sede *"
-            name="companyLocation"
-            :rules="[rules.required]"
-            id="companyLocation"
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+          />
+          <info-box
+            :msg="'Il codice univoco con cui viene identificato il dipendente a livello di gioco'"
+          />
+        </div>
+        <div v-if="$v.code.$error">
+          <div class="error" v-if="!$v.code.required">Il campo codice e' richiesto.</div>
+        </div>
+      </div>
+
+      <div class="field-group mb-6 w-full">
+        <div
+          class="flex flex-col sm:flex-row  mt-3 justify-stretch  "
+          :class="{ 'form-group--error': $v.location.$error }"
+        >
+          <label class="field-label" for="password">Sede </label>
+          <select
+            class="focus:border-blue-600 border-2 p-2 mb-2 flex-none mr-2 w-40"
             v-model.trim="$v.location.$model"
-            :items="listaSedi"
-            outlined
-          ></v-autocomplete>
-        </v-col>
-      </v-row>
+          >
+            <option v-for="loc in allLocations.items" :key="loc.id" :value="loc.id">
+              {{ loc.id }}
+            </option>
+          </select>
+        </div>
+
+        <div v-if="$v.location.$error">
+          <div class="error" v-if="!$v.location.required">
+            Il campo Sede e' richiesto.
+          </div>
+        </div>
+      </div>
     </div>
   </form>
 </template>
 <script>
 import { required } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
+import InfoBox from "@/components/InfoBox.vue";
 import { mapState, mapActions } from "vuex";
 
 export default {
+  components: {
+    InfoBox,
+  },
   data() {
     return {
       employee: {},
@@ -91,10 +98,6 @@ export default {
       code: "",
       location: "",
       locations: [],
-      listaSedi: [],
-      rules: {
-          required: value => !!value || 'Campo richiesto.',
-      },
     };
   },
   validations: {
@@ -111,8 +114,6 @@ export default {
       required,
     },
   },
-
-
   computed: {
     ...mapState("company", ["actualCompany"]),
     ...mapState("location", ["allLocations", "actualLocation"]),
@@ -149,9 +150,6 @@ export default {
   },
   mounted() {
     this.loadLocations();
-
-    this.listaSedi.unshift(this.allLocations.items.id);
-    
     EventBus.$on("EDIT_EMPLOYEE_FORM", (employee) => {
       this.copyFormValues(employee);
     });

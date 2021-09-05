@@ -10,23 +10,28 @@
           
           <div class="border-teal p-4 border-t-12 bg-white mb-6 rounded-lg shadow-lg">
             <div class="mb-4">
+              <label class="font-bold block ml-5 text-primary text-left"
+                >Username</label
+              >
               <v-col
                 cols="12"
               >
                 <v-text-field
                   :rules="[rules.required]"
-                  label="Username"
                   placeholder="Il tuo username"
                   v-model="username"
                   name="username"
                   id="username"
-                  outlined
+                  solo
                   hide-details
                 ></v-text-field>
               </v-col>
             </div>
 
             <div class="mb-4">
+              <label class="font-bold text-primary block ml-5 text-left"
+                >Password</label
+              >
               <div class="relative">
                 <v-col
                 cols="12"
@@ -36,12 +41,11 @@
                     :type="show ? 'text' : 'password'"
                     :rules="[rules.required]"
                     class="input-group--focused"
-                    label="Password"
                     placeholder="La tua password"
                     v-model="password"
                     name="password"
                     id="password"
-                    outlined
+                    solo
                     hide-details
                     @click:append="show = !show"
                   ></v-text-field>

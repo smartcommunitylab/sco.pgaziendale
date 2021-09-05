@@ -30,17 +30,19 @@
 
           <div v-if="step == 1">
             <div class="mb-4">
+              <label class="font-bold block text-primary mt-2 ml-4 text-left"
+                >Username</label
+              >
               <v-col
                 cols="12"
               >
                 <v-text-field
                   :rules="[rules.required]"
-                  label="Username"
                   placeholder="Il tuo username"
                   v-model="username"
                   name="username"
                   id="username"
-                  outlined
+                  solo
                   hide-details
                 ></v-text-field>
               </v-col>
@@ -48,6 +50,9 @@
           </div>
           <div v-if="step == 2">
             <div class="mb-4">
+              <label class="font-bold text-primary block mt-2 ml-4 text-left"
+                >Nuova Password</label
+              >
               <div class="relative">
                 <v-col
                 cols="12"
@@ -57,12 +62,11 @@
                     :type="show1 ? 'text' : 'password'"
                     :rules="[rules.required]"
                     class="input-group--focused"
-                    label="Nuova Password"
                     placeholder="Nuova password"
                     v-model="passwordFirst"
                     name="passwordFirst"
                     id="passwordFirst"
-                    outlined
+                    solo
                     hide-details
                     @click:append="show1 = !show1"
                   ></v-text-field>
@@ -70,6 +74,9 @@
               </div>
             </div>
             <div class="mb-4">
+              <label class="font-bold text-primary block ml-4 text-left"
+                >Ripeti la nuova password</label
+              >
               <div class="relative">
                 <v-col
                 cols="12"
@@ -80,12 +87,11 @@
                     :rules="[rules.required]"
                     class="input-group--focused"
                     :class="{ 'password-different': passwordDifferent }"
-                    label="Ripeti la nuova Password"
                     placeholder="Ripeti la password"
                     v-model="passwordSecond"
                     name="passwordSecond"
                     id="passwordSecond"
-                    outlined
+                    solo
                     hide-details
                     @click:append="show2 = !show2"
                   ></v-text-field>
