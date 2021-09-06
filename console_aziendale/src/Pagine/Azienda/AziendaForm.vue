@@ -32,7 +32,7 @@
             <template v-slot:append>
               <v-tooltip
                 left
-                nudge-bottom="25px"
+                nudge-bottom="50px"
               >
                 <template v-slot:activator="{ on }">
                   <v-icon v-on="on">
@@ -199,7 +199,7 @@
             <template v-slot:append>
               <v-tooltip
                 left
-                nudge-bottom="25px"
+                nudge-bottom="50px"
               >
                 <template v-slot:activator="{ on }">
                   <v-icon v-on="on">

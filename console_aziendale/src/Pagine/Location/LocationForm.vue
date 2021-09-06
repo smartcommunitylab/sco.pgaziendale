@@ -32,7 +32,7 @@
             <template v-slot:append>
               <v-tooltip
                 left
-                nudge-bottom="25px"
+                nudge-bottom="50px"
                 v-if="$v.id.$model == ''"
               >
                 <template v-slot:activator="{ on }">
@@ -160,7 +160,7 @@
               <v-tooltip
                 bottom
                 nudge-bottom="10"
-                nudge-left="100"
+                nudge-left="75"
               >
                 <template v-slot:activator="{ on }">
                   <v-icon v-on="on">
@@ -246,6 +246,7 @@
               v-model="nonWorkingDays"
               multiple
               scrollable
+              no-title
             >
               <v-spacer></v-spacer>
               <v-btn

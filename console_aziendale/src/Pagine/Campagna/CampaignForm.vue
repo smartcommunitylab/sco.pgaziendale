@@ -1,238 +1,252 @@
 <template>
   <form action="" id="addCampaign">
     <div class="mb-20 flex flex-wrap justify-between">
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.id.$error }">
-          <label class="field-label" for="first_name">Id </label>
-          <input
+      <v-row>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Id"
+            placeholder="Id *"
             type="text"
             name="campaignId"
-            placeholder="Id *"
+            :rules="[inputRules.required]"
+            id="campaignId"
             v-model.trim="$v.id.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-            id="campaignLogo"
+            outlined
+            
             :disabled="edit"
-          />
-          <info-box v-if="$v.id.$model == ''" :msg="'Codice univoco della campagna'" />
-          <info-box
-            v-else
-            :msg="'Non é possibile cambiare identificativo sede una volta creato'"
-          />
-        </div>
-        <div v-if="$v.logo.$error">
-          <div class="error" v-if="!$v.id.required">Il campo Id e' richiesto.</div>
-        </div>
-      </div>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.logo.$error }">
-          <label class="field-label" for="first_name">Logo </label>
-          <input
+          >
+            <template v-slot:append>
+              <v-tooltip
+                left
+                nudge-bottom="50px"
+                v-if="$v.id.$model == ''"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-icon v-on="on">
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                Codice univoco della campagna
+              </v-tooltip>
+            </template>
+          </v-text-field>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Logo"
+            placeholder="Logo"
             type="text"
             name="campaignLogo"
-            placeholder="Logo *"
-            v-model.trim="$v.logo.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
             id="campaignLogo"
-          />
-        </div>
-        <div v-if="$v.logo.$error">
-          <div class="error" v-if="!$v.logo.required">Il campo Logo e' richiesto.</div>
-        </div>
-      </div>
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.title.$error }">
-          <label class="field-label" for="first_name">Titolo </label>
-          <input
+            v-model.trim="$v.logo.$model"
+            outlined
+          >
+            <template v-slot:append>
+              <v-tooltip
+                left
+                nudge-bottom="50px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-icon v-on="on">
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                Inserisci un url che contenga il logo dell'azienda
+              </v-tooltip>
+            </template>
+          </v-text-field>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Titolo"
+            placeholder="Titolo *"
             type="text"
             name="campaignTitle"
-            placeholder="Titolo *"
-            v-model.trim="$v.title.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
+            :rules="[inputRules.required]"
             id="campaignTitle"
-          />
-        </div>
-        <div v-if="$v.title.$error">
-          <div class="error" v-if="!$v.title.required">Il campo titolo e' richiesto.</div>
-        </div>
-      </div>
-
-      <div class="field-group mb-4 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.description.$error }">
-          <label class="field-label" for="first_name">Descrizione</label>
-          <input
+            v-model.trim="$v.title.$model"
+            outlined            
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-text-field
+            label="Descrizione"
+            placeholder="Descrizione *"
             type="text"
             name="campaignDescription"
+            :rules="[inputRules.required]"
             id="campaignDescription"
-            placeholder="Descrizione *"
             v-model.trim="$v.description.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.description.$error">
-          <div class="error" v-if="!$v.description.required">
-            Il campo descrizione e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-6 w-full">
-        <div class="form-group flex" :class="{ 'form-group--error': $v.from.$error }">
-          <label class="field-label" for="password">Da </label>
-          <VueTailwindPicker
-            :theme="{
-              background: '#1A202C',
-              text: 'text-white',
-              border: 'border-gray-700',
-              currentColor: 'text-gray-200',
-              navigation: {
-                background: 'bg-gray-800',
-                hover: 'hover:bg-gray-700',
-                focus: 'bg-gray-700',
-              },
-              picker: {
-                rounded: 'rounded-md',
-                selected: {
-                  background: 'bg-teal-400',
-                  border: 'border-teal-400',
-                  hover: 'hover:border-teal-400',
-                },
-                holiday: 'text-red-400',
-                weekend: 'text-green-400',
-                event: 'bg-blue-500',
-              },
-              event: {
-                border: 'border-gray-700',
-              },
-            }"
-            @change="(v) => ($v.from.$model = v)"
+            outlined            
+          ></v-text-field>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-menu
+            ref="menu"
+            v-model="menu"
+            :close-on-content-click="false"
+            :return-value.sync="from"
+            transition="scale-transition"
+            offset-y
+            min-width="auto"
+            :rules="[inputRules.required]"
+            outlined
           >
-            <input
-              type="text"
-              name="campaignFrom"
-              id=""
-              required
-              placeholder="Da *"
-              autocomplete="off"
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                v-model.trim="$v.from.$model"
+                label="Da"
+                prepend-icon="mdi-calendar"
+                readonly
+                v-bind="attrs"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker
               v-model.trim="$v.from.$model"
-              class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-            />
-          </VueTailwindPicker>
-        </div>
-        <div v-if="$v.from.$error">
-          <div class="error" v-if="!$v.from.required">Il campo da e' richiesto.</div>
-        </div>
-      </div>
-      <div class="field-group mb-6 w-full">
-        <div class="form-group flex" :class="{ 'form-group--error': $v.to.$error }">
-          <label class="field-label" for="password">A </label>
-          <VueTailwindPicker
-            :theme="{
-              background: '#1A202C',
-              text: 'text-white',
-              border: 'border-gray-700',
-              currentColor: 'text-gray-200',
-              navigation: {
-                background: 'bg-gray-800',
-                hover: 'hover:bg-gray-700',
-                focus: 'bg-gray-700',
-              },
-              picker: {
-                rounded: 'rounded-md',
-                selected: {
-                  background: 'bg-teal-400',
-                  border: 'border-teal-400',
-                  hover: 'hover:border-teal-400',
-                },
-                holiday: 'text-red-400',
-                weekend: 'text-green-400',
-                event: 'bg-blue-500',
-              },
-              event: {
-                border: 'border-gray-700',
-              },
-            }"
-            @change="(v) => ($v.to.$model = v)"
+              no-title
+              scrollable
+              color="primary"
+            >
+              <v-spacer></v-spacer>
+              <v-btn
+                text
+                color="primary"
+                @click="$refs.menu.save(from)"
+              >
+                Conferma
+              </v-btn>
+            </v-date-picker>
+          </v-menu>
+        </v-col>
+        <v-col
+          cols="6"
+        >
+          <v-menu
+            ref="menu2"
+            v-model="menu2"
+            :close-on-content-click="false"
+            :return-value.sync="to"
+            transition="scale-transition"
+            offset-y
+            min-width="auto"
+            :rules="[inputRules.required]"
+            outlined            
           >
-            <input
-              type="text"
-              name="campaignTo"
-              id=""
-              required
-              placeholder="A *"
-              autocomplete="off"
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                v-model.trim="$v.to.$model"
+                label="A"
+                prepend-icon="mdi-calendar"
+                readonly
+                v-bind="attrs"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker
               v-model.trim="$v.to.$model"
-              class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-            />
-          </VueTailwindPicker>
-        </div>
-        <div v-if="$v.to.$error">
-          <div class="error" v-if="!$v.to.required">Il campo a e' richiesto.</div>
-        </div>
-      </div>
-      <div class="field-group mb-6 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.rules.$error }">
-          <label class="field-label" for="password">Regole</label>
-          <vue-editor v-model="$v.rules.$model"></vue-editor>
-        </div>
-        <div v-if="$v.rules.$error">
-          <div class="error" v-if="!$v.rules.required">Il campo Regole e' richiesto.</div>
-        </div>
-      </div>
-      <div class="field-group mb-6 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.privacy.$error }">
-          <label class="field-label" for="password">Privacy</label>
-          <vue-editor v-model="$v.privacy.$model"></vue-editor>
-        </div>
-        <div v-if="$v.privacy.$error">
-          <div class="error" v-if="!$v.privacy.required">
-            Il campo privacy e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="block">
-        <span class="text-gray-700">Mezzi</span>
-        <div class="field-group mb-6 w-full">
-          <div class="form-group" :class="{ 'form-group--error': $v.means.$error }">
+              no-title
+              scrollable
+              color="primary"
+            >
+              <v-spacer></v-spacer>
+              <v-btn
+                text
+                color="primary"
+                @click="$refs.menu2.save(to)"
+              >
+                Conferma
+              </v-btn>
+            </v-date-picker>
+          </v-menu>
+        </v-col>
+        <v-col
+          cols="12"
+        >
+          <v-expansion-panels>
+            <v-expansion-panel>
+              <v-expansion-panel-header>
+                <p class="text-subtitle-1">Regole</p>
+              </v-expansion-panel-header>
+              <v-expansion-panel-content>
+                <vue-editor v-model="$v.rules.$model"></vue-editor>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-col>
+        <v-col
+          cols="12"
+        >
+          <v-expansion-panels>
+            <v-expansion-panel>
+              <v-expansion-panel-header>
+                <p class="text-subtitle-1">Privacy</p>
+              </v-expansion-panel-header>
+              <v-expansion-panel-content>
+                <vue-editor v-model="$v.privacy.$model"></vue-editor>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>         
+        </v-col>
+        <v-col 
+          cols="3"
+        >
+          <v-form
+          >
+            <p class="text-subtitle-1">Mezzi</p>
             <div v-for="mean in arrayMeans" v-bind:key="mean.value">
-              <label class="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  class="form-checkbox"
-                  v-model.trim="$v.means.$model"
-                  :value="mean.value"
-                />
-                <span class="ml-2">{{ mean.text }}</span>
-              </label>
+              <v-checkbox
+                v-model="$v.means.$model"
+                :label= mean.text
+                :value="mean.value"
+                :rules="meanRules"
+                hide-details
+              ></v-checkbox>
             </div>
-          </div>
-          <div v-if="$v.means.$error">
-            <div class="error" v-if="!$v.means.required">
-              Il campo Mezzi e' richiesto.
-            </div>
-          </div>
-        </div>
-      </div>
+          </v-form>
+        </v-col>
+        <v-col 
+          cols="3"
+        >
+          <p class="text-subtitle-1">Attiva Campagna</p>
+          <v-switch
+            v-if="active === false"
+            v-model="active"
+            label="La campagna è disattivata"
+          ></v-switch>
+          <v-switch
+            v-if="active === true"
+            v-model="active"
+            label="La campagna è attivata"
+          ></v-switch>
+        </v-col>
+        <v-col
+          cols="6"
+        > 
+          <v-autocomplete
+            label="Applicazione"
+            placeholder="Applicazione *"
+            :rules="[rules.required]"
+            v-model.trim="$v.application.$model"
+            :items="listaApplications"
+            outlined
+          ></v-autocomplete>
+        </v-col>
+      </v-row>
+
+      <!--
       <div class="field-group mb-6 w-full">
-        <div class="form-group" :class="{ 'form-group--error': $v.active.$error }">
-          <label class="field-label" for="password">Attiva</label>
-          <input
-            type="checkbox"
-            name="campaignActive"
-            id=""
-            required
-            placeholder="Attiva *"
-            v-model.trim="$v.active.$model"
-            class="focus:border-blue-600 border-2 p-2 mb-2 flex-1 mr-2"
-          />
-        </div>
-        <div v-if="$v.active.$error">
-          <div class="error" v-if="!$v.active.required">
-            Il campo Attiva e' richiesto.
-          </div>
-        </div>
-      </div>
-      <div class="field-group mb-6 w-full">
-        <div             class="flex flex-row"
- :class="{ 'form-group--error': $v.application.$error }">
+        <div class="flex flex-row" :class="{ 'form-group--error': $v.application.$error }">
           <label class="field-label" for="password">Applicazione</label>
           <select
             class="focus:border-blue-600 border-2 p-2 mb-2 flex-none mr-2 w-40"
@@ -249,19 +263,17 @@
           </div>
         </div>
       </div>
+      -->
     </div>
   </form>
 </template>
 <script>
 import { required } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
-import VueTailwindPicker from "vue-tailwind-picker";
 import { campaignService } from "../../services";
-import InfoBox from "@/components/InfoBox.vue";
 import {mapState} from "vuex";
 
 export default {
-  components: { VueTailwindPicker, InfoBox },
   data() {
     return {
       arrayMeans: [],
@@ -278,7 +290,11 @@ export default {
       means: [],
       active: false,
       application: "",
-      edit: false
+      edit: false,
+      inputRules: {
+        required: value => !!value || 'Campo richiesto.',
+      },
+      panel: [0]
     };
   },
   validations: {
@@ -354,6 +370,11 @@ export default {
   },
     computed: {
     ...mapState("account", ["status", "user", "role"]),
+    meanRules() {
+      return [
+        this.means.length > 0 || "Seleziona almeno un mezzo."
+      ];
+    },
   },
   mounted() {
     if (this.role == 'ROLE_ADMIN' && this.adminCompany == null){
