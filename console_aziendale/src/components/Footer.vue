@@ -1,7 +1,7 @@
 <template>
   <v-footer
     padless
-    class="justify-center"
+    class="justify-center up"
   >
   <v-row>
     <v-col cols="12" class="p-0 m-0">
@@ -60,5 +60,9 @@ export default {
 }
 </script>
 <style>
+
+.up {
+  z-index: 50;
+}
 
 </style>

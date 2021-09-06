@@ -34,12 +34,13 @@
 
     <v-main>
       <v-container class="p-0 m-0">
-        <Loader v-if="loading" />
+        <!-- NON VIENE MAI UTILIZZATO - Componente inutile (?)-->
+        <!-- <Loader v-if="loading" /> -->
         <transition name="fade">
-          <div v-if="alert.message" :class="`alert ${alert.type}`">
-          {{ alert.message }}
-        </div>
+          <snackbar v-if="alert.message" :snackbar="true" :text="alert.message">
+          </snackbar>
         </transition>
+
         <router-view class="min-h-screen px-5 py-5 pb-10" v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
         <router-view class="min-h-screen " v-else />
       </v-container>
@@ -55,12 +56,15 @@
 import MenuHeader from "./components/NavBar/MenuHeader.vue";
 import { mapActions, mapState } from "vuex";
 
-import Loader from "./components/Loader";
+/*import Loader from "./components/Loader";*/
 import Footer from "@/components/Footer"
+import Snackbar from "@/components/Snackbar.vue"
+
+
 export default {
   name: 'App',
 
-   components: { "menu-header": MenuHeader,Loader,"app-footer":Footer },
+   components: { "menu-header": MenuHeader,/*Loader,*/"app-footer":Footer, "snackbar":Snackbar},
 
 
   computed: {
