@@ -165,6 +165,7 @@
 import Modal from "@/components/Modal.vue";
 import { mapActions, mapState } from "vuex";
 import InfoBox from "@/components/InfoBox.vue";
+
 export default {
   name: "ProfileManager",
   components: { Modal, InfoBox },
