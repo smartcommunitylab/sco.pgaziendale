@@ -41,6 +41,12 @@
           </snackbar>
         </transition>
 
+        <!-- INIZIO ESEMPIO: Nuovo componente modale-->
+        <transition name="fade">
+          <modal v-if="modalActive" :modalType="modal.type" :modalObject="modal.object"/>
+        </transition>
+        <!-- FINE ESEMPIO: Nuovo componente modale-->
+
         <router-view class="min-h-screen px-5 py-5 pb-10" v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
         <router-view class="min-h-screen " v-else />
       </v-container>
