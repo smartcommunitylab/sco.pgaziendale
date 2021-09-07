@@ -40,30 +40,31 @@
       </v-col>
       <!-- PROFILO LOCATION -->
       <profilo-location v-if="actualLocation && actualLocation.item"/> 
+    </v-row>
       <!-- MODALE LOCATION -->
-      <modal v-show="deleteModalVisible">
+    <modal v-show="deleteModalVisible">
 
-      <template v-slot:header> <div class="text-danger">Cancella Sede </div></template>
-      <template v-slot:body> 
-        <p class="text-subtitle-1">Sei sicuro di voler cancellare la sede?</p>
-      </template>
-      <template v-slot:footer>
+    <template v-slot:header> <div class="text-danger">Cancella Sede </div></template>
+    <template v-slot:body> 
+      <p class="text-subtitle-1">Sei sicuro di voler cancellare la sede?</p>
+    </template>
+    <template v-slot:footer>
+      <v-btn
+          text
+          @click="closeDeleteModal"
+          class="py-8 ml-8"
+        >
+          Annulla
+        </v-btn>
         <v-btn
-            text
-            @click="closeDeleteModal"
-            class="py-8 ml-8"
-          >
-            Annulla
-          </v-btn>
-          <v-btn
-            color="error"
-            text
-            @click="deleteConfirm"
-            class="py-8 ml-8"
-          >
-            Conferma
-          </v-btn>
-      </template>
+          color="error"
+          text
+          @click="deleteConfirm"
+          class="py-8 ml-8"
+        >
+          Conferma
+        </v-btn>
+    </template>
     </modal>
     <modal v-show="editModalVisible">
 
@@ -90,116 +91,61 @@
           </v-btn>
       </template>
     </modal>
-    <transition
-        enter-active-class="transition duration-300 ease-out transform"
-        enter-class="scale-95 opacity-0"
-        enter-to-class="scale-100 opacity-100"
-        leave-active-class="transition duration-150 ease-in transform"
-        leave-class="scale-100 opacity-100"
-        leave-to-class="scale-95 opacity-0"
-      >
-        <div
-          class="fixed z-10 inset-0 overflow-y-auto shadow-md"
-          v-if="modalImportLocationsOpen"
+    <modal v-show="modalImportLocationsOpen">
+
+      <template v-slot:header> Importa Sedi </template>
+
+
+      <template v-slot:body> 
+        <v-row
+          justify="center"
+          class="mt-5 mb-8"
         >
-          <div
-            class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+          <v-btn
+            outlined
+            color="primary"
           >
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
+            <a href="/files/exampleLocations.csv" download>Scarica file di esempio</a>
+          </v-btn>
+        </v-row>
+        <v-row>
+          <v-col
+            cols="12"
+          >
+            <v-file-input
+              label="Clicca qui per caricare il file .csv"
+              type="file"
+              ref="file"
+              v-model="fileUploaded"
+              accept=".csv"
+              @change="onFileUploaderChange"
+              outlined
+              dense
+            ></v-file-input>
+          </v-col>
+        </v-row>
+      </template>
 
-            <span
-              class="hidden sm:inline-block sm:align-middle sm:h-screen"
-              aria-hidden="true"
-              >&#8203;</span
-            >
 
-            <div
-              class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="modal-headline"
-            >
-              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start">
-                  <div
-                    class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
-                  >
-                    <import-icon id="import-icon" />
-                  </div>
-                  <div class="mt-3 text-center sm:mt-0 sm:ml-4">
-                    <h3
-                      class="text-lg leading-6 font-medium text-gray-900 text-left"
-                      id="modal-headline"
-                    >
-                      Importa sedi
-                    </h3>
-                    <button
-                      class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
-                    >
-                      <a href="/files/exampleLocations.csv" download>Scarica file di esempio</a>
-                    </button>
-                    <template v-if="fileUploaded != null"
-                      ><div class="pt-2">
-                        <span class="text-left text-lg"> {{ fileName }} </span
-                        ><span @click="removeFile()" class="text-danger cursor-pointer">
-                          rimuovi</span
-                        >
-                      </div></template
-                    >
-                    <template v-else>
-                      <div class="mt-2">
-                        <div
-                          class="p-12 border-gray-300 border-dashed border-8 border-primary"
-                          :class="inDragArea ? ' bg-primary_light' : 'bg-background'"
-                          @dragover.prevent="dragover"
-                          @dragleave.prevent="dragleave"
-                          @drop.prevent="drop"
-                        >
-                          <input
-                            type="file"
-                            name="fileUploader"
-                            id="fileUploader"
-                            class="w-px h-px opacity-0 overflow-hidden absolute"
-                            @change="onFileUploaderChange"
-                            ref="file"
-                            accept=".csv"
-                          />
-
-                          <label for="fileUploader" class="block cursor-pointer">
-                            <div>
-                              Trascina qui il file
-                              <span class="font-semibold">.csv</span> oppure
-                              <span class="text-primary">clicca qui</span> per caricarlo
-                            </div>
-                          </label>
-                        </div>
-                      </div></template
-                    >
-                  </div>
-                </div>
-              </div>
-              <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  @click="importLocations"
-                  class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-primary rounded shadow ripple hover:shadow-lg hover:bg-primary_light focus:outline-none"
-                >
-                  Importa sedi
-                </button>
-                <button
-                  @click="modalImportLocationsOpen = false"
-                  class="mx-2 inline-block px-6 py-2 text-xs font-medium leading-6 text-center text-white uppercase transition bg-danger rounded shadow ripple hover:shadow-lg focus:outline-none"
-                >
-                  Annulla
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </transition>
-    </v-row>
-  </div> 
+      <template v-slot:footer>
+        <v-btn
+            text
+            @click="closeImportModal"
+            class="py-8 ml-8"
+          >
+            Annulla
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="importLocations"
+            class="py-8 ml-8"
+          >
+            Importa Sedi
+          </v-btn>
+      </template>
+    </modal>
+  </div>
 </template>
 
 <script>
@@ -209,6 +155,7 @@ import GenericTable from "@/components/GenericTable.vue";
 import Modal from "@/components/Modal.vue";
 import EventBus from "@/components/eventBus";
 import LocationForm from "./LocationForm.vue";
+
 export default {
   name: "Locations",
   components: { ProfiloLocation, GenericTable, Modal, LocationForm },
@@ -342,6 +289,10 @@ export default {
     closeDeleteModal() {
       this.deleteModalVisible = false;
     },
+    closeImportModal() {
+      this.modalImportLocationsOpen = false
+    },
+    
 
     saveLocation() {
       //check fields
@@ -354,44 +305,12 @@ export default {
         locationId: this.actualLocation.item.id,
       });
     },
-    // updateLocation() {
-    //   //check fields
-    //   // eslint-disable-next-line no-constant-condition
-    //   if (true) {
-    //     this.updateLocationCall(this.location);
-    //     this.editModalVisible = false;
-    //   }
-    // },
-     onFileUploaderChange: function () {
-      console.log(this.$refs["file"]);
-      this.fileUploaded = this.$refs["file"].files;
-    },
-    removeUploadedFile: function () {
-      this.fileUploaded = null;
-    },
-
-    dragover: function () {
-      this.inDragArea = true;
-    },
-    dragleave: function () {
-      this.inDragArea = false;
-    },
-    drop: function (event) {
-      event.preventDefault();
-      this.inDragArea = false;
-
-      this.$refs["file"].files = event.dataTransfer.files;
-      this.onFileUploaderChange();
-    },
     importLocations: function () {
       console.log(this.fileUploaded);
       this.modalImportLocationsOpen = false;
       var formData = new FormData();
       formData.append("file", this.fileUploaded.item(0));
       this.importData({ companyId: this.actualCompany.item.id, file: formData });
-    },
-    removeFile: function () {
-      this.fileUploaded = null;
     },
   },
 };
