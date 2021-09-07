@@ -6,16 +6,20 @@
       <v-text-field
         v-model="search"
         append-icon="mdi-magnify"
-        label="Search"
+        label="Cerca"
         single-line
         hide-details
       ></v-text-field>
     </v-card-title>
     <v-data-table
+      class="row-pointer"
       :headers="headers"
       :items="items"
       :search="search"
       @click:row="method"
+      :footer-props="{
+        'items-per-page-text':'righe per pagina'
+      }"
     >
     </v-data-table>
   </v-card>
@@ -56,5 +60,7 @@ export default {
 }
 </script>
 <style scoped>
-
+.row-pointer:hover {
+  cursor: pointer;
+}
 </style>

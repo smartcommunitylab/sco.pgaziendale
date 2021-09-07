@@ -55,7 +55,7 @@
             <v-btn
                 v-if="!adminCompany && actualCompany && role == 'ROLE_ADMIN'"
                 text
-                color="teal accent-4"
+                color="primary"
                 @click="chooseCompanyAdmin"
             >
                 DIVENTA AMMINISTRATORE
@@ -64,7 +64,7 @@
                 v-if="adminCompany && $route.name !== 'azienda'"
                 text
                 disabled
-                color="teal accent-4"
+                color="primary"
             >
                 SEI AMMINISTRATORE
             </v-btn>

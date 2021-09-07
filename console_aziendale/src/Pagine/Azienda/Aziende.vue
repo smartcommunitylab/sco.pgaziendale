@@ -3,12 +3,14 @@
     <v-row>
       <v-col>
         <v-btn
-          class="fab"
-          fab
-          color="cyan accent-2"
+          x-large
+          color="secondary"
+          rounded
+          elevation="6"
           @click="showModal('Aggiungi azienda')"
         >
-          <v-icon>mdi-plus</v-icon>
+          <v-icon left>mdi-plus</v-icon>
+          AGGIUNGI
         </v-btn>
       </v-col>
     </v-row>

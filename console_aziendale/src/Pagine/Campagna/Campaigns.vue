@@ -3,12 +3,14 @@
     <v-row>
       <v-col>
         <v-btn
-          class="fab"
-          fab
-          color="cyan accent-2"
+          x-large
+          color="secondary"
+          rounded
+          elevation="6"
           @click="showModal('Aggiungi campagna')"
         >
-          <v-icon>mdi-plus</v-icon>
+          <v-icon left>mdi-plus</v-icon>
+          AGGIUNGI
         </v-btn>
       </v-col>
     </v-row>
@@ -108,7 +110,7 @@ export default {
   data: function () {
     return {
       tableTitle: "Campagne",
-      headerColumns: [{text:"Nome", value:"title"}, {text:"Inizio", value:"from"}, {text:"Fine", value:"to"}, {text:"Status", value:"active"}],
+      headerColumns: [{text:"Nome", value:"title"}, {text:"Inizio", value:"from"}, {text:"Fine", value:"to"}, {text:"Stato", value:"active"}],
       associateCampaignModalVisible:false,
       editModalVisible: false,
       deleteModalVisible: false,

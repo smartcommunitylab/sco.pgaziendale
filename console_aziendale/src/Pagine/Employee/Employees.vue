@@ -3,20 +3,25 @@
     <v-row>
       <v-col>
         <v-btn
-          class="fab mr-4"
-          fab
-          color="cyan accent-2"
+          x-large
+          color="secondary"
+          rounded
+          elevation="6"
           @click="showModal('Aggiungi dipendente')"
+          class="mr-4"
         >
-          <v-icon>mdi-plus</v-icon>
+          <v-icon left>mdi-plus</v-icon>
+          AGGIUNGI
         </v-btn>
         <v-btn
-          class="fab"
-          fab
-          color="cyan accent-2"
+          x-large
+          color="secondary"
+          rounded
+          elevation="6"
           @click="modalImportEmployeesOpen = true"
         >
-          <v-icon>mdi-file-import</v-icon>
+          <v-icon left>mdi-file-import</v-icon>
+          IMPORTA
         </v-btn>
       </v-col>
     </v-row>

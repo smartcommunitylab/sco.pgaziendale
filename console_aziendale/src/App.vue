@@ -25,7 +25,7 @@
         target="_blank"
         text
       >
-        <span class="mr-2">User Settings</span>
+        <span class="mr-2">Impostazioni Utente</span>
         <v-icon>mdi-setting</v-icon>
       </v-btn>
     </v-app-bar>
