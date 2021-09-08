@@ -117,6 +117,18 @@ export default {
     ...mapState("company", ["actualCompany"]),
     ...mapState("location", ["allLocations", "actualLocation"]),
   },
+  watch: {
+    allLocations(locations) {
+      // Our fancy notification (2).
+      if (locations.items)
+          {
+            for (let i=0;i<locations.items.length; i++)
+             {
+               this.listaSedi.push(locations.items[i].id);}
+            console.log(this.listaSedi);
+          }
+    }
+  },
   methods: {
     loadLocations() {
       if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
@@ -149,8 +161,7 @@ export default {
   },
   mounted() {
     this.loadLocations();
-
-    this.listaSedi.unshift(this.allLocations.items.id);
+    //this.listaSedi.unshift(this.allLocations.items.id);
     
     EventBus.$on("EDIT_EMPLOYEE_FORM", (employee) => {
       this.copyFormValues(employee);
