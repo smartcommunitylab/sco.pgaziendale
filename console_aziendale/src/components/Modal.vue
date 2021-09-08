@@ -1,53 +1,51 @@
 <template>
-  <transition name="modal-fade">
-    <div class="modal-backdrop" v-init="show">
-      <div class="modal w-2/3 z-50 m-0 absolute "
-        role="dialog"
-        aria-labelledby="modalTitle"
-        aria-describedby="modalDescription"
+  <div class="modal-backdrop" v-init="show">
+    <div class="modal w-2/3 z-50 m-0 absolute "
+      role="dialog"
+      aria-labelledby="modalTitle"
+      aria-describedby="modalDescription"
+    >
+      <header
+        class="modal-header"
+        id="modalTitle"
       >
-        <header
-          class="modal-header"
-          id="modalTitle"
-        >
-          <slot name="header">
-            Titolo
+        <slot name="header">
+          Titolo
 
-            <button
-              type="button"
-              class="py-8 ml-8"
-              @click="close"
-              aria-label="Close modal"
-            >
-              x
-            </button>
-          </slot>
-        </header>
-        <section
-          class="modal-body"
-          id="modalDescription"
-        >
-          <slot name="body">
-            Body
-          </slot>
-        </section>
-        <div class="modal-footer">
-          <slot name="footer">
-            Footer
+          <button
+            type="button"
+            class="py-8 ml-8"
+            @click="close"
+            aria-label="Close modal"
+          >
+            x
+          </button>
+        </slot>
+      </header>
+      <section
+        class="modal-body"
+        id="modalDescription"
+      >
+        <slot name="body">
+          Body
+        </slot>
+      </section>
+      <div class="modal-footer">
+        <slot name="footer">
+          Footer
 
-            <v-btn
-              text
-              @click="close"
-              class="py-8 ml-8"
-              aria-label="Close modal"
-            >
-              Chiudi
-            </v-btn>
-          </slot>
-        </div>
+          <v-btn
+            text
+            @click="close"
+            class="py-8 ml-8"
+            aria-label="Close modal"
+          >
+            Chiudi
+          </v-btn>
+        </slot>
       </div>
     </div>
-  </transition>
+  </div>
 </template>
 
 <script>

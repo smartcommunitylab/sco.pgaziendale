@@ -7,7 +7,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="showModal('Aggiungi azienda')"
+          @click="openModal({type:'aziendaFormAdd', object:null})"
         >
           <v-icon left>mdi-plus</v-icon>
           AGGIUNGI
@@ -168,6 +168,9 @@ export default {
         title: title,
       };
     },
+
+    ...mapActions("modal", { openModal:"openModal"}),
+
     closeModal() {
       this.editModalVisible = false;
       this.newCompany = false;
@@ -178,7 +181,7 @@ export default {
     },
    
     saveCompany() {
-            EventBus.$emit("CHECK_COMPANY_FORM");
+      EventBus.$emit("CHECK_COMPANY_FORM");
     },
     deleteConfirm() {
       this.deleteModalVisible = false;

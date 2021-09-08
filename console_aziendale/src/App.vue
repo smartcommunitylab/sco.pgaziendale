@@ -42,9 +42,7 @@
         </transition>
 
         <!-- INIZIO ESEMPIO: Nuovo componente modale-->
-        <transition name="fade">
-          <modal v-if="modalActive" :modalType="modal.type" :modalObject="modal.object"/>
-        </transition>
+        <modal-center v-show="active" :modalType="type" :modalObject="object"/>
         <!-- FINE ESEMPIO: Nuovo componente modale-->
 
         <router-view class="min-h-screen px-5 py-5 pb-10" v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
@@ -65,12 +63,12 @@ import { mapActions, mapState } from "vuex";
 /*import Loader from "./components/Loader";*/
 import Footer from "@/components/Footer"
 import Snackbar from "@/components/Snackbar.vue"
-
+import ModalCenter from "@/components/ModalCenter.vue"
 
 export default {
   name: 'App',
 
-   components: { "menu-header": MenuHeader,/*Loader,*/"app-footer":Footer, "snackbar":Snackbar},
+   components: { "menu-header": MenuHeader,/*Loader,*/"app-footer":Footer, "snackbar":Snackbar, "modal-center": ModalCenter},
 
 
   computed: {
@@ -82,6 +80,7 @@ export default {
       currentRouteName() {
         return this.$route.name;
     },
+    ...mapState("modal", ["active", "type", "object"]),
     ...mapState('account', ['status']),
     ...mapState('alert', ['message'])
   },
@@ -93,7 +92,6 @@ export default {
   methods: {
     ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
     ...mapActions("alert", { clearAlert: "clear" }),
-
   },
   watch: {
     // eslint-disable-next-line no-unused-vars

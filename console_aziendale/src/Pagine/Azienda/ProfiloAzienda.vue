@@ -71,8 +71,16 @@
 
             <v-spacer></v-spacer>
 
+            <!-- BACKUP MODO DI MODIFICA MODAL - edit Azienda
             <v-btn icon v-if="role == 'ROLE_ADMIN'"
             @click="editAzienda">
+                <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+            -->
+
+            <!-- PROVA nuovo Modifica con nuovo MODAL -->
+            <v-btn icon v-if="role == 'ROLE_ADMIN'"
+            @click="openModal({type:'aziendaFormEdit'})">
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
 
@@ -101,21 +109,9 @@ export default {
     ...mapActions("company", {
       getCompanyById: "getCompanyById",
       chooseCompanyAdminCall: "chooseCompanyAdmin",
-      /*
-      existImageURL: function(url) {
-        var request = new XMLHttpRequest();
-        request.open("GET", url, true);
-        request.send();
-        request.onload = function() {
-            if (request.status == 200) //if(statusText == OK)
-            {
-                return true;
-            } else {
-                return false;
-            }
-        }
-      }*/
     }),
+
+    ...mapActions("modal", {openModal: "openModal"}),
 
     deleteAzienda() {
       EventBus.$emit("DELETE_COMPANY", this.actualCompany);
