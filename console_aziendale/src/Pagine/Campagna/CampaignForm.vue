@@ -236,7 +236,7 @@
           <v-autocomplete
             label="Applicazione"
             placeholder="Applicazione *"
-            :rules="[rules.required]"
+            :rules="[inputRules.required]"
             v-model.trim="$v.application.$model"
             :items="listaApplications"
             outlined
@@ -244,8 +244,8 @@
         </v-col>
       </v-row>
 
-      <!--
-      <div class="field-group mb-6 w-full">
+      
+      <!-- <div class="field-group mb-6 w-full">
         <div class="flex flex-row" :class="{ 'form-group--error': $v.application.$error }">
           <label class="field-label" for="password">Applicazione</label>
           <select
@@ -262,8 +262,8 @@
             Il campo Applicazione e' richiesto.
           </div>
         </div>
-      </div>
-      -->
+      </div> -->
+
     </div>
   </form>
 </template>
@@ -291,6 +291,9 @@ export default {
       active: false,
       application: "",
       edit: false,
+      listaApplications:['ciao','pippo'],
+      menu:false,
+      menu2:false,
       inputRules: {
         required: value => !!value || 'Campo richiesto.',
       },
@@ -379,14 +382,19 @@ export default {
   mounted() {
     if (this.role == 'ROLE_ADMIN' && this.adminCompany == null){
     campaignService.getApplications().then((res) => {
+      console.log(this.applications);
       this.applications = res;
+      for (let i=0;i<this.applications.length; i++){
+          this.listaApplications.push(this.applications[i].name)      
+      }
+      console.log(JSON.stringify(this.listaApplications))
     });
     }
     this.arrayMeans = campaignService.getArrayMeans();
 
     EventBus.$on("EDIT_CAMPAIGN_FORM", (campaign) => {
             this.edit = true;
-      this.copyFormValues(campaign);
+           this.copyFormValues(campaign);
     });
     EventBus.$on("NEW_CAMPAIGN_FORM", () => {
             this.edit = false;
@@ -405,6 +413,7 @@ export default {
         this.$v.$reset();
       }
     });
+
   },
 
   beforeDestroy() {
