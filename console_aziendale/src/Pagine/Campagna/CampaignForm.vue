@@ -244,7 +244,7 @@
         </v-col>
       </v-row>
 
-      <!--
+      
       <div class="field-group mb-6 w-full">
         <div class="flex flex-row" :class="{ 'form-group--error': $v.application.$error }">
           <label class="field-label" for="password">Applicazione</label>
@@ -263,7 +263,7 @@
           </div>
         </div>
       </div>
-      -->
+
     </div>
   </form>
 </template>
@@ -291,6 +291,7 @@ export default {
       active: false,
       application: "",
       edit: false,
+      listaApplications:[],
       inputRules: {
         required: value => !!value || 'Campo richiesto.',
       },
@@ -380,6 +381,9 @@ export default {
     if (this.role == 'ROLE_ADMIN' && this.adminCompany == null){
     campaignService.getApplications().then((res) => {
       this.applications = res;
+      for (let app in this.applications){
+          this.listaApplications.push(app.name)      
+      }
     });
     }
     this.arrayMeans = campaignService.getArrayMeans();
@@ -405,6 +409,7 @@ export default {
         this.$v.$reset();
       }
     });
+
   },
 
   beforeDestroy() {
