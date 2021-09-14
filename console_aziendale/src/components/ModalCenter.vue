@@ -1,7 +1,7 @@
 <template>
     <div>
         <!-- MODALI utilizzabili per tutti i dati-->
-        <delete-modal v-if="modalType == 'delete'"/>
+        <!--<delete-modal v-if="modalType == 'delete'"/>-->
 
         <!-- MODALI per l' UtenteLoggato -->
         <profile-setting-modal v-if="modalType == 'profileSetting'"/>
@@ -9,16 +9,19 @@
         <!-- MODALI per le Aziende -->
         <azienda-form-modal v-if="modalType == 'aziendaFormAdd'" typeCall="add"/>
         <azienda-form-modal v-if="modalType == 'aziendaFormEdit'" typeCall="edit"/>
-        
+        <delete-modal v-if="modalType == 'deleteAzienda'" typeCall="azienda"/>
+
         <!-- MODALI per l' User -->
         <user-form-modal v-if="modalType == 'userFormAdd'" typeCall="add"/>
         <user-form-modal v-if="modalType == 'userFormEdit'" typeCall="edit"/>
+        <delete-modal v-if="modalType == 'deleteUser'" typeCall="user"/>
 
         <!-- MODALI per le Campaign -->
         <campaign-form-modal v-if="modalType == 'campaignFormAdd'" typeCall="add"/>
         <campaign-form-modal v-if="modalType == 'campaignFormEdit'" typeCall="edit"/>
+        <delete-modal v-if="modalType == 'deleteCampaign'" typeCall="campaign"/>
         <associate-form-modal v-if="modalType == 'associateForm'"/>
-
+        
         <!-- MODALI per gli Employee -->
         <employee-form-modal v-if="modalType == 'employeeFormAdd'" typeCall="add"/>
         <employee-form-modal v-if="modalType == 'employeeFormEdit'" typeCall="edit"/>
@@ -26,6 +29,7 @@
         <!-- MODALI per le Location -->
         <location-form-modal v-if="modalType == 'locationFormAdd'" typeCall="add"/>
         <location-form-modal v-if="modalType == 'locationFormEdit'" typeCall="edit"/>
+        <delete-modal v-if="modalType == 'deleteLocation'" typeCall="location"/>
     </div>
 </template>
 
@@ -52,7 +56,6 @@ export default {
     },
     props: {
         modalType: String,
-        modalObject: Object,
     },
 }
 </script>

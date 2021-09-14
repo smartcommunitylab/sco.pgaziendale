@@ -80,12 +80,12 @@
 
             <!-- PROVA nuovo Modifica con nuovo MODAL -->
             <v-btn icon v-if="role == 'ROLE_ADMIN'"
-            @click="openModal({type:'aziendaFormEdit'})">
+            @click="openModal({type:'aziendaFormEdit', object:null})">
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
 
             <v-btn icon v-show="$route.name !== 'azienda'"
-            @click="deleteAzienda">
+            @click="openModal({type:'deleteAzienda', object:null})">
                 <v-icon>mdi-delete</v-icon>
             </v-btn>
 
@@ -96,7 +96,6 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
-import EventBus from "@/components/eventBus";
 
 export default {
   name: "ProfiloAzienda",
@@ -113,12 +112,6 @@ export default {
 
     ...mapActions("modal", {openModal: "openModal"}),
 
-    deleteAzienda() {
-      EventBus.$emit("DELETE_COMPANY", this.actualCompany);
-    },
-    editAzienda() {
-      EventBus.$emit("EDIT_COMPANY", this.actualCompany);
-    },
     chooseCompanyAdmin() {
       this.chooseCompanyAdminCall(this.actualCompany);
     },
