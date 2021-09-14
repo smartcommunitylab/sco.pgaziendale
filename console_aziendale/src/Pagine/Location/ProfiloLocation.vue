@@ -85,7 +85,7 @@
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
 
-            <v-btn icon @click="deleteLocation">
+            <v-btn icon @click="openModal({type:'deleteLocation', object: {actCompany: actualCompany, actLocaiton: actualLocation}})">
                 <v-icon>mdi-delete</v-icon>
             </v-btn>
 
@@ -116,6 +116,7 @@ export default {
     };
   },
   computed: {
+    ...mapState("company", ["actualCompany"]),
     ...mapState("location", ["actualLocation"]),
     center() {
       return latLng(
@@ -126,6 +127,7 @@ export default {
   },
   methods: {
     ...mapActions("location", { changeActualLocation: "changeActualLocation" }),
+    ...mapActions("modal", { openModal: "openModal" }),
     deleteLocation() {
       EventBus.$emit("DELETE_LOCATION", this.actualLocation);
     },

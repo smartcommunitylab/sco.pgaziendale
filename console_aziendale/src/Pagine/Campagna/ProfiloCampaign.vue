@@ -93,7 +93,7 @@
               <v-icon>mdi-pencil</v-icon>
           </v-btn>
 
-          <v-btn icon @click="deleteCampaign">
+          <v-btn icon @click="openModal({type:'deleteCampaign', object:null})">
               <v-icon>mdi-delete</v-icon>
           </v-btn>
 
@@ -102,7 +102,7 @@
   </v-col>
 </template>
 <script>
-import { mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 import EventBus from "@/components/eventBus";
 import { campaignService } from "../../services";
 
@@ -121,9 +121,7 @@ export default {
     getListOfMeans() {
       return campaignService.getTextOfMeans(this.actualCampaign.item.means);
     },
-    deleteCampaign() {
-      EventBus.$emit("DELETE_CAMPAIGN", this.actualCampaign);
-    },
+    ...mapActions("modal", {openModal: "openModal"}),
     editCampaign() {
       EventBus.$emit("EDIT_CAMPAIGN", this.actualCampaign);
     },

@@ -56,7 +56,7 @@
               <v-btn icon @click="editUser(user)">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-btn icon @click="deleteUser(user)">
+              <v-btn icon @click="openModal({type:'deleteUser', object: {user: user, adminCompany: adminCompany.item.id}})">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </v-card-actions>
@@ -177,7 +177,7 @@ export default {
         title: "Modifica",
       };
     },
-
+    ...mapActions("modal", {openModal:"openModal"}),
     deleteUser(user) {
       this.deleteModalVisible = true;
       this.user = user;

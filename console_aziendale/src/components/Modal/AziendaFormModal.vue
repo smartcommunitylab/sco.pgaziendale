@@ -242,7 +242,6 @@
 import { mapActions, mapState } from "vuex";
 
 import { required, email,url } from "vuelidate/lib/validators";
-import EventBus from "@/components/eventBus";
 import Modal from "@/components/Modal.vue";
 
 export default {
@@ -348,6 +347,8 @@ export default {
         ...mapActions("modal", { closeModal:"closeModal" }),
         copyFormValues(company) {
             console.log("Sono nel For");
+            console.log("Questa è la company:");
+            console.log(company);
             for (const [key] of Object.entries(company)) {
                 this[key] = company[key];
             }
@@ -410,74 +411,38 @@ export default {
             this.createCompany();
             if(this.typeCall == "add"){
                 this.addCompany(this.company);
+                this.closeModal();
             }else if (this.typeCall == "edit") {
                 this.updateCompany(this.company);
                 this.closeModal();
+            }
+        },
+        setModalData(){
+            if(this.typeCall == "add"){
+                this.initCompany();
+                this.popup.title = "Aggiungi Azienda";
+                console.log("Modalità AGGIUNGI");
+
+            }else if (this.typeCall == "edit") {
+                this.copyFormValues(this.actualCompany.item);
+                this.popup.title = "Modifica Azienda";
+                console.log("Modalità MODIFICA");
             }
         },
     },
     computed: {
         ...mapState("company", ["actualCompany"]),
     },
-    mounted() {
-        if(this.typeCall == "add"){
-            this.initCompany();
-            this.popup.title = "Aggiungi Azienda";
-
-        }else if (this.typeCall == "edit") {
-            this.copyFormValues(this.actualCompany.item);
-            this.popup.title = "Modifica Azienda";
-        }
-
-        EventBus.$on("EDIT_COMPANY_FORM", (company) => {
-            this.copyFormValues(company);
-        });
-        EventBus.$on("NEW_COMPANY_FORM", () => {
-            this.initCompany();
-        });
-        EventBus.$on("CHECK_COMPANY_FORM", () => {
-            this.$v.$touch();
-            if (this.$v.$invalid) {
-                //generate event no
-                EventBus.$emit("NO_COMPANY_FORM");
-            } else {
-                //   generate event ok
-                this.createCompany();
-                EventBus.$emit("OK_COMPANY_FORM", this.company);
-                this.$v.$reset();
-            }
-        });
-
-        EventBus.$on("EDIT_COMPANY", (company) => {
-            EventBus.$emit("EDIT_COMPANY_FORM", company.item);
-            this.popup = {
-                title: "Modifica",
-            };
-        });
-        EventBus.$on("DELETE_COMPANY", (company) => {
-            this.deleteModalVisible = true;
-            this.company = company.item;
-            this.popup = {
-                title: "Cancella",
-            };
-        });
-        EventBus.$on("OK_COMPANY_FORM", (company) => {
-            if (this.newCompany) {
-                this.addCompanyCall(company);
-            } else {
-                this.updateCompanyCall(company);
-            }
-            this.closeModal();
-            this.newCompany = false;
-        });
-        EventBus.$on("NO_COMPANY_FORM", () => {
-            this.submitStatus = "ERROR";
-        });
+    created() {
+        this.setModalData()
     },
-    beforeDestroy() {
-        EventBus.$off("CHECK_COMPANY_FORM");
-        EventBus.$off("NEW_COMPANY_FORM");
-        EventBus.$off("EDIT_COMPANY_FORM");
+    watch: {
+        typeCall: function(){
+            this.setModalData();
+        },
+        actualCompany: function(){
+            this.setModalData();
+        }
     },
 }
 </script>
