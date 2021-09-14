@@ -1,9 +1,9 @@
 <template>
   <form action="" id="addLocation">
-    <div class="mb-20 flex flex-wrap justify-between">
+    <div class="mb-20">
       <v-row>
         <v-col
-          cols="12"
+          cols="8"
         >
           <div class="map-style">
             <geolocation-selector
@@ -14,6 +14,114 @@
             />
           </div>
         </v-col>
+        <v-col
+          cols="4"
+          align-self="center"
+          class="mt-6"
+          
+        >
+          <v-row
+            class="p-0 mx-1"
+            justify="center"
+          >
+            <v-text-field
+              label="Raggio"
+              placeholder="Raggio *"
+              type="text"
+              name="campaignRadius"
+              :rules="raggioRules"
+              id="campaignRadius"
+              v-model.trim="$v.radius.$model"
+              outlined
+            >
+              <template v-slot:append>
+                <v-tooltip
+                  bottom
+                  nudge-bottom="10"
+                  nudge-left="75"
+                >
+                  <template v-slot:activator="{ on }">
+                    <v-icon v-on="on">
+                      mdi-help-circle-outline
+                    </v-icon>
+                  </template>
+                  Distanza in metri all'interno di cui i viaggi dei dipendenti risultano essere validi
+                </v-tooltip>
+              </template>
+            </v-text-field>
+          </v-row>           
+          <v-row
+            class="p-0 mx-1 my-7"
+            justify="center"
+          >
+            <v-btn
+              icon
+              x-small
+              color="primary"
+              v-if="notEnabled = true"
+              @click="changeNotEnabled()"
+            >
+              <v-icon>mdi-lock-outline</v-icon>
+            </v-btn>
+            <v-btn
+              icon
+              x-small
+              color="red"
+              v-else
+              @click="changeNotEnabled()"
+            >
+              <v-icon>mdi-lock-open-outline</v-icon>
+            </v-btn>
+            <v-text-field
+              label="Longitudine"
+              placeholder="Longitudine *"
+              type="text"
+              name="campaignLongitude"
+              :rules="[rules.required]"
+              id="campaignLongitude"
+              v-model.trim="$v.longitude.$model"
+              outlined
+              :disabled="notEnabled"
+            ></v-text-field>
+          </v-row>
+          <v-row
+            class="p-0 mx-1"
+            justify="center"
+          >
+            <v-btn
+              icon
+              x-small
+              color="primary"
+              v-if="notEnabled2 = true"
+              @click="changeNotEnabled2()"
+            >
+              <v-icon>mdi-lock-outline</v-icon>
+            </v-btn>
+            <v-btn
+              icon
+              x-small
+              color="red"
+              v-else
+              @click="changeNotEnabled2()"
+            >
+              <v-icon>mdi-lock-open-outline</v-icon>
+            </v-btn>
+            <v-text-field
+              label="Latitudine"
+              placeholder="Latitudine *"
+              type="text"
+              name="campaignLatitude"
+              :rules="[rules.required]"
+              id="campaignLatitude"
+              v-model.trim="$v.latitude.$model"
+              outlined
+              :disabled="notEnabled2"
+            ></v-text-field>
+          </v-row>
+        </v-col>
+      </v-row>
+
+      <v-row>
         <v-col
           cols="4"
         >
@@ -73,6 +181,8 @@
             outlined            
           ></v-text-field>
         </v-col>
+      </v-row>
+      <v-row>
         <v-col
           cols="4"
         >
@@ -115,8 +225,9 @@
             outlined
           ></v-autocomplete>
         </v-col>
+      </v-row>
+      <v-row>
         <v-col
-          cols="6"
         > 
           <v-autocomplete
             label="Regione"
@@ -130,7 +241,6 @@
           ></v-autocomplete>
         </v-col>
         <v-col
-          cols="6"
         >
           <v-text-field
             label="Stato"
@@ -143,65 +253,11 @@
             outlined
           ></v-text-field>
         </v-col>
-        <v-col
-          cols="4"
-        >
-          <v-text-field
-            label="Raggio"
-            placeholder="Raggio *"
-            type="text"
-            name="campaignRadius"
-            :rules="raggioRules"
-            id="campaignRadius"
-            v-model.trim="$v.radius.$model"
-            outlined
-          >
-            <template v-slot:append>
-              <v-tooltip
-                bottom
-                nudge-bottom="10"
-                nudge-left="75"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-icon v-on="on">
-                    mdi-help-circle-outline
-                  </v-icon>
-                </template>
-                Distanza in metri all'interno di cui i viaggi dei dipendenti risultano essere validi
-              </v-tooltip>
-            </template>
-          </v-text-field>
-        </v-col>
-        <v-col
-          cols="4"
-        >
-          <v-text-field
-            label="Latitudine"
-            placeholder="Latitudine *"
-            type="text"
-            name="campaignLatitude"
-            :rules="[rules.required]"
-            id="campaignLatitude"
-            v-model.trim="$v.latitude.$model"
-            outlined
-          ></v-text-field>
-        </v-col>
-        <v-col
-          cols="4"
-        >
-          <v-text-field
-            label="Longitudine"
-            placeholder="Longitudine *"
-            type="text"
-            name="campaignLongitude"
-            :rules="[rules.required]"
-            id="campaignLongitude"
-            v-model.trim="$v.longitude.$model"
-            outlined
-          ></v-text-field>
-        </v-col>
+      </v-row>
+      <v-row>
         <v-col 
           cols="4"
+          class="mt-3"
         >
           <v-form>
             <p class="text-subtitle-1">Giorni NON lavorativi</p>
@@ -217,8 +273,7 @@
         </v-col>
         <v-spacer></v-spacer>
         <v-col
-          cols="12"
-          sm="6"
+          cols="8"
         >
           <v-menu
             ref="menu"
@@ -265,7 +320,7 @@
             </v-date-picker>
           </v-menu>
         </v-col>
-      </v-row>
+      </v-row>  
     </div>
   </form>
 </template>
@@ -335,10 +390,19 @@ export default {
           v => !!v || 'Campo richiesto.', 
           v => !isNaN(v) || 'Il campo Raggio deve contenere un valore numerico.'
       ],
+      notEnabled: true,
+      notEnabled2: true,
     };
   },
   computed: {},
   methods: {
+    changeNotEnabled(){
+      this.notEnabled = !this.notEnabled
+    },
+    changeNotEnabled2(){
+      this.notEnabled2 = !this.notEnabled2
+    },
+
     locationChanged(input) {
       console.log(input);
       this.locationSelected = input.address;
@@ -378,6 +442,7 @@ export default {
       this.createLocation();
     },
     initLocation() {
+      
       this.id = "";
       this.address = "";
       this.streetNumber = "";
@@ -391,7 +456,10 @@ export default {
       this.radius = 200;
       this.nonWorkingDays = [];
       this.nonWorking = [];
+      this.notEnabled = true;
+      this.notEnabled2 = true
     },
+
     createLocation() {
       this.locationSelected = {
         id: this.id,
@@ -490,8 +558,7 @@ export default {
   top: -30px;
 }
 .map-style {
-  width: 80%;
-  height: 500px;
-  margin: auto;
+  height: 300px;
+
 }
 </style>
