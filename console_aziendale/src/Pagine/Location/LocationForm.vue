@@ -54,24 +54,6 @@
             class="p-0 mx-1 my-7"
             justify="center"
           >
-            <v-btn
-              icon
-              x-small
-              color="primary"
-              v-if="notEnabled = true"
-              @click="changeNotEnabled()"
-            >
-              <v-icon>mdi-lock-outline</v-icon>
-            </v-btn>
-            <v-btn
-              icon
-              x-small
-              color="red"
-              v-else
-              @click="changeNotEnabled()"
-            >
-              <v-icon>mdi-lock-open-outline</v-icon>
-            </v-btn>
             <v-text-field
               label="Longitudine"
               placeholder="Longitudine *"
@@ -81,31 +63,12 @@
               id="campaignLongitude"
               v-model.trim="$v.longitude.$model"
               outlined
-              :disabled="notEnabled"
             ></v-text-field>
           </v-row>
           <v-row
             class="p-0 mx-1"
             justify="center"
           >
-            <v-btn
-              icon
-              x-small
-              color="primary"
-              v-if="notEnabled2 = true"
-              @click="changeNotEnabled2()"
-            >
-              <v-icon>mdi-lock-outline</v-icon>
-            </v-btn>
-            <v-btn
-              icon
-              x-small
-              color="red"
-              v-else
-              @click="changeNotEnabled2()"
-            >
-              <v-icon>mdi-lock-open-outline</v-icon>
-            </v-btn>
             <v-text-field
               label="Latitudine"
               placeholder="Latitudine *"
@@ -115,7 +78,6 @@
               id="campaignLatitude"
               v-model.trim="$v.latitude.$model"
               outlined
-              :disabled="notEnabled2"
             ></v-text-field>
           </v-row>
         </v-col>
@@ -390,19 +352,10 @@ export default {
           v => !!v || 'Campo richiesto.', 
           v => !isNaN(v) || 'Il campo Raggio deve contenere un valore numerico.'
       ],
-      notEnabled: true,
-      notEnabled2: true,
     };
   },
   computed: {},
   methods: {
-    changeNotEnabled(){
-      this.notEnabled = !this.notEnabled
-    },
-    changeNotEnabled2(){
-      this.notEnabled2 = !this.notEnabled2
-    },
-
     locationChanged(input) {
       console.log(input);
       this.locationSelected = input.address;
@@ -456,8 +409,6 @@ export default {
       this.radius = 200;
       this.nonWorkingDays = [];
       this.nonWorking = [];
-      this.notEnabled = true;
-      this.notEnabled2 = true
     },
 
     createLocation() {
@@ -550,6 +501,7 @@ export default {
 };
 </script>
 <style scoped>
+
 .tooltip-day {
   transform: translateY(0px);
 }
