@@ -407,6 +407,7 @@ export default {
         },
         ...mapActions("company", {addCompany:"addCompany", updateCompany:"updateCompany"}),
         saveCompany() {
+            
             //EventBus.$emit("CHECK_COMPANY_FORM");
             this.createCompany();
             if(this.typeCall == "add"){

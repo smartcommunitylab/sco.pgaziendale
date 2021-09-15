@@ -7,7 +7,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="showModal('Aggiungi utente')"
+          @click="openModal({type:'userFormAdd', object:null})/*showModal('Aggiungi utente')*/"
         >
           <v-icon left>mdi-plus</v-icon>
           AGGIUNGI
@@ -53,7 +53,7 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn icon @click="editUser(user)">
+              <v-btn icon @click="openModal({type:'userFormEdit', object:user})">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
               <v-btn icon @click="openModal({type:'deleteUser', object: {user: user, adminCompany: adminCompany.item.id}})">
@@ -66,7 +66,7 @@
       
       <!-- MODALE AGGIUNTA DIPENDENTE -->
       <modal v-show="editModalVisible">
-        <template v-slot:header> {{ popup.title }} </template>
+        <template v-slot:header> CIAO </template>
         <template v-slot:body>
           <user-form />
         </template>
@@ -132,9 +132,6 @@ export default {
       editModalVisible: false,
       deleteModalVisible: false,
       newUser: true,
-      popup: {
-        title: "",
-      },
     };
   },
   computed: {
@@ -143,6 +140,7 @@ export default {
   },
 
   methods: {
+    ...mapActions("modal", {openModal:'openModal'}),
     ...mapActions("company", {
       getCompanyById: "getCompanyById",
       getUsers: "getUsers",
@@ -153,13 +151,10 @@ export default {
     }),
     ...mapActions("campaign", { getAllCampaigns: "getAll" }),
     ...mapActions("navigation", { changePage: "changePage" }),
-    showModal(title) {
+    showModal() {
       this.editModalVisible = true;
       this.newUser = true;
       EventBus.$emit("NEW_USER_FORM");
-      this.popup = {
-        title: title,
-      };
     },
     closeModal() {
       this.editModalVisible = false;
@@ -173,9 +168,6 @@ export default {
       this.user = user;
       this.newUser = false;
       EventBus.$emit("EDIT_USER_FORM", user);
-      this.popup = {
-        title: "Modifica",
-      };
     },
     ...mapActions("modal", {openModal:"openModal"}),
     deleteUser(user) {

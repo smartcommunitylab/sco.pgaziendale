@@ -7,7 +7,7 @@
         <azienda-form-modal v-if="modalType == 'aziendaFormAdd'" typeCall="add"/>
         <azienda-form-modal v-if="modalType == 'aziendaFormEdit'" typeCall="edit"/>
         <delete-modal v-if="modalType == 'deleteAzienda'" typeCall="azienda"/>
-
+        
         <!-- MODALI per l' User -->
         <user-form-modal v-if="modalType == 'userFormAdd'" typeCall="add"/>
         <user-form-modal v-if="modalType == 'userFormEdit'" typeCall="edit"/>
