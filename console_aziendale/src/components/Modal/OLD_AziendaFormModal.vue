@@ -13,12 +13,9 @@
                                 placeholder="Nome *"
                                 type="text"
                                 name="companyName"
+                                :rules="[rules.required]"
                                 id="companyName"
                                 v-model.trim="$v.name.$model"
-                                :error-messages="nameErrors"                                
-                                required
-                                @input="$v.name.$touch()"
-                                @blur="$v.name.$touch()"
                                 outlined
                             ></v-text-field>
                         </v-col>
@@ -30,12 +27,9 @@
                                 placeholder="Codice *"
                                 type="text"
                                 name="companyCode"
+                                :rules="[rules.required]"
                                 id="companyCode"
                                 v-model.trim="$v.code.$model"
-                                :error-messages="codeErrors"                                
-                                required
-                                @input="$v.code.$touch()"
-                                @blur="$v.code.$touch()"
                                 outlined
                             >
                                 <template v-slot:append>
@@ -61,12 +55,9 @@
                                 placeholder="Indirizzo *"
                                 type="text"
                                 name="companyAddress"
+                                :rules="[rules.required]"
                                 id="companyAddress"
                                 v-model.trim="$v.address.$model"
-                                :error-messages="addressErrors"                                
-                                required
-                                @input="$v.address.$touch()"
-                                @blur="$v.address.$touch()"
                                 outlined
                             ></v-text-field>
                         </v-col>
@@ -78,12 +69,9 @@
                                 placeholder="Numero *"
                                 type="text"
                                 name="companyNumber"
+                                :rules="[rules.required]"
                                 id="companyNumber"
                                 v-model.trim="$v.streetNumber.$model"
-                                :error-messages="numberErrors"                                
-                                required
-                                @input="$v.streetNumber.$touch()"
-                                @blur="$v.streetNumber.$touch()"
                                 outlined
                             ></v-text-field>
                         </v-col>
@@ -95,12 +83,9 @@
                                 placeholder="CAP *"
                                 type="text"
                                 name="companyCap"
+                                :rules="[rules.required]"
                                 id="companyCap"
                                 v-model.trim="$v.zip.$model"
-                                :error-messages="capErrors"                                
-                                required
-                                @input="$v.zip.$touch()"
-                                @blur="$v.zip.$touch()"
                                 outlined
                             ></v-text-field>
                         </v-col>
@@ -112,12 +97,9 @@
                                 placeholder="Città *"
                                 type="text"
                                 name="companyCity"
+                                :rules="[rules.required]"
                                 id="companyCity"
                                 v-model.trim="$v.city.$model"
-                                :error-messages="cityErrors"                                
-                                required
-                                @input="$v.city.$touch()"
-                                @blur="$v.city.$touch()"
                                 outlined
                             ></v-text-field>
                         </v-col>
@@ -128,12 +110,9 @@
                                 label="Provincia"
                                 placeholder="Provincia *"
                                 name="companyProvince"
+                                :rules="provinceRules"
                                 id="companyProvince"
                                 v-model.trim="$v.province.$model"
-                                :error-messages="provinceErrors"                                
-                                required
-                                @input="$v.province.$touch()"
-                                @blur="$v.province.$touch()"
                                 :items="listaProvince"
                                 outlined
                             ></v-autocomplete>
@@ -145,12 +124,9 @@
                                 label="Regione"
                                 placeholder="Regione *"
                                 name="companyRegion"
+                                :rules="[rules.required]"
                                 id="companyRegion"
                                 v-model.trim="$v.region.$model"
-                                :error-messages="regionErrors"                                
-                                required
-                                @input="$v.region.$touch()"
-                                @blur="$v.region.$touch()"
                                 :items="listaRegioni"
                                 outlined
                             ></v-autocomplete>
@@ -163,12 +139,9 @@
                                 placeholder="Stato *"
                                 type="text"
                                 name="companyCountry"
+                                :rules="[rules.required]"
                                 id="companyCountry"
                                 v-model.trim="$v.country.$model"
-                                :error-messages="countryErrors"                                
-                                required
-                                @input="$v.country.$touch()"
-                                @blur="$v.country.$touch()"
                                 outlined
                             ></v-text-field>
                         </v-col>
@@ -180,12 +153,9 @@
                                 placeholder="Telefono *"
                                 type="text"
                                 name="companyPhone"
+                                :rules="[rules.required]"
                                 id="companyPhone"
                                 v-model.trim="$v.contactPhone.$model"
-                                :error-messages="phoneErrors"                                
-                                required
-                                @input="$v.contactPhone.$touch()"
-                                @blur="$v.contactPhone.$touch()"
                                 outlined
                             ></v-text-field>
                         </v-col>
@@ -197,12 +167,9 @@
                                 placeholder="E-mail *"
                                 type="text"
                                 name="companyEmail"
+                                :rules="contactEmailRules"
                                 id="companyEmail"
                                 v-model.trim="$v.contactEmail.$model"
-                                :error-messages="emailErrors"                                
-                                required
-                                @input="$v.contactEmail.$touch()"
-                                @blur="$v.contactEmail.$touch()"
                                 outlined
                             ></v-text-field>
                         </v-col>
@@ -214,12 +181,9 @@
                                 placeholder="Web *"
                                 type="text"
                                 name="companyWeb"
+                                :rules="webRules"
                                 id="companyWeb"
                                 v-model.trim="$v.web.$model"
-                                :error-messages="webErrors"                                
-                                required
-                                @input="$v.web.$touch()"
-                                @blur="$v.web.$touch()"
                                 outlined
                             ></v-text-field>
                         </v-col>
@@ -257,7 +221,7 @@
         <template v-slot:footer>
             <v-btn
             text
-            @click="closeThisModal"
+            @click="closeModal()"
             class="py-8 ml-8"
             >
             Annulla
@@ -277,16 +241,13 @@
 <script>
 import { mapActions, mapState } from "vuex";
 
-import { validationMixin } from 'vuelidate';
-import { required, email, url } from 'vuelidate/lib/validators';
-
+import { required, email,url } from "vuelidate/lib/validators";
 import Modal from "@/components/Modal.vue";
 
 export default {
     props: {
         typeCall: String,
     },
-    mixins: [validationMixin],
     components:{
         "modal": Modal,
     },
@@ -325,9 +286,22 @@ export default {
             popup: {
                 title: "",
             },
+            
+            rules: {
+                required: value => !!value || 'Campo richiesto.',
+            },
+            provinceRules: [
+                value => this.isInListaProvince(value) || 'Campo richiesto.'
+            ],
+            contactEmailRules: [
+                v => !!v || 'Campo richiesto.', 
+                v => this.validateEmail(v) || 'E-mail non valida.'
+            ],
+            webRules: [ 
+                (v) => this.isURL(v) || 'URL non valido. Inserire " https:// ". ',
+            ], 
         };
     },
-
     validations: {
         name: {
             required,
@@ -393,7 +367,9 @@ export default {
             var re = /\S+@\S+\.\S+/;
             return re.test(email);
         },
-
+        isInListaProvince(value){
+            return this.listaProvince.includes(value)
+        },
         initCompany() {
             this.company = {};
             this.id = null;
@@ -430,14 +406,8 @@ export default {
             };
         },
         ...mapActions("company", {addCompany:"addCompany", updateCompany:"updateCompany"}),
-        closeThisModal(){
-            this.$v.$reset();
-            this.closeModal();
-
-        },
         saveCompany() {
             //EventBus.$emit("CHECK_COMPANY_FORM");
-            this.$v.$touch();
             this.createCompany();
             if(this.typeCall == "add"){
                 this.addCompany(this.company);
@@ -445,7 +415,6 @@ export default {
             }else if (this.typeCall == "edit") {
                 this.updateCompany(this.company);
                 this.closeModal();
-                
             }
         },
         setModalData(){
@@ -463,91 +432,9 @@ export default {
     },
     computed: {
         ...mapState("company", ["actualCompany"]),
-
-        //Messaggi di Errore per gli input del form
-        nameErrors () {
-            const errors = []
-            if (!this.$v.name.$dirty) return errors
-            !this.$v.name.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        codeErrors () {
-            const errors = []
-            if (!this.$v.code.$dirty) return errors
-            !this.$v.code.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        addressErrors () {
-            const errors = []
-            if (!this.$v.address.$dirty) return errors
-            !this.$v.address.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        numberErrors () {
-            const errors = []
-            if (!this.$v.streetNumber.$dirty) return errors
-            !this.$v.streetNumber.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        capErrors () {
-            const errors = []
-            if (!this.$v.zip.$dirty) return errors
-            !this.$v.zip.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        cityErrors () {
-            const errors = []
-            if (!this.$v.city.$dirty) return errors
-            !this.$v.city.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        provinceErrors () {
-            const errors = []
-            if (!this.$v.province.$dirty) return errors
-            !this.$v.province.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        regionErrors () {
-            const errors = []
-            if (!this.$v.region.$dirty) return errors
-            !this.$v.region.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        countryErrors () {
-            const errors = []
-            if (!this.$v.country.$dirty) return errors
-            !this.$v.country.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        phoneErrors () {
-            const errors = []
-            if (!this.$v.contactPhone.$dirty) return errors
-            !this.$v.contactPhone.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        emailErrors () {
-            const errors = []
-            if (!this.$v.contactEmail.$dirty) return errors
-            !this.$v.contactEmail.email && errors.push('E-mail non valida.')
-            !this.$v.contactEmail.required && errors.push('E-mail richiesta.')
-            return errors
-        },
-        webErrors () {
-            const errors = []
-            if (!this.$v.web.$dirty) return errors
-            !this.$v.web.url && errors.push('Url non valido.')
-            !this.$v.web.required && errors.push('Url richiesto.')
-            return errors
-        },
-
-        /*
-            webRules: [ 
-                (v) => this.isURL(v) || 'URL non valido. Inserire " https:// ". ',
-            ], 
-        */
     },
     created() {
-        this.setModalData();
+        this.setModalData()
     },
     watch: {
         typeCall: function(){
