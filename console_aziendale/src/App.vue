@@ -18,16 +18,7 @@
       </div>
 
       <v-spacer></v-spacer>
-
-      <v-btn
-        v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Impostazioni Utente</span>
-        <v-icon>mdi-setting</v-icon>
-      </v-btn>
+      <profile-manager v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
     </v-app-bar>
 
     <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
@@ -64,11 +55,18 @@ import { mapActions, mapState } from "vuex";
 import Footer from "@/components/Footer"
 import Snackbar from "@/components/Snackbar.vue"
 import ModalCenter from "@/components/ModalCenter.vue"
+import ProfileManager from "@/components/ProfileManager.vue"
 
 export default {
   name: 'App',
 
-   components: { "menu-header": MenuHeader,/*Loader,*/"app-footer":Footer, "snackbar":Snackbar, "modal-center": ModalCenter},
+  components: { 
+    "menu-header": MenuHeader,
+    "app-footer":Footer,
+    "snackbar":Snackbar,
+    "modal-center": ModalCenter,
+    "profile-manager": ProfileManager,
+  },
 
 
   computed: {

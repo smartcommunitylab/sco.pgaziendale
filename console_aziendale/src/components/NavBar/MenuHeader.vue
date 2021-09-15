@@ -6,13 +6,6 @@
     clipped
   >
     <v-list>
-      <v-list-item class="px-2">
-        <v-list-item-avatar>
-          <!--<v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>-->
-          <profile-manager />
-        </v-list-item-avatar>
-      </v-list-item>
-
       <v-list-item link>
         <v-list-item-content>        
           <profilo-header/>
@@ -114,13 +107,11 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import ProfiloHeader from "./ProfiloHeader.vue";
-import ProfileManager from "./ProfileManager.vue";
 
 export default {
   name: "MenuHeader",
   components: {
     ProfiloHeader,
-    ProfileManager,
   },
   data: function () {
     return { isOpen: true };

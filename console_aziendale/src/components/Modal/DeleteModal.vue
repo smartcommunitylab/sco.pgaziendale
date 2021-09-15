@@ -7,7 +7,7 @@
                 <div v-if="typeCall == 'campaign'">Cancella Campagna</div>
                 <div v-if="typeCall == 'user'">Cancella Utente</div>
                 <div v-if="typeCall == 'location'">Cancella Sede</div>
-                <div v-if="typeCall == 'employee'">Cancella Dipendente NUOVO</div>
+                <div v-if="typeCall == 'employee'">Cancella Dipendente</div>
             </div>
         </template>
         <template v-slot:body>
@@ -95,8 +95,6 @@ export default {
             this.closeModal();
         }
     }
-
-
 }
 </script>
 
