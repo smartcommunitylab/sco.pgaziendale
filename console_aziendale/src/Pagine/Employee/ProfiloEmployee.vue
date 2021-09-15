@@ -41,7 +41,7 @@
             <v-btn icon @click="editEmployee">
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
-            <v-btn icon @click="deleteEmployee">
+            <v-btn icon @click="openModal({type:'deleteEmployee', object:{actCompany: actualCompany, actEmployee: actualEmployee}})">
                 <v-icon>mdi-delete</v-icon>
             </v-btn>
         </v-card-actions>
@@ -49,7 +49,7 @@
   </v-col>
 </template>
 <script>
-import { mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 import EventBus from "@/components/eventBus";
 export default {
   name: "ProfiloEmployee",
@@ -59,11 +59,10 @@ export default {
 
   computed: {
     ...mapState("employee", ["actualEmployee"]),
+    ...mapState("company", ["actualCompany"]),
   },
   methods: {
-	deleteEmployee() {
-		EventBus.$emit("DELETE_EMPLOYEE",this.actualEmployee);
-	},
+    ...mapActions("modal", {openModal:"openModal"}),
 	editEmployee() {
 		EventBus.$emit("EDIT_EMPLOYEE",this.actualEmployee);
 	},

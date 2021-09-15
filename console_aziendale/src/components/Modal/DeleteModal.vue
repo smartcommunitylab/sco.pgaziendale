@@ -7,6 +7,7 @@
                 <div v-if="typeCall == 'campaign'">Cancella Campagna</div>
                 <div v-if="typeCall == 'user'">Cancella Utente</div>
                 <div v-if="typeCall == 'location'">Cancella Sede</div>
+                <div v-if="typeCall == 'employee'">Cancella Dipendente NUOVO</div>
             </div>
         </template>
         <template v-slot:body>
@@ -55,6 +56,7 @@ export default {
         ...mapActions("company", { deleteCompany: "deleteCompany", getCompanyById:"getCompanyById", deleteUser:"deleteUser"}),
         ...mapActions("campaign", { deleteCampaign: "deleteCampaign", getAllCompaniesOfCampaign:"getAllCompaniesOfCampaign"}),
         ...mapActions("location", { deleteLocation: "deleteLocation"}),
+        ...mapActions("employee", { deleteEmployee: "deleteEmployee"}),
         remove: function() {
             switch (this.typeCall) {
                 case 'azienda':
@@ -78,6 +80,12 @@ export default {
                     this.deleteLocation({
                         companyId: this.object.actCompany.item.id,
                         locationId: this.object.actLocaiton.item.id,
+                    });
+                    break;
+                case 'employee':
+                    this.deleteEmployee({
+                        companyId: this.object.actCompany.item.id,
+                        employeeId: this.object.actEmployee.item.id,
                     });
                     break;
                 default:

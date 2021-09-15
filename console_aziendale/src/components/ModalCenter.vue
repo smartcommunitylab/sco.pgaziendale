@@ -1,8 +1,5 @@
 <template>
     <div>
-        <!-- MODALI utilizzabili per tutti i dati-->
-        <!--<delete-modal v-if="modalType == 'delete'"/>-->
-
         <!-- MODALI per l' UtenteLoggato -->
         <profile-setting-modal v-if="modalType == 'profileSetting'"/>
         
@@ -25,6 +22,7 @@
         <!-- MODALI per gli Employee -->
         <employee-form-modal v-if="modalType == 'employeeFormAdd'" typeCall="add"/>
         <employee-form-modal v-if="modalType == 'employeeFormEdit'" typeCall="edit"/>
+        <delete-modal v-if="modalType == 'deleteEmployee'" typeCall="employee"/>
 
         <!-- MODALI per le Location -->
         <location-form-modal v-if="modalType == 'locationFormAdd'" typeCall="add"/>
