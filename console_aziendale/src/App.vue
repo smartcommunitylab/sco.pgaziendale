@@ -24,7 +24,7 @@
     <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
 
     <v-main>
-      <v-container class="p-0 m-0">
+      <v-container class="p-0 m-0 blockScroll">
         <!-- NON VIENE MAI UTILIZZATO - Componente inutile (?)-->
         <!-- <Loader v-if="loading" /> -->
         <transition name="fade">
@@ -105,6 +105,14 @@ export default {
       // clear alert on location change
       this.clearAlert();
     },
+    active: function() {
+      if(this.active){
+        document.documentElement.style.overflow = 'hidden';
+        return;
+      }
+      document.documentElement.style.overflow = 'auto';
+      document.documentElement.style.overflowX = 'hidden';
+    }
   },
 };
 </script>
@@ -137,5 +145,9 @@ export default {
 }
 .alert-danger {
   background-color: #dc3545;
+}
+
+.blockScroll{
+  overflow: hidden;
 }
 </style>
