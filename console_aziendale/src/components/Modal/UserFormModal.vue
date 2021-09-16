@@ -221,6 +221,7 @@ export default {
                 this.updateUser({ companyId: this.adminCompany.item.id, user: this.user });
             }
             this.$v.$reset();
+            this.setModalData();
             this.closeModal();
         }
     },
@@ -256,6 +257,7 @@ export default {
     initUser() {
       //clean form
       this.user = {};
+      this.id = "";
       this.playerId = "";
       this.resetDate = "";
       this.activated = true;
