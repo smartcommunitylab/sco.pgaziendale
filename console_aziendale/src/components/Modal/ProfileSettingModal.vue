@@ -133,28 +133,30 @@
               <div v-if="passwordDifferent">
                 <div class="error">Le due password non coincidono</div>
               </div>
-              <button
-                type="button"
-                class="btn-close"
-                aria-label="Close modal"
+              <v-row>
+                <v-spacer></v-spacer>
+                <v-btn
+                color="primary"
+                text
                 @click="changePwd()"
-              >
+                class="py-8 ml-8"
+                >
                 Salva
-              </button>
+                </v-btn>
+              </v-row>
             </div>
           </div>
         </div>
       </template>
 
       <template v-slot:footer>
-        <button
-          type="button"
-          class="btn-close"
-          aria-label="Close modal"
-          @click="closeModal()"
+        <v-btn
+        text
+        @click="closeModal()"
+        class="py-8 ml-8"
         >
-          Chiudi
-        </button>
+        Chiudi
+        </v-btn>
       </template>
     </modal>
 </template>
