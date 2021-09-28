@@ -1,38 +1,35 @@
 <template>
   <v-footer
     padless
-    class="justify-center up"
+    class="up"
   >
   <v-row>
     <v-col cols="12" class="p-0 m-0">
     <v-card
       flat
       dark
-      class="white--text text-center justify-center"
+      class="white--text d-flex mx-2"
     >
-      <v-card-text>
-        <v-btn
-          v-for="icon in icons"
-          :key="icon"
-          class="mx-4 white--text"
-          icon
-        >
-          <v-icon size="24px">
-            {{ icon }}
-          </v-icon>
-        </v-btn>
-      </v-card-text>
-
-      <v-card-text class="white--text pt-0">
-        Sviluppato da FBK (Fondazione Bruno Kessler)
-        Nell'ambito del progetto - Airbreak - Urban Innovative Actions
-      </v-card-text>
-
-      <v-divider></v-divider>
-
-      <v-card-text class="white--text">
-        {{ new Date().getFullYear() }} — <strong>Play & Go</strong>
-      </v-card-text>
+      
+        <v-card-text class="float-left">
+          <strong>Play & Go © </strong> {{ new Date().getFullYear() }}
+          design by FBK - nell'ambito del progetto: Airbreak e Urban Innovative Actions
+        </v-card-text>
+        
+        <div class="float-right mt-2" style="width:340px">
+          <v-btn
+            v-for="icon in icons"
+            :key="icon"
+            class="mx-4 white--text "
+            icon
+            style="overflow:auto"
+          >
+            <v-icon size="24px">
+              {{ icon }}
+            </v-icon>
+          </v-btn>
+        </div>
+        
     </v-card>
     </v-col>
   </v-row>
