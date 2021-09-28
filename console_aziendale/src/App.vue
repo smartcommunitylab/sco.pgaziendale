@@ -12,7 +12,7 @@
           alt="Vuetify Name"
           class="shrink mt-1 hidden-sm-and-down"
           contain
-          src="https://cdn.discordapp.com/attachments/677235003247034375/880095586068606986/pgaziendale.png"
+          src="@/assets/images/pgaziendale.png"
           width="75px"
         />
       </div>

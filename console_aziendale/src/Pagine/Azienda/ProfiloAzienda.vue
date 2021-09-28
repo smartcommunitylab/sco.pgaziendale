@@ -1,6 +1,6 @@
 <template>
-  <v-col cols="4">
-    <v-card elevation="2">
+  <v-col cols="4"  v-bind:class="{ 'bg-colonna': isAdmin}">
+    <v-card elevation="2" class="frosted-glass">
         <v-card-title>{{ actualCompany.item.name }}</v-card-title>
         
         <v-img
@@ -11,7 +11,7 @@
         />
         
         <v-card-text>
-            <v-list dense>
+            <v-list dense style="background-color: transparent">
                 <v-list-item-group
                     color="primary"
                 >
@@ -103,6 +103,13 @@ export default {
   computed: {
     ...mapState("company", ["adminCompany", "actualCompany"]),
     ...mapState("account", ["role"]),
+    isAdmin: function(){
+        if(this.adminCompany){
+            return true;
+        }else{
+            return false;
+        }
+    }
   },
   methods: {
     ...mapActions("company", {
@@ -120,5 +127,17 @@ export default {
 </script>
 
 <style scoped>
+.frosted-glass {
+  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2); 
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, .15);
+  border-color: transparent;
+  backdrop-filter: blur(5px);
+}
 
+.bg-colonna{
+  background-image: url("../../assets/images/bg-foglie.png");
+  background-size: 200px;
+  background-position: 250px 200px;
+}
 </style>

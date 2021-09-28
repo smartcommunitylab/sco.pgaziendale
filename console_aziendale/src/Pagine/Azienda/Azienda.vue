@@ -123,6 +123,7 @@ export default {
 }
 
 .profiloAziendaMargin{
-  margin-top: 124px;
+  margin-top: 121px;
 }
+
 </style>

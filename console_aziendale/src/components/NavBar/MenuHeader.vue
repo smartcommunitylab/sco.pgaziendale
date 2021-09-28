@@ -6,11 +6,7 @@
     clipped
   >
     <v-list>
-      <v-list-item link>
-        <v-list-item-content>        
-          <profilo-header/>
-        </v-list-item-content>
-      </v-list-item>
+      <profilo-header/>
     </v-list>
 
     <v-divider></v-divider>
