@@ -1,35 +1,38 @@
 <template>
-    <div class="bg-primary h-screen w-screen font-sans relative">
+    <div class="bg-primary h-screen w-screen font-sans">
       <div class="container h-full flex justify-center items-center">
         <div class="">
-          <img src="@/assets/images/pgaziendale.png" alt="Logo" class="max-h-40 m-auto"/>
+          <img src="@/assets/images/pgaziendale.png" alt="Logo" class="max-h-36 m-auto"/>
 
-          <h1 class="font-hairline mb-6 text-center text-white text-3xl">
+          <h1 class="font-hairline mb-10 text-center text-white text-3xl">
             Entra in Aziende Play&Go
           </h1>
           
-          <div class="border-teal p-4 border-t-12 bg-white mb-6 rounded-lg shadow-lg">
-            <div class="mb-4">
-              <v-col
-                cols="12"
-              >
-                <v-text-field
-                  :rules="[rules.required]"
-                  label="Username"
-                  placeholder="Il tuo username"
-                  v-model="username"
-                  name="username"
-                  id="username"
-                  outlined
-                  hide-details
-                ></v-text-field>
-              </v-col>
-            </div>
-
-            <div class="mb-4">
-              <div class="relative">
+          <v-row
+            class="align-content-center justify-center"
+          >
+            <v-col
+              cols="10"
+              class="border-teal border-t-12 bg-white rounded-lg shadow-lg m-0"
+            >
+              <v-row>
                 <v-col
-                cols="12"
+                  cols="12"
+                >
+                  <v-text-field
+                    :rules="[rules.required]"
+                    label="Username"
+                    placeholder="Il tuo username"
+                    v-model="username"
+                    name="username"
+                    id="username"
+                    outlined
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+
+                <v-col
+                  cols="12"
                 >
                   <v-text-field
                     :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
@@ -46,47 +49,46 @@
                     @click:append="show = !show"
                   ></v-text-field>
                 </v-col>
-              </div>
-            </div>
+              </v-row>
 
-            <v-row class="mb-8">
-              <v-col
-              cols="4"
-              class="p-0"
-              >
-                <v-checkbox
-                  class="px-7 py-0 m-0"
-                  v-model="EventualeVariabile"
-                  label="Ricordami"
-                  color="primary"
-                  value="primary"
-                  hide-details
-                ></v-checkbox>
-              </v-col>
-              <v-col
-              cols="8"
-              class="text-right p-0 m-0"
-              >
-                <span class="pwd-forgot text-right m-0 pr-8" @click="resetPwd">Password dimenticata?</span>
-              </v-col>
-            </v-row>
-            <v-row>
-            </v-row>
-            
-            <div class="flex items-center justify-between">
-              <div class="form-group w-full">
-                <v-btn
-                  depressed
-                  color="primary"
-                  class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-10 rounded text-center w-full"
-                  type="button"
-                  @click="handleSubmit"
+              <v-row class="mb-6">
+                <v-col
+                cols="4"
+                class="p-0 m-0"
                 >
-                  Login
-                </v-btn>
-              </div>
-            </div>
-          </div>
+                  <v-checkbox
+                    class="px-7 py-0 m-0"
+                    v-model="EventualeVariabile"
+                    label="Ricordami"
+                    color="primary"
+                    value="primary"
+                    hide-details
+                  ></v-checkbox>
+                </v-col>
+                <v-col
+                cols="8"
+                class="text-right p-0 m-0"
+                >
+                  <span class="pwd-forgot text-right m-0 pr-8" @click="resetPwd">Password dimenticata?</span>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col
+                  cols="12"
+                >
+                  <v-btn
+                    depressed
+                    color="primary"
+                    class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-10 rounded text-center w-full"
+                    type="button"
+                    @click="handleSubmit"
+                  >
+                    Login
+                  </v-btn>
+                </v-col>
+              </v-row> 
+            </v-col>
+          </v-row>  
         </div>
       </div>
     </div>

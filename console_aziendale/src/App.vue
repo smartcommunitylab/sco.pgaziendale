@@ -37,7 +37,7 @@
         <!-- FINE ESEMPIO: Nuovo componente modale-->
 
         <router-view class="min-h-screen px-5 py-5 pb-10" v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
-        <router-view class="min-h-screen " v-else />
+        <router-view class="min-h-screen" v-else />
       </v-container>
     </v-main>
 
@@ -150,4 +150,5 @@ export default {
 .blockScroll{
   overflow: hidden;
 }
+
 </style>
