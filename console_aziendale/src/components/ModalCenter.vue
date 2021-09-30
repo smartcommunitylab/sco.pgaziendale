@@ -2,6 +2,7 @@
     <div class="container-modal">
         <!-- MODALI per l' UtenteLoggato -->
         <profile-setting-modal v-if="modalType == 'profileSetting'"/>
+        <change-password-modal v-if="modalType == 'changePasswordModal'"/>
         
         <!-- MODALI per le Aziende -->
         <azienda-form-modal v-if="modalType == 'aziendaFormAdd'" typeCall="add"/>
@@ -40,6 +41,7 @@ import CampaignFormModal from "@/components/Modal/CampaignFormModal.vue";
 import AssociateFormModal from "@/components/Modal/AssociateFormModal.vue";
 import EmployeeFormModal from "@/components/Modal/EmployeeFormModal.vue";
 import LocationFormModal from "@/components/Modal/LocationFormModal.vue";
+import ChangePasswordModal from "@/components/Modal/ChangePasswordModal.vue";
 
 export default {
     components: {
@@ -51,6 +53,7 @@ export default {
         "associate-form-modal": AssociateFormModal,
         "employee-form-modal": EmployeeFormModal,
         "location-form-modal": LocationFormModal,
+        "change-password-modal": ChangePasswordModal,
     },
     props: {
         modalType: String,
