@@ -12,11 +12,12 @@
       ></v-text-field>
     </v-card-title>
     <v-data-table
-      class="row-pointer"
+      class="row-pointer elevation"
       :headers="headers"
       :items="items"
       :search="search"
       @click:row="method"
+      :header-props="{'sortByText': 'Ordina per'}"
       :footer-props="{
         'items-per-page-text':'righe per pagina'
       }"
@@ -62,5 +63,9 @@ export default {
 <style scoped>
 .row-pointer:hover {
   cursor: pointer;
+}
+
+.elevation{
+  z-index: 60;
 }
 </style>

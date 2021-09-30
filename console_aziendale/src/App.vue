@@ -84,12 +84,14 @@ export default {
   },
   created() {
     console.log("account" + this.account);
+    this.initModal();
     //check login and push the right page
     // this.bootProfile();
   },
   methods: {
     ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
     ...mapActions("alert", { clearAlert: "clear" }),
+    ...mapActions("modal", { initModal:"initModal" }),
   },
   watch: {
     // eslint-disable-next-line no-unused-vars

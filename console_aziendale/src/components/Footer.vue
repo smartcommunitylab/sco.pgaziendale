@@ -63,7 +63,8 @@ export default {
 </script>
 <style>
 .up {
-  z-index: 10;
+  position: relative;
+  z-index: -10;
 }
 
 .link {

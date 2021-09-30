@@ -13,6 +13,9 @@ const actions = {
     closeModal({ commit }) {
         commit('setActive', false);
     },
+    initModal({ commit }){
+        commit('init');
+    }
 };
 
 const mutations = {
@@ -25,6 +28,11 @@ const mutations = {
     setObject(state, object) {
         state.object = object;
     },
+    init(state) {
+        state.active = null;
+        state.type = null;
+        state.object = null;
+    }
 };
 
 export const modal = {

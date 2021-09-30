@@ -121,6 +121,7 @@ export default {
 
     chooseCompanyAdmin() {
       this.chooseCompanyAdminCall(this.actualCompany);
+      this.$router.push('/azienda');
     },
   },
 };
