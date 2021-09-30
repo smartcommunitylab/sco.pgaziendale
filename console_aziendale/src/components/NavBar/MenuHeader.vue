@@ -16,11 +16,19 @@
       dense
     >
       <router-link to="/aziende" v-if="role == 'ROLE_ADMIN' && adminCompany == null" >
-        <v-list-item link>
+        <v-list-item link >
           <v-list-item-icon>
-            <v-icon>mdi-factory</v-icon>
+            <v-icon
+              color = "primary"
+              v-if = "isActiveGestioneAziende"
+            > mdi-factory
+            </v-icon>
+            <v-icon
+              v-else
+            > mdi-factory
+            </v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Gestione Aziende</v-list-item-title>
+          <v-list-item-title :class="{ active: isActiveGestioneAziende }">Gestione Aziende</v-list-item-title>
         </v-list-item>
       </router-link>
       <router-link
@@ -33,9 +41,16 @@
           >
         <v-list-item link >
           <v-list-item-icon>
-            <v-icon>mdi-home</v-icon>
+            <v-icon
+              color = "primary"
+              v-if = "isActiveProfiloAzienda"
+            >mdi-home</v-icon>
+            <v-icon
+              v-else
+            >mdi-home
+            </v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Profilo Azienda</v-list-item-title>
+          <v-list-item-title :class="{ active: isActiveProfiloAzienda }">Profilo Azienda</v-list-item-title>
         </v-list-item>
       </router-link>
       <router-link
@@ -47,9 +62,16 @@
           >
         <v-list-item link>
           <v-list-item-icon>
-            <v-icon>mdi-domain</v-icon>
+            <v-icon
+              color = "primary"
+              v-if = "isActiveGestioneSedi"
+            >mdi-domain</v-icon>
+            <v-icon
+              v-else
+            >mdi-domain
+            </v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Gestione Sedi</v-list-item-title>
+          <v-list-item-title :class="{ active: isActiveGestioneSedi }">Gestione Sedi</v-list-item-title>
         </v-list-item>
       </router-link>
       <router-link
@@ -61,9 +83,16 @@
           >
         <v-list-item link>
           <v-list-item-icon>
-            <v-icon>mdi-account-group</v-icon>
+            <v-icon
+              color = "primary"
+              v-if = "isActiveGestioneDipendenti"
+            >mdi-account-group</v-icon>
+            <v-icon
+              v-else
+            >mdi-account-group
+            </v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Gestione Dipendenti</v-list-item-title>
+          <v-list-item-title :class="{ active: isActiveGestioneDipendenti }">Gestione Dipendenti</v-list-item-title>
         </v-list-item>
       </router-link>
       <router-link
@@ -72,9 +101,16 @@
           >
         <v-list-item link>
           <v-list-item-icon>
-            <v-icon>mdi-clipboard-text-multiple-outline</v-icon>
+            <v-icon
+              color = "primary"
+              v-if = "isActiveGestioneCamagne"
+            >mdi-clipboard-text-multiple-outline</v-icon>
+            <v-icon
+              v-else
+            >mdi-clipboard-text-multiple-outline
+            </v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Gestione Campagne</v-list-item-title>
+          <v-list-item-title :class="{ active: isActiveGestioneCamagne }">Gestione Campagne</v-list-item-title>
         </v-list-item>
       </router-link>
       <router-link
@@ -83,9 +119,16 @@
           >
         <v-list-item link>
           <v-list-item-icon>
-            <v-icon>mdi-chart-line</v-icon>
+            <v-icon
+              color = "primary"
+              v-if = "isActiveStatistiche"
+            >mdi-chart-line</v-icon>
+            <v-icon
+              v-else
+            >mdi-chart-line
+            </v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Statistiche</v-list-item-title>
+          <v-list-item-title :class="{ active: isActiveStatistiche }">Statistiche</v-list-item-title>
         </v-list-item>
       </router-link>
       <router-link to="/" v-on:click.native="logout">
@@ -110,8 +153,21 @@ export default {
     ProfiloHeader,
   },
   data: function () {
-    return { isOpen: true };
+    return { 
+      isOpen: true,
+      isActiveGestioneAziende: false,
+      isActiveProfiloAzienda: false,
+      isActiveGestioneSedi: false,
+      isActiveGestioneDipendenti: false,
+      isActiveGestioneCamagne: false,
+      isActiveStatistiche: false,
+    };
   },
+
+  created: function () {
+      this.activeRootSelection();
+  },
+
   computed: {
     ...mapState("account", ["status", "user", "role"]),
     ...mapState("navigation", ["page"]),
@@ -133,19 +189,61 @@ export default {
         this.$router.push("/azienda");
       }
     },
+    turnOffActive(){
+      this.isActiveGestioneAziende = false;
+      this.isActiveProfiloAzienda = false;
+      this.isActiveGestioneSedi = false;
+      this.isActiveGestioneDipendenti = false;
+      this.isActiveGestioneCamagne = false;
+      this.isActiveStatistiche = false;
+    },
+    activeRootSelection(){
+      switch (this.$router.currentRoute.path) {
+                case '/aziende':
+                    this.turnOffActive();
+                    this.isActiveGestioneAziende = true;
+                    break;
+                case '/azienda':
+                    this.turnOffActive();
+                    this.isActiveProfiloAzienda = true;
+                    break;
+                case '/locations':
+                    this.turnOffActive();
+                    this.isActiveGestioneSedi = true;
+                    break;
+                case '/dipendenti':
+                    this.turnOffActive();
+                    this.isActiveGestioneDipendenti = true;
+                    break;
+                case '/gestionecampagne':
+                    this.turnOffActive();
+                    this.isActiveGestioneCamagne = true;
+                    break;
+                case '/stats':
+                    this.turnOffActive();
+                    this.isActiveStatistiche = true;
+                    break;
+      }
+    },
     ...mapActions("account", ["logout"]),
     ...mapActions("company", ["resetCompanyAdmin"]),
+  },
+  watch: {
+    $route: function () {
+      this.activeRootSelection();
+    },
   },
 };
 </script>
 
 <style>
+
 .profile-button {
   position: absolute;
   right: 50px;
 }
-
-.prova{
-  color: red;
+.active {
+  color: #0f70b7;
 }
+
 </style>

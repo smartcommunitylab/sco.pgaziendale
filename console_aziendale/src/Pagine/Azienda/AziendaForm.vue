@@ -19,6 +19,7 @@
         <v-col
           cols="6"
         >
+           <!--Modificare editabilità del codice azienda (Editabile solo con Nuova Azienda)-->
           <v-text-field
             label="Codice Azienda"
             placeholder="Codice *"
@@ -28,11 +29,14 @@
             id="companyCode"
             v-model.trim="$v.code.$model"
             outlined
+            :disabled="edit"
           >
+          
             <template v-slot:append>
               <v-tooltip
                 left
                 nudge-bottom="50px"
+                v-if="$v.id.$model == ''"
               >
                 <template v-slot:activator="{ on }">
                   <v-icon v-on="on">
@@ -238,6 +242,7 @@ export default {
       'Friuli-Venezia Giulia', 'Lazio', 'Liguria', 'Lombardia', 'Marche', 'Molise', 'Piemonte', 
       'Puglia', 'Sardegna', 'Sicilia', 'Toscana', 'Trentino-Alto Adige', 'Umbria', 'Valle d\'Aosta Veneto' 
       ],
+      edit: false,
       company: {},
       id: null,
       name: "",
@@ -375,9 +380,11 @@ export default {
   },
   mounted() {
     EventBus.$on("EDIT_COMPANY_FORM", (company) => {
+      this.edit = true; //Da portare nel nuovo metodo per modificare editabilità del codice azienda
       this.copyFormValues(company);
     });
     EventBus.$on("NEW_COMPANY_FORM", () => {
+      this.edit = false; //Da portare nel nuovo metodo per modificare editabilità del codice azienda
       this.initCompany();
     });
     EventBus.$on("CHECK_COMPANY_FORM", () => {
