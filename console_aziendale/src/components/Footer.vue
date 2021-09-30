@@ -10,7 +10,7 @@
       class="white--text d-flex mx-2"
     >
       <v-row class="riga-colore">
-        <v-col>
+        <v-col cols="7">
           <v-card-text class="float-left">
             <strong>Play & Go © </strong> {{ new Date().getFullYear() }}
             design by <a class="link" href="https://www.fbk.eu/it/" target="_blank">FBK</a>. Nell'ambito del progetto: <a class="link" href="https://airbreakferrara.net/" target="_blank">Airbreak</a> e <a class="link" href="https://uia-initiative.eu/en" target="_blank">Urban Innovative Actions</a>
