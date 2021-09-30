@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-backdrop" v-init="show">
+  <div class="modal-backdrop" v-init="show" @click="closeModal">
     <div class="modal w-2/3 z-50 m-0 absolute "
       role="dialog"
       aria-labelledby="modalTitle"
@@ -49,9 +49,11 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 export default {
   name: 'modal',
   methods: {
+    ...mapActions("modal", {closeModal:"closeModal"}),
     toggleBodyClass(addRemoveClass, className) {
       const el = document.body;
       if (addRemoveClass === 'addClass') {

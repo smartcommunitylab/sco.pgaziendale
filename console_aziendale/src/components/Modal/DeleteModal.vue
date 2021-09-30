@@ -47,7 +47,7 @@ export default {
     },
     computed: {
         ...mapState("modal", ["object"]),
-        ...mapState("company", ["actualCompany, adminCompany"]),
+        ...mapState("company", ["actualCompany", "adminCompany"]),
         ...mapState("campaign", ["actualCampaign"]),
         ...mapState("location", ["actualLocation"]),
     },
@@ -60,6 +60,8 @@ export default {
         remove: function() {
             switch (this.typeCall) {
                 case 'azienda':
+                    console.log("Sono nello switch");
+                    console.log(this.actualCompany);
                     this.deleteCompany(this.actualCompany.item);
                     this.getCompanyById(null);
                     break;

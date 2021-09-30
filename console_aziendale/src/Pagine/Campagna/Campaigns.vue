@@ -7,7 +7,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="showModal('Aggiungi campagna')"
+          @click="openModal({type:'campaignFormAdd', object:null})"
         >
           <v-icon left>mdi-plus</v-icon>
           AGGIUNGI
@@ -30,29 +30,6 @@
       <!-- TODO: Profilo Campagna -->
       <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
       <!-- TODO: Modale Campagna -->
-      <modal v-show="deleteModalVisible">
-        <template v-slot:header> <div class="text-danger"> Cancella Campagna </div>  </template>
-        <template v-slot:body>
-          <p class="text-subtitle-1">Sei sicuro di voler cancellare la campagna?</p>
-        </template>                  
-        <template v-slot:footer>
-          <v-btn
-            text
-            @click="closeDeleteModal"
-            class="py-8 ml-8"
-          >
-            Annulla
-          </v-btn>
-          <v-btn
-            color="error"
-            text
-            @click="deleteConfirm"
-            class="py-8 ml-8"
-          >
-            Conferma
-          </v-btn>
-        </template>
-      </modal>
       <modal v-show="editModalVisible">
         <template v-slot:header> {{ popup.title }} </template>
         <template v-slot:body>
@@ -199,6 +176,7 @@ export default {
   },
 
   methods: {
+    ...mapActions("modal", {openModal:"openModal"}),
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
       getAllCompaniesOfCampaignCall: "getAllCompaniesOfCampaign",

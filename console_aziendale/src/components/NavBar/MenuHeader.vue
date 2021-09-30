@@ -39,7 +39,7 @@
               (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
             "
           >
-        <v-list-item link>
+        <v-list-item link >
           <v-list-item-icon>
             <v-icon
               color = "primary"

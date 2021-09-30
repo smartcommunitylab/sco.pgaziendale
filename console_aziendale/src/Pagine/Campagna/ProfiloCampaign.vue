@@ -89,7 +89,7 @@
       <v-card-actions>
           <v-spacer></v-spacer>
 
-          <v-btn icon @click="editCampaign">
+          <v-btn icon @click="openModal({type:'campaignFormEdit', object:null})">
               <v-icon>mdi-pencil</v-icon>
           </v-btn>
 
