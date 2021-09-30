@@ -23,7 +23,7 @@
 
     <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
 
-    <v-main>
+    <v-main class="">
       <v-container class="p-0 m-0 blockScroll">
         <!-- NON VIENE MAI UTILIZZATO - Componente inutile (?)-->
         <!-- <Loader v-if="loading" /> -->
