@@ -400,11 +400,11 @@ export default {
         //EventBus.$emit("CHECK_COMPANY_FORM");
         this.createCampaign();
         if(this.typeCall == "add"){
-            this.addCampaign({companyId: this.actualCompany.item.id, campaign: this.campaign});
+            this.addCampaign({companyId: this.adminCompany ? this.actualCompany.item.id : null, campaign: this.campaign});
             this.closeModal();
         }else if (this.typeCall == "edit") {
             console.log(this.campaign);
-            this.updateCampaign({companyId: this.actualCompany.item.id, campaign: this.campaign});
+            this.updateCampaign({companyId:this.adminCompany ? this.actualCompany.item.id : null, campaign: this.campaign});
             this.closeModal();
             
         }
@@ -418,7 +418,7 @@ export default {
     computed: {
     ...mapState("account", ["status", "user", "role"]),
     ...mapState("campaign", ["actualCampaign"]),
-    ...mapState("company", ["actualCompany"]),
+    ...mapState("company", ["actualCompany","adminCompany"]),
     meanRules() {
       return [
         this.means.length > 0 || "Seleziona almeno un mezzo."
