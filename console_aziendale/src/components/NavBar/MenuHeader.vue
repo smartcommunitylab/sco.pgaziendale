@@ -163,6 +163,11 @@ export default {
       isActiveStatistiche: false,
     };
   },
+
+  created: function () {
+      this.activeRootSelection();
+  },
+
   computed: {
     ...mapState("account", ["status", "user", "role"]),
     ...mapState("navigation", ["page"]),
@@ -192,11 +197,7 @@ export default {
       this.isActiveGestioneCamagne = false;
       this.isActiveStatistiche = false;
     },
-    ...mapActions("account", ["logout"]),
-    ...mapActions("company", ["resetCompanyAdmin"]),
-  },
-  watch: {
-    $route: function () {
+    activeRootSelection(){
       switch (this.$router.currentRoute.path) {
                 case '/aziende':
                     this.turnOffActive();
@@ -223,6 +224,13 @@ export default {
                     this.isActiveStatistiche = true;
                     break;
       }
+    },
+    ...mapActions("account", ["logout"]),
+    ...mapActions("company", ["resetCompanyAdmin"]),
+  },
+  watch: {
+    $route: function () {
+      this.activeRootSelection();
     },
   },
 };
