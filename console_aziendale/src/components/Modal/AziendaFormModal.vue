@@ -438,16 +438,17 @@ export default {
         saveCompany() {
             
             //EventBus.$emit("CHECK_COMPANY_FORM");
-            this.$v.$touch();
             this.createCompany();
             if(this.typeCall == "add"){
                 this.addCompany(this.company);
                 this.closeModal();
             }else if (this.typeCall == "edit") {
+                console.log(this.company);
                 this.updateCompany(this.company);
                 this.closeModal();
                 
             }
+            this.$v.$touch();
         },
         setModalData(){
             if(this.typeCall == "add"){

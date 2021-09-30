@@ -28,66 +28,18 @@
         <div v-else class="empty-list">Non ci sono Aziende</div>
       </v-col>
       <profilo-azienda v-if="actualCompany"></profilo-azienda>
-      <modal v-show="editModalVisible">
-        <template v-slot:header> {{ popup.title }} </template>
-        <template v-slot:body>
-          <azienda-form />
-        </template>
-        <template v-slot:footer>
-          <v-btn
-            text
-            @click="closeModal"
-            class="py-8 ml-8"
-          >
-            Annulla
-          </v-btn>
-          <v-btn
-            color="primary"
-            text
-            @click="saveCompany"
-            class="py-8 ml-8"
-          >
-            Salva
-          </v-btn>
-        </template>
-      </modal>
-      <modal v-show="deleteModalVisible">
-        <template v-slot:header> <div class="text-danger"> Cancella Azienda </div>  </template>
-        <template v-slot:body>
-          <p class="text-subtitle-1">Sei sicuro di voler cancellare l'azienda selezionata?</p>
-        </template>
-        <template v-slot:footer>
-          <v-btn
-            text
-            @click="closeDeleteModal"
-            class="py-8 ml-8"
-          >
-            Annulla
-          </v-btn>
-          <v-btn
-            color="error"
-            text
-            @click="deleteConfirm"
-            class="py-8 ml-8"
-          >
-            Conferma
-          </v-btn>
-        </template>
-      </modal>
     </v-row>
   </div>
 </template>
 
 <script>
 import ProfiloAzienda from "./ProfiloAzienda.vue";
-import Modal from "@/components/Modal.vue";
 import { mapState, mapActions } from "vuex";
 import EventBus from "@/components/eventBus";
 import GenericTable from "@/components/GenericTable.vue";
-import AziendaForm from "./AziendaForm.vue"
 
 export default {
-  components: { ProfiloAzienda, Modal, GenericTable,AziendaForm },
+  components: { ProfiloAzienda, GenericTable },
   name: "Aziende",
   data: function () {
     return {

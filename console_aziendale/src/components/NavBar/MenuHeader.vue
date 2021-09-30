@@ -31,7 +31,7 @@
               (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
             "
           >
-        <v-list-item link>
+        <v-list-item link >
           <v-list-item-icon>
             <v-icon>mdi-home</v-icon>
           </v-list-item-icon>
@@ -143,5 +143,9 @@ export default {
 .profile-button {
   position: absolute;
   right: 50px;
+}
+
+.prova{
+  color: red;
 }
 </style>

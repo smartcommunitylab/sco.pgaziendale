@@ -59,7 +59,8 @@ export default {
 <style>
 
 .up {
-  z-index: 50;
+  position:relative;
+  z-index: 10;
 }
 
 </style>

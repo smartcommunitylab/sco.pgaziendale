@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="container-modal">
         <!-- MODALI per l' UtenteLoggato -->
         <profile-setting-modal v-if="modalType == 'profileSetting'"/>
         
@@ -59,5 +59,8 @@ export default {
 </script>
 
 <style>
-
+.container-modal{
+    position:relative;
+    z-index: 51;
+}
 </style>
