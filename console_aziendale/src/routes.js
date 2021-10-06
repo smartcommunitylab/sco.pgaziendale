@@ -7,6 +7,7 @@ import Locations from "./Pagine/Location/Locations.vue"
 import Stats from "./Pagine/Stat/Stats.vue"
 import GestioneDipendenti from "./Pagine/Employee/Employees.vue"
 import GestioneCampagne from "./Pagine/Campagna/Campaigns.vue"
+import GestioneUtenti from "./Pagine/Utenti/Utenti.vue"
 import NotFound from "./Pagine/NotFound.vue"
 import ResetPwd from "./Pagine/Login/ResetPwd.vue"
 Vue.use(Router);
@@ -41,6 +42,11 @@ const routes = [
         name: 'dipendenti',
         component: GestioneDipendenti
     },
+    {
+      path: '/gestioneUtenti',
+      name: 'gestioneUtenti',
+      component: GestioneUtenti
+  },
     {
       path: '/stats',
       name: 'stats',

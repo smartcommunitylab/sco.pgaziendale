@@ -1,10 +1,9 @@
 <template>
   <div>
     <v-row>
-      <v-col cols="8">
-        <gestione-azienda v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)"></gestione-azienda>
+      <v-col cols="12">
+        <profilo-azienda class="profiloAziendaMargin"></profilo-azienda>
       </v-col>
-      <profilo-azienda class="profiloAziendaMargin"></profilo-azienda>
     </v-row>
     <!-- MODALE MODIFICA DATI PROFILO AZIENDA -->
     <modal v-show="editModalVisible">
@@ -37,7 +36,6 @@
 <script>
 import { mapActions, mapState } from "vuex";
 import ProfiloAzienda from "./ProfiloAzienda.vue";
-import GestioneAzienda from "./GestioneAzienda.vue";
 import EventBus from "@/components/eventBus";
 import Modal from "@/components/Modal.vue";
 import AziendaForm from "./AziendaForm.vue";
@@ -46,7 +44,6 @@ export default {
   name: "Azienda",
   components: {
     ProfiloAzienda,
-    GestioneAzienda,
     Modal,
     AziendaForm,
   },

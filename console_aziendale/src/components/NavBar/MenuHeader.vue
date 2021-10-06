@@ -53,6 +53,30 @@
           <v-list-item-title :class="{ active: isActiveProfiloAzienda }">Profilo Azienda</v-list-item-title>
         </v-list-item>
       </router-link>
+
+      <router-link
+            to="/gestioneUtenti"
+            v-if="
+              role == 'ROLE_COMPANY_ADMIN' ||
+              (role == 'ROLE_ADMIN' && adminCompany != null) ||
+              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+            "
+          >
+        <v-list-item link >
+          <v-list-item-icon>
+            <v-icon
+              color = "primary"
+              v-if = "isActiveGestioneUtenti"
+            >mdi-account-tie</v-icon>
+            <v-icon
+              v-else
+            >mdi-account-tie
+            </v-icon>
+          </v-list-item-icon>
+          <v-list-item-title :class="{ active: isActiveGestioneUtenti }">Gestione Utenti</v-list-item-title>
+        </v-list-item>
+      </router-link>
+
       <router-link
             to="/locations"
             v-if="
@@ -161,6 +185,7 @@ export default {
       isActiveGestioneDipendenti: false,
       isActiveGestioneCamagne: false,
       isActiveStatistiche: false,
+      isActiveGestioneUtenti: false,
     };
   },
 
@@ -196,6 +221,7 @@ export default {
       this.isActiveGestioneDipendenti = false;
       this.isActiveGestioneCamagne = false;
       this.isActiveStatistiche = false;
+      this.isActiveGestioneUtenti = false;
     },
     activeRootSelection(){
       switch (this.$router.currentRoute.path) {
@@ -223,6 +249,9 @@ export default {
                     this.turnOffActive();
                     this.isActiveStatistiche = true;
                     break;
+                case '/gestioneUtenti':
+                    this.turnOffActive();
+                    this.isActiveGestioneUtenti = true;
       }
     },
     ...mapActions("account", ["logout"]),
