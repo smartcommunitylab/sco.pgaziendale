@@ -19,8 +19,11 @@
       @click:row="method"
       :header-props="{'sortByText': 'Ordina per'}"
       :footer-props="{
-        'items-per-page-text':'righe per pagina'
+        'items-per-page-text':'righe per pagina',
+        /*'page-text': */
       }"
+      no-results-text="La ricerca non ha dato risultati"
+      no-data-text="Non ci sono dati inseriti"
     >
     </v-data-table>
   </v-card>
@@ -44,7 +47,7 @@ export default {
         console.log(val);
         console.log(oldVal)
       }
-    }
+    },
   },
   data() {
     return {

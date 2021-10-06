@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-backdrop" v-init="show" @click="closeModal">
+  <div class="modal-backdrop" v-init="show" @click.self="closeModal">
     <div class="modal w-2/3 z-50 m-0 absolute "
       role="dialog"
       aria-labelledby="modalTitle"

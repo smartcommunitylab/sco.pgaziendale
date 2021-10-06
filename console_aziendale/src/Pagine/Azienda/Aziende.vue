@@ -44,7 +44,7 @@ export default {
   data: function () {
     return {
       tableTitle: "Aziende",
-      headerColumns: [{text:"Nome", value:"name"}, {text:"Codice Azienda", value:"code"}],
+      headerColumns: [{text:"Nome", value:"name"}, {text:"Codice Azienda", value:"code"}, {text:"Indirizzo", value:"address"}],
       editModalVisible: false,
       deleteModalVisible: false,
       currentCompanySelected: undefined,
