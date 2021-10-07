@@ -43,7 +43,7 @@ export default {
       newUser: true,
 
       tableTitle: "Utenti",
-      headerColumns: [{text:"Cognome", value:"surname"}, {text:"Nome", value:"name"}, {text:"Username", value:"username"}, {text:"Ruoli", value:"roles"}, { text: 'Azioni', value: 'actions', sortable: false }],
+      headerColumns: [{text:"Cognome", value:"surname"}, {text:"Nome", value:"name"}, {text:"Username", value:"username"}, {text:"Ruoli", value:"rolesComputed"}, { text: 'Azioni', value: 'actions', sortable: false }],
     };
   },
   computed: {
@@ -65,7 +65,7 @@ export default {
     ...mapActions("navigation", { changePage: "changePage" }),
     
     ...mapActions("modal", {openModal:"openModal"}),
-    
+
   },
 
   mounted() {

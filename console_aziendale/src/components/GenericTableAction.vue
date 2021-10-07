@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-data-table
+    <v-data-table 
         class="row-pointer elevation"
         :headers="headers"
         :items="items"
@@ -54,11 +54,12 @@ import { mapActions, mapState } from 'vuex'
     props: {
         items: Array,
         headers: Array,
-        title: String,
-    },
+        title: String
+            },
     data() {
         return {
         search: '',
+        componentKey: 0
         }
     },
     computed: {
@@ -66,7 +67,8 @@ import { mapActions, mapState } from 'vuex'
     },
     methods: {
         ...mapActions("modal", {openModal:'openModal'}),
-    },
+
+    }
   }
 </script>
 
