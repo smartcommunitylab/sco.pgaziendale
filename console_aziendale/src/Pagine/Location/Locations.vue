@@ -285,6 +285,7 @@ export default {
     closeModal() {
       this.editModalVisible = false;
       this.newLocation = false;
+      this.$v.$reset();
     },
     closeDeleteModal() {
       this.deleteModalVisible = false;
@@ -296,7 +297,11 @@ export default {
 
     saveLocation() {
       //check fields
-      EventBus.$emit("CHECK_LOCATION_FORM");
+      if (!this.$v.$invalid) {
+          EventBus.$emit("CHECK_LOCATION_FORM");      
+      }else{
+        this.$v.$touch();
+      }
     },
     deleteConfirm() {
       this.deleteModalVisible = false;

@@ -10,7 +10,6 @@
             placeholder="Nome *"
             type="text"
             name="employeeName"
-            :rules="[rules.required]"
             id="employeeName"
             v-model.trim="$v.name.$model"
             :error-messages="nameErrors"                                
@@ -28,7 +27,6 @@
             placeholder="Cognome *"
             type="text"
             name="employeeSurname"
-            :rules="[rules.required]"
             id="employeeSurname"
             v-model.trim="$v.surname.$model"
             :error-messages="surnameErrors"                                
@@ -46,7 +44,6 @@
             placeholder="Codice *"
             type="text"
             name="employeeCode"
-            :rules="[rules.required]"
             id="employeeCode"
             v-model.trim="$v.code.$model"
             :error-messages="codeErrors"                                
@@ -78,7 +75,6 @@
             label="Sede"
             placeholder="Sede *"
             name="companyLocation"
-            :rules="[rules.required]"
             id="companyLocation"
             v-model.trim="$v.location.$model"
             :items="listaSedi"
@@ -110,9 +106,6 @@ export default {
       location: "",
       locations: [],
       listaSedi: [],
-      rules: {
-          required: value => !!value || 'Campo richiesto.',
-      },
     };
   },
   validations: {

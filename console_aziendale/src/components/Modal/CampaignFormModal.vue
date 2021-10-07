@@ -489,77 +489,72 @@ export default {
     ...mapState("account", ["status", "user", "role"]),
     ...mapState("campaign", ["actualCampaign"]),
     ...mapState("company", ["actualCompany","adminCompany"]),
-    meanRules() {
-      return [
-        this.means.length > 0 || "Seleziona almeno un mezzo."
-      ];
-    },
     nameErrors () {
             const errors = []
             if (!this.$v.name.$dirty) return errors
             !this.$v.name.required && errors.push('Campo richiesto.')
             return errors
-        },
-        idErrors () {
-            const errors = []
-            if (!this.$v.id.$dirty) return errors
-            !this.$v.id.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        logoErrors () {
-            const errors = []
-            if (!this.$v.logo.$dirty) return errors
-            !this.$v.logo.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        titleErrors () {
-            const errors = []
-            if (!this.$v.title.$dirty) return errors
-            !this.$v.title.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        descriptionErrors () {
-            const errors = []
-            if (!this.$v.description.$dirty) return errors
-            !this.$v.description.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        fromErrors () {
-            const errors = []
-            if (!this.$v.from.$dirty) return errors
-            !this.$v.from.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        toErrors () {
-            const errors = []
-            if (!this.$v.to.$dirty) return errors
-            !this.$v.to.required && errors.push('Campo richiesto.')
-            return errors
-        },
-        rulesErrors () {
-            const errors = []
-            if (!this.$v.rules.$dirty) return errors
-            !this.$v.rules.required && errors.push('Seleziona almeno un mezzo.')
-            return errors
-        },
-        privacyErrors () {
-            const errors = []
-            if (!this.$v.privacy.$dirty) return errors
-            !this.$v.privacy.required && errors.push('Seleziona almeno un mezzo.')
-            return errors
-        },
-        meansErrors () {
-            const errors = []
-            if (!this.$v.means.$dirty) return errors
-            !this.$v.means.required && errors.push('Seleziona almeno un mezzo.')
-            return errors
-        },
-        applicationErrors () {
-            const errors = []
-            if (!this.$v.application.$dirty) return errors
-            !this.$v.application.required && errors.push('Campo richiesto.')
-            return errors
-        },
+    },
+    idErrors () {
+        const errors = []
+        if (!this.$v.id.$dirty) return errors
+        !this.$v.id.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    logoErrors () {
+        const errors = []
+        if (!this.$v.logo.$dirty) return errors
+        !this.$v.logo.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    titleErrors () {
+        const errors = []
+        if (!this.$v.title.$dirty) return errors
+        !this.$v.title.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    descriptionErrors () {
+        const errors = []
+        if (!this.$v.description.$dirty) return errors
+        !this.$v.description.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    fromErrors () {
+        const errors = []
+        if (!this.$v.from.$dirty) return errors
+        !this.$v.from.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    toErrors () {
+        const errors = []
+        if (!this.$v.to.$dirty) return errors
+        !this.$v.to.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    rulesErrors () {
+        const errors = []
+        if (!this.$v.rules.$dirty) return errors
+        !this.$v.rules.required && errors.push('Seleziona almeno un mezzo.')
+        return errors
+    },
+    privacyErrors () {
+        const errors = []
+        if (!this.$v.privacy.$dirty) return errors
+        !this.$v.privacy.required && errors.push('Seleziona almeno un mezzo.')
+        return errors
+    },
+    meansErrors () {
+        const errors = []
+        if (!this.$v.means.$dirty) return errors
+        !this.$v.means.required && errors.push('Seleziona almeno un mezzo.')
+        return errors
+    },
+    applicationErrors () {
+        const errors = []
+        if (!this.$v.application.$dirty) return errors
+        !this.$v.application.required && errors.push('Campo richiesto.')
+        return errors
+    },
   },
   mounted() {
     if (this.role == 'ROLE_ADMIN' && this.adminCompany == null){

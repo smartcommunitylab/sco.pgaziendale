@@ -37,9 +37,12 @@
               placeholder="Raggio *"
               type="text"
               name="campaignRadius"
-              :rules="raggioRules"
               id="campaignRadius"
               v-model.trim="$v.radius.$model"
+              :error-messages="radiusErrors"                                
+              required
+              @input="$v.radius.$touch()"
+              @blur="$v.radius.$touch()"
               outlined
             >
               <template v-slot:append>
@@ -67,9 +70,12 @@
               placeholder="Longitudine *"
               type="text"
               name="campaignLongitude"
-              :rules="[rules.required]"
               id="campaignLongitude"
               v-model.trim="$v.longitude.$model"
+              :error-messages="longitudeErrors"                                
+              required
+              @input="$v.longitude.$touch()"
+              @blur="$v.longitude.$touch()"
               outlined
             ></v-text-field>
           </v-row>
@@ -82,9 +88,12 @@
               placeholder="Latitudine *"
               type="text"
               name="campaignLatitude"
-              :rules="[rules.required]"
               id="campaignLatitude"
               v-model.trim="$v.latitude.$model"
+              :error-messages="latitudeErrors"                                
+              required
+              @input="$v.latitude.$touch()"
+              @blur="$v.latitude.$touch()"
               outlined
             ></v-text-field>
           </v-row>
@@ -110,9 +119,12 @@
             placeholder="Identificativo *"
             type="text"
             name="campaignCode"
-            :rules="[rules.required]"
             id="campaignCode"
             v-model.trim="$v.id.$model"
+            :error-messages="idErrors"                                
+            required
+            @input="$v.id.$touch()"
+            @blur="$v.id.$touch()"
             outlined
             
             :disabled="edit"
@@ -141,9 +153,12 @@
             placeholder="Indirizzo *"
             type="text"
             name="campaignAddress"
-            :rules="[rules.required]"
             id="campaignAddress"
             v-model.trim="$v.address.$model"
+            :error-messages="addressErrors"                                
+            required
+            @input="$v.address.$touch()"
+            @blur="$v.address.$touch()"
             outlined            
           ></v-text-field>
         </v-col>
@@ -155,9 +170,12 @@
             placeholder="Numero *"
             type="text"
             name="campaignstreetNumber"
-            :rules="[rules.required]"
             id="campaignstreetNumber"
             v-model.trim="$v.streetNumber.$model"
+            :error-messages="streetNumberErrors"                                
+            required
+            @input="$v.streetNumber.$touch()"
+            @blur="$v.streetNumber.$touch()"
             outlined            
           ></v-text-field>
         </v-col>
@@ -171,9 +189,12 @@
             placeholder="CAP *"
             type="text"
             name="campaignZip"
-            :rules="[rules.required]"
             id="campaignZip"
             v-model.trim="$v.zip.$model"
+            :error-messages="zipErrors"                                
+            required
+            @input="$v.zip.$touch()"
+            @blur="$v.zip.$touch()"
             outlined            
           ></v-text-field>
         </v-col>
@@ -185,9 +206,12 @@
             placeholder="Cittá *"
             type="text"
             name="campaignCity"
-            :rules="[rules.required]"
             id="campaignCity"
             v-model.trim="$v.city.$model"
+            :error-messages="cityErrors"                                
+            required
+            @input="$v.city.$touch()"
+            @blur="$v.city.$touch()"
             outlined            
           ></v-text-field>
         </v-col>
@@ -198,10 +222,13 @@
             label="Provincia"
             placeholder="Provincia *"
             name="campaignProvince"
-            :rules="provinceRules"
             id="campaignProvince"
             v-model.trim="$v.province.$model"
             :items="listaProvince"
+            :error-messages="provinceErrors"                                
+            required
+            @input="$v.province.$touch()"
+            @blur="$v.province.$touch()"
             outlined
           ></v-autocomplete>
         </v-col>
@@ -213,10 +240,13 @@
             label="Regione"
             placeholder="Regione *"
             name="campaignRegion"
-            :rules="[rules.required]"
             id="campaignRegion"
             v-model.trim="$v.region.$model"
             :items="listaRegioni"
+            :error-messages="regionErrors"                                
+            required
+            @input="$v.region.$touch()"
+            @blur="$v.region.$touch()"
             outlined
           ></v-autocomplete>
         </v-col>
@@ -227,10 +257,13 @@
             placeholder="Stato *"
             type="text"
             name="campaignCountry"
-            :rules="[rules.required]"
             id="campaignCountry"
             v-model.trim="$v.country.$model"
-            outlined
+            :error-messages="countryErrors"                                
+            required
+            @input="$v.country.$touch()"
+            @blur="$v.country.$touch()"
+           outlined
           ></v-text-field>
         </v-col>
       </v-row>
@@ -306,7 +339,7 @@
 </template>
 
 <script>
-
+import { validationMixin } from 'vuelidate';
 import { required, numeric } from "vuelidate/lib/validators";
 import { locationService } from "../../services";
 import EventBus from "@/components/eventBus";
@@ -316,6 +349,7 @@ export default {
   components: {
     "geolocation-selector": GeoLocationSelectorMapVue,
   },
+  mixins: [validationMixin],
   data() {
     return {
       id: "",
@@ -363,16 +397,77 @@ export default {
       ],
       giorniSettimana: [{1:'Lunedì', 2:'Martedì', 3:'Mercoledì', 4:'Giovedì', 5:'Venerdì', 6:'Sabato', 7:'Domenica'}
       ],
-      rules: {
-        required: value => !!value || 'Campo richiesto.',
-      },
-      raggioRules: [
-          v => !!v || 'Campo richiesto.', 
-          v => !isNaN(v) || 'Il campo Raggio deve contenere un valore numerico.'
-      ],
     };
   },
-  computed: {},
+  computed: {
+    radiusErrors () {
+            const errors = []
+            if (!this.$v.radius.$dirty) return errors
+            !this.$v.radius.required && errors.push('Campo richiesto.')
+            !this.$v.radius.numeric && errors.push('Il campo Raggio deve contenere un valore numerico.')
+            return errors
+    },
+    latitudeErrors () {
+            const errors = []
+            if (!this.$v.latitude.$dirty) return errors
+            !this.$v.latitude.required && errors.push('Campo richiesto.')
+            return errors
+    },
+    longitudeErrors () {
+            const errors = []
+            if (!this.$v.longitude.$dirty) return errors
+            !this.$v.longitude.required && errors.push('Campo richiesto.')
+            return errors
+    },
+    idErrors () {
+            const errors = []
+            if (!this.$v.id.$dirty) return errors
+            !this.$v.id.required && errors.push('Campo richiesto.')
+            return errors
+    },
+    addressErrors () {
+            const errors = []
+            if (!this.$v.address.$dirty) return errors
+            !this.$v.address.required && errors.push('Campo richiesto.')
+            return errors
+    },
+    streetNumberErrors () {
+            const errors = []
+            if (!this.$v.streetNumber.$dirty) return errors
+            !this.$v.streetNumber.required && errors.push('Campo richiesto.')
+            return errors
+    },
+    zipErrors () {
+            const errors = []
+            if (!this.$v.zip.$dirty) return errors
+            !this.$v.zip.required && errors.push('Campo richiesto.')
+            return errors
+    },
+    cityErrors () {
+            const errors = []
+            if (!this.$v.city.$dirty) return errors
+            !this.$v.city.required && errors.push('Campo richiesto.')
+            return errors
+    },
+    provinceErrors () {
+            const errors = []
+            if (!this.$v.province.$dirty) return errors
+            !this.$v.province.required && errors.push('Campo richiesto.')
+            return errors
+    },
+    regionErrors () {
+            const errors = []
+            if (!this.$v.region.$dirty) return errors
+            !this.$v.region.required && errors.push('Campo richiesto.')
+            return errors
+    },
+    countryErrors () {
+            const errors = []
+            if (!this.$v.country.$dirty) return errors
+            !this.$v.country.required && errors.push('Campo richiesto.')
+            return errors
+    },
+  },
   methods: {
     locationChanged(input) {
       console.log(input);

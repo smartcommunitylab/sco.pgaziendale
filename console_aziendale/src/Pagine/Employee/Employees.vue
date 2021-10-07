@@ -263,6 +263,7 @@ export default {
     },
     closeImportModal() {
       this.modalImportEmployeesOpen = false
+      this.$v.$reset();
     },
 
     copyFormValues() {
@@ -272,7 +273,12 @@ export default {
     },
 
     saveEmployee() {
-      EventBus.$emit("CHECK_EMPLOYEE_FORM");
+      if (!this.$v.$invalid) {
+        EventBus.$emit("CHECK_EMPLOYEE_FORM");       
+      } else{
+        this.$v.$touch();
+      }
+      
     },
     deleteConfirm() {
       this.deleteModalVisible = false;
