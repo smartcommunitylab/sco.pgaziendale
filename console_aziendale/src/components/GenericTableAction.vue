@@ -77,4 +77,5 @@ import { mapActions, mapState } from 'vuex'
 .elevation{
   z-index: 60;
 }
+
 </style>
