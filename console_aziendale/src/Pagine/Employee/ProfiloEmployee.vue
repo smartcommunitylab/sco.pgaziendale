@@ -38,7 +38,7 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn icon @click="editEmployee">
+            <v-btn icon @click="openModal({type:'employeeFormEdit', object:null})">
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
             <v-btn icon @click="openModal({type:'deleteEmployee', object:{actCompany: actualCompany, actEmployee: actualEmployee}})">
