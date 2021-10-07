@@ -118,10 +118,6 @@
                 transition="scale-transition"
                 offset-y
                 min-width="auto"
-                :error-messages="fromErrors"                                
-                required
-                @input="$v.from.$touch()"
-                @blur="$v.from.$touch()"
                 outlined
             >
                 <template v-slot:activator="{ on, attrs }">
@@ -132,6 +128,10 @@
                     readonly
                     v-bind="attrs"
                     v-on="on"
+                    :error-messages="fromErrors"                                
+                    required
+                    @input="$v.from.$touch()"
+                    @blur="$v.from.$touch()"
                 ></v-text-field>
                 </template>
                 <v-date-picker
@@ -162,10 +162,6 @@
                 transition="scale-transition"
                 offset-y
                 min-width="auto"
-                :error-messages="toErrors"                                
-                required
-                @input="$v.to.$touch()"
-                @blur="$v.to.$touch()"
                 outlined            
             >
                 <template v-slot:activator="{ on, attrs }">
@@ -176,6 +172,10 @@
                     readonly
                     v-bind="attrs"
                     v-on="on"
+                    :error-messages="toErrors"                                
+                    required
+                    @input="$v.to.$touch()"
+                    @blur="$v.to.$touch()"
 
                 ></v-text-field>
                 </template>
@@ -228,7 +228,12 @@
             <v-expansion-panels>
                 <v-expansion-panel>
                 <v-expansion-panel-header>
-                    <p class="text-subtitle-1">Privacy</p>
+                    <p class="text-subtitle-1" :class="{InvalidInput : privacyInvalid}">Privacy</p>
+                    <v-fade-transition 
+                      leave-absolute
+                    >
+                      <span v-if="privacyInvalid" class="InvalidInput">Campo richiesto.</span>
+                    </v-fade-transition>
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
                     <vue-editor
@@ -355,7 +360,8 @@ export default {
       listaApplications:['ciao','pippo'],
       menu:false,
       menu2:false,
-      regolamentoInvalid:false,
+      regolamentoInvalid:false,      
+      privacyInvalid:false,
       panel: [0],
       popup: {
           title: "",
@@ -455,16 +461,28 @@ export default {
           }else if (this.typeCall == "edit") {
               console.log(this.campaign);
               this.updateCampaign({companyId:this.adminCompany ? this.actualCompany.item.id : null, campaign: this.campaign});
-              this.closeModal();
-            
+              this.closeModal();        
         }
       } else{
         this.$v.$touch();
+      }
+
+      //Controlli per dare feedback sui campi Regolamento e Privacy
+      if(this.rules != ""){
+        this.regolamentoInvalid = false;
+      } else{
+        this.regolamentoInvalid = true;
+      }
+      if(this.privacy != ""){
+        this.privacyInvalid = false;
+      } else{
+        this.privacyInvalid = true;
       }
     },
     closeThisModal(){
         this.$v.$reset();
         this.closeModal();
+        this.regolamentoInvalid = false;
     },
   },
     computed: {
@@ -588,7 +606,7 @@ export default {
         },
         actualCampaign: function(){
             this.setModalData();
-        }
+        },
     },
 
   beforeDestroy() {
@@ -596,8 +614,6 @@ export default {
     EventBus.$off("NEW_CAMPAIGN_FORM");
     EventBus.$off("EDIT_CAMPAIGN_FORM");
   },
-
-  
 };
 </script>
 <style scoped>

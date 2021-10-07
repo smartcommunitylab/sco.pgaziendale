@@ -13,6 +13,10 @@
             :rules="[rules.required]"
             id="employeeName"
             v-model.trim="$v.name.$model"
+            :error-messages="nameErrors"                                
+            required
+            @input="$v.name.$touch()"
+            @blur="$v.name.$touch()"
             outlined
           ></v-text-field>
         </v-col>
@@ -27,6 +31,10 @@
             :rules="[rules.required]"
             id="employeeSurname"
             v-model.trim="$v.surname.$model"
+            :error-messages="surnameErrors"                                
+            required
+            @input="$v.surname.$touch()"
+            @blur="$v.surname.$touch()"
             outlined
           ></v-text-field>
         </v-col>
@@ -41,6 +49,10 @@
             :rules="[rules.required]"
             id="employeeCode"
             v-model.trim="$v.code.$model"
+            :error-messages="codeErrors"                                
+            required
+            @input="$v.code.$touch()"
+            @blur="$v.code.$touch()"
             outlined
           >
             <template v-slot:append>
@@ -70,6 +82,10 @@
             id="companyLocation"
             v-model.trim="$v.location.$model"
             :items="listaSedi"
+            :error-messages="locationErrors"                                
+            required
+            @input="$v.location.$touch()"
+            @blur="$v.location.$touch()"
             outlined
           ></v-autocomplete>
         </v-col>
@@ -78,11 +94,13 @@
   </form>
 </template>
 <script>
+import { validationMixin } from 'vuelidate';
 import { required } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
 import { mapState, mapActions } from "vuex";
 
 export default {
+  mixins: [validationMixin],
   data() {
     return {
       employee: {},
@@ -116,6 +134,30 @@ export default {
   computed: {
     ...mapState("company", ["actualCompany"]),
     ...mapState("location", ["allLocations", "actualLocation"]),
+    nameErrors () {
+        const errors = []
+        if (!this.$v.name.$dirty) return errors
+        !this.$v.name.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    surnameErrors () {
+        const errors = []
+        if (!this.$v.surname.$dirty) return errors
+        !this.$v.surname.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    codeErrors () {
+        const errors = []
+        if (!this.$v.code.$dirty) return errors
+        !this.$v.code.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    locationErrors () {
+        const errors = []
+        if (!this.$v.location.$dirty) return errors
+        !this.$v.location.required && errors.push('Campo richiesto.')
+        return errors
+    },
   },
   watch: {
     allLocations(locations) {

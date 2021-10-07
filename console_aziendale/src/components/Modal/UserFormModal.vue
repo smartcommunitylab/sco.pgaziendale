@@ -313,11 +313,12 @@ export default {
         return errors
     },
     usernameErrors () {
-        const errors = []
-        if (!this.$v.username.$dirty) return errors
-        !this.$v.username.required && errors.push('Campo richiesto.')
-        return errors
-    },
+            const errors = []
+            if (!this.$v.username.$dirty) return errors
+            !this.$v.username.email && errors.push('E-mail non valida.')
+            !this.$v.username.required && errors.push('E-mail richiesta.')
+            return errors
+        },
     phoneErrors () {
         const errors = []
         if (!this.$v.phone.$dirty) return errors
