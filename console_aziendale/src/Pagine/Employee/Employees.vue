@@ -7,7 +7,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="showModal('Aggiungi dipendente')"
+          @click="openModal({type:'employeeFormAdd', object:null})"
           class="mr-4"
         >
           <v-icon left>mdi-plus</v-icon>
@@ -39,8 +39,8 @@
         </div>
         <div v-else class="empty-list">Non ci sono Dipendenti</div>
       </v-col>
-      <!-- TODO: ProfiloDipendente -->
       <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
+      
       <!-- TODO: Modale Dipendente -->
       <modal v-show="deleteModalVisible">
         <template v-slot:header> <div class="text-danger"> Cancella Dipendente </div> </template>
@@ -142,6 +142,9 @@
             </v-btn>
         </template>
       </modal>
+
+
+
     </v-row>
   </div>
 </template>
@@ -237,6 +240,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions("modal", {openModal: 'openModal'}),
     ...mapActions("employee", {
       getAllEmployees: "getAll",
       addEmployeeCall: "addEmployee",
