@@ -37,6 +37,7 @@
           >
           </generic-table>
         </div>
+        <div v-else class="empty-list">Non ci sono Dipendenti</div>
       </v-col>
       <!-- TODO: ProfiloDipendente -->
       <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>

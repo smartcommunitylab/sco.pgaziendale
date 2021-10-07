@@ -11,6 +11,30 @@
       />
       
       <v-card-text>
+
+        <v-row class="mb-0">
+          <v-col
+            cols="12"
+            class="mb-0"
+          >
+            <p class="text-subtitle-2 ml-2 mb-2"> Mezzi associati </p>
+            <v-spacer></v-spacer>
+            <p class="text-body-2 ml-4 mb-0"> {{ getListOfMeans() }} </p>
+          </v-col>
+        </v-row>
+        <v-row class="my-0">
+          <v-col
+            cols="12"
+            class="mt-0 mb-5"
+          >
+            <p class="text-subtitle-2 ml-2 mb-2"> Aziende che hanno aderito </p>
+            <v-spacer></v-spacer>
+            <p class="text-body-2 ml-4 mb-0" v-for="company in actualCampaign.item.companies" :key="company.id">
+              {{ company.name }}
+            </p>
+          </v-col>
+        </v-row>
+
         <v-expansion-panels>
           <v-expansion-panel>
             <v-expansion-panel-header>
@@ -19,33 +43,7 @@
             <v-expansion-panel-content>
               {{ actualCampaign.item.description }}
             </v-expansion-panel-content>
-          </v-expansion-panel>
-          <v-expansion-panel>
-            <v-expansion-panel-header>
-              Periodo
-            </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <v-row>
-                <v-col cols="2" class="pr-0">
-                  <p class="font-weight-bold">
-                    Da:
-                  </p>
-                </v-col>
-                <v-col cols="3" class="pl-0">
-                  {{ moment(actualCampaign.item.from).format("DD-MM-YYYY") }} 
-                </v-col>
-                <v-spacer></v-spacer>
-                <v-col cols="2" class="pr-0">
-                  <p class="font-weight-bold">
-                    A:
-                  </p>
-                </v-col>
-                <v-col cols="3" class="pl-0">
-                  {{ moment(actualCampaign.item.to).format("DD-MM-YYYY") }}
-                </v-col>
-              </v-row>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
+          </v-expansion-panel>        
           <v-expansion-panel>
             <v-expansion-panel-header>
               Regolamento
@@ -64,24 +62,6 @@
               <div
                 v-html="actualCampaign.item.privacy"
               ></div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-          <v-expansion-panel>
-            <v-expansion-panel-header>
-              Mezzi associati alla campagna
-            </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              {{ getListOfMeans() }}
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-          <v-expansion-panel>
-            <v-expansion-panel-header>
-              Aziende che hanno aderito alla campagna
-            </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <div v-for="company in actualCampaign.item.companies" :key="company.id">
-                {{ company.name }}
-              </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
