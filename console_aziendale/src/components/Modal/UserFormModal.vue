@@ -13,9 +13,12 @@
                         placeholder="Nome *"
                         type="text"
                         name="name"
-                        :rules="[rules.required]"
                         id="name"
                         v-model.trim="$v.name.$model"
+                        :error-messages="nameErrors"                                
+                        required
+                        @input="$v.name.$touch()"
+                        @blur="$v.name.$touch()"
                         outlined
                     ></v-text-field>
                     </v-col>
@@ -27,9 +30,12 @@
                         placeholder="Cognome *"
                         type="text"
                         name="surname"
-                        :rules="[rules.required]"
                         id="surname"
                         v-model.trim="$v.surname.$model"
+                        :error-messages="surnameErrors"                                
+                        required
+                        @input="$v.surname.$touch()"
+                        @blur="$v.surname.$touch()"
                         outlined
                     ></v-text-field>
                     </v-col>
@@ -41,9 +47,12 @@
                         placeholder="Username *"
                         type="text"
                         name="username"
-                        :rules="userRules"
                         id="username"
                         v-model.trim="$v.username.$model"
+                        :error-messages="usernameErrors"                                
+                        required
+                        @input="$v.username.$touch()"
+                        @blur="$v.username.$touch()"
                         outlined
                     >
                         <template v-slot:append>
@@ -69,9 +78,12 @@
                         placeholder="Telefono *"
                         type="text"
                         name="phone"
-                        :rules="[rules.required]"
                         id="phone"
                         v-model.trim="$v.phone.$model"
+                        :error-messages="phoneErrors"                                
+                        required
+                        @input="$v.phone.$touch()"
+                        @blur="$v.phone.$touch()"
                         outlined
                     ></v-text-field>
                     </v-col>
@@ -79,15 +91,21 @@
                     <v-form>
                         <p class="text-subtitle-1">Ruoli</p>
                         <v-checkbox
-                        :rules="roleRules"
-                        v-model="roles"
+                        :error-messages="roleErrors"                                
+                        required
+                        @input="$v.roles.$touch()"
+                        @blur="$v.roles.$touch()"
+                        v-model="$v.roles.$model"
                         label="Amministratore Aziendale"
                         value="ROLE_COMPANY_ADMIN"
                         hide-details
                         ></v-checkbox>
                         <v-checkbox
-                        :rules="roleRules"
-                        v-model="roles"
+                        :error-messages="roleErrors"                                
+                        required
+                        @input="$v.roles.$touch()"
+                        @blur="$v.roles.$touch()"
+                        v-model="$v.roles.$model"
                         label="Mobility Manager"
                         value="ROLE_MOBILITY_MANAGER"
                         ></v-checkbox>
@@ -100,7 +118,7 @@
         <template v-slot:footer>
             <v-btn
                 text
-                @click="closeModal()"
+                @click="closeThisModal"
                 class="py-8 ml-8"
             >
                 Annulla
@@ -119,6 +137,7 @@
 
 
 <script>
+import { validationMixin } from 'vuelidate';
 import { required, email } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
 import { mapActions, mapState } from "vuex";
@@ -128,6 +147,7 @@ export default {
   components: {
       "modal": Modal,
   },
+  mixins: [validationMixin],
   props: {
       typeCall: String,
   },
@@ -147,17 +167,6 @@ export default {
       popup: {
         title: "",
       },
-      rules: {
-          required: value => !!value || 'Campo richiesto.',
-      },
-      provinceRules: [
-        value => this.isInListaProvince(value) || 'Campo richiesto.'
-      ],
-      userRules: [
-          v => !!v || 'Campo richiesto.', 
-          v => this.validateEmail(v) || 'Il campo username non risulta valido.',
-          v => this.isUsernameUnique(v) || 'Questo username risulta giá registrato.'
-      ],
     };
   },
 
@@ -204,6 +213,10 @@ export default {
             this.popup.title = "Modifica Utente";
         }
     },
+    closeThisModal(){
+        this.$v.$reset();
+        this.closeModal();
+    },
     save(){
         this.$v.$touch();
         if (this.$v.$invalid) {
@@ -224,11 +237,6 @@ export default {
             this.setModalData();
             this.closeModal();
         }
-    },
-    validateEmail(email) 
-    {
-        var re = /\S+@\S+\.\S+/;
-        return re.test(email);
     },
     isUsernameUnique(value) {
       console.log(value);
@@ -292,11 +300,37 @@ export default {
     ...mapState("modal", ["type","object"]),
     ...mapState("company", ["adminCompany"]),
     ...mapState("company", ["adminCompany", "adminCompanyUsers"]),
-    roleRules() {
-      return [
-        this.roles.length > 0 || "Seleziona almeno un ruolo."
-      ];
+    nameErrors () {
+        const errors = []
+        if (!this.$v.name.$dirty) return errors
+        !this.$v.name.required && errors.push('Campo richiesto.')
+        return errors
     },
+    surnameErrors () {
+        const errors = []
+        if (!this.$v.surname.$dirty) return errors
+        !this.$v.surname.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    usernameErrors () {
+        const errors = []
+        if (!this.$v.username.$dirty) return errors
+        !this.$v.username.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    phoneErrors () {
+        const errors = []
+        if (!this.$v.phone.$dirty) return errors
+        !this.$v.phone.required && errors.push('Campo richiesto.')
+        return errors
+    },
+    roleErrors () {
+        const errors = []
+        if (!this.$v.roles.$dirty) return errors
+        !this.$v.roles.required && errors.push('Seleziona almeno un ruolo.')
+        return errors
+    },
+        
   },
   mounted() {
     EventBus.$on("EDIT_USER_FORM", (user) => {
