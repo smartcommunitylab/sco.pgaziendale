@@ -20,7 +20,7 @@
       :header-props="{'sortByText': 'Ordina per'}"
       :footer-props="{
         'items-per-page-text':'righe per pagina',
-        /*'page-text': */
+        pageText: '{0}-{1} di {2}'
       }"
       no-results-text="La ricerca non ha dato risultati"
       no-data-text="Non ci sono dati inseriti"
@@ -71,4 +71,5 @@ export default {
 .elevation{
   z-index: 60;
 }
+
 </style>
