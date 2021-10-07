@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="4"  v-bind:class="{ 'bg-colonna': isAdmin}">
+  <v-col cols="4">
     <v-card elevation="2" class="frosted-glass">
         <v-card-title>{{ actualCompany.item.name }}</v-card-title>
         
@@ -134,11 +134,5 @@ export default {
   background-color: rgba(255, 255, 255, .15);
   border-color: transparent;
   backdrop-filter: blur(5px);
-}
-
-.bg-colonna{
-  background-image: url("../../assets/images/bg-foglie.png");
-  background-size: 200px;
-  background-position: 250px 200px;
 }
 </style>

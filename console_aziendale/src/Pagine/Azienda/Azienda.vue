@@ -2,7 +2,7 @@
   <div>
     <v-row>
       <v-col cols="12">
-        <profilo-azienda class="profiloAziendaMargin"></profilo-azienda>
+        <profilo-azienda></profilo-azienda>
       </v-col>
     </v-row>
     <!-- MODALE MODIFICA DATI PROFILO AZIENDA -->
@@ -118,9 +118,4 @@ export default {
 .selected {
   @apply bg-background;
 }
-
-.profiloAziendaMargin{
-  margin-top: 121px;
-}
-
 </style>
