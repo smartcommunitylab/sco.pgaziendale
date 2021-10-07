@@ -321,7 +321,7 @@ export default {
   },
   created() {
     this.initUser();
-    this.popup.title = "Aggiungi Utente";
+    this.setModalData();
   },
   watch: {
     typeCall: function(){

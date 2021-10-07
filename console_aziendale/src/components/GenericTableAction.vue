@@ -55,7 +55,7 @@ import { mapActions, mapState } from 'vuex'
         items: Array,
         headers: Array,
         title: String
-            },
+    },
     data() {
         return {
         search: '',
