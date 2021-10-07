@@ -67,13 +67,13 @@ export default {
     ...mapActions("modal", {openModal:"openModal"}),
 
   },
-
   mounted() {
     if (this.adminCompany) {
       this.getUsers(this.adminCompany.item);
       this.getAllCampaigns(this.adminCompany.item.id);
     }
-  }
+  },
+  
 };
 </script>
 
