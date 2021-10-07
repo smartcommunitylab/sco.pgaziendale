@@ -105,9 +105,13 @@ function translateRole(roles) {
   }
   function computedNewRoles(items) {
     if (items) {
-      items.forEach((element) => {
-        element.rolesComputed = translateRole(element.roles);
-      });
+        if(Array.isArray(items)){
+            items.forEach((element) => {
+                element.rolesComputed = translateRole(element.roles);
+            });
+        }else{
+            items.rolesComputed = translateRole(items.roles);
+        }
     }
     return items;
   }
@@ -132,10 +136,12 @@ function getUsers(company){
 function addUser(companyId, user) {
     return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_USERS_API, user).then(
         res => {
-            if (res && res.data && res.data) {
-                return Promise.resolve(res.data);
+            if (res && res.data ) {
+                let retData = computedNewRoles(res.data)
+                return Promise.resolve(retData);
             }
             else return Promise.reject(null);
+
         }, err => {
             return Promise.reject(err);
         }
@@ -146,10 +152,12 @@ function addUser(companyId, user) {
 function updateUser(companyId, user) {
     return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_USERS_API , user).then(
         res => {
-            if (res && res.data) {
-                return Promise.resolve(res.data);
+            if (res && res.data ) {
+                let retData = computedNewRoles(res.data)
+                return Promise.resolve(retData);
             }
             else return Promise.reject(null);
+
         }, err => {
             return Promise.reject(err);
         }
