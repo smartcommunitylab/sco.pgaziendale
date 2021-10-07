@@ -19,7 +19,8 @@
         <campaign-form-modal v-if="modalType == 'campaignFormEdit'" typeCall="edit"/>
         <delete-modal v-if="modalType == 'deleteCampaign'" typeCall="campaign"/>
         <associate-form-modal v-if="modalType == 'associateForm'"/>
-        
+        <dissociate-form-modal v-if="modalType == 'dissociateForm'"/>
+
         <!-- MODALI per gli Employee -->
         <employee-form-modal v-if="modalType == 'employeeFormAdd'" typeCall="add"/>
         <employee-form-modal v-if="modalType == 'employeeFormEdit'" typeCall="edit"/>
@@ -42,6 +43,7 @@ import AssociateFormModal from "@/components/Modal/AssociateFormModal.vue";
 import EmployeeFormModal from "@/components/Modal/EmployeeFormModal.vue";
 import LocationFormModal from "@/components/Modal/LocationFormModal.vue";
 import ChangePasswordModal from "@/components/Modal/ChangePasswordModal.vue";
+import DissociateFormModal from '@/components/Modal/DissociateFormModal.vue';
 
 export default {
     components: {
@@ -54,6 +56,7 @@ export default {
         "employee-form-modal": EmployeeFormModal,
         "location-form-modal": LocationFormModal,
         "change-password-modal": ChangePasswordModal,
+        "dissociate-form-modal": DissociateFormModal,
     },
     props: {
         modalType: String,

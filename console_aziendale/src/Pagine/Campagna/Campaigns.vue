@@ -3,6 +3,12 @@
     <v-row>
       <v-col>
         <v-btn
+          v-if="
+            role == 'ROLE_COMPANY_ADMIN' ||
+            (role == 'ROLE_ADMIN' && adminCompany != null) ||
+            (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+          "
+          class="mr-4"
           x-large
           color="secondary"
           rounded
@@ -12,6 +18,23 @@
           <v-icon left>mdi-plus</v-icon>
           AGGIUNGI
         </v-btn>
+
+        <v-btn
+          v-if="
+            role == 'ROLE_COMPANY_ADMIN' ||
+            (role == 'ROLE_ADMIN' && adminCompany != null) ||
+            (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+          "
+          x-large
+          color="secondary"
+          rounded
+          elevation="6"
+          @click="openModal({type:'associateForm', object:null})"
+        >
+          <v-icon left>mdi-wrench</v-icon>
+          ASSOCIA / DISASSOCIA
+        </v-btn>
+
       </v-col>
     </v-row>
     <v-row>
