@@ -2,33 +2,10 @@
   <div>
     <v-row>
       <v-col cols="12">
-        <profilo-azienda class="profiloAziendaMargin"></profilo-azienda>
+        <profilo-azienda></profilo-azienda>
       </v-col>
     </v-row>
-    <!-- MODALE MODIFICA DATI PROFILO AZIENDA -->
-    <modal v-show="editModalVisible">
-      <template v-slot:header> {{ popup.title }} </template>
-      <template v-slot:body>
-        <azienda-form />
-      </template>
-      <template v-slot:footer>
-        <v-btn
-          text
-          @click="closeModal"
-          class="py-8 ml-8"
-        >
-          Annulla
-        </v-btn>
-        <v-btn
-          color="primary"
-          text
-          @click="saveCompany"
-          class="py-8 ml-8"
-        >
-          Salva
-        </v-btn>
-      </template>
-    </modal>
+    
 
   </div>
 </template>
@@ -37,16 +14,12 @@
 import { mapActions, mapState } from "vuex";
 import ProfiloAzienda from "./ProfiloAzienda.vue";
 import EventBus from "@/components/eventBus";
-import Modal from "@/components/Modal.vue";
-import AziendaForm from "./AziendaForm.vue";
 
 export default {
   name: "Azienda",
   components: {
-    ProfiloAzienda,
-    Modal,
-    AziendaForm,
-  },
+    ProfiloAzienda
+      },
   data: function () {
     return {
             editModalVisible: false,
@@ -118,9 +91,4 @@ export default {
 .selected {
   @apply bg-background;
 }
-
-.profiloAziendaMargin{
-  margin-top: 121px;
-}
-
 </style>
