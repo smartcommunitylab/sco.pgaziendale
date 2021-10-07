@@ -13,11 +13,14 @@
                 placeholder="Id *"
                 type="text"
                 name="campaignId"
-                :rules="[inputRules.required]"
                 id="campaignId"
                 v-model.trim="$v.id.$model"
                 outlined
-                
+                :error-messages="idErrors"                          
+                required
+                @input="$v.id.$touch()"
+                @blur="$v.id.$touch()"
+
                 :disabled="edit"
             >
                 <template v-slot:append>
@@ -47,6 +50,11 @@
                 id="campaignLogo"
                 v-model.trim="$v.logo.$model"
                 outlined
+                :error-messages="logoErrors"                                
+                required
+                @input="$v.logo.$touch()"
+                @blur="$v.logo.$touch()"
+
             >
                 <template v-slot:append>
                 <v-tooltip
@@ -71,10 +79,14 @@
                 placeholder="Titolo *"
                 type="text"
                 name="campaignTitle"
-                :rules="[inputRules.required]"
                 id="campaignTitle"
                 v-model.trim="$v.title.$model"
-                outlined            
+                outlined 
+                :error-messages="titleErrors"                                
+                required
+                @input="$v.title.$touch()"
+                @blur="$v.title.$touch()"
+           
             ></v-text-field>
             </v-col>
             <v-col
@@ -85,10 +97,14 @@
                 placeholder="Descrizione *"
                 type="text"
                 name="campaignDescription"
-                :rules="[inputRules.required]"
                 id="campaignDescription"
                 v-model.trim="$v.description.$model"
-                outlined            
+                outlined   
+                :error-messages="descriptionErrors"                                
+                required
+                @input="$v.description.$touch()"
+                @blur="$v.description.$touch()"
+         
             ></v-text-field>
             </v-col>
             <v-col
@@ -102,7 +118,10 @@
                 transition="scale-transition"
                 offset-y
                 min-width="auto"
-                :rules="[inputRules.required]"
+                :error-messages="fromErrors"                                
+                required
+                @input="$v.from.$touch()"
+                @blur="$v.from.$touch()"
                 outlined
             >
                 <template v-slot:activator="{ on, attrs }">
@@ -143,7 +162,10 @@
                 transition="scale-transition"
                 offset-y
                 min-width="auto"
-                :rules="[inputRules.required]"
+                :error-messages="toErrors"                                
+                required
+                @input="$v.to.$touch()"
+                @blur="$v.to.$touch()"
                 outlined            
             >
                 <template v-slot:activator="{ on, attrs }">
@@ -154,6 +176,7 @@
                     readonly
                     v-bind="attrs"
                     v-on="on"
+
                 ></v-text-field>
                 </template>
                 <v-date-picker
@@ -179,10 +202,22 @@
             <v-expansion-panels>
                 <v-expansion-panel>
                 <v-expansion-panel-header>
-                    <p class="text-subtitle-1">Regole</p>
+                    <p class="text-subtitle-1" :class="{InvalidInput : regolamentoInvalid}">Regole</p>
+                    <v-fade-transition 
+                      leave-absolute
+                    >
+                      <span v-if="regolamentoInvalid" class="InvalidInput">Campo richiesto.</span>
+                    </v-fade-transition>
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
-                    <vue-editor v-model="$v.rules.$model"></vue-editor>
+                    <vue-editor 
+                      v-model="$v.rules.$model"
+                      :error-messages="rulesErrors"                                
+                      required
+                      @input="$v.rules.$touch()"
+                      @blur="$v.rules.$touch()"
+                    >
+                    </vue-editor>
                 </v-expansion-panel-content>
                 </v-expansion-panel>
             </v-expansion-panels>
@@ -196,7 +231,14 @@
                     <p class="text-subtitle-1">Privacy</p>
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
-                    <vue-editor v-model="$v.privacy.$model"></vue-editor>
+                    <vue-editor
+                      v-model="$v.privacy.$model"
+                      :error-messages="privacyErrors"                                
+                      required
+                      @input="$v.privacy.$touch()"
+                      @blur="$v.privacy.$touch()"
+                    >
+                    </vue-editor>
                 </v-expansion-panel-content>
                 </v-expansion-panel>
             </v-expansion-panels>         
@@ -212,7 +254,10 @@
                     v-model="$v.means.$model"
                     :label= mean.text
                     :value="mean.value"
-                    :rules="meanRules"
+                    :error-messages="meansErrors"                                
+                    required
+                    @input="$v.means.$touch()"
+                    @blur="$v.means.$touch()"
                     hide-details
                 ></v-checkbox>
                 </div>
@@ -239,10 +284,14 @@
             <v-autocomplete
                 label="Applicazione"
                 placeholder="Applicazione *"
-                :rules="[inputRules.required]"
                 v-model.trim="$v.application.$model"
                 :items="listaApplications"
                 outlined
+                :error-messages="applicationErrors"                                
+                required
+                @input="$v.application.$touch()"
+                @blur="$v.application.$touch()"
+
             ></v-autocomplete>
             </v-col>
         </v-row>
@@ -271,6 +320,7 @@
 
 
 <script>
+import { validationMixin } from 'vuelidate';
 import { required } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
 import { campaignService } from "../../services";
@@ -281,6 +331,7 @@ export default {
   props:{
       typeCall: String,
   },
+  mixins: [validationMixin],
   components:{
     "modal": Modal,
     },
@@ -304,9 +355,7 @@ export default {
       listaApplications:['ciao','pippo'],
       menu:false,
       menu2:false,
-      inputRules: {
-        required: value => !!value || 'Campo richiesto.',
-      },
+      regolamentoInvalid:false,
       panel: [0],
       popup: {
           title: "",
@@ -398,17 +447,20 @@ export default {
     },
     saveCampaign() {    
         //EventBus.$emit("CHECK_COMPANY_FORM");
-        this.createCampaign();
-        if(this.typeCall == "add"){
-            this.addCampaign({companyId: this.adminCompany ? this.actualCompany.item.id : null, campaign: this.campaign});
-            this.closeModal();
-        }else if (this.typeCall == "edit") {
-            console.log(this.campaign);
-            this.updateCampaign({companyId:this.adminCompany ? this.actualCompany.item.id : null, campaign: this.campaign});
-            this.closeModal();
+        if (!this.$v.$invalid) {
+          this.createCampaign();
+          if(this.typeCall == "add"){
+              this.addCampaign({companyId: this.adminCompany ? this.actualCompany.item.id : null, campaign: this.campaign});
+              this.closeModal();
+          }else if (this.typeCall == "edit") {
+              console.log(this.campaign);
+              this.updateCampaign({companyId:this.adminCompany ? this.actualCompany.item.id : null, campaign: this.campaign});
+              this.closeModal();
             
         }
+      } else{
         this.$v.$touch();
+      }
     },
     closeThisModal(){
         this.$v.$reset();
@@ -424,6 +476,72 @@ export default {
         this.means.length > 0 || "Seleziona almeno un mezzo."
       ];
     },
+    nameErrors () {
+            const errors = []
+            if (!this.$v.name.$dirty) return errors
+            !this.$v.name.required && errors.push('Campo richiesto.')
+            return errors
+        },
+        idErrors () {
+            const errors = []
+            if (!this.$v.id.$dirty) return errors
+            !this.$v.id.required && errors.push('Campo richiesto.')
+            return errors
+        },
+        logoErrors () {
+            const errors = []
+            if (!this.$v.logo.$dirty) return errors
+            !this.$v.logo.required && errors.push('Campo richiesto.')
+            return errors
+        },
+        titleErrors () {
+            const errors = []
+            if (!this.$v.title.$dirty) return errors
+            !this.$v.title.required && errors.push('Campo richiesto.')
+            return errors
+        },
+        descriptionErrors () {
+            const errors = []
+            if (!this.$v.description.$dirty) return errors
+            !this.$v.description.required && errors.push('Campo richiesto.')
+            return errors
+        },
+        fromErrors () {
+            const errors = []
+            if (!this.$v.from.$dirty) return errors
+            !this.$v.from.required && errors.push('Campo richiesto.')
+            return errors
+        },
+        toErrors () {
+            const errors = []
+            if (!this.$v.to.$dirty) return errors
+            !this.$v.to.required && errors.push('Campo richiesto.')
+            return errors
+        },
+        rulesErrors () {
+            const errors = []
+            if (!this.$v.rules.$dirty) return errors
+            !this.$v.rules.required && errors.push('Seleziona almeno un mezzo.')
+            return errors
+        },
+        privacyErrors () {
+            const errors = []
+            if (!this.$v.privacy.$dirty) return errors
+            !this.$v.privacy.required && errors.push('Seleziona almeno un mezzo.')
+            return errors
+        },
+        meansErrors () {
+            const errors = []
+            if (!this.$v.means.$dirty) return errors
+            !this.$v.means.required && errors.push('Seleziona almeno un mezzo.')
+            return errors
+        },
+        applicationErrors () {
+            const errors = []
+            if (!this.$v.application.$dirty) return errors
+            !this.$v.application.required && errors.push('Campo richiesto.')
+            return errors
+        },
   },
   mounted() {
     if (this.role == 'ROLE_ADMIN' && this.adminCompany == null){
@@ -478,6 +596,12 @@ export default {
     EventBus.$off("NEW_CAMPAIGN_FORM");
     EventBus.$off("EDIT_CAMPAIGN_FORM");
   },
+
+  
 };
 </script>
-<style scoped></style>
+<style scoped>
+.InvalidInput{
+  color: #b71c1c;
+}
+</style>
