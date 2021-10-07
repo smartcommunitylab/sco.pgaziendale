@@ -1,20 +1,27 @@
 <template>
-    <v-snackbar v-model="snackbar" class="up">
-        {{ alert.message }}
-        <v-btn
-            color="primary"
-            text
-            @click="snackbar = false"
-        >
-            Chiudi
-        </v-btn>
-    </v-snackbar>
+    <div v-if="snackbarOpen">
+        <v-snackbar v-model="snackbar" class="up">
+            {{ alert.message }}
+            <v-btn
+                color="primary"
+                text
+                @click="snackbarOpen = false"
+            >
+                Chiudi
+            </v-btn>
+        </v-snackbar>
+    </div>
 </template>
 
 <script>
 import { mapActions, mapState } from "vuex";
 
 export default {
+    data() {
+        return{
+            snackbarOpen: true,
+        }
+    },
     computed: {
         snackbar: Boolean,
         text: String,
