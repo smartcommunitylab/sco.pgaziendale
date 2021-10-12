@@ -95,9 +95,6 @@ export default {
     getListOfMeans() {
       return campaignService.getTextOfMeans(this.actualCampaign.item.means);
     },
-
-    editCampaign() {
-    },
   },
 
   computed: {

@@ -110,14 +110,10 @@ export default {
     return {
       tableTitle: "Campagne",
       headerColumns: [{text:"Nome", value:"title"}, {text:"Inizio", value:"from"}, {text:"Fine", value:"to"}, {text:"Stato", value:"active"}],
-      associateCampaignModalVisible:false,
-      editModalVisible: false,
-      deleteModalVisible: false,
       currentCampaignSelected: undefined,
       popup: {
         title: "",
       },
-      submitStatus: null,
     };
   },
   
@@ -142,6 +138,8 @@ export default {
         this.currentCampaignSelected = campaign;
       }
     },
+
+    //IMPORTANTE PER LA TRADUZIONE
     getStatus: function (status) {
       let toRtn = "";
       if (status) {
@@ -151,48 +149,6 @@ export default {
       }
 
       return toRtn;
-    },
-    formatDate: function (date) {
-      const moment = require("moment");
-
-      moment.locale("it");
-
-      return moment(date).format("DD MM YYYY");
-    },
-    showModal(title) {
-      if (this.role == 'ROLE_ADMIN' && !this.adminCompany)
-      {
-        this.editModalVisible = true;
-        this.newCampaign = true;
-      this.popup = {
-        title: title,
-      };
-      }
-      else {
-        console.log('associa campagna ad azienda');
-        this.popup = {
-        title: "Campagne pubbliche",
-      };
-        this.associateCampaignModalVisible=true;
-      }
-    },
-    closeModal() {
-      this.editModalVisible = false;
-      this.associateCampaignModalVisible = false;
-      this.newCampaign = false;
-    },
-    closeDeleteModal() {
-      this.deleteModalVisible = false;
-    },
-    saveCampaign() {
-      //check fields
-    },
-    deleteConfirm() {
-      this.deleteModalVisible = false;
-      this.deleteCampaignCall({
-        companyId: this.adminCompan ? this.actualCompany.item.id : null,
-        campaignId: this.actualCampaign.item.id,
-      });
     },
   },
 
