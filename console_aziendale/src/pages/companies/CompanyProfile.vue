@@ -91,7 +91,4 @@ export default {
 </script>
 
 <style>
-.selected {
-  @apply bg-background;
-}
 </style>

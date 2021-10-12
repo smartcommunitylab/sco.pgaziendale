@@ -162,9 +162,7 @@ export default {
   display: inline-block;
   width: 40%;
 }
-.selected {
-  @apply bg-background;
-}
+
 .form-group--error {
   /* color: red; */
   animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
