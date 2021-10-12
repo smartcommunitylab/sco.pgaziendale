@@ -7,7 +7,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="showModal('Aggiungi sede')"
+          @click="openModal({type:'locationFormAdd', object:null})"
           class="mr-4"
         >
           <v-icon left>mdi-plus</v-icon>
@@ -18,7 +18,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="modalImportLocationsOpen = true"
+          @click="openModal({type:'locationImport', object:null})"
         >
           <v-icon left>mdi-file-import</v-icon>
           IMPORTA
@@ -41,56 +41,7 @@
       <!-- PROFILO LOCATION -->
       <profilo-location v-if="actualLocation && actualLocation.item"/> 
     </v-row>
-      <!-- MODALE LOCATION -->
-    <modal v-show="deleteModalVisible">
 
-    <template v-slot:header> <div class="text-danger">Cancella Sede </div></template>
-    <template v-slot:body> 
-      <p class="text-subtitle-1">Sei sicuro di voler cancellare la sede?</p>
-    </template>
-    <template v-slot:footer>
-      <v-btn
-          text
-          @click="closeDeleteModal"
-          class="py-8 ml-8"
-        >
-          Annulla
-        </v-btn>
-        <v-btn
-          color="error"
-          text
-          @click="deleteConfirm"
-          class="py-8 ml-8"
-        >
-          Conferma
-        </v-btn>
-    </template>
-    </modal>
-    <modal v-show="editModalVisible">
-
-      <template v-slot:header > {{ popup.title }} </template>
-
-      <template v-slot:body>
-        <location-form />
-      </template>
-      <template v-slot:footer>
-        <v-btn
-            text
-            @click="closeModal"
-            class="py-8 ml-8"
-          >
-            Annulla
-          </v-btn>
-          <v-btn
-            color="primary"
-            text
-            @click="saveLocation"
-            class="py-8 ml-8"
-          >
-            Salva
-          </v-btn>
-      </template>
-    </modal>
     <modal v-show="modalImportLocationsOpen">
 
       <template v-slot:header> Importa Sedi </template>
@@ -118,7 +69,7 @@
               ref="file"
               v-model="fileUploaded"
               accept=".csv"
-              @change="onFileUploaderChange"
+              @change="/*onFileUploaderChange*/"
               outlined
               dense
             ></v-file-input>
@@ -154,11 +105,10 @@ import { mapState, mapActions } from "vuex";
 import GenericTable from "@/components/GenericTable.vue";
 import Modal from "@/components/Modal.vue";
 import EventBus from "@/components/eventBus";
-import LocationForm from "./LocationForm.vue";
 
 export default {
   name: "Locations",
-  components: { ProfiloLocation, GenericTable, Modal, LocationForm },
+  components: { ProfiloLocation, GenericTable, Modal },
   data: function () {
     return {
       headerColumns: [{text:"Identificativo", value:"id"}, {text:"Cittá", value:"city"}, {text:"Indirizzo", value:"address"}, {text:"Numero", value:"streetNumber"}],
@@ -240,6 +190,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions("modal", {openModal:'openModal'}),
     ...mapActions("location", {
       getAllLocations: "getAllLocations",
       selectActualLocation: "selectActualLocation",

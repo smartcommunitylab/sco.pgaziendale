@@ -24,11 +24,13 @@
         <!-- MODALI per gli Employee -->
         <employee-form-modal v-if="modalType == 'employeeFormAdd'" typeCall="add"/>
         <employee-form-modal v-if="modalType == 'employeeFormEdit'" typeCall="edit"/>
+        <import-modal v-if="modalType == 'employeeImport'" typeCall='employee'/>
         <delete-modal v-if="modalType == 'deleteEmployee'" typeCall="employee"/>
 
         <!-- MODALI per le Location -->
         <location-form-modal v-if="modalType == 'locationFormAdd'" typeCall="add"/>
         <location-form-modal v-if="modalType == 'locationFormEdit'" typeCall="edit"/>
+        <import-modal v-if="modalType == 'locationImport'" typeCall='location'/>
         <delete-modal v-if="modalType == 'deleteLocation'" typeCall="location"/>
     </div>
 </template>
@@ -44,6 +46,7 @@ import EmployeeFormModal from "@/components/Modal/EmployeeFormModal.vue";
 import LocationFormModal from "@/components/Modal/LocationFormModal.vue";
 import ChangePasswordModal from "@/components/Modal/ChangePasswordModal.vue";
 import DissociateFormModal from '@/components/Modal/DissociateFormModal.vue';
+import ImportModal from '@/components/Modal/ImportModal.vue';
 
 export default {
     components: {
@@ -57,6 +60,7 @@ export default {
         "location-form-modal": LocationFormModal,
         "change-password-modal": ChangePasswordModal,
         "dissociate-form-modal": DissociateFormModal,
+        "import-modal": ImportModal,
     },
     props: {
         modalType: String,

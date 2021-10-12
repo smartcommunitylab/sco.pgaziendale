@@ -81,7 +81,7 @@
         <v-card-actions>
             <v-spacer></v-spacer>
 
-            <v-btn icon @click="editLocation">
+            <v-btn icon @click="openModal({type:'locationFormEdit', object: null})">
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
 

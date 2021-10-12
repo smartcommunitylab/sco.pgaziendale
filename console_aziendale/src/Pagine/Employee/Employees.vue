@@ -18,7 +18,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="modalImportEmployeesOpen = true"
+          @click="openModal({type:'employeeImport', object:null})"
         >
           <v-icon left>mdi-file-import</v-icon>
           IMPORTA
