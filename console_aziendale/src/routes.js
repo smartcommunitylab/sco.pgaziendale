@@ -1,65 +1,67 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Aziende from "./Pagine/Azienda/Aziende.vue"
-import Azienda from "./Pagine/Azienda/Azienda.vue"
-import Login from "./Pagine/Login/Login.vue"
-import Locations from "./Pagine/Location/Locations.vue"
-import Stats from "./Pagine/Stat/Stats.vue"
-import GestioneDipendenti from "./Pagine/Employee/Employees.vue"
-import GestioneCampagne from "./Pagine/Campagna/Campaigns.vue"
-import GestioneUtenti from "./Pagine/Utenti/Utenti.vue"
-import NotFound from "./Pagine/NotFound.vue"
-import ResetPwd from "./Pagine/Login/ResetPwd.vue"
+import Aziende from "@/pages/companies/Companies.vue"
+import Azienda from "@/pages/companies/CompanyProfile.vue"
+import Login from "@/pages/login/Login.vue"
+import Locations from "@/pages/locations/Locations.vue"
+import Stats from "@/pages/stats/Stats.vue"
+import GestioneDipendenti from "@/pages/employees/Employees.vue"
+import GestioneCampagne from "@/pages/campaigns/Campaigns.vue"
+import GestioneUtenti from "@/pages/users/Users.vue"
+import NotFound from "@/pages/NotFound.vue"
+import ResetPwd from "@/pages/login/ResetPwd.vue"
+
 Vue.use(Router);
+
 const routes = [
     {
       path: '/',
-      redirect: '/login' 
+      redirect: '/Login' 
     },
     {
-      path: '/login',
-      name: 'login',
+      path: '/Login',
+      name: 'Login',
       component: Login
     },
     {
-      path: '/resetPwd',
-      name: 'resetpwd',
+      path: '/ResetPassword',
+      name: 'ResetPassword',
       component: ResetPwd
     },
     
     {
-      path: '/aziende',
-      name: 'aziende',
+      path: '/GestioneAziende',
+      name: 'GestioneAziende',
       component: Aziende
     },
     {
-        path: '/locations',
-        name: 'locations',
+        path: '/GestioneSedi',
+        name: 'GestioneSedi',
         component: Locations
     },
     {
-        path: '/dipendenti',
-        name: 'dipendenti',
+        path: '/GestioneDipendenti',
+        name: 'GestioneDipendenti',
         component: GestioneDipendenti
     },
     {
-      path: '/gestioneUtenti',
-      name: 'gestioneUtenti',
+      path: '/GestioneUtenti',
+      name: 'GestioneUtenti',
       component: GestioneUtenti
   },
     {
-      path: '/stats',
-      name: 'stats',
+      path: '/Statistiche',
+      name: 'Statistiche',
       component: Stats
   },
   {
-    path: '/gestionecampagne',
-    name: 'gestionecampagne',
+    path: '/GestioneCampagne',
+    name: 'GestioneCampagne',
     component: GestioneCampagne
 },
 {
-  path: '/azienda',
-  name: 'azienda',
+  path: '/ProfiloAzienda',
+  name: 'ProfiloAzienda',
   component: Azienda
 },
     { 
@@ -78,12 +80,12 @@ const routes = [
     routes})
     router.beforeEach((to, from, next) => {
       // redirect to login page if not logged in and trying to access a restricted page
-      const publicPages = ['/login'];
+      const publicPages = ['/Login'];
       const authRequired = !publicPages.includes(to.path);
       const loggedIn = localStorage.getItem('user');
     
-      if (authRequired && !loggedIn && to.name!='resetpwd') {
-        return next('/login');
+      if (authRequired && !loggedIn && to.name!='ResetPassword') {
+        return next('/Login');
       }
     
       next();

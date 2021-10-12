@@ -11,7 +11,7 @@ e la snackbar.
       color="primary"
       dark
       clipped-left
-      v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"
+      v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'"
     >
       <!-- TODO: Da modificare il link da dove pesca il logo, al momento provvisorio -->
       <div class="d-flex align-center">
@@ -35,7 +35,7 @@ e la snackbar.
       </v-btn>
     </v-app-bar>
 
-    <navigation-drawer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
+    <navigation-drawer v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'" />
 
     <v-main class="">
       <v-container class="p-0 m-0 blockScroll">
@@ -50,22 +50,22 @@ e la snackbar.
         <modal-center v-show="active" :modalType="type" :modalObject="object"/>
         <!-- FINE ESEMPIO: Nuovo componente modale-->
 
-        <router-view class="min-h-screen px-5 py-5 pb-10" v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
+        <router-view class="min-h-screen px-5 py-5 pb-10" v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'" />
         <router-view class="min-h-screen" v-else />
       </v-container>
     </v-main>
 
-    <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
+    <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'"/>
 
   </v-app>
 </template>
 
 <script>
-import NavigationDrawer from "./components/NavigationDrawer/NavigationDrawer.vue";
+import NavigationDrawer from "@/components/navigation-drawer/NavigationDrawer.vue";
 import { mapActions, mapState } from "vuex";
 import Footer from "@/components/Footer"
 import Snackbar from "@/components/Snackbar.vue"
-import ModalCenter from "@/components/ModalCenter.vue"
+import ModalCenter from "@/components/modal/ModalCenter.vue"
 
 export default {
   name: 'App',
