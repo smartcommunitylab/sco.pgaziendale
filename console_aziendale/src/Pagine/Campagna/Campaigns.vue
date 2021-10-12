@@ -4,9 +4,9 @@
       <v-col>
         <v-btn
           v-if="
-            role == 'ROLE_COMPANY_ADMIN' ||
+            !(role == 'ROLE_COMPANY_ADMIN' ||
             (role == 'ROLE_ADMIN' && adminCompany != null) ||
-            (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+            (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null))
           "
           class="mr-4"
           x-large
@@ -99,13 +99,11 @@
 import { mapState, mapActions } from "vuex";
 import ProfiloCampagna from "./ProfiloCampaign.vue";
 import EventBus from "@/components/eventBus";
-import Modal from "@/components/Modal.vue";
-import GenericTable from "@/components/GenericTable.vue";
-import CampaignForm from "./CampaignForm.vue";
-import AssociateForm from "./AssociateForm.vue";
+import Modal from "@/components/modal/ModalStructure.vue";
+import GenericTable from "@/components/data-table/GenericTable.vue";
  
 export default {
-  components: { ProfiloCampagna, Modal, GenericTable ,CampaignForm, AssociateForm},
+  components: { ProfiloCampagna, Modal, GenericTable },
 
   name: "GestioneCampagne",
 
