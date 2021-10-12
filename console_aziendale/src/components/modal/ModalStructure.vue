@@ -77,7 +77,6 @@ export default {
       this.toggleBodyClass('addClass', 'modal-show');
     },
     close() {
-      this.$emit('close');
       console.log('modal detroyed');
       this.toggleBodyClass('removeClass', 'modal-hide');
     },

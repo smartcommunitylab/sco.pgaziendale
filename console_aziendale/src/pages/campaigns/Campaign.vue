@@ -84,7 +84,6 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-import EventBus from "@/components/eventBus";
 import { campaignService } from "@/services";
 
 export default {
@@ -98,7 +97,6 @@ export default {
     },
 
     editCampaign() {
-      EventBus.$emit("EDIT_CAMPAIGN", this.actualCampaign);
     },
   },
 

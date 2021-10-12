@@ -60,7 +60,6 @@ export default {
               campaign: campaign,
               });
           }
-          this.$emit("update:allCampaigns.items", this.allCampaigns.items);
       },
   },
   

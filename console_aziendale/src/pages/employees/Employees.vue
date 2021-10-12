@@ -153,7 +153,6 @@
 import { mapState, mapActions } from "vuex";
 import ProfiloEmployee from "./Employee.vue";
 import Modal from "@/components/modal/ModalStructure.vue";
-import EventBus from "@/components/eventBus";
 import GenericTable from "@/components/data-table/GenericTable.vue";
 
 export default {
@@ -197,7 +196,6 @@ export default {
     showModal(title) {
       this.editModalVisible = true;
       this.newEmployee = true;
-      EventBus.$emit("NEW_EMPLOYEE_FORM");
       this.popup = {
         title: title,
       };
@@ -216,13 +214,6 @@ export default {
     copyFormValues() {
       for (const [key] of Object.entries(this.employee)) {
         this[key] = this.employee[key];
-      }
-    },
-    saveEmployee() {
-      if (!this.$v.$invalid) {
-        EventBus.$emit("CHECK_EMPLOYEE_FORM");       
-      } else{
-        this.$v.$touch();
       }
     },
     deleteConfirm() {
@@ -278,45 +269,6 @@ export default {
     this.changePage({ title: "", route: "/GestioneDipendenti" });
     if (this.actualCompany && this.actualCompany.item)
       this.getAllEmployees(this.actualCompany.item.id);
-    EventBus.$on("EDIT_EMPLOYEE", (employee) => {
-      this.editModalVisible = true;
-      EventBus.$emit("EDIT_EMPLOYEE_FORM", employee.item);
-      this.popup = {
-        title: "Modifica",
-      };
-    });
-    EventBus.$on("DELETE_EMPLOYEE", (employee) => {
-      this.deleteModalVisible = true;
-      this.employee = employee.item;
-      this.popup = {
-        title: "Cancella",
-      };
-    });
-    EventBus.$on("OK_EMPLOYEE_FORM", (employee) => {
-      if (this.newEmployee) {
-        this.addEmployeeCall({
-          companyId: this.actualCompany.item.id,
-          employee: employee,
-        });
-      } else {
-        this.updateEmployeeCall({
-          companyId: this.actualCompany.item.id,
-          employee: employee,
-        });
-      }
-      this.editModalVisible = false;
-      this.newEmployee = false;
-    });
-    EventBus.$on("NO_EMPLOYEE_FORM", () => {
-      this.submitStatus = "ERROR";
-    });
-  },
-
-  beforeDestroy() {
-    EventBus.$off("NO_EMPLOYEE_FORM");
-    EventBus.$off("OK_EMPLOYEE_FORM");
-    EventBus.$off("DELETE_EMPLOYEE");
-    EventBus.$off("EDIT_EMPLOYEE");
   },
 };
 </script>

@@ -138,7 +138,6 @@
 <script>
 import { validationMixin } from 'vuelidate';
 import { required, email } from "vuelidate/lib/validators";
-import EventBus from "@/components/eventBus";
 import { mapActions, mapState } from "vuex";
 import Modal from "@/components/modal/ModalStructure.vue";
 
@@ -355,31 +354,6 @@ export default {
   },
 
   mounted() {
-    EventBus.$on("EDIT_USER_FORM", (user) => {
-      this.copyValues(user);
-    });
-    EventBus.$on("NEW_USER_FORM", () => {
-      this.initUser();
-    });
-    EventBus.$on("CHECK_USER_FORM", () => {
-      this.$v.$touch();
-      if (this.$v.$invalid) {
-        //generate event no
-        EventBus.$emit("NO_USER_FORM");
-      } else {
-        //   generate event ok
-        this.createUser();
-        this.unique = true;
-        EventBus.$emit("OK_USER_FORM", this.user);
-        this.$v.$reset();
-      }
-    });
-  },
-  
-  beforeDestroy() {
-    EventBus.$off("CHECK_USER_FORM");
-    EventBus.$off("NEW_USER_FORM");
-    EventBus.$off("EDIT_USER_FORM");
   },
 };
 </script>

@@ -53,7 +53,6 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
-import EventBus from "@/components/eventBus";
 import { campaignService } from "@/services/campaign.services";
 import Modal from "@/components/modal/ModalStructure.vue";
 
@@ -62,11 +61,9 @@ export default {
 
   data() {
     return {
-      disassociaTmpCampaign:null,
       campaigns: [],
-      disassociaModalVisible:false,
       popup: {
-          title: 'Associa o Disassocia Campagne',
+        title: 'Associa o Disassocia Campagne',
       }
     };
   },
@@ -76,15 +73,11 @@ export default {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
       getPublicCampaigns: "getPublicCampaigns",
-      getAllCompaniesOfCampaignCall: "getAllCompaniesOfCampaign",
-      addCampaignCall: "addCampaign",
-      updateCampaignCall: "updateCampaign",
-      deleteCampaignCall: "deleteCampaign",
-      deleteCompanyCampaign: "deleteCompanyCampaign",
       createCompanyCampaign: "createCompanyCampaign",
     }),
     
     associa(campaign) {
+      /*
       if (this.role == "ROLE_ADMIN" && this.adminCompany && this.adminCompany.item) {
         this.createCompanyCampaign({
           companyId: this.adminCompany.item.id,
@@ -96,7 +89,11 @@ export default {
           campaign: campaign,
         });
       }
-      this.$emit("update:allCampaigns.items", this.allCampaigns.items);
+      */
+      this.createCompanyCampaign({
+        companyId: this.actualCompany.item.id,
+        campaign: campaign,
+      });
     },
     isAssociated(campaign) {
       if (this.allCampaigns && this.allCampaigns.items)
@@ -110,10 +107,9 @@ export default {
   computed: {
     ...mapState("account", ["role"]),
     ...mapState("company", ["actualCompany", "adminCompany"]),
-    ...mapState("campaign", ["allCampaigns", "actualCampaign", "publicCampaigns"]),
+    ...mapState("campaign", ["allCampaigns"]),
   },
 
-  
   mounted() {
       //get all public
       if (this.role == "ROLE_ADMIN" && this.adminCompany && this.adminCompany.item) {
@@ -130,11 +126,6 @@ export default {
         }
       }
   },
-
-  beforeDestroy() {
-    EventBus.$off("ASSOCIATE_CAMPAIGN_FORM");
-  },
-
 };
 </script>
 

@@ -98,7 +98,6 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import ProfiloCampagna from "./Campaign.vue";
-import EventBus from "@/components/eventBus";
 import Modal from "@/components/modal/ModalStructure.vue";
 import GenericTable from "@/components/data-table/GenericTable.vue";
  
@@ -165,7 +164,6 @@ export default {
       {
         this.editModalVisible = true;
         this.newCampaign = true;
-        EventBus.$emit("NEW_CAMPAIGN_FORM");
       this.popup = {
         title: title,
       };
@@ -176,7 +174,6 @@ export default {
         title: "Campagne pubbliche",
       };
         this.associateCampaignModalVisible=true;
-        EventBus.$emit("ASSOCIATE_CAMPAIGN_FORM");
       }
     },
     closeModal() {
@@ -189,7 +186,6 @@ export default {
     },
     saveCampaign() {
       //check fields
-      EventBus.$emit("CHECK_CAMPAIGN_FORM");
     },
     deleteConfirm() {
       this.deleteModalVisible = false;
@@ -237,45 +233,6 @@ export default {
     if (this.role == "ROLE_ADMIN" && this.adminCompany == null ) {
       this.getAllCampaigns(null);
     }
-    EventBus.$on("EDIT_CAMPAIGN", (campaign) => {
-      this.editModalVisible = true;
-      EventBus.$emit("EDIT_CAMPAIGN_FORM", campaign.item);
-
-      this.popup = {
-        title: "Modifica",
-      };
-    });
-    EventBus.$on("DELETE_CAMPAIGN", (campaign) => {
-      this.deleteModalVisible = true;
-      this.campaign = campaign.item;
-      this.popup = {
-        title: "Cancella",
-      };
-    });
-    EventBus.$on("OK_CAMPAIGN_FORM", (campaign) => {
-        if (this.newCampaign) {
-          this.addCampaignCall({
-            companyId: this.adminCompany ? this.actualCompany.item.id : null,
-            campaign: campaign,
-          });
-        } else {
-          this.updateCampaignCall({
-            companyId: this.adminCompany ? this.actualCompany.item.id : null,
-            campaign: campaign,
-          });
-        }
-      this.editModalVisible = false;
-      this.newCampaign = false;
-    });
-    EventBus.$on("NO_CAMPAIGN_FORM", () => {
-      this.submitStatus = "ERROR";
-    });
-  },
-  beforeDestroy() {
-    EventBus.$off("NO_CAMPAIGN_FORM");
-    EventBus.$off("OK_CAMPAIGN_FORM");
-    EventBus.$off("DELETE_CAMPAIGN");
-    EventBus.$off("EDIT_CAMPAIGN");
   },
 };
 </script>

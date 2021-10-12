@@ -35,7 +35,6 @@
 <script>
 import ProfiloAzienda from "./Company.vue";
 import { mapState, mapActions } from "vuex";
-import EventBus from "@/components/eventBus";
 import GenericTable from "@/components/data-table/GenericTable.vue";
 
 export default {
@@ -70,7 +69,6 @@ export default {
       this.nColsTable = 8;
       this.editModalVisible = true;
       this.newCompany = true;
-      EventBus.$emit("NEW_COMPANY_FORM");
       this.popup = {
         title: title,
       };
@@ -85,7 +83,6 @@ export default {
       this.deleteModalVisible = false;
     },
     saveCompany() {
-      EventBus.$emit("CHECK_COMPANY_FORM");
     },
     deleteConfirm() {
       this.deleteModalVisible = false;
@@ -120,39 +117,6 @@ export default {
   mounted: function () {
     this.changePage({ title: "", route: "/GestioneAziende" });
     this.getAllCompanies();
-    EventBus.$on("EDIT_COMPANY", (company) => {
-      this.editModalVisible = true;
-      EventBus.$emit("EDIT_COMPANY_FORM", company.item);
-      this.popup = {
-        title: "Modifica",
-      };
-    });
-    EventBus.$on("DELETE_COMPANY", (company) => {
-      this.deleteModalVisible = true;
-      this.company = company.item;
-      this.popup = {
-        title: "Cancella",
-      };
-    });
-    EventBus.$on("OK_COMPANY_FORM", (company) => {
-        if (this.newCompany) {
-          this.addCompanyCall(company);
-        } else {
-          this.updateCompanyCall(company);
-      }
-      this.editModalVisible = false;
-      this.newCompany = false;
-    });
-    EventBus.$on("NO_COMPANY_FORM", () => {
-      this.submitStatus = "ERROR";
-    });
-  },
-
-  beforeDestroy() {
-    EventBus.$off("NO_COMPANY_FORM");
-    EventBus.$off("OK_COMPANY_FORM");
-    EventBus.$off("DELETE_COMPANY");
-    EventBus.$off("EDIT_COMPANY");
   },
 };
 </script>

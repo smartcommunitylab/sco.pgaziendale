@@ -13,7 +13,6 @@
 <script>
 import { mapActions, mapState } from "vuex";
 import ProfiloAzienda from "./Company.vue";
-import EventBus from "@/components/eventBus";
 
 export default {
   name: "Azienda",
@@ -41,7 +40,6 @@ export default {
     ...mapActions("navigation", { changePage: "changePage" }),
 
     saveCompany() {
-        EventBus.$emit("CHECK_COMPANY_FORM");
     },
 
     closeModal() {
@@ -60,32 +58,6 @@ export default {
 
   mounted() {
     this.changePage({title: 'Profilo azienda', route: '/ProfiloAzienda'})
-    EventBus.$on("EDIT_COMPANY", (company) => {
-    this.editModalVisible = true;
-    EventBus.$emit("EDIT_COMPANY_FORM", company.item);
-    this.popup = {
-      title: "Modifica",
-    };
-    });
-    EventBus.$on("OK_COMPANY_FORM", (company) => {
-        if (this.newCompany) {
-          this.addCompanyCall(company);
-        } else {
-          this.updateCompanyCall(company);
-      }
-      this.editModalVisible = false;
-    });
-    EventBus.$on("OK_COMPANY_FORM", (company) => {
-      {
-        this.updateCompanyCall(company);
-      }
-      this.editModalVisible = false;
-    });
-  },
-
-  beforeDestroy() {
-    EventBus.$off("OK_COMPANY_FORM");
-    EventBus.$off("EDIT_COMPANY");
   },
 };
 </script>

@@ -95,7 +95,6 @@
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
-import EventBus from "../../components/eventBus";
 import { latLng } from "leaflet";
 import { locationService } from "@/services";
 import moment from "moment";
@@ -122,10 +121,8 @@ export default {
     ...mapActions("modal", { openModal: "openModal" }),
     
     deleteLocation() {
-      EventBus.$emit("DELETE_LOCATION", this.actualLocation);
     },
     editLocation() {
-      EventBus.$emit("EDIT_LOCATION", this.actualLocation);
     },
     initMap() {},
     getNonWorking(days) {

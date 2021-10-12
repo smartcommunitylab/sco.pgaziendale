@@ -435,7 +435,6 @@ export default {
         },
         saveCompany() {
             if (!this.$v.$invalid) {
-                //EventBus.$emit("CHECK_COMPANY_FORM");
                 this.createCompany();
                 if(this.typeCall == "add"){
                     this.addCompany(this.company);

@@ -326,7 +326,6 @@
 <script>
 import { validationMixin } from 'vuelidate';
 import { required } from "vuelidate/lib/validators";
-import EventBus from "@/components/eventBus";
 import { campaignService } from "@/services";
 import {mapActions, mapState} from "vuex";
 import Modal from "@/components/modal/ModalStructure.vue";
@@ -453,7 +452,6 @@ export default {
         }
     },
     saveCampaign() {    
-        //EventBus.$emit("CHECK_COMPANY_FORM");
         if (!this.$v.$invalid) {
           this.createCampaign();
           if(this.typeCall == "add"){
@@ -586,34 +584,6 @@ export default {
     });
     }
     this.arrayMeans = campaignService.getArrayMeans();
-
-    EventBus.$on("EDIT_CAMPAIGN_FORM", (campaign) => {
-            this.edit = true;
-           this.copyFormValues(campaign);
-    });
-    EventBus.$on("NEW_CAMPAIGN_FORM", () => {
-            this.edit = false;
-
-      this.initCampaign();
-    });
-    EventBus.$on("CHECK_CAMPAIGN_FORM", () => {
-      this.$v.$touch();
-      if (this.$v.$invalid) {
-        //generate event no
-        EventBus.$emit("NO_CAMPAIGN_FORM");
-      } else {
-        //   generate event ok
-        this.createCampaign();
-        EventBus.$emit("OK_CAMPAIGN_FORM", this.campaign);
-        this.$v.$reset();
-      }
-    });
-  },
-
-  beforeDestroy() {
-    EventBus.$off("CHECK_CAMPAIGN_FORM");
-    EventBus.$off("NEW_CAMPAIGN_FORM");
-    EventBus.$off("EDIT_CAMPAIGN_FORM");
   },
 };
 </script>

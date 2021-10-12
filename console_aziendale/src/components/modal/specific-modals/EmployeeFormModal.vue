@@ -196,7 +196,6 @@ export default {
     },
     saveEmployee() {
       if (!this.$v.$invalid) {
-          //EventBus.$emit("CHECK_COMPANY_FORM");
           this.createEmployee();
           if(this.typeCall == "add"){
               this.addEmployee({companyId: this.actualCompany.item.id, employee: this.employee});

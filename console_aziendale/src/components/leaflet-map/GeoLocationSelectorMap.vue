@@ -35,7 +35,6 @@
 import { LMap, LMarker, LTileLayer, LTooltip } from "vue2-leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import GeoSearch from '@/components/leaflet-map/Geosearch.vue'
-import EventBus from "@/components/eventBus";
 
 export default {
   name: "LocationInput",
@@ -182,9 +181,9 @@ export default {
   watch: {
     position: {
       deep: true,
-      async handler(value) {
+      async handler(/*value*/) {
         this.address = await this.getAddress();
-        this.$emit("poschanged", { position: value, address: this.address });
+        //this.$emit("poschanged", { position: value, address: this.address });
       },
     },
   },
@@ -192,18 +191,7 @@ export default {
   mounted() {
     this.getUserPosition();
     this.$refs.map.mapObject.on("geosearch/showlocation", this.onSearch);
-    EventBus.$on("EDIT_LOCATION_FORM", location => {
-      this.initMap(location);
-    });
-    EventBus.$on("NEW_LOCATION_FORM", location => {
-      this.initMap(location);
-    });
     this.$refs.map.mapObject.invalidateSize();
-  },
-
-  beforeDestroy() {
-    EventBus.$off("EDIT_LOCATION_FORM");
-    EventBus.$off("NEW_LOCATION_FORM");
   },
 };
 </script>

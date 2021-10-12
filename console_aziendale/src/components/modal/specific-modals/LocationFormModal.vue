@@ -364,7 +364,6 @@
 import { validationMixin } from 'vuelidate';
 import { required, numeric } from "vuelidate/lib/validators";
 import { locationService } from "@/services";
-import EventBus from "@/components/eventBus";
 import GeoLocationSelectorMapVue from "@/components/leaflet-map/GeoLocationSelectorMap.vue";
 import Modal from "@/components/modal/ModalStructure.vue";
 import { mapActions, mapState } from 'vuex';
@@ -594,7 +593,6 @@ export default {
     },
     saveLocation(){
         if (!this.$v.$invalid) {
-            //EventBus.$emit("CHECK_COMPANY_FORM");
             this.createLocation();
             if(this.typeCall == "add"){
                 this.addLocation({companyId: this.actualCompany.item.id, location: this.locationSelected});
@@ -621,26 +619,6 @@ export default {
   },
   mounted() {
     this.arrayDays = locationService.getArrayDays();
-    EventBus.$on("EDIT_LOCATION_FORM", (location) => {
-      this.edit = true;
-      this.copyFormValues(location);
-    });
-    EventBus.$on("NEW_LOCATION_FORM", () => {
-      this.edit = false;
-      this.initLocation();
-    });
-    EventBus.$on("CHECK_LOCATION_FORM", () => {
-      this.$v.$touch();
-      if (this.$v.$invalid) {
-        //generate event no
-        EventBus.$emit("NO_LOCATION_FORM");
-      } else {
-        //   generate event ok
-        this.createLocation();
-        EventBus.$emit("OK_LOCATION_FORM", this.locationSelected);
-        this.$v.$reset();
-      }
-    });
   },
   created() {
         this.setModalData();
@@ -654,12 +632,6 @@ export default {
             this.createOldLocation();
         }
     },
-
-  beforeDestroy() {
-    EventBus.$off("CHECK_LOCATION_FORM");
-    EventBus.$off("NEW_LOCATION_FORM");
-    EventBus.$off("EDIT_LOCATION_FORM");
-  },
   validations: {
     id: {
       required,

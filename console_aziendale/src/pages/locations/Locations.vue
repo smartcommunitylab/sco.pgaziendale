@@ -104,7 +104,6 @@ import ProfiloLocation from "./Location.vue";
 import { mapState, mapActions } from "vuex";
 import GenericTable from "@/components/data-table/GenericTable.vue";
 import Modal from "@/components/modal/ModalStructure.vue";
-import EventBus from "@/components/eventBus";
 
 export default {
   name: "Locations",
@@ -166,7 +165,6 @@ export default {
     showModal(title) {
       this.editModalVisible = true;
       this.newLocation = true;
-      EventBus.$emit("NEW_LOCATION_FORM");
       this.popup = {
         title: title,
       };
@@ -183,14 +181,7 @@ export default {
     closeImportModal() {
       this.modalImportLocationsOpen = false
     },
-    saveLocation() {
-      //check fields
-      if (!this.$v.$invalid) {
-          EventBus.$emit("CHECK_LOCATION_FORM");      
-      }else{
-        this.$v.$touch();
-      }
-    },
+    
     deleteConfirm() {
       this.deleteModalVisible = false;
       this.deleteLocation({
@@ -230,47 +221,6 @@ export default {
   
   mounted() {
     this.changePage({ title: "Lista sedi", route: "/GestioneSedi" });
-    EventBus.$on("EDIT_LOCATION", (location) => {
-      this.editModalVisible = true;
-      EventBus.$emit("EDIT_LOCATION_FORM", location.item);
-      this.oldLocation=location.item;
-      this.popup = {
-        title: "Modifica",
-      };
-    });
-    EventBus.$on("DELETE_LOCATION", (location) => {
-      this.deleteModalVisible = true;
-      this.location = location.item;
-      this.popup = {
-        title: "Cancella",
-      };
-    });
-    EventBus.$on("OK_LOCATION_FORM", (location) => {
-      if (this.newLocation) {
-        this.addLocationCall({
-          companyId: this.actualCompany.item.id,
-          location: location,
-        });
-      } else {
-        this.updateLocationCall({
-          companyId: this.actualCompany.item.id,
-          location: location,
-          oldLocation:this.oldLocation
-        });
-      }
-      this.editModalVisible = false;
-      this.newLocation = false;
-    });
-    EventBus.$on("NO_LOCATION_FORM", () => {
-      this.submitStatus = "ERROR";
-    });
-  },
-
-  beforeDestroy() {
-    EventBus.$off("NO_LOCATION_FORM");
-    EventBus.$off("OK_LOCATION_FORM");
-    EventBus.$off("DELETE_LOCATION");
-    EventBus.$off("EDIT_LOCATION");
   },
 };
 </script>

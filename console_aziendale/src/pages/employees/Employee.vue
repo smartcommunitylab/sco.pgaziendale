@@ -51,7 +51,6 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-import EventBus from "@/components/eventBus";
 
 export default {
   name: "ProfiloEmployee",
@@ -60,7 +59,6 @@ export default {
     ...mapActions("modal", {openModal:"openModal"}),
 
 	editEmployee() {
-		EventBus.$emit("EDIT_EMPLOYEE",this.actualEmployee);
 	},
     getCampaings(campaigns) {
         var returnCampaigns=" ";
