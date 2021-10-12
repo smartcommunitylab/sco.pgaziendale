@@ -1,3 +1,7 @@
+<!-- 
+DESCRIZIONE:
+Il "Footer.vue" contiene il Footer dell'applicativo.
+-->
 <template>
   <v-footer
     padless

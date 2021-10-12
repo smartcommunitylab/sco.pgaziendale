@@ -1,3 +1,10 @@
+<!-- 
+DESCRIZIONE:
+Il "ModalCenter.vue" è un componente dormiente in primo piano dell'applicativo contenente tutti i
+componenti modali che l'applicazione necessita. Il suo compito è quello di attivarsi e disattivarsi
+quando l'applicazione lo richiede per visualizzare o smettere di visualizzare un modale. Questo lo
+fa in base alla variabile "modalType" che permette l'avvio del modale corretto.
+-->
 <template>
     <div class="container-modal">
         <!-- MODALI per l' UtenteLoggato -->
@@ -5,8 +12,8 @@
         <change-password-modal v-if="modalType == 'changePasswordModal'"/>
         
         <!-- MODALI per le Aziende -->
-        <azienda-form-modal v-if="modalType == 'aziendaFormAdd'" typeCall="add"/>
-        <azienda-form-modal v-if="modalType == 'aziendaFormEdit'" typeCall="edit"/>
+        <company-form-modal v-if="modalType == 'aziendaFormAdd'" typeCall="add"/>
+        <company-form-modal v-if="modalType == 'aziendaFormEdit'" typeCall="edit"/>
         <delete-modal v-if="modalType == 'deleteAzienda'" typeCall="azienda"/>
         
         <!-- MODALI per l' User -->
@@ -38,7 +45,7 @@
 <script>
 import DeleteModal from "@/components/Modal/DeleteModal.vue";
 import ProfileSettingModal from "@/components/Modal/ProfileSettingModal.vue";
-import AziendaFormModal from "@/components/Modal/AziendaFormModal.vue";
+import CompanyFormModal from "@/components/Modal/CompanyFormModal.vue";
 import UserFormModal from "@/components/Modal/UserFormModal.vue";
 import CampaignFormModal from "@/components/Modal/CampaignFormModal.vue";
 import AssociateFormModal from "@/components/Modal/AssociateFormModal.vue";
@@ -52,7 +59,7 @@ export default {
     components: {
         "delete-modal": DeleteModal,
         "profile-setting-modal": ProfileSettingModal,
-        "azienda-form-modal": AziendaFormModal,
+        "company-form-modal": CompanyFormModal,
         "user-form-modal": UserFormModal,
         "campaign-form-modal": CampaignFormModal,
         "associate-form-modal": AssociateFormModal,

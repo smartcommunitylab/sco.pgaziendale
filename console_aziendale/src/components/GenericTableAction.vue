@@ -1,3 +1,9 @@
+<!-- 
+DESCRIZIONE:
+Il "GenericTableAction.vue" è una tabella generalizzata così da poterla usare con qualsiasi
+tipo di dato e intestazione vogliamo all'interno dell'applicativo (come la GenericTable.vue)
+con la differenza che ogni riga della tabella contiene 2 azioni (modifica e elimina).
+-->
 <template>
   <v-card>
     <v-data-table 

@@ -1,3 +1,8 @@
+<!-- 
+DESCRIZIONE:
+Il "GenericTable.vue" è una tabella generalizzata così da poterla usare con qualsiasi tipo di
+dato e intestazione vogliamo all'interno dell'applicativo.
+-->
 <template>
   <v-card>
     <v-card-title>

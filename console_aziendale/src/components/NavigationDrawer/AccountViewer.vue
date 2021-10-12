@@ -1,3 +1,12 @@
+
+<!-- 
+DESCRIZIONE:
+L' "AccountViewer.vue" è un componente posto, in posizione di default, all'interno del
+NavigtionDrawer nella sua parte più in alto. Il componente permette di visualizzare il
+ruolo ricoperto all'intenro dell'applicativo (il ruolo/account con il quale si è loggati)
+e permette agli admin loggati come amministratori di una specifica azienda di, cliccando
+l'apposita icona, tornare allo stato di admin globale.
+-->
 <template>
   <div>
     <div v-if="role=='ROLE_ADMIN'">

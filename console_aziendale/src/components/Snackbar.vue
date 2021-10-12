@@ -1,3 +1,9 @@
+<!-- 
+DESCRIZIONE:
+Il "Snackbar.vue" è un componente dormiente posto in primo piano dell'applicativo. Il suo scopo è,
+quando chiamato e avviato, gestire i messaggi lanciati dall'applicativo e farli visualizzare
+all'utente come una snackbar.
+-->
 <template>
     <div v-if="snackbarOpen">
         <v-snackbar v-model="snackbar" class="up">

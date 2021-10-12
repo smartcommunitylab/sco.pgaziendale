@@ -1,7 +1,7 @@
 <template>
-    <div class="bg-primary h-screen w-screen font-sans">
+    <div class="bg-primary font-sans sizeGesture">
       <div class="container h-full flex justify-center items-center">
-        <div class="">
+        <div class="mt-20">
           <img src="@/assets/images/pgaziendale.png" alt="Logo" class="max-h-36 m-auto"/>
 
           <h1 class="font-hairline mb-10 text-center text-white text-3xl">
@@ -133,6 +133,11 @@ export default {
 </script>
 
 <style scoped>
+.sizeGesture{
+  width: 100vw;
+
+}
+
 .pwd-forgot{
   text-align: center;
   font-style: italic;

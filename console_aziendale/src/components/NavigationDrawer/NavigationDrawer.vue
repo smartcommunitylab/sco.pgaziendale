@@ -1,3 +1,10 @@
+<!-- 
+DESCRIZIONE:
+Il "NavigationDrawer.vue" è il Navigation Drawer dell'applicativo. Ovvero la sidebar posta a
+sinistra che permette la navigazione in tutte le pagine che l'utente può visualizzare.
+Da qui si gestisce infatti anche la parte di permessi di visualizzaizone o meno delle
+pagine dall'utente in base al suo login.
+-->
 <template>
   <v-navigation-drawer
     app
@@ -6,7 +13,7 @@
     clipped
   >
     <v-list>
-      <profilo-header/>
+      <account-viewer/>
     </v-list>
 
     <v-divider></v-divider>
@@ -169,12 +176,14 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
-import ProfiloHeader from "./ProfiloHeader.vue";
+import AccountViewer from "./AccountViewer.vue";
 
 export default {
-  name: "MenuHeader",
+  name: "NavigationDrawer",
 
-  components: {ProfiloHeader},
+  components: {
+    "account-viewer": AccountViewer
+  },
 
   data: function () {
     return { 

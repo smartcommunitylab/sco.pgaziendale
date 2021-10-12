@@ -1,3 +1,9 @@
+<!-- 
+DESCRIZIONE:
+L' "App.vue" è il cuore dell'applicativo. Gestisce il "template" di base diviso in: topbar,
+navigationDrawer, mainBody e footer. Contiene anche i componenti dormienti come: il ModalCenter
+e la snackbar.
+-->
 <template>
   <v-app>
     <v-app-bar
@@ -5,6 +11,7 @@
       color="primary"
       dark
       clipped-left
+      v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"
     >
       <!-- TODO: Da modificare il link da dove pesca il logo, al momento provvisorio -->
       <div class="d-flex align-center">
@@ -18,10 +25,17 @@
       </div>
 
       <v-spacer></v-spacer>
-      <profile-manager v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
+      <v-btn
+        icon
+        @click="openModal({type:'profileSetting', object:null})"
+      >
+        <v-icon size="24px">
+          mdi-account-cog
+        </v-icon>
+      </v-btn>
     </v-app-bar>
 
-    <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
+    <navigation-drawer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
 
     <v-main class="">
       <v-container class="p-0 m-0 blockScroll">
@@ -41,34 +55,32 @@
       </v-container>
     </v-main>
 
-    <app-footer/>
+    <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
 
   </v-app>
 </template>
 
 <script>
-import MenuHeader from "./components/NavBar/MenuHeader.vue";
+import NavigationDrawer from "./components/NavigationDrawer/NavigationDrawer.vue";
 import { mapActions, mapState } from "vuex";
 import Footer from "@/components/Footer"
 import Snackbar from "@/components/Snackbar.vue"
 import ModalCenter from "@/components/ModalCenter.vue"
-import ProfileManager from "@/components/ProfileManager.vue"
 
 export default {
   name: 'App',
 
   components: { 
-    "menu-header": MenuHeader,
+    "navigation-drawer": NavigationDrawer,
     "app-footer":Footer,
     "snackbar":Snackbar,
     "modal-center": ModalCenter,
-    "profile-manager": ProfileManager,
   },
 
   methods: {
     ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
     ...mapActions("alert", { clearAlert: "clear" }),
-    ...mapActions("modal", { initModal:"initModal" }),
+    ...mapActions("modal", { initModal:"initModal", openModal:'openModal' }),
   },
 
   computed: {

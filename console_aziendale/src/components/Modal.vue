@@ -1,3 +1,10 @@
+<!-- 
+DESCRIZIONE:
+Il "Modal.vue" è un componente che serve per dare lo "scheletro" a tutti i modali, così da
+facilitarne la creazione. Divide i modali in 3 aree: header, body, footer. L'header contiene
+il titolo del modale, il body contiene tutti i campi per la compilazione che il modale richiede
+mentre il footer contiene i bottoni per gestire lo stato dei modali e l'invio dei dati in esso.
+-->
 <template>
   <div class="modal-backdrop" v-init="show" @click.self="closeModal">
     <div class="modal w-2/3 z-50 m-0 absolute "
