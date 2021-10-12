@@ -89,6 +89,7 @@
     </div>
   </form>
 </template>
+
 <script>
 import { validationMixin } from 'vuelidate';
 import { required } from "vuelidate/lib/validators";
@@ -96,18 +97,9 @@ import EventBus from "@/components/eventBus";
 import { mapState, mapActions } from "vuex";
 
 export default {
+
   mixins: [validationMixin],
-  data() {
-    return {
-      employee: {},
-      name: "",
-      surname: "",
-      code: "",
-      location: "",
-      locations: [],
-      listaSedi: [],
-    };
-  },
+  
   validations: {
     name: {
       required,
@@ -123,10 +115,54 @@ export default {
     },
   },
 
+  data() {
+    return {
+      employee: {},
+      name: "",
+      surname: "",
+      code: "",
+      location: "",
+      locations: [],
+      listaSedi: [],
+    };
+  },
+
+  methods: {
+    ...mapActions("location", {
+      getAllLocations: "getAllLocations",
+    }),
+    
+    loadLocations() {
+      if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
+    },
+    copyFormValues(employee) {
+      for (const [key] of Object.entries(employee)) {
+        this[key] = employee[key];
+      }
+    },
+    initEmployee() {
+      this.employee = {};
+      this.id = null;
+      this.name = "";
+      this.surname = "";
+      this.code = "";
+      this.location = "";
+    },
+    createEmployee() {
+      this.employee = {
+        id: this.id,
+        name: this.name,
+        surname: this.surname,
+        code: this.code,
+        location: this.location,
+      };
+    },
+  },
 
   computed: {
     ...mapState("company", ["actualCompany"]),
     ...mapState("location", ["allLocations", "actualLocation"]),
+
     nameErrors () {
         const errors = []
         if (!this.$v.name.$dirty) return errors
@@ -152,6 +188,7 @@ export default {
         return errors
     },
   },
+
   watch: {
     allLocations(locations) {
       // Our fancy notification (2).
@@ -164,36 +201,7 @@ export default {
           }
     }
   },
-  methods: {
-    loadLocations() {
-      if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
-    },
-    copyFormValues(employee) {
-      for (const [key] of Object.entries(employee)) {
-        this[key] = employee[key];
-      }
-    },
-    ...mapActions("location", {
-      getAllLocations: "getAllLocations",
-    }),
-    initEmployee() {
-      this.employee = {};
-      this.id = null;
-      this.name = "";
-      this.surname = "";
-      this.code = "";
-      this.location = "";
-    },
-    createEmployee() {
-      this.employee = {
-        id: this.id,
-        name: this.name,
-        surname: this.surname,
-        code: this.code,
-        location: this.location,
-      };
-    },
-  },
+  
   mounted() {
     this.loadLocations();
     //this.listaSedi.unshift(this.allLocations.items.id);
@@ -225,4 +233,6 @@ export default {
   },
 };
 </script>
-<style scoped></style>
+
+<style scoped>
+</style>

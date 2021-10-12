@@ -90,48 +90,51 @@ import { mapActions, mapState } from "vuex";
 
 export default {
     components: {Modal},
+
     data: function () {
-    return {
-      profileSetting: false,
-      oldPassword: "",
-      newPassword: "",
-      newPassword2: "",
-      passwordFieldTypeFirst: "password",
-      passwordFieldTypeSecond: "password",
-      passwordFieldTypeThird: "password",
-      passwordDifferent: false,
-      show1: false,
-      show2: false,
-      show3: false,
-      rules: {
-          required: value => !!value || 'Campo richiesto.',
-      },
-    };
+      return {
+        profileSetting: false,
+        oldPassword: "",
+        newPassword: "",
+        newPassword2: "",
+        passwordFieldTypeFirst: "password",
+        passwordFieldTypeSecond: "password",
+        passwordFieldTypeThird: "password",
+        passwordDifferent: false,
+        show1: false,
+        show2: false,
+        show3: false,
+        rules: {
+            required: value => !!value || 'Campo richiesto.',
+        },
+      };
     },
-    computed: {
-        ...mapState("account", ["status", "user", "role"]),
-    },
+
     methods: {
-        ...mapActions("modal", {openModal:"openModal", closeModal:"closeModal"}),
-        ...mapActions("account", ["changePassword"]),
-        changePwd() {
-        //check if equal
-        if (this.newPassword === this.newPassword2) {
-            this.passwordDifferent = false;
-            // visible edit pwd
-            this.changePassword({
-            oldPassword: this.oldPassword,
-            newPassword: this.newPassword,
-            });
-        } else this.passwordDifferent = true;
-        },
-        switchVisibility(id) {
-        this[id] = this[id] === "password" ? "text" : "password";
-        },
+      ...mapActions("modal", {openModal:"openModal", closeModal:"closeModal"}),
+      ...mapActions("account", ["changePassword"]),
+
+      changePwd() {
+      //check if equal
+      if (this.newPassword === this.newPassword2) {
+          this.passwordDifferent = false;
+          // visible edit pwd
+          this.changePassword({
+          oldPassword: this.oldPassword,
+          newPassword: this.newPassword,
+          });
+      } else this.passwordDifferent = true;
+      },
+      switchVisibility(id) {
+      this[id] = this[id] === "password" ? "text" : "password";
+      },
+    },
+
+    computed: {
+      ...mapState("account", ["status", "user", "role"]),
     },
 }
 </script>
-
 
 <style>
 .errore {

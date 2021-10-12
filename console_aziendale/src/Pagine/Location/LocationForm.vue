@@ -346,10 +346,47 @@ import EventBus from "@/components/eventBus";
 import GeoLocationSelectorMapVue from "@/components/GeoLocationSelectorMap.vue";
 
 export default {
-  components: {
-    "geolocation-selector": GeoLocationSelectorMapVue,
-  },
+  components: {"geolocation-selector": GeoLocationSelectorMapVue},
+
   mixins: [validationMixin],
+
+  validations: {
+    id: {
+      required,
+    },
+    address: {
+      required,
+    },
+    streetNumber: {
+      required,
+    },
+    zip: {
+      required,
+    },
+    city: {
+      required,
+    },
+    province: {
+      required,
+    },
+    region: {
+      required,
+    },
+    country: {
+      required,
+    },
+    radius: {
+      required,
+      numeric,
+    },
+    latitude: {
+      required,
+    },
+    longitude: {
+      required,
+    },
+  },
+
   data() {
     return {
       id: "",
@@ -399,75 +436,7 @@ export default {
       ],
     };
   },
-  computed: {
-    radiusErrors () {
-            const errors = []
-            if (!this.$v.radius.$dirty) return errors
-            !this.$v.radius.required && errors.push('Campo richiesto.')
-            !this.$v.radius.numeric && errors.push('Il campo Raggio deve contenere un valore numerico.')
-            return errors
-    },
-    latitudeErrors () {
-            const errors = []
-            if (!this.$v.latitude.$dirty) return errors
-            !this.$v.latitude.required && errors.push('Campo richiesto.')
-            return errors
-    },
-    longitudeErrors () {
-            const errors = []
-            if (!this.$v.longitude.$dirty) return errors
-            !this.$v.longitude.required && errors.push('Campo richiesto.')
-            return errors
-    },
-    idErrors () {
-            const errors = []
-            if (!this.$v.id.$dirty) return errors
-            !this.$v.id.required && errors.push('Campo richiesto.')
-            return errors
-    },
-    addressErrors () {
-            const errors = []
-            if (!this.$v.address.$dirty) return errors
-            !this.$v.address.required && errors.push('Campo richiesto.')
-            return errors
-    },
-    streetNumberErrors () {
-            const errors = []
-            if (!this.$v.streetNumber.$dirty) return errors
-            !this.$v.streetNumber.required && errors.push('Campo richiesto.')
-            return errors
-    },
-    zipErrors () {
-            const errors = []
-            if (!this.$v.zip.$dirty) return errors
-            !this.$v.zip.required && errors.push('Campo richiesto.')
-            return errors
-    },
-    cityErrors () {
-            const errors = []
-            if (!this.$v.city.$dirty) return errors
-            !this.$v.city.required && errors.push('Campo richiesto.')
-            return errors
-    },
-    provinceErrors () {
-            const errors = []
-            if (!this.$v.province.$dirty) return errors
-            !this.$v.province.required && errors.push('Campo richiesto.')
-            return errors
-    },
-    regionErrors () {
-            const errors = []
-            if (!this.$v.region.$dirty) return errors
-            !this.$v.region.required && errors.push('Campo richiesto.')
-            return errors
-    },
-    countryErrors () {
-            const errors = []
-            if (!this.$v.country.$dirty) return errors
-            !this.$v.country.required && errors.push('Campo richiesto.')
-            return errors
-    },
-  },
+  
   methods: {
     locationChanged(input) {
       console.log(input);
@@ -508,7 +477,6 @@ export default {
       this.createLocation();
     },
     initLocation() {
-      
       this.id = "";
       this.address = "";
       this.streetNumber = "";
@@ -523,7 +491,6 @@ export default {
       this.nonWorkingDays = [];
       this.nonWorking = [];
     },
-
     createLocation() {
       this.locationSelected = {
         id: this.id,
@@ -542,6 +509,78 @@ export default {
       };
     },
   },
+
+  computed: {
+    //Controls for form validation
+    radiusErrors () {
+      const errors = []
+      if (!this.$v.radius.$dirty) return errors
+      !this.$v.radius.required && errors.push('Campo richiesto.')
+      !this.$v.radius.numeric && errors.push('Il campo Raggio deve contenere un valore numerico.')
+      return errors
+    },
+    latitudeErrors () {
+      const errors = []
+      if (!this.$v.latitude.$dirty) return errors
+      !this.$v.latitude.required && errors.push('Campo richiesto.')
+      return errors
+    },
+    longitudeErrors () {
+      const errors = []
+      if (!this.$v.longitude.$dirty) return errors
+      !this.$v.longitude.required && errors.push('Campo richiesto.')
+      return errors
+    },
+    idErrors () {
+      const errors = []
+      if (!this.$v.id.$dirty) return errors
+      !this.$v.id.required && errors.push('Campo richiesto.')
+      return errors
+    },
+    addressErrors () {
+      const errors = []
+      if (!this.$v.address.$dirty) return errors
+      !this.$v.address.required && errors.push('Campo richiesto.')
+      return errors
+    },
+    streetNumberErrors () {
+      const errors = []
+      if (!this.$v.streetNumber.$dirty) return errors
+      !this.$v.streetNumber.required && errors.push('Campo richiesto.')
+      return errors
+    },
+    zipErrors () {
+      const errors = []
+      if (!this.$v.zip.$dirty) return errors
+      !this.$v.zip.required && errors.push('Campo richiesto.')
+      return errors
+    },
+    cityErrors () {
+      const errors = []
+      if (!this.$v.city.$dirty) return errors
+      !this.$v.city.required && errors.push('Campo richiesto.')
+      return errors
+    },
+    provinceErrors () {
+      const errors = []
+      if (!this.$v.province.$dirty) return errors
+      !this.$v.province.required && errors.push('Campo richiesto.')
+      return errors
+    },
+    regionErrors () {
+      const errors = []
+      if (!this.$v.region.$dirty) return errors
+      !this.$v.region.required && errors.push('Campo richiesto.')
+      return errors
+    },
+    countryErrors () {
+      const errors = []
+      if (!this.$v.country.$dirty) return errors
+      !this.$v.country.required && errors.push('Campo richiesto.')
+      return errors
+    },
+  },
+  
   mounted() {
     this.arrayDays = locationService.getArrayDays();
     EventBus.$on("EDIT_LOCATION_FORM", (location) => {
@@ -571,50 +610,10 @@ export default {
     EventBus.$off("NEW_LOCATION_FORM");
     EventBus.$off("EDIT_LOCATION_FORM");
   },
-  validations: {
-    id: {
-      required,
-    },
-    address: {
-      required,
-    },
-    streetNumber: {
-      required,
-    },
-    zip: {
-      required,
-    },
-    city: {
-      required,
-    },
-    province: {
-      required,
-    },
-    region: {
-      required,
-    },
-    country: {
-      required,
-    },
-    radius: {
-      required,
-      numeric,
-    },
-    latitude: {
-      required,
-    },
-    longitude: {
-      required,
-    },
-    newNonWorkingDay: {},
-    nonWorkingDays: {
-    },
-    nonWorking: {},
-  },
 };
 </script>
-<style scoped>
 
+<style scoped>
 .tooltip-day {
   transform: translateY(0px);
 }
@@ -624,6 +623,5 @@ export default {
 }
 .map-style {
   height: 300px;
-
 }
 </style>

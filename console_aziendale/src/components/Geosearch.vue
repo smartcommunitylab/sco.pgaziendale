@@ -1,25 +1,21 @@
 <template>
   <div>
-
   </div>
 </template>
 
 <script>
 // fix problem with search and click on the item
 import { GeoSearchControl } from 'leaflet-geosearch';
+
 export default {
   props: {
     options: {
       required: true
     },
   },
+
   name: 'v-geosearch',
-  mounted() {
-    this.add();
-  },
-  beforeDestroy() {
-    this.remove();
-  },
+
   methods: {
     deferredMountedTo(parent) {
       const searchControl = new GeoSearchControl(this.options);
@@ -36,6 +32,14 @@ export default {
         this.deferredMountedTo(this.$parent.mapObject);
       }
     },
+  },
+
+  mounted() {
+    this.add();
+  },
+
+  beforeDestroy() {
+    this.remove();
   },
 };
 </script>

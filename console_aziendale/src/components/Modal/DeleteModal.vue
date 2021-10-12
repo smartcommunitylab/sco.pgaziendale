@@ -39,24 +39,17 @@ import { mapActions, mapState } from "vuex";
 import Modal from "@/components/Modal.vue";
 
 export default {
-    components: {
-        "modal": Modal,
-    },
-    props: {
-        typeCall: String,
-    },
-    computed: {
-        ...mapState("modal", ["object"]),
-        ...mapState("company", ["actualCompany", "adminCompany"]),
-        ...mapState("campaign", ["actualCampaign"]),
-        ...mapState("location", ["actualLocation"]),
-    },
+    components: {"modal": Modal},
+
+    props: {typeCall: String},
+
     methods: {
         ...mapActions("modal", { closeModal:"closeModal" }),
         ...mapActions("company", { deleteCompany: "deleteCompany", getCompanyById:"getCompanyById", deleteUser:"deleteUser"}),
         ...mapActions("campaign", { deleteCampaign: "deleteCampaign", getAllCompaniesOfCampaign:"getAllCompaniesOfCampaign"}),
         ...mapActions("location", { deleteLocation: "deleteLocation"}),
         ...mapActions("employee", { deleteEmployee: "deleteEmployee"}),
+
         remove: function() {
             switch (this.typeCall) {
                 case 'azienda':
@@ -96,10 +89,16 @@ export default {
             }
             this.closeModal();
         }
+    },
+
+    computed: {
+        ...mapState("modal", ["object"]),
+        ...mapState("company", ["actualCompany", "adminCompany"]),
+        ...mapState("campaign", ["actualCampaign"]),
+        ...mapState("location", ["actualLocation"]),
     }
 }
 </script>
 
 <style>
-
 </style>

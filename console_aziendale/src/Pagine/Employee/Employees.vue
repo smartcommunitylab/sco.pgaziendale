@@ -156,9 +156,12 @@ import Modal from "@/components/Modal.vue";
 import EventBus from "@/components/eventBus";
 import GenericTable from "@/components/GenericTable.vue";
 import EmployeeForm from "./EmployeeForm.vue";
+
 export default {
   components: { ProfiloEmployee, Modal, GenericTable, EmployeeForm },
+
   name: "Dipendenti",
+
   data: function () {
     return {
       tableTitle: "Dipendenti",
@@ -178,6 +181,98 @@ export default {
       fileUploaded: null,
       inDragArea: false,
     };
+  },
+  
+  methods: {
+    ...mapActions("modal", {openModal: 'openModal'}),
+    ...mapActions("employee", {
+      getAllEmployees: "getAll",
+      addEmployeeCall: "addEmployee",
+      updateEmployeeCall: "updateEmployee",
+      getEmployee: "getEmployee",
+      deleteEmployee: "deleteEmployee",
+      importData: "importEmployees",
+    }),
+    ...mapActions("navigation", { changePage: "changePage" }),
+
+    showModal(title) {
+      this.editModalVisible = true;
+      this.newEmployee = true;
+      EventBus.$emit("NEW_EMPLOYEE_FORM");
+      this.popup = {
+        title: title,
+      };
+    },
+    closeModal() {
+      this.editModalVisible = false;
+      this.newEmployee = false;
+    },
+    closeDeleteModal() {
+      this.deleteModalVisible = false;
+    },
+    closeImportModal() {
+      this.modalImportEmployeesOpen = false
+      this.$v.$reset();
+    },
+    copyFormValues() {
+      for (const [key] of Object.entries(this.employee)) {
+        this[key] = this.employee[key];
+      }
+    },
+    saveEmployee() {
+      if (!this.$v.$invalid) {
+        EventBus.$emit("CHECK_EMPLOYEE_FORM");       
+      } else{
+        this.$v.$touch();
+      }
+    },
+    deleteConfirm() {
+      this.deleteModalVisible = false;
+      this.deleteEmployee({
+        companyId: this.actualCompany.item.id,
+        employeeId: this.actualEmployee.item.id,
+      });
+    },
+   
+    showEmployeeInfo: function (employee) {
+      if (this.currentEmployeeSelected == employee) {
+        this.getEmployee(null);
+
+        this.currentEmployeeSelected = undefined;
+      } else {
+        this.getEmployee(employee);
+        this.currentEmployeeSelected = employee;
+      }
+    },
+    onFileUploaderChange: function () {
+      console.log(this.$refs["file"]);
+      this.fileUploaded = this.$refs["file"].files;
+    },
+    importEmployees: function () {
+      console.log(this.fileUploaded);
+      this.modalImportEmployeesOpen = false;
+      var formData = new FormData();
+      formData.append("file", this.fileUploaded.item(0));
+      this.importData({ companyId: this.actualCompany.item.id, file: formData });
+    },
+  },
+  
+  computed: {
+    ...mapState("employee", ["allEmployees", "actualEmployee"]),
+    ...mapState("company", ["actualCompany"]),
+
+    fileName() {
+      return this.fileUploaded.item(0).name;
+    },
+    nColsTable_calculator: function() {
+      if(this.actualEmployee){
+        return 8;
+      }else if(this.actualEmployee == null){
+        return 12;
+      }else{
+        return 12;
+      }
+    },
   },
 
   mounted: function () {
@@ -217,105 +312,12 @@ export default {
       this.submitStatus = "ERROR";
     });
   },
+
   beforeDestroy() {
     EventBus.$off("NO_EMPLOYEE_FORM");
     EventBus.$off("OK_EMPLOYEE_FORM");
     EventBus.$off("DELETE_EMPLOYEE");
     EventBus.$off("EDIT_EMPLOYEE");
-  },
-  computed: {
-    ...mapState("employee", ["allEmployees", "actualEmployee"]),
-    ...mapState("company", ["actualCompany"]),
-    fileName() {
-      return this.fileUploaded.item(0).name;
-    },
-    nColsTable_calculator: function() {
-      if(this.actualEmployee){
-        return 8;
-      }else if(this.actualEmployee == null){
-        return 12;
-      }else{
-        return 12;
-      }
-    },
-  },
-  methods: {
-    ...mapActions("modal", {openModal: 'openModal'}),
-    ...mapActions("employee", {
-      getAllEmployees: "getAll",
-      addEmployeeCall: "addEmployee",
-      updateEmployeeCall: "updateEmployee",
-      getEmployee: "getEmployee",
-      deleteEmployee: "deleteEmployee",
-      importData: "importEmployees",
-    }),
-    ...mapActions("navigation", { changePage: "changePage" }),
-
-    showModal(title) {
-      this.editModalVisible = true;
-      this.newEmployee = true;
-      EventBus.$emit("NEW_EMPLOYEE_FORM");
-      this.popup = {
-        title: title,
-      };
-    },
-    closeModal() {
-      this.editModalVisible = false;
-      this.newEmployee = false;
-    },
-    closeDeleteModal() {
-      this.deleteModalVisible = false;
-    },
-    closeImportModal() {
-      this.modalImportEmployeesOpen = false
-      this.$v.$reset();
-    },
-
-    copyFormValues() {
-      for (const [key] of Object.entries(this.employee)) {
-        this[key] = this.employee[key];
-      }
-    },
-
-    saveEmployee() {
-      if (!this.$v.$invalid) {
-        EventBus.$emit("CHECK_EMPLOYEE_FORM");       
-      } else{
-        this.$v.$touch();
-      }
-      
-    },
-    deleteConfirm() {
-      this.deleteModalVisible = false;
-      this.deleteEmployee({
-        companyId: this.actualCompany.item.id,
-        employeeId: this.actualEmployee.item.id,
-      });
-    },
-   
-    showEmployeeInfo: function (employee) {
-      if (this.currentEmployeeSelected == employee) {
-        this.getEmployee(null);
-
-        this.currentEmployeeSelected = undefined;
-      } else {
-        this.getEmployee(employee);
-        this.currentEmployeeSelected = employee;
-      }
-    },
-
-    onFileUploaderChange: function () {
-      console.log(this.$refs["file"]);
-      this.fileUploaded = this.$refs["file"].files;
-    },
-
-    importEmployees: function () {
-      console.log(this.fileUploaded);
-      this.modalImportEmployeesOpen = false;
-      var formData = new FormData();
-      formData.append("file", this.fileUploaded.item(0));
-      this.importData({ companyId: this.actualCompany.item.id, file: formData });
-    },
   },
 };
 </script>

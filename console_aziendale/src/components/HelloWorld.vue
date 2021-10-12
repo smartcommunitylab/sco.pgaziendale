@@ -110,6 +110,7 @@
           href: 'https://github.com/vuetifyjs/awesome-vuetify',
         },
       ],
+
       importantLinks: [
         {
           text: 'Documentation',
@@ -132,6 +133,7 @@
           href: 'https://medium.com/vuetify',
         },
       ],
+      
       whatsNext: [
         {
           text: 'Explore components',

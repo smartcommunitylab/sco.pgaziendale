@@ -58,6 +58,7 @@ export default {
         "change-password-modal": ChangePasswordModal,
         "dissociate-form-modal": DissociateFormModal,
     },
+    
     props: {
         modalType: String,
     },

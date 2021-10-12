@@ -267,6 +267,7 @@
     </div>
   </form>
 </template>
+
 <script>
 import { required } from "vuelidate/lib/validators";
 import EventBus from "@/components/eventBus";
@@ -274,32 +275,6 @@ import { campaignService } from "../../services";
 import {mapState} from "vuex";
 
 export default {
-  data() {
-    return {
-      arrayMeans: [],
-      applications: [],
-      campaign: {},
-      id: "",
-      logo: "",
-      title: "",
-      description: "",
-      from: "",
-      to: "",
-      rules: "",
-      privacy: "",
-      means: [],
-      active: false,
-      application: "",
-      edit: false,
-      listaApplications:['ciao','pippo'],
-      menu:false,
-      menu2:false,
-      inputRules: {
-        required: value => !!value || 'Campo richiesto.',
-      },
-      panel: [0]
-    };
-  },
   validations: {
     id: {
       required,
@@ -335,6 +310,34 @@ export default {
       required,
     },
   },
+
+  data() {
+    return {
+      arrayMeans: [],
+      applications: [],
+      campaign: {},
+      id: "",
+      logo: "",
+      title: "",
+      description: "",
+      from: "",
+      to: "",
+      rules: "",
+      privacy: "",
+      means: [],
+      active: false,
+      application: "",
+      edit: false,
+      listaApplications:['ciao','pippo'],
+      menu:false,
+      menu2:false,
+      inputRules: {
+        required: value => !!value || 'Campo richiesto.',
+      },
+      panel: [0]
+    };
+  },
+  
   methods: {
     initCampaign() {
       this.campaign = {};
@@ -371,14 +374,16 @@ export default {
       };
     },
   },
-    computed: {
+  computed: {
     ...mapState("account", ["status", "user", "role"]),
+
     meanRules() {
       return [
         this.means.length > 0 || "Seleziona almeno un mezzo."
       ];
     },
   },
+  
   mounted() {
     if (this.role == 'ROLE_ADMIN' && this.adminCompany == null){
     campaignService.getApplications().then((res) => {
@@ -423,4 +428,6 @@ export default {
   },
 };
 </script>
-<style scoped></style>
+
+<style scoped>
+</style>

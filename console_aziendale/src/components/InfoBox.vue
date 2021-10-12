@@ -13,11 +13,7 @@
 <script>
 export default {
   name: "Box",
-  data() {
-    return {
-      isActive: false,
-    };
-  },
+
   props: {
     msg: {
       type: String,
@@ -25,13 +21,18 @@ export default {
       default: "",
     },
   },
-  created() {},
+
+  data() {
+    return {
+      isActive: false,
+    };
+  },
+  
   methods: {
     cahngeVisibility() {
       this.isActive = !this.isActive;
     },
   },
-  computed: {},
 };
 </script>
 
@@ -73,7 +74,6 @@ export default {
   border-bottom: 10px solid transparent;
   border-right: 10px solid black;
 }
-
 .fade-enter-active,
 .fade-leave-active {
   opacity: 1;

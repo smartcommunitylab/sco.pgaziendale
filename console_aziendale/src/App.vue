@@ -47,11 +47,8 @@
 </template>
 
 <script>
-
 import MenuHeader from "./components/NavBar/MenuHeader.vue";
 import { mapActions, mapState } from "vuex";
-
-/*import Loader from "./components/Loader";*/
 import Footer from "@/components/Footer"
 import Snackbar from "@/components/Snackbar.vue"
 import ModalCenter from "@/components/ModalCenter.vue"
@@ -68,6 +65,11 @@ export default {
     "profile-manager": ProfileManager,
   },
 
+  methods: {
+    ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
+    ...mapActions("alert", { clearAlert: "clear" }),
+    ...mapActions("modal", { initModal:"initModal" }),
+  },
 
   computed: {
     ...mapState({
@@ -82,17 +84,7 @@ export default {
     ...mapState('account', ['status']),
     ...mapState('alert', ['message'])
   },
-  created() {
-    console.log("account" + this.account);
-    this.initModal();
-    //check login and push the right page
-    // this.bootProfile();
-  },
-  methods: {
-    ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
-    ...mapActions("alert", { clearAlert: "clear" }),
-    ...mapActions("modal", { initModal:"initModal" }),
-  },
+
   watch: {
     // eslint-disable-next-line no-unused-vars
     status(newCount, oldCount) {
@@ -106,6 +98,7 @@ export default {
     $route(to, from) {
       // clear alert on location change
       this.clearAlert();
+      window.scrollTo(0,0);
     },
     active: function() {
       if(this.active){
@@ -115,6 +108,13 @@ export default {
       document.documentElement.style.overflow = 'auto';
       document.documentElement.style.overflowX = 'hidden';
     }
+  },
+
+  created() {
+    console.log("account" + this.account);
+    this.initModal();
+    //check login and push the right page
+    // this.bootProfile();
   },
 };
 </script>
@@ -148,9 +148,7 @@ export default {
 .alert-danger {
   background-color: #dc3545;
 }
-
 .blockScroll{
   overflow: hidden;
 }
-
 </style>

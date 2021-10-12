@@ -102,6 +102,7 @@ import moment from "moment";
 
 export default {
   name: "ProfiloLocation",
+
   data() {
     return {
       zoom: 13,
@@ -115,19 +116,11 @@ export default {
       },
     };
   },
-  computed: {
-    ...mapState("company", ["actualCompany"]),
-    ...mapState("location", ["actualLocation"]),
-    center() {
-      return latLng(
-        this.actualLocation.item.latitude,
-        this.actualLocation.item.longitude
-      );
-    },
-  },
+
   methods: {
     ...mapActions("location", { changeActualLocation: "changeActualLocation" }),
     ...mapActions("modal", { openModal: "openModal" }),
+    
     deleteLocation() {
       EventBus.$emit("DELETE_LOCATION", this.actualLocation);
     },
@@ -150,6 +143,18 @@ export default {
           returnDays += moment(element).format('DD-MM-YYYY') + "<br>";
         });
       return returnDays;
+    },
+  },
+
+  computed: {
+    ...mapState("company", ["actualCompany"]),
+    ...mapState("location", ["actualLocation"]),
+
+    center() {
+      return latLng(
+        this.actualLocation.item.latitude,
+        this.actualLocation.item.longitude
+      );
     },
   },
 };

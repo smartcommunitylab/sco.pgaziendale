@@ -81,6 +81,7 @@
     </v-card>
   </v-col>
 </template>
+
 <script>
 import { mapActions, mapState } from "vuex";
 import EventBus from "@/components/eventBus";
@@ -88,25 +89,25 @@ import { campaignService } from "../../services";
 
 export default {
   name: "ProfiloCampagna",
-  data() {
-    return {};
-  },
-  computed: {
-    ...mapState("campaign", ["actualCampaign"]),
-    ...mapState("account", [ "role"]),
-        ...mapState("company", [ "adminCompany"]),
 
-  },
   methods: {
+    ...mapActions("modal", {openModal: "openModal"}),
+
     getListOfMeans() {
       return campaignService.getTextOfMeans(this.actualCampaign.item.means);
     },
-    ...mapActions("modal", {openModal: "openModal"}),
+
     editCampaign() {
       EventBus.$emit("EDIT_CAMPAIGN", this.actualCampaign);
     },
   },
-  mounted() {},
+
+  computed: {
+    ...mapState("campaign", ["actualCampaign"]),
+    ...mapState("account", [ "role"]),
+    ...mapState("company", [ "adminCompany"]),
+
+  },
 };
 </script>
 

@@ -47,35 +47,35 @@
   </v-card>
 </template>
 
-
 <script>
 import { mapActions, mapState } from 'vuex'
-  export default {
+
+export default {
     props: {
         items: Array,
         headers: Array,
         title: String
     },
+
     data() {
         return {
         search: '',
         componentKey: 0
         }
     },
-    computed: {
-        ...mapState("company",["adminCompany"]),
-    },
+
     methods: {
         ...mapActions("modal", {openModal:'openModal'}),
+    },
 
+    computed: {
+        ...mapState("company",["adminCompany"]),
     }
-  }
+}
 </script>
-
 
 <style scoped>
 .elevation{
   z-index: 60;
 }
-
 </style>

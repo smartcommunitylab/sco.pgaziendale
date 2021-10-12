@@ -22,23 +22,25 @@
     </div>
   </div>
 </template>
+
 <script>
  import { mapActions,mapState } from 'vuex';
 
-
 export default {
-    name: "ProfiloHeader",
+  name: "ProfiloHeader",
 
-    computed: {
-        ...mapState('account', ['role']),
-        ...mapState('company',['adminCompany','actualCompany'])
-    },
   methods: {
+    ...mapActions('company', ['resetCompanyAdmin']),
+
     resetCompany() {
       this.resetCompanyAdmin();
       this.$router.push("/aziende");
-    },
-     ...mapActions('company', ['resetCompanyAdmin'])
+    }
+  },
+
+  computed: {
+      ...mapState('account', ['role']),
+      ...mapState('company',['adminCompany','actualCompany'])
   },
 }
 </script>
@@ -47,11 +49,8 @@ export default {
 .linked{
   font-style: italic;
 }
-
 .linked:hover {
   text-decoration: underline;
   cursor: pointer;
 }
-
-
 </style>

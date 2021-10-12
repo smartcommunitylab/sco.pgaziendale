@@ -50,6 +50,7 @@
         </template>
   </modal>
 </template>
+
 <script>
 import { mapState, mapActions } from "vuex";
 import EventBus from "@/components/eventBus";
@@ -58,6 +59,7 @@ import Modal from "@/components/Modal.vue";
 
 export default {
   components: {Modal},
+
   data() {
     return {
       disassociaTmpCampaign:null,
@@ -67,11 +69,6 @@ export default {
           title: 'Associa o Disassocia Campagne',
       }
     };
-  },
-  computed: {
-    ...mapState("account", ["role"]),
-    ...mapState("company", ["actualCompany", "adminCompany"]),
-    ...mapState("campaign", ["allCampaigns", "actualCampaign", "publicCampaigns"]),
   },
 
   methods: {
@@ -86,6 +83,7 @@ export default {
       deleteCompanyCampaign: "deleteCompanyCampaign",
       createCompanyCampaign: "createCompanyCampaign",
     }),
+    
     associa(campaign) {
       if (this.role == "ROLE_ADMIN" && this.adminCompany && this.adminCompany.item) {
         this.createCompanyCampaign({
@@ -108,6 +106,14 @@ export default {
       else return false;
     },
   },
+
+  computed: {
+    ...mapState("account", ["role"]),
+    ...mapState("company", ["actualCompany", "adminCompany"]),
+    ...mapState("campaign", ["allCampaigns", "actualCampaign", "publicCampaigns"]),
+  },
+
+  
   mounted() {
       //get all public
       if (this.role == "ROLE_ADMIN" && this.adminCompany && this.adminCompany.item) {
@@ -131,6 +137,7 @@ export default {
 
 };
 </script>
+
 <style scoped>
 .v-card__title {
     font-size: 1.00rem;

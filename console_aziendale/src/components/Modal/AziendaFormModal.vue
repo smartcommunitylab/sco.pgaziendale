@@ -276,57 +276,16 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-
 import { validationMixin } from 'vuelidate';
 import { required, email, url } from 'vuelidate/lib/validators';
-
 import Modal from "@/components/Modal.vue";
 
 export default {
-    props: {
-        typeCall: String,
-    },
+    props: {typeCall: String},
+
     mixins: [validationMixin],
-    components:{
-        "modal": Modal,
-    },
-    data() {
-        return {
-            listaProvince: ['AG', 'AL', 'AN', 'AO', 'AR', 'AP', 'AT', 'AV', 'BA', 'BT',
-            'BL', 'BN', 'BG', 'BI', 'BO', 'BZ', 'BS', 'BR', 'CA', 'CL',
-            'CB', 'CE', 'CT', 'CZ', 'CH', 'CO', 'CS', 'CR', 'KR', 'CN',
-            'EN', 'FM', 'FE', 'FI', 'FG', 'FC', 'FR', 'GE', 'GO', 'GR',
-            'IM', 'IS', 'AQ', 'SP', 'LT', 'LE', 'LC', 'LI', 'LO', 'LU', 'MC',
-            'MN', 'MS', 'MT', 'ME', 'MI', 'MO', 'MB', 'NA', 'NO', 'NU',
-            'OR', 'PD', 'PA', 'PR', 'PV', 'PG', 'PU', 'PE', 'PC', 'PI', 'PT',
-            'PN', 'PZ', 'PO', 'RG', 'RA', 'RC', 'RE', 'RI', 'RN', 'RM', 'RO',
-            'SA', 'SS', 'SV', 'SI', 'SR', 'SO', 'SU', 'TA', 'TE', 'TR', 'TO', 'TP',
-            'TN', 'TV', 'TS', 'UD', 'VA', 'VE', 'VB', 'VC', 'VR', 'VV', 'VI', 'VT'
-            ],
-            listaRegioni: ['Abruzzo', 'Basilicata', 'Calabria', 'Campania', 'Emilia-Romagna', 
-            'Friuli-Venezia Giulia', 'Lazio', 'Liguria', 'Lombardia', 'Marche', 'Molise', 'Piemonte', 
-            'Puglia', 'Sardegna', 'Sicilia', 'Toscana', 'Trentino-Alto Adige', 'Umbria', 'Valle d\'Aosta Veneto' 
-            ],
-            company: {},
-            id: null,
-            name: "",
-            code: "",
-            address: "",
-            streetNumber: "",
-            city: "",
-            province: 1,
-            region: "",
-            country: "",
-            zip: "",
-            contactEmail: "",
-            contactPhone: "",
-            web: "",
-            logo: "",
-            popup: {
-                title: "",
-            },
-        };
-    },
+
+    components:{"modal": Modal},
 
     validations: {
         name: {
@@ -369,8 +328,50 @@ export default {
         logo: {
         },
     },
+
+    data() {
+        return {
+            listaProvince: ['AG', 'AL', 'AN', 'AO', 'AR', 'AP', 'AT', 'AV', 'BA', 'BT',
+            'BL', 'BN', 'BG', 'BI', 'BO', 'BZ', 'BS', 'BR', 'CA', 'CL',
+            'CB', 'CE', 'CT', 'CZ', 'CH', 'CO', 'CS', 'CR', 'KR', 'CN',
+            'EN', 'FM', 'FE', 'FI', 'FG', 'FC', 'FR', 'GE', 'GO', 'GR',
+            'IM', 'IS', 'AQ', 'SP', 'LT', 'LE', 'LC', 'LI', 'LO', 'LU', 'MC',
+            'MN', 'MS', 'MT', 'ME', 'MI', 'MO', 'MB', 'NA', 'NO', 'NU',
+            'OR', 'PD', 'PA', 'PR', 'PV', 'PG', 'PU', 'PE', 'PC', 'PI', 'PT',
+            'PN', 'PZ', 'PO', 'RG', 'RA', 'RC', 'RE', 'RI', 'RN', 'RM', 'RO',
+            'SA', 'SS', 'SV', 'SI', 'SR', 'SO', 'SU', 'TA', 'TE', 'TR', 'TO', 'TP',
+            'TN', 'TV', 'TS', 'UD', 'VA', 'VE', 'VB', 'VC', 'VR', 'VV', 'VI', 'VT'
+            ],
+            listaRegioni: ['Abruzzo', 'Basilicata', 'Calabria', 'Campania', 'Emilia-Romagna', 
+            'Friuli-Venezia Giulia', 'Lazio', 'Liguria', 'Lombardia', 'Marche', 'Molise', 'Piemonte', 
+            'Puglia', 'Sardegna', 'Sicilia', 'Toscana', 'Trentino-Alto Adige', 'Umbria', 'Valle d\'Aosta Veneto' 
+            ],
+            company: {},
+            id: null,
+            name: "",
+            code: "",
+            address: "",
+            streetNumber: "",
+            city: "",
+            province: 1,
+            region: "",
+            country: "",
+            zip: "",
+            contactEmail: "",
+            contactPhone: "",
+            web: "",
+            logo: "",
+            popup: {
+                title: "",
+            },
+        };
+    },
+
+    
     methods: {
         ...mapActions("modal", { closeModal:"closeModal" }),
+        ...mapActions("company", {addCompany:"addCompany", updateCompany:"updateCompany"}),
+
         copyFormValues(company) {
             console.log("Sono nel For");
             console.log("Questa è la company:");
@@ -379,7 +380,6 @@ export default {
                 this[key] = company[key];
             }
         },
-
         isURL(str) {
             let url;
             try {
@@ -393,7 +393,6 @@ export default {
             var re = /\S+@\S+\.\S+/;
             return re.test(email);
         },
-
         initCompany() {
             this.company = {};
             this.id = null;
@@ -428,12 +427,11 @@ export default {
                 web: this.web,
                 logo: this.logo,
             };
-        },
-        ...mapActions("company", {addCompany:"addCompany", updateCompany:"updateCompany"}),
+        },     
         closeThisModal(){
+            this.initCompany();
             this.$v.$reset();
             this.closeModal();
-
         },
         saveCompany() {
             if (!this.$v.$invalid) {
@@ -446,7 +444,6 @@ export default {
                     console.log(this.company);
                     this.updateCompany(this.company);
                     this.closeModal();
-                    
                 }
             }else{
              this.$v.$touch();
@@ -465,10 +462,11 @@ export default {
             }
         },
     },
+
     computed: {
         ...mapState("company", ["actualCompany"]),
 
-        //Messaggi di Errore per gli input del form
+        //Controls for form validation 
         nameErrors () {
             const errors = []
             if (!this.$v.name.$dirty) return errors
@@ -543,16 +541,8 @@ export default {
             !this.$v.web.required && errors.push('Url richiesto.')
             return errors
         },
+    },
 
-        /*
-            webRules: [ 
-                (v) => this.isURL(v) || 'URL non valido. Inserire " https:// ". ',
-            ], 
-        */
-    },
-    created() {
-        this.setModalData();
-    },
     watch: {
         typeCall: function(){
             this.setModalData();
@@ -561,9 +551,12 @@ export default {
             this.setModalData();
         }
     },
+
+    created() {
+        this.setModalData();
+    },
 }
 </script>
 
 <style>
-
 </style>
