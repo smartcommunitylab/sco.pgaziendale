@@ -12,10 +12,10 @@ import moment from "moment";
 import { campaignService } from "../../services";
 
 export default {
-  components: {
-    LineChart,
-  },
+  components: {LineChart},
+
   props: ["selection"],
+
   data() {
     return {
       datacollection: null,
@@ -23,20 +23,7 @@ export default {
       title:""
     };
   },
-  computed: {
-    ...mapState("account", ["role"]),
-    ...mapState("stat", ["stat"]),
-  },
-  mounted() {
-    this.means = campaignService.getArrayMeans();
-    this.fillData();
-  },
-  watch: {
-    stat() {
-      console.log(this.stat);
-      if (this.stat && this.stat.items) this.fillData();
-    },
-  },
+
   methods: {
     format(string, span) {
       if (span == "date") return moment(string).format("DD-MM-YYYY");
@@ -60,7 +47,6 @@ export default {
         default:
           break;
       }
-
       return title;
     },
     fillData() {
@@ -90,8 +76,7 @@ export default {
           data.push(this.stat.items[i][this.selection.selectedType]);
 
         }
-        } 
-
+        }
         this.datacollection = {
           labels: labels,
           datasets: [
@@ -104,6 +89,23 @@ export default {
         };
       }
     },
+  },
+
+  computed: {
+    ...mapState("account", ["role"]),
+    ...mapState("stat", ["stat"]),
+  },
+
+  watch: {
+    stat() {
+      console.log(this.stat);
+      if (this.stat && this.stat.items) this.fillData();
+    },
+  },
+  
+  mounted() {
+    this.means = campaignService.getArrayMeans();
+    this.fillData();
   },
 };
 </script>

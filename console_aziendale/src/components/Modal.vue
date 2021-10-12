@@ -50,10 +50,13 @@
 
 <script>
 import { mapActions } from 'vuex';
+
 export default {
   name: 'modal',
+
   methods: {
     ...mapActions("modal", {closeModal:"closeModal"}),
+
     toggleBodyClass(addRemoveClass, className) {
       const el = document.body;
       if (addRemoveClass === 'addClass') {
@@ -80,7 +83,6 @@ export default {
 .modal-fade-leave-active {
   opacity: 0;
 }
-
 .modal-fade-enter-active,
 .modal-fade-leave-active {
   transition: opacity .5s ease
@@ -97,7 +99,6 @@ export default {
   align-items: center;
   z-index: 10;
 }
-
 .modal {
   background: #FFFFFF;
   box-shadow: 2px 2px 20px 1px;
@@ -106,8 +107,6 @@ export default {
   flex-direction: column;
   /* text-align: center; */
 }
-
-  
 .modal-header {
   justify-content: space-between;
   height: 50px;
@@ -120,15 +119,12 @@ export default {
   z-index: 9;
   padding: 18px;
   margin: 20px;
-
 }
-
 .modal-footer {
   justify-content: flex-end;
   text-align: right;
   padding: 16px 24px;
 }
-
 .modal-body {
   position: relative;
   margin-left: 20px;

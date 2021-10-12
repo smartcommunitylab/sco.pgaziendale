@@ -173,9 +173,9 @@ import ProfiloHeader from "./ProfiloHeader.vue";
 
 export default {
   name: "MenuHeader",
-  components: {
-    ProfiloHeader,
-  },
+
+  components: {ProfiloHeader},
+
   data: function () {
     return { 
       isOpen: true,
@@ -189,16 +189,10 @@ export default {
     };
   },
 
-  created: function () {
-      this.activeRootSelection();
-  },
-
-  computed: {
-    ...mapState("account", ["status", "user", "role"]),
-    ...mapState("navigation", ["page"]),
-    ...mapState("company", ["adminCompany", "actualCompany"]),
-  },
   methods: {
+    ...mapActions("account", ["logout"]),
+    ...mapActions("company", ["resetCompanyAdmin"]),
+    
     drawer() {
       this.isOpen = !this.isOpen;
     },
@@ -206,10 +200,9 @@ export default {
       this.resetCompanyAdmin();
     },
     goHome() {
-      if ( this.role == 'ROLE_ADMIN' && this.adminCompany == null) 
-              {
-                this.$router.push("/aziende");
-              }
+      if ( this.role == 'ROLE_ADMIN' && this.adminCompany == null){
+        this.$router.push("/aziende");
+      }
       else {
         this.$router.push("/azienda");
       }
@@ -254,19 +247,27 @@ export default {
                     this.isActiveGestioneUtenti = true;
       }
     },
-    ...mapActions("account", ["logout"]),
-    ...mapActions("company", ["resetCompanyAdmin"]),
   },
+
+  computed: {
+    ...mapState("account", ["status", "user", "role"]),
+    ...mapState("navigation", ["page"]),
+    ...mapState("company", ["adminCompany", "actualCompany"]),
+  },
+  
   watch: {
     $route: function () {
       this.activeRootSelection();
     },
   },
+
+  created: function () {
+    this.activeRootSelection();
+  },
 };
 </script>
 
 <style>
-
 .profile-button {
   position: absolute;
   right: 50px;
@@ -274,5 +275,4 @@ export default {
 .active {
   color: #0f70b7;
 }
-
 </style>

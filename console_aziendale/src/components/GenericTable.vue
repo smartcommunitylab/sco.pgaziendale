@@ -39,6 +39,12 @@ export default {
     method:Function
   },
   
+  data() {
+    return {
+      search: '',
+    }
+  },
+
   watch: {
     data: {
       // the callback will be called immediately after the start of the observation
@@ -49,27 +55,20 @@ export default {
       }
     },
   },
-  data() {
-    return {
-      search: '',
-    }
-  },
+
   filters: {
     capitalize: function(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
   },
-  method: {
-  }
 }
 </script>
+
 <style scoped>
 .row-pointer:hover {
   cursor: pointer;
 }
-
 .elevation{
   z-index: 60;
 }
-
 </style>

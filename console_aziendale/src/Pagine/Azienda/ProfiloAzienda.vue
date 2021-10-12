@@ -99,10 +99,24 @@ import { mapState, mapActions } from "vuex";
 
 export default {
   name: "ProfiloAzienda",
+  
+  methods: {
+    ...mapActions("company", {
+      getCompanyById: "getCompanyById",
+      chooseCompanyAdminCall: "chooseCompanyAdmin",
+    }),
+    ...mapActions("modal", {openModal: "openModal"}),
+
+    chooseCompanyAdmin() {
+      this.chooseCompanyAdminCall(this.actualCompany);
+      this.$router.push('/azienda');
+    },
+  },
 
   computed: {
     ...mapState("company", ["adminCompany", "actualCompany"]),
     ...mapState("account", ["role"]),
+
     isAdmin: function(){
         if(this.adminCompany){
             return true;
@@ -110,19 +124,6 @@ export default {
             return false;
         }
     }
-  },
-  methods: {
-    ...mapActions("company", {
-      getCompanyById: "getCompanyById",
-      chooseCompanyAdminCall: "chooseCompanyAdmin",
-    }),
-
-    ...mapActions("modal", {openModal: "openModal"}),
-
-    chooseCompanyAdmin() {
-      this.chooseCompanyAdminCall(this.actualCompany);
-      this.$router.push('/azienda');
-    },
   },
 };
 </script>

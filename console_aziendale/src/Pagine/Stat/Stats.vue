@@ -528,6 +528,7 @@ export default {
     Chart,
     GenericTable,
   },
+
   data() {
     return {
       tabWhatActive: "table",
@@ -553,47 +554,7 @@ export default {
       dataStat: [],
     };
   },
-  computed: {
-    ...mapState("account", ["status", "user", "role"]),
-    ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
-    ...mapState("company", ["allCompanies", "adminCompany", "actualCompany"]),
-    ...mapState("location", ["allLocations"]),
-    ...mapState("employee", ["allEmployees"]),
-    ...mapState("stat", ["stat"]),
-  },
-  created() {
-    //default company if AA
-    //this.selectedCompany = null;
-    if (this.role == "ROLE_ADMIN" && this.adminCompany == null) {
-      //get all campaigns
-      this.getAllCampaigns();
-    } else if (
-      this.role == "ROLE_COMPANY_ADMIN" ||
-      (this.role == "ROLE_ADMIN" && this.adminCompany != null) ||
-      (this.role == "ROLE_MOBILITY_MANAGER" && this.actualCompany != null)
-    ) {
-      this.selectedCompany = this.adminCompany
-        ? this.adminCompany.item
-        : this.actualCompany.item;
-      this.getAllCampaigns(this.selectedCompany.id);
-      this.what = "sede";
-    }
 
-    if (this.selectedCompany) {
-      this.getAllLocations(this.selectedCompany.id);
-      this.getAllEmployees(this.selectedCompany.id);
-    }
-  },
-  mounted() {
-    this.changePage({ title: "Statistiche", route: "/stats" });
-    this.resetStat();
-  },
-  watch: {
-    stat() {
-      console.log(this.stat);
-      if (this.stat && this.stat.items) this.buildTable();
-    },
-  },
   methods: {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
@@ -894,8 +855,54 @@ export default {
       }
     },
   },
+
+  computed: {
+    ...mapState("account", ["status", "user", "role"]),
+    ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
+    ...mapState("company", ["allCompanies", "adminCompany", "actualCompany"]),
+    ...mapState("location", ["allLocations"]),
+    ...mapState("employee", ["allEmployees"]),
+    ...mapState("stat", ["stat"]),
+  },
+  
+  watch: {
+    stat() {
+      console.log(this.stat);
+      if (this.stat && this.stat.items) this.buildTable();
+    },
+  },
+
+  created() {
+    //default company if AA
+    //this.selectedCompany = null;
+    if (this.role == "ROLE_ADMIN" && this.adminCompany == null) {
+      //get all campaigns
+      this.getAllCampaigns();
+    } else if (
+      this.role == "ROLE_COMPANY_ADMIN" ||
+      (this.role == "ROLE_ADMIN" && this.adminCompany != null) ||
+      (this.role == "ROLE_MOBILITY_MANAGER" && this.actualCompany != null)
+    ) {
+      this.selectedCompany = this.adminCompany
+        ? this.adminCompany.item
+        : this.actualCompany.item;
+      this.getAllCampaigns(this.selectedCompany.id);
+      this.what = "sede";
+    }
+
+    if (this.selectedCompany) {
+      this.getAllLocations(this.selectedCompany.id);
+      this.getAllEmployees(this.selectedCompany.id);
+    }
+  },
+
+  mounted() {
+    this.changePage({ title: "Statistiche", route: "/stats" });
+    this.resetStat();
+  },
 };
 </script>
+
 <style scoped>
 .btn-stat {
   border: none;

@@ -28,12 +28,14 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import {mapState, mapActions} from "vuex";
 import GenericTableAction from '../../components/GenericTableAction.vue';
 
 export default {
   name: "GestioneAzienda",
+
   components: { GenericTableAction },
+
   data() {
     return {
       submitStatus: null,
@@ -41,14 +43,9 @@ export default {
       editModalVisible: false,
       deleteModalVisible: false,
       newUser: true,
-
       tableTitle: "Utenti",
       headerColumns: [{text:"Cognome", value:"surname"}, {text:"Nome", value:"name"}, {text:"Username", value:"username"}, {text:"Ruoli", value:"rolesComputed"}, { text: 'Azioni', value: 'actions', sortable: false }],
     };
-  },
-  computed: {
-    ...mapState("company", ["adminCompany", "adminCompanyUsers"]),
-    ...mapState("campaign", ["allCampaigns"]),
   },
 
   methods: {
@@ -63,17 +60,20 @@ export default {
     }),
     ...mapActions("campaign", { getAllCampaigns: "getAll" }),
     ...mapActions("navigation", { changePage: "changePage" }),
-    
     ...mapActions("modal", {openModal:"openModal"}),
-
   },
+
+  computed: {
+    ...mapState("company", ["adminCompany", "adminCompanyUsers"]),
+    ...mapState("campaign", ["allCampaigns"]),
+  },
+
   mounted() {
     if (this.adminCompany) {
       this.getUsers(this.adminCompany.item);
       this.getAllCampaigns(this.adminCompany.item.id);
     }
   },
-  
 };
 </script>
 

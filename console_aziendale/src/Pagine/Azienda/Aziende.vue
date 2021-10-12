@@ -40,7 +40,9 @@ import GenericTable from "@/components/GenericTable.vue";
 
 export default {
   components: { ProfiloAzienda, GenericTable },
+
   name: "Aziende",
+
   data: function () {
     return {
       tableTitle: "Aziende",
@@ -54,8 +56,56 @@ export default {
       submitStatus: null,
     };
   },
+  
+  methods: {
+    ...mapActions("company", {
+      getAllCompanies: "getAll",
+      addCompanyCall: "addCompany",
+      updateCompanyCall: "updateCompany",
+      getCompanyById: "getCompanyById",
+      deleteCompany: "deleteCompany",
+    }),
+    ...mapActions("navigation", { changePage: "changePage" }),
+    showModal(title) {
+      this.nColsTable = 8;
+      this.editModalVisible = true;
+      this.newCompany = true;
+      EventBus.$emit("NEW_COMPANY_FORM");
+      this.popup = {
+        title: title,
+      };
+    },
+    ...mapActions("modal", { openModal:"openModal"}),
+
+    closeModal() {
+      this.editModalVisible = false;
+      this.newCompany = false;
+    },
+    closeDeleteModal() {
+      this.deleteModalVisible = false;
+    },
+    saveCompany() {
+      EventBus.$emit("CHECK_COMPANY_FORM");
+    },
+    deleteConfirm() {
+      this.deleteModalVisible = false;
+      this.deleteCompany(this.company);
+    },  
+    showCompanyInfo: function (company) {
+      if (this.currentCompanySelected == company) {
+        this.getCompanyById(null);
+
+        this.currentCompanySelected = undefined;
+      } else {
+        this.getCompanyById(company.id);
+        this.currentCompanySelected = company;
+      }
+    },
+  },
+
   computed: {
     ...mapState("company", ["allCompanies", "actualCompany", "adminCompany"]),
+
     nColsTable_calculator: function() {
       if(this.actualCompany){
         return 8;
@@ -66,6 +116,7 @@ export default {
       }
     },
   },
+
   mounted: function () {
     this.changePage({ title: "Lista aziende", route: "/aziende" });
     this.getAllCompanies();
@@ -96,60 +147,12 @@ export default {
       this.submitStatus = "ERROR";
     });
   },
-    beforeDestroy() {
+
+  beforeDestroy() {
     EventBus.$off("NO_COMPANY_FORM");
     EventBus.$off("OK_COMPANY_FORM");
     EventBus.$off("DELETE_COMPANY");
     EventBus.$off("EDIT_COMPANY");
-  },
-  methods: {
-    ...mapActions("company", {
-      getAllCompanies: "getAll",
-      addCompanyCall: "addCompany",
-      updateCompanyCall: "updateCompany",
-      getCompanyById: "getCompanyById",
-      deleteCompany: "deleteCompany",
-    }),
-    ...mapActions("navigation", { changePage: "changePage" }),
-    showModal(title) {
-      this.nColsTable = 8;
-      this.editModalVisible = true;
-      this.newCompany = true;
-      EventBus.$emit("NEW_COMPANY_FORM");
-      this.popup = {
-        title: title,
-      };
-    },
-
-    ...mapActions("modal", { openModal:"openModal"}),
-
-    closeModal() {
-      this.editModalVisible = false;
-      this.newCompany = false;
-    },
-
-    closeDeleteModal() {
-      this.deleteModalVisible = false;
-    },
-   
-    saveCompany() {
-      EventBus.$emit("CHECK_COMPANY_FORM");
-    },
-    deleteConfirm() {
-      this.deleteModalVisible = false;
-      this.deleteCompany(this.company);
-    },
-    
-    showCompanyInfo: function (company) {
-      if (this.currentCompanySelected == company) {
-        this.getCompanyById(null);
-
-        this.currentCompanySelected = undefined;
-      } else {
-        this.getCompanyById(company.id);
-        this.currentCompanySelected = company;
-      }
-    },
   },
 };
 </script>
@@ -162,7 +165,6 @@ export default {
 .selected {
   @apply bg-background;
 }
-
 .form-group--error {
   /* color: red; */
   animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
@@ -171,28 +173,23 @@ export default {
   color: red;
   text-align: center;
 }
-
 @keyframes shake {
   10%,
   90% {
     transform: translate3d(-1px, 0, 0);
   }
-
   20%,
   80% {
     transform: translate3d(2px, 0, 0);
   }
-
   30%,
   50%,
   70% {
     transform: translate3d(-4px, 0, 0);
   }
-
   40%,
   60% {
     transform: translate3d(4px, 0, 0);
   }
 }
-
 </style>

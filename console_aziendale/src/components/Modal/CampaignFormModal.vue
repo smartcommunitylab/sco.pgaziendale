@@ -323,7 +323,6 @@
     </modal>
 </template>
 
-
 <script>
 import { validationMixin } from 'vuelidate';
 import { required } from "vuelidate/lib/validators";
@@ -333,41 +332,12 @@ import {mapActions, mapState} from "vuex";
 import Modal from "@/components/Modal.vue";
 
 export default {
-  props:{
-      typeCall: String,
-  },
+  props:{typeCall: String},
+
   mixins: [validationMixin],
-  components:{
-    "modal": Modal,
-    },
-  data() {
-    return {
-      arrayMeans: [],
-      applications: [],
-      campaign: {},
-      id: null,
-      logo: "",
-      title: "",
-      description: "",
-      from: "",
-      to: "",
-      rules: "",
-      privacy: "",
-      means: [],
-      active: false,
-      application: "",
-      edit: false,
-      listaApplications:['ciao','pippo'],
-      menu:false,
-      menu2:false,
-      regolamentoInvalid:false,      
-      privacyInvalid:false,
-      panel: [0],
-      popup: {
-          title: "",
-      }
-    };
-  },
+
+  components:{"modal": Modal},
+
   validations: {
     id: {
       required,
@@ -403,9 +373,40 @@ export default {
       required,
     },
   },
+
+  data() {
+    return {
+      arrayMeans: [],
+      applications: [],
+      campaign: {},
+      id: null,
+      logo: "",
+      title: "",
+      description: "",
+      from: "",
+      to: "",
+      rules: "",
+      privacy: "",
+      means: [],
+      active: false,
+      application: "",
+      edit: false,
+      listaApplications:['ciao','pippo'],
+      menu:false,
+      menu2:false,
+      regolamentoInvalid:false,      
+      privacyInvalid:false,
+      panel: [0],
+      popup: {
+          title: "",
+      }
+    };
+  },
+
   methods: {
     ...mapActions("modal", {closeModal:"closeModal"}),
     ...mapActions("campaign", {addCampaign: "addCampaign", updateCampaign:"updateCampaign"}),
+
     initCampaign() {
       this.campaign = {};
       this.id = null;
@@ -480,15 +481,18 @@ export default {
       }
     },
     closeThisModal(){
+        this.initCampaign();
         this.$v.$reset();
         this.closeModal();
         this.regolamentoInvalid = false;
     },
   },
-    computed: {
+  computed: {
     ...mapState("account", ["status", "user", "role"]),
     ...mapState("campaign", ["actualCampaign"]),
     ...mapState("company", ["actualCompany","adminCompany"]),
+
+    //Controls for form validation 
     nameErrors () {
             const errors = []
             if (!this.$v.name.$dirty) return errors
@@ -556,6 +560,20 @@ export default {
         return errors
     },
   },
+
+  watch: {
+    typeCall: function(){
+        this.setModalData();
+    },
+    actualCampaign: function(){
+        this.setModalData();
+    },
+  },
+  
+  created() {
+    this.setModalData();
+  },
+
   mounted() {
     if (this.role == 'ROLE_ADMIN' && this.adminCompany == null){
     campaignService.getApplications().then((res) => {
@@ -590,19 +608,7 @@ export default {
         this.$v.$reset();
       }
     });
-
   },
-    created() {
-        this.setModalData();
-    },
-    watch: {
-        typeCall: function(){
-            this.setModalData();
-        },
-        actualCampaign: function(){
-            this.setModalData();
-        },
-    },
 
   beforeDestroy() {
     EventBus.$off("CHECK_CAMPAIGN_FORM");
@@ -611,6 +617,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .InvalidInput{
   color: #b71c1c;

@@ -17,20 +17,39 @@ import EventBus from "@/components/eventBus";
 
 export default {
   name: "Azienda",
-  components: {
-    ProfiloAzienda
-      },
+
+  components: {ProfiloAzienda},
+
   data: function () {
     return {
-            editModalVisible: false,
-                  popup: {
+      editModalVisible: false,
+      popup: {
         title: "",
       },
       submitStatus: null,
     };
   },
-  created() {
+  
+  computed: {
+    ...mapState("company", ["adminCompany","actualCompany"]),
+    ...mapState("account", ["role","user"]),
+  },
 
+  methods: {
+    ...mapActions("company", { getCompanyById: "getCompanyById",updateCompanyCall: "updateCompany", }),
+    ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
+    ...mapActions("navigation", { changePage: "changePage" }),
+
+    saveCompany() {
+        EventBus.$emit("CHECK_COMPANY_FORM");
+    },
+
+    closeModal() {
+      this.editModalVisible = false;
+    },
+  },
+
+  created() {
     //check actualCompany otherwise get it by id
     if (!this.actualCompany) {
       //get company Id from profile
@@ -38,15 +57,15 @@ export default {
       //this.actualCompany = this.getCompanyById(this.role)
     }
   },
+
   mounted() {
-        this.changePage({title: 'Profilo azienda',
-                route: '/azienda'})
-        EventBus.$on("EDIT_COMPANY", (company) => {
-      this.editModalVisible = true;
-      EventBus.$emit("EDIT_COMPANY_FORM", company.item);
-      this.popup = {
-        title: "Modifica",
-      };
+    this.changePage({title: 'Profilo azienda', route: '/azienda'})
+    EventBus.$on("EDIT_COMPANY", (company) => {
+    this.editModalVisible = true;
+    EventBus.$emit("EDIT_COMPANY_FORM", company.item);
+    this.popup = {
+      title: "Modifica",
+    };
     });
     EventBus.$on("OK_COMPANY_FORM", (company) => {
         if (this.newCompany) {
@@ -56,33 +75,17 @@ export default {
       }
       this.editModalVisible = false;
     });
-        EventBus.$on("OK_COMPANY_FORM", (company) => {
-        {
-          this.updateCompanyCall(company);
+    EventBus.$on("OK_COMPANY_FORM", (company) => {
+      {
+        this.updateCompanyCall(company);
       }
       this.editModalVisible = false;
     });
   },
-      beforeDestroy() {
+
+  beforeDestroy() {
     EventBus.$off("OK_COMPANY_FORM");
     EventBus.$off("EDIT_COMPANY");
-  },
-  computed: {
-    ...mapState("company", ["adminCompany","actualCompany"]),
-    ...mapState("account", ["role","user"]),
-  },
-  methods: {
-    ...mapActions("company", { getCompanyById: "getCompanyById",updateCompanyCall: "updateCompany", }),
-        ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
-        ...mapActions("navigation", { changePage: "changePage" }),
-        saveCompany() {
-            EventBus.$emit("CHECK_COMPANY_FORM");
-
-
-    },
-        closeModal() {
-      this.editModalVisible = false;
-    },
   },
 };
 </script>

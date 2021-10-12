@@ -54,27 +54,26 @@ export default {
       ],
     }
   },
-    methods: {
+
+  methods: {
     openTab(url){
       window.open(url, '_blank');
     }
   },
 }
 </script>
+
 <style>
 .up {
   position: relative;
   z-index: -10;
 }
-
 .link {
   text-decoration: none;
 }
-
 .link:hover {
   text-decoration: underline;
 }
-
 .riga-colore{
   background-color: #212121;
 }

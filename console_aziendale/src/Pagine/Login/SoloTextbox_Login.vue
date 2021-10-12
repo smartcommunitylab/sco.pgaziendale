@@ -112,12 +112,10 @@ export default {
       },
     };
   },
-  computed: {
-    ...mapState("account", ["status"]),
-  },
-  created() {},
+
   methods: {
     ...mapActions("account", ["login", "logout"]),
+    
     handleSubmit() {
       this.submitted = true;
       const { username, password } = this;
@@ -129,8 +127,13 @@ export default {
       this.$router.push('resetpwd');
     },
   },
+
+  computed: {
+    ...mapState("account", ["status"]),
+  },
 };
 </script>
+
 <style scoped>
 .pwd-forgot{
   text-align: center;

@@ -111,6 +111,7 @@
         </template>
     </modal>
 </template>
+
 <script>
 import { validationMixin } from 'vuelidate';
 import { required } from "vuelidate/lib/validators";
@@ -119,26 +120,11 @@ import Modal from "@/components/Modal.vue";
 
 export default {
   mixins: [validationMixin],
-    components: {
-     "modal": Modal,
-    },
-    props: {
-        typeCall: String,
-    },
-  data() {
-    return {
-      employee: {},
-      name: "",
-      surname: "",
-      code: "",
-      location: "",
-      locations: [],
-      listaSedi: [],
-      popup: {
-          title: '',
-      }
-    };
-  },
+
+  components: {"modal": Modal},
+
+  props: {typeCall: String},
+
   validations: {
     name: {
       required,
@@ -154,11 +140,92 @@ export default {
     },
   },
 
+  data() {
+    return {
+      employee: {},
+      name: "",
+      surname: "",
+      code: "",
+      location: "",
+      locations: [],
+      listaSedi: [],
+      popup: {
+          title: '',
+      }
+    };
+  },
+
+  methods: {
+    ...mapActions("modal", {closeModal: 'closeModal'}),
+    ...mapActions("employee", {addEmployee: 'addEmployee', updateEmployee: 'updateEmployee'}),
+    ...mapActions("location", {getAllLocations: "getAllLocations"}),
+
+    loadLocations() {
+      if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
+    },
+    copyFormValues(employee) {
+      for (const [key] of Object.entries(employee)) {
+        this[key] = employee[key];
+      }
+    },
+    initEmployee() {
+      this.employee = {};
+      this.id = null;
+      this.name = "";
+      this.surname = "";
+      this.code = "";
+      this.location = "";
+    },
+    createEmployee() {
+      this.employee = {
+        id: this.id,
+        name: this.name,
+        surname: this.surname,
+        code: this.code,
+        location: this.location,
+      };
+    },
+    setModalData(){
+      if(this.typeCall == "add"){
+          this.popup.title = "Aggiungi Dipendente"
+          this.initEmployee();
+      }else if(this.typeCall == "edit"){
+          this.popup.title = "Modifica Dipendente"
+          this.copyFormValues(this.actualEmployee.item);
+      }
+    },
+    saveEmployee() {
+      if (!this.$v.$invalid) {
+          //EventBus.$emit("CHECK_COMPANY_FORM");
+          this.createEmployee();
+          if(this.typeCall == "add"){
+              this.addEmployee({companyId: this.actualCompany.item.id, employee: this.employee});
+              this.closeModal();
+          }else if (this.typeCall == "edit") {
+              this.updateEmployee({
+                  companyId: this.actualCompany.item.id,
+                  employee: this.employee,
+              });
+              this.closeThisModal();
+              
+          }
+      }else{
+          this.$v.$touch();
+      }
+    },
+    closeThisModal(){
+        this.initEmployee();
+        this.$v.$reset();
+        this.closeModal();
+    }
+  },
 
   computed: {
     ...mapState("employee", ["allEmployees", "actualEmployee"]),
     ...mapState("company", ["actualCompany"]),
     ...mapState("location", ["allLocations", "actualLocation"]),
+
+    //Controls for form validation 
     nameErrors () {
         const errors = []
         if (!this.$v.name.$dirty) return errors
@@ -184,16 +251,17 @@ export default {
         return errors
     },
   },
+
   watch: {
     allLocations(locations) {
       // Our fancy notification (2).
       if (locations.items)
-          {
-            for (let i=0;i<locations.items.length; i++)
-             {
-               this.listaSedi.push(locations.items[i].id);}
-            console.log(this.listaSedi);
-          }
+        {
+          for (let i=0;i<locations.items.length; i++)
+            {
+              this.listaSedi.push(locations.items[i].id);}
+          console.log(this.listaSedi);
+        }
     },
     typeCall(){
         this.setModalData();
@@ -202,78 +270,17 @@ export default {
         this.setModalData();
     }   
   },
-  methods: {
-    ...mapActions("modal", {closeModal: 'closeModal'}),
-    ...mapActions("employee", {addEmployee: 'addEmployee', updateEmployee: 'updateEmployee'}),
-    loadLocations() {
-      if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
-    },
-    copyFormValues(employee) {
-      for (const [key] of Object.entries(employee)) {
-        this[key] = employee[key];
-      }
-    },
-    ...mapActions("location", {
-      getAllLocations: "getAllLocations",
-    }),
-    initEmployee() {
-      this.employee = {};
-      this.id = null;
-      this.name = "";
-      this.surname = "";
-      this.code = "";
-      this.location = "";
-    },
-    createEmployee() {
-      this.employee = {
-        id: this.id,
-        name: this.name,
-        surname: this.surname,
-        code: this.code,
-        location: this.location,
-      };
-    },
-    setModalData(){
-        if(this.typeCall == "add"){
-            this.popup.title = "Aggiungi Dipendente"
-            this.initEmployee();
-        }else if(this.typeCall == "edit"){
-            this.popup.title = "Modifica Dipendente"
-            this.copyFormValues(this.actualEmployee.item);
-        }
-    },
-    saveEmployee() {
-        if (!this.$v.$invalid) {
-            //EventBus.$emit("CHECK_COMPANY_FORM");
-            this.createEmployee();
-            if(this.typeCall == "add"){
-                this.addEmployee({companyId: this.actualCompany.item.id, employee: this.employee});
-                this.closeModal();
-            }else if (this.typeCall == "edit") {
-                this.updateEmployee({
-                    companyId: this.actualCompany.item.id,
-                    employee: this.employee,
-                });
-                this.closeThisModal();
-                
-            }
-        }else{
-            this.$v.$touch();
-        }
-    },
-    closeThisModal(){
-        this.initEmployee();
-        this.$v.$reset();
-        this.closeModal();
-    }
+  
+  created() {
+    this.setModalData();
   },
+
   mounted() {
     this.loadLocations();
     //this.listaSedi.unshift(this.allLocations.items.id);
   },
-    created() {
-        this.setModalData();
-    },
 };
 </script>
-<style scoped></style>
+
+<style scoped>
+</style>

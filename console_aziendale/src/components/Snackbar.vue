@@ -22,15 +22,19 @@ export default {
             snackbarOpen: true,
         }
     },
-    computed: {
-        snackbar: Boolean,
-        text: String,
-        ...mapState({alert: (state) => state.alert}),
-        ...mapState('alert', ['message'])
-    },
+
     methods: {
         ...mapActions("alert", { clearAlert: "clear" }),
     },
+
+    computed: {
+        ...mapState({alert: (state) => state.alert}),
+        ...mapState('alert', ['message']),
+
+        snackbar: Boolean,
+        text: String,
+    },
+
     watch: {
         message(newAlert,oldAlert){
             console.log(JSON.stringify(newAlert) + JSON.stringify(oldAlert));

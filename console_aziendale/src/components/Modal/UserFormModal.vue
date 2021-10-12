@@ -135,7 +135,6 @@
     </modal>
 </template>
 
-
 <script>
 import { validationMixin } from 'vuelidate';
 import { required, email } from "vuelidate/lib/validators";
@@ -144,31 +143,11 @@ import { mapActions, mapState } from "vuex";
 import Modal from "@/components/Modal.vue";
 
 export default {
-  components: {
-      "modal": Modal,
-  },
+  components: {"modal": Modal},
+
   mixins: [validationMixin],
-  props: {
-      typeCall: String,
-  },
-  data() {
-    return {
-      user: null,
-      id: "",
-      playerId: "",
-      resetDate: "",
-      activated: true,
-      name: "",
-      surname: "",
-      username: "",
-      phone: "",
-      roles: ['ROLE_COMPANY_ADMIN'],
-      unique: true,
-      popup: {
-        title: "",
-      },
-    };
-  },
+
+  props: {typeCall: String},
 
   validations: {
     name: {
@@ -201,19 +180,42 @@ export default {
       required,
     },
   },
+
+  data() {
+    return {
+      user: null,
+      id: "",
+      playerId: "",
+      resetDate: "",
+      activated: true,
+      name: "",
+      surname: "",
+      username: "",
+      phone: "",
+      roles: ['ROLE_COMPANY_ADMIN'],
+      unique: true,
+      popup: {
+        title: "",
+      },
+    };
+  },
+
+  
   methods: {
     ...mapActions("modal", {closeModal: "closeModal"}),
     ...mapActions("company", {addUser: "addUser", updateUser:"updateUser"}),
+
     setModalData(){
-        if(this.typeCall == "add"){
-            this.initUser();
-            this.popup.title = "Aggiungi Utente";
-        }else if(this.typeCall == "edit"){
-            this.copyValues(this.object);
-            this.popup.title = "Modifica Utente";
-        }
+      if(this.typeCall == "add"){
+          this.initUser();
+          this.popup.title = "Aggiungi Utente";
+      }else if(this.typeCall == "edit"){
+          this.copyValues(this.object);
+          this.popup.title = "Modifica Utente";
+      }
     },
     closeThisModal(){
+        this.initUser();
         this.$v.$reset();
         this.closeModal();
     },
@@ -296,10 +298,13 @@ export default {
       };
     },
   },
+
   computed: {
     ...mapState("modal", ["type","object"]),
     ...mapState("company", ["adminCompany"]),
     ...mapState("company", ["adminCompany", "adminCompanyUsers"]),
+
+    //Controls for form validation
     nameErrors () {
         const errors = []
         if (!this.$v.name.$dirty) return errors
@@ -313,26 +318,42 @@ export default {
         return errors
     },
     usernameErrors () {
-            const errors = []
-            if (!this.$v.username.$dirty) return errors
-            !this.$v.username.email && errors.push('E-mail non valida.')
-            !this.$v.username.required && errors.push('E-mail richiesta.')
-            return errors
-        },
+      const errors = []
+      if (!this.$v.username.$dirty) return errors
+      !this.$v.username.email && errors.push('E-mail non valida.')
+      !this.$v.username.required && errors.push('E-mail richiesta.')
+      return errors
+    },
     phoneErrors () {
-        const errors = []
-        if (!this.$v.phone.$dirty) return errors
-        !this.$v.phone.required && errors.push('Campo richiesto.')
-        return errors
+      const errors = []
+      if (!this.$v.phone.$dirty) return errors
+      !this.$v.phone.required && errors.push('Campo richiesto.')
+      return errors
     },
     roleErrors () {
-        const errors = []
-        if (!this.$v.roles.$dirty) return errors
-        !this.$v.roles.required && errors.push('Seleziona almeno un ruolo.')
-        return errors
+      const errors = []
+      if (!this.$v.roles.$dirty) return errors
+      !this.$v.roles.required && errors.push('Seleziona almeno un ruolo.')
+      return errors
     },
-        
   },
+
+  watch: {
+    typeCall: function(){
+        console.log("WATCH - setModalData");
+        this.setModalData();
+    },
+    object: function(){
+        console.log("WATCH - object cambiato setModalData");
+        this.setModalData();
+    },
+  },
+
+  created() {
+    this.initUser();
+    this.setModalData();
+  },
+
   mounted() {
     EventBus.$on("EDIT_USER_FORM", (user) => {
       this.copyValues(user);
@@ -354,20 +375,7 @@ export default {
       }
     });
   },
-  created() {
-    this.initUser();
-    this.setModalData();
-  },
-  watch: {
-    typeCall: function(){
-        console.log("WATCH - setModalData");
-        this.setModalData();
-    },
-    object: function(){
-        console.log("WATCH - object cambiato setModalData");
-        this.setModalData();
-    },
-  },
+  
   beforeDestroy() {
     EventBus.$off("CHECK_USER_FORM");
     EventBus.$off("NEW_USER_FORM");
@@ -375,4 +383,6 @@ export default {
   },
 };
 </script>
-<style scoped></style>
+
+<style scoped>
+</style>

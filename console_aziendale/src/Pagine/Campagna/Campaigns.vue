@@ -106,7 +106,9 @@ import AssociateForm from "./AssociateForm.vue";
  
 export default {
   components: { ProfiloCampagna, Modal, GenericTable ,CampaignForm, AssociateForm},
+
   name: "GestioneCampagne",
+
   data: function () {
     return {
       tableTitle: "Campagne",
@@ -115,89 +117,13 @@ export default {
       editModalVisible: false,
       deleteModalVisible: false,
       currentCampaignSelected: undefined,
-    
       popup: {
         title: "",
       },
       submitStatus: null,
     };
   },
- 
-  computed: {
-    ...mapState("company", ["actualCompany", "adminCompany"]),
-    ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
-    ...mapState("account", ["role"]),
-    nColsTable_calculator: function() {
-      if(this.actualCampaign){
-        return 8;
-      }else if(this.actualCampaign == null){
-        return 12;
-      }else{
-        return 12;
-      }
-    },
-  },
-  watch: {
-    adminCompany() {
-    if (this.adminCompany && this.adminCompany.item) {
-      this.getAllCampaigns(this.actualCompany.item.id);
-    }
-    },
-  },
-  mounted: function () {
-    this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
-    // console.log(this.adminCompany)
-    // if (this.adminCompany && this.adminCompany.item) {
-    //   this.getAllCampaigns(this.adminCompany.item.id);
-    // }
-    // console.log(this.adminCompany)
-    if (this.adminCompany && this.adminCompany.item) {
-      this.getAllCampaigns(this.actualCompany.item.id);
-    }
-    if (this.role == "ROLE_ADMIN" && this.adminCompany == null ) {
-      this.getAllCampaigns(null);
-    }
- EventBus.$on("EDIT_CAMPAIGN", (campaign) => {
-      this.editModalVisible = true;
-      EventBus.$emit("EDIT_CAMPAIGN_FORM", campaign.item);
-
-      this.popup = {
-        title: "Modifica",
-      };
-    });
-    EventBus.$on("DELETE_CAMPAIGN", (campaign) => {
-      this.deleteModalVisible = true;
-      this.campaign = campaign.item;
-      this.popup = {
-        title: "Cancella",
-      };
-    });
-    EventBus.$on("OK_CAMPAIGN_FORM", (campaign) => {
-        if (this.newCampaign) {
-          this.addCampaignCall({
-            companyId: this.adminCompany ? this.actualCompany.item.id : null,
-            campaign: campaign,
-          });
-        } else {
-          this.updateCampaignCall({
-            companyId: this.adminCompany ? this.actualCompany.item.id : null,
-            campaign: campaign,
-          });
-        }
-      this.editModalVisible = false;
-      this.newCampaign = false;
-    });
-    EventBus.$on("NO_CAMPAIGN_FORM", () => {
-      this.submitStatus = "ERROR";
-    });
-  },
-  beforeDestroy() {
-    EventBus.$off("NO_CAMPAIGN_FORM");
-    EventBus.$off("OK_CAMPAIGN_FORM");
-    EventBus.$off("DELETE_CAMPAIGN");
-    EventBus.$off("EDIT_CAMPAIGN");
-  },
-
+  
   methods: {
     ...mapActions("modal", {openModal:"openModal"}),
     ...mapActions("campaign", {
@@ -219,7 +145,6 @@ export default {
         this.currentCampaignSelected = campaign;
       }
     },
-
     getStatus: function (status) {
       let toRtn = "";
       if (status) {
@@ -230,7 +155,6 @@ export default {
 
       return toRtn;
     },
-
     formatDate: function (date) {
       const moment = require("moment");
 
@@ -269,8 +193,6 @@ export default {
       //check fields
       EventBus.$emit("CHECK_CAMPAIGN_FORM");
     },
-
-   
     deleteConfirm() {
       this.deleteModalVisible = false;
       this.deleteCampaignCall({
@@ -278,6 +200,84 @@ export default {
         campaignId: this.actualCampaign.item.id,
       });
     },
+  },
+
+  computed: {
+    ...mapState("company", ["actualCompany", "adminCompany"]),
+    ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
+    ...mapState("account", ["role"]),
+
+    nColsTable_calculator: function() {
+      if(this.actualCampaign){
+        return 8;
+      }else if(this.actualCampaign == null){
+        return 12;
+      }else{
+        return 12;
+      }
+    },
+  },
+
+  watch: {
+    adminCompany() {
+      if (this.adminCompany && this.adminCompany.item) {
+        this.getAllCampaigns(this.actualCompany.item.id);
+      }
+    },
+  },
+
+  mounted: function () {
+    this.changePage({ title: "Lista campagne", route: "/gestionecampagne" });
+    // console.log(this.adminCompany)
+    // if (this.adminCompany && this.adminCompany.item) {
+    //   this.getAllCampaigns(this.adminCompany.item.id);
+    // }
+    // console.log(this.adminCompany)
+    if (this.adminCompany && this.adminCompany.item) {
+      this.getAllCampaigns(this.actualCompany.item.id);
+    }
+    if (this.role == "ROLE_ADMIN" && this.adminCompany == null ) {
+      this.getAllCampaigns(null);
+    }
+    EventBus.$on("EDIT_CAMPAIGN", (campaign) => {
+      this.editModalVisible = true;
+      EventBus.$emit("EDIT_CAMPAIGN_FORM", campaign.item);
+
+      this.popup = {
+        title: "Modifica",
+      };
+    });
+    EventBus.$on("DELETE_CAMPAIGN", (campaign) => {
+      this.deleteModalVisible = true;
+      this.campaign = campaign.item;
+      this.popup = {
+        title: "Cancella",
+      };
+    });
+    EventBus.$on("OK_CAMPAIGN_FORM", (campaign) => {
+        if (this.newCampaign) {
+          this.addCampaignCall({
+            companyId: this.adminCompany ? this.actualCompany.item.id : null,
+            campaign: campaign,
+          });
+        } else {
+          this.updateCampaignCall({
+            companyId: this.adminCompany ? this.actualCompany.item.id : null,
+            campaign: campaign,
+          });
+        }
+      this.editModalVisible = false;
+      this.newCampaign = false;
+    });
+    EventBus.$on("NO_CAMPAIGN_FORM", () => {
+      this.submitStatus = "ERROR";
+    });
+  },
+  beforeDestroy() {
+    EventBus.$off("NO_CAMPAIGN_FORM");
+    EventBus.$off("OK_CAMPAIGN_FORM");
+    EventBus.$off("DELETE_CAMPAIGN");
+    EventBus.$off("EDIT_CAMPAIGN");
   },
 };
 </script>

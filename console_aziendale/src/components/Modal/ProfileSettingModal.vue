@@ -71,8 +71,9 @@ import Modal from "@/components/Modal.vue";
 import { mapActions, mapState } from "vuex";
 
 export default {
-    components: { Modal},
-    data: function () {
+  components: { Modal},
+
+  data: function () {
     return {
       profileSetting: false,
       oldPassword: "",
@@ -83,32 +84,33 @@ export default {
       passwordFieldTypeThird: "password",
       passwordDifferent: false,
     };
+  },
+
+  methods: {
+    ...mapActions("modal", {openModal:"openModal", closeModal:"closeModal"}),
+    ...mapActions("account", ["changePassword"]),
+
+    changePwd() {
+    //check if equal
+      if (this.newPassword === this.newPassword2) {
+          this.passwordDifferent = false;
+          // visible edit pwd
+          this.changePassword({
+          oldPassword: this.oldPassword,
+          newPassword: this.newPassword,
+          });
+      } else this.passwordDifferent = true;
     },
-    computed: {
-        ...mapState("account", ["status", "user", "role"]),
+    switchVisibility(id) {
+      this[id] = this[id] === "password" ? "text" : "password";
     },
-    methods: {
-        ...mapActions("modal", {openModal:"openModal", closeModal:"closeModal"}),
-        ...mapActions("account", ["changePassword"]),
-        changePwd() {
-        //check if equal
-        if (this.newPassword === this.newPassword2) {
-            this.passwordDifferent = false;
-            // visible edit pwd
-            this.changePassword({
-            oldPassword: this.oldPassword,
-            newPassword: this.newPassword,
-            });
-        } else this.passwordDifferent = true;
-        },
-        switchVisibility(id) {
-        this[id] = this[id] === "password" ? "text" : "password";
-        },
-    },
+  },
+
+  computed: {
+    ...mapState("account", ["status", "user", "role"]),
+  }, 
 }
 </script>
 
-
 <style>
-
 </style>

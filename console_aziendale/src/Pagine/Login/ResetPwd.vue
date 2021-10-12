@@ -132,9 +132,8 @@ import { mapActions } from "vuex";
 import Footer from "@/components/Footer";
 
 export default {
-  components: {
-    "app-footer": Footer,
-  },
+  components: {"app-footer": Footer},
+
   data() {
     return {
       step: 1,
@@ -152,12 +151,7 @@ export default {
       },
     };
   },
-  created() {
-    if (this.$route.query.key) {
-      this.step = 2;
-      this.key = this.$route.query.key;
-    }
-  },
+
   methods: {
     ...mapActions("account", {
       resetPasswordInit: "resetPasswordInit",
@@ -178,8 +172,16 @@ export default {
       this.resetPasswordInit(this.username);
     },
   },
+
+  created() {
+    if (this.$route.query.key) {
+      this.step = 2;
+      this.key = this.$route.query.key;
+    }
+  },
 };
 </script>
+
 <style scoped>
 .backButton {
   position: absolute;

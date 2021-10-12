@@ -48,33 +48,35 @@
     </v-card>
   </v-col>
 </template>
+
 <script>
 import { mapActions, mapState } from "vuex";
 import EventBus from "@/components/eventBus";
+
 export default {
   name: "ProfiloEmployee",
-  data() {
-    return {};
+
+  methods: {
+    ...mapActions("modal", {openModal:"openModal"}),
+
+	editEmployee() {
+		EventBus.$emit("EDIT_EMPLOYEE",this.actualEmployee);
+	},
+    getCampaings(campaigns) {
+        var returnCampaigns=" ";
+        campaigns.forEach(element => {
+        returnCampaigns+="<div> "+element+" </div>";
+        });
+        return returnCampaigns;
+    }
   },
 
   computed: {
     ...mapState("employee", ["actualEmployee"]),
     ...mapState("company", ["actualCompany"]),
   },
-  methods: {
-    ...mapActions("modal", {openModal:"openModal"}),
-	editEmployee() {
-		EventBus.$emit("EDIT_EMPLOYEE",this.actualEmployee);
-	},
-  getCampaings(campaigns) {
-    var returnCampaigns=" ";
-    campaigns.forEach(element => {
-      returnCampaigns+="<div> "+element+" </div>";
-    });
-    return returnCampaigns;
-  }
-  },
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+</style>

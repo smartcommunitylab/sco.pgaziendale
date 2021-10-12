@@ -29,42 +29,46 @@ import { mapActions, mapState } from "vuex";
 import Modal from "@/components/Modal.vue";
 
 export default {
-    components: {Modal},
-    data() {
-        return{
-            popup: {
-                title: 'Disassociare la campagna'
-            }
+  components: {Modal},
+
+  data() {
+    return{
+        popup: {
+            title: 'Disassociare la campagna'
         }
-    },
-    computed: {
-        ...mapState("modal", ['object']),
-        ...mapState("account", ["role"]),
-        ...mapState("company", ["actualCompany", "adminCompany"]),
-        ...mapState("campaign", ["allCampaigns"]),
-    },
-    methods: {
-        ...mapActions("modal", {openModal: 'openModal', closeModal: 'closeModal'}),
-        ...mapActions("campaign", {deleteCompanyCampaign: 'deleteCompanyCampaign'}),
-        deleteConfirm() {
-            console.log(this.object);
-            this.disassocia(this.object);
-            this.closeModal();
-        },
-        disassocia(campaign) {
-            if (this.role == "ROLE_ADMIN" && this.adminCompany && this.adminCompany.item) {
-                this.deleteCompanyCampaign({
-                companyId: this.adminCompany.item.id,
-                campaign: campaign,
-                });
-            } else {
-                this.deleteCompanyCampaign({
-                companyId: this.actualCompany.item.id,
-                campaign: campaign,
-                });
-            }
-            this.$emit("update:allCampaigns.items", this.allCampaigns.items);
-        },
     }
+  },
+
+  methods: {
+      ...mapActions("modal", {openModal: 'openModal', closeModal: 'closeModal'}),
+      ...mapActions("campaign", {deleteCompanyCampaign: 'deleteCompanyCampaign'}),
+
+      deleteConfirm() {
+          console.log(this.object);
+          this.disassocia(this.object);
+          this.closeModal();
+      },
+      disassocia(campaign) {
+          if (this.role == "ROLE_ADMIN" && this.adminCompany && this.adminCompany.item) {
+              this.deleteCompanyCampaign({
+              companyId: this.adminCompany.item.id,
+              campaign: campaign,
+              });
+          } else {
+              this.deleteCompanyCampaign({
+              companyId: this.actualCompany.item.id,
+              campaign: campaign,
+              });
+          }
+          this.$emit("update:allCampaigns.items", this.allCampaigns.items);
+      },
+  },
+  
+  computed: {
+      ...mapState("modal", ['object']),
+      ...mapState("account", ["role"]),
+      ...mapState("company", ["actualCompany", "adminCompany"]),
+      ...mapState("campaign", ["allCampaigns"]),
+  }
 }
 </script>

@@ -128,9 +128,106 @@ export default {
     };
   },
 
+  methods: {
+    ...mapActions("modal", {openModal:'openModal'}),
+    ...mapActions("location", {
+      getAllLocations: "getAllLocations",
+      selectActualLocation: "selectActualLocation",
+      addLocationCall: "addLocation",
+      updateLocationCall: "updateLocation",
+      deleteLocation: "deleteLocation",
+      importData: "importLocations",
+    }),
+    ...mapActions("navigation", { changePage: "changePage" }),
+
+    loadLocations() {
+      if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
+    },
+
+    showLocationInfo: function (location) {
+      console.log("Questo è il valore di actualLocation:");
+      console.log(this.actualLocation);
+      console.log("Questo è il valore di location:");
+      console.log(location);
+      if (this.actualLocation != null) {
+        if (this.actualLocation.item == location) {
+          this.selectActualLocation(null);
+
+          this.actualLocation = undefined;
+        } else {
+          this.selectActualLocation(location);
+          this.actualLocation = location;
+        }
+      }else{
+        this.selectActualLocation(location);
+        this.actualLocation = location;
+      }
+    },
+    showModal(title) {
+      this.editModalVisible = true;
+      this.newLocation = true;
+      EventBus.$emit("NEW_LOCATION_FORM");
+      this.popup = {
+        title: title,
+      };
+    },
+    closeModal() {
+      this.editModalVisible = false;
+      this.newLocation = false;
+      this.$v.$reset();
+      //this.initLocation();
+    },
+    closeDeleteModal() {
+      this.deleteModalVisible = false;
+    },
+    closeImportModal() {
+      this.modalImportLocationsOpen = false
+    },
+    saveLocation() {
+      //check fields
+      if (!this.$v.$invalid) {
+          EventBus.$emit("CHECK_LOCATION_FORM");      
+      }else{
+        this.$v.$touch();
+      }
+    },
+    deleteConfirm() {
+      this.deleteModalVisible = false;
+      this.deleteLocation({
+        companyId: this.actualCompany.item.id,
+        locationId: this.actualLocation.item.id,
+      });
+    },
+    importLocations: function () {
+      console.log(this.fileUploaded);
+      this.modalImportLocationsOpen = false;
+      var formData = new FormData();
+      formData.append("file", this.fileUploaded.item(0));
+      this.importData({ companyId: this.actualCompany.item.id, file: formData });
+    },
+  },
+
+  computed: {
+    ...mapState("location", ["allLocations", "actualLocation"]),
+    ...mapState("company", ["actualCompany"]),
+    ...mapState("account", ["role"]),
+
+    fileName() {
+      return this.fileUploaded.item(0).name;
+    },
+    nColsTable_calculator: function() {
+      if(this.actualLocation != null && this.actualLocation != undefined && this.actualLocation.item != null){
+        return 8;
+      } else{
+        return 12;
+      }
+    },
+  },
+
   created() {
     this.loadLocations();
   },
+  
   mounted() {
     this.changePage({ title: "Lista sedi", route: "/locations" });
     EventBus.$on("EDIT_LOCATION", (location) => {
@@ -168,108 +265,15 @@ export default {
       this.submitStatus = "ERROR";
     });
   },
+
   beforeDestroy() {
     EventBus.$off("NO_LOCATION_FORM");
     EventBus.$off("OK_LOCATION_FORM");
     EventBus.$off("DELETE_LOCATION");
     EventBus.$off("EDIT_LOCATION");
   },
-  computed: {
-    ...mapState("location", ["allLocations", "actualLocation"]),
-    ...mapState("company", ["actualCompany"]),
-    ...mapState("account", ["role"]),
-        fileName() {
-      return this.fileUploaded.item(0).name;
-    },
-    nColsTable_calculator: function() {
-      if(this.actualLocation != null && this.actualLocation != undefined && this.actualLocation.item != null){
-        return 8;
-      } else{
-        return 12;
-      }
-    },
-  },
-  methods: {
-    ...mapActions("modal", {openModal:'openModal'}),
-    ...mapActions("location", {
-      getAllLocations: "getAllLocations",
-      selectActualLocation: "selectActualLocation",
-      addLocationCall: "addLocation",
-      updateLocationCall: "updateLocation",
-      deleteLocation: "deleteLocation",
-      importData: "importLocations",
-    }),
-    ...mapActions("navigation", { changePage: "changePage" }),
-
-    loadLocations() {
-      if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
-    },
-
-    showLocationInfo: function (location) {
-      console.log("Questo è il valore di actualLocation:");
-      console.log(this.actualLocation);
-      console.log("Questo è il valore di location:");
-      console.log(location);
-      if (this.actualLocation != null) {
-        if (this.actualLocation.item == location) {
-          this.selectActualLocation(null);
-
-          this.actualLocation = undefined;
-        } else {
-          this.selectActualLocation(location);
-          this.actualLocation = location;
-        }
-      }else{
-        this.selectActualLocation(location);
-        this.actualLocation = location;
-      }
-      
-    },
-    showModal(title) {
-      this.editModalVisible = true;
-      this.newLocation = true;
-      EventBus.$emit("NEW_LOCATION_FORM");
-      this.popup = {
-        title: title,
-      };
-    },
-    closeModal() {
-      this.editModalVisible = false;
-      this.newLocation = false;
-      this.$v.$reset();
-    },
-    closeDeleteModal() {
-      this.deleteModalVisible = false;
-    },
-    closeImportModal() {
-      this.modalImportLocationsOpen = false
-    },
-    
-
-    saveLocation() {
-      //check fields
-      if (!this.$v.$invalid) {
-          EventBus.$emit("CHECK_LOCATION_FORM");      
-      }else{
-        this.$v.$touch();
-      }
-    },
-    deleteConfirm() {
-      this.deleteModalVisible = false;
-      this.deleteLocation({
-        companyId: this.actualCompany.item.id,
-        locationId: this.actualLocation.item.id,
-      });
-    },
-    importLocations: function () {
-      console.log(this.fileUploaded);
-      this.modalImportLocationsOpen = false;
-      var formData = new FormData();
-      formData.append("file", this.fileUploaded.item(0));
-      this.importData({ companyId: this.actualCompany.item.id, file: formData });
-    },
-  },
 };
 </script>
 
-<style></style>
+<style>
+</style>

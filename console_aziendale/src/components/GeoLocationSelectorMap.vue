@@ -30,13 +30,16 @@
     </l-marker>
   </l-map>
 </template>
+
 <script>
 import { LMap, LMarker, LTileLayer, LTooltip } from "vue2-leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import GeoSearch from '@/components/Geosearch.vue'
 import EventBus from "@/components/eventBus";
+
 export default {
   name: "LocationInput",
+
   components: {
     LMap,
     LTileLayer,
@@ -44,15 +47,18 @@ export default {
     LTooltip,
     "v-geosearch": GeoSearch
   },
+
   props: {
     radius: {
       type: Number,
       deafult: 0,
     },
+
     value: {
       type: Object,
       required: true,
     },
+
     defaultLocation: {
       type: Object,
       default: () => ({
@@ -61,6 +67,7 @@ export default {
       }),
     },
   },
+
   data() {
     return {
       loading: false,
@@ -84,48 +91,12 @@ export default {
       dragging: false,
     };
   },
-  mounted() {
-    this.getUserPosition();
-    this.$refs.map.mapObject.on("geosearch/showlocation", this.onSearch);
-    EventBus.$on("EDIT_LOCATION_FORM", location => {
-      this.initMap(location);
-    });
-    EventBus.$on("NEW_LOCATION_FORM", location => {
-      this.initMap(location);
-    });
-    this.$refs.map.mapObject.invalidateSize();
-  },
-  beforeDestroy() {
-    EventBus.$off("EDIT_LOCATION_FORM");
-    EventBus.$off("NEW_LOCATION_FORM");
-  },
-  watch: {
-    position: {
-      deep: true,
-      async handler(value) {
-        this.address = await this.getAddress();
-        this.$emit("poschanged", { position: value, address: this.address });
-      },
-    },
-  },
-  computed: {
-    tooltipContent() {
-      if (this.dragging) return "...";
-      if (this.loading) return "Loading...";
-      return `<strong>${
-        this.address && this.address.structuredValue
-          ? this.getStringAddress(this.address.structuredValue)
-          : ""
-      }</strong> <hr/><strong>lat:</strong> ${
-        this.position.lat
-      }<br/> <strong>lng:</strong> ${this.position.lng}`;
-    },
-  },
+
   methods: {
     initMap(location) {
       setTimeout(() => {
         if (location)
-{        this.position ={ lat: location.latitude, lng: location.longitude };
+          {this.position ={ lat: location.latitude, lng: location.longitude };
         this.zoom=location.radius;}
         this.$refs.map.mapObject.invalidateSize();
       }, 250);
@@ -193,11 +164,53 @@ export default {
       }
     },
   },
+
+  computed: {
+    tooltipContent() {
+      if (this.dragging) return "...";
+      if (this.loading) return "Loading...";
+      return `<strong>${
+        this.address && this.address.structuredValue
+          ? this.getStringAddress(this.address.structuredValue)
+          : ""
+      }</strong> <hr/><strong>lat:</strong> ${
+        this.position.lat
+      }<br/> <strong>lng:</strong> ${this.position.lng}`;
+    },
+  },
+
+  watch: {
+    position: {
+      deep: true,
+      async handler(value) {
+        this.address = await this.getAddress();
+        this.$emit("poschanged", { position: value, address: this.address });
+      },
+    },
+  },
+
+  mounted() {
+    this.getUserPosition();
+    this.$refs.map.mapObject.on("geosearch/showlocation", this.onSearch);
+    EventBus.$on("EDIT_LOCATION_FORM", location => {
+      this.initMap(location);
+    });
+    EventBus.$on("NEW_LOCATION_FORM", location => {
+      this.initMap(location);
+    });
+    this.$refs.map.mapObject.invalidateSize();
+  },
+
+  beforeDestroy() {
+    EventBus.$off("EDIT_LOCATION_FORM");
+    EventBus.$off("NEW_LOCATION_FORM");
+  },
 };
 </script>
+
 <style scoped>
 .map-style{
-    border: solid 1px;
-    border-radius: 8px;
+  border: solid 1px;
+  border-radius: 8px;
 }
 </style>
