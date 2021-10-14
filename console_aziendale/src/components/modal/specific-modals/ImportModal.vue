@@ -3,8 +3,8 @@
       <modal>
         <template v-slot:header>
             <div> 
-                <div v-if="typeCall == 'location'">Importa Sedi</div>
-                <div v-if="typeCall == 'employee'">Importa Dipendenti</div>
+              <div v-if="typeCall == 'location'">Importa Sedi</div>
+              <div v-if="typeCall == 'employee'">Importa Dipendenti</div>
             </div>
         </template>
         <template v-slot:body> 
