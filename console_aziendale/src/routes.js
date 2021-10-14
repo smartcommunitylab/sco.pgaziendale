@@ -4,6 +4,7 @@ import Aziende from "@/pages/companies/Companies.vue"
 import Azienda from "@/pages/companies/CompanyProfile.vue"
 import Login from "@/pages/login/Login.vue"
 import Locations from "@/pages/locations/Locations.vue"
+import StatsOLD from "@/pages/stats-old/Stats.vue"
 import Stats from "@/pages/stats/Stats.vue"
 import GestioneDipendenti from "@/pages/employees/Employees.vue"
 import GestioneCampagne from "@/pages/campaigns/Campaigns.vue"
@@ -49,11 +50,16 @@ const routes = [
       name: 'GestioneUtenti',
       component: GestioneUtenti
   },
-    {
-      path: '/Statistiche',
-      name: 'Statistiche',
-      component: Stats
+  {
+      path: '/StatisticheOLD',
+      name: 'StatisticheOLD',
+      component: StatsOLD
   },
+  {
+    path: '/Statistiche',
+    name: 'Statistiche',
+    component: Stats
+},
   {
     path: '/GestioneCampagne',
     name: 'GestioneCampagne',

@@ -162,6 +162,24 @@ pagine dall'utente in base al suo login.
           <v-list-item-title :class="{ active: isActiveStatistiche }">Statistiche</v-list-item-title>
         </v-list-item>
       </router-link>
+      <router-link
+            to="/StatisticheOLD"
+            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
+          >
+        <v-list-item link>
+          <v-list-item-icon>
+            <v-icon
+              color = "primary"
+              v-if = "isActiveStatistiche"
+            >mdi-chart-line</v-icon>
+            <v-icon
+              v-else
+            >mdi-chart-line
+            </v-icon>
+          </v-list-item-icon>
+          <v-list-item-title :class="{ active: isActiveStatistiche }">Statistiche OLD</v-list-item-title>
+        </v-list-item>
+      </router-link>
       <router-link to="/" v-on:click.native="logout">
         <v-list-item link>
           <v-list-item-icon>
