@@ -49,7 +49,7 @@
                     close
                     </v-btn>
                 </div>
-                <form>
+                <form class="mx-4">
                     <v-row>
                         <v-col cols="3">
                             <v-select
@@ -80,6 +80,52 @@
                             @blur="$v.select.$touch()"
                             ></v-select>
                         </v-col>
+
+                        <v-col cols="3">
+                          <v-select
+                            v-model="select"
+                            :items="items"
+                            :error-messages="selectErrors"
+                            label="Visualizzazione Temporale"
+                            required
+                            @change="$v.select.$touch()"
+                            @blur="$v.select.$touch()"
+                          ></v-select>
+                          <v-select
+                            v-model="select"
+                            :items="items"
+                            :error-messages="selectErrors"
+                            label="Seleziona il mese"
+                            required
+                            @change="$v.select.$touch()"
+                            @blur="$v.select.$touch()"
+                          ></v-select>
+                        </v-col>
+
+                        <v-col cols="3">
+                          <v-select
+                            v-model="select"
+                            :items="items"
+                            :error-messages="selectErrors"
+                            label="Seleziona il mezzo"
+                            required
+                            @change="$v.select.$touch()"
+                            @blur="$v.select.$touch()"
+                          ></v-select>
+                        </v-col>
+
+                        <v-col cols="3">
+                          <v-select
+                            v-model="select"
+                            :items="items"
+                            :error-messages="selectErrors"
+                            label="Raggruppa per"
+                            required
+                            @change="$v.select.$touch()"
+                            @blur="$v.select.$touch()"
+                          ></v-select>
+                        </v-col>
+
                     </v-row>
                     <v-checkbox
                     v-model="checkbox"
@@ -108,6 +154,7 @@
 
 
 <script>
+//import {mapActions, mapState} from "vuex";
 import { validationMixin } from 'vuelidate'
 import { required, maxLength, email } from 'vuelidate/lib/validators'
 

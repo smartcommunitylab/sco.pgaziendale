@@ -58,7 +58,8 @@ export default {
         },
         changeOpenSidebar(){
             this.isOpenSidebar = !this.isOpenSidebar;
-        }
+        },
+        
     },
     computed: {
         nColsCalculator: function() {
@@ -79,8 +80,6 @@ export default {
 <style>
 .customButton{
     top: 30px;
-    border: solid black 2px;
-
 }
 
 </style>
