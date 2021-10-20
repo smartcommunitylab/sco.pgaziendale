@@ -38,7 +38,7 @@ e la snackbar.
     <navigation-drawer v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'" />
 
     <v-main class="">
-      <v-container class="p-0 m-0 blockScroll">
+      <v-container class="p-0 m-0 " :class="{'blockScroll': $route.path != '/Login'}">
         <!-- NON VIENE MAI UTILIZZATO - Componente inutile (?)-->
         <!-- <Loader v-if="loading" /> -->
         <transition name="fade">
