@@ -1,30 +1,88 @@
+<!-- 
+DESCRIZIONE:
+L' "App.vue" è il cuore dell'applicativo. Gestisce il "template" di base diviso in: topbar,
+navigationDrawer, mainBody e footer. Contiene anche i componenti dormienti come: il ModalCenter
+e la snackbar.
+-->
 <template>
-  <div id="app">
-    <Loader v-if="loading" />
-    <menu-header v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'" />
-    <transition name="fade">
-      <div v-if="alert.message" :class="`alert ${alert.type}`">
-      {{ alert.message }}
-    </div>
-    </transition>
-    <router-view class=" min-h-screen "
-      :class="{
-        'lg:pl-64 pt-16 lg:pt-16 padding-bottom': account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd',
-      }"
-    />
-      <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='login' && currentRouteName!='resetpwd'"/>
-  </div>
+  <v-app>
+    <v-app-bar
+      app
+      color="primary"
+      dark
+      clipped-left
+      v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'"
+    >
+      <!-- TODO: Da modificare il link da dove pesca il logo, al momento provvisorio -->
+      <div class="d-flex align-center">
+        <v-img
+          alt="Vuetify Name"
+          class="shrink mt-1 hidden-sm-and-down"
+          contain
+          src="@/assets/images/pgaziendale.png"
+          width="75px"
+        />
+      </div>
+
+      <v-spacer></v-spacer>
+      <v-btn
+        icon
+        @click="openModal({type:'profileSetting', object:null})"
+      >
+        <v-icon size="24px">
+          mdi-account-cog
+        </v-icon>
+      </v-btn>
+    </v-app-bar>
+
+    <navigation-drawer v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'" />
+
+    <v-main class="">
+      <v-container class="p-0 m-0 " :class="{'blockScroll': $route.path != '/Login'}">
+        <!-- NON VIENE MAI UTILIZZATO - Componente inutile (?)-->
+        <!-- <Loader v-if="loading" /> -->
+        <transition name="fade">
+          <snackbar v-if="alert.message" :snackbar="true" :text="alert.message">
+          </snackbar>
+        </transition>
+
+        <!-- INIZIO ESEMPIO: Nuovo componente modale-->
+        <modal-center v-show="active" :modalType="type" :modalObject="object"/>
+        <!-- FINE ESEMPIO: Nuovo componente modale-->
+
+        <router-view class="min-h-screen px-5 py-5 pb-10" v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'" />
+        <router-view class="min-h-screen" v-else />
+      </v-container>
+    </v-main>
+
+    <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'"/>
+
+  </v-app>
 </template>
 
 <script>
-import MenuHeader from "./components/NavBar/MenuHeader.vue";
+import NavigationDrawer from "@/components/navigation-drawer/NavigationDrawer.vue";
 import { mapActions, mapState } from "vuex";
-import Loader from "./components/Loader";
 import Footer from "@/components/Footer"
-// import httpClient from './utils/httpClient';
+import Snackbar from "@/components/Snackbar.vue"
+import ModalCenter from "@/components/modal/ModalCenter.vue"
+
 export default {
-  name: "App",
-  components: { "menu-header": MenuHeader,Loader,"app-footer":Footer },
+  name: 'App',
+
+  components: { 
+    "navigation-drawer": NavigationDrawer,
+    "app-footer":Footer,
+    "snackbar":Snackbar,
+    "modal-center": ModalCenter,
+  },
+
+  methods: {
+    ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
+    ...mapActions("alert", { clearAlert: "clear" }),
+    ...mapActions("modal", { initModal:"initModal", openModal:'openModal' }),
+  },
+
   computed: {
     ...mapState({
       account: (state) => state.account,
@@ -34,19 +92,11 @@ export default {
       currentRouteName() {
         return this.$route.name;
     },
+    ...mapState("modal", ["active", "type", "object"]),
     ...mapState('account', ['status']),
     ...mapState('alert', ['message'])
   },
-  created() {
-    console.log("account" + this.account);
-    //check login and push the right page
-    // this.bootProfile();
-  },
-  methods: {
-    ...mapActions("account", { setDefaultCompany: "setDefaultCompany" }),
-    ...mapActions("alert", { clearAlert: "clear" }),
 
-  },
   watch: {
     // eslint-disable-next-line no-unused-vars
     status(newCount, oldCount) {
@@ -60,13 +110,28 @@ export default {
     $route(to, from) {
       // clear alert on location change
       this.clearAlert();
+      window.scrollTo(0,0);
     },
+    active: function() {
+      if(this.active){
+        document.documentElement.style.overflow = 'hidden';
+        return;
+      }
+      document.documentElement.style.overflow = 'auto';
+      document.documentElement.style.overflowX = 'hidden';
+    }
+  },
+
+  created() {
+    console.log("account" + this.account);
+    this.initModal();
+    //check login and push the right page
+    // this.bootProfile();
   },
 };
 </script>
 
 <style scoped>
-
 .closebtn {
   margin-left: 15px;
   color: white;
@@ -94,5 +159,8 @@ export default {
 }
 .alert-danger {
   background-color: #dc3545;
+}
+.blockScroll{
+  overflow: hidden;
 }
 </style>

@@ -207,33 +207,37 @@ public class TrackingDataService {
 
 				HttpEntity<TrackingDataRequestDTO> entity = new HttpEntity<>(request, headers);
 
-				List<TrackingData> list = restTemplate.exchange(a.getEndpoint(), HttpMethod.POST, entity, resp).getBody();
-				ImmutableListMultimap<String, TrackingData> playerMap = Multimaps.index(list, track -> track.getPlayerId());
+				try {
+					List<TrackingData> list = restTemplate.exchange(a.getEndpoint(), HttpMethod.POST, entity, resp).getBody();
+					ImmutableListMultimap<String, TrackingData> playerMap = Multimaps.index(list, track -> track.getPlayerId());
 
-				playerMap.keySet().forEach(key -> {
-					List<TrackingData> playerList = playerMap.get(key);
-					logger.info("Received data for player: " + key +" - " + playerList.size()+ " entities");
+					playerMap.keySet().forEach(key -> {
+						List<TrackingData> playerList = playerMap.get(key);
+						logger.info("Received data for player: " + key +" - " + playerList.size()+ " entities");
 
-					DayStat stat = new DayStat();
-					stat.setPlayerId(key);
-					stat.setCampaign(campaign.getId());
-					stat.setCompany(company.getId());
-					stat.setDate(day.toString());
-					stat.setTrackCount(playerList.size());
-					stat.setDistances(Distances.fromMap(playerList.stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance())))));
-					stat.setTracks(playerList);
-					stat.setCo2saved(stat.computeCO2());
-					stat.setMonth(day.format(MONTH_PATTERN));
+						DayStat stat = new DayStat();
+						stat.setPlayerId(key);
+						stat.setCampaign(campaign.getId());
+						stat.setCompany(company.getId());
+						stat.setDate(day.toString());
+						stat.setTrackCount(playerList.size());
+						stat.setDistances(Distances.fromMap(playerList.stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance())))));
+						stat.setTracks(playerList);
+						stat.setCo2saved(stat.computeCO2());
+						stat.setMonth(day.format(MONTH_PATTERN));
 
-					limitDistances(campaign, key, stat);
+						limitDistances(campaign, key, stat);
 
-					DayStat old = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(key, campaign.getId(), company.getId(), stat.getDate());
-					if (old != null) {
-						stat.setId(old.getId());
-					}
-					dayStatRepo.save(stat);
+						DayStat old = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(key, campaign.getId(), company.getId(), stat.getDate());
+						if (old != null) {
+							stat.setId(old.getId());
+						}
+						dayStatRepo.save(stat);
 
-				});				
+					});
+				} catch (Exception dayEx) {
+					logger.error("Error processing campaign/company data for date: {}/{} {}", campaign.getId(), company.getId(), d.toString());
+				}				
 				d = d.plusDays(1);
 			}
 			
@@ -350,8 +354,8 @@ public class TrackingDataService {
 		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) criteria = criteria.gte(from.toString());
 		
-		List<String> users = userRepo.findByCampaignAndCompany(campaignId, company.getCode()).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
-		criteria = criteria.and("playerId").in(users);
+//		List<String> users = userRepo.findByCampaignAndCompany(campaignId, company.getCode()).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+//		criteria = criteria.and("playerId").in(users);
 		return extractStats(groupBy, noLimits, campaign, criteria);		
 	}
 

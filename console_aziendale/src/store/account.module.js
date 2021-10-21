@@ -58,7 +58,7 @@ const actions = {
         dispatch('employee/logout', null, { root: true });
         dispatch('location/logout', null, { root: true });
         dispatch('stat/logout', null, { root: true });
-        router.push('/login');
+        router.push('/Login');
     },
     setDefaultCompany({ dispatch }, user) {
         var userCompanies = userService.getCompanies(user);

@@ -237,7 +237,7 @@ public class CampaignService {
 		return campaignRepo.findById(campaignId).orElse(null);
 	}
 
-	@Scheduled(fixedDelay=1000*60*60*24)
+	@Scheduled(fixedDelay=1000*60*60*24) 
 	public void syncSubscriptions() {
 		List<Company> companies = companyRepo.findAll();
 		companies.forEach(company -> {
