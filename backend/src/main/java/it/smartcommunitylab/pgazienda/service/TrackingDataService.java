@@ -555,21 +555,21 @@ public class TrackingDataService {
 		
 		csvWriter.writeNext(header.split(";"));
 		
-		final List<DayStat> newStats = new LinkedList<>();
-		final Map<String, Company> companyCache = new HashMap<>();
-		stats.forEach(ds -> {
-			List<Employee> employees = findEmployees(ds.getPlayerId(), campaignId, companyCache);
-			if (employees != null) {
-				employees.forEach(e -> {
-					DayStat newDs = new DayStat();
-					newDs.setDistances(DayStat.Distances.copy(ds.getDistances()));
-					newDs.setCompany(e.getCompanyId());
-					newDs.setTrackCount(ds.getTrackCount());
-					newStats.add(newDs);
-				});
-			}
-			
-		});
+		final List<DayStat> newStats = stats;//new LinkedList<>();
+//		final Map<String, Company> companyCache = new HashMap<>();
+//		stats.forEach(ds -> {
+//			List<Employee> employees = findEmployees(ds.getPlayerId(), campaignId, companyCache);
+//			if (employees != null) {
+//				employees.forEach(e -> {
+//					DayStat newDs = new DayStat();
+//					newDs.setDistances(DayStat.Distances.copy(ds.getDistances()));
+//					newDs.setCompany(e.getCompanyId());
+//					newDs.setTrackCount(ds.getTrackCount());
+//					newStats.add(newDs);
+//				});
+//			}
+//			
+//		});
 		
 		
 		Map<String, List<DayStat>> companyStats = newStats.stream().filter(ds -> ds.getCompany() != null).collect(Collectors.groupingBy(DayStat::getCompany));
@@ -685,7 +685,7 @@ public class TrackingDataService {
 		MatchOperation filterOperation = Aggregation.match(criteria);
 		String src = Boolean.TRUE.equals(noLimits) ? "distances" : "limitedDistances";
 		
-		GroupOperation groupByOperation = byMonth ? Aggregation.group("playerId", Constants.AGG_MONTH) : Aggregation.group("playerId");
+		GroupOperation groupByOperation = byMonth ? Aggregation.group("playerId", "company", Constants.AGG_MONTH) : Aggregation.group("playerId", "company");
 		
 		groupByOperation =	groupByOperation
 				.sum("co2saved").as("co2saved")
@@ -698,6 +698,7 @@ public class TrackingDataService {
 		return aggResult.getMappedResults().stream().map(m -> {
 			DayStat stat = new DayStat();
 			stat.setCo2saved(((Number)m.getOrDefault("co2saved", 0d)).doubleValue());
+			stat.setCompany((String)m.get("company"));
 			if (byMonth) {
 				stat.setMonth((String)((Map) m.get("_id")).get(Constants.AGG_MONTH));
 				stat.setPlayerId((String)((Map) m.get("_id")).get("playerId"));
