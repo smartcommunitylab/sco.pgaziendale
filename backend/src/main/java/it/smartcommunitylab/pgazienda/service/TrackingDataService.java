@@ -698,13 +698,11 @@ public class TrackingDataService {
 		return aggResult.getMappedResults().stream().map(m -> {
 			DayStat stat = new DayStat();
 			stat.setCo2saved(((Number)m.getOrDefault("co2saved", 0d)).doubleValue());
-			stat.setCompany((String)m.get("company"));
 			if (byMonth) {
 				stat.setMonth((String)((Map) m.get("_id")).get(Constants.AGG_MONTH));
-				stat.setPlayerId((String)((Map) m.get("_id")).get("playerId"));
-			} else {
-				stat.setPlayerId((String)m.get("_id"));
 			}
+			stat.setPlayerId((String)((Map) m.get("_id")).get("playerId"));
+			stat.setCompany((String)((Map) m.get("_id")).get("company"));
 			stat.setDistances(Distances.fromMap(m));
 			stat.setTrackCount((Integer) m.getOrDefault("trackCount", 0));
 			return stat;
