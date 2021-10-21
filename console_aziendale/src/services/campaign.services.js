@@ -28,7 +28,7 @@ var dateEnd = moment(campaign.to);
 var timeValues = [];
 
 while (dateEnd > dateStart || dateStart.format('M') === dateEnd.format('M')) {
-   timeValues.push({id:timeValues.length,name: dateStart.format('MMMM'), value:dateStart.format('YYYY-MM-DD') });
+   timeValues.push({id:timeValues.length,name: dateStart.format('MMMM'), value:dateStart.startOf('month').format('YYYY-MM-DD') });
    dateStart.add(1,'month');
 }
 return timeValues;

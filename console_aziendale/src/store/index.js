@@ -10,7 +10,10 @@ import { employee } from './employee.module';
 import { alert } from './alert.module';
 import { loader } from './loader.module';
 import { stat } from './stat.module';
+import { modal } from './modal.module';
+
 import createPersistedState from "vuex-persistedstate";
+
 
 Vue.use(Vuex);
 
@@ -24,7 +27,8 @@ export const store = new Vuex.Store({
         alert,
         employee,
         loader,
-        stat
+        stat,
+        modal
     },
     plugins: [createPersistedState({
         storage: window.sessionStorage

@@ -354,8 +354,8 @@ public class TrackingDataService {
 		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) criteria = criteria.gte(from.toString());
 		
-		List<String> users = userRepo.findByCampaignAndCompany(campaignId, company.getCode()).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
-		criteria = criteria.and("playerId").in(users);
+//		List<String> users = userRepo.findByCampaignAndCompany(campaignId, company.getCode()).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+//		criteria = criteria.and("playerId").in(users);
 		return extractStats(groupBy, noLimits, campaign, criteria);		
 	}
 

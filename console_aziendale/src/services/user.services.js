@@ -93,27 +93,27 @@ function getHome(role) {
         case 'ROLE_ADMIN':
             return {
                 title: 'Gestione aziende',
-                route: '/aziende'
+                route: '/GestioneAziende'
             };
         case 'ROLE_COMPANY_ADMIN':
             return {
                 title: 'Gestione campagne',
-                route: '/gestionecampagne'
+                route: '/GestioneCampagne'
             };
         case 'ROLE_MOBILITY_MANAGER':
             return {
                 title: 'Gestione dipendenti',
-                route: '/dipendenti'
+                route: '/GestioneDipendenti'
             };
         case 'ROLE_APP_USER':
             return {
                 title: 'aziende',
-                route: '/aziende'
+                route: '/GestioneAziende'
             };
         default:
             return {
                 title: 'aziende',
-                route: '/aziende'
+                route: '/GestioneAziende'
             };
     }
 }

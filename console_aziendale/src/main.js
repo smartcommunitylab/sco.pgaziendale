@@ -49,6 +49,7 @@ Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 import moment from 'moment'
+import vuetify from './plugins/vuetify'
 
 Vue.prototype.moment = moment
 
@@ -136,5 +137,6 @@ Vue.use(Vuelidate)
 new Vue({
   render: h => h(App),
   router,
-  store:store,
+  vuetify,
+  store:store
 }).$mount('#app')
