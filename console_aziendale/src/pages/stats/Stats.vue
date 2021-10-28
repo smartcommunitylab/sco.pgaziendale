@@ -35,10 +35,10 @@
 
 
 <script>
+import { mapState, mapActions } from "vuex";
 import SlideGroup from "@/components/slide-group/SlideGroup.vue";
 import Tab from "@/components/tab/Tab.vue";
 import Sidebar from "@/components/sidebar/Sidebar.vue";
-
 
 export default {
     components : {
@@ -53,15 +53,16 @@ export default {
         }
     },
     methods: {
-        pippo(){
-            return console.log("Sono il metodo pippo");
-        },
+        ...mapActions("stat",{getConfigurationByRole:"getConfigurationByRole"}),
+
         changeOpenSidebar(){
             this.isOpenSidebar = !this.isOpenSidebar;
+            this.getConfigurationByRole({role:"ROLE_COMPANY_ADMIN"});
         },
         
     },
     computed: {
+        ...mapState("stat", ["configurations"]),
         nColsCalculator: function() {
             if(this.isOpenSidebar){
                 return 9;
@@ -71,7 +72,9 @@ export default {
         }
     },
     watch: {
-
+        configurations(){
+            console.log(this.configurations);
+        }
     }
 }
 </script>

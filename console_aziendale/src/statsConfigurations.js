@@ -1,4 +1,4 @@
-import VARIABLES from "./variables";
+import { VARIABLES } from "./variables";
 
 export const statsConfigurations = [
   /*
@@ -8,9 +8,9 @@ export const statsConfigurations = [
   {
     id: 0,
     name: VARIABLES.STATS.NAME.KM_COUNTED,
+    profile: VARIABLES.ROLE.COMPANY_ADMIN,
     views: [
       {
-        profile: VARIABLES.ROLE.COMPANY_ADMIN,
         type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
         dataColumns: [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
@@ -34,7 +34,6 @@ export const statsConfigurations = [
         exportCSV: true,
       },
       {
-        profile: VARIABLES.ROLE.COMPANY_ADMIN,
         type: VARIABLES.STATS.VIEWS.TYPE.BAR_CHART,
         dataColumns: [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
@@ -52,7 +51,6 @@ export const statsConfigurations = [
         exportCSV: false,
       },
       {
-        profile: VARIABLES.ROLE.COMPANY_ADMIN,
         type: VARIABLES.STATS.VIEWS.TYPE.LINE_CHART,
         dataColumns: [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
@@ -69,8 +67,19 @@ export const statsConfigurations = [
         selectRangeTime: true,
         exportCSV: false,
       },
+    ],
+  },
+
+  /*
+  / Configurazione - Km Fatti e Utili
+  / Specifica per l'ADMIN -> Amministratore di Sistema
+  */
+  {
+    id: 1,
+    name: VARIABLES.STATS.NAME.KM_COUNTED,
+    profile: VARIABLES.ROLE.ADMIN,
+    views: [
       {
-        profile: VARIABLES.ROLE.ADMIN,
         type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
         dataColumns: [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
@@ -99,11 +108,11 @@ export const statsConfigurations = [
   / Configurazione - Partecipazione Dipendenti
   */
   {
-    id: 1,
+    id: 2,
     name: VARIABLES.STATS.NAME.EMPLOYEES_PARTECIPATION,
+    profile: VARIABLES.ROLE.COMPANY_ADMIN,
     views: [
       {
-        profile: VARIABLES.ROLE.COMPANY_ADMIN,
         type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
         dataColumns: [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.REGISTER_EMPLOYEES,
@@ -127,7 +136,6 @@ export const statsConfigurations = [
         exportCSV: true,
       },
       {
-        profile: VARIABLES.ROLE.COMPANY_ADMIN,
         type: VARIABLES.STATS.VIEWS.TYPE.HORIZONTAL_STACKED_BARS,
         dataColumns: [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_SUBSCRIBED_EMPLOYEES,
@@ -150,11 +158,11 @@ export const statsConfigurations = [
   / Configurazione - Impatto Ambientale
   */
   {
-    id: 2,
+    id: 3,
     name: VARIABLES.STATS.NAME.ENVIRONMENTAL_IMPACT,
+    profile: VARIABLES.ROLE.COMPANY_ADMIN,
     views: [
       {
-        profile: VARIABLES.ROLE.COMPANY_ADMIN,
         type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
         dataColumns: [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.TOTAL_TRAVEL,
@@ -175,7 +183,6 @@ export const statsConfigurations = [
         exportCSV: true,
       },
       {
-        profile: VARIABLES.ROLE.COMPANY_ADMIN,
         type: VARIABLES.STATS.VIEWS.TYPE.LINE_CHART,
         dataColumns: [VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED],
         dataLevel: [
