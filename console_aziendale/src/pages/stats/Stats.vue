@@ -49,7 +49,7 @@ export default {
     data: function() {
         return {
             isOpenSidebar: true,
-            selectionCards: [{title:"Km fatti e utili", backgroundImageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Nuvola503.jpg", method: this.pippo}, {title:"Partecipazione dipendenti", backgroundImageUrl: "https://upload.wikimedia.org/wikipedia/it/4/43/Bender.png", method: this.pippo}, {title:"Impatto ambientale", backgroundImageUrl: "https://upload.wikimedia.org/wikipedia/it/4/43/Bender.png", method: this.pippo}],
+            selectionCards: [{title:"Km fatti e utili", description: "Prova prova prova", method: this.pippo}, {title:"Partecipazione dipendenti", description: "Prova prova prova provaprovaprovaprovaprovaprovap prova", method: this.pippo}, {title:"Impatto ambientale", description: "Prova prova prova", method: this.pippo}],
         }
     },
     methods: {

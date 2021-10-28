@@ -17,7 +17,7 @@
         <selection-card
           :selected="active ? false : true"
           :title="item.title"
-          :backgroundImageUrl="item.backgroundImageUrl"
+          :description="item.description"
           :method="item.method"
           class="ma-4"
           height="200"
