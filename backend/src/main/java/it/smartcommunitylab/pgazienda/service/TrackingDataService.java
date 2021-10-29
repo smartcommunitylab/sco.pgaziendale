@@ -354,9 +354,8 @@ public class TrackingDataService {
 		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) criteria = criteria.gte(from.toString());
 		
-		criteria = criteria.and("company").is(companyId);
-//		List<String> users = userRepo.findByCampaignAndCompany(campaignId, company.getCode()).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
-//		criteria = criteria.and("playerId").in(users);
+		List<String> users = userRepo.findByCampaignAndCompany(campaignId, company.getCode()).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+		criteria = criteria.and("playerId").in(users);
 		return extractStats(groupBy, noLimits, campaign, criteria);		
 	}
 
@@ -555,21 +554,21 @@ public class TrackingDataService {
 		
 		csvWriter.writeNext(header.split(";"));
 		
-		final List<DayStat> newStats = stats;//new LinkedList<>();
-//		final Map<String, Company> companyCache = new HashMap<>();
-//		stats.forEach(ds -> {
-//			List<Employee> employees = findEmployees(ds.getPlayerId(), campaignId, companyCache);
-//			if (employees != null) {
-//				employees.forEach(e -> {
-//					DayStat newDs = new DayStat();
-//					newDs.setDistances(DayStat.Distances.copy(ds.getDistances()));
-//					newDs.setCompany(e.getCompanyId());
-//					newDs.setTrackCount(ds.getTrackCount());
-//					newStats.add(newDs);
-//				});
-//			}
-//			
-//		});
+		final List<DayStat> newStats = new LinkedList<>();
+		final Map<String, Company> companyCache = new HashMap<>();
+		stats.forEach(ds -> {
+			List<Employee> employees = findEmployees(ds.getPlayerId(), campaignId, companyCache);
+			if (employees != null) {
+				employees.forEach(e -> {
+					DayStat newDs = new DayStat();
+					newDs.setDistances(DayStat.Distances.copy(ds.getDistances()));
+					newDs.setCompany(e.getCompanyId());
+					newDs.setTrackCount(ds.getTrackCount());
+					newStats.add(newDs);
+				});
+			}
+			
+		});
 		
 		
 		Map<String, List<DayStat>> companyStats = newStats.stream().filter(ds -> ds.getCompany() != null).collect(Collectors.groupingBy(DayStat::getCompany));
@@ -685,7 +684,7 @@ public class TrackingDataService {
 		MatchOperation filterOperation = Aggregation.match(criteria);
 		String src = Boolean.TRUE.equals(noLimits) ? "distances" : "limitedDistances";
 		
-		GroupOperation groupByOperation = byMonth ? Aggregation.group("playerId", "company", Constants.AGG_MONTH) : Aggregation.group("playerId", "company");
+		GroupOperation groupByOperation = byMonth ? Aggregation.group("playerId", Constants.AGG_MONTH) : Aggregation.group("playerId");
 		
 		groupByOperation =	groupByOperation
 				.sum("co2saved").as("co2saved")
@@ -700,9 +699,10 @@ public class TrackingDataService {
 			stat.setCo2saved(((Number)m.getOrDefault("co2saved", 0d)).doubleValue());
 			if (byMonth) {
 				stat.setMonth((String)((Map) m.get("_id")).get(Constants.AGG_MONTH));
+				stat.setPlayerId((String)((Map) m.get("_id")).get("playerId"));
+			} else {
+				stat.setPlayerId((String)m.get("_id"));
 			}
-			stat.setPlayerId((String)((Map) m.get("_id")).get("playerId"));
-			stat.setCompany((String)((Map) m.get("_id")).get("company"));
 			stat.setDistances(Distances.fromMap(m));
 			stat.setTrackCount((Integer) m.getOrDefault("trackCount", 0));
 			return stat;
