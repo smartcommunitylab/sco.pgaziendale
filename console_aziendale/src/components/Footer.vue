@@ -5,7 +5,6 @@ Il "Footer.vue" contiene il Footer dell'applicativo.
 <template>
   <v-footer
     padless
-    class="up"
   >
   <v-row>
     <v-col cols="12" class="p-0 m-0">
@@ -68,10 +67,7 @@ export default {
 </script>
 
 <style>
-.up {
-  position: relative;
-  z-index: -10;
-}
+
 .link {
   text-decoration: none;
 }

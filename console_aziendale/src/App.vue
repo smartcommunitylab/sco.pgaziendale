@@ -55,7 +55,7 @@ e la snackbar.
       </v-container>
     </v-main>
 
-    <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'"/>
+    <app-footer class="positionFooter" v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'"/>
 
   </v-app>
 </template>
@@ -162,5 +162,9 @@ export default {
 }
 .blockScroll{
   overflow: hidden;
+}
+.positionFooter{
+  position: relative;
+  z-index: 10;
 }
 </style>

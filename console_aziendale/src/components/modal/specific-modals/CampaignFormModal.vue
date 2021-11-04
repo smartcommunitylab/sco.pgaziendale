@@ -456,10 +456,12 @@ export default {
           this.createCampaign();
           if(this.typeCall == "add"){
               this.addCampaign({companyId: this.adminCompany ? this.actualCompany.item.id : null, campaign: this.campaign});
+              this.$v.$reset();
               this.closeModal();
           }else if (this.typeCall == "edit") {
               console.log(this.campaign);
               this.updateCampaign({companyId:this.adminCompany ? this.actualCompany.item.id : null, campaign: this.campaign});
+              this.$v.$reset();
               this.closeModal();        
         }
       } else{
