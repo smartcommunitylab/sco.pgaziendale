@@ -204,7 +204,7 @@ const actions = {
     statService.getConfigurationByRole(role).then(
       (configurations) => {
         commit("getConfigurationByRoleSuccess", configurations);
-        dispatch("setActiveConfiguration", configurations[0].id);
+        dispatch("setActiveConfiguration", {configurationId:configurations[0].id});
       },
       (error) => {
         commit("getConfigurationByRoleFailure", error),
@@ -222,7 +222,7 @@ const actions = {
         commit("setActiveConfigurationSuccess", configurationId);
         dispatch(
           "setActiveViewType",
-          state.configurations[configurationId].views[0].type
+          state.configurations.items[configurationId].views[0].type
         );
       },
       (error) => {
