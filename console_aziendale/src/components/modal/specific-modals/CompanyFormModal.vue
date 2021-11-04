@@ -380,6 +380,7 @@ export default {
                 this[key] = company[key];
             }
         },
+        
         isURL(str) {
             let url;
             try {
@@ -539,6 +540,7 @@ export default {
             const errors = []
             if (!this.$v.web.$dirty) return errors
             !this.$v.web.required && errors.push('Url richiesto.')
+            !this.isURL(this.web) && errors.push('Inserisci un url con "Http://" o "Https://".')
             return errors
         },
     },
