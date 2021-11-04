@@ -2,6 +2,8 @@ import axios from "axios";
 import { statsConfigurations } from "../statsConfigurations";
 
 export const statService = {
+  setActiveViewType,
+  setActiveConfiguration,
   getConfigurationByRole,
   getCampaignCsv,
   getCompanyCsv,
@@ -11,6 +13,14 @@ export const statService = {
   getLocationStat,
   getEmployeeStat,
 };
+
+function setActiveViewType(activeViewType) {
+  return Promise.resolve(activeViewType);
+}
+
+function setActiveConfiguration(configurationId) {
+  return Promise.resolve(configurationId);
+}
 
 function getConfigurationByRole(ROLE) {
   let array = [];

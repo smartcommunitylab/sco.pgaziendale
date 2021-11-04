@@ -1,16 +1,9 @@
 <template>
     <div>
         <v-card>
-            <div class="flex">
-            <v-card-title class="left">Configuraizone in uso</v-card-title>
-            <v-spacer></v-spacer>
-            <v-btn
-                class="right mt-4 mr-4"
-                icon
-                @click="method"
-            >
-               <v-icon>mdi-chevron-right</v-icon> 
-            </v-btn>
+            <div>
+            <v-card-title> Filtri - {{actualViewType.items}} </v-card-title>
+            
             </div>
             <v-card-text class="px-5 py-4">
                 <p v-if="pippo" class="p-0"><b>Riassunto1</b>: {{pippo}}</p>
@@ -34,7 +27,7 @@
             </v-card-actions>
         </v-card>
 
-        <!-- Gestore di inserimento dati -->
+        <!-- Gestore di inserimento dati (MODALE) -->
         <v-bottom-sheet v-model="sheet">
             <v-sheet
                 height="500px"
@@ -154,7 +147,7 @@
 
 
 <script>
-//import {mapActions, mapState} from "vuex";
+import {mapActions, mapState} from "vuex";
 import { validationMixin } from 'vuelidate'
 import { required, maxLength, email } from 'vuelidate/lib/validators'
 
@@ -180,6 +173,7 @@ export default {
         return {
             sheet: false,
             pippo: "ciao",
+            title: null,
 
             name: '',
             email: '',
@@ -195,6 +189,8 @@ export default {
     },
 
     computed: {
+      ...mapState("stat", ["configurations", "actualViewType"]),
+
       checkboxErrors () {
         const errors = []
         if (!this.$v.checkbox.$dirty) return errors
@@ -234,7 +230,25 @@ export default {
         this.select = null
         this.checkbox = false
       },
+
+      ...mapActions("stat",{getConfigurationByRole:"getConfigurationByRole"}),
+      
+      loadConfiguration(){
+        this.getConfigurationByRole({role:"ROLE_COMPANY_ADMIN"});
+        console.log(this.configurations.items);
+      },
     },
+
+    created(){
+      this.loadConfiguration();
+    },
+
+    watch: {
+      actualViewType(){
+        console.log("cambio titolo");
+        this.title = this.actualViewType.items;
+      }
+    }
 }
 </script>
 
