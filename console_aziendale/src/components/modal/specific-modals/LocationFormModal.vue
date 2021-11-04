@@ -123,14 +123,12 @@
             type="text"
             name="campaignCode"
             id="campaignCode"
+            :disabled="disabled"
             v-model.trim="$v.id.$model"
             :error-messages="idErrors"                                
-            required
             @input="$v.id.$touch()"
             @blur="$v.id.$touch()"
             outlined
-            
-            :disabled="edit"
           >
             <template v-slot:append>
               <v-tooltip
@@ -451,7 +449,6 @@ export default {
       selectedPosition: false,
       key: 1,
       locationSelected: {},
-      edit: false,
       listaProvince: ['AG', 'AL', 'AN', 'AO', 'AR', 'AP', 'AT', 'AV', 'BA', 'BT',
       'BL', 'BN', 'BG', 'BI', 'BO', 'BZ', 'BS', 'BR', 'CA', 'CL',
       'CB', 'CE', 'CT', 'CZ', 'CH', 'CO', 'CS', 'CR', 'KR', 'CN',
@@ -470,6 +467,7 @@ export default {
       giorniSettimana: [{1:'Lunedì', 2:'Martedì', 3:'Mercoledì', 4:'Giovedì', 5:'Venerdì', 6:'Sabato', 7:'Domenica'}
       ],
       oldLocation: {},
+      disabled: false,
     };
   },
 
@@ -668,7 +666,14 @@ export default {
   watch: {
     typeCall: function(){
         this.setModalData();
+
+        if(this.typeCall == "add"){
+          this.disabled = false;
+        }else if (this.typeCall == "edit") {
+          this.disabled = true;
+        }
     },
+
     actualLocation: function(){
         this.setModalData();
         this.createOldLocation();

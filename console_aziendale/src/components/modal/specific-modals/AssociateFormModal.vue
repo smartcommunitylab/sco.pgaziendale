@@ -5,22 +5,24 @@
             <v-row v-if="campaigns">
             <v-col cols="4" v-for="campaign in campaigns" :key="campaign.id">
                 <v-card
-                v-if="campaigns && campaigns.length > 0"
-                class="mx-auto"
-                max-width="344"
+                v-if="campaigns && campaigns.length > 0"              
                 >
-                <v-card-title>
+
+                <v-card-title
+                  class="textSize"
+                >
                     {{ campaign.title }}
                 </v-card-title>
+
+                <v-spacer></v-spacer>
+
                 <v-card-actions>
-                    <v-spacer></v-spacer>
                     <v-btn
                     color="error"
                     plain
                     small
                     v-if="isAssociated(campaign)"
                     @click="openModal({type:'dissociateForm', object:campaign})/*,disassociaPopup(campaign)*/"
-                    class="py-8 ml-8"
                     >
                     Disassocia
                     </v-btn>
@@ -30,7 +32,6 @@
                     small
                     v-else
                     @click="associa(campaign)"
-                    class="py-8 ml-8"
                     >
                     Associa
                     </v-btn>
@@ -137,5 +138,8 @@ export default {
     line-height: 2rem;
     word-break: break-all;
     padding-bottom: 0px;
+}
+.textSize{
+  font-size: 98%;
 }
 </style>
