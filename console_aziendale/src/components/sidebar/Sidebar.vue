@@ -2,7 +2,7 @@
     <div>
         <v-card>
             <div>
-            <v-card-title>Configuraizone in uso</v-card-title>
+            <v-card-title> Filtri - {{actualViewType.items}} </v-card-title>
             
             </div>
             <v-card-text class="px-5 py-4">
@@ -27,7 +27,7 @@
             </v-card-actions>
         </v-card>
 
-        <!-- Gestore di inserimento dati -->
+        <!-- Gestore di inserimento dati (MODALE) -->
         <v-bottom-sheet v-model="sheet">
             <v-sheet
                 height="500px"
@@ -173,6 +173,7 @@ export default {
         return {
             sheet: false,
             pippo: "ciao",
+            title: null,
 
             name: '',
             email: '',
@@ -188,7 +189,7 @@ export default {
     },
 
     computed: {
-      ...mapState("stat", ["configurations"]),
+      ...mapState("stat", ["configurations", "actualViewType"]),
 
       checkboxErrors () {
         const errors = []
@@ -241,6 +242,13 @@ export default {
     created(){
       this.loadConfiguration();
     },
+
+    watch: {
+      actualViewType(){
+        console.log("cambio titolo");
+        this.title = this.actualViewType.items;
+      }
+    }
 }
 </script>
 

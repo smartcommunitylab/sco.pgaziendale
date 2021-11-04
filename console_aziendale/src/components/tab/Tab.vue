@@ -13,7 +13,7 @@ Il componente "Tabs.vue" cicla la cartella "tab" e prende tutti i componenti "Ta
             <v-tab
             v-for="item in configurations.items[0].views"
             :key="item.type"
-            
+            @click.prevent="setNewActualView(item.type)"
             >
                 {{ item.type }}
             </v-tab>
@@ -56,11 +56,15 @@ export default {
       }
     },
     computed:{
-      ...mapState("stat", ["configurations"]),
+      ...mapState("stat", ["configurations", "activeConfiguration", "actualViewType"]),
     },
     methods: {
-      ...mapActions("stat",{getConfigurationByRole:"getConfigurationByRole"}),
+      ...mapActions("stat",{getConfigurationByRole:"getConfigurationByRole", setActiveViewType:"setActiveViewType"}),
       
+      setNewActualView(view){
+        this.setActiveViewType({activeViewType:view});
+      },
+
       loadConfiguration(){
         this.getConfigurationByRole({role:"ROLE_COMPANY_ADMIN"});
         console.log(this.configurations.items);
@@ -69,6 +73,12 @@ export default {
     created(){
       this.loadConfiguration();
     },
+
+    watch:{
+        activeConfiguration(){
+            this.tab = this.actualViewType;
+        }
+    }
   }
 </script>
 

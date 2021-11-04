@@ -14,6 +14,7 @@
         class="pt-0"
         text
         color="primary"
+        :disabled="disabled"
         @click.prevent="selectConfiguration()"
       >
         Seleziona
@@ -23,7 +24,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapState, mapActions } from "vuex";
 
 export default {
     props: {
@@ -32,13 +33,37 @@ export default {
         id: Number,
         selected: Boolean,
     },  
+    data(){
+      return {
+        disabled: false,
+      }
+    },
+    computed:{
+      ...mapState("stat", ["activeConfiguration"]),
+    },
     methods: {
       ...mapActions("stat",{setActiveConfiguration:"setActiveConfiguration"}),
       selectConfiguration(){
         this.setActiveConfiguration({configurationId: this.id})
+      },
+      setDisabledButton(){
+        this.disabled = true;
       }
       
-    } 
+    },
+    watch: {
+      activeConfiguration(){
+        this.disabled = false;
+        console.log("id");
+        console.log(this.id);
+        console.log("activeConfiguration");
+        console.log(this.activeConfiguration);
+        if(this.activeConfiguration.items == this.id){
+          console.log("Sono nell'if");
+          this.setDisabledButton();
+        }
+      }
+    }
 }
 </script>
 

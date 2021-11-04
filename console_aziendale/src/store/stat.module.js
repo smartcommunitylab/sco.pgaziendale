@@ -204,7 +204,9 @@ const actions = {
     statService.getConfigurationByRole(role).then(
       (configurations) => {
         commit("getConfigurationByRoleSuccess", configurations);
-        dispatch("setActiveConfiguration", {configurationId:configurations[0].id});
+        dispatch("setActiveConfiguration", {
+          configurationId: configurations[0].id,
+        });
       },
       (error) => {
         commit("getConfigurationByRoleFailure", error),
@@ -220,10 +222,10 @@ const actions = {
     statService.setActiveConfiguration(configurationId).then(
       (configurationId) => {
         commit("setActiveConfigurationSuccess", configurationId);
-        dispatch(
-          "setActiveViewType",
-          state.configurations.items[configurationId].views[0].type
-        );
+        dispatch("setActiveViewType", {
+          activeViewType:
+            state.configurations.items[configurationId].views[0].type,
+        });
       },
       (error) => {
         commit("setActiveConfigurationFailure", error),
@@ -232,7 +234,7 @@ const actions = {
     );
   },
 
-  setActiveViewType({ commit, dispatch }, activeViewType) {
+  setActiveViewType({ commit, dispatch }, { activeViewType }) {
     console.log("activeViewType:");
     console.log(activeViewType);
     commit("setActiveViewType");
