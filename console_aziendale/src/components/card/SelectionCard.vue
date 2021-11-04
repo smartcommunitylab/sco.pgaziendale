@@ -5,20 +5,16 @@
     min-width="300px"
   >
 
-    <v-card-title class="mb-0 pb-0">
+    <v-card-title class="mb-2 pb-0">
       {{title}}
     </v-card-title>
-
-    <v-card-text class="mb-0 pb-0">{{description}}</v-card-text>
-
     
-
     <v-card-actions class="pt-0">
       <v-btn
         class="pt-0"
         text
         color="primary"
-        @click="method"
+        @click.prevent="selectConfiguration()"
       >
         Seleziona
       </v-btn>
@@ -27,15 +23,22 @@
 </template>
 
 <script>
-
+import { mapActions } from "vuex";
 
 export default {
     props: {
         title: String,
         description: String,
-        method: Function,
+        id: Number,
         selected: Boolean,
-    },   
+    },  
+    methods: {
+      ...mapActions("stat",{setActiveConfiguration:"setActiveConfiguration"}),
+      selectConfiguration(){
+        this.setActiveConfiguration({configurationId: this.id})
+      }
+      
+    } 
 }
 </script>
 

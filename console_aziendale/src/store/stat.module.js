@@ -3,6 +3,8 @@ import { statService } from "../services";
 const state = {
   stat: null,
   configurations: null,
+  activeConfiguration: null,
+  activeViewType: null,
 };
 
 function saveFile(filename, stats) {
@@ -202,9 +204,44 @@ const actions = {
     statService.getConfigurationByRole(role).then(
       (configurations) => {
         commit("getConfigurationByRoleSuccess", configurations);
+        dispatch("setActiveConfiguration", configurations[0].id);
       },
       (error) => {
         commit("getConfigurationByRoleFailure", error),
+          dispatch("alert/error", error, { root: true });
+      }
+    );
+  },
+
+  setActiveConfiguration({ commit, dispatch, state }, { configurationId }) {
+    console.log("configurationID:");
+    console.log(configurationId);
+    commit("setActiveConfiguration");
+    statService.setActiveConfiguration(configurationId).then(
+      (configurationId) => {
+        commit("setActiveConfigurationSuccess", configurationId);
+        dispatch(
+          "setActiveViewType",
+          state.configurations[configurationId].views[0].type
+        );
+      },
+      (error) => {
+        commit("setActiveConfigurationFailure", error),
+          dispatch("alert/error", error, { root: true });
+      }
+    );
+  },
+
+  setActiveViewType({ commit, dispatch }, activeViewType) {
+    console.log("activeViewType:");
+    console.log(activeViewType);
+    commit("setActiveViewType");
+    statService.setActiveViewType(activeViewType).then(
+      (activeViewType) => {
+        commit("setActiveViewTypeSuccess", activeViewType);
+      },
+      (error) => {
+        commit("setActiveViewTypeFailure", error),
           dispatch("alert/error", error, { root: true });
       }
     );
@@ -289,6 +326,24 @@ const mutations = {
   },
   getConfigurationByRoleFailure(state, error) {
     state.configurations = { error };
+  },
+  setActiveConfiguration() {
+    state.activeConfiguration = { loading: true };
+  },
+  setActiveConfigurationSuccess(state, configurationId) {
+    state.activeConfiguration = { items: configurationId };
+  },
+  setActiveConfigurationFailure(state, error) {
+    state.activeConfiguration = { error };
+  },
+  setActiveViewType() {
+    state.activeViewType = { loading: true };
+  },
+  setActiveViewTypeSuccess(state, activeViewType) {
+    state.activeViewType = { items: activeViewType };
+  },
+  setActiveViewTypeFailure(state, error) {
+    state.activeViewType = { error };
   },
 };
 

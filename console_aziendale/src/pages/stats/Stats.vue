@@ -1,4 +1,20 @@
 <template>
+    <div>
+        <v-row>
+            <v-col cols="12">
+                <slide-group :items="selectionCards"></slide-group>
+            </v-col>
+        </v-row>
+        <v-row>
+            <v-col cols="9">
+                <tab></tab>
+            </v-col>
+            <v-col v-if="isOpenSidebar" cols="3">
+                <sidebar :method="changeOpenSidebar"></sidebar>
+            </v-col>
+        </v-row>
+    </div> 
+        <!--
         <v-row>
             <v-col :cols="nColsCalculator" class="p-0 m-0">
                 <v-row>
@@ -31,11 +47,12 @@
                 <sidebar class="ml-4 mt-0 pt-0" :method="changeOpenSidebar"></sidebar>
             </v-col>
         </v-row>
+        --> 
 </template>
 
 
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapState /*, mapActions*/ } from "vuex";
 import SlideGroup from "@/components/slide-group/SlideGroup.vue";
 import Tab from "@/components/tab/Tab.vue";
 import Sidebar from "@/components/sidebar/Sidebar.vue";
@@ -49,15 +66,12 @@ export default {
     data: function() {
         return {
             isOpenSidebar: true,
-            selectionCards: [{title:"Km fatti e utili", description: "Prova prova prova", method: this.pippo}, {title:"Partecipazione dipendenti", description: "Prova prova prova provaprovaprovaprovaprovaprovap prova", method: this.pippo}, {title:"Impatto ambientale", description: "Prova prova prova", method: this.pippo}],
+            selectionCards: [{title:"Km fatti e utili", description: "Prova prova prova", method: this.pippo}, {title:"Partecipazione dipendenti", description: "Prova prova prova provaprovaprovaprovaprovaprovap prova", method: this.pippo}, {title:"Impatto ambientale", description: "Prova prova prova", method: this.pippo}, {title:"Impatto ambientale", description: "Prova prova prova", method: this.pippo}, {title:"Impatto ambientale", description: "Prova prova prova", method: this.pippo}, {title:"Impatto ambientale", description: "Prova prova prova", method: this.pippo}],
         }
     },
     methods: {
-        ...mapActions("stat",{getConfigurationByRole:"getConfigurationByRole"}),
-
         changeOpenSidebar(){
             this.isOpenSidebar = !this.isOpenSidebar;
-            this.getConfigurationByRole({role:"ROLE_COMPANY_ADMIN"});
         },
         
     },
@@ -71,11 +85,6 @@ export default {
             }
         }
     },
-    watch: {
-        configurations(){
-            console.log(this.configurations);
-        }
-    }
 }
 </script>
 

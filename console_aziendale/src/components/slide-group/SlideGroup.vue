@@ -10,15 +10,14 @@
       show-arrows
     >
       <v-slide-item
-        v-for="(item, index) in items"
+        v-for="(item, index) in configurations.items"
         :key="index"
         v-slot="{ active, toggle }"
       >
         <selection-card
           :selected="active ? false : true"
-          :title="item.title"
-          :description="item.description"
-          :method="item.method"
+          :title="item.name"
+          :id="item.id"
           class="ma-4"
           height="200"
           width="100"
@@ -32,6 +31,7 @@
 
 
 <script>
+import { mapState, mapActions } from "vuex";
 import SelectionCard from "@/components/card/SelectionCard.vue";
 
   export default {
@@ -40,6 +40,20 @@ import SelectionCard from "@/components/card/SelectionCard.vue";
     },
     components: {
         "selection-card": SelectionCard,
+    },
+    computed:{
+      ...mapState("stat", ["configurations"]),
+    },
+    methods: {
+      ...mapActions("stat",{getConfigurationByRole:"getConfigurationByRole"}),
+      
+      loadConfiguration(){
+        this.getConfigurationByRole({role:"ROLE_COMPANY_ADMIN"});
+        console.log(this.configurations.items);
+      },
+    },
+    created(){
+      this.loadConfiguration();
     },
   }
 </script>
