@@ -3,7 +3,7 @@ import { statsConfigurations } from "../statsConfigurations";
 
 export const statService = {
   setActiveViewType,
-  setActiveConfiguration,
+  getActiveConfiguration,
   getConfigurationByRole,
   getCampaignCsv,
   getCompanyCsv,
@@ -18,7 +18,7 @@ function setActiveViewType(activeViewType) {
   return Promise.resolve(activeViewType);
 }
 
-function setActiveConfiguration(configurationId) {
+function getActiveConfiguration(configurationId) {
   return Promise.resolve(configurationId);
 }
 

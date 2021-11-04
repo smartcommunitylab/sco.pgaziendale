@@ -219,12 +219,16 @@ const actions = {
     console.log("configurationID:");
     console.log(configurationId);
     commit("setActiveConfiguration");
-    statService.setActiveConfiguration(configurationId).then(
+    statService.getActiveConfiguration(configurationId).then(
       (configurationId) => {
         commit("setActiveConfigurationSuccess", configurationId);
+
+        let configuration = state.configurations.items.find(
+          (i) => i.id === configurationId
+        )[0];
+
         dispatch("setActiveViewType", {
-          activeViewType:
-            state.configurations.items[configurationId].views[0].type,
+          activeViewType: configuration.views[0].type,
         });
       },
       (error) => {

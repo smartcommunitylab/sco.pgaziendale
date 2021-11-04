@@ -12,7 +12,7 @@
       <v-slide-item
         v-for="(item, index) in configurations.items"
         :key="index"
-        v-slot="{ active, toggle }"
+        v-slot="active"
       >
         <selection-card
           :selected="active ? false : true"
@@ -21,7 +21,6 @@
           class="ma-4"
           height="200"
           width="100"
-          @click="toggle"
         >
         </selection-card>
       </v-slide-item>

@@ -54,12 +54,7 @@ export default {
     watch: {
       activeConfiguration(){
         this.disabled = false;
-        console.log("id");
-        console.log(this.id);
-        console.log("activeConfiguration");
-        console.log(this.activeConfiguration);
         if(this.activeConfiguration.items == this.id){
-          console.log("Sono nell'if");
           this.setDisabledButton();
         }
       }

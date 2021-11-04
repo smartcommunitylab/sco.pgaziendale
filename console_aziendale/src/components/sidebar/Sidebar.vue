@@ -2,7 +2,7 @@
     <div>
         <v-card>
             <div>
-            <v-card-title> Filtri - {{actualViewType.items}} </v-card-title>
+            <v-card-title> Filtri - {{activeViewType.items}} </v-card-title>
             
             </div>
             <v-card-text class="px-5 py-4">
@@ -42,6 +42,26 @@
                     close
                     </v-btn>
                 </div>
+                <div>
+                  {{getConfigurationById}}
+                </div>
+
+                <div v-if="getConfigurationById">
+                  <div v-if="activeViewType.items === 'Tabella'">
+                    Tabella
+                  </div>
+                  <div v-if="activeViewType.items === 'Grafico a Barre Orizzontali'">
+                    Grafico a Barre Orizzontali
+                  </div>
+                  <div v-if="activeViewType.items === 'Grafico a Linee'">
+                    Grafico a Linee
+                  </div>
+                  <div v-if="activeViewType.items === 'Grafico a Barre'">
+                    Grafico a Barre
+                  </div>                  
+                </div>
+
+                <!--
                 <form class="mx-4">
                     <v-row>
                         <v-col cols="3">
@@ -139,6 +159,8 @@
                     clear
                     </v-btn>
                 </form>
+                --> 
+
             </v-sheet>
         </v-bottom-sheet>
 
@@ -173,7 +195,6 @@ export default {
         return {
             sheet: false,
             pippo: "ciao",
-            title: null,
 
             name: '',
             email: '',
@@ -189,7 +210,19 @@ export default {
     },
 
     computed: {
-      ...mapState("stat", ["configurations", "actualViewType"]),
+      ...mapState("stat", ["configurations", "activeViewType", "activeConfiguration"]),
+
+      getConfigurationById(){
+        let conf = {};
+
+        this.configurations.items.forEach(configuration => {
+          if(configuration.id == this.activeConfiguration.items){
+            conf = configuration;
+          }
+        });
+        
+        return conf;
+      },
 
       checkboxErrors () {
         const errors = []
@@ -237,18 +270,12 @@ export default {
         this.getConfigurationByRole({role:"ROLE_COMPANY_ADMIN"});
         console.log(this.configurations.items);
       },
+
     },
 
     created(){
       this.loadConfiguration();
     },
-
-    watch: {
-      actualViewType(){
-        console.log("cambio titolo");
-        this.title = this.actualViewType.items;
-      }
-    }
 }
 </script>
 
