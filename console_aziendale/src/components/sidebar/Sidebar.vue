@@ -227,6 +227,10 @@ export default {
                 'Item 4',
             ],
             checkbox: false,
+
+            
+            /* Dati per i componenti
+
             menu: false,
             menu2: false,
             DA: null,
@@ -234,6 +238,7 @@ export default {
             radioGroup: "Intera durata campagna",
             unitaTemporale:"Settimana",
             listaUnitaTemporali: ['Mese','Settimana','Giorno','Campagna'],
+            */
         }
     },
 
