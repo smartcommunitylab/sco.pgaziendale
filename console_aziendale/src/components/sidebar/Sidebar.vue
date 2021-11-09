@@ -34,12 +34,12 @@
             >
                 <div class="text-center">
                     <v-btn
-                    class="mt-6"
+                    class="my-6"
                     text
-                    color="red"
+                    color="primary"
                     @click="sheet = !sheet"
                     >
-                    close
+                      Salva Filtri
                     </v-btn>
                 </div>
                 <div>
@@ -61,105 +61,126 @@
                   </div>                  
                 </div>
 
+                <!-- Componenti per il filtraggio -->
+
                 <!--
-                <form class="mx-4">
-                    <v-row>
-                        <v-col cols="3">
-                            <v-select
-                            v-model="select"
-                            :items="items"
-                            :error-messages="selectErrors"
-                            label="Seleziona una campagna"
-                            required
-                            @change="$v.select.$touch()"
-                            @blur="$v.select.$touch()"
-                            ></v-select>
-                            <v-select
-                            v-model="select"
-                            :items="items"
-                            :error-messages="selectErrors"
-                            label="Seleziona un'azienda"
-                            required
-                            @change="$v.select.$touch()"
-                            @blur="$v.select.$touch()"
-                            ></v-select>
-                            <v-select
-                            v-model="select"
-                            :items="items"
-                            :error-messages="selectErrors"
-                            label="Seleziona il tipo di dato"
-                            required
-                            @change="$v.select.$touch()"
-                            @blur="$v.select.$touch()"
-                            ></v-select>
-                        </v-col>
-
-                        <v-col cols="3">
-                          <v-select
-                            v-model="select"
-                            :items="items"
-                            :error-messages="selectErrors"
-                            label="Visualizzazione Temporale"
-                            required
-                            @change="$v.select.$touch()"
-                            @blur="$v.select.$touch()"
-                          ></v-select>
-                          <v-select
-                            v-model="select"
-                            :items="items"
-                            :error-messages="selectErrors"
-                            label="Seleziona il mese"
-                            required
-                            @change="$v.select.$touch()"
-                            @blur="$v.select.$touch()"
-                          ></v-select>
-                        </v-col>
-
-                        <v-col cols="3">
-                          <v-select
-                            v-model="select"
-                            :items="items"
-                            :error-messages="selectErrors"
-                            label="Seleziona il mezzo"
-                            required
-                            @change="$v.select.$touch()"
-                            @blur="$v.select.$touch()"
-                          ></v-select>
-                        </v-col>
-
-                        <v-col cols="3">
-                          <v-select
-                            v-model="select"
-                            :items="items"
-                            :error-messages="selectErrors"
-                            label="Raggruppa per"
-                            required
-                            @change="$v.select.$touch()"
-                            @blur="$v.select.$touch()"
-                          ></v-select>
-                        </v-col>
-
-                    </v-row>
-                    <v-checkbox
-                    v-model="checkbox"
-                    :error-messages="checkboxErrors"
-                    label="Do you agree?"
-                    required
-                    @change="$v.checkbox.$touch()"
-                    @blur="$v.checkbox.$touch()"
-                    ></v-checkbox>
-
-                    <v-btn
-                    class="mr-4"
-                    @click="submit"
+                <v-row justify="center">
+                  <v-col
+                    cols="4"
+                    class="pl-5 pr-20"
+                  >
+                    <p class="text-subtitle-1">Livello Aggregazione</p>
+                  </v-col>
+                  
+                  <v-col
+                    cols="4"
+                    class="pl-5 pr-20"
+                  >
+                    <p class="text-subtitle-1 mb-10">Unità temporale</p>
+                    <v-autocomplete
+                        label="Unità Temporale"
+                        placeholder="Unità Temporale"
+                        name="unitaTemporale"
+                        id="unitaTemporale"
+                        v-model="unitaTemporale"
+                        :items="listaUnitaTemporali"
+                        outlined
+                    ></v-autocomplete>
+                    <v-container
+                      class="px-0"
+                      fluid
                     >
-                    submit
-                    </v-btn>
-                    <v-btn @click="clear">
-                    clear
-                    </v-btn>
-                </form>
-                --> 
+                      <v-radio-group v-model="radioGroup">
+                        <v-radio
+                          label="Intera durata campagna"
+                          value="Intera durata campagna"
+                        ></v-radio>
+                        <v-radio
+                          label="Periodo Specifico"
+                          value="Periodo Specifico"
+                        ></v-radio>
+                      </v-radio-group>
+                    </v-container>
+                    <v-menu
+                        ref="menu"
+                        v-model="menu"
+                        :close-on-content-click="false"
+                        :return-value.sync="DA"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="auto"
+                        outlined            
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          v-model="DA"
+                          label="DA"
+                          prepend-icon="mdi-calendar"
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker
+                      v-model="DA"
+                      no-title
+                      scrollable
+                      color="primary"
+                      >
+                        <v-btn
+                            text
+                            color="primary"
+                            @click="$refs.menu.save(DA)"
+                        >
+                            Conferma
+                        </v-btn>
+                      </v-date-picker>
+                    </v-menu>
+                    <v-menu
+                        ref="menu2"
+                        v-model="menu2"
+                        :close-on-content-click="false"
+                        :return-value.sync="A"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="auto"
+                        outlined            
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          v-model="A"
+                          label="A"
+                          prepend-icon="mdi-calendar"
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker
+                      v-model="A"
+                      no-title
+                      scrollable
+                      color="primary"
+                      >
+                        <v-btn
+                            text
+                            color="primary"
+                            @click="$refs.menu2.save(A)"
+                        >
+                            Conferma
+                        </v-btn>
+                      </v-date-picker>
+                    </v-menu>
+                  </v-col>
+
+                  <v-col
+                    cols="4"
+                    class="pl-5 pr-20"
+                  >
+                    <p class="text-subtitle-1">Colonne Dati</p>
+                  </v-col>
+                </v-row>
+            -->
 
             </v-sheet>
         </v-bottom-sheet>
@@ -206,6 +227,13 @@ export default {
                 'Item 4',
             ],
             checkbox: false,
+            menu: false,
+            menu2: false,
+            DA: null,
+            A: null,
+            radioGroup: "Intera durata campagna",
+            unitaTemporale:"Settimana",
+            listaUnitaTemporali: ['Mese','Settimana','Giorno','Campagna'],
         }
     },
 
