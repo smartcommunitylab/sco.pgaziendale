@@ -194,10 +194,11 @@ export default {
       },
     },
 
-    latLng(){
-      //Fai una query per latlong come search
-      
-    },
+    // latLng(){
+    //   //Fai una query per latlong come search
+    //   console.log(this.latLng)
+    //   this.position = this.latLng;
+    // },
   },
 
   mounted() {
