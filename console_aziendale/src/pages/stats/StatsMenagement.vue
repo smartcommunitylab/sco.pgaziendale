@@ -46,14 +46,11 @@
                     
                     </div>
                     <v-card-text class="px-5 py-4">
-                        <p v-if="pippo" class="p-0"><b>Riassunto1</b>: {{pippo}}</p>
-                        <p v-if="pippo" class="p-0"><b>Riassunto1</b>: {{pippo}}</p>
-                        <p v-if="pippo" class="p-0"><b>Riassunto1</b>: {{pippo}}</p>
-                        <p v-if="pippo" class="p-0"><b>Riassunto1</b>: {{pippo}}</p>
-                        <p v-if="pippo" class="p-0"><b>Riassunto1</b>: {{pippo}}</p>
-                        <p v-if="pippo" class="p-0"><b>Riassunto1</b>: {{pippo}}</p>
-                        <p v-if="pippo" class="p-0"><b>Riassunto1</b>: {{pippo}}</p>
-                        <p v-if="pippo" class="p-0"><b>Riassunto1</b>: {{pippo}}</p>   
+                        <p v-if="selectDataLevel" class="p-0"><b>Livello Aggregazione</b>: {{selectDataLevel}}</p>
+                        <p v-if="selectTimeUnit" class="p-0"><b>Unità temporale</b>: {{selectTimeUnit}}</p>
+                        <p v-if="from && to" class="p-0"><b>Da | A</b>: {{from}} | {{to}}</p>
+                        <p v-if="checkedElements" class="p-0"><b>Colonne di dati</b>: {{checkedElements}}</p>
+                        
                     </v-card-text>
 
                     <v-card-actions>
@@ -286,7 +283,6 @@ export default {
       return {
         tab: null,
         sheet: false,
-            pippo: "ciao",
 
             from: null,
             to: null,

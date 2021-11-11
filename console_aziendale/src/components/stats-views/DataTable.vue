@@ -36,20 +36,6 @@
 
         headers: [],
 
-        headersList: [
-          {
-            text: 'Dessert (100g serving)',
-            align: 'start',
-            sortable: false,
-            value: 'name',
-            width: "200px" 
-          },
-          { text: 'Calories', value: 'calories', width: "200px" },
-          { text: 'Fat (g)', value: 'fat', width: "200px" },
-          { text: 'Carbs (g)', value: 'carbs', width: "200px" },
-          { text: 'Protein (g)', value: 'protein', width: "200px" },
-          { text: 'Iron (%)', value: 'iron', width: "200px" },
-        ],
         desserts: [
           {
             name: 'Frozen Yogurt',
