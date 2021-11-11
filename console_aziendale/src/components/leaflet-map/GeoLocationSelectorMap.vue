@@ -48,6 +48,12 @@ export default {
   },
 
   props: {
+
+    latLng: {
+      lat: Number,
+      lng: Number,
+    },
+
     radius: {
       type: Number,
       deafult: 0,
@@ -147,6 +153,7 @@ export default {
       this.position = value.latlng;
     },
     onSearch(value) {
+      console.log(value);
       const loc = value.location;
       this.position = { lat: loc.y, lng: loc.x };
     },
@@ -181,11 +188,17 @@ export default {
   watch: {
     position: {
       deep: true,
-      async handler(/*value*/) {
+      async handler(value) {
         this.address = await this.getAddress();
-        //this.$emit("poschanged", { position: value, address: this.address });
+        this.$emit("poschanged", { position: value, address: this.address });
       },
     },
+
+    // latLng(){
+    //   //Fai una query per latlong come search
+    //   console.log(this.latLng)
+    //   this.position = this.latLng;
+    // },
   },
 
   mounted() {

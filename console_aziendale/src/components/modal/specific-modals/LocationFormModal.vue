@@ -22,6 +22,7 @@
               :key="key"
               :radius="radius"
               v-on:poschanged="locationChanged"
+              :latLng="{lat: latitude, lng: longitude}"
             />
           </div>
         </v-col>
@@ -65,24 +66,6 @@
             </v-text-field>
           </v-row>           
           <v-row
-            class="p-0 mx-1 my-7"
-            justify="center"
-          >
-            <v-text-field
-              label="Longitudine"
-              placeholder="Longitudine *"
-              type="text"
-              name="campaignLongitude"
-              id="campaignLongitude"
-              v-model.trim="$v.longitude.$model"
-              :error-messages="longitudeErrors"                                
-              required
-              @input="$v.longitude.$touch()"
-              @blur="$v.longitude.$touch()"
-              outlined
-            ></v-text-field>
-          </v-row>
-          <v-row
             class="p-0 mx-1"
             justify="center"
           >
@@ -97,6 +80,24 @@
               required
               @input="$v.latitude.$touch()"
               @blur="$v.latitude.$touch()"
+              outlined
+            ></v-text-field>
+          </v-row>
+          <v-row
+            class="p-0 mx-1 my-7"
+            justify="center"
+          >
+            <v-text-field
+              label="Longitudine"
+              placeholder="Longitudine *"
+              type="text"
+              name="campaignLongitude"
+              id="campaignLongitude"
+              v-model.trim="$v.longitude.$model"
+              :error-messages="longitudeErrors"                                
+              required
+              @input="$v.longitude.$touch()"
+              @blur="$v.longitude.$touch()"
               outlined
             ></v-text-field>
           </v-row>
@@ -303,6 +304,7 @@
                 v-model="nonWorkingDays"
                 multiple
                 chips
+                clearable
                 label="Giorni di chiusura"
                 placeholder="Scegli i giorni di chiusura:"
                 prepend-icon="mdi-calendar"
@@ -476,7 +478,6 @@ export default {
       ...mapActions("location", {addLocation:'addLocation', updateLocation:'updateLocation'}),
 
     locationChanged(input) {
-      console.log(input);
       this.locationSelected = input.address;
       this.latitude = this.locationSelected.pos.lat;
       this.longitude = this.locationSelected.pos.lng;
@@ -678,7 +679,7 @@ export default {
     actualLocation: function(){
         this.setModalData();
         this.createOldLocation();
-    }
+    },
   },
 
   created() {
