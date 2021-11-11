@@ -291,8 +291,8 @@ export default {
       }
     },
     computed:{
-      ...mapState("stat", ["configurations", "activeConfiguration", "activeViewType"]),
-
+        ...mapState("stat", ["configurations", "activeConfiguration", "activeViewType"]),
+        ...mapState("navigation", ["page"]),
         view(){
         
         console.log("La vista è: ");
@@ -372,11 +372,19 @@ export default {
     created(){
       this.loadConfiguration();
     },
+    mounted(){
+       this.tab = this.actualViewType;
+    },
 
     watch:{
         activeConfiguration(){
             this.tab = this.actualViewType;
-        }
+        },
+        $route(){
+            console.log("E' cambiata la root, ora sei in: ");
+            console.log(this.page);
+            this.tab = this.actualViewType;
+        },
     }
   }
 </script>
