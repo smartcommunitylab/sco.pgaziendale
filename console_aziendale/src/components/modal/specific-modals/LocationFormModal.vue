@@ -586,6 +586,7 @@ export default {
     closeThisModal(){
         this.$v.$reset();
         this.closeModal();
+        this.initLocation();
     },
   },
 
