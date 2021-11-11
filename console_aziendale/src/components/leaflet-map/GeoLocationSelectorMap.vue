@@ -49,6 +49,7 @@ export default {
 
   props: {
 
+    // Props utilizzate per collegare la mappa agli input del form
     latLng: {
       lat: Number,
       lng: Number,
