@@ -43,7 +43,7 @@
                     </v-btn>
                 </div>
                 <div>
-                  {{getConfigurationById}}
+                  {{getConfigurationById.views}}
                 </div>
 
                 <div v-if="getConfigurationById">

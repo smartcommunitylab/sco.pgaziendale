@@ -225,7 +225,7 @@ const actions = {
 
         let configuration = state.configurations.items.find(
           (i) => i.id === configurationId
-        )[0];
+        );
 
         dispatch("setActiveViewType", {
           activeViewType: configuration.views[0].type,
