@@ -17,12 +17,13 @@
           cols="8"
         >
           <div class="map-style">
+            <!--Props utilizzate per collegare la mappa agli input del form-->
             <geolocation-selector
               v-model="locationSelected"
               :key="key"
               :radius="radius"
               v-on:poschanged="locationChanged"
-              :latLng="{lat: latitude, lng: longitude}"
+              :latLng="{lat: latitude, lng: longitude}"  
             />
           </div>
         </v-col>
@@ -81,6 +82,7 @@
               @input="$v.latitude.$touch()"
               @blur="$v.latitude.$touch()"
               outlined
+              disabled
             ></v-text-field>
           </v-row>
           <v-row
@@ -99,6 +101,7 @@
               @input="$v.longitude.$touch()"
               @blur="$v.longitude.$touch()"
               outlined
+              disabled
             ></v-text-field>
           </v-row>
         </v-col>
