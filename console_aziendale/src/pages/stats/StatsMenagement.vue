@@ -19,7 +19,12 @@
                 
                 <v-tabs-items v-model="tab" class="mt-5">
                     <v-tab-item key="Tabella">
-                        <data-table></data-table>
+                        <data-table
+                            :timeFilterList="getListUnitTime"
+                            :nDataColumActive="checkedElements.length"
+                            :notFormattedHeaders="checkedElements"
+                            :selectDataLevel="selectDataLevel"
+                        ></data-table>
                     </v-tab-item>
                     <v-tab-item key="Grafico a Barre Orizzontali">
                     </v-tab-item>
@@ -107,9 +112,9 @@
                             <p class="text-subtitle-1">Livello Aggregazione</p>
                         
                             <v-autocomplete
-                                label="Unità Temporale"
-                                name="unitaTemporale"
-                                id="unitaTemporale"
+                                label="Livello Aggregazione"
+                                name="livelloAggregazione"
+                                id="livelloAggregazione"
                                 v-model="selectDataLevel"
                                 :items="view.dataLevel"
                                 outlined
@@ -131,27 +136,27 @@
                                 :items="view.timeUnit"
                                 outlined
                             ></v-autocomplete>
-                            <!--
+                            
                             <v-container
                             class="px-0"
                             fluid
                             >
-                            <v-radio-group v-model="radioGroup">
-                                <v-radio
-                                label="Intera durata campagna"
-                                value="Intera durata campagna"
-                                ></v-radio>
-                                <v-radio
-                                label="Periodo Specifico"
-                                value="Periodo Specifico"
-                                ></v-radio>
-                            </v-radio-group>
+                                <v-radio-group v-model="radioGroup">
+                                    <v-radio
+                                        label="Intera durata campagna"
+                                        value="Intera durata campagna"
+                                    ></v-radio>
+                                    <v-radio
+                                        label="Periodo Specifico"
+                                        value="Periodo Specifico"
+                                    ></v-radio>
+                                </v-radio-group>
                             </v-container>
                             <v-menu
                                 ref="menu"
                                 v-model="menu"
                                 :close-on-content-click="false"
-                                :return-value.sync="DA"
+                                :return-value.sync="from"
                                 transition="scale-transition"
                                 offset-y
                                 min-width="auto"
@@ -159,7 +164,7 @@
                             >
                             <template v-slot:activator="{ on, attrs }">
                                 <v-text-field
-                                v-model="DA"
+                                v-model="from"
                                 label="DA"
                                 prepend-icon="mdi-calendar"
                                 readonly
@@ -168,7 +173,7 @@
                                 ></v-text-field>
                             </template>
                             <v-date-picker
-                            v-model="DA"
+                            v-model="from"
                             no-title
                             scrollable
                             color="primary"
@@ -176,17 +181,18 @@
                                 <v-btn
                                     text
                                     color="primary"
-                                    @click="$refs.menu.save(DA)"
+                                    @click="$refs.menu.save(from)"
                                 >
                                     Conferma
                                 </v-btn>
                             </v-date-picker>
+                            
                             </v-menu>
                             <v-menu
                                 ref="menu2"
                                 v-model="menu2"
                                 :close-on-content-click="false"
-                                :return-value.sync="A"
+                                :return-value.sync="to"
                                 transition="scale-transition"
                                 offset-y
                                 min-width="auto"
@@ -194,7 +200,7 @@
                             >
                             <template v-slot:activator="{ on, attrs }">
                                 <v-text-field
-                                v-model="A"
+                                v-model="to"
                                 label="A"
                                 prepend-icon="mdi-calendar"
                                 readonly
@@ -203,7 +209,7 @@
                                 ></v-text-field>
                             </template>
                             <v-date-picker
-                            v-model="A"
+                            v-model="to"
                             no-title
                             scrollable
                             color="primary"
@@ -211,13 +217,12 @@
                                 <v-btn
                                     text
                                     color="primary"
-                                    @click="$refs.menu2.save(A)"
+                                    @click="$refs.menu2.save(to)"
                                 >
                                     Conferma
                                 </v-btn>
                             </v-date-picker>
                             </v-menu>
-                            -->
                         </v-col>
 
                         <v-col
@@ -225,8 +230,16 @@
                             class="pl-5 pr-20"
                         >
                             <p class="text-subtitle-1">Colonne Dati</p>
+
+                            <v-checkbox
+                                v-for="data in view.dataColumns"
+                                :key="data"
+                                v-model="checkedElements"
+                                :value="data"
+                                :label="data"
+                            ></v-checkbox>
+
                         </v-col>
-                        
                         </v-row>
                     
 
@@ -275,8 +288,17 @@ export default {
         sheet: false,
             pippo: "ciao",
 
+            from: null,
+            to: null,
+
             selectDataLevel: null,
             selectTimeUnit: null,
+
+            radioGroup: null,
+            menu: null,
+            menu2: null,
+
+            checkedElements: [],
 
             name: '',
             email: '',
@@ -288,6 +310,7 @@ export default {
                 'Item 4',
             ],
             checkbox: false,
+            months: ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"],
       }
     },
     computed:{
@@ -303,6 +326,30 @@ export default {
         console.log(view);
 
         return view;
+      },
+
+      //Restituisce un array contenente l'intestazione di primo livello per la vista "Tabella" 
+      //TODO: Vanno ancora implementati i metodi per la visualizzazione annua e per campagna.
+      getListUnitTime(){
+          let slave = [];
+
+          if(this.selectTimeUnit === "Mese"){
+            let unitTimeList = this.monthsListFromDateRange(this.from,this.to);
+            console.log(unitTimeList);
+
+            unitTimeList.forEach(unit => {
+                unit = new Date(unit);
+                slave.push(this.months[unit.getMonth()] + " " + unit.getFullYear());
+            });
+
+            return slave;
+          }
+          /*else if(selectTimeUnit === "Anno"){
+
+          }else if(selectTimeUnit === "Campagna"){
+
+          }*/
+          return [];
       },
 
       getConfigurationById(){
@@ -349,6 +396,25 @@ export default {
     methods: {
       ...mapActions("stat",{getConfigurationByRole:"getConfigurationByRole", setActiveViewType:"setActiveViewType"}),
 
+        monthsListFromDateRange(startDate, endDate) {
+            var start      = startDate.split('-');
+            var end        = endDate.split('-');
+            var startYear  = parseInt(start[0]);
+            var endYear    = parseInt(end[0]);
+            var dates      = [];
+
+            for(var i = startYear; i <= endYear; i++) {
+                var endMonth = i != endYear ? 11 : parseInt(end[1]) - 1;
+                var startMon = i === startYear ? parseInt(start[1])-1 : 0;
+                for(var j = startMon; j <= endMonth; j = j > 12 ? j % 12 || 11 : j+1) {
+                var month = j+1;
+                var displayMonth = month < 10 ? '0'+month : month;
+                dates.push([i, displayMonth, '01'].join('-'));
+                }
+            }
+            return dates;
+        },
+
       setNewActualView(view){
         this.setActiveViewType({activeViewType:view});
       },
@@ -373,17 +439,17 @@ export default {
       this.loadConfiguration();
     },
     mounted(){
-       this.tab = this.actualViewType;
+       this.tab = this.activeViewType;
     },
 
     watch:{
         activeConfiguration(){
-            this.tab = this.actualViewType;
+            this.tab = this.activeViewType;
         },
         $route(){
             console.log("E' cambiata la root, ora sei in: ");
             console.log(this.page);
-            this.tab = this.actualViewType;
+            this.tab = this.activeViewType;
         },
     }
   }

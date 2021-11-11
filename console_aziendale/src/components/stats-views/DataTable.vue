@@ -5,26 +5,50 @@
     :items-per-page="5"
     class="elevation-1"
   >
+    <template v-slot:header>
+      <!-- Le category vanno popolate con il valore inserito nell'unità temporale tramite (v-for).
+           Il "colspan" va popolatocon una variabile, sempre passata come pros, che
+           indica il numero di campi selezionati (dataLevel) dall'utente che vuole vedere
+      --> 
+      <thead>
+        <tr>
+          <th colspan="1"></th>
+          <th v-for="time in timeFilterList" :key="time" :colspan="nDataColumActive">{{time}}</th>
+        </tr>
+      </thead>
+    </template>
   </v-data-table>
 </template>
 
 
 <script>
   export default {
+
+    props:{
+      timeFilterList: Array,
+      nDataColumActive: Number,
+      notFormattedHeaders: Array,
+      selectDataLevel: String,
+    },
+
     data () {
       return {
-        headers: [
+
+        headers: [],
+
+        headersList: [
           {
             text: 'Dessert (100g serving)',
             align: 'start',
             sortable: false,
             value: 'name',
+            width: "200px" 
           },
-          { text: 'Calories', value: 'calories' },
-          { text: 'Fat (g)', value: 'fat' },
-          { text: 'Carbs (g)', value: 'carbs' },
-          { text: 'Protein (g)', value: 'protein' },
-          { text: 'Iron (%)', value: 'iron' },
+          { text: 'Calories', value: 'calories', width: "200px" },
+          { text: 'Fat (g)', value: 'fat', width: "200px" },
+          { text: 'Carbs (g)', value: 'carbs', width: "200px" },
+          { text: 'Protein (g)', value: 'protein', width: "200px" },
+          { text: 'Iron (%)', value: 'iron', width: "200px" },
         ],
         desserts: [
           {
@@ -110,5 +134,51 @@
         ],
       }
     },
+
+    computed: {
+     
+    },
+     /*
+        headers: [
+          {
+            text: 'Dessert (100g serving)',
+            align: 'start',
+            sortable: false,
+            value: 'name',
+            width: "200px" 
+          },
+          { text: 'Calories', value: 'calories', width: "200px" },
+          { text: 'Fat (g)', value: 'fat', width: "200px" },
+          { text: 'Carbs (g)', value: 'carbs', width: "200px" },
+          { text: 'Protein (g)', value: 'protein', width: "200px" },
+          { text: 'Iron (%)', value: 'iron', width: "200px" },
+        ],
+      */
+    methods: {
+      formatHeaders(){
+        console.log("Sono nel computed");
+        let headersAray = [];
+
+        headersAray.push({
+          text: this.selectDataLevel,
+          align: 'start',
+          sortable: false,
+          value: 'name',
+          width: "200px" 
+        },)
+
+        for(let i = 0; i < this.timeFilterList.length; i++){
+          this.notFormattedHeaders.forEach(element => {
+            headersAray.push({text: element, value: element, width: "200px" });
+          });
+        }
+        this.headers = headersAray;
+      },
+    },
+    watch:{
+      notFormattedHeaders(){
+        this.formatHeaders();
+      }
+    }
   }
 </script>
