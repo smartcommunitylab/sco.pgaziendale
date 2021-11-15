@@ -52,45 +52,6 @@
       </v-col>
       <!-- TODO: Profilo Campagna -->
       <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
-      <!-- TODO: Modale Campagna -->
-      <modal v-show="editModalVisible">
-        <template v-slot:header> {{ popup.title }} </template>
-        <template v-slot:body>
-          <campaign-form />
-        </template>
-        <template v-slot:footer>
-          <v-btn
-            text
-            @click="closeModal"
-            class="py-8 ml-8"
-          >
-            Annulla
-          </v-btn>
-          <v-btn
-            color="primary"
-            text
-            @click="saveCampaign"
-            class="py-8 ml-8"
-          >
-            Salva
-          </v-btn>
-        </template>
-      </modal>
-      <modal v-show="associateCampaignModalVisible">
-        <template v-slot:header> {{ popup.title }} </template>
-        <template v-slot:body>
-          <associate-form />
-        </template>
-        <template v-slot:footer>
-          <v-btn
-            text
-            @click="closeModal"
-            class="py-8 ml-8"
-          >
-            Chiudi
-          </v-btn>
-        </template>
-      </modal>
     </v-row>
   </div>
 </template>
@@ -98,13 +59,10 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import ProfiloCampagna from "./Campaign.vue";
-import Modal from "@/components/modal/ModalStructure.vue";
 import GenericTable from "@/components/data-table/GenericTable.vue";
  
 export default {
-  components: { ProfiloCampagna, Modal, GenericTable },
-
-  name: "GestioneCampagne",
+  components: { ProfiloCampagna, GenericTable },
 
   data: function () {
     return {

@@ -277,7 +277,7 @@
 <script>
 import { mapActions, mapState } from "vuex";
 import { validationMixin } from 'vuelidate';
-import { required, email, url } from 'vuelidate/lib/validators';
+import { required, email } from 'vuelidate/lib/validators';
 import Modal from "@/components/modal/ModalStructure.vue";
 
 export default {
@@ -323,7 +323,7 @@ export default {
             required,
         },
         web: {
-            url
+            required,
         },
         logo: {
         },
@@ -380,6 +380,7 @@ export default {
                 this[key] = company[key];
             }
         },
+        
         isURL(str) {
             let url;
             try {
@@ -438,10 +439,12 @@ export default {
                 this.createCompany();
                 if(this.typeCall == "add"){
                     this.addCompany(this.company);
+                    this.$v.$reset();
                     this.closeModal();
                 }else if (this.typeCall == "edit") {
                     console.log(this.company);
                     this.updateCompany(this.company);
+                    this.$v.$reset();
                     this.closeModal();
                 }
             }else{
@@ -536,8 +539,8 @@ export default {
         webErrors () {
             const errors = []
             if (!this.$v.web.$dirty) return errors
-            !this.$v.web.url && errors.push('Url non valido.')
             !this.$v.web.required && errors.push('Url richiesto.')
+            !this.isURL(this.web) && errors.push('Inserisci un url con "Http://" o "Https://".')
             return errors
         },
     },
