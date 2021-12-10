@@ -51,6 +51,8 @@ import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.security.SecurityUtils;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.service.errors.InvalidPasswordException;
 import it.smartcommunitylab.pgazienda.util.RandomUtil;
 
 /**
@@ -125,7 +127,7 @@ public class UserService {
             });
     }
 
-    public User createUser(User userDTO, String companyId) {
+    public User createUser(User userDTO, String companyId) throws InconsistentDataException {
         User user = new User();
         user.setUsername(userDTO.getUsername().toLowerCase());
         user.setName(userDTO.getName());
@@ -141,7 +143,7 @@ public class UserService {
         if (companyId != null) {
             // check roles: only the company roles are applicable
             user.setRoles(userDTO.getRoles().stream().filter((r -> companyId.equals(r.getCompanyId()))).collect(Collectors.toList()));
-            if (user.getRoles().isEmpty()) throw new IllegalArgumentException("Empty company roles");
+            if (user.getRoles().isEmpty()) throw new InconsistentDataException("Empty company roles", "EMPTY_ROLES");
         } else {
         	user.setRoles(userDTO.getRoles());
         }
@@ -175,35 +177,38 @@ public class UserService {
      *
      * @param userDTO user to update.
      * @return updated user.
+     * @throws InconsistentDataException 
      */
-    public Optional<User> updateUser(User userDTO, String companyId) {
-        return Optional.of(userRepository
+    public Optional<User> updateUser(User userDTO, String companyId) throws InconsistentDataException {
+    	Optional<User> userOpt = Optional.of(userRepository
             .findById(userDTO.getId()))
             .filter(Optional::isPresent)
-            .map(Optional::get)
-            .map(user -> {
-                user.setUsername(userDTO.getUsername().toLowerCase());
-                user.setName(userDTO.getName());
-                user.setSurname(userDTO.getSurname());
-                user.setPhone(userDTO.getPhone());
-                if (!StringUtils.isEmpty(userDTO.getPlayerId())) user.setPlayerId(userDTO.getPlayerId());
+            .map(Optional::get);
+        if (userOpt.isPresent()) {
+        	User user = userOpt.get();
+            user.setUsername(userDTO.getUsername().toLowerCase());
+            user.setName(userDTO.getName());
+            user.setSurname(userDTO.getSurname());
+            user.setPhone(userDTO.getPhone());
+            if (!StringUtils.isEmpty(userDTO.getPlayerId())) user.setPlayerId(userDTO.getPlayerId());
 
-                if (companyId != null) {
-                    // check roles: only the company roles are applicable
-                    List<UserRole> roles = userDTO.getRoles().stream().filter((r -> companyId.equals(r.getCompanyId()))).collect(Collectors.toList());
-                    user.setRoles(mergeRoles(companyId, roles, user.getRoles()));
-                    if (user.getRoles().isEmpty()) throw new IllegalArgumentException("Empty company roles");
-                }
-                
-                userRepository.save(user);
-                if (log.isDebugEnabled()) {
-                    try {
-    					log.debug("Changed Information for User: {} / {}", new ObjectMapper().writeValueAsString(user), new ObjectMapper().writeValueAsString(userDTO));
-    				} catch (JsonProcessingException e) {
-    				}
-                }
-                return user;
-            });
+            if (companyId != null) {
+                // check roles: only the company roles are applicable
+                List<UserRole> roles = userDTO.getRoles().stream().filter((r -> companyId.equals(r.getCompanyId()))).collect(Collectors.toList());
+                user.setRoles(mergeRoles(companyId, roles, user.getRoles()));
+                if (user.getRoles().isEmpty()) throw new InconsistentDataException("Empty company roles", "EMPTY_ROLES");
+            }
+            
+            userRepository.save(user);
+            if (log.isDebugEnabled()) {
+                try {
+					log.debug("Changed Information for User: {} / {}", new ObjectMapper().writeValueAsString(user), new ObjectMapper().writeValueAsString(userDTO));
+				} catch (JsonProcessingException e) {
+				}
+            }
+            return Optional.of(user);
+        }
+        return userOpt;
     }
 
 

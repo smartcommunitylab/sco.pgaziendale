@@ -29,13 +29,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import it.smartcommunitylab.pgazienda.service.ImportDataException;
-import it.smartcommunitylab.pgazienda.service.InvalidPasswordException;
-import it.smartcommunitylab.pgazienda.service.UserAnotherOrgException;
-import it.smartcommunitylab.pgazienda.service.UsernameAlreadyUsedException;
+import it.smartcommunitylab.pgazienda.service.errors.ImportDataException;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.service.errors.InvalidPasswordException;
+import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionException;
+import it.smartcommunitylab.pgazienda.service.errors.UserAnotherOrgException;
+import it.smartcommunitylab.pgazienda.service.errors.UsernameAlreadyUsedException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.AccountResourceException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.BadRequestAlertException;
-import it.smartcommunitylab.pgazienda.web.rest.errors.RepeatingSubscriptionException;
 
 /**
  * @author raman
@@ -49,46 +50,46 @@ public class RestResponseEntityExceptionHandler
     @ExceptionHandler(InvalidPasswordException.class)
     protected ResponseEntity<Object> handleInvalidPwd(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Invalid password"), 
+        return handleExceptionInternal(ex, new ErrorMsg("Invalid password","INVALID_PASSWORD"), 
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(UsernameAlreadyUsedException.class)
     protected ResponseEntity<Object> handleLoginInUse(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Login already in use"), 
+        return handleExceptionInternal(ex, new ErrorMsg("Login already in use", "LOGIN_IN_USE"), 
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
     @ExceptionHandler(UserAnotherOrgException.class)
     protected ResponseEntity<Object> handleLoginAnotherOrg(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("User exists in another company"), 
+        return handleExceptionInternal(ex, new ErrorMsg("User exists in another company", "USER_ANOTHER_COMPANY"), 
           new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
     @ExceptionHandler(AccountResourceException.class)
     protected ResponseEntity<Object> handleAccountError(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Account data exception"), 
+        return handleExceptionInternal(ex, new ErrorMsg("Account data exception", "ACCONT_EXCEPTION"), 
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }    
     @ExceptionHandler(BadRequestAlertException.class)
     protected ResponseEntity<Object> handleBadRequest(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Incorrect data: " + ex.getMessage()), 
+        return handleExceptionInternal(ex, new ErrorMsg("Incorrect data: " + ex.getMessage(), "BAD_REQUEST_DATA"), 
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(RepeatingSubscriptionException.class)
     protected ResponseEntity<Object> handleRepeatingSubscription(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Repeating subscription"), 
+        return handleExceptionInternal(ex, new ErrorMsg("Repeating subscription", "REPEATING_SUBSCRIPTION"), 
           new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler(InconsistentDataException.class)
     protected ResponseEntity<Object> handleIllegalArgument(
-      Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Incorrect data: " + ex.getMessage()), 
+    		InconsistentDataException ex, WebRequest request) {
+        return handleExceptionInternal(ex, new ErrorMsg("Incorrect data: " + ex.getMessage(), ex.getDetails()), 
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
@@ -98,27 +99,27 @@ public class RestResponseEntityExceptionHandler
     	Map<String, Object> errorData =new HashMap<>();
     	errorData.put("col", ex.getCol());
     	errorData.put("row", ex.getRow());
-        return handleExceptionInternal(ex, new ErrorMsg("Incorrect imported data row "+ex.getRow()+", col " + ex.getCol(), errorData), 
+        return handleExceptionInternal(ex, new ErrorMsg("Incorrect imported data row "+ex.getRow()+", col " + ex.getCol(), "INVALID_IMPORT_DATA", errorData), 
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<Object> handleSecurity(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Incorrect credentials"), 
+        return handleExceptionInternal(ex, new ErrorMsg("Incorrect credentials", "BAD_CREDENTIALS"), 
           new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
     }
 
     @ExceptionHandler(SecurityException.class)
     protected ResponseEntity<Object> handleAccess(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Insufficient rights"), 
+        return handleExceptionInternal(ex, new ErrorMsg("Insufficient rights", "INSUFFICIENT_RIGHTS"), 
           new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
     @ExceptionHandler(AccessDeniedException.class)
     protected ResponseEntity<Object> handleAccessDenied(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, new ErrorMsg("Insufficient rights"), 
+        return handleExceptionInternal(ex, new ErrorMsg("Insufficient rights", "INSUFFICIENT_RIGHTS"), 
           new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
 
@@ -126,20 +127,22 @@ public class RestResponseEntityExceptionHandler
     protected ResponseEntity<Object> handleGeneric(
       Exception ex, WebRequest request) {
     	ex.printStackTrace();
-        return handleExceptionInternal(ex, new ErrorMsg("Generic error"), 
+        return handleExceptionInternal(ex, new ErrorMsg("Generic error", "GENERIC_ERROR"), 
           new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
     
     
     public static class ErrorMsg {
     	public String message;
+    	public String type;
     	public Map<String, Object> errorData;
 
-		public ErrorMsg(String message) {
+		public ErrorMsg(String message, String type) {
 			super();
 			this.message = message;
+			this.type = type;
 		}
-		public ErrorMsg(String message, Map<String, Object> errorData) {
+		public ErrorMsg(String message, String type, Map<String, Object> errorData) {
 			super();
 			this.message = message;
 			this.errorData = errorData;

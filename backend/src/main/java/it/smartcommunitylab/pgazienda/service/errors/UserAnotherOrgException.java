@@ -1,4 +1,4 @@
-package it.smartcommunitylab.pgazienda.service;
+package it.smartcommunitylab.pgazienda.service.errors;
 
 public class UserAnotherOrgException extends RuntimeException {
 

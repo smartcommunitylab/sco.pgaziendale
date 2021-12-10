@@ -2,32 +2,63 @@
   <v-card
     class="mx-2"
     max-width="300px"
-    @click="method"
+    min-width="300px"
   >
-    <v-img
-      :src="backgroundImageUrl"
-      height="75px"
-      :class="{opacity: selected}"
-    >
-        <v-card-title>
-            {{title}}
-        </v-card-title>
-    </v-img>
 
+    <v-card-title class="mb-2 pb-0">
+      {{title}}
+    </v-card-title>
     
+    <v-card-actions class="pt-0">
+      <v-btn
+        class="pt-0"
+        text
+        color="primary"
+        :disabled="disabled"
+        @click.prevent="selectConfiguration()"
+      >
+        Seleziona
+      </v-btn>
+    </v-card-actions>
   </v-card>
 </template>
 
 <script>
-
+import { mapState, mapActions } from "vuex";
 
 export default {
     props: {
         title: String,
-        backgroundImageUrl: String,
-        method: Function,
+        description: String,
+        id: Number,
         selected: Boolean,
-    },   
+    },  
+    data(){
+      return {
+        disabled: false,
+      }
+    },
+    computed:{
+      ...mapState("stat", ["activeConfiguration"]),
+    },
+    methods: {
+      ...mapActions("stat",{setActiveConfiguration:"setActiveConfiguration"}),
+      selectConfiguration(){
+        this.setActiveConfiguration({configurationId: this.id})
+      },
+      setDisabledButton(){
+        this.disabled = true;
+      }
+      
+    },
+    watch: {
+      activeConfiguration(){
+        this.disabled = false;
+        if(this.activeConfiguration.items == this.id){
+          this.setDisabledButton();
+        }
+      }
+    }
 }
 </script>
 

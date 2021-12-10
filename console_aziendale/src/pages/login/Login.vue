@@ -1,7 +1,7 @@
 <template>
-    <div class="bg-primary font-sans sizeGesture">
+    <div class="bg-primary font-sans WebContainer sizeGesture">
       <div class="container h-full flex justify-center items-center">
-        <div class="mt-20">
+        <div class="mt-10">
           <img src="@/assets/images/pgaziendale.png" alt="Logo" class="max-h-36 m-auto"/>
 
           <h1 class="font-hairline mb-10 text-center text-white text-3xl">
@@ -157,5 +157,9 @@ export default {
 }
 .eye-icon{
   cursor: pointer;
+}
+.WebContainer{
+    width: 100%;
+    height: auto;
 }
 </style>

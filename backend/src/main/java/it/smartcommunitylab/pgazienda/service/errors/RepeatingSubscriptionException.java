@@ -14,7 +14,7 @@
  *    limitations under the License.
  ******************************************************************************/
 
-package it.smartcommunitylab.pgazienda.web.rest.errors;
+package it.smartcommunitylab.pgazienda.service.errors;
 
 /**
  * @author raman

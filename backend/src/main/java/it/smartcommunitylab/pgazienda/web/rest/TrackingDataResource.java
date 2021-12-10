@@ -43,6 +43,7 @@ import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.TrackingDataService;
 import it.smartcommunitylab.pgazienda.service.UserService;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 /**
  * @author raman
@@ -68,9 +69,10 @@ public class TrackingDataResource {
      * Read all company locations
      * @param companyId
      * @return
+     * @throws InconsistentDataException 
      */
     @GetMapping("/campaigns/{campaignId}/stats/me")
-	public ResponseEntity<List<DayStat>> getMyStats(@PathVariable String campaignId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) {
+	public ResponseEntity<List<DayStat>> getMyStats(@PathVariable String campaignId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws InconsistentDataException {
     	log.debug("Read proper stats {}", campaignId);
     	if (from == null) from = LocalDate.now().toString();
     	if (to == null) to = LocalDate.now().toString();
@@ -83,29 +85,30 @@ public class TrackingDataResource {
      * Read all company locations
      * @param companyId
      * @return
+     * @throws InconsistentDataException 
      */
     @GetMapping("/campaigns/{campaignId}/stats/{employeeId:.*}")
-	public ResponseEntity<List<DayStat>> getEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) {
+	public ResponseEntity<List<DayStat>> getEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean withTracks, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws InconsistentDataException {
     	log.debug("Read user stats {} / {}", campaignId, employeeId);
 //    	if (from == null) from = LocalDate.now().toString();
     	if (to == null) to = LocalDate.now().toString();
     	
     	Employee employee = employeeRepo.findById(employeeId).orElse( null);
-    	if (employee == null) throw new IllegalArgumentException("Invalid employee: "+ employeeId);
+    	if (employee == null) throw new InconsistentDataException("Invalid employee: "+ employeeId, "NO_EMPLOYEE");
     	
     	if (!userService.isInCompanyRole(employee.getCompanyId(), Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	
     	Optional<Company> company = companyRepo.findById(employee.getCompanyId());
-    	if (company.isEmpty())  throw new IllegalArgumentException("Invalid company: "+ employee.getCompanyId());
+    	if (company.isEmpty())  throw new InconsistentDataException("Invalid company: "+ employee.getCompanyId(), "NO_COMPANY");
     	
     	List<User> users = userService.getUserByEmployeeCode(campaignId, company.get().getCode(), employee.getCode());
-    	if (users == null || users.isEmpty()) throw new IllegalArgumentException("Invalid employee - no subscription: "+ employeeId);
+    	if (users == null || users.isEmpty()) throw new InconsistentDataException("Invalid employee - no subscription: "+ employeeId, "NO_SUBSCRIPTION");
     	
     	return ResponseEntity.ok(dataService.getUserCampaignData(users.get(0).getPlayerId(), campaignId, from == null ? null : LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks, noLimits));
 	}
     
     @GetMapping("/campaigns/{campaignId}/stats/csv/employee/{companyId:.*}")
-    public void getCompanyCsv(@PathVariable String campaignId, @PathVariable String companyId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException {
+    public void getCompanyCsv(@PathVariable String campaignId, @PathVariable String companyId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException, InconsistentDataException {
         log.debug("REST request to export company employee report");
     	response.setContentType("text/csv;charset=utf-8");
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
@@ -114,7 +117,7 @@ public class TrackingDataResource {
     	dataService.createEmployeeStatsCSV(response.getWriter(), campaignId, companyId, fromDate, toDate);
     }
     @GetMapping("/campaigns/{campaignId}/stats/csv/location/{companyId:.*}")
-    public void getLocationCsv(@PathVariable String campaignId, @PathVariable String companyId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException {
+    public void getLocationCsv(@PathVariable String campaignId, @PathVariable String companyId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException, InconsistentDataException {
         log.debug("REST request to export company location report");
     	response.setContentType("text/csv;charset=utf-8");
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
@@ -125,7 +128,7 @@ public class TrackingDataResource {
     
     @GetMapping("/campaigns/{campaignId}/stats/csv")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-    public void getCampaignCsv(@PathVariable String campaignId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException {
+    public void getCampaignCsv(@PathVariable String campaignId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, HttpServletResponse response) throws IOException, InconsistentDataException {
         log.debug("REST request to export campaign report");
     	response.setContentType("text/csv;charset=utf-8");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
@@ -135,7 +138,7 @@ public class TrackingDataResource {
 
     @GetMapping("/campaigns/{campaignId}/agg")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-    public ResponseEntity<List<DayStat>>  getCampaignStats(@PathVariable String campaignId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException {
+    public ResponseEntity<List<DayStat>>  getCampaignStats(@PathVariable String campaignId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException, InconsistentDataException {
         log.debug("REST request to export campaign report");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
@@ -143,7 +146,7 @@ public class TrackingDataResource {
     }
 
     @GetMapping("/campaigns/{campaignId}/agg/{companyId:.*}")
-    public ResponseEntity<List<DayStat>>  getCompanyStats(@PathVariable String campaignId, @PathVariable String companyId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException {
+    public ResponseEntity<List<DayStat>>  getCompanyStats(@PathVariable String campaignId, @PathVariable String companyId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException, InconsistentDataException {
         log.debug("REST request to export campaign report");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
@@ -154,7 +157,7 @@ public class TrackingDataResource {
     }
 
     @GetMapping("/campaigns/{campaignId}/agg/{companyId}/{locationId:.*}")
-    public ResponseEntity<List<DayStat>>  getLocationStats(@PathVariable String campaignId, @PathVariable String companyId, @PathVariable String locationId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException {
+    public ResponseEntity<List<DayStat>>  getLocationStats(@PathVariable String campaignId, @PathVariable String companyId, @PathVariable String locationId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException, InconsistentDataException {
         log.debug("REST request to export campaign report");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
@@ -166,21 +169,22 @@ public class TrackingDataResource {
      * Read all company locations
      * @param companyId
      * @return
+     * @throws InconsistentDataException 
      */
     @GetMapping("/campaigns/{campaignId}/stats/{employeeId:.*}/exist")
-	public ResponseEntity<Boolean> hasEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId) {
+	public ResponseEntity<Boolean> hasEmployeeStats(@PathVariable String campaignId, @PathVariable String employeeId) throws InconsistentDataException {
     	log.debug("Read user stats {} / {}", campaignId, employeeId);
     	
     	Employee employee = employeeRepo.findById(employeeId).orElse( null);
-    	if (employee == null) throw new IllegalArgumentException("Invalid employee: "+ employeeId);
+    	if (employee == null) throw new InconsistentDataException("Invalid employee: "+ employeeId, "NO_EMPLOYEE");
     	
     	if (!userService.isInCompanyRole(employee.getCompanyId(), Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	
     	Optional<Company> company = companyRepo.findById(employee.getCompanyId());
-    	if (company.isEmpty())  throw new IllegalArgumentException("Invalid company: "+ employee.getCompanyId());
+    	if (company.isEmpty())  throw new InconsistentDataException("Invalid company: "+ employee.getCompanyId(), "NO_COMPANY");
     	
     	List<User> users = userService.getUserByEmployeeCode(campaignId, company.get().getCode(), employee.getCode());
-    	if (users == null || users.isEmpty()) throw new IllegalArgumentException("Invalid employee - no subscription: "+ employeeId);
+    	if (users == null || users.isEmpty()) throw new InconsistentDataException("Invalid employee - no subscription: "+ employeeId, "NO_SUBSCRIPTION");
     	
     	return ResponseEntity.ok(dataService.hasCampaignData(users.get(0).getPlayerId(), campaignId));
 	}

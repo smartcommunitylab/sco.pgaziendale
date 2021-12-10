@@ -103,7 +103,6 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10;
 }
 .modal {
   background: #FFFFFF;
@@ -122,7 +121,6 @@ export default {
   font-weight: 400;
   letter-spacing: normal !important;
   text-align: left;
-  z-index: 9;
   padding: 18px;
   margin: 20px;
 }

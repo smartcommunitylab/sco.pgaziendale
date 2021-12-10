@@ -5,13 +5,14 @@ navigationDrawer, mainBody e footer. Contiene anche i componenti dormienti come:
 e la snackbar.
 -->
 <template>
-  <v-app>
+  <v-app
+    v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'"
+  >
     <v-app-bar
       app
       color="primary"
       dark
       clipped-left
-      v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'"
     >
       <!-- TODO: Da modificare il link da dove pesca il logo, al momento provvisorio -->
       <div class="d-flex align-center">
@@ -35,7 +36,7 @@ e la snackbar.
       </v-btn>
     </v-app-bar>
 
-    <navigation-drawer v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'" />
+    <navigation-drawer/>
 
     <v-main class="">
       <v-container class="p-0 m-0 " :class="{'blockScroll': $route.path != '/Login'}">
@@ -50,14 +51,18 @@ e la snackbar.
         <modal-center v-show="active" :modalType="type" :modalObject="object"/>
         <!-- FINE ESEMPIO: Nuovo componente modale-->
 
-        <router-view class="min-h-screen px-5 py-5 pb-10" v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'" />
-        <router-view class="min-h-screen" v-else />
+        <router-view class="min-h-screen px-5 py-5 pb-10"/>
       </v-container>
     </v-main>
 
-    <app-footer v-if="account && account.status && account.status.loggedIn && currentRouteName!='Login' && currentRouteName!='ResetPassword'"/>
+    <app-footer class="positionFooter"/>
 
   </v-app>
+  
+  <v-app style="background-color: #0f70b7" v-else>
+    <router-view></router-view>
+  </v-app>
+
 </template>
 
 <script>
@@ -162,5 +167,9 @@ export default {
 }
 .blockScroll{
   overflow: hidden;
+}
+.positionFooter{
+  position: relative;
+  z-index: 10;
 }
 </style>

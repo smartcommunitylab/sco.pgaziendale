@@ -47,6 +47,7 @@ import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 /**
  * @author raman
@@ -130,7 +131,7 @@ public class TrackingDataServiceTest {
     }
     
     @Test
-    public void testStats() {
+    public void testStats() throws InconsistentDataException {
     	
 		List<DayStat> aggregation = tds.doPlayerAggregation(campaign.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
 		assertEquals(500d, aggregation.get(0).getDistances().getBike());
@@ -138,7 +139,7 @@ public class TrackingDataServiceTest {
     }
 
     @Test
-    public void testCompanyCSV() {
+    public void testCompanyCSV() throws InconsistentDataException {
     	StringWriter writer = new StringWriter();
     	tds.createEmployeeStatsCSV(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
     	assertEquals("\"Nome\";\"Cognome\";\"CodiceSede\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
@@ -146,7 +147,7 @@ public class TrackingDataServiceTest {
     }
 
     @Test
-    public void testLocationCSV() {
+    public void testLocationCSV() throws InconsistentDataException {
     	StringWriter writer = new StringWriter();
     	tds.createLocationStatsCSV(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
     	assertEquals("\"Indentificativo\";\"Indirizzo\";\"Numero\";\"CAP\";\"Comune\";\"Provincia\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
@@ -154,7 +155,7 @@ public class TrackingDataServiceTest {
     }
 
     @Test
-    public void testGlobalCSV() {
+    public void testGlobalCSV() throws InconsistentDataException {
     	StringWriter writer = new StringWriter();
     	tds.createCampaignStatsCSV(writer, campaign.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
     	assertEquals("\"Azienda\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
@@ -162,7 +163,7 @@ public class TrackingDataServiceTest {
     }
 
     @Test
-    public void testGlobalStats() {
+    public void testGlobalStats() throws InconsistentDataException {
     	List<DayStat> stats = tds.createCampaignStats(campaign.getId(), Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
     	assertEquals(1, stats.size());
     	assertEquals(500d, stats.get(0).getDistances().getBike());
@@ -177,7 +178,7 @@ public class TrackingDataServiceTest {
     }
     
     @Test
-    public void testCompanyStats() {
+    public void testCompanyStats() throws InconsistentDataException {
     	List<DayStat> stats = tds.createCompanyStats(campaign.getId(), company.getId(), Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
     	assertEquals(1, stats.size());
     	assertEquals(500d, stats.get(0).getDistances().getBike());
@@ -192,7 +193,7 @@ public class TrackingDataServiceTest {
     }
     
     @Test
-    public void testLocationStats() {
+    public void testLocationStats() throws InconsistentDataException {
     	List<DayStat> stats = tds.createCompanyLocationStats(campaign.getId(), company.getId(), "testlocation", Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
     	assertEquals(1, stats.size());
     	assertEquals(500d, stats.get(0).getDistances().getBike());
