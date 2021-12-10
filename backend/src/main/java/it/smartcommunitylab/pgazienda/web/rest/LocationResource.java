@@ -41,6 +41,7 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.service.CompanyService;
 import it.smartcommunitylab.pgazienda.service.UserService;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 /**
  * @author raman
@@ -60,10 +61,11 @@ public class LocationResource {
      * Create a new location
      * @param company
      * @return
+     * @throws InconsistentDataException 
      */
     @PostMapping("/companies/{companyId}/locations")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
-	public ResponseEntity<CompanyLocation> createLocation(@PathVariable String companyId, @Valid @RequestBody CompanyLocation location) {
+	public ResponseEntity<CompanyLocation> createLocation(@PathVariable String companyId, @Valid @RequestBody CompanyLocation location) throws InconsistentDataException {
     	log.debug("Creating a location {} / {}", companyId, location);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.createLocation(companyId, location));
@@ -74,10 +76,11 @@ public class LocationResource {
      * @param companyId
      * @param company
      * @return
+     * @throws InconsistentDataException 
      */
     @PutMapping("/companies/{companyId}/locations/{locationId:.*}")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
-	public ResponseEntity<CompanyLocation> updateLocation(@PathVariable String companyId, @PathVariable String locationId, @Valid @RequestBody CompanyLocation location) {
+	public ResponseEntity<CompanyLocation> updateLocation(@PathVariable String companyId, @PathVariable String locationId, @Valid @RequestBody CompanyLocation location) throws InconsistentDataException {
     	log.debug("Updating a location {} / {}", companyId, locationId);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.updateLocation(companyId, location));

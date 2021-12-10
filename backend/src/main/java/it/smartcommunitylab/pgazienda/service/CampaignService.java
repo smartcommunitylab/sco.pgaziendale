@@ -42,7 +42,8 @@ import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
-import it.smartcommunitylab.pgazienda.web.rest.errors.RepeatingSubscriptionException;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionException;
 
 /**
  * @author raman
@@ -111,28 +112,29 @@ public class CampaignService {
 	 * @param companyCode
 	 * @param campaignId
 	 * @throws RepeatingSubscriptionException 
+	 * @throws InconsistentDataException 
 	 */
-	public void subscribe(String key, String companyCode, String campaignId) throws RepeatingSubscriptionException {
+	public void subscribe(String key, String companyCode, String campaignId) throws RepeatingSubscriptionException, InconsistentDataException {
 		// find user
 		User user = userService.getUserWithAuthorities().orElse(null);
-		if (user == null) throw new IllegalArgumentException("Invalid user");
+		if (user == null) throw new InconsistentDataException("Invalid user", "NO_USER");
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new IllegalArgumentException("Invalid campaign");
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign", "NO_CAMPAIGN");
 		Company company = companyRepo.findOneByCode(companyCode).orElse(null);
-		if (company == null || company.getCampaigns() == null || !company.getCampaigns().contains(campaignId)) throw new IllegalArgumentException("Invalid company");
+		if (company == null || company.getCampaigns() == null || !company.getCampaigns().contains(campaignId)) throw new InconsistentDataException("Invalid company", "NO_COMPANY");
 		// app user role
 		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 
 		// control key already used
 		List<User> registered = userService.getUserByEmployeeCode(campaignId, companyCode, key);
 		if (registered != null && registered.size() > 0 && !registered.get(0).getId().equals(user.getId())) {
-			throw new IllegalArgumentException("User code already in use: " + campaignId +", " + companyCode + ", " + key);			
+			throw new InconsistentDataException("User code already in use: " + campaignId +", " + companyCode + ", " + key, "CODE_IN_USE");			
 		}
 		
 		;// not yet subscribed
 		if (role == null || role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId))) {
 			Employee employee = employeeRepo.findOneByCompanyIdAndCode(company.getId(), key).orElse(null);
-			if (employee == null ) throw new IllegalArgumentException("Invalid user key");
+			if (employee == null ) throw new InconsistentDataException("Invalid user key", "NO_CODE");
 			if (employee.getCampaigns() == null) employee.setCampaigns(new LinkedList<>());
 			
 			// TODO check
@@ -156,11 +158,12 @@ public class CampaignService {
 	/**
 	 * Unsubscribe a campaign for the current user. The user should exist
 	 * @param campaignId
+	 * @throws InconsistentDataException 
 	 */
-	public void unsubscribe(String campaignId) {
+	public void unsubscribe(String campaignId) throws InconsistentDataException {
 		// find user
 		User user = userService.getUserWithAuthorities().orElse(null);
-		if (user == null) throw new IllegalArgumentException("Invalid user");
+		if (user == null) throw new InconsistentDataException("Invalid user", "NO_USER");
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) return;
 		// app user role

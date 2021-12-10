@@ -41,6 +41,7 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.service.UserService;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 /**
  * Do authentication with external OAuth2.0 token reading the user data from the
@@ -76,7 +77,7 @@ public class ExternalUserDetailsService {
     private UserService userService;
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-	public Authentication externalAuthentication(String token) {
+	public Authentication externalAuthentication(String token) throws InconsistentDataException {
     	HttpHeaders headers = new HttpHeaders();
     	headers.set("Authorization", "Bearer " + extractToken(token));
     	HttpEntity entity = new HttpEntity(headers);
