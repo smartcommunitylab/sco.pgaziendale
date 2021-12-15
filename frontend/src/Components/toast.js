@@ -1,9 +1,9 @@
-const state = {
-    type: null,
-    message: null
-};
+import Vue from 'vue';
+import VueToast from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
+Vue.use(VueToast);
 const HttpErrors ={
-    'INVALID_ROLES':'Ruoli non esistono',
+  'INVALID_ROLES':'Ruoli non esistono',
 	'INVALID_USER_DATA':'	Dati utente non validi',
 	'NO_COMPANY'	:'Azienda specificata non esiste',
 	'INVALID_COMPANY_DATA':'	Dati azienda non validi',
@@ -31,37 +31,25 @@ const HttpErrors ={
 	'USER_ANOTHER_COMPANY'	:'Utente specificato é giá sottoscritto per un\'altra azienda',
 	'REPEATING_SUBSCRIPTION'	:'Utente specificato ha giá I dati in precedenza',
 }
+	
 
-const actions = {
-    success({ commit }, message) {
-        commit('success', message);
+const toast = {
+    error: (type) => {
+        return Vue.$toast.open({
+          message: HttpErrors[type],
+          type: 'error',
+          duration:3000,
+          position:'bottom'
+      });
     },
-    error({ commit }, message) {
-        commit('error', message);
-    },
-    clear({ commit }) {
-        commit('clear');
-    }
+    success: (message) => {
+      return Vue.$toast.open({
+        message: message,
+        type: 'success',
+        duration:3000,
+        position:'bottom'
+    });
+  }
 };
 
-const mutations = {
-    success(state, message) {
-        state.type = 'alert-success';
-        state.message = message;
-    },
-    error(state, message) {
-        state.type = 'alert-danger';
-        state.message = HttpErrors[message];
-    },
-    clear(state) {
-        state.type = null;
-        state.message = null;
-    }
-};
-
-export const alert = {
-    namespaced: true,
-    state,
-    actions,
-    mutations
-};
+export default toast;

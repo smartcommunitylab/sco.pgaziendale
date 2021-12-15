@@ -27,7 +27,10 @@ import Back from "vue-material-design-icons/ArrowLeft";
 import Credits from "vue-material-design-icons/Creation";
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
+import toast from './Components/toast'
+
 Vue.use(Loading);
+
 Vue.component('info-outline-icon', InformationOutlineIcon);
 Vue.component('pencil-outline-icon', PencilOutlineIcon);
 Vue.component('login-icon', LoginIcon);
@@ -63,7 +66,14 @@ axios.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
+axios.interceptors.response.use(
+  function(response) { return response;}, 
+  function(error) {
+    // handle error
+    if (error.response) {
+        toast.error(error.response.data.type);
+    }
+});
 //filters
 Vue.filter('round', function(value, decimals) {
   if(!value) {
