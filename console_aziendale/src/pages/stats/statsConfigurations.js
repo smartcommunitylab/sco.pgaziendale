@@ -1,4 +1,4 @@
-import { VARIABLES } from "./variables";
+import { VARIABLES } from "../../variables";
 
 export const statsConfigurations = [
   /*
@@ -28,6 +28,11 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
           VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
         ],
+        default: {
+          dataColumns:VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
+          dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
+          timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+        },
         selectAggregazionePuntuale:
           "si per il dipendente (nome dipendente); no per sedi; no per azienda",
         selectRangeTime: true,
@@ -46,6 +51,11 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
           VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
         ],
+        default: {
+          dataColumns:VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
+          dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+          timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+        },
         selectAggregazionePuntuale: "nessuna",
         selectRangeTime: false,
         exportCSV: false,
@@ -63,6 +73,11 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
           VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
         ],
+        default: {
+          dataColumns:VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
+          dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+          timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+        },
         selectAggregazionePuntuale: "nessuna",
         selectRangeTime: true,
         exportCSV: false,

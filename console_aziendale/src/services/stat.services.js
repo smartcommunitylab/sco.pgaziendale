@@ -1,5 +1,5 @@
 import axios from "axios";
-import { statsConfigurations } from "../statsConfigurations";
+import { statsConfigurations } from "../pages/stats/statsConfigurations";
 
 export const statService = {
   setActiveViewType,

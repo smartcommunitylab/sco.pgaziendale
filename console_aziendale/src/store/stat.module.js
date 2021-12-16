@@ -5,6 +5,7 @@ const state = {
   configurations: null,
   activeConfiguration: null,
   activeViewType: null,
+  activeSelection:null
 };
 
 function saveFile(filename, stats) {
@@ -198,7 +199,25 @@ const actions = {
       }
     );
   },
-
+  initConfigurationByRole({ commit, dispatch }, { role }) {
+    commit("getConfigurationByRole");
+    statService.getConfigurationByRole(role).then(
+      (configurations) => {
+        commit("getConfigurationByRoleSuccess", configurations);
+        dispatch("setActiveConfiguration", {
+          configurationId: configurations[0].id,
+        });
+        if (configurations[0]?.views[0]?.default)
+        dispatch("setActiveSelection", {
+          selection: configurations[0].views[0].default,
+        });
+      },
+      (error) => {
+        commit("getConfigurationByRoleFailure", error),
+          dispatch("alert/error", error, { root: true });
+      }
+    );
+  },
   getConfigurationByRole({ commit, dispatch }, { role }) {
     commit("getConfigurationByRole");
     statService.getConfigurationByRole(role).then(
@@ -214,7 +233,12 @@ const actions = {
       }
     );
   },
-
+  setActiveSelection({ commit }, { selection }) {
+    console.log("active Selection:");
+    console.log(selection);
+    commit("setActiveSelection",selection);
+    //call and get stats?
+  },
   setActiveConfiguration({ commit, dispatch, state }, { configurationId }) {
     console.log("configurationID:");
     console.log(configurationId);
@@ -346,11 +370,14 @@ const mutations = {
     state.activeViewType = { loading: true };
   },
   setActiveViewTypeSuccess(state, activeViewType) {
-    state.activeViewType = { items: activeViewType };
+    state.activeViewType = { item: activeViewType };
   },
   setActiveViewTypeFailure(state, error) {
     state.activeViewType = { error };
   },
+  setActiveSelection(state, selection) {
+    state.activeSelection= selection;
+  }
 };
 
 export const stat = {
