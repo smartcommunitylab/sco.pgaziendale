@@ -38,7 +38,7 @@
           <div>
             <v-card-title> Filtri - {{ activeViewType.item }} </v-card-title>
           </div>
-          <v-card-text class="px-5 py-4">
+          <v-card-text class="px-5 py-4" v-if="activeSelection">
             <p v-if="activeSelection.dataLevel" class="p-0">
               <b>Livello</b>: {{ activeSelection.dataLevel }}
             </p>

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <stats-selection></stats-selection>
     <v-row>
       <v-col cols="12">
         <slide-group :items="selectionCards"></slide-group>
@@ -13,11 +14,13 @@
 import { mapState /*, mapActions*/ } from "vuex";
 import SlideGroup from "@/components/slide-group/SlideGroup.vue";
 import StatsMenagement from "@/pages/stats/StatsMenagement.vue";
+import StatsSelection from "@/pages/stats/StatsSelection.vue";
 
 export default {
   components: {
     "slide-group": SlideGroup,
     "stats-menagement": StatsMenagement,
+    "stats-selection":StatsSelection
   },
   data: function () {
     return {
@@ -66,6 +69,7 @@ export default {
       }
     },
   },
+  
 };
 </script>
 
