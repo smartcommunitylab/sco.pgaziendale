@@ -73,6 +73,7 @@ axios.interceptors.response.use(
     if (error.response) {
         toast.error(error.response.data.type);
     }
+    return Promise.reject(error);
 });
 //filters
 Vue.filter('round', function(value, decimals) {
