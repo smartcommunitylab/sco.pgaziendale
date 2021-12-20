@@ -66,17 +66,17 @@ export default {
   },
     watch: {
       allCompanies: {
-        handler: function (oldValue, newValue) {
-          if (!oldValue && newValue) {
-            this.localCompany = this.newValue.items[0];
+        handler: function (newValue, oldValue ) {
+          if (oldValue.loading && newValue.items) {
+            this.localCompany = newValue.items[0];
           }
         },
         deep: true,
       },
       allCampaigns: {
-        handler: function (oldValue, newValue) {
-          if (!oldValue && newValue) {
-            this.localCampaign = this.newValue.items[0];
+        handler: function (newValue, oldValue ) {
+          if (oldValue.loading && newValue.items) {
+            this.localCampaign = newValue.items[0];
           }
         },
         deep: true,

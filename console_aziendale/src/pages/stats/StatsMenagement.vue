@@ -34,7 +34,7 @@
     </v-col>
     <v-col cols="3">
       <div>
-        <v-card>
+        <v-card v-if="activeViewType">
           <div>
             <v-card-title> Filtri - {{ activeViewType.item }} </v-card-title>
           </div>
@@ -60,11 +60,11 @@
                 Salva Filtri
               </v-btn>
             </div>
-            <div>
+            <div v-if="getConfigurationById">
               {{ getConfigurationById.views }}
             </div>
 
-            <div v-if="getConfigurationById">
+            <div v-if="activeViewType">
               <div v-if="activeViewType.item === 'Tabella'">Tabella</div>
               <div v-if="activeViewType.item === 'Grafico a Barre Orizzontali'">
                 Grafico a Barre Orizzontali
@@ -76,7 +76,7 @@
             <!-- INPUT - Componenti per il filtraggio -->
 
             <v-row justify="center">
-              <v-col cols="4" class="pl-5 pr-20">
+              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
                 <p class="text-subtitle-1">Livello Aggregazione</p>
 
                 <v-autocomplete
@@ -90,7 +90,7 @@
                 ></v-autocomplete>
               </v-col>
 
-              <v-col cols="4" class="pl-5 pr-20">
+              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
                 <p class="text-subtitle-1 mb-10">Unità temporale</p>
                 <v-autocomplete
                   label="Unità Temporale"
@@ -172,7 +172,9 @@ export default {
     // },
     view() {
       console.log("La vista è: ");
-      let view = this.getConfigurationById.views.find(
+      let view = null;
+      if (this.getConfigurationById && this.getConfigurationById.views)
+      view = this.getConfigurationById.views.find(
         (element) => element.type === this.activeViewType.item
       );
       console.log(view);
@@ -182,6 +184,7 @@ export default {
 
     getConfigurationById() {
       let conf = {};
+      if (this.configurations && this.configurations.items)
       this.configurations.items.forEach((configuration) => {
         if (configuration.id == this.activeConfiguration.items) {
           conf = configuration;
