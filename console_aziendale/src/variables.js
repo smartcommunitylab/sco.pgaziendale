@@ -51,6 +51,14 @@ export const VARIABLES = {
         MONTH: "Mese",
         CAMPAIGN: "Campagna",
       },
+      TIMEPERIOD:{
+        ALL:{label:"Intera durata campagna",value:"ALL"},
+        SPECIFIC:{label:"Periodo specifico",value:"SPECIFIC"}
+      },
+      TYPEDATA:{
+        ALL:{label:"Tutte",value:"ALL"},
+        SPECIFIC:{label:"Visualizza selezione",value:"SPECIFIC"}
+      }
     },
   },
 };

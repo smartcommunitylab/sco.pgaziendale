@@ -25,9 +25,9 @@
           <v-tab-item key="Grafico a Linee">
             <line-chart></line-chart>
           </v-tab-item>
-          <v-tab-item key="Grafico a Barre"> 
+          <v-tab-item key="Grafico a Barre">
             <bar-chart></bar-chart>
-            </v-tab-item>
+          </v-tab-item>
           <v-tab-item key="Mappa???"> </v-tab-item>
         </v-tabs-items>
       </v-card>
@@ -45,6 +45,12 @@
             <p v-if="activeSelection.timeUnit" class="p-0">
               <b>Unità temporale</b>: {{ activeSelection.timeUnit }}
             </p>
+            <p v-if="activeSelection.dataColumns" class="p-0">
+              <b>Colonne dati</b>: {{ activeSelection.dataColumns }}
+            </p>
+            <p v-if="activeSelection.timePeriod" class="p-0">
+              <b>Periodo di tempo</b>: {{ activeSelection.timePeriod.label }}
+            </p>
           </v-card-text>
 
           <v-card-actions>
@@ -60,9 +66,9 @@
                 Salva Filtri
               </v-btn>
             </div>
-            <div v-if="getConfigurationById">
+            <!-- <div v-if="getConfigurationById">
               {{ getConfigurationById.views }}
-            </div>
+            </div> -->
 
             <div v-if="activeViewType">
               <div v-if="activeViewType.item === 'Tabella'">Tabella</div>
@@ -106,6 +112,104 @@
 
               <v-col cols="4" class="pl-5 pr-20">
                 <p class="text-subtitle-1">Colonne Dati</p>
+                <v-select
+                  v-model="localSelection.dataColumns"
+                  :items="view.dataColumns"
+                  :menu-props="{ maxHeight: '400' }"
+                  label="Colonne Dati"
+                  multiple
+                  hint="Seleziona le colonne da visualizzare"
+                  persistent-hint
+                ></v-select>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="4" class="pl-5 pr-20">
+                <p class="text-subtitle-1">Visualizza selezione</p>
+                <v-radio-group v-model="localSelection.typeData">
+                  <v-radio
+                    v-for="period in view.typeData"
+                    :key="period"
+                    :label="period.label"
+                    :value="period.value"
+                  ></v-radio>
+                </v-radio-group>
+                <div v-if="localSelection && localSelection.typeData == 'SPECIFIC'">
+                 
+                <v-autocomplete
+                  label="Selezione"
+                  name="typeData"
+                  id="typeData"
+                  v-model="localSelection.typeDataMultiple"
+                  :items="localSelection.items"
+                  @change="updateTypeDataMultiple"
+                  outlined
+                  multiple="true"
+                ></v-autocomplete>
+                </div>
+              </v-col>
+              <v-col cols="4" class="pl-5 pr-20">
+                <p class="text-subtitle-1">Periodo di tempo</p>
+                <v-radio-group v-model="localSelection.timePeriod">
+                  <v-radio
+                    v-for="period in view.timePeriod"
+                    :key="period"
+                    :label="period.label"
+                    :value="period.value"
+                  ></v-radio>
+                </v-radio-group>
+                <div v-if="localSelection && localSelection.timePeriod == 'SPECIFIC'">
+                  <v-menu
+                    v-model="showPicker"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    full-width
+                    max-width="290px"
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field
+                        v-model="selectedDate"
+                        label="Choose the date"
+                        hint="YYYY/MM/DD"
+                        persistent-hint
+                        readonly
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="selectedDate"
+                      no-title
+                      @input="showPicker = false"
+                    ></v-date-picker>
+                  </v-menu>
+                  <v-menu
+                    v-model="showPicker"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    full-width
+                    max-width="290px"
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field
+                        v-model="selectedDate"
+                        label="Choose the date"
+                        hint="YYYY/MM/DD"
+                        persistent-hint
+                        readonly
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="selectedDate"
+                      no-title
+                      @input="showPicker = false"
+                    ></v-date-picker>
+                  </v-menu>
+                </div>
               </v-col>
             </v-row>
           </v-sheet>
@@ -151,6 +255,9 @@ export default {
       localSelection: {
         dataLevel: null,
         timeUnit: null,
+        dataColumns: null,
+        typeData:null,
+        typeDataMultiple:null
       },
       name: "",
       email: "",
@@ -174,9 +281,9 @@ export default {
       console.log("La vista è: ");
       let view = null;
       if (this.getConfigurationById && this.getConfigurationById.views)
-      view = this.getConfigurationById.views.find(
-        (element) => element.type === this.activeViewType.item
-      );
+        view = this.getConfigurationById.views.find(
+          (element) => element.type === this.activeViewType.item
+        );
       console.log(view);
 
       return view;
@@ -185,11 +292,11 @@ export default {
     getConfigurationById() {
       let conf = {};
       if (this.configurations && this.configurations.items)
-      this.configurations.items.forEach((configuration) => {
-        if (configuration.id == this.activeConfiguration.items) {
-          conf = configuration;
-        }
-      });
+        this.configurations.items.forEach((configuration) => {
+          if (configuration.id == this.activeConfiguration.items) {
+            conf = configuration;
+          }
+        });
 
       return conf;
     },
@@ -228,10 +335,19 @@ export default {
       setActiveViewType: "setActiveViewType",
       setActiveSelection: "setActiveSelection",
     }),
+    getTypeDataMultiple() {
+      //based on kind of data return  
+    },
     updateTimeUnit() {
       this.setActiveSelection({ selection: this.localSelection });
     },
     updateDataLevel() {
+      this.setActiveSelection({ selection: this.localSelection });
+    },
+    updateDataColumns() {
+      this.setActiveSelection({ selection: this.localSelection });
+    },
+    updateTypeDataMultiple() {
       this.setActiveSelection({ selection: this.localSelection });
     },
     setNewActiveView(view) {
@@ -262,6 +378,9 @@ export default {
     if (this.activeSelection) {
       this.localSelection.dataLevel = this.activeSelection.dataLevel;
       this.localSelection.timeUnit = this.activeSelection.timeUnit;
+      this.localSelection.dataColumns = this.activeSelection.dataColumns;
+      this.localSelection.typeData = this.activeSelection.typeData;
+      this.localSelection.typeDataMultiple = this.getTypeDataMultiple();
     }
   },
 

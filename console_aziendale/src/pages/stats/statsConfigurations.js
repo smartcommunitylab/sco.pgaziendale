@@ -28,10 +28,20 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
           VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
         ],
+        timePeriod: [
+          VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+          VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
+        ],
+        typeData: [
+          VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
+          VARIABLES.STATS.VIEWS.TYPEDATA.SPECIFIC
+        ],
         default: {
           dataColumns:VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
           dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
           timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+          timePeriod:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+          typeData:VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
         },
         selectAggregazionePuntuale:
           "si per il dipendente (nome dipendente); no per sedi; no per azienda",
@@ -51,10 +61,20 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
           VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
         ],
+        timePeriod: [
+          VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+          VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
+        ],
+        typeData: [
+          VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
+          VARIABLES.STATS.VIEWS.TYPEDATA.SPECIFIC
+        ],
         default: {
           dataColumns:VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
           dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
           timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+          timePeriod:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+          typeData:VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
         },
         selectAggregazionePuntuale: "nessuna",
         selectRangeTime: false,
@@ -73,10 +93,20 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
           VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
         ],
+        timePeriod: [
+          VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+          VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
+        ],
+        typeData: [
+          VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
+          VARIABLES.STATS.VIEWS.TYPEDATA.SPECIFIC
+        ],
         default: {
           dataColumns:VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
           dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
           timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+          timePeriod:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+          typeData:VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
         },
         selectAggregazionePuntuale: "nessuna",
         selectRangeTime: true,
