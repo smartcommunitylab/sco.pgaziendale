@@ -16,7 +16,10 @@
       ></v-autocomplete>
     </v-col>
 
-    <v-col cols="4" class="pl-5 pr-20" v-if="allCampaigns && allCompanies.items">
+ <v-col cols="4" class="pl-5 pr-20" v-if="!isAdmin && localCompany">
+   <p class="text-subtitle-1">Azienda: {{localCompany.name}}</p>
+ </v-col>
+    <!-- <v-col cols="4" class="pl-5 pr-20" v-if="!isAdmin && allCompanies && allCompanies.items">
       <p class="text-subtitle-1">Seleziona Azienda</p>
       <v-autocomplete
         label="Azienda"
@@ -30,7 +33,7 @@
         @change="updateCompany"
         outlined
       ></v-autocomplete>
-    </v-col>
+    </v-col> -->
   </v-row>
 </template>
 
@@ -40,62 +43,84 @@ import { mapState, mapActions } from "vuex";
 export default {
   data() {
     return {
-        localCompany: null,
-        localCampaign: null,
-    
+      localCompany: null,
+      localCampaign: null,
     };
   },
   computed: {
     ...mapState("company", ["allCompanies", "actualCompany", "adminCompany"]),
-    ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
+    ...mapState("campaign", ["allCampaigns", "actualCampaign","getAllCompaniesOfCampaignCall"]),
+    ...mapState("stat", ["activeSelection"]),
+    ...mapState("account", ["role","temporaryAdmin"]),
+    isAdmin(){
+      return this.role=='ROLE_ADMIN' && !this.temporaryAdmin
+    }
   },
   mounted: function () {
-        if (this.allCompanies && this.allCompanies.items) {
-        this.localCompany = this.allCompanies.items[0];
-      } else {
-    this.getAllCompanies();
+    if (this.isAdmin){
+    // if (this.allCompanies && this.allCompanies.items) {
+    //   this.localCompany = this.allCompanies.items[0];
+    //   this.updateCompany();
+    // } else {
+    //   this.getAllCompanies();
+    // }
 
+    if (this.allCampaigns && this.allCampaigns.items) {
+      this.localCampaign = this.allCampaigns.items[0];
+      this.updateCampaign();
+    } else {
+        this.getAllCampaigns();
       }
-
-      if (this.allCampaigns && this.allCampaigns.items) {
-        this.localCampaign = this.allCampaigns.items[0];
-      } else {
-            this.getAllCampaigns();
-
-      }
+    }
+    else {
+      this.localCompany=this.actualCompany.item;
+      this.getAllCampaigns(this.actualCompany.item.id);
+    }
   },
-    watch: {
-      allCompanies: {
-        handler: function (newValue, oldValue ) {
-          if (oldValue.loading && newValue.items) {
-            this.localCompany = newValue.items[0];
-          }
-        },
-        deep: true,
+  watch: {
+    // allCompanies: {
+    //   handler: function (newValue, oldValue) {
+    //     if (oldValue.loading && newValue.items) {
+    //       this.localCompany = newValue.items[0];
+    //       this.updateCompany();
+    //     }
+    //   },
+    //   deep: true,
+    // },
+    allCampaigns: {
+      handler: function (newValue, oldValue) {
+        if (oldValue && oldValue.loading && newValue.items) {
+          this.localCampaign = newValue.items[0];
+          this.updateCampaign();
+        }
       },
-      allCampaigns: {
-        handler: function (newValue, oldValue ) {
-          if (oldValue.loading && newValue.items) {
-            this.localCampaign = newValue.items[0];
-          }
-        },
-        deep: true,
-      },
+      deep: true,
     },
+  },
   methods: {
-    ...mapActions("company", {
-      getAllCompanies: "getAll",
-    }),
+    // ...mapActions("company", {
+    //   getAllCompanies: "getAll",
+    // }),
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
     }),
-    updateCompany() {
-      console.log(this.localCompany)
+    ...mapActions("stat", {
+      setActiveSelection: "setActiveSelection",
+    }),
+    // updateCompany() {
+    //   console.log(this.localCompany);
+    //   if (this.activeSelection && this.localCompany) {
+    //     this.activeSelection.company = this.localCompany;
+    //     this.setActiveSelection({ selection: this.activeSelection });
+    //   }
+    // },
+    updateCampaign(value) {
+      console.log(value);
+      if (this.activeSelection && this.localCampaign) {
+        this.activeSelection.campaign = this.localCampaign;
+        this.setActiveSelection({ selection: this.activeSelection });
+      }
     },
-    updateCampaign() {
-            console.log(this.localCampaign)
-    },
-    
   },
 };
 </script>

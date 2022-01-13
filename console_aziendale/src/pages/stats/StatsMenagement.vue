@@ -33,6 +33,11 @@
       </v-card>
     </v-col>
     <v-col cols="3">
+      <!-- <div> 
+       <v-layout row justify-center align-center>
+        <v-btn color="primary" @click="exportCsv"> Download CSV </v-btn>
+      </v-layout>
+     </div> -->
       <div>
         <v-card v-if="activeViewType">
           <div>
@@ -43,13 +48,31 @@
               <b>Livello</b>: {{ activeSelection.dataLevel }}
             </p>
             <p v-if="activeSelection.timeUnit" class="p-0">
-              <b>Unità temporale</b>: {{ activeSelection.timeUnit }}
+              <b>Unità temporale</b>: {{ activeSelection.timeUnit.label }}
             </p>
             <p v-if="activeSelection.dataColumns" class="p-0">
-              <b>Colonne dati</b>: {{ activeSelection.dataColumns }}
+              <b>Colonne dati</b>:
+              <span v-for="(column, index) in activeSelection.dataColumns" :key="index">{{
+                column
+              }}</span>
             </p>
             <p v-if="activeSelection.timePeriod" class="p-0">
-              <b>Periodo di tempo</b>: {{ activeSelection.timePeriod.label }}
+              <b>Periodo di tempo</b>:
+              <template v-if="timeSelected"
+                ><span>{{ activeSelection.selectedDateFrom }}<br /></span> 
+                <span>{{ activeSelection.selectedDateTo }}<br /></span> </template
+              ><template v-else
+                ><span>{{ activeSelection.timePeriod.label }}</span></template
+              >
+            </p>
+            <p v-if="activeSelection.puntualAggregation" class="p-0">
+              <b>Aggregazione puntuale</b>:
+              <template v-if="activeAggregation"
+                ><span
+                  v-for="(agg, index) in activeSelection.puntualAggregation"
+                  :key="index"
+                  >{{ agg.name }}<br /></span></template
+              ><template v-else><span>Nessuna</span></template>
             </p>
           </v-card-text>
 
@@ -57,7 +80,9 @@
             <v-btn color="primary" text @click="sheet = !sheet"> Modifica filtri </v-btn>
           </v-card-actions>
         </v-card>
-
+        <div class="text-center m-2">
+          <v-btn color="primary" @click="exportCsv"> Download CSV </v-btn>
+        </div>
         <!-- Gestore di inserimento dati (MODALE) -->
         <v-bottom-sheet v-model="sheet">
           <v-sheet height="100vh">
@@ -105,6 +130,8 @@
                   id="unitaTemporale"
                   v-model="localSelection.timeUnit"
                   :items="view.timeUnit"
+                  item-text="label"
+                  item-value="value"
                   @change="updateTimeUnit"
                   outlined
                 ></v-autocomplete>
@@ -124,89 +151,94 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="4" class="pl-5 pr-20">
-                <p class="text-subtitle-1">Visualizza selezione</p>
-                <v-radio-group v-model="localSelection.typeData">
+              <v-col cols="4" class="pl-5 pr-20" v-if="puntualAggregationValue">
+                <p class="text-subtitle-1">Aggregazione puntuale</p>
+                <v-radio-group
+                  v-model="puntualAggregationValue"
+                  @change="updatePuntualAggregationChange"
+                >
                   <v-radio
-                    v-for="period in view.typeData"
-                    :key="period"
-                    :label="period.label"
-                    :value="period.value"
+                    v-for="(agg, index) in view.puntualAggregation"
+                    :key="index"
+                    :label="agg.label"
+                    :value="agg.value"
                   ></v-radio>
                 </v-radio-group>
-                <div v-if="localSelection && localSelection.typeData == 'SPECIFIC'">
-                 
-                <v-autocomplete
-                  label="Selezione"
-                  name="typeData"
-                  id="typeData"
-                  v-model="localSelection.typeDataMultiple"
-                  :items="localSelection.items"
-                  @change="updateTypeDataMultiple"
-                  outlined
-                  multiple="true"
-                ></v-autocomplete>
+                <div
+                  v-if="
+                    puntualAggregationValue &&
+                    puntualAggregationValue != 'NONE' &&
+                    localSelection.itemsAggreation != null
+                  "
+                >
+                  <v-autocomplete
+                    label="Selezione"
+                    name="typeData"
+                    id="typeData"
+                    v-model="localSelection.puntualAggregation"
+                    :items="localSelection.itemsAggreation"
+                    @change="updatePuntualAggregationChange"
+                    item-text="name"
+                    return-object
+                    outlined
+                    multiple
+                  ></v-autocomplete>
                 </div>
               </v-col>
               <v-col cols="4" class="pl-5 pr-20">
                 <p class="text-subtitle-1">Periodo di tempo</p>
-                <v-radio-group v-model="localSelection.timePeriod">
+                <v-radio-group v-model="timePeriodValue">
                   <v-radio
-                    v-for="period in view.timePeriod"
-                    :key="period"
+                    v-for="(period, index) in view.timePeriod"
+                    :key="index"
                     :label="period.label"
                     :value="period.value"
                   ></v-radio>
                 </v-radio-group>
-                <div v-if="localSelection && localSelection.timePeriod == 'SPECIFIC'">
+                <div v-if="timePeriodValue && timePeriodValue == 'SPECIFIC'">
                   <v-menu
-                    v-model="showPicker"
+                    v-model="showPickerFrom"
                     :close-on-content-click="false"
+                    :nudge-right="40"
                     transition="scale-transition"
                     offset-y
-                    full-width
-                    max-width="290px"
-                    min-width="290px"
+                    min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
                       <v-text-field
-                        v-model="selectedDate"
-                        label="Choose the date"
-                        hint="YYYY/MM/DD"
+                        v-model="localSelection.selectedDateFrom"
+                        label="Seleziona la data di inizio"
+                        hint="DD/MM/YYYY"
                         persistent-hint
-                        readonly
                         v-on="on"
                       ></v-text-field>
                     </template>
                     <v-date-picker
-                      v-model="selectedDate"
-                      no-title
-                      @input="showPicker = false"
+                      v-model="localSelection.selectedDateFrom"
+                      @input="showPickerFrom = false"
                     ></v-date-picker>
                   </v-menu>
+
                   <v-menu
-                    v-model="showPicker"
+                    v-model="showPickerTo"
                     :close-on-content-click="false"
+                    :nudge-right="40"
                     transition="scale-transition"
                     offset-y
-                    full-width
-                    max-width="290px"
-                    min-width="290px"
+                    min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
                       <v-text-field
-                        v-model="selectedDate"
-                        label="Choose the date"
-                        hint="YYYY/MM/DD"
+                        v-model="localSelection.selectedDateTo"
+                        label="Seleziona la data di fine"
+                        hint="DD/MM/YYYY"
                         persistent-hint
-                        readonly
                         v-on="on"
                       ></v-text-field>
                     </template>
                     <v-date-picker
-                      v-model="selectedDate"
-                      no-title
-                      @input="showPicker = false"
+                      v-model="localSelection.selectedDateTo"
+                      @input="showPickerTo = false"
                     ></v-date-picker>
                   </v-menu>
                 </div>
@@ -226,7 +258,7 @@ import { required, maxLength, email } from "vuelidate/lib/validators";
 import DataTable from "@/components/stats-views/DataTable.vue";
 import LineChart from "@/components/stats-views/LineChart.vue";
 import BarChart from "@/components/stats-views/BarChart.vue";
-
+import { statService } from "../../services";
 export default {
   mixins: [validationMixin],
 
@@ -251,13 +283,19 @@ export default {
     return {
       tab: null,
       sheet: false,
-      pippo: "ciao",
+      showPickerFrom: false,
+      showPickerTo: false,
+      puntualAggregationValue: "NONE",
+      timePeriodValue: null,
       localSelection: {
         dataLevel: null,
         timeUnit: null,
         dataColumns: null,
-        typeData:null,
-        typeDataMultiple:null
+        timePeriod: null,
+        selectedDateFrom: new Date(),
+        selectedDateTo: new Date(),
+        puntualAggregation: [],
+        itemsAggreation: [],
       },
       name: "",
       email: "",
@@ -274,9 +312,21 @@ export default {
       "activeSelection",
     ]),
     ...mapState("navigation", ["page"]),
+    ...mapState("account", ["role", "temporaryAdmin"]),
     // activeSelection () {
     //   return this.$store.state.stat.activeSelection;
     // },
+    activeAggregation() {
+      return (
+        this.activeSelection.puntualAggregation &&
+        this.activeSelection.puntualAggregation.length
+      );
+    },
+    timeSelected() {
+      return (
+        this.timePeriodValue!='ALL'
+      );
+    },
     view() {
       console.log("La vista è: ");
       let view = null;
@@ -334,9 +384,18 @@ export default {
       initConfigurationByRole: "initConfigurationByRole",
       setActiveViewType: "setActiveViewType",
       setActiveSelection: "setActiveSelection",
+      getStatFromServer: "getStat",
+      downloadCsv: "getCsv",
     }),
-    getTypeDataMultiple() {
-      //based on kind of data return  
+    ...mapActions("stat", { getConfigurationByRole: "getConfigurationByRole" }),
+    // getTypeDataMultiple() {
+    //   //based on kind of data return
+    // },
+    getLocalStat(selection) {
+      this.getStatFromServer(selection);
+    },
+    exportCsv() {
+      this.downloadCsv(this.localSelection);
     },
     updateTimeUnit() {
       this.setActiveSelection({ selection: this.localSelection });
@@ -347,7 +406,9 @@ export default {
     updateDataColumns() {
       this.setActiveSelection({ selection: this.localSelection });
     },
-    updateTypeDataMultiple() {
+    updatePuntualAggregationChange() {
+      if (this.puntualAggregationValue == "NONE")
+        this.localSelection.puntualAggregation = [];
       this.setActiveSelection({ selection: this.localSelection });
     },
     setNewActiveView(view) {
@@ -355,7 +416,10 @@ export default {
     },
 
     initConfigurationStat() {
-      this.initConfigurationByRole({ role: "ROLE_COMPANY_ADMIN" });
+      this.initConfigurationByRole({
+        role: this.role,
+        temporaryAdmin: this.temporaryAdmin,
+      });
       console.log(this.configurations.items);
     },
 
@@ -369,6 +433,26 @@ export default {
       this.select = null;
       this.checkbox = false;
     },
+    getItemsAggregation() {
+      statService
+        .getItemsAggregation(
+          this.puntualAggregationValue,
+          this.localSelection.campaign.id
+        )
+        .then(
+          (values) => {
+            this.localSelection.itemsAggreation = values;
+            console.log(values);
+          },
+          (err) => {
+            console.log(err);
+          }
+        );
+    },
+    getDataRange() {
+      this.localSelection.selectedDateFrom = this.activeSelection.campaign.from;
+      this.localSelection.selectedDateTo = this.activeSelection.campaign.to;
+    },
   },
   created() {
     this.initConfigurationStat();
@@ -376,21 +460,35 @@ export default {
   mounted() {
     this.tab = this.activeViewType;
     if (this.activeSelection) {
+      //init with view configuration
+      this.localSelection.company = this.activeSelection.company;
+      this.localSelection.campaign = this.activeSelection.campaign;
       this.localSelection.dataLevel = this.activeSelection.dataLevel;
       this.localSelection.timeUnit = this.activeSelection.timeUnit;
       this.localSelection.dataColumns = this.activeSelection.dataColumns;
-      this.localSelection.typeData = this.activeSelection.typeData;
-      this.localSelection.typeDataMultiple = this.getTypeDataMultiple();
+      this.localSelection.timePeriod = this.activeSelection.timePeriod;
+      this.timePeriodValue = this.activeSelection.timePeriod.value;
+      this.localSelection.selectedDateFrom = this.activeSelection.selectedDateFrom;
+      this.localSelection.selectedDateTo = this.activeSelection.selectedDateTo;
+      this.puntualAggregationValue = this.activeSelection.puntualAggregation.value;
+      //load specific values
+      this.getItemsAggregation();
+      this.getDataRange();
+      //load default values
+      this.getLocalStat(this.localSelection);
     }
   },
 
   watch: {
+    puntualAggregationValue() {
+      this.getItemsAggregation();
+    },
     activeConfiguration() {
       this.tab = this.activeViewType;
     },
     activeSelection: {
       handler: function (oldValue, newValue) {
-        if (!oldValue && newValue) {
+        if (!oldValue && newValue && this.localSelection && this.activeSelection) {
           this.localSelection.dataLevel = this.activeSelection.dataLevel;
           this.localSelection.timeUnit = this.activeSelection.timeUnit;
         }

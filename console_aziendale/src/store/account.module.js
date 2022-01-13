@@ -3,8 +3,8 @@ import { router } from '../routes';
 
 const user = JSON.parse(localStorage.getItem('user'));
 const state = user
-    ? { status: { loggedIn: true }, user, role: userService.getRole(user), home: userService.getHome(userService.getRole(user)) }
-    : { status: {}, user: null, role: null, home: null };
+    ? { status: { loggedIn: true }, user, role: userService.getRole(user), temporaryAdmin:false, home: userService.getHome(userService.getRole(user)) }
+    : { status: {}, user: null, role: null, temporaryAdmin:false,home: null};
 
 function isCompanyAdmin(role){
     if (role==='ROLE_COMPANY_ADMIN')
@@ -59,6 +59,12 @@ const actions = {
         dispatch('location/logout', null, { root: true });
         dispatch('stat/logout', null, { root: true });
         router.push('/Login');
+    },
+    temporaryCompanyAdmin({ commit }) {
+        commit('temporaryCompanyAdmin');
+    },
+    removedCompanyAdmin({ commit }) {
+        commit('removedCompanyAdmin');
     },
     setDefaultCompany({ dispatch }, user) {
         var userCompanies = userService.getCompanies(user);
@@ -130,13 +136,22 @@ const mutations = {
         state.user = null;
         state.role = null;
         state.home = null;
+        state.temporaryAdmin=false;
     },
     logout(state) {
         state.status = {};
         state.user = null;
         state.role = null;
         state.home = null;
+        state.temporaryAdmin=false;
     },
+    temporaryCompanyAdmin(state) {
+        state.temporaryAdmin=true;
+    },
+    removedCompanyAdmin(state) {
+        state.temporaryAdmin=false;
+    },
+        
     changePassword() {
         
     },

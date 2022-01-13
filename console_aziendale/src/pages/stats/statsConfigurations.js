@@ -3,10 +3,60 @@ import { VARIABLES } from "../../variables";
 export const statsConfigurations = [
   /*
   / Configurazione - Km Fatti e Utili
-  / Specifica per il COMPANY ADMIN -> Amministratore Aziendale
+  / Specifica per l'ADMIN -> Amministratore di Sistema
   */
   {
     id: 0,
+    name: VARIABLES.STATS.NAME.KM_COUNTED,
+    profile: VARIABLES.ROLE.ADMIN,
+    views: [
+      {
+        type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
+        dataColumns: [
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
+        ],
+        dataLevel: [
+          VARIABLES.STATS.VIEWS.DATALEVEL.CAMPAIGN,
+          VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES
+          ],
+        timeUnit: [
+          VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+          VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+          VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
+        ],
+        timePeriod: [
+          VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+          VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
+        ],
+        puntualAggregation: [
+          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.COMPANIES
+        ],
+        default: {
+          dataColumns:[
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
+          ],
+          dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES,
+          timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+          timePeriod:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+          puntualAggregation:VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+        },
+        exportCSV: true,
+      }
+    ],
+  },
+  /*
+  / Configurazione - Km Fatti e Utili
+  / Specifica per il COMPANY ADMIN -> Amministratore Aziendale
+  */
+  {
+    id: 1,
     name: VARIABLES.STATS.NAME.KM_COUNTED,
     profile: VARIABLES.ROLE.COMPANY_ADMIN,
     views: [
@@ -32,20 +82,17 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
           VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
         ],
-        typeData: [
-          VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
-          VARIABLES.STATS.VIEWS.TYPEDATA.SPECIFIC
+        puntualAggregation: [
+          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES
         ],
         default: {
           dataColumns:VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-          dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
-          timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+          dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.CAMPAIGN,
+          timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
           timePeriod:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
-          typeData:VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
+          puntualAggregation:VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
         },
-        selectAggregazionePuntuale:
-          "si per il dipendente (nome dipendente); no per sedi; no per azienda",
-        selectRangeTime: true,
         exportCSV: true,
       },
       {
@@ -65,19 +112,17 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
           VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
         ],
-        typeData: [
-          VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
-          VARIABLES.STATS.VIEWS.TYPEDATA.SPECIFIC
+        puntualAggregation: [
+          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES
         ],
         default: {
           dataColumns:VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
           dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
           timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
           timePeriod:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
-          typeData:VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
+          puntualAggregation:VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
         },
-        selectAggregazionePuntuale: "nessuna",
-        selectRangeTime: false,
         exportCSV: false,
       },
       {
@@ -97,57 +142,23 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
           VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
         ],
-        typeData: [
-          VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
-          VARIABLES.STATS.VIEWS.TYPEDATA.SPECIFIC
+        puntualAggregation: [
+          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES
         ],
         default: {
           dataColumns:VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
           dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
           timeUnit:VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
           timePeriod:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
-          typeData:VARIABLES.STATS.VIEWS.TYPEDATA.ALL,
+          puntualAggregation:VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
         },
-        selectAggregazionePuntuale: "nessuna",
-        selectRangeTime: true,
         exportCSV: false,
       },
     ],
   },
 
-  /*
-  / Configurazione - Km Fatti e Utili
-  / Specifica per l'ADMIN -> Amministratore di Sistema
-  */
-  {
-    id: 1,
-    name: VARIABLES.STATS.NAME.KM_COUNTED,
-    profile: VARIABLES.ROLE.ADMIN,
-    views: [
-      {
-        type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
-        dataColumns: [
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
-        ],
-        dataLevel: [
-          VARIABLES.STATS.VIEWS.DATALEVEL.CAMPAIGN,
-          VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES,
-        ],
-        timeUnit: [
-          VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
-        ],
-        selectAggregazionePuntuale:
-          "si per azienda (nome azienda); no per campagna",
-        selectRangeTime: true,
-        exportCSV: true,
-      },
-    ],
-  },
+  
 
   /*
   / Configurazione - Partecipazione Dipendenti
