@@ -61,6 +61,12 @@ e la snackbar.
   
   <v-app style="background-color: #0f70b7" v-else>
     <router-view></router-view>
+
+        <transition name="fade">
+          <snackbar v-if="alert.message" :snackbar="true" :text="alert.message">
+          </snackbar>
+        </transition>
+
   </v-app>
 
 </template>

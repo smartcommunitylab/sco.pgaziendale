@@ -46,11 +46,21 @@ export const VARIABLES = {
         COMPANIES: "Aziende",
       },
       TIMEUNIT: {
-        DAY: "Giorno",
-        WEEK: "Settimana",
-        MONTH: "Mese",
-        CAMPAIGN: "Campagna",
+        DAY: {label:"Giorno",value:"day"},
+        WEEK: {label:"Settimana",value:"week"},
+        MONTH: {label:"Mese",value:"month"},
+        CAMPAIGN: {label:"Campagna",value:"all"},
       },
+      TIMEPERIOD: {
+        ALL: { label: "Intera durata campagna", value: "ALL" },
+        SPECIFIC: { label: "Periodo specifico", value: "SPECIFIC" }
+      },
+      PUNTUALAGGREGATION: {
+        NONE: { label: "Nessuna", value: "NONE" },
+        EMPLOYEES: { label: "Dipendente", value: "EMPLOYEES" },
+        LOCATIONS:{ label: "Sedi", value: "LOCATIONS" },
+        COMPANIES: { label: "Aziende", value: "COMPANIES" }
     },
+  },
   },
 };

@@ -2,7 +2,7 @@
   <v-sheet
     class="mx-auto"
   >
-    <v-slide-group
+    <v-slide-group v-if="configurations"
       class=""
       prev-icon="mdi-chevron-left"
       next-icon="mdi-chevron-right"
@@ -42,16 +42,17 @@ import SelectionCard from "@/components/card/SelectionCard.vue";
     },
     computed:{
       ...mapState("stat", ["configurations"]),
+      ...mapState("account", ["role","temporaryAdmin"])
     },
     methods: {
       ...mapActions("stat",{getConfigurationByRole:"getConfigurationByRole"}),
-      
+
       loadConfiguration(){
-        this.getConfigurationByRole({role:"ROLE_COMPANY_ADMIN"});
-        console.log(this.configurations.items);
+        this.getConfigurationByRole({role:this.role,temporaryAdmin:this.temporaryAdmin});
+        //console.log(this.configurations.items);
       },
     },
-    created(){
+    mounted(){
       this.loadConfiguration();
     },
   }

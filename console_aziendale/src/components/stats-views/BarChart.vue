@@ -1,14 +1,15 @@
 <template>
-<div>line chart </div>
+<div>bar chart</div>
 </template>
 
 
+ 
 <script>
   export default {
     data () {
       return {
         
       }
-    },
+    }
   }
 </script>

@@ -17,7 +17,7 @@
         :disabled="disabled"
         @click.prevent="selectConfiguration()"
       >
-        Seleziona
+        <span v-if="!disabled">Seleziona</span><span v-else>Selezionato</span>
       </v-btn>
     </v-card-actions>
   </v-card>

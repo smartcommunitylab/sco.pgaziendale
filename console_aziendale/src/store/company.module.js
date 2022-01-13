@@ -21,7 +21,7 @@ const actions = {
                 companies => commit('getAllSuccess', companies),
                 error => {
                     commit('getAllFailure', error);
-                    dispatch('alert/error', error, { root: true });
+                    dispatch('alert/error', error.response.data.type, { root: true });
                 }
             );
     },
@@ -46,6 +46,7 @@ const actions = {
             companyService.getCompanyById(companyId).then(
                 company => {
                     commit('choooseCompanyAdmin', { item: company });
+                    dispatch('account/temporaryCompanyAdmin', company, { root: true });
                     dispatch('getUsers', company);
                     dispatch('alert/success', "Azienda selezionata", { root: true });
                 },
@@ -71,12 +72,14 @@ const actions = {
     },
     chooseCompanyAdmin({ commit, dispatch }, company) {
         commit('choooseCompanyAdmin', company);
+        dispatch('account/temporaryCompanyAdmin', company, { root: true });
         dispatch('getUsers', company.item);
         dispatch('campaign/removeActualCampaign', null, { root: true });
         dispatch('alert/success', "Azienda selezionata. Ora sei Amministratore", { root: true });
     },
     resetCompanyAdmin({ commit, dispatch }) {
         commit('resetCompanyAdmin');
+        dispatch('account/removedCompanyAdmin', null, { root: true });
         //dispatch('campaign/removeActualCampaign', null, { root: true });
         // dispatch('company/logout', null, { root: true });
         dispatch('campaign/logout', null, { root: true });
@@ -180,6 +183,7 @@ const mutations = {
     resetCompanyAdmin(state) {
         state.adminCompany = null;
         state.actualCompany = null;
+        state.adminCompanyUsers =null;
     },
     removeActualCompany(state) {
         state.actualCompany = null;

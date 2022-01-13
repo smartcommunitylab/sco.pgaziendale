@@ -23,7 +23,7 @@ const actions = {
                 campaigns => commit('getAllSuccess', campaigns),
                 error => {
                     commit('getAllFailure', error);
-                    dispatch('alert/error', error, { root: true });
+                    dispatch('alert/error', error.response.data.type, { root: true });
                 }
             );
     },
@@ -35,7 +35,7 @@ const actions = {
                 campaigns => commit('getPublicCampaignsSuccess', campaigns),
                 error => {
                     commit('getPublicCampaignsFailure', error);
-                    dispatch('alert/error', error, { root: true });
+                    dispatch('alert/error', error.response.data.type, { root: true });
                 }
             );
     },
@@ -51,7 +51,7 @@ const actions = {
                     },
                     error => {
                         commit('getAllCompaniesOfCampaignFailure', error);
-                        dispatch('alert/error', error, { root: true });
+                        dispatch('alert/error', error.response.data.type, { root: true });
                     }
                 );
         }
@@ -65,7 +65,7 @@ const actions = {
             campaign => commit('addCampaignSuccess', campaign),
             error => {
                 commit('addCampaignFailure', error);
-                dispatch('alert/error', error, { root: true });
+                dispatch('alert/error', error.response.data.type, { root: true });
             }
         );
     },
@@ -78,7 +78,7 @@ const actions = {
             },
             error => {
                 commit('updateCampaignFailure', error);
-                dispatch('alert/error', error, { root: true });
+                dispatch('alert/error', error.response.data.type, { root: true });
             }
         );
     },
@@ -92,7 +92,7 @@ const actions = {
             },
             error => {
                 commit('deleteCampaignFailure', error);
-                dispatch('alert/error', error, { root: true });
+                dispatch('alert/error', error.response.data.type, { root: true });
             }
         );
     },
@@ -106,7 +106,7 @@ const actions = {
             },
             error => {
                 commit('deleteCompanyCampaignFailure', error);
-                dispatch('alert/error', error, { root: true });
+                dispatch('alert/error', error.response.data.type, { root: true });
             }
         );
     },
@@ -120,7 +120,7 @@ const actions = {
             },
             error => {
                 commit('createCompanyCampaignFailure', error);
-                dispatch('alert/error', error, { root: true });
+                dispatch('alert/error', error.response.data.type, { root: true });
             }
         );
     },
