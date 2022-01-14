@@ -176,6 +176,20 @@ public class TrackingDataServiceTest {
     	assertEquals(45, stats.size());
     	assertEquals(0d, stats.get(30).getDistances().getBike());
     }
+    @Test
+    public void testGlobalCompanyStats() throws InconsistentDataException {
+    	List<DayStat> stats = tds.createCampaignCompanyStats(campaign.getId(), Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(1, stats.size());
+    	assertEquals(500d, stats.get(0).getDistances().getBike());
+    	
+    	stats = tds.createCampaignCompanyStats(campaign.getId(), Constants.AGG_MONTH, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(2, stats.size());
+    	assertEquals(250d, stats.get(0).getDistances().getBike());
+
+    	stats = tds.createCampaignCompanyStats(campaign.getId(), Constants.AGG_DAY, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
+    	assertEquals(45, stats.size());
+    	assertEquals(0d, stats.get(30).getDistances().getBike());
+    }
     
     @Test
     public void testCompanyStats() throws InconsistentDataException {
@@ -221,6 +235,7 @@ public class TrackingDataServiceTest {
 			DayStat ds = new DayStat();
 			ds.setPlayerId("test");
 			ds.setCampaign(campaign.getId());
+			ds.setCompany(company.getId());
 			ds.getDistances().setBike((double)i);
 			ds.setTrackCount(1);
 			ds.setMonth(date.format(monthFormatter));

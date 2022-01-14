@@ -144,6 +144,14 @@ public class TrackingDataResource {
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
     	return ResponseEntity.ok(dataService.createCampaignStats(campaignId, groupBy, fromDate, toDate, noLimits));
     }
+    @GetMapping("/campaigns/{campaignId}/agg/company")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+    public ResponseEntity<List<DayStat>>  getCampaignCompanyStats(@PathVariable String campaignId,  @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException, InconsistentDataException {
+        log.debug("REST request to export campaign report");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	return ResponseEntity.ok(dataService.createCampaignCompanyStats(campaignId, groupBy, fromDate, toDate, noLimits));
+    }
 
     @GetMapping("/campaigns/{campaignId}/agg/{companyId:.*}")
     public ResponseEntity<List<DayStat>>  getCompanyStats(@PathVariable String campaignId, @PathVariable String companyId, @RequestParam(required=false) String from, @RequestParam(required=false) String to, @RequestParam(required=false, defaultValue = "day") String groupBy, @RequestParam(required=false, defaultValue = "false") Boolean noLimits) throws IOException, InconsistentDataException {
