@@ -20,7 +20,7 @@
 
         <v-tabs-items v-model="tab" class="mt-5">
           <v-tab-item key="Tabella">
-            <data-table></data-table>
+            <data-table :dataTableData="viewData"></data-table>
           </v-tab-item>
           <v-tab-item key="Grafico a Linee">
             <line-chart></line-chart>
@@ -33,11 +33,6 @@
       </v-card>
     </v-col>
     <v-col cols="3">
-      <!-- <div> 
-       <v-layout row justify-center align-center>
-        <v-btn color="primary" @click="exportCsv"> Download CSV </v-btn>
-      </v-layout>
-     </div> -->
       <div>
         <v-card v-if="activeViewType">
           <div>
@@ -91,9 +86,6 @@
                 Salva Filtri
               </v-btn>
             </div>
-            <!-- <div v-if="getConfigurationById">
-              {{ getConfigurationById.views }}
-            </div> -->
 
             <div v-if="activeViewType">
               <div v-if="activeViewType.item === 'Tabella'">Tabella</div>
@@ -137,7 +129,7 @@
                 ></v-autocomplete>
               </v-col>
 
-              <v-col cols="4" class="pl-5 pr-20">
+              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
                 <p class="text-subtitle-1">Colonne Dati</p>
                 <v-select
                   v-model="localSelection.dataColumns"
@@ -302,6 +294,7 @@ export default {
       select: null,
       items: ["Item 1", "Item 2", "Item 3", "Item 4"],
       checkbox: false,
+      viewData:null,
     };
   },
   computed: {
@@ -310,6 +303,7 @@ export default {
       "activeConfiguration",
       "activeViewType",
       "activeSelection",
+      "statValues"
     ]),
     ...mapState("navigation", ["page"]),
     ...mapState("account", ["role", "temporaryAdmin"]),
@@ -391,6 +385,10 @@ export default {
     // getTypeDataMultiple() {
     //   //based on kind of data return
     // },
+    fillTheViewWithValues(values,view,activeSelection){
+      
+      this.viewData=statService.fillTheViewWithValues(values,view,activeSelection);
+    },
     getLocalStat(selection) {
       this.getStatFromServer(selection);
     },
@@ -434,6 +432,7 @@ export default {
       this.checkbox = false;
     },
     getItemsAggregation() {
+      if (this.localSelection)
       statService
         .getItemsAggregation(
           this.puntualAggregationValue,
@@ -480,6 +479,14 @@ export default {
   },
 
   watch: {
+    statValues: {
+       handler: function (newVal) {
+        if (newVal && newVal.items) {
+          this.fillTheViewWithValues(newVal.items,this.activeViewType,this.activeSelection)
+        }
+      },
+      deep: true,
+    },
     puntualAggregationValue() {
       this.getItemsAggregation();
     },

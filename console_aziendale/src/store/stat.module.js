@@ -1,7 +1,8 @@
 import { statService } from "../services";
 
 const state = {
-  stat: null,
+  statValues: null,
+  csvValues:null,
   configurations: null,
   activeConfiguration: null,
   activeViewType: null,
@@ -316,19 +317,19 @@ const actions = {
 
 const mutations = {
   getStat(state) {
-    state.stat = { loading: true };
+    state.statValues = { loading: true };
   },
   getStatSuccess(state, statistics) {
-    state.stat = { items: statistics };
+    state.statValues = { items: statistics };
   },
   getStatFailure(state, error) {
-    state.stat = { error };
+    state.statValues = { error };
   },
   // getCompanyStat(state) {
   //   state.stat = { loading: true };
   // },
   removeStat(state) {
-    state.stat = null;
+    state.statValues = null;
   },
   // getCompanyStatSuccess(state, statistics) {
   //   state.stat = { items: statistics };
@@ -355,13 +356,13 @@ const mutations = {
   //   state.stat = { error };
   // },
   getCsv(state) {
-    state.stat = { loading: true };
+    state.csvValues = { loading: true };
   },
   getCsvSuccess(state, stats) {
-    state.stat = { items: stats };
+    state.csvValues = { items: stats };
   },
   getCsvFailure(state, error) {
-    state.stat = { error };
+    state.csvValues = { error };
   },
   // getCompanyCsv(state) {
   //   state.stat = { loading: true };
@@ -382,7 +383,7 @@ const mutations = {
   //   state.stat = { error };
   // },
   resetStat(state) {
-    state.stat = null;
+    state.statValues = null;
   },
   getConfigurationByRole() {
     state.configurations = { loading: true };

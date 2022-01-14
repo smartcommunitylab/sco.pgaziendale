@@ -58,7 +58,7 @@
                 >
                   <v-checkbox
                     class="px-7 py-0 m-0"
-                    v-model="EventualeVariabile"
+                    v-model="remindMe"
                     label="Ricordami"
                     color="primary"
                     value="primary"
@@ -103,6 +103,7 @@ export default {
       username: "",
       password: "",
       passwordFieldType: "password",
+      remindMe:true,
       submitted: false,
       show: false,
       rules: {
