@@ -3,8 +3,8 @@ import { router } from '../routes';
 
 const user = JSON.parse(localStorage.getItem('user'));
 const state = user
-    ? { status: { loggedIn: true }, user, role: userService.getRole(user), home: userService.getHome(userService.getRole(user)) }
-    : { status: {}, user: null, role: null, home: null };
+    ? { status: { loggedIn: true }, user, role: userService.getRole(user), temporaryAdmin:false, home: userService.getHome(userService.getRole(user)) }
+    : { status: {}, user: null, role: null, temporaryAdmin:false,home: null};
 
 function isCompanyAdmin(role){
     if (role==='ROLE_COMPANY_ADMIN')
@@ -45,7 +45,7 @@ const actions = {
                 },
                 error => {
                     commit('loginFailure', error);
-                    dispatch('alert/error', "Errore nell'accesso alla console.", { root: true });
+                    dispatch('alert/error', error.response.data.type, { root: true });
                 }
             );
     },
@@ -60,6 +60,12 @@ const actions = {
         dispatch('stat/logout', null, { root: true });
         router.push('/Login');
     },
+    temporaryCompanyAdmin({ commit }) {
+        commit('temporaryCompanyAdmin');
+    },
+    removedCompanyAdmin({ commit }) {
+        commit('removedCompanyAdmin');
+    },
     setDefaultCompany({ dispatch }, user) {
         var userCompanies = userService.getCompanies(user);
         if (userCompanies.length > 0)
@@ -73,7 +79,7 @@ const actions = {
 
         } ,function(error){
             commit('changePasswordFailure', error);
-            dispatch('alert/error', "Errore, verificare la password e riprovare.", { root: true });
+            dispatch('alert/error', error.response.data.type, { root: true });
         })
     },
     resetPasswordInit({ commit, dispatch },username){
@@ -84,7 +90,7 @@ const actions = {
 
         } ,function(error){
             commit('resetPasswordInitFailure', error);
-            dispatch('alert/error', "Errore nella reimpostazione della password.", { root: true });
+            dispatch('alert/error', error.response.data.type, { root: true });
         })
     },
     resetPasswordFinish({ commit, dispatch },{key,newPassword}){
@@ -95,7 +101,7 @@ const actions = {
 
         } ,function(error){
             commit('cresetPasswordFinishFailure', error);
-            dispatch('alert/error',"Errore nella reimpostazione della password." , { root: true });
+            dispatch('alert/error', error.response.data.type, { root: true });
         })
     },
 
@@ -130,13 +136,22 @@ const mutations = {
         state.user = null;
         state.role = null;
         state.home = null;
+        state.temporaryAdmin=false;
     },
     logout(state) {
         state.status = {};
         state.user = null;
         state.role = null;
         state.home = null;
+        state.temporaryAdmin=false;
     },
+    temporaryCompanyAdmin(state) {
+        state.temporaryAdmin=true;
+    },
+    removedCompanyAdmin(state) {
+        state.temporaryAdmin=false;
+    },
+        
     changePassword() {
         
     },

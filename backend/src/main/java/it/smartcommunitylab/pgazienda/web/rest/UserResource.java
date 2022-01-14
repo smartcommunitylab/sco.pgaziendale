@@ -42,9 +42,10 @@ import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.service.MailService;
-import it.smartcommunitylab.pgazienda.service.UserAnotherOrgException;
 import it.smartcommunitylab.pgazienda.service.UserService;
-import it.smartcommunitylab.pgazienda.service.UsernameAlreadyUsedException;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.service.errors.UserAnotherOrgException;
+import it.smartcommunitylab.pgazienda.service.errors.UsernameAlreadyUsedException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.BadRequestAlertException;
 
 /**
@@ -98,11 +99,12 @@ public class UserResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new user, or with status {@code 400 (Bad Request)} if the login or email is already in use.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      * @throws BadRequestAlertException {@code 400 (Bad Request)} if the login or email is already in use.
+     * @throws InconsistentDataException 
      * @throws LoginAlreadyUsedException 
      */
     @PostMapping("/companies/{companyId}/users")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
-    public ResponseEntity<User> createUser(@PathVariable String companyId, @Valid @RequestBody User userDTO) throws URISyntaxException, BadRequestAlertException, UsernameAlreadyUsedException {
+    public ResponseEntity<User> createUser(@PathVariable String companyId, @Valid @RequestBody User userDTO) throws URISyntaxException, BadRequestAlertException, UsernameAlreadyUsedException, InconsistentDataException {
         log.debug("REST request to save User : {}", userDTO);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
 
@@ -130,12 +132,13 @@ public class UserResource {
      *
      * @param userDTO the user to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated user.
+     * @throws InconsistentDataException 
      * @throws EmailAlreadyUsedException {@code 400 (Bad Request)} if the email is already in use.
      * @throws LoginAlreadyUsedException {@code 400 (Bad Request)} if the login is already in use.
      */
     @PutMapping("/companies/{companyId}/users")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
-    public ResponseEntity<User> updateUser(@PathVariable String companyId, @Valid @RequestBody User userDTO) throws UsernameAlreadyUsedException {
+    public ResponseEntity<User> updateUser(@PathVariable String companyId, @Valid @RequestBody User userDTO) throws UsernameAlreadyUsedException, InconsistentDataException {
         log.debug("REST request to update User : {}", userDTO);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
         Optional<User> existingUser = userRepository.findOneByUsernameIgnoreCase(userDTO.getUsername().toLowerCase());

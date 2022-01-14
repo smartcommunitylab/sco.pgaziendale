@@ -40,7 +40,7 @@ deploy_backend_prod:
   stage: deploy
   image: smartcommunitylab/kubectl-alpine:latest
   environment:
-    name: develop
+    name: platform-new
   script:
     - echo "deploy"
     - kubectl -n pgaziendale set image deployments/pgaziendale-backend-prod pgaziendale-backend-prod=$CONTAINER_BACKEND_PROD_IMAGE --record=true
@@ -52,7 +52,7 @@ deploy_backend_dev:
   stage: deploy
   image: smartcommunitylab/kubectl-alpine:latest
   environment:
-    name: develop
+    name: platform-new
   script:
     - echo "deploy"
     - kubectl -n pgaziendale set image deployments/pgaziendale-backend-dev pgaziendale-backend-dev=$CONTAINER_BACKEND_DEV_IMAGE --record=true

@@ -22,6 +22,7 @@
               :key="key"
               :radius="radius"
               v-on:poschanged="locationChanged"
+              :latLng="{lat: latitude, lng: longitude}"
             />
           </div>
         </v-col>
@@ -65,24 +66,6 @@
             </v-text-field>
           </v-row>           
           <v-row
-            class="p-0 mx-1 my-7"
-            justify="center"
-          >
-            <v-text-field
-              label="Longitudine"
-              placeholder="Longitudine *"
-              type="text"
-              name="campaignLongitude"
-              id="campaignLongitude"
-              v-model.trim="$v.longitude.$model"
-              :error-messages="longitudeErrors"                                
-              required
-              @input="$v.longitude.$touch()"
-              @blur="$v.longitude.$touch()"
-              outlined
-            ></v-text-field>
-          </v-row>
-          <v-row
             class="p-0 mx-1"
             justify="center"
           >
@@ -97,6 +80,24 @@
               required
               @input="$v.latitude.$touch()"
               @blur="$v.latitude.$touch()"
+              outlined
+            ></v-text-field>
+          </v-row>
+          <v-row
+            class="p-0 mx-1 my-7"
+            justify="center"
+          >
+            <v-text-field
+              label="Longitudine"
+              placeholder="Longitudine *"
+              type="text"
+              name="campaignLongitude"
+              id="campaignLongitude"
+              v-model.trim="$v.longitude.$model"
+              :error-messages="longitudeErrors"                                
+              required
+              @input="$v.longitude.$touch()"
+              @blur="$v.longitude.$touch()"
               outlined
             ></v-text-field>
           </v-row>
@@ -123,14 +124,12 @@
             type="text"
             name="campaignCode"
             id="campaignCode"
+            :disabled="disabled"
             v-model.trim="$v.id.$model"
             :error-messages="idErrors"                                
-            required
             @input="$v.id.$touch()"
             @blur="$v.id.$touch()"
             outlined
-            
-            :disabled="edit"
           >
             <template v-slot:append>
               <v-tooltip
@@ -305,6 +304,7 @@
                 v-model="nonWorkingDays"
                 multiple
                 chips
+                clearable
                 label="Giorni di chiusura"
                 placeholder="Scegli i giorni di chiusura:"
                 prepend-icon="mdi-calendar"
@@ -451,7 +451,6 @@ export default {
       selectedPosition: false,
       key: 1,
       locationSelected: {},
-      edit: false,
       listaProvince: ['AG', 'AL', 'AN', 'AO', 'AR', 'AP', 'AT', 'AV', 'BA', 'BT',
       'BL', 'BN', 'BG', 'BI', 'BO', 'BZ', 'BS', 'BR', 'CA', 'CL',
       'CB', 'CE', 'CT', 'CZ', 'CH', 'CO', 'CS', 'CR', 'KR', 'CN',
@@ -470,6 +469,7 @@ export default {
       giorniSettimana: [{1:'Lunedì', 2:'Martedì', 3:'Mercoledì', 4:'Giovedì', 5:'Venerdì', 6:'Sabato', 7:'Domenica'}
       ],
       oldLocation: {},
+      disabled: false,
     };
   },
 
@@ -478,7 +478,6 @@ export default {
       ...mapActions("location", {addLocation:'addLocation', updateLocation:'updateLocation'}),
 
     locationChanged(input) {
-      console.log(input);
       this.locationSelected = input.address;
       this.latitude = this.locationSelected.pos.lat;
       this.longitude = this.locationSelected.pos.lng;
@@ -588,6 +587,7 @@ export default {
     closeThisModal(){
         this.$v.$reset();
         this.closeModal();
+        this.initLocation();
     },
   },
 
@@ -668,11 +668,18 @@ export default {
   watch: {
     typeCall: function(){
         this.setModalData();
+
+        if(this.typeCall == "add"){
+          this.disabled = false;
+        }else if (this.typeCall == "edit") {
+          this.disabled = true;
+        }
     },
+
     actualLocation: function(){
         this.setModalData();
         this.createOldLocation();
-    }
+    },
   },
 
   created() {

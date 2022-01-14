@@ -177,7 +177,7 @@ pagine dall'utente in base al suo login.
             >mdi-chart-line
             </v-icon>
           </v-list-item-icon>
-          <v-list-item-title :class="{ active: isActiveStatistiche }">Statistiche OLD</v-list-item-title>
+          <v-list-item-title :class="{ active: isActiveStatistiche }">StatisticheOld</v-list-item-title>
         </v-list-item>
       </router-link>
       <router-link to="/" v-on:click.native="logout">

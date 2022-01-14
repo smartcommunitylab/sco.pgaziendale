@@ -70,6 +70,7 @@ import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.util.LimitsUtils;
 
 /**
@@ -289,10 +290,11 @@ public class TrackingDataService {
 	 * @param groupBy (day o month)
 	 * @param withTracks (to inlcude tracks or not, applicable for day aggregation only)
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public List<DayStat> getUserCampaignData(String playerId, String campaignId, LocalDate from, LocalDate to, String groupBy, Boolean withTracks, Boolean noLimits) {
+	public List<DayStat> getUserCampaignData(String playerId, String campaignId, LocalDate from, LocalDate to, String groupBy, Boolean withTracks, Boolean noLimits) throws InconsistentDataException {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 
 		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) criteria = criteria.gte(from.toString());
@@ -310,7 +312,7 @@ public class TrackingDataService {
 		} else if (Constants.AGG_TOTAL.equals(groupBy)){
 			res = doAggregation(campaign, criteria, false, noLimits);
 		} else {
-			throw new IllegalArgumentException("Incorrect grouping");
+			throw new InconsistentDataException("Incorrect grouping: " + groupBy, "INVALID_GROUPING_DATA");
 		} 
 		res.forEach(stat -> {
 			stat.setCampaign(campaignId);
@@ -326,14 +328,34 @@ public class TrackingDataService {
 	 * @param to
 	 * @param noLimits
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public List<DayStat> createCampaignStats(String campaignId, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) {
+	public List<DayStat> createCampaignStats(String campaignId, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) throws InconsistentDataException {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) criteria = criteria.gte(from.toString());
 
-		return extractStats(groupBy, noLimits, campaign, criteria);		
+		return extractStats(groupBy, false, noLimits, campaign, criteria);		
+	}
+	
+	/**
+	 * Collect campaign statistics
+	 * @param campaignId
+	 * @param groupBy
+	 * @param from
+	 * @param to
+	 * @param noLimits
+	 * @return
+	 * @throws InconsistentDataException 
+	 */
+	public List<DayStat> createCampaignCompanyStats(String campaignId, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) throws InconsistentDataException {
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
+		if (from != null) criteria = criteria.gte(from.toString());
+
+		return extractStats(groupBy, true, noLimits, campaign, criteria);		
 	}
 
 	/**
@@ -344,19 +366,20 @@ public class TrackingDataService {
 	 * @param to
 	 * @param noLimits
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public List<DayStat> createCompanyStats(String campaignId, String companyId, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) {
+	public List<DayStat> createCompanyStats(String campaignId, String companyId, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) throws InconsistentDataException {
 		Company company = companyRepo.findById(companyId).orElse(null);
-		if (company == null) throw new IllegalArgumentException("Invalid company: " + companyId);
+		if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
 
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) criteria = criteria.gte(from.toString());
 		
 		List<String> users = userRepo.findByCampaignAndCompany(campaignId, company.getCode()).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
 		criteria = criteria.and("playerId").in(users);
-		return extractStats(groupBy, noLimits, campaign, criteria);		
+		return extractStats(groupBy, false, noLimits, campaign, criteria);		
 	}
 
 	/**
@@ -367,13 +390,14 @@ public class TrackingDataService {
 	 * @param to
 	 * @param noLimits
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public List<DayStat> createCompanyLocationStats(String campaignId, String companyId, String location, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) {
+	public List<DayStat> createCompanyLocationStats(String campaignId, String companyId, String location, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) throws InconsistentDataException {
 		Company company = companyRepo.findById(companyId).orElse(null);
-		if (company == null) throw new IllegalArgumentException("Invalid company: " + companyId);
+		if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
 
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) criteria = criteria.gte(from.toString());
 		
@@ -381,7 +405,7 @@ public class TrackingDataService {
 		
 		List<String> users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, company.getCode(), employeeKeys).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
 		criteria = criteria.and("playerId").in(users);
-		return extractStats(groupBy, noLimits, campaign, criteria);		
+		return extractStats(groupBy, false, noLimits, campaign, criteria);		
 	}
 	/**
 	 * @param groupBy
@@ -392,13 +416,16 @@ public class TrackingDataService {
 	 * @return
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private List<DayStat> extractStats(String groupBy, Boolean noLimits, Campaign campaign, Criteria criteria) {
+	private List<DayStat> extractStats(String groupBy, boolean company, Boolean noLimits, Campaign campaign, Criteria criteria) {
+		
 		String group = Constants.AGG_TOTAL.equals(groupBy) ? "campaign": Constants.AGG_MONTH.equals(groupBy) ? "month" : "date";
 
 		MatchOperation filterOperation = Aggregation.match(criteria);
 		String src = Boolean.TRUE.equals(noLimits) ? "distances" : "limitedDistances";
+
+		String[] groupArray = company ? new String[]{"company", group} : new String[]{group};
 		
-		GroupOperation groupByOperation = Aggregation.group(group)
+		GroupOperation groupByOperation = Aggregation.group(groupArray)
 				.sum("co2saved").as("co2saved")
 				.sum("trackCount").as("trackCount");
 		
@@ -411,13 +438,27 @@ public class TrackingDataService {
 			stat.setCo2saved(((Number)m.getOrDefault("co2saved", 0d)).doubleValue());
 			stat.setDistances(Distances.fromMap(m));
 			stat.setTrackCount((Integer) m.getOrDefault("trackCount", 0));
-			if (Constants.AGG_DAY.equals(groupBy)) {
-				stat.setDate((String)m.get("_id"));
-				stat.setMonth(LocalDate.parse(stat.getDate()).format(MONTH_PATTERN));
+			
+			if (company) {
+				Map<String, String> idMap = (Map<String, String>) m.get("_id");
+				stat.setCompany((String)idMap.get("company"));
+				if (Constants.AGG_DAY.equals(groupBy)) {
+					stat.setDate((String)idMap.get("date"));
+					stat.setMonth(LocalDate.parse(stat.getDate()).format(MONTH_PATTERN));
+				}
+				if (Constants.AGG_MONTH.equals(groupBy)) {
+					stat.setMonth((String)idMap.get("month"));
+				}
+			} else {
+				if (Constants.AGG_DAY.equals(groupBy)) {
+					stat.setDate((String)m.get("_id"));
+					stat.setMonth(LocalDate.parse(stat.getDate()).format(MONTH_PATTERN));
+				}
+				if (Constants.AGG_MONTH.equals(groupBy)) {
+					stat.setMonth((String)m.get("_id"));
+				}
 			}
-			if (Constants.AGG_MONTH.equals(groupBy)) {
-				stat.setMonth((String)m.get("_id"));
-			}
+
 			return stat;
 		}).sorted((a,b) -> {
 			if (a.getDate() != null) return a.getDate().compareTo(b.getDate());
@@ -433,13 +474,14 @@ public class TrackingDataService {
 	 * @param companyId
 	 * @param from
 	 * @param to
+	 * @throws InconsistentDataException 
 	 */
-	public void createEmployeeStatsCSV(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) {
+	public void createEmployeeStatsCSV(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) throws InconsistentDataException {
 		Company company = companyRepo.findById(companyId).orElse(null);
-		if (company == null) throw new IllegalArgumentException("Invalid company: " + companyId);
+		if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
 		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		String header = "Nome;Cognome;CodiceSede;ViaggiValidi";
@@ -480,13 +522,14 @@ public class TrackingDataService {
 	 * @param companyId
 	 * @param from
 	 * @param to
+	 * @throws InconsistentDataException 
 	 */
-	public void createLocationStatsCSV(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) {
+	public void createLocationStatsCSV(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) throws InconsistentDataException {
 		Company company = companyRepo.findById(companyId).orElse(null);
-		if (company == null) throw new IllegalArgumentException("Invalid company: " + companyId);
+		if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
 		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		String header = "Indentificativo;Indirizzo;Numero;CAP;Comune;Provincia;ViaggiValidi";
@@ -543,10 +586,10 @@ public class TrackingDataService {
 	}	
 	
 	
-	public void createCampaignStatsCSV(Writer writer, String campaignId, LocalDate from, LocalDate to) {
+	public void createCampaignStatsCSV(Writer writer, String campaignId, LocalDate from, LocalDate to) throws InconsistentDataException {
 		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		String header = "Azienda;ViaggiValidi";
@@ -654,9 +697,9 @@ public class TrackingDataService {
 		return Collections.emptyList();
 	}
 
-	public List<DayStat> doPlayerAggregation(String campaignId, LocalDate from, LocalDate to) {
+	public List<DayStat> doPlayerAggregation(String campaignId, LocalDate from, LocalDate to) throws InconsistentDataException {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new IllegalArgumentException("Invalid campaign: " + campaignId);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 
 		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) {

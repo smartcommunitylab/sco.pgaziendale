@@ -53,6 +53,8 @@ import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
+import it.smartcommunitylab.pgazienda.service.errors.ImportDataException;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 /**
  * @author raman
@@ -222,10 +224,11 @@ public class CompanyService {
 	 * @param companyId
 	 * @param location
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public CompanyLocation createLocation(String companyId, CompanyLocation location) {
+	public CompanyLocation createLocation(String companyId, CompanyLocation location) throws InconsistentDataException {
 		if (location.getId() == null) {
-			throw new IllegalArgumentException("Empty location ID");
+			throw new InconsistentDataException("Empty location ID", "NO_LOCATION");
 		}
 		companyRepo.findById(companyId).ifPresent(company -> {
 			if (company.getLocations() == null) company.setLocations(Collections.singletonList(location));
@@ -243,10 +246,11 @@ public class CompanyService {
 	 * @param companyId
 	 * @param campaign
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public CompanyLocation updateLocation(String companyId, CompanyLocation location) {
+	public CompanyLocation updateLocation(String companyId, CompanyLocation location) throws InconsistentDataException {
 		if (location.getId() == null) {
-			throw new IllegalArgumentException("Empty location ID");
+			throw new InconsistentDataException("Empty location ID", "NO_LOCATION");
 		}
 		companyRepo.findById(companyId).ifPresent(company -> {
 			if (company.getLocations() != null) {
@@ -378,7 +382,7 @@ public class CompanyService {
 		
 		List<String[]> list = csvReader.readAll();
 		if (list.size() > 0 && list.get(0).length != columns) {
-			throw new IllegalArgumentException("Invalid CSV format");
+			throw new InconsistentDataException("Invalid CSV format", "INVALID_CSV");
 		}
 		
 		return list;
