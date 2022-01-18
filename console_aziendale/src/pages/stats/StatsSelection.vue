@@ -105,7 +105,7 @@ export default {
       getAllCampaigns: "getAll",
     }),
     ...mapActions("stat", {
-      setActiveSelection: "setActiveSelection",
+      setCurrentCampaign: "setCurrentCampaign",
     }),
     // updateCompany() {
     //   console.log(this.localCompany);
@@ -117,8 +117,8 @@ export default {
     updateCampaign(value) {
       console.log(value);
       if (this.activeSelection && this.localCampaign) {
-        this.activeSelection.campaign = this.localCampaign;
-        this.setActiveSelection({ selection: this.activeSelection });
+          // this.activeSelection.campaign = this.localCampaign;
+        this.setCurrentCampaign({ campaign: this.localCampaign });
       }
     },
   },

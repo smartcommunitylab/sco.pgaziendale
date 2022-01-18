@@ -2,11 +2,12 @@ import { statService } from "../services";
 
 const state = {
   statValues: null,
-  csvValues:null,
+  csvValues: null,
   configurations: null,
   activeConfiguration: null,
   activeViewType: null,
-  activeSelection:null
+  activeSelection: null,
+  currentCampaign: null
 };
 
 function saveFile(filename, stats) {
@@ -32,9 +33,9 @@ const actions = {
   logout({ commit }) {
     commit("removeStat");
   },
-  getStat({commit,dispatch},configuration){
+  getStat({ commit, dispatch,state }, configuration) {
     commit("getStat");
-    statService.getStat(configuration).then(
+    statService.getStat(configuration,state.currentCampaign.item).then(
       (statistics) => {
         commit("getStatSuccess", statistics);
         dispatch("alert/success", "Recuperate le statistiche con successo.", {
@@ -49,10 +50,10 @@ const actions = {
       }
     );
   },
-  getCsv({commit,dispatch},configuration){
+  getCsv({ commit, dispatch,state }, configuration) {
     commit("getCsv");
 
-    statService.getCsv(configuration).then(
+    statService.getCsv(configuration,state.currentCampaign.item).then(
       (stats) => {
         commit("getCsvSuccess", stats);
         saveFile("campaign.csv", stats);
@@ -68,186 +69,19 @@ const actions = {
       }
     );
   },
-  // getCampaignStat(
-  //   { commit, dispatch },
-  //   { campaignId, from, to, groupBy, noLimits }
-  // ) {
-  //   commit("getCampaignStat");
 
-  //   statService.getCampaignStat(campaignId, from, to, groupBy, noLimits).then(
-  //     (statistics) => {
-  //       commit("getCampaignStatSuccess", statistics);
-  //       dispatch("alert/success", "Recuperate le statistiche della campagna.", {
-  //         root: true,
-  //       });
-  //     },
-  //     (error) => {
-  //       commit("getCampaignStatFailure", error);
-  //       dispatch("alert/error", "Errore nel recupero delle statistiche.", {
-  //         root: true,
-  //       });
-  //     }
-  //   );
-  // },
-
-  // getCompanyStat(
-  //   { commit, dispatch },
-  //   { campaignId, companyId, from, to, groupBy, noLimits }
-  // ) {
-  //   commit("getCompanyStat");
-
-  //   statService
-  //     .getCompanyStat(campaignId, companyId, from, to, groupBy, noLimits)
-  //     .then(
-  //       (statistics) => {
-  //         commit("getCompanyStatSuccess", statistics);
-  //         dispatch(
-  //           "alert/success",
-  //           "Recuperate le statistiche della azienda.",
-  //           { root: true }
-  //         );
-  //       },
-  //       (error) => {
-  //         commit("getCompanyStatFailure", error);
-  //         dispatch("alert/error", "Errore nel recupero delle statistiche.", {
-  //           root: true,
-  //         });
-  //       }
-  //     );
-  // },
-  // getEmployeeStat(
-  //   { commit, dispatch },
-  //   { campaignId, employeeId, from, to, groupBy, withTracks, noLimits }
-  // ) {
-  //   commit("getCompanyStat");
-
-  //   statService
-  //     .getEmployeeStat(
-  //       campaignId,
-  //       employeeId,
-  //       from,
-  //       to,
-  //       groupBy,
-  //       withTracks,
-  //       noLimits
-  //     )
-  //     .then(
-  //       (statistics) => {
-  //         commit("getEmployeeStatSuccess", statistics);
-  //         dispatch(
-  //           "alert/success",
-  //           "Recuperate le statistiche del dipendente.",
-  //           { root: true }
-  //         );
-  //       },
-  //       (error) => {
-  //         commit("getEmployeeStatFailure", error);
-  //         dispatch("alert/error", "Errore nel recupero delle statistiche.", {
-  //           root: true,
-  //         });
-  //       }
-  //     );
-  // },
-  // getLocationStat(
-  //   { commit, dispatch },
-  //   { campaignId, companyId, locationId, from, to, groupBy, noLimits }
-  // ) {
-  //   commit("getLocationStat");
-
-  //   statService
-  //     .getLocationStat(
-  //       campaignId,
-  //       companyId,
-  //       locationId,
-  //       from,
-  //       to,
-  //       groupBy,
-  //       noLimits
-  //     )
-  //     .then(
-  //       (statistics) => {
-  //         commit("getLocationStatSuccess", statistics);
-  //         dispatch("alert/success", "Recuperate le statistiche della sede.", {
-  //           root: true,
-  //         });
-  //       },
-  //       (error) => {
-  //         commit("getLocationStatFailure", error);
-  //         dispatch("alert/error", "Errore nel recupero delle statistiche.", {
-  //           root: true,
-  //         });
-  //       }
-  //     );
-  // },
-  // getCampaignCsv({ commit, dispatch }, { campaignId, from, to }) {
-  //   commit("getCampaignCsv");
-
-  //   statService.getCampaignCsv(campaignId, from, to).then(
-  //     (stats) => {
-  //       commit("getCampaignCsvSuccess", stats);
-  //       saveFile("campaign.csv", stats);
-  //       dispatch("alert/success", "Recuperate le statistiche della campagna.", {
-  //         root: true,
-  //       });
-  //     },
-  //     (error) => {
-  //       commit("getCampaignCsvFailure", error);
-  //       dispatch("alert/error", "Errore nel recupero delle statistiche.", {
-  //         root: true,
-  //       });
-  //     }
-  //   );
-  // },
-  // getCompanyCsv({ commit, dispatch }, { campaignId, companyId, from, to }) {
-  //   commit("getCompanyCsv");
-
-  //   statService.getCompanyCsv(campaignId, companyId, from, to).then(
-  //     (stats) => {
-  //       commit("getCompanyCsvSuccess", stats);
-  //       saveFile("company.csv", stats);
-  //       dispatch("alert/success", "Recuperate le statistiche della campagna.", {
-  //         root: true,
-  //       });
-  //     },
-  //     (error) => {
-  //       commit("getCompanyCsvFailure", error);
-  //       dispatch("alert/error", "Errore nel recupero delle statistiche.", {
-  //         root: true,
-  //       });
-  //     }
-  //   );
-  // },
-  // getLocationCsv({ commit, dispatch }, { campaignId, companyId, from, to }) {
-  //   commit("getLocationCsv");
-
-  //   statService.getLocationCsv(campaignId, companyId, from, to).then(
-  //     (stats) => {
-  //       commit("getLocationCsvSuccess", stats);
-  //       saveFile("location.csv", stats);
-  //       dispatch("alert/success", "Recuperate le statistiche della campagna.", {
-  //         root: true,
-  //       });
-  //     },
-  //     (error) => {
-  //       commit("getLocationCsvFailure", error);
-  //       dispatch("alert/error", "Errore nel recupero delle statistiche.", {
-  //         root: true,
-  //       });
-  //     }
-  //   );
-  // },
-  initConfigurationByRole({ commit, dispatch }, { role,temporaryAdmin }) {
+  initConfigurationByRole({ commit, dispatch }, { role, temporaryAdmin }) {
     commit("getConfigurationByRole");
-    statService.getConfigurationByRole(role,temporaryAdmin).then(
+    statService.getConfigurationByRole(role, temporaryAdmin).then(
       (configurations) => {
         commit("getConfigurationByRoleSuccess", configurations);
         dispatch("setActiveConfiguration", {
           configurationId: configurations[0].id,
         });
         if (configurations[0]?.views[0]?.default)
-        dispatch("setActiveSelection", {
-          selection: configurations[0].views[0].default,
-        });
+          dispatch("setActiveSelection", {
+            selection: configurations[0].views[0].default,
+          });
       },
       (error) => {
         commit("getConfigurationByRoleFailure", error),
@@ -255,9 +89,9 @@ const actions = {
       }
     );
   },
-  getConfigurationByRole({ commit, dispatch }, { role,temporaryAdmin }) {
+  getConfigurationByRole({ commit, dispatch }, { role, temporaryAdmin }) {
     commit("getConfigurationByRole");
-    statService.getConfigurationByRole(role,temporaryAdmin).then(
+    statService.getConfigurationByRole(role, temporaryAdmin).then(
       (configurations) => {
         commit("getConfigurationByRoleSuccess", configurations);
         dispatch("setActiveConfiguration", {
@@ -270,10 +104,13 @@ const actions = {
       }
     );
   },
+  setCurrentCampaign({ commit }, { campaign }) {
+    commit("setCurrentCampaign", campaign);
+  },
   setActiveSelection({ commit }, { selection }) {
     console.log("active Selection:");
     console.log(selection);
-    commit("setActiveSelection",selection);
+    commit("setActiveSelection", selection);
     //call and get stats?
   },
   setActiveConfiguration({ commit, dispatch, state }, { configurationId }) {
@@ -325,36 +162,13 @@ const mutations = {
   getStatFailure(state, error) {
     state.statValues = { error };
   },
-  // getCompanyStat(state) {
-  //   state.stat = { loading: true };
-  // },
+  setCurrentCampaign(state, campaign) {
+    state.currentCampaign = { item: campaign };
+  },
   removeStat(state) {
     state.statValues = null;
   },
-  // getCompanyStatSuccess(state, statistics) {
-  //   state.stat = { items: statistics };
-  // },
-  // getCompanyStatFailure(state, error) {
-  //   state.stat = { error };
-  // },
-  // getEmployeeStat(state) {
-  //   state.stat = { loading: true };
-  // },
-  // getEmployeeStatSuccess(state, statistics) {
-  //   state.stat = { items: statistics };
-  // },
-  // getEmployeeStatFailure(state, error) {
-  //   state.stat = { error };
-  // },
-  // getLocationStat(state) {
-  //   state.stat = { loading: true };
-  // },
-  // getLocationStatSuccess(state, statistics) {
-  //   state.stat = { items: statistics };
-  // },
-  // getLocationStatFailure(state, error) {
-  //   state.stat = { error };
-  // },
+  
   getCsv(state) {
     state.csvValues = { loading: true };
   },
@@ -364,24 +178,7 @@ const mutations = {
   getCsvFailure(state, error) {
     state.csvValues = { error };
   },
-  // getCompanyCsv(state) {
-  //   state.stat = { loading: true };
-  // },
-  // getCompanyCsvSuccess(state, stats) {
-  //   state.stat = { items: stats };
-  // },
-  // getCompanyCsvFailure(state, error) {
-  //   state.stat = { error };
-  // },
-  // getLocationCsv(state) {
-  //   state.stat = { loading: true };
-  // },
-  // getLocationCsvSuccess(state, stats) {
-  //   state.stat = { items: stats };
-  // },
-  // getLocationCsvFailure(state, error) {
-  //   state.stat = { error };
-  // },
+  
   resetStat(state) {
     state.statValues = null;
   },
@@ -413,7 +210,7 @@ const mutations = {
     state.activeViewType = { error };
   },
   setActiveSelection(state, selection) {
-    state.activeSelection= selection;
+    state.activeSelection = selection;
   }
 };
 

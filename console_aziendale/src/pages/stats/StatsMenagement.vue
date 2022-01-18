@@ -34,7 +34,7 @@
     </v-col>
     <v-col cols="3">
       <div>
-        <v-card v-if="activeViewType">
+        <v-card v-if="activeViewType && activeSelection">
           <div>
             <v-card-title> Filtri - {{ activeViewType.item }} </v-card-title>
           </div>
@@ -142,7 +142,7 @@
                 ></v-select>
               </v-col>
             </v-row>
-            <v-row>
+            <v-row v-if="view">
               <v-col cols="4" class="pl-5 pr-20" v-if="puntualAggregationValue">
                 <p class="text-subtitle-1">Aggregazione puntuale</p>
                 <v-radio-group
@@ -303,6 +303,7 @@ export default {
       "activeConfiguration",
       "activeViewType",
       "activeSelection",
+      "currentCampaign",
       "statValues"
     ]),
     ...mapState("navigation", ["page"]),
@@ -385,9 +386,8 @@ export default {
     // getTypeDataMultiple() {
     //   //based on kind of data return
     // },
-    fillTheViewWithValues(values,view,activeSelection){
-      
-      this.viewData=statService.fillTheViewWithValues(values,view,activeSelection);
+    fillTheViewWithValues(values,view,activeSelection,currentCampaign){
+      this.viewData=statService.fillTheViewWithValues(values,view,activeSelection,currentCampaign);
     },
     getLocalStat(selection) {
       this.getStatFromServer(selection);
@@ -449,19 +449,15 @@ export default {
         );
     },
     getDataRange() {
-      this.localSelection.selectedDateFrom = this.activeSelection.campaign.from;
-      this.localSelection.selectedDateTo = this.activeSelection.campaign.to;
+      this.localSelection.selectedDateFrom = this.currentCampaign.item.from;
+      this.localSelection.selectedDateTo = this.currentCampaign.item.to;
     },
-  },
-  created() {
-    this.initConfigurationStat();
-  },
-  mounted() {
-    this.tab = this.activeViewType;
+    initiSelection() {
+       this.tab = this.activeViewType;
     if (this.activeSelection) {
       //init with view configuration
       this.localSelection.company = this.activeSelection.company;
-      this.localSelection.campaign = this.activeSelection.campaign;
+      this.localSelection.campaign = this.currentCampaign.item;
       this.localSelection.dataLevel = this.activeSelection.dataLevel;
       this.localSelection.timeUnit = this.activeSelection.timeUnit;
       this.localSelection.dataColumns = this.activeSelection.dataColumns;
@@ -476,32 +472,60 @@ export default {
       //load default values
       this.getLocalStat(this.localSelection);
     }
+    },
+
+    setDefaultCampaign(){
+
+    }
+  },
+  created() {
+    this.initConfigurationStat();
+  },
+  mounted() {
+   if (this.statValues && this.activeViewType && this.activeSelection && this.currentCampaign.item)
+             this.fillTheViewWithValues(this.statValues.items,this.activeViewType,this.activeSelection,this.currentCampaign.item)
+
   },
 
   watch: {
     statValues: {
        handler: function (newVal) {
         if (newVal && newVal.items) {
-          this.fillTheViewWithValues(newVal.items,this.activeViewType,this.activeSelection)
+          this.fillTheViewWithValues(newVal.items,this.activeViewType,this.activeSelection,this.currentCampaign.item)
         }
       },
       deep: true,
     },
+
     puntualAggregationValue() {
       this.getItemsAggregation();
     },
     activeConfiguration() {
       this.tab = this.activeViewType;
     },
-    activeSelection: {
-      handler: function (oldValue, newValue) {
-        if (!oldValue && newValue && this.localSelection && this.activeSelection) {
-          this.localSelection.dataLevel = this.activeSelection.dataLevel;
-          this.localSelection.timeUnit = this.activeSelection.timeUnit;
+    currentCampaign: {
+      handler: function (newValue,oldValue) {
+        if (!oldValue && newValue  ) {
+          // if (!this.activeSelection.campaign)
+          //   this.setDefaultCampaign();
+          // else 
+            this.initiSelection();
         }
       },
       deep: true,
     },
+    // activeSelection: {
+    //   handler: function (newValue,oldValue) {
+    //     if (!oldValue && newValue && this.localSelection && this.activeSelection ) {
+    //       if (!this.activeSelection.campaign)
+    //         this.setDefaultCampaign();
+    //       else 
+    //         this.initiSelection();
+    //     }
+    //   },
+    //   deep: true,
+    // },
+
     $route() {
       console.log("E' cambiata la root, ora sei in: ");
       console.log(this.page);
