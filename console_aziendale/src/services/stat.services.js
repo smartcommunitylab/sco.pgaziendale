@@ -235,6 +235,9 @@ function getHeadersTable(values, selection, currentCampaign) {
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(currentCampaign.from), moment(currentCampaign.to), 'day'));
       break;
+    case 'campaign':
+      headers.push('Campagna');
+      break;
     default:
       headers.push('Campagna');
       break;
@@ -244,7 +247,7 @@ function getHeadersTable(values, selection, currentCampaign) {
 //based on configuration, return the subheader=header.length*selection.dataColumns
 function getSubHeaders(headers, selection) {
   let subheaders = [{ text: 'Nome', value: 'name' }];
-  for (let i = 1; i < headers.length; i++) {
+  for (let i = 0; i < headers.length; i++) {
     for (let k = 0; k < selection.dataColumns.length; k++) {
       subheaders.push({ text: selection.dataColumns[k].label, value: selection.dataColumns[k].value + headers[i] })
     }
@@ -272,17 +275,53 @@ async function getRowName(obj, selectionValue, currentCampaign) {
 
 //return the value of the stat or the aggregation in case of distances (array with multuple values)
 function getValueByField(value) {
+  if (value){
   if (!isNaN(value)) {
     return value
   }
   else return Object.values(value).reduce((a, b) => a + b);
 }
+return value;
+}
+//sum all the properties
+function sumProp(items, prop){
+  return items.reduce( function(a, b){
+      return a + getValueByField(b[prop]);
+  }, 0);
+}
 
-//find the element of the row depending if the data has one or 2 dimension (1 or multiple row)
+//find the element of the row depending if the data has one, 2 dimension (1 or multiple row) or is an aggregation
 function findElementInValues(values, rowIndex, selection, headers, columnIndex) {
-  if (Object.prototype.hasOwnProperty.call(values[rowIndex],'values'))
+
+
+  if (Object.prototype.hasOwnProperty.call(values[rowIndex],'values')){
+    if (selection.timeUnit.value=='campaign'){
+      let newObj={};
+      if (values[rowIndex].values[0])
+      for (let key in values[rowIndex].values[0]) {
+        if (Object.prototype.hasOwnProperty.call(values[rowIndex].values[0], key)) {
+            //var val = obj[key];
+            newObj[key]=sumProp(values[rowIndex].values,key)
+        }
+    }
+    return newObj
+    } 
     return (values[rowIndex].values.find(el => el[selection.timeUnit.value] === headers[columnIndex]))
+  }
+  else {
+    if (selection.timeUnit.value=='campaign'){
+      let newObj={};
+      if (values[0])
+      for (let key in values[0]) {
+        if (Object.prototype.hasOwnProperty.call(values[0], key)) {
+            //var val = obj[key];
+            newObj[key]=sumProp(values,key)
+        }
+    }
+    return newObj
+    }
   return (values.find(el => el[selection.timeUnit.value] === headers[columnIndex]))
+  }
 }
 
 // if values has more than 1 level it return the number of elements (every row of the table is an element)

@@ -142,6 +142,7 @@
                   v-model="localSelection.dataColumns"
                   :items="view.dataColumns"
                   item-text="label"
+                  return-object
                   :menu-props="{ maxHeight: '400' }"
                   label="Colonne Dati"
                   multiple

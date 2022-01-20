@@ -79,10 +79,10 @@ export const statsConfigurations = [
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
-            value: "date",
-            apiOption: "groupBy=date",
-            apiField: "date",
-            apiFunction:""
+            value: "campaign",
+            apiOption: "groupBy=month",
+            apiField: "month",
+            apiFunction:"aggregate"
           }
         ],
         timePeriod: [
