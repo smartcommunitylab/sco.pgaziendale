@@ -49,7 +49,7 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM, 
             value:  "Km utili",
             apiOption: "noLimits=true",
-            apiField: "distances",
+            apiField: "distancesNolimits",
             apiFunction:""
           },
           {
@@ -63,7 +63,7 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
              value: "Viaggi utili",
             apiOption: "noLimits=true",
-            apiField: "trackCount",
+            apiField: "trackCountNolimits",
             apiFunction:""
           },
         ],
