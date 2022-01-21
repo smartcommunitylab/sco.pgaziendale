@@ -133,15 +133,24 @@ export const statsConfigurations = [
               apiFunction:""
             },
           ],
+          puntualAggregationSelected:{
+            label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+            value: 'NONE',
+            function:''
+          },
           dataLevel: {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES,
             value: "companies",
             api: "getCampaignCompanyStats",
-            puntualAggregation: {
+            puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
               function:''
-            }
+            },{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.COMPANIES,
+              value: 'COMPANIES',
+              function:'aggregateBycompany'
+            }]
           },
           timeUnit:  {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,

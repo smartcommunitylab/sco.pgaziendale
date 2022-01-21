@@ -43,11 +43,11 @@ function getConfigurationByRole(ROLE, temporaryAdmin) {
 }
 function getItemsAggregation(itemAggregationValue, campaignId) {
   switch (itemAggregationValue) {
-    case VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES.value:
+    case "EMPLOYEES":
       return;
-    case VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.LOCATIONS.value:
+    case "LOCATIONS":
       return;
-    case VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.COMPANIES.value:
+    case "COMPANIES":
       return campaignService.getAllCompaniesOfCampaign(campaignId);
     default:
       return Promise.resolve(null);
@@ -55,9 +55,41 @@ function getItemsAggregation(itemAggregationValue, campaignId) {
   }
 
 }
+function buildAggregateData(configuration,responses){
+  let aggregateArray=[];
+  for (let companyId=0;companyId<configuration.puntualAggregationItems.length;companyId++){
+    aggregateArray.push({ company: configuration.puntualAggregationItems[companyId].id, values: responses[companyId] })
+  }
+  return aggregateArray;
+}
+function aggregateCompanyStat(configuration) {
+  let arrayRequest=[];
+  for (let companyId=0;companyId<configuration.puntualAggregationItems.length;companyId++){
+    arrayRequest.push(  getCompanyStat({
+      campaignId: configuration.campaign.id,
+      companyId: configuration.puntualAggregationItems[companyId].id,
+      from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
+      to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
+      groupBy: configuration.timeUnit.value,
+      noLimits: configuration.nolimitsKm ? true : false,
+    }))
+  }
+  return axios.all(arrayRequest).then(axios.spread((...responses) => {
+    console.log(responses);
+    return Promise.resolve(buildAggregateData(configuration,responses));
+  })).catch(errors => {
+    console.log(errors)
+    return Promise.reject();
+
+  })
+
+}
 function getStat(configuration, campaign) {
   //check configuration and ask the right stat
-  switch (configuration.dataLevel.api) {
+  let apiToCall = configuration.dataLevel.api
+  if (configuration.puntualAggregationSelected.function)
+    apiToCall = configuration.puntualAggregationSelected.function
+  switch (apiToCall) {
     //admin that check all comopanies of a campaign
     case "getCampaignCompanyStats":
       //based on limits or not get all marge data
@@ -76,7 +108,9 @@ function getStat(configuration, campaign) {
         groupBy: configuration.timeUnit.value,
         noLimits: configuration.nolimitsKm ? true : false,
       });
-
+    case "aggregateBycompany":
+      //TODO
+      return aggregateCompanyStat(configuration);
     case VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY:
       return getCompanyStat({
         campaignId: configuration.campaign.id,
@@ -225,15 +259,17 @@ function getPeriodBetweenDates(startDate, endDate, type) {
 // based on values and selection, return the right headers for the table (day, month or Campaign)
 function getHeadersTable(values, selection, currentCampaign) {
   console.log(values, selection, currentCampaign)
+  let from = selection.timePeriod.value == 'SPECIFIC' ? selection.selectedDateFrom : currentCampaign.from
+  let to = selection.timePeriod.value == 'SPECIFIC' ? selection.selectedDateTo : currentCampaign.to
   let headers = [];
   switch (selection.timeUnit.value) {
     case 'month':
       //get all month from selection.company.from to selection.company.to 
-      headers.push(...getPeriodBetweenDates(moment(currentCampaign.from), moment(currentCampaign.to), 'month'));
+      headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'month'));
       break;
     case 'date':
       //get all month from selection.company.from to selection.company.to 
-      headers.push(...getPeriodBetweenDates(moment(currentCampaign.from), moment(currentCampaign.to), 'day'));
+      headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'day'));
       break;
     case 'campaign':
       headers.push('Campagna');
@@ -275,18 +311,18 @@ async function getRowName(obj, selectionValue, currentCampaign) {
 
 //return the value of the stat or the aggregation in case of distances (array with multuple values)
 function getValueByField(value) {
-  if (value){
-  if (!isNaN(value)) {
-    return value
+  if (value) {
+    if (!isNaN(value)) {
+      return value
+    }
+    else return Object.values(value).reduce((a, b) => a + b);
   }
-  else return Object.values(value).reduce((a, b) => a + b);
-}
-return value;
+  return value;
 }
 //sum all the properties
-function sumProp(items, prop){
-  return items.reduce( function(a, b){
-      return a + getValueByField(b[prop]);
+function sumProp(items, prop) {
+  return items.reduce(function (a, b) {
+    return a + getValueByField(b[prop]);
   }, 0);
 }
 
@@ -294,42 +330,42 @@ function sumProp(items, prop){
 function findElementInValues(values, rowIndex, selection, headers, columnIndex) {
 
 
-  if (Object.prototype.hasOwnProperty.call(values[rowIndex],'values')){
-    if (selection.timeUnit.value=='campaign'){
-      let newObj={};
+  if (Object.prototype.hasOwnProperty.call(values[rowIndex], 'values')) {
+    if (selection.timeUnit.value == 'campaign') {
+      let newObj = {};
       if (values[rowIndex].values[0])
-      for (let key in values[rowIndex].values[0]) {
-        if (Object.prototype.hasOwnProperty.call(values[rowIndex].values[0], key)) {
+        for (let key in values[rowIndex].values[0]) {
+          if (Object.prototype.hasOwnProperty.call(values[rowIndex].values[0], key)) {
             //var val = obj[key];
-            newObj[key]=sumProp(values[rowIndex].values,key)
+            newObj[key] = sumProp(values[rowIndex].values, key)
+          }
         }
+      return newObj
     }
-    return newObj
-    } 
     return (values[rowIndex].values.find(el => el[selection.timeUnit.value] === headers[columnIndex]))
   }
   else {
-    if (selection.timeUnit.value=='campaign'){
-      let newObj={};
+    if (selection.timeUnit.value == 'campaign') {
+      let newObj = {};
       if (values[0])
-      for (let key in values[0]) {
-        if (Object.prototype.hasOwnProperty.call(values[0], key)) {
+        for (let key in values[0]) {
+          if (Object.prototype.hasOwnProperty.call(values[0], key)) {
             //var val = obj[key];
-            newObj[key]=sumProp(values,key)
+            newObj[key] = sumProp(values, key)
+          }
         }
+      return newObj
     }
-    return newObj
-    }
-  return (values.find(el => el[selection.timeUnit.value] === headers[columnIndex]))
+    return (values.find(el => el[selection.timeUnit.value] === headers[columnIndex]))
   }
 }
 
 // if values has more than 1 level it return the number of elements (every row of the table is an element)
 // otherwise it is a table with just one row
-function getRowByValues(values){
-if (Object.prototype.hasOwnProperty.call(values[0],'values'))
-  return values.length
-return 1;
+function getRowByValues(values) {
+  if (Object.prototype.hasOwnProperty.call(values[0], 'values'))
+    return values.length
+  return 1;
 }
 
 // return the data array with all the elements row for the table

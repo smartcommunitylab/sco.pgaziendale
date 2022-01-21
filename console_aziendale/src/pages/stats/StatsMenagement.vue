@@ -43,31 +43,31 @@
               <b>Livello</b>: {{ activeSelection.dataLevel.label }}
             </p>
             <p v-if="activeSelection.timeUnit" class="p-0">
-              <b>Unità temporale</b>: {{ activeSelection.timeUnit.label }}
+              <b>Unità temporale</b>:<br> {{ activeSelection.timeUnit.label }}
             </p>
             <p v-if="activeSelection.dataColumns" class="p-0">
               <b>Colonne dati</b>:
-              <span v-for="(column, index) in activeSelection.dataColumns" :key="index">{{
+              <span v-for="(column, index) in activeSelection.dataColumns" :key="index"><br>{{
                 column.label
               }}</span>
             </p>
             <p v-if="activeSelection.timePeriod" class="p-0">
               <b>Periodo di tempo</b>:
               <template v-if="timeSelected"
-                ><span>{{ activeSelection.selectedDateFrom }}<br /></span>
+                ><br><span>{{ activeSelection.selectedDateFrom }}<br /></span>
                 <span>{{ activeSelection.selectedDateTo }}<br /></span> </template
               ><template v-else
-                ><span>{{ activeSelection.timePeriod.label }}</span></template
+                ><br><span>{{ activeSelection.timePeriod.label }}</span></template
               >
             </p>
-            <p v-if="activeSelection.dataLevel.puntualAggregation" class="p-0">
+            <p v-if="activeSelection.puntualAggregationSelected" class="p-0">
               <b>Aggregazione puntuale</b>:
-              <template v-if="activeSelection.dataLevel.puntualAggregation.value != 'NONE'"
-                ><span
-                  v-for="(agg, index) in activeSelection.itemAggregation"
+              <template v-if="activeSelection.puntualAggregationSelected.value != 'NONE'"
+                ><br><span
+                  v-for="(agg, index) in activeSelection.puntualAggregationItems"
                   :key="index"
                   >{{ agg.name }}<br /></span></template
-              ><template v-else><span>Nessuna</span></template>
+              ><template v-else><br><span>Nessuna</span></template>
             </p>
           </v-card-text>
 
@@ -151,19 +151,19 @@
                 ></v-select>
               </v-col>
             </v-row>
-            <v-row v-if="view">
+            <v-row v-if="view ">
               <v-col
                 cols="4"
                 class="pl-5 pr-20"
-                v-if="localSelection && localSelection.dataLevel.puntualAggregation"
+                v-if="localSelection && localSelection.puntualAggregationSelected "
               >
                 <p class="text-subtitle-1">Aggregazione puntuale</p>
                 <v-radio-group
-                  v-model="localSelection.dataLevel.puntualAggregation"
+                  v-model="localSelection.puntualAggregationSelected"
                   @change="updatePuntualAggregationChange"
                 >
                   <v-radio
-                    v-for="(agg, index) in view.dataLevel.puntualAggregation"
+                    v-for="(agg, index) in localSelection.dataLevel.puntualAggregation"
                     :key="index"
                     :label="agg.label"
                     :value="agg"
@@ -171,8 +171,8 @@
                 </v-radio-group>
                 <div
                   v-if="
-                    localSelection.dataLevel.puntualAggregation &&
-                    localSelection.dataLevel.puntualAggregation.value != 'NONE' &&
+                    localSelection.puntualAggregationSelected &&
+                    localSelection.puntualAggregationSelected.value != 'NONE' &&
                     localSelection.itemsAggreation != null
                   "
                 >
@@ -304,7 +304,8 @@ export default {
         timePeriod: null,
         selectedDateFrom: new Date(),
         selectedDateTo: new Date(),
-        puntualAggregation: null,
+        puntualAggregation: [],
+        puntualAggregationSelected:null,
         puntualAggregationItems: [],
         itemsAggreation: [],
       },
@@ -330,14 +331,18 @@ export default {
     // activeSelection () {
     //   return this.$store.state.stat.activeSelection;
     // },
-    activeAggregation() {
-      return (
-        this.activeSelection.dataLevel.puntualAggregation &&
-        this.activeSelection.dataLevel.puntualAggregation.length
-      );
-    },
+    // activeAggregation() {
+    //   return (
+    //     this.activeSelection.dataLevel.puntualAggregation &&
+    //     this.activeSelection.dataLevel.puntualAggregation.length
+    //   );
+    // },
+    //     currentPuntualAggregation(){
+    //   //return array of puntual aggregation based on this.localSelection.dataLevel
+    //   return (this.view.dataLevel.find(el => el.value == this.localSelection.dataLevel.value)).puntualAggregation
+    // },
     timeSelected() {
-      return this.localSelection.timePeriod.value != "ALL";
+      return this.localSelection && this.localSelection.timePeriod && this.localSelection.timePeriod.value != "ALL";
     },
     view() {
       console.log("La vista è: ");
@@ -431,7 +436,7 @@ export default {
       this.setActiveSelection({ selection: this.localSelection });
     },
     updatePuntualAggregationChange() {
-      if (this.localSelection.dataLevel.puntualAggregation.value == "NONE")
+      if (this.localSelection.puntualAggregationSelected.value == "NONE")
         this.localSelection.puntualAggregationItems = [];
       else this.getItemsAggregation();
       this.setActiveSelection({ selection: this.localSelection });
@@ -462,7 +467,7 @@ export default {
       if (this.localSelection)
         statService
           .getItemsAggregation(
-            this.localSelection.dataLevel.puntualAggregation.value,
+            this.localSelection.puntualAggregationSelected.value,
             this.localSelection.campaign.id
           )
           .then(
@@ -492,6 +497,7 @@ export default {
         //this.timePeriodValue = this.activeSelection.timePeriod.value;
         this.localSelection.selectedDateFrom = this.activeSelection.selectedDateFrom;
         this.localSelection.selectedDateTo = this.activeSelection.selectedDateTo;
+        this.localSelection.puntualAggregationSelected=this.activeSelection.puntualAggregationSelected;
         // this.localSelection.puntualAggregation = this.activeSelection.puntualAggregation;
         //load specific values
         this.getItemsAggregation();
