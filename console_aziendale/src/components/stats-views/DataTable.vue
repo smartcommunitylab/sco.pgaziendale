@@ -10,7 +10,7 @@
     <thead>
       <tr>
          <th colspan="1"></th>
-        <th colspan="4" v-for="(header,index) in dataTableData.headers" :key="index">{{header}}</th>
+        <th :colspan="dataTableData.headerNumber" v-for="(header,index) in dataTableData.headers" :key="index">{{header}}</th>
       </tr>
     </thead>
   </template>

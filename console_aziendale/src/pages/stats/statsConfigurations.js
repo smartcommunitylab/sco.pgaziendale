@@ -41,7 +41,7 @@ export const statsConfigurations = [
           {
             label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
             value: "Km percorsi",
-            apiOption: "noLimits=true",
+            apiOption: "noLimits=false",
             apiField: "distances",
             apiFunction:""
           },
@@ -55,7 +55,7 @@ export const statsConfigurations = [
           {
             label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL, 
             value: "Viaggi totali",
-            apiOption: "noLimits=true",
+            apiOption: "noLimits=false",
             apiField: "trackCount",
             apiFunction:""
           },
@@ -107,7 +107,7 @@ export const statsConfigurations = [
             {
               label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
               value: "Km percorsi",
-              apiOption: "noLimits=true",
+              apiOption: "noLimits=false",
               apiField: "distances",
               apiFunction:""
             },
@@ -115,13 +115,13 @@ export const statsConfigurations = [
               label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM, 
               value:  "Km utili",
               apiOption: "noLimits=true",
-              apiField: "distances",
+              apiField: "distancesNolimits",
               apiFunction:""
             },
             {
               label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL, 
               value: "Viaggi totali",
-              apiOption: "noLimits=true",
+              apiOption: "noLimits=false",
               apiField: "trackCount",
               apiFunction:""
             },
@@ -129,7 +129,7 @@ export const statsConfigurations = [
               label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
                value: "Viaggi utili",
               apiOption: "noLimits=true",
-              apiField: "trackCount",
+              apiField: "trackCountNolimits",
               apiFunction:""
             },
           ],

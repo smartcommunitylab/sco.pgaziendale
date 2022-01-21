@@ -65,11 +65,11 @@ function buildAggregateData(configuration,responses){
 function aggregateCompanyStat(configuration) {
   let arrayRequest=[];
   for (let companyId=0;companyId<configuration.puntualAggregationItems.length;companyId++){
-    arrayRequest.push(  getCompanyStat({
+    arrayRequest.push(getCompanyStat({
       campaignId: configuration.campaign.id,
       companyId: configuration.puntualAggregationItems[companyId].id,
-      from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
-      to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
+      from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
+      to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
       groupBy: configuration.timeUnit.value,
       noLimits: configuration.nolimitsKm ? true : false,
     }))
@@ -95,28 +95,25 @@ function getStat(configuration, campaign) {
       //based on limits or not get all marge data
       return getAllCompaniesCampaignStat({
         campaignId: campaign.id,
-        from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
-        to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
-        groupBy: configuration.timeUnit.value,
-        noLimits: configuration.nolimitsKm ? true : false,
+        from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
+        to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
+        groupBy: configuration.timeUnit.value
       });
     case "getCampaignStats":
       return getCampaignStat({
         campaignId: campaign.id,
-        from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
-        to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
-        groupBy: configuration.timeUnit.value,
-        noLimits: configuration.nolimitsKm ? true : false,
+        from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
+        to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
+        groupBy: configuration.timeUnit.value
       });
     case "aggregateBycompany":
-      //TODO
       return aggregateCompanyStat(configuration);
     case VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY:
       return getCompanyStat({
         campaignId: configuration.campaign.id,
         companyId: configuration.company.id,
-        from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
-        to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
+        from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
+      to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
         groupBy: configuration.timeUnit.value,
         noLimits: configuration.nolimitsKm ? true : false,
       });
@@ -126,8 +123,8 @@ function getStat(configuration, campaign) {
       return getEmployeeStat({
         campaignId: campaign.id,
         employeeId: configuration.employeeId,
-        from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
-        to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
+        from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
+        to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
         groupBy: configuration.timeUnit.value,
         noLimits: configuration.nolimitsKm ? true : false,
       });
@@ -136,8 +133,8 @@ function getStat(configuration, campaign) {
         campaignId: campaign.id,
         companyId: configuration.company.id,
         locationId: configuration.locationId,
-        from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
-        to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
+        from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
+        to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
         groupBy: configuration.timeUnit.value,
         noLimits: configuration.nolimitsKm ? true : false,
       });
@@ -176,8 +173,59 @@ function getCsv(configuration, campaign) {
       break;
   }
 }
-function getAllCompaniesCampaignStat({ campaignId, from, to, groupBy, noLimits = false }) {
-  return axios
+function combineMultipleLimits(limitedArray,unlimitedArray,key){
+  let combinedArray=[]
+  if (limitedArray[0].values){
+    limitedArray.map( (el,index) => {
+      if (el[key]===unlimitedArray[index][key]){
+        let combinedItem={};
+        Object.defineProperty(combinedItem, key, {
+          value: el[key],
+          writable: true
+        });
+        Object.defineProperty(combinedItem, 'values', {
+          value: [],
+          writable: true
+        });
+        // let combinedItem={company:el[key],values:[]}
+        el.values.map((val,subindex) => {
+          let combinedElement=JSON.parse(JSON.stringify(val));
+          combinedElement['distancesNolimits']=unlimitedArray[index].values[subindex]['distances'];
+        combinedElement['trackCountNolimits']=unlimitedArray[index].values[subindex]['trackCount'];
+        combinedItem.values.push(combinedElement);
+        })
+        combinedArray.push(combinedItem);
+      }
+    })
+  }
+  else {
+    limitedArray.map((val,index) => {
+      let combinedElement=JSON.parse(JSON.stringify(val));
+      combinedElement['distancesNolimits']=unlimitedArray[index]['distances'];
+    combinedElement['trackCountNolimits']=unlimitedArray[index]['trackCount'];
+    //combinedItem.values.push(combinedElement);
+    combinedArray.push(combinedElement);
+    })
+    
+  }
+    return combinedArray;
+
+  }
+  function dynamicSort(property) {
+    var sortOrder = 1;
+    if(property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+    return function (a,b) {
+        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        return result * sortOrder;
+    }
+}
+function getAllCompaniesCampaignStat({ campaignId, from, to, groupBy }) {
+  let multiple=[];
+  // noLimits
+  multiple.push(axios
     .get(
       process.env.VUE_APP_BASE_URL +
       process.env.VUE_APP_CAMPAIGNS_API +
@@ -189,21 +237,37 @@ function getAllCompaniesCampaignStat({ campaignId, from, to, groupBy, noLimits =
           ...(from ? { from: from } : {}),
           ...(to ? { to: to } : {}),
           ...(groupBy ? { groupBy: groupBy } : {}),
-          ...(noLimits ? { noLimits: noLimits } : {}),
+          ...({ noLimits: true } ),
         },
       }
-    )
-    .then(
-      (res) => {
-        if (res && res.data) {
-          let companiesState = aggregateByCompany(res.data)
-          return Promise.resolve(companiesState);
-        } else return Promise.reject(null);
-      },
-      (err) => {
-        return Promise.reject(err);
+    ))
+  // limits
+  multiple.push(axios
+    .get(
+      process.env.VUE_APP_BASE_URL +
+      process.env.VUE_APP_CAMPAIGNS_API +
+      "/" +
+      campaignId +
+      "/agg/company",
+      {
+        params: {
+          ...(from ? { from: from } : {}),
+          ...(to ? { to: to } : {}),
+          ...(groupBy ? { groupBy: groupBy } : {}),
+          ...( { noLimits: false }),
+        },
       }
-    );
+    ))
+    return axios.all(multiple).then(axios.spread((...responses) => {
+      //combine limits and not limits values
+      let companiesStateLimited = aggregateByCompany(responses[0].data);
+      let companiesStateUnlimited = aggregateByCompany(responses[1].data);
+      let returnData=combineMultipleLimits(companiesStateLimited.sort(dynamicSort('company')),companiesStateUnlimited.sort(dynamicSort('company')),'company');
+      return Promise.resolve(returnData);
+    })).catch(errors => {
+      console.log(errors)
+      return Promise.reject();
+    })
 }
 function aggregateByCompany(allStat) {
   var companiesStat = []
@@ -220,11 +284,15 @@ function aggregateByCompany(allStat) {
   })
   return companiesStat;
 }
+function getHeadersNumner(selection){
+  return selection.dataColumns.length;
+}
 async function fillTheViewWithValues(values, view, selection, currentCampaign) {
   let viewData = {};
   switch (view.item) {
     case 'Tabella':
       viewData.headers = getHeadersTable(values, selection, currentCampaign)
+      viewData.headerNumber=getHeadersNumner(selection);
       viewData.subheaders = getSubHeaders(viewData.headers, selection)
       viewData.data = await getData(currentCampaign, viewData.headers, viewData.subheaders, selection, values)
       break;
@@ -328,8 +396,6 @@ function sumProp(items, prop) {
 
 //find the element of the row depending if the data has one, 2 dimension (1 or multiple row) or is an aggregation
 function findElementInValues(values, rowIndex, selection, headers, columnIndex) {
-
-
   if (Object.prototype.hasOwnProperty.call(values[rowIndex], 'values')) {
     if (selection.timeUnit.value == 'campaign') {
       let newObj = {};
@@ -390,98 +456,11 @@ async function getData(currentCampaign, headers, subheaders, selection, values) 
     }
   return data;
 
-  // return ['',
-  //   {
-  //     name: 'Frozen Yogurt',
-  //     calories: 159,
-  //     fat: 6.0,
-  //     carbs: 24,
-  //     protein: 4.0,
-  //     iron: '1%',
-  //   },
-  //   {
-  //     name: 'Ice cream sandwich',
-  //     calories: 237,
-  //     fat: 9.0,
-  //     carbs: 37,
-  //     protein: 4.3,
-  //     iron: '1%',
-  //   },
-  //   {
-  //     name: 'Eclair',
-  //     calories: 262,
-  //     fat: 16.0,
-  //     carbs: 23,
-  //     protein: 6.0,
-  //     iron: '7%',
-  //   },
-  //   {
-  //     name: 'Cupcake',
-  //     calories: 305,
-  //     fat: 3.7,
-  //     carbs: 67,
-  //     protein: 4.3,
-  //     iron: '8%',
-  //   },
-  //   {
-  //     name: 'Gingerbread',
-  //     calories: 356,
-  //     fat: 16.0,
-  //     carbs: 49,
-  //     protein: 3.9,
-  //     iron: '16%',
-  //   },
-  //   {
-  //     name: 'Jelly bean',
-  //     calories: 375,
-  //     fat: 0.0,
-  //     carbs: 94,
-  //     protein: 0.0,
-  //     iron: '0%',
-  //   },
-  //   {
-  //     name: 'Lollipop',
-  //     calories: 392,
-  //     fat: 0.2,
-  //     carbs: 98,
-  //     protein: 0,
-  //     iron: '2%',
-  //   },
-  //   {
-  //     name: 'Honeycomb',
-  //     calories: 408,
-  //     fat: 3.2,
-  //     carbs: 87,
-  //     protein: 6.5,
-  //     iron: '45%',
-  //   },
-  //   {
-  //     name: 'Donut',
-  //     calories: 452,
-  //     fat: 25.0,
-  //     carbs: 51,
-  //     protein: 4.9,
-  //     iron: '22%',
-  //   },
-  //   {
-  //     name: 'KitKat',
-  //     calories: 518,
-  //     fat: 26.0,
-  //     carbs: 65,
-  //     protein: 7,
-  //     iron: '6%',
-  //   },
-  // ]
 }
-function getCampaignStat({ campaignId, from, to, groupBy, noLimits = false }) {
-  // var fromParam= from?('?from='+from):''
-  // var toParam=''
-  // if (fromParam)
-  //  toParam=to?('&to='+to):''
-  // if (fromParam)
-  //   groupBy="&groupBy="+groupBy;
-  // else groupBy="?groupBy="+groupBy;
-  return axios
+function getCampaignStat({ campaignId, from, to, groupBy}) {
+  let multiple=[];
+  // noLimits
+  multiple.push(axios
     .get(
       process.env.VUE_APP_BASE_URL +
       process.env.VUE_APP_CAMPAIGNS_API +
@@ -493,20 +472,37 @@ function getCampaignStat({ campaignId, from, to, groupBy, noLimits = false }) {
           ...(from ? { from: from } : {}),
           ...(to ? { to: to } : {}),
           ...(groupBy ? { groupBy: groupBy } : {}),
-          ...(noLimits ? { noLimits: noLimits } : {}),
+          ...({ noLimits: true } ),
         },
       }
-    )
-    .then(
-      (res) => {
-        if (res && res.data) {
-          return Promise.resolve(res.data);
-        } else return Promise.reject(null);
-      },
-      (err) => {
-        return Promise.reject(err);
+    ))
+  // limits
+  multiple.push(axios
+    .get(
+      process.env.VUE_APP_BASE_URL +
+          process.env.VUE_APP_CAMPAIGNS_API +
+          "/" +
+          campaignId +
+          "/agg",
+      {
+        params: {
+          ...(from ? { from: from } : {}),
+          ...(to ? { to: to } : {}),
+          ...(groupBy ? { groupBy: groupBy } : {}),
+          ...( { noLimits: false }),
+        },
       }
-    );
+    ))
+    return axios.all(multiple).then(axios.spread((...responses) => {
+      //combine limits and not limits values
+      let campaignLimited = responses[0].data;
+      let campaignUnLimited = responses[1].data;
+      let returnData=combineMultipleLimits(campaignLimited,campaignUnLimited);
+      return Promise.resolve(returnData);
+    })).catch(errors => {
+      console.log(errors)
+      return Promise.reject();
+    })
 }
 
 function getCompanyStat(
@@ -514,10 +510,29 @@ function getCompanyStat(
     companyId,
     from,
     to,
-    groupBy,
-    noLimits = false }
+    groupBy}
 ) {
-  return axios
+  let multiple=[];
+  // noLimits
+  multiple.push(axios
+    .get(
+      process.env.VUE_APP_BASE_URL +
+          process.env.VUE_APP_CAMPAIGNS_API +
+          "/" +
+          campaignId +
+          "/agg/" +
+          companyId,
+      {
+        params: {
+          ...(from ? { from: from } : {}),
+          ...(to ? { to: to } : {}),
+          ...(groupBy ? { groupBy: groupBy } : {}),
+          ...({ noLimits: true } ),
+        },
+      }
+    ))
+  // limits
+  multiple.push(axios
     .get(
       process.env.VUE_APP_BASE_URL +
       process.env.VUE_APP_CAMPAIGNS_API +
@@ -530,20 +545,47 @@ function getCompanyStat(
           ...(from ? { from: from } : {}),
           ...(to ? { to: to } : {}),
           ...(groupBy ? { groupBy: groupBy } : {}),
-          ...(noLimits ? { noLimits: noLimits } : {}),
+          ...( { noLimits: false }),
         },
       }
-    )
-    .then(
-      (res) => {
-        if (res && res.data) {
-          return Promise.resolve(res.data);
-        } else return Promise.reject(null);
-      },
-      (err) => {
-        return Promise.reject(err);
-      }
-    );
+    ))
+    return axios.all(multiple).then(axios.spread((...responses) => {
+      //combine limits and not limits values
+      let companyStatLimited = responses[0].data;
+      let companyStatUnLimited = responses[1].data;
+      let returnData=combineMultipleLimits(companyStatLimited,companyStatUnLimited);
+      return Promise.resolve(returnData);
+    })).catch(errors => {
+      console.log(errors)
+      return Promise.reject();
+    })
+  // return axios
+  //   .get(
+  //     process.env.VUE_APP_BASE_URL +
+  //     process.env.VUE_APP_CAMPAIGNS_API +
+  //     "/" +
+  //     campaignId +
+  //     "/agg/" +
+  //     companyId,
+  //     {
+  //       params: {
+  //         ...(from ? { from: from } : {}),
+  //         ...(to ? { to: to } : {}),
+  //         ...(groupBy ? { groupBy: groupBy } : {}),
+  //         ...(noLimits ? { noLimits: noLimits } : {}),
+  //       },
+  //     }
+  //   )
+  //   .then(
+  //     (res) => {
+  //       if (res && res.data) {
+  //         return Promise.resolve(res.data);
+  //       } else return Promise.reject(null);
+  //     },
+  //     (err) => {
+  //       return Promise.reject(err);
+  //     }
+  //   );
 }
 function getLocationStat(
   { campaignId,

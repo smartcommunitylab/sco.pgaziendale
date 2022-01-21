@@ -148,6 +148,7 @@
                   multiple
                   hint="Seleziona le colonne da visualizzare"
                   persistent-hint
+                   @change="updateDataColumns"
                 ></v-select>
               </v-col>
             </v-row>
@@ -312,7 +313,7 @@ export default {
       name: "",
       email: "",
       select: null,
-      items: ["Item 1", "Item 2", "Item 3", "Item 4"],
+      // items: ["Item 1", "Item 2", "Item 3", "Item 4"],
       checkbox: false,
       viewData: null,
     };
