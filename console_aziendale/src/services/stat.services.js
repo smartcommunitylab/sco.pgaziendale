@@ -1,8 +1,9 @@
 import axios from "axios";
 import { statsConfigurations } from "../pages/stats/statsConfigurations";
 import { VARIABLES } from "../variables";
-import { campaignService } from '.';
-import { companyService } from ".";
+import { campaignService, companyService, locationService } from '.';
+// import { companyService } from ".";
+import { employeeService } from ".";
 import moment from "moment";
 
 export const statService = {
@@ -21,6 +22,9 @@ export const statService = {
   // getLocationStat,
   // getEmployeeStat,
 };
+let mapEmployees = {};
+let mapCompanies = {};
+ let mapLocations={};
 
 function setActiveViewType(activeViewType) {
   return Promise.resolve(activeViewType);
@@ -41,10 +45,10 @@ function getConfigurationByRole(ROLE, temporaryAdmin) {
 
   return Promise.resolve(array);
 }
-function getItemsAggregation(itemAggregationValue, campaignId) {
+function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
   switch (itemAggregationValue) {
     case "EMPLOYEES":
-      return;
+      return employeeService.getAllEmployees(companyId);
     case "LOCATIONS":
       return;
     case "COMPANIES":
@@ -55,28 +59,123 @@ function getItemsAggregation(itemAggregationValue, campaignId) {
   }
 
 }
-function buildAggregateData(configuration,responses){
-  let aggregateArray=[];
-  for (let companyId=0;companyId<configuration.puntualAggregationItems.length;companyId++){
-    aggregateArray.push({ company: configuration.puntualAggregationItems[companyId].id, values: responses[companyId] })
+// function buildAggregateData(configuration, responses, field) {
+//   let aggregateArray = [];
+//   for (let index = 0; index < configuration.puntualAggregationItems.length; index++) {
+//     let newItem = {}
+//     Object.defineProperty(newItem, field, {
+//       value: configuration.puntualAggregationItems[index].id,
+//       writable: true
+//     });
+//     Object.defineProperty(newItem, 'values', {
+//       value: responses[index],
+//       writable: true
+//     });
+//     aggregateArray.push(newItem)
+//   }
+//   return aggregateArray;
+// }
+function getAllLocationsStat(configuration) {
+  //getAll  employeesid of company and call aggregateByEmployeeStat
+  return locationService.getAllLocations(configuration.company.id).then(values => {
+    configuration.puntualAggregationItems = values;
+    if (values)
+    values.map(el => {
+          Object.defineProperty(mapLocations, el.id, {
+            value: el,
+            writable: true
+          });
+        })
+    return aggregateByLocationStat(configuration)
+      })
+}
+function getAllEmployeesStat(configuration) {
+  //getAll  employeesid of company and call aggregateByEmployeeStat
+  return employeeService.getAllEmployees(configuration.company.id).then(values => {
+    configuration.puntualAggregationItems = values;
+    if (values)
+    values.map(el => {
+          Object.defineProperty(mapEmployees, el.id, {
+            value: el,
+            writable: true
+          });
+        })
+    // configuration.puntualAggregationItems = values.map(function (obj) {
+    //   return obj.id;
+    // });
+    return aggregateByEmployeeStat(configuration)
+  })
+}
+
+function aggregateByEmployeeStat(configuration) {
+  let arrayRequest = [];
+  for (let employeeId = 0; employeeId < configuration.puntualAggregationItems.length; employeeId++) {
+    //don't put if the employee has no camapign
+    if (configuration.puntualAggregationItems[employeeId].campaigns && configuration.puntualAggregationItems[employeeId].campaigns.length > 0)
+      arrayRequest.push(getEmployeeStat({
+        campaignId: configuration.campaign.id,
+        //companyId: configuration.company.id,
+        employeeId: configuration.puntualAggregationItems[employeeId].id,
+        from: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+        to: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+        groupBy: configuration.timeUnit.apiField,
+        noLimits: configuration.nolimitsKm ? true : false,
+      }))
   }
-  return aggregateArray;
+  // if (!mapEmployees[Object.keys(mapEmployees)[0]] || mapEmployees[Object.keys(mapEmployees)[0]].companyId != companyId)
+  //   arrayRequest.push(employeeService.getAllEmployees(companyId))
+  return axios.all(arrayRequest).then(axios.spread((...responses) => {
+    console.log(responses);
+    let returnArray = responses;
+    return Promise.resolve(returnArray);
+  })).catch(errors => {
+    console.log(errors)
+    return Promise.reject();
+
+  })
+
+}
+function aggregateByLocationStat(configuration) {
+  let arrayRequest = [];
+  for (let locationId = 0; locationId < configuration.puntualAggregationItems.length; locationId++) {
+          arrayRequest.push(getLocationStat({
+        campaignId: configuration.campaign.id,
+        companyId: configuration.company.id,
+        locationId: configuration.puntualAggregationItems[locationId].id,
+        from: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+        to: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+        groupBy: configuration.timeUnit.apiField,
+        noLimits: configuration.nolimitsKm ? true : false,
+      }))
+  }
+  // if (!mapEmployees[Object.keys(mapEmployees)[0]] || mapEmployees[Object.keys(mapEmployees)[0]].companyId != companyId)
+  //   arrayRequest.push(employeeService.getAllEmployees(companyId))
+  return axios.all(arrayRequest).then(axios.spread((...responses) => {
+    console.log(responses);
+    let returnArray = responses;
+    return Promise.resolve(returnArray);
+  })).catch(errors => {
+    console.log(errors)
+    return Promise.reject();
+
+  })
+
 }
 function aggregateCompanyStat(configuration) {
-  let arrayRequest=[];
-  for (let companyId=0;companyId<configuration.puntualAggregationItems.length;companyId++){
+  let arrayRequest = [];
+  for (let companyId = 0; companyId < configuration.puntualAggregationItems.length; companyId++) {
     arrayRequest.push(getCompanyStat({
       campaignId: configuration.campaign.id,
       companyId: configuration.puntualAggregationItems[companyId].id,
-      from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
-      to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
-      groupBy: configuration.timeUnit.value,
+      from: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+      to: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+      groupBy: configuration.timeUnit.apiField,
       noLimits: configuration.nolimitsKm ? true : false,
     }))
   }
   return axios.all(arrayRequest).then(axios.spread((...responses) => {
     console.log(responses);
-    return Promise.resolve(buildAggregateData(configuration,responses));
+    return Promise.resolve(responses);
   })).catch(errors => {
     console.log(errors)
     return Promise.reject();
@@ -87,7 +186,7 @@ function aggregateCompanyStat(configuration) {
 function getStat(configuration, campaign) {
   //check configuration and ask the right stat
   let apiToCall = configuration.dataLevel.api
-  if (configuration.puntualAggregationSelected.function)
+  if (configuration.puntualAggregationSelected && configuration.puntualAggregationSelected.function)
     apiToCall = configuration.puntualAggregationSelected.function
   switch (apiToCall) {
     //admin that check all comopanies of a campaign
@@ -95,51 +194,40 @@ function getStat(configuration, campaign) {
       //based on limits or not get all marge data
       return getAllCompaniesCampaignStat({
         campaignId: campaign.id,
-        from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
-        to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
-        groupBy: configuration.timeUnit.value
+        from: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+        to: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+        groupBy: configuration.timeUnit.apiField
       });
     case "getCampaignStats":
       return getCampaignStat({
         campaignId: campaign.id,
-        from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
-        to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
-        groupBy: configuration.timeUnit.value
+        from: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+        to: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+        groupBy: configuration.timeUnit.apiField
       });
     case "aggregateBycompany":
       return aggregateCompanyStat(configuration);
-    case VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY:
+    case "getEmployeesStats":
+      return getAllEmployeesStat(configuration);
+    case "aggregateByemployee":
+      return aggregateByEmployeeStat(configuration);
+    case "getLocationsStats":
+      return getAllLocationsStat(configuration);
+    case "getCompanyStats":
+      //define single compamy in the map if not defined
+      Object.defineProperty(mapCompanies, configuration.company.id, {
+        value: configuration.company,
+        writable: true
+      });
       return getCompanyStat({
         campaignId: configuration.campaign.id,
         companyId: configuration.company.id,
-        from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
-      to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
-        groupBy: configuration.timeUnit.value,
-        noLimits: configuration.nolimitsKm ? true : false,
-      });
-
-    case VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES:
-
-      return getEmployeeStat({
-        campaignId: campaign.id,
-        employeeId: configuration.employeeId,
-        from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
-        to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
-        groupBy: configuration.timeUnit.value,
-        noLimits: configuration.nolimitsKm ? true : false,
-      });
-    case VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS:
-      return getLocationStat({
-        campaignId: campaign.id,
-        companyId: configuration.company.id,
-        locationId: configuration.locationId,
-        from: configuration.timePeriod.value!='ALL'?(configuration.selectedDateFrom ? configuration.selectedDateFrom : null):null,
-        to: configuration.timePeriod.value!='ALL'?(configuration.selectedDateTo ? configuration.selectedDateTo : null):null,
-        groupBy: configuration.timeUnit.value,
-        noLimits: configuration.nolimitsKm ? true : false,
-      });
-
-
+        from: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+        to: configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+        groupBy: configuration.timeUnit.apiField,
+      }).then(value=> {
+        return Promise.resolve([value])
+      })
     default:
       break;
   }
@@ -173,12 +261,31 @@ function getCsv(configuration, campaign) {
       break;
   }
 }
-function combineMultipleLimits(limitedArray,unlimitedArray,key){
-  let combinedArray=[]
-  if (limitedArray[0].values){
-    limitedArray.map( (el,index) => {
-      if (el[key]===unlimitedArray[index][key]){
-        let combinedItem={};
+
+function combineSingleItem(limitsData,unlimitsData){
+  let returnValue={};
+        Object.defineProperty(returnValue, 'id', {
+          value: limitsData.id,
+          writable: true
+        });
+        Object.defineProperty(returnValue, 'values', {
+          value: [],
+          writable: true
+        });
+        limitsData.values.map((val, subindex) => {
+          let combinedElement = JSON.parse(JSON.stringify(val));
+          combinedElement['distancesNolimits'] = unlimitsData.values[subindex]['distances'];
+          combinedElement['trackCountNolimits'] = unlimitsData.values[subindex]['trackCount'];
+          returnValue.values.push(combinedElement);
+                })
+                return returnValue;
+}
+function combineMultipleLimits(limitedArray, unlimitedArray, key) {
+  let combinedArray = []
+  if (limitedArray[0].values) {
+    limitedArray.map((el, index) => {
+      if (el[key] === unlimitedArray[index][key]) {
+        let combinedItem = {};
         Object.defineProperty(combinedItem, key, {
           value: el[key],
           writable: true
@@ -188,42 +295,42 @@ function combineMultipleLimits(limitedArray,unlimitedArray,key){
           writable: true
         });
         // let combinedItem={company:el[key],values:[]}
-        el.values.map((val,subindex) => {
-          let combinedElement=JSON.parse(JSON.stringify(val));
-          combinedElement['distancesNolimits']=unlimitedArray[index].values[subindex]['distances'];
-        combinedElement['trackCountNolimits']=unlimitedArray[index].values[subindex]['trackCount'];
-        combinedItem.values.push(combinedElement);
+        el.values.map((val, subindex) => {
+          let combinedElement = JSON.parse(JSON.stringify(val));
+          combinedElement['distancesNolimits'] = unlimitedArray[index].values[subindex]['distances'];
+          combinedElement['trackCountNolimits'] = unlimitedArray[index].values[subindex]['trackCount'];
+          combinedItem.values.push(combinedElement);
         })
         combinedArray.push(combinedItem);
       }
     })
   }
   else {
-    limitedArray.map((val,index) => {
-      let combinedElement=JSON.parse(JSON.stringify(val));
-      combinedElement['distancesNolimits']=unlimitedArray[index]['distances'];
-    combinedElement['trackCountNolimits']=unlimitedArray[index]['trackCount'];
-    //combinedItem.values.push(combinedElement);
-    combinedArray.push(combinedElement);
+    limitedArray.map((val, index) => {
+      let combinedElement = JSON.parse(JSON.stringify(val));
+      combinedElement['distancesNolimits'] = unlimitedArray[index]['distances'];
+      combinedElement['trackCountNolimits'] = unlimitedArray[index]['trackCount'];
+      //combinedItem.values.push(combinedElement);
+      combinedArray.push(combinedElement);
     })
-    
-  }
-    return combinedArray;
 
   }
-  function dynamicSort(property) {
-    var sortOrder = 1;
-    if(property[0] === "-") {
-        sortOrder = -1;
-        property = property.substr(1);
-    }
-    return function (a,b) {
-        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-        return result * sortOrder;
-    }
+  return combinedArray;
+
+}
+function dynamicSort(property) {
+  var sortOrder = 1;
+  if (property[0] === "-") {
+    sortOrder = -1;
+    property = property.substr(1);
+  }
+  return function (a, b) {
+    var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+    return result * sortOrder;
+  }
 }
 function getAllCompaniesCampaignStat({ campaignId, from, to, groupBy }) {
-  let multiple=[];
+  let multiple = [];
   // noLimits
   multiple.push(axios
     .get(
@@ -237,7 +344,7 @@ function getAllCompaniesCampaignStat({ campaignId, from, to, groupBy }) {
           ...(from ? { from: from } : {}),
           ...(to ? { to: to } : {}),
           ...(groupBy ? { groupBy: groupBy } : {}),
-          ...({ noLimits: true } ),
+          ...({ noLimits: true }),
         },
       }
     ))
@@ -254,37 +361,60 @@ function getAllCompaniesCampaignStat({ campaignId, from, to, groupBy }) {
           ...(from ? { from: from } : {}),
           ...(to ? { to: to } : {}),
           ...(groupBy ? { groupBy: groupBy } : {}),
-          ...( { noLimits: false }),
+          ...({ noLimits: false }),
         },
       }
     ))
-    return axios.all(multiple).then(axios.spread((...responses) => {
-      //combine limits and not limits values
-      let companiesStateLimited = aggregateByCompany(responses[0].data);
-      let companiesStateUnlimited = aggregateByCompany(responses[1].data);
-      let returnData=combineMultipleLimits(companiesStateLimited.sort(dynamicSort('company')),companiesStateUnlimited.sort(dynamicSort('company')),'company');
-      return Promise.resolve(returnData);
-    })).catch(errors => {
-      console.log(errors)
-      return Promise.reject();
+  //get statinfo
+  multiple.push(companyService.getAllCompanies())
+  return axios.all(multiple).then(axios.spread((...responses) => {
+    //combine limits and not limits values
+
+    let companiesStateUnlimited = aggregateCompany(responses[0].data);
+    let companiesStateLimited = aggregateCompany(responses[1].data);
+    responses[2].map(el => {
+      Object.defineProperty(mapCompanies, el.id, {
+        value: el,
+        writable: true
+      });
     })
+    let returnData = combineMultipleLimits(companiesStateLimited.sort(dynamicSort('id')), companiesStateUnlimited.sort(dynamicSort('id')), 'id');
+    return Promise.resolve(returnData);
+  })).catch(errors => {
+    console.log(errors)
+    return Promise.reject();
+  })
 }
-function aggregateByCompany(allStat) {
-  var companiesStat = []
+function aggregateCompany(allStat) {
+  var stats = []
   allStat.forEach(stat => {
     //se la mappa contiene l'azienda, aggiungi la stat al suo array
-    let index = companiesStat.findIndex(el => el.company == stat.company)
+    let index = stats.findIndex(el => el['company'] == stat['company'])
     if (index != -1) {
-      companiesStat[index].values.push(stat)
+      stats[index].values.push(stat)
     }
     //altrimenti aggiungi nuova azienda e array con un elemento
     else {
-      companiesStat.push({ company: stat.company, values: [stat] })
+      let newItem = {}
+      Object.defineProperty(newItem, 'company', {
+        value: stat['company'],
+        writable: true
+      });
+      Object.defineProperty(newItem, 'id', {
+        value: stat['company'],
+        writable: true
+      });
+      Object.defineProperty(newItem, 'values', {
+        value: [stat],
+        writable: true
+      });
+      stats.push(newItem)
+      // stats.push({ company: stat[field], values: [stat] })
     }
   })
-  return companiesStat;
+  return stats;
 }
-function getHeadersNumner(selection){
+function getHeadersNumner(selection) {
   return selection.dataColumns.length;
 }
 async function fillTheViewWithValues(values, view, selection, currentCampaign) {
@@ -292,7 +422,7 @@ async function fillTheViewWithValues(values, view, selection, currentCampaign) {
   switch (view.item) {
     case 'Tabella':
       viewData.headers = getHeadersTable(values, selection, currentCampaign)
-      viewData.headerNumber=getHeadersNumner(selection);
+      viewData.headerNumber = getHeadersNumner(selection);
       viewData.subheaders = getSubHeaders(viewData.headers, selection)
       viewData.data = await getData(currentCampaign, viewData.headers, viewData.subheaders, selection, values)
       break;
@@ -359,18 +489,48 @@ function getSubHeaders(headers, selection) {
   return subheaders;
 }
 
+function getCompanyName(id) {
+  if (mapCompanies[id])
+    return Promise.resolve(mapCompanies[id].name);
+  return Promise.resolve("");
+}
+function getEmployeeName(id) {
+  if (mapEmployees[id])
+    return Promise.resolve(mapEmployees[id].name + ' ' + mapEmployees[id].surname);
+  return Promise.resolve("");
+}
+function getLocationName(id){
+  if (mapLocations[id])
+  return Promise.resolve(mapLocations[id].id);
+  return Promise.resolve("");
+}
 
 //get the first element of the table (name) based on the selection: if companies get the name of the single company
 //if campaign return the current campaign and so on
 async function getRowName(obj, selectionValue, currentCampaign) {
   let returnValue = ""
+  if (obj)
   switch (selectionValue) {
     case ("companies"):
-      returnValue = (await companyService.getCompanyById(obj['company'])).name
+      //map with companyID and detail
+      returnValue = await getCompanyName([obj['id']])
       break;
+   case ("company"):
+        //map with companyID and detail
+        returnValue = await getCompanyName([obj['id']])
+        break;
     case ("campaign"):
       returnValue = currentCampaign.title;
       break;
+      case ("employees"):
+        //TODO add the name of employee
+        //map with companyID and detail
+        returnValue = await getEmployeeName([obj['id']])
+        break;
+      case ("locations"):
+          //map with companyID and detail
+          returnValue = await getLocationName(decodeURI([obj['id']]))
+          break;
     default:
       break;
   }
@@ -396,7 +556,7 @@ function sumProp(items, prop) {
 
 //find the element of the row depending if the data has one, 2 dimension (1 or multiple row) or is an aggregation
 function findElementInValues(values, rowIndex, selection, headers, columnIndex) {
-  if (Object.prototype.hasOwnProperty.call(values[rowIndex], 'values')) {
+  if (values[rowIndex] && Object.prototype.hasOwnProperty.call(values[rowIndex], 'values')) {
     if (selection.timeUnit.value == 'campaign') {
       let newObj = {};
       if (values[rowIndex].values[0])
@@ -408,7 +568,9 @@ function findElementInValues(values, rowIndex, selection, headers, columnIndex) 
         }
       return newObj
     }
-    return (values[rowIndex].values.find(el => el[selection.timeUnit.value] === headers[columnIndex]))
+    return (values[rowIndex].values ? values[rowIndex].values.find(el => {
+      return el[selection.timeUnit.value] === headers[columnIndex]
+    }) : null)
   }
   else {
     if (selection.timeUnit.value == 'campaign') {
@@ -429,7 +591,7 @@ function findElementInValues(values, rowIndex, selection, headers, columnIndex) 
 // if values has more than 1 level it return the number of elements (every row of the table is an element)
 // otherwise it is a table with just one row
 function getRowByValues(values) {
-  if (Object.prototype.hasOwnProperty.call(values[0], 'values'))
+  if (values[0] && Object.prototype.hasOwnProperty.call(values[0], 'values'))
     return values.length
   return 1;
 }
@@ -457,8 +619,8 @@ async function getData(currentCampaign, headers, subheaders, selection, values) 
   return data;
 
 }
-function getCampaignStat({ campaignId, from, to, groupBy}) {
-  let multiple=[];
+function getCampaignStat({ campaignId, from, to, groupBy }) {
+  let multiple = [];
   // noLimits
   multiple.push(axios
     .get(
@@ -472,7 +634,7 @@ function getCampaignStat({ campaignId, from, to, groupBy}) {
           ...(from ? { from: from } : {}),
           ...(to ? { to: to } : {}),
           ...(groupBy ? { groupBy: groupBy } : {}),
-          ...({ noLimits: true } ),
+          ...({ noLimits: true }),
         },
       }
     ))
@@ -480,29 +642,29 @@ function getCampaignStat({ campaignId, from, to, groupBy}) {
   multiple.push(axios
     .get(
       process.env.VUE_APP_BASE_URL +
-          process.env.VUE_APP_CAMPAIGNS_API +
-          "/" +
-          campaignId +
-          "/agg",
+      process.env.VUE_APP_CAMPAIGNS_API +
+      "/" +
+      campaignId +
+      "/agg",
       {
         params: {
           ...(from ? { from: from } : {}),
           ...(to ? { to: to } : {}),
           ...(groupBy ? { groupBy: groupBy } : {}),
-          ...( { noLimits: false }),
+          ...({ noLimits: false }),
         },
       }
     ))
-    return axios.all(multiple).then(axios.spread((...responses) => {
-      //combine limits and not limits values
-      let campaignLimited = responses[0].data;
-      let campaignUnLimited = responses[1].data;
-      let returnData=combineMultipleLimits(campaignLimited,campaignUnLimited);
-      return Promise.resolve(returnData);
-    })).catch(errors => {
-      console.log(errors)
-      return Promise.reject();
-    })
+  return axios.all(multiple).then(axios.spread((...responses) => {
+    //combine limits and not limits values
+    let campaignUnLimited = responses[0].data;
+    let campaignLimited = responses[1].data;
+    let returnData = combineMultipleLimits(campaignLimited, campaignUnLimited);
+    return Promise.resolve(returnData);
+  })).catch(errors => {
+    console.log(errors)
+    return Promise.reject();
+  })
 }
 
 function getCompanyStat(
@@ -510,24 +672,24 @@ function getCompanyStat(
     companyId,
     from,
     to,
-    groupBy}
+    groupBy }
 ) {
-  let multiple=[];
+  let multiple = [];
   // noLimits
   multiple.push(axios
     .get(
       process.env.VUE_APP_BASE_URL +
-          process.env.VUE_APP_CAMPAIGNS_API +
-          "/" +
-          campaignId +
-          "/agg/" +
-          companyId,
+      process.env.VUE_APP_CAMPAIGNS_API +
+      "/" +
+      campaignId +
+      "/agg/" +
+      companyId,
       {
         params: {
           ...(from ? { from: from } : {}),
           ...(to ? { to: to } : {}),
           ...(groupBy ? { groupBy: groupBy } : {}),
-          ...({ noLimits: true } ),
+          ...({ noLimits: true }),
         },
       }
     ))
@@ -545,20 +707,84 @@ function getCompanyStat(
           ...(from ? { from: from } : {}),
           ...(to ? { to: to } : {}),
           ...(groupBy ? { groupBy: groupBy } : {}),
-          ...( { noLimits: false }),
+          ...({ noLimits: false }),
         },
       }
     ))
-    return axios.all(multiple).then(axios.spread((...responses) => {
-      //combine limits and not limits values
-      let companyStatLimited = responses[0].data;
-      let companyStatUnLimited = responses[1].data;
-      let returnData=combineMultipleLimits(companyStatLimited,companyStatUnLimited);
-      return Promise.resolve(returnData);
-    })).catch(errors => {
-      console.log(errors)
-      return Promise.reject();
-    })
+  return axios.all(multiple).then(axios.spread((...responses) => {
+    //combine limits and not limits values
+    
+    let companyStatLimited = createEmployeeData(responses[0]);
+    let companyStatUnLimited = createEmployeeData(responses[1]);
+    let combinedItem = combineSingleItem(companyStatLimited,companyStatUnLimited);
+    return Promise.resolve(combinedItem);
+  })).catch(errors => {
+    console.log(errors)
+    return Promise.reject();
+  })
+  
+}
+function getLocationStat(
+  { campaignId,
+    companyId,
+    locationId,
+    from,
+    to,
+    groupBy}
+) {
+  let multiple = [];
+  // noLimits
+  multiple.push(axios
+    .get(
+      process.env.VUE_APP_BASE_URL +
+      process.env.VUE_APP_CAMPAIGNS_API +
+      "/" +
+      campaignId +
+      "/agg/" +
+      companyId +
+      "/" +
+      locationId,
+      {
+        params: {
+          ...(from ? { from: from } : {}),
+          ...(to ? { to: to } : {}),
+          ...(groupBy ? { groupBy: groupBy } : {}),
+          // ...(withTracks ? { withTracks: withTracks } : {}),
+          ...({ noLimits: true }),
+        },
+      }
+    ))
+  // limits
+  multiple.push(axios
+    .get(
+      process.env.VUE_APP_BASE_URL +
+          process.env.VUE_APP_CAMPAIGNS_API +
+          "/" +
+          campaignId +
+          "/agg/" +
+          companyId +
+          "/" +
+          locationId,
+      {
+        params: {
+          ...(from ? { from: from } : {}),
+          ...(to ? { to: to } : {}),
+          ...(groupBy ? { groupBy: groupBy } : {}),
+          // ...(withTracks ? { withTracks: withTracks } : {}),
+          ...({ noLimits: false }),
+        },
+      }
+    ))
+
+  return axios.all(multiple).then(axios.spread((...responses) => {
+    let unlimitsData=createEmployeeData(responses[0])
+    let limitsData=createEmployeeData(responses[1])
+    let combinedItem = combineSingleItem(limitsData,unlimitsData);
+    return Promise.resolve(combinedItem);
+  })).catch(errors => {
+    console.log(errors)
+    return Promise.reject();
+  })
   // return axios
   //   .get(
   //     process.env.VUE_APP_BASE_URL +
@@ -566,7 +792,9 @@ function getCompanyStat(
   //     "/" +
   //     campaignId +
   //     "/agg/" +
-  //     companyId,
+  //     companyId +
+  //     "/" +
+  //     locationId,
   //     {
   //       params: {
   //         ...(from ? { from: from } : {}),
@@ -587,55 +815,19 @@ function getCompanyStat(
   //     }
   //   );
 }
-function getLocationStat(
-  { campaignId,
-    companyId,
-    locationId,
-    from,
-    to,
-    groupBy,
-    noLimits = false }
-) {
-  return axios
-    .get(
-      process.env.VUE_APP_BASE_URL +
-      process.env.VUE_APP_CAMPAIGNS_API +
-      "/" +
-      campaignId +
-      "/agg/" +
-      companyId +
-      "/" +
-      locationId,
-      {
-        params: {
-          ...(from ? { from: from } : {}),
-          ...(to ? { to: to } : {}),
-          ...(groupBy ? { groupBy: groupBy } : {}),
-          ...(noLimits ? { noLimits: noLimits } : {}),
-        },
-      }
-    )
-    .then(
-      (res) => {
-        if (res && res.data) {
-          return Promise.resolve(res.data);
-        } else return Promise.reject(null);
-      },
-      (err) => {
-        return Promise.reject(err);
-      }
-    );
-}
-function getEmployeeStat(
+function getEmployeeStat({
   campaignId,
+  //companyId,
   employeeId,
   from,
   to,
   groupBy,
   withTracks = false,
-  noLimits = false
-) {
-  return axios
+
+}) {
+  let multiple = [];
+  // noLimits
+  multiple.push(axios
     .get(
       process.env.VUE_APP_BASE_URL +
       process.env.VUE_APP_CAMPAIGNS_API +
@@ -649,22 +841,69 @@ function getEmployeeStat(
           ...(to ? { to: to } : {}),
           ...(groupBy ? { groupBy: groupBy } : {}),
           ...(withTracks ? { withTracks: withTracks } : {}),
-          ...(noLimits ? { noLimits: noLimits } : {}),
+          ...({ noLimits: true }),
         },
       }
-    )
-    .then(
-      (res) => {
-        if (res && res.data) {
-          return Promise.resolve(res.data);
-        } else return Promise.reject(null);
-      },
-      (err) => {
-        return Promise.reject(err);
+    ))
+  // limits
+  multiple.push(axios
+    .get(
+      process.env.VUE_APP_BASE_URL +
+      process.env.VUE_APP_CAMPAIGNS_API +
+      "/" +
+      campaignId +
+      "/stats/" +
+      employeeId,
+      {
+        params: {
+          ...(from ? { from: from } : {}),
+          ...(to ? { to: to } : {}),
+          ...(groupBy ? { groupBy: groupBy } : {}),
+          ...(withTracks ? { withTracks: withTracks } : {}),
+          ...({ noLimits: false }),
+        },
       }
-    );
-}
+    ))
 
+  return axios.all(multiple).then(axios.spread((...responses) => {
+    //order responses.data
+    
+    let unlimitsData=createEmployeeData(responses[0]);
+    unlimitsData.values=unlimitsData.values.sort(dynamicSort(groupBy=='day'?'date':'month'))
+    let limitsData=createEmployeeData(responses[1])
+    limitsData.values=limitsData.values.sort(dynamicSort(groupBy=='day'?'date':'month'))
+    let combinedItem = {};
+        Object.defineProperty(combinedItem, 'id', {
+          value: limitsData.id,
+          writable: true
+        });
+        Object.defineProperty(combinedItem, 'values', {
+          value: [],
+          writable: true
+        });
+        limitsData.values.map((val, subindex) => {
+          let combinedElement = JSON.parse(JSON.stringify(val));
+          combinedElement['distancesNolimits'] = unlimitsData.values[subindex]['distances'];
+          combinedElement['trackCountNolimits'] = unlimitsData.values[subindex]['trackCount'];
+          combinedItem.values.push(combinedElement);        })
+    return Promise.resolve(combinedItem);
+  })).catch(errors => {
+    console.log(errors)
+    return Promise.reject();
+  })
+}
+function createEmployeeData(res){
+//combine limits and not limits values
+let req = res.request.responseURL.split("?")
+req = req[0];
+// Get the last path:
+req = req.split("/");
+let id = req[req.length - 1];
+res.data = res.data.map(el => {
+  return { ...el, id: id };
+})
+return {id:id,values:res.data};
+}
 function getCampaignCsv(campaignId, from, to) {
   // var fromParam= from?('?from='+from):''
   // var toParam=''

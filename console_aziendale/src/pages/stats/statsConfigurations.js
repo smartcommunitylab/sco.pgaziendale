@@ -39,30 +39,26 @@ export const statsConfigurations = [
         ],
         dataColumns: [
           {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-            value: "Km percorsi",
-            apiOption: "noLimits=false",
+            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
+            value: "Km utili",
             apiField: "distances",
             apiFunction:""
           },
           {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM, 
-            value:  "Km utili",
-            apiOption: "noLimits=true",
+            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED, 
+            value:  "Km percorsi",
             apiField: "distancesNolimits",
             apiFunction:""
           },
           {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL, 
-            value: "Viaggi totali",
-            apiOption: "noLimits=false",
+            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL, 
+            value: "Viaggi utili",
             apiField: "trackCount",
             apiFunction:""
           },
           {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
-             value: "Viaggi utili",
-            apiOption: "noLimits=true",
+            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+             value: "Viaggi totali",
             apiField: "trackCountNolimits",
             apiFunction:""
           },
@@ -73,14 +69,12 @@ export const statsConfigurations = [
           {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",
-            apiOption: "groupBy=month",
             apiField: "month",
             apiFunction:""
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
             value: "campaign",
-            apiOption: "groupBy=month",
             apiField: "month",
             apiFunction:"aggregate"
           }
@@ -89,14 +83,12 @@ export const statsConfigurations = [
           {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
             value: "ALL",
-            apiOption: "",
             apiField: "",
             apiFunction:""
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC,
             value: "SPECIFIC",
-            apiOptions: ["from=","to="],
             apiField: "month",
             apiFunction:""
           },
@@ -106,29 +98,25 @@ export const statsConfigurations = [
           dataColumns: [
             {
               label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-              value: "Km percorsi",
-              apiOption: "noLimits=false",
+              value: "Km utili",
               apiField: "distances",
               apiFunction:""
             },
             {
               label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM, 
-              value:  "Km utili",
-              apiOption: "noLimits=true",
+              value:  "Km percorsi",
               apiField: "distancesNolimits",
               apiFunction:""
             },
             {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL, 
-              value: "Viaggi totali",
-              apiOption: "noLimits=false",
+              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL, 
+              value: "Viaggi utili",
               apiField: "trackCount",
               apiFunction:""
             },
             {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
-               value: "Viaggi utili",
-              apiOption: "noLimits=true",
+              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+               value: "Viaggi totali",
               apiField: "trackCountNolimits",
               apiFunction:""
             },
@@ -155,14 +143,12 @@ export const statsConfigurations = [
           timeUnit:  {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",
-            apiOption: "groupBy=month",
             apiField: "month",
             apiFunction:""
           },
           timePeriod: {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
             value: "ALL",
-            apiOption: "",
             apiField: "",
             apiFunction:""
           },
@@ -183,199 +169,305 @@ export const statsConfigurations = [
     views: [
       {
         type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
-        dataColumns: [
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
-        ],
         dataLevel: [
-          VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
-          VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
-          VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES,
+          {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+            value: "company",
+            api: "getCompanyStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value:  'NONE'
+            }],
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
+            value: "locations",
+            api: "getLocationsStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value: 'NONE',
+              function:''
+            }]
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES,
+            value: "employees",
+            api: "getEmployeesStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value: 'NONE',
+              function:''
+            },{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES,
+              value: 'EMPLOYEES',
+              function:'aggregateByemployee'
+            }]
+          }
+        ],
+        dataColumns: [
+          {
+            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
+            value: "Km utili",
+            apiField: "distances",
+            apiFunction:""
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED, 
+            value:  "Km percorsi",
+            apiField: "distancesNolimits",
+            apiFunction:""
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL, 
+            value: "Viaggi utili",
+            apiField: "trackCount",
+            apiFunction:""
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+             value: "Viaggi totali",
+            apiField: "trackCountNolimits",
+            apiFunction:""
+          },
         ],
         timeUnit: [
-          VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
-          // VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+            value: "month",
+            apiField: "month",
+            apiFunction:""
+          },
+          {
+            label:VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
+            value: "date",
+            apiField: "day",
+            apiFunction:""
+          }
         ],
         timePeriod: [
-          VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
-          VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
+          {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+            value: "ALL",
+            apiField: "",
+            apiFunction:""
+          },
+          {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC,
+            value: "SPECIFIC",
+            apiField: "month",
+            apiFunction:""
+          },
         ],
-        puntualAggregation: [
-          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
-          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES
-        ],
+        
         default: {
-          dataColumns: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-          dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.CAMPAIGN,
-          timeUnit: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
-          timePeriod: VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
-          puntualAggregation: VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
-        },
+          dataColumns: [
+            {
+              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
+              value: "Km utili",
+              apiField: "distances",
+              apiFunction:""
+            },
+            {
+              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED, 
+              value:  "Km percorsi",
+              apiField: "distancesNolimits",
+              apiFunction:""
+            }
+          ],
+          puntualAggregationSelected:{
+            label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+            value: 'NONE',
+            function:''
+          },
+          dataLevel: {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES,
+            value: "employees",
+            api: "getEmployeesStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value: 'NONE',
+              function:''
+            },{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES,
+              value: 'EMPLOYEES',
+              function:'aggregateByemployee'
+            }]
+          },
+          timeUnit:  {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+            value: "month",
+            apiField: "month",
+            apiFunction:""
+          },
+          timePeriod: {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+            value: "ALL",
+            apiField: "",
+            apiFunction:""
+          },
+        
         exportCSV: true,
-      },
-      {
-        type: VARIABLES.STATS.VIEWS.TYPE.BAR_CHART,
-        dataColumns: [
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.DISCARDED_KM,
-        ],
-        dataLevel: [VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY],
-        timeUnit: [
-          VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
-          // VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
-        ],
-        timePeriod: [
-          VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
-          VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
-        ],
-        puntualAggregation: [
-          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
-          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES
-        ],
-        default: {
-          dataColumns: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-          dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
-          timeUnit: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
-          timePeriod: VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
-          puntualAggregation: VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
-        },
-        exportCSV: false,
-      },
-      {
-        type: VARIABLES.STATS.VIEWS.TYPE.LINE_CHART,
-        dataColumns: [
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
-        ],
-        dataLevel: [VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY],
-        timeUnit: [
-          //VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
-        ],
-        timePeriod: [
-          VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
-          VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
-        ],
-        puntualAggregation: [
-          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
-          VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES
-        ],
-        default: {
-          dataColumns: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-          dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
-          timeUnit: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
-          timePeriod: VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
-          puntualAggregation: VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
-        },
-        exportCSV: false,
-      },
+      }
+    },
+      // {
+      //   type: VARIABLES.STATS.VIEWS.TYPE.BAR_CHART,
+      //   dataColumns: [
+      //     VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
+      //     VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
+      //     VARIABLES.STATS.VIEWS.DATACOLUMNS.DISCARDED_KM,
+      //   ],
+      //   dataLevel: [VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY],
+      //   timeUnit: [
+      //     VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
+      //     // VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+      //     VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+      //     VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
+      //   ],
+      //   timePeriod: [
+      //     VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+      //     VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
+      //   ],
+      //   puntualAggregation: [
+      //     VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+      //     VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES
+      //   ],
+      //   default: {
+      //     dataColumns: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
+      //     dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+      //     timeUnit: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+      //     timePeriod: VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+      //     puntualAggregation: VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+      //   },
+      //   exportCSV: false,
+      // },
+      // {
+      //   type: VARIABLES.STATS.VIEWS.TYPE.LINE_CHART,
+      //   dataColumns: [
+      //     VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
+      //     VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
+      //     VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+      //     VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+      //   ],
+      //   dataLevel: [VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY],
+      //   timeUnit: [
+      //     //VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+      //     VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
+      //   ],
+      //   timePeriod: [
+      //     VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+      //     VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC
+      //   ],
+      //   puntualAggregation: [
+      //     VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+      //     VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES
+      //   ],
+      //   default: {
+      //     dataColumns: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
+      //     dataLevel: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+      //     timeUnit: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+      //     timePeriod: VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+      //     puntualAggregation: VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+      //   },
+      //   exportCSV: false,
+      // },
     ],
   },
 
 
 
-  /*
-  / Configurazione - Partecipazione Dipendenti
-  */
-  {
-    id: 2,
-    name: VARIABLES.STATS.NAME.EMPLOYEES_PARTECIPATION,
-    profile: VARIABLES.ROLE.COMPANY_ADMIN,
-    views: [
-      {
-        type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
-        dataColumns: [
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.REGISTER_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.SUBSCRIBED_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_SUBSCRIBED_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.INACTIVE_SUBSCRIBED_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.PERCENTAGE_EMPLOYEES,
-        ],
-        dataLevel: [
-          VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
-          VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
-        ],
-        timeUnit: [
-          //VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
-        ],
-        selectAggregazionePuntuale: "nessuna",
-        selectRangeTime: true,
-        exportCSV: true,
-      },
-      {
-        type: VARIABLES.STATS.VIEWS.TYPE.HORIZONTAL_STACKED_BARS,
-        dataColumns: [
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_SUBSCRIBED_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.INACTIVE_SUBSCRIBED_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.NOT_SUBSCRIBED_EMPLOYEES,
-        ],
-        dataLevel: [
-          VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
-          VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
-        ],
-        timeUnit: [VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN],
-        selectAggregazionePuntuale: "si per sedi",
-        selectRangeTime: true,
-        exportCSV: false,
-      },
-    ],
-  },
+  // /*
+  // / Configurazione - Partecipazione Dipendenti
+  // */
+  // {
+  //   id: 2,
+  //   name: VARIABLES.STATS.NAME.EMPLOYEES_PARTECIPATION,
+  //   profile: VARIABLES.ROLE.COMPANY_ADMIN,
+  //   views: [
+  //     {
+  //       type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
+  //       dataColumns: [
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.REGISTER_EMPLOYEES,
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.SUBSCRIBED_EMPLOYEES,
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_EMPLOYEES,
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_SUBSCRIBED_EMPLOYEES,
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.INACTIVE_SUBSCRIBED_EMPLOYEES,
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.PERCENTAGE_EMPLOYEES,
+  //       ],
+  //       dataLevel: [
+  //         VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
+  //         VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+  //       ],
+  //       timeUnit: [
+  //         //VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+  //         VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+  //         VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
+  //       ],
+  //       selectAggregazionePuntuale: "nessuna",
+  //       selectRangeTime: true,
+  //       exportCSV: true,
+  //     },
+  //     {
+  //       type: VARIABLES.STATS.VIEWS.TYPE.HORIZONTAL_STACKED_BARS,
+  //       dataColumns: [
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_SUBSCRIBED_EMPLOYEES,
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.INACTIVE_SUBSCRIBED_EMPLOYEES,
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.NOT_SUBSCRIBED_EMPLOYEES,
+  //       ],
+  //       dataLevel: [
+  //         VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
+  //         VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+  //       ],
+  //       timeUnit: [VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN],
+  //       selectAggregazionePuntuale: "si per sedi",
+  //       selectRangeTime: true,
+  //       exportCSV: false,
+  //     },
+  //   ],
+  // },
 
-  /*
-  / Configurazione - Impatto Ambientale
-  */
-  {
-    id: 3,
-    name: VARIABLES.STATS.NAME.ENVIRONMENTAL_IMPACT,
-    profile: VARIABLES.ROLE.COMPANY_ADMIN,
-    views: [
-      {
-        type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
-        dataColumns: [
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.TOTAL_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED,
-        ],
-        dataLevel: [
-          VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
-          VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
-        ],
-        timeUnit: [
-          //VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
-        ],
-        selectAggregazionePuntuale: "nessuna",
-        selectRangeTime: true,
-        exportCSV: true,
-      },
-      {
-        type: VARIABLES.STATS.VIEWS.TYPE.LINE_CHART,
-        dataColumns: [VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED],
-        dataLevel: [
-          VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
-          VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
-        ],
-        timeUnit: [
-          //VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
-          VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
-        ],
-        selectAggregazionePuntuale: "nessuna",
-        selectRangeTime: true,
-        exportCSV: true,
-      },
-    ],
-  },
+  // /*
+  // / Configurazione - Impatto Ambientale
+  // */
+  // {
+  //   id: 3,
+  //   name: VARIABLES.STATS.NAME.ENVIRONMENTAL_IMPACT,
+  //   profile: VARIABLES.ROLE.COMPANY_ADMIN,
+  //   views: [
+  //     {
+  //       type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
+  //       dataColumns: [
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.TOTAL_TRAVEL,
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
+  //         VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED,
+  //       ],
+  //       dataLevel: [
+  //         VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
+  //         VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+  //       ],
+  //       timeUnit: [
+  //         //VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+  //         VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+  //         VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
+  //       ],
+  //       selectAggregazionePuntuale: "nessuna",
+  //       selectRangeTime: true,
+  //       exportCSV: true,
+  //     },
+  //     {
+  //       type: VARIABLES.STATS.VIEWS.TYPE.LINE_CHART,
+  //       dataColumns: [VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED],
+  //       dataLevel: [
+  //         VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
+  //         VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+  //       ],
+  //       timeUnit: [
+  //         //VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+  //         VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
+  //       ],
+  //       selectAggregazionePuntuale: "nessuna",
+  //       selectRangeTime: true,
+  //       exportCSV: true,
+  //     },
+  //   ],
+  // },
 ];

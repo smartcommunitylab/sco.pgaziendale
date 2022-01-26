@@ -38,9 +38,9 @@ export const VARIABLES = {
         CO2_SAVED: "CO2 salvata", 
       },
       DATALEVEL: {
-        LOCATIONS: { label: "Sedi", value: "Locations" },
-        COMPANY: { label: "Azienda", value: "company" },
-        EMPLOYEES: { label: "Dipendenti", value: "employees" },
+        LOCATIONS:  "Sedi",
+        COMPANY:  "Azienda", 
+        EMPLOYEES: "Dipendenti",
         CAMPAIGN: "Campagna",
         COMPANIES: "Aziende",
       },

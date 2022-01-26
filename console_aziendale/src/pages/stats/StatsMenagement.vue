@@ -327,21 +327,10 @@ export default {
       "currentCampaign",
       "statValues",
     ]),
+    ...mapState("company",["actualCompany"]),
+    ...mapState("navigation", ["page"]),
     ...mapState("navigation", ["page"]),
     ...mapState("account", ["role", "temporaryAdmin"]),
-    // activeSelection () {
-    //   return this.$store.state.stat.activeSelection;
-    // },
-    // activeAggregation() {
-    //   return (
-    //     this.activeSelection.dataLevel.puntualAggregation &&
-    //     this.activeSelection.dataLevel.puntualAggregation.length
-    //   );
-    // },
-    //     currentPuntualAggregation(){
-    //   //return array of puntual aggregation based on this.localSelection.dataLevel
-    //   return (this.view.dataLevel.find(el => el.value == this.localSelection.dataLevel.value)).puntualAggregation
-    // },
     timeSelected() {
       return this.localSelection && this.localSelection.timePeriod && this.localSelection.timePeriod.value != "ALL";
     },
@@ -469,7 +458,8 @@ export default {
         statService
           .getItemsAggregation(
             this.localSelection.puntualAggregationSelected.value,
-            this.localSelection.campaign.id
+            this.localSelection.campaign?this.localSelection.campaign.id:null,
+            this.localSelection.company?this.localSelection.company.id:null
           )
           .then(
             (values) => {
@@ -489,7 +479,8 @@ export default {
       this.tab = this.activeViewType;
       if (this.activeSelection && this.currentCampaign) {
         //init with view configuration
-        this.localSelection.company = this.activeSelection.company;
+        
+        this.localSelection.company = this.activeSelection.company?this.activeSelection.company:(this.actualCompany?this.actualCompany.item:undefined);
         this.localSelection.campaign = this.currentCampaign.item;
         this.localSelection.dataLevel = this.activeSelection.dataLevel;
         this.localSelection.timeUnit = this.activeSelection.timeUnit;
@@ -565,6 +556,17 @@ export default {
       },
       deep: true,
     },
+      // actualCompany: {
+      //   handler: function (newValue, oldValue) {
+      //     if (!oldValue && newValue) {
+      //       // if (!this.activeSelection.campaign)
+      //       //   this.setDefaultCampaign();
+      //       // else
+      //       this.initiSelection();
+      //     }
+      //   },
+      //   deep: true,
+      // },
     // activeSelection: {
     //   handler: function (newValue,oldValue) {
     //     if (!oldValue && newValue && this.localSelection && this.activeSelection ) {

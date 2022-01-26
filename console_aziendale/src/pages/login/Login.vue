@@ -123,7 +123,7 @@ export default {
       }
     },
     resetPwd(){
-      this.$router.push('/ResetPassword');
+      this.$router.push('/resetpwd');
     },
   },
 
