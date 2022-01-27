@@ -289,6 +289,7 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES,
             value: "employees",
             api: "getEmployeesStats",
+            exportCSV:true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
