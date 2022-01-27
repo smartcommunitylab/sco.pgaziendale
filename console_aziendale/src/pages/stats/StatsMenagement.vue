@@ -75,8 +75,8 @@
             <v-btn color="primary" text @click="sheet = !sheet"> Modifica filtri </v-btn>
           </v-card-actions>
         </v-card>
-        <div class="text-center m-2">
-          <v-btn color="primary" @click="exportCsv" :disabled="!localSelection.dataLevel.exportCSV"> Download CSV </v-btn>
+        <div class="text-center m-2" v-if="activeSelection && activeSelection.dataLevel">
+          <v-btn color="primary" @click="exportCsv" :disabled="!activeSelection.dataLevel.exportCSV"> Download CSV </v-btn>
         </div>
         <!-- Gestore di inserimento dati (MODALE) -->
         <v-bottom-sheet v-model="sheet">
@@ -270,6 +270,7 @@ import DataTable from "@/components/stats-views/DataTable.vue";
 import LineChart from "@/components/stats-views/LineChart.vue";
 import BarChart from "@/components/stats-views/BarChart.vue";
 import { statService } from "../../services";
+import { viewStatService } from "../../services";
 export default {
   mixins: [validationMixin],
 
@@ -401,7 +402,7 @@ export default {
       this.getLocalStat(this.localSelection);
     },
     fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
-      statService
+      viewStatService
         .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
         .then((viewData) => {
           this.viewData = viewData;
@@ -503,22 +504,22 @@ export default {
   },
   created() {
     this.initConfigurationStat();
-    this.initiSelection();
+    //this.initiSelection();
   },
   mounted() {
-    if (
-      this.statValues &&
-      this.statValues.items &&
-      this.activeViewType &&
-      this.activeSelection &&
-      this.currentCampaign.item
-    )
-      this.fillTheViewWithValues(
-        this.statValues.items,
-        this.activeViewType,
-        this.activeSelection,
-        this.currentCampaign.item
-      );
+    // if (
+    //   this.statValues &&
+    //   this.statValues.items &&
+    //   this.activeViewType &&
+    //   this.activeSelection &&
+    //   this.currentCampaign.item
+    // )
+    //   this.fillTheViewWithValues(
+    //     this.statValues.items,
+    //     this.activeViewType,
+    //     this.activeSelection,
+    //     this.currentCampaign.item
+    //   );
   },
 
   watch: {
@@ -541,6 +542,7 @@ export default {
     // },
     activeConfiguration() {
       this.tab = this.activeViewType;
+      this.initiSelection();
     },
     // puntualAggregation() {
     //    this.getItemsAggregation();

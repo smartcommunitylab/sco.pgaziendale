@@ -71,6 +71,7 @@ const actions = {
   },
 
   initConfigurationByRole({ commit, dispatch }, { role, temporaryAdmin }) {
+     commit("resetStat");
     commit("getConfigurationByRole");
     statService.getConfigurationByRole(role, temporaryAdmin).then(
       (configurations) => {
@@ -181,11 +182,19 @@ const mutations = {
   
   resetStat(state) {
     state.statValues = null;
+    state.configurations = null; 
+    state.activeConfiguration = null;
+    state.activeViewType =null;
+    state.activeSelection=null;
   },
   getConfigurationByRole() {
     state.configurations = { loading: true };
   },
   getConfigurationByRoleSuccess(state, configurations) {
+    // state.statValues = null;
+    // state.activeConfiguration = null;
+    // state.activeViewType =null;
+    // state.activeSelection=null;
     state.configurations = { items: configurations };
   },
   getConfigurationByRoleFailure(state, error) {
