@@ -35,7 +35,8 @@ import './assets/styles/index.css';
 import Vuelidate from 'vuelidate'
 import { VueEditor } from "vue2-editor";
 import { LMap, LTileLayer, LMarker,LPopup,LCircle} from 'vue2-leaflet';
-
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 
 // import VGeosearch from 'vue2-leaflet-geosearch';
 
@@ -133,7 +134,7 @@ axios.interceptors.response.use(
   }
 )
 Vue.use(Vuelidate)
-
+Vue.use(Loading);
 new Vue({
   render: h => h(App),
   router,

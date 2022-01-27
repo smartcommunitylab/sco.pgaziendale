@@ -297,6 +297,7 @@ export default {
       sheet: false,
       showPickerFrom: false,
       showPickerTo: false,
+      loader:null,
       // puntualAggregationValue: "NONE",
       //timePeriodValue: null,
       localSelection: {
@@ -401,14 +402,20 @@ export default {
       this.sheet = !this.sheet;
       this.getLocalStat(this.localSelection);
     },
-    fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
+    fillTheViewWithValues(values, view, activeSelection, currentCampaign,loader) {
       viewStatService
         .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
         .then((viewData) => {
           this.viewData = viewData;
+          loader.hide();
         });
     },
     getLocalStat(selection) {
+       this.loader = this.$loading.show({
+        canCancel: false,
+        backgroundColor: "#000",
+        color: "#fff",
+      });
       this.getStatFromServer(selection);
     },
     exportCsv() {
@@ -530,23 +537,18 @@ export default {
             newVal.items,
             this.activeViewType,
             this.activeSelection,
-            this.currentCampaign.item
+            this.currentCampaign.item,
+            this.loader
           );
         }
       },
       deep: true,
     },
-
-    // puntualAggregationValue() {
-    //   this.getItemsAggregation();
-    // },
     activeConfiguration() {
       this.tab = this.activeViewType;
       this.initiSelection();
     },
-    // puntualAggregation() {
-    //    this.getItemsAggregation();
-    // },
+    
     currentCampaign: {
       handler: function (newValue, oldValue) {
         if (!oldValue && newValue) {
