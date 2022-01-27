@@ -417,6 +417,9 @@ export default {
         color: "#fff",
       });
       this.getStatFromServer(selection);
+      setTimeout(() => {
+                  this.loader.hide();
+                },10000)
     },
     exportCsv() {
       this.downloadCsv(this.localSelection);

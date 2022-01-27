@@ -121,12 +121,15 @@ const actions = {
     statService.getActiveConfiguration(configurationId).then(
       (configurationId) => {
         commit("setActiveConfigurationSuccess", configurationId);
-
         let configuration = state.configurations.items.find(
           (i) => i.id === configurationId
         );
-
-        dispatch("setActiveViewType", {
+        if (configuration?.views[0]?.default)
+          dispatch("setActiveSelection", {
+            selection: configuration.views[0].default,
+          });
+          if (configuration?.views[0]?.type)
+         dispatch("setActiveViewType", {
           activeViewType: configuration.views[0].type,
         });
       },
