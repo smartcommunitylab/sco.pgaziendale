@@ -289,9 +289,14 @@ public class CompanyService {
 	 * @param companyId
 	 * @param employee
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public Employee createEmployee(String companyId, @Valid Employee employee) {
+	public Employee createEmployee(String companyId, @Valid Employee employee) throws InconsistentDataException {
 		employee.setCompanyId(companyId);
+		Employee existing = employeeRepo.findOneByCompanyIdAndCode(companyId, employee.getCode()).orElse(null);
+		if (existing != null) {
+			throw new InconsistentDataException("Duplicate user creation", "INVALID_USER_DATA");
+		}
 		return employeeRepo.save(employee);
 	}
 
