@@ -1,7 +1,6 @@
 <template>
-  <v-row justify="center">
+  <v-row justify="center" align="center" >
     <v-col cols="4" class="pl-5 pr-20" v-if="allCampaigns && allCampaigns.items">
-      <p class="text-subtitle-1">Seleziona Campagna</p>
 
       <v-autocomplete
         label="Campagna"
@@ -17,7 +16,7 @@
     </v-col>
 
     <v-col cols="4" class="pl-5 pr-20" v-if="!isAdmin && localCompany">
-      <p class="text-subtitle-1">Azienda: {{ localCompany.name }}</p>
+      <p class="text-subtitle-1"> {{ localCompany.name }}</p>
     </v-col>
   </v-row>
 </template>
