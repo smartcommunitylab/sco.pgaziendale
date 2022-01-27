@@ -17,6 +17,7 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.CAMPAIGN,
             value: "campaign",
             api: "getCampaignStats",
+            exportCSV: false,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value:  'NONE'
@@ -26,6 +27,7 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES,
             value: "companies",
             api: "getCampaignCompanyStats",
+            exportCSV: true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
@@ -130,6 +132,7 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES,
             value: "companies",
             api: "getCampaignCompanyStats",
+            exportCSV: true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
@@ -174,6 +177,7 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
             value: "company",
             api: "getCompanyStats",
+            exportCSV: false,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value:  'NONE'
@@ -183,6 +187,7 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
             value: "locations",
             api: "getLocationsStats",
+            exportCSV: true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
@@ -193,6 +198,7 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES,
             value: "employees",
             api: "getEmployeesStats",
+            exportCSV: true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
@@ -305,8 +311,6 @@ export const statsConfigurations = [
             apiField: "",
             apiFunction:""
           },
-        
-        exportCSV: true,
       }
     },
       // {

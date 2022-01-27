@@ -76,7 +76,7 @@
           </v-card-actions>
         </v-card>
         <div class="text-center m-2">
-          <v-btn color="primary" @click="exportCsv"> Download CSV </v-btn>
+          <v-btn color="primary" @click="exportCsv" :disabled="!localSelection.dataLevel.exportCSV"> Download CSV </v-btn>
         </div>
         <!-- Gestore di inserimento dati (MODALE) -->
         <v-bottom-sheet v-model="sheet">

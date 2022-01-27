@@ -1,6 +1,6 @@
 import axios from "axios";
 import { statsConfigurations } from "../pages/stats/statsConfigurations";
-import { VARIABLES } from "../variables";
+// import { VARIABLES } from "../variables";
 import { campaignService, companyService, locationService } from '.';
 // import { companyService } from ".";
 import { employeeService } from ".";
@@ -234,22 +234,22 @@ function getStat(configuration, campaign) {
 }
 function getCsv(configuration, campaign) {
   //check configuration and ask the right csv
-  switch (configuration.dataLevel) {
-    case VARIABLES.STATS.VIEWS.DATALEVEL.CAMPAIGN:
+  switch (configuration.dataLevel.api) {
+    case "getCampaignCompanyStats":
       return getCampaignCsv({
         campaignId: campaign.id,
         from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
         to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
       });
 
-    case VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES:
+    case "getEmployeesStats":
       return getCompanyCsv({
         campaignId: campaign.id,
         companyId: configuration.company.id,
         from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
         to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
       });
-    case VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS:
+    case "getLocationsStats":
       return getLocationCsv({
         campaignId: campaign.id,
         companyId: configuration.company.id,
@@ -904,7 +904,7 @@ res.data = res.data.map(el => {
 })
 return {id:id,values:res.data};
 }
-function getCampaignCsv(campaignId, from, to) {
+function getCampaignCsv({campaignId, from, to}) {
   // var fromParam= from?('?from='+from):''
   // var toParam=''
   // if (fromParam)
