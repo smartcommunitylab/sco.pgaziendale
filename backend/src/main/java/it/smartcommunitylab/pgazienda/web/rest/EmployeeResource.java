@@ -19,7 +19,6 @@ package it.smartcommunitylab.pgazienda.web.rest;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +41,7 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.service.CompanyService;
 import it.smartcommunitylab.pgazienda.service.UserService;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.BadRequestAlertException;
 
 /**
@@ -63,10 +63,11 @@ public class EmployeeResource {
      * @param company
      * @return
      * @throws BadRequestAlertException 
+     * @throws InconsistentDataException 
      */
     @PostMapping("/companies/{companyId}/employees")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN + "\", \""+Constants.ROLE_MOBILITY_MANAGER+"\")")
-	public ResponseEntity<Employee> createEmployee(@PathVariable String companyId, @Valid @RequestBody Employee employee) throws BadRequestAlertException {
+	public ResponseEntity<Employee> createEmployee(@PathVariable String companyId, @Valid @RequestBody Employee employee) throws BadRequestAlertException, InconsistentDataException {
     	log.debug("Creating a employee {} / {}", companyId, employee);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
     	if (employee.getId() != null) {
