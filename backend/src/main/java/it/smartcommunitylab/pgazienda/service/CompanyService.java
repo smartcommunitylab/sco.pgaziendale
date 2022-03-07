@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -139,8 +140,12 @@ public class CompanyService {
 	/**
 	 * @param company
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public Company createCompany(Company company) {
+	public Company createCompany(Company company) throws InconsistentDataException {
+		if (findByCode(company.getCode()).isPresent()) {
+			throw new InconsistentDataException("Duplicate company creation", "INVALID_COMPANY_DATA");
+		}
 		return companyRepo.save(company);
 	}
 
@@ -230,15 +235,16 @@ public class CompanyService {
 		if (location.getId() == null) {
 			throw new InconsistentDataException("Empty location ID", "NO_LOCATION");
 		}
-		companyRepo.findById(companyId).ifPresent(company -> {
+		Company company = companyRepo.findById(companyId).orElse(null);
+		if (company != null) {
 			if (company.getLocations() == null) company.setLocations(Collections.singletonList(location));
 			else {
 				int idx = company.getLocations().indexOf(location);
-				if (idx >= 0) company.getLocations().set(idx, location);
+				if (idx >= 0) throw new InconsistentDataException("Duplicate location", "INVALID_COMPANY_DATA");
 				else company.getLocations().add(location);
 			}
 			companyRepo.save(company);
-		});
+		}
 		return location;
 	}
 
@@ -406,9 +412,16 @@ public class CompanyService {
 		}
 		int i = 0;
 		List<CompanyLocation> locations = new LinkedList<>();
+		Set<String> locationIds = new HashSet<>();
 		for (String[] l : lines) {
 			CompanyLocation loc = new CompanyLocation();
-			loc.setId(stringValue(l[0], i+1, 0, true));
+			String id = stringValue(l[0], i+1, 0, true);
+			if (locationIds.contains(id)) {
+				throw new InconsistentDataException("Duplicate locations", "INVALID_CSV");				
+			}
+			locationIds.add(id);
+			
+			loc.setId(id);
 			loc.setAddress(stringValue(l[1], i+1, 1, true));
 			loc.setStreetNumber(stringValue(l[2], i+1, 2, false));
 			loc.setZip(stringValue(l[3], i+1, 3, true));

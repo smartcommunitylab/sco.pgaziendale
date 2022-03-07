@@ -5,3 +5,4 @@ export * from './company.services';
 export * from './location.services';
 export * from './employee.services';
 export * from './stat.services';
+export * from './viewStat.services';
