@@ -71,6 +71,7 @@ const actions = {
   },
 
   initConfigurationByRole({ commit, dispatch }, { role, temporaryAdmin }) {
+     commit("resetStat");
     commit("getConfigurationByRole");
     statService.getConfigurationByRole(role, temporaryAdmin).then(
       (configurations) => {
@@ -120,12 +121,15 @@ const actions = {
     statService.getActiveConfiguration(configurationId).then(
       (configurationId) => {
         commit("setActiveConfigurationSuccess", configurationId);
-
         let configuration = state.configurations.items.find(
           (i) => i.id === configurationId
         );
-
-        dispatch("setActiveViewType", {
+        if (configuration?.views[0]?.default)
+          dispatch("setActiveSelection", {
+            selection: configuration.views[0].default,
+          });
+          if (configuration?.views[0]?.type)
+         dispatch("setActiveViewType", {
           activeViewType: configuration.views[0].type,
         });
       },
@@ -181,11 +185,19 @@ const mutations = {
   
   resetStat(state) {
     state.statValues = null;
+    state.configurations = null; 
+    state.activeConfiguration = null;
+    state.activeViewType =null;
+    state.activeSelection=null;
   },
   getConfigurationByRole() {
     state.configurations = { loading: true };
   },
   getConfigurationByRoleSuccess(state, configurations) {
+    // state.statValues = null;
+    // state.activeConfiguration = null;
+    // state.activeViewType =null;
+    // state.activeSelection=null;
     state.configurations = { items: configurations };
   },
   getConfigurationByRoleFailure(state, error) {
