@@ -146,6 +146,7 @@ public class CompanyService {
 		if (findByCode(company.getCode()).isPresent()) {
 			throw new InconsistentDataException("Duplicate company creation", "INVALID_COMPANY_DATA");
 		}
+		
 		return companyRepo.save(company);
 	}
 

@@ -109,7 +109,7 @@ pagine dall'utente in base al suo login.
             to="/GestioneDipendenti"
             v-if="
               (role == 'ROLE_ADMIN' && adminCompany != null) ||
-              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+              (role == 'ROLE_COMPANY_ADMIN' && actualCompany != null)
             "
           >
         <v-list-item link>
