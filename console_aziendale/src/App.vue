@@ -43,7 +43,7 @@ e la snackbar.
         <!-- NON VIENE MAI UTILIZZATO - Componente inutile (?)-->
         <!-- <Loader v-if="loading" /> -->
         <transition name="fade">
-          <snackbar v-if="alert.message" :snackbar="true" :text="alert.message">
+          <snackbar  :snackbar="message" :text="message">
           </snackbar>
         </transition>
 
@@ -63,7 +63,7 @@ e la snackbar.
     <router-view></router-view>
 
         <transition name="fade">
-          <snackbar v-if="alert.message" :snackbar="true" :text="alert.message">
+          <snackbar :snackbar="message" :text="message">
           </snackbar>
         </transition>
 
@@ -97,7 +97,7 @@ export default {
   computed: {
     ...mapState({
       account: (state) => state.account,
-      alert: (state) => state.alert
+      // alert: (state) => state.alert
     }),
     ...mapState("loader", ["loading"]),
       currentRouteName() {
@@ -115,12 +115,12 @@ export default {
     },
     message(newAlert,oldAlert){
       console.log(JSON.stringify(newAlert) + JSON.stringify(oldAlert));
-      setTimeout(()=>this.clearAlert(),2500)
+      //setTimeout(()=>this.clearAlert(),2500)
     },
     // eslint-disable-next-line no-unused-vars
     $route(to, from) {
       // clear alert on location change
-      this.clearAlert();
+      //this.clearAlert();
       window.scrollTo(0,0);
     },
     active: function() {
