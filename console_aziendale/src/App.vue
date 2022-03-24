@@ -115,12 +115,12 @@ export default {
     },
     message(newAlert,oldAlert){
       console.log(JSON.stringify(newAlert) + JSON.stringify(oldAlert));
-      //setTimeout(()=>this.clearAlert(),2500)
+      // setTimeout(()=>this.clearAlert(),2500)
     },
     // eslint-disable-next-line no-unused-vars
     $route(to, from) {
       // clear alert on location change
-      //this.clearAlert();
+      setTimeout(()=>this.clearAlert(),2500);
       window.scrollTo(0,0);
     },
     active: function() {

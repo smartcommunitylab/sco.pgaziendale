@@ -21,7 +21,7 @@ const actions = {
                 companies => commit('getAllSuccess', companies),
                 error => {
                     commit('getAllFailure', error);
-                    dispatch('alert/error', error.response.data.type, { root: true });
+                    dispatch('alert/error', error, { root: true });
                 }
             );
     },

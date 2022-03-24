@@ -52,7 +52,9 @@ const mutations = {
     },
     error(state, message) {
         state.type = 'error';
+        if (HttpErrors[message.response.data.type])
         state.message = HttpErrors[message.response.data.type];
+        else state.message = HttpErrors['GENERIC_ERROR'];
     },
     clear(state) {
         state.type = null;
