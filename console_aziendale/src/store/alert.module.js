@@ -25,7 +25,7 @@ const HttpErrors ={
         'LOGIN_IN_USE'	:'Attenzione, il nome utente utilizzato é giá in uso!',
         'BAD_REQUEST_DATA'	:'Attenzione, dati della richiesta non validi!',
         'INVALID_IMPORT_DATA':'Attenzione, formato dati per l\'import non valido!',
-      'BAD_CREDENTIALS'	:'Attenzione, le credenziali per accedere non sono valide!',
+        'BAD_CREDENTIALS'	:'Attenzione, le credenziali per accedere non sono valide!',
         'INSUFFICIENT_RIGHTS':'Attenzione, permessi non validi per eseguire l\'operazione!',
         'GENERIC_ERROR'	:'Attenzione, errori di sistema, riprovare piú tardi!',
         'USER_ANOTHER_COMPANY'	:'Attenzione, l\'utente specificato é giá iscritto per un\'altra azienda!',
@@ -47,12 +47,14 @@ const actions = {
 
 const mutations = {
     success(state, message) {
-        state.type = 'alert-success';
+        state.type = 'success';
         state.message = message;
     },
     error(state, message) {
-        state.type = 'alert-danger';
-        state.message = HttpErrors[message];
+        state.type = 'error';
+        if (HttpErrors[message.response.data.type])
+        state.message = HttpErrors[message.response.data.type];
+        else state.message = HttpErrors['GENERIC_ERROR'];
     },
     clear(state) {
         state.type = null;

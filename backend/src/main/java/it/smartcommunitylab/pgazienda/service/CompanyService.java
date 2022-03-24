@@ -300,7 +300,7 @@ public class CompanyService {
 	 */
 	public Employee createEmployee(String companyId, @Valid Employee employee) throws InconsistentDataException {
 		employee.setCompanyId(companyId);
-		Employee existing = employeeRepo.findOneByCompanyIdAndCode(companyId, employee.getCode()).orElse(null);
+		Employee existing = employeeRepo.findByCompanyIdAndCode(companyId, employee.getCode()).stream().findAny().orElse(null);
 		if (existing != null) {
 			throw new InconsistentDataException("Duplicate user creation", "INVALID_USER_DATA");
 		}
@@ -363,7 +363,7 @@ public class CompanyService {
 			lines = readCSV(new ByteArrayInputStream(bytes), ';', 4);
 		}
 		lines.forEach(l -> {
-			Employee existing = employeeRepo.findOneByCompanyIdAndCode(companyId, l[2]).orElse(null);
+			Employee existing = employeeRepo.findByCompanyIdAndCode(companyId, l[2]).stream().findAny().orElse(null);
 			if (existing != null) {
 				existing.setLocation(l[3]);
 				existing.setName(l[0]);
