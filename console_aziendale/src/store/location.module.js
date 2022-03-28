@@ -17,7 +17,7 @@ const actions = {
                 () => {
                     commit('importLocationsSuccess');
                     dispatch('alert/success', "Sedi importate con successo", { root: true });
-                    dispatch('getAll', companyId);
+                    dispatch('getAllLocations', companyId);
                 },
                 error => {
                     commit('importLocationsFailure', error);
