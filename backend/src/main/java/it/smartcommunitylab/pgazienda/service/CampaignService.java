@@ -120,7 +120,7 @@ public class CampaignService {
 		if (user == null) throw new InconsistentDataException("Invalid user", "NO_USER");
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign", "NO_CAMPAIGN");
-		Company company = companyRepo.findOneByCode(companyCode).orElse(null);
+		Company company = companyRepo.findByCode(companyCode).stream().findFirst().orElse(null);
 		if (company == null || company.getCampaigns() == null || !company.getCampaigns().contains(campaignId)) throw new InconsistentDataException("Invalid company", "NO_COMPANY");
 		// app user role
 		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
@@ -171,7 +171,7 @@ public class CampaignService {
 		// not yet subscribed
 		if (role != null && role.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaignId))) {
 			role.getSubscriptions().forEach(s -> {
-				Company company = companyRepo.findOneByCode(s.getCompanyCode()).orElse(null);
+				Company company = companyRepo.findByCode(s.getCompanyCode()).stream().findFirst().orElse(null);
 				if (company != null) {
 					Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), s.getKey()).stream().findAny().orElse(null);					
 					if (employee != null && employee.getCampaigns().contains(campaignId)) {

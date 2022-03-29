@@ -42,7 +42,7 @@
       <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
       
       <!-- TODO: Modale Dipendente -->
-      <modal v-show="deleteModalVisible">
+      <!-- <modal v-show="deleteModalVisible">
         <template v-slot:header> <div class="text-danger"> Cancella Dipendente </div> </template>
         <template v-slot:body>
           <p class="text-subtitle-1">Sei sicuro di voler cancellare il dipendente?</p>
@@ -87,8 +87,8 @@
             Salva
           </v-btn>
         </template>
-      </modal>
-      <modal v-show="modalImportEmployeesOpen">
+      </modal> -->
+      <!-- <modal v-show="modalImportEmployeesOpen">
 
         <template v-slot:header> Importa dipendenti </template>
 
@@ -141,7 +141,7 @@
               Importa dipendenti
             </v-btn>
         </template>
-      </modal>
+      </modal> -->
 
 
 
@@ -152,11 +152,11 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import ProfiloEmployee from "./Employee.vue";
-import Modal from "@/components/modal/ModalStructure.vue";
+// import Modal from "@/components/modal/ModalStructure.vue";
 import GenericTable from "@/components/data-table/GenericTable.vue";
 
 export default {
-  components: { ProfiloEmployee, Modal, GenericTable },
+  components: { ProfiloEmployee,  GenericTable },
 
   name: "Dipendenti",
 
@@ -176,7 +176,7 @@ export default {
       selectedCampaign: 0,
       modalInsertEmployeeOpen: false,
       modalImportEmployeesOpen: false,
-      fileUploaded: null,
+      // fileUploaded: null,
       inDragArea: false,
     };
   },
@@ -224,7 +224,7 @@ export default {
       });
     },
    
-    showEmployeeInfo: function (employee) {
+    showEmployeeInfo(employee) {
       if (this.currentEmployeeSelected == employee) {
         this.getEmployee(null);
 
@@ -234,26 +234,26 @@ export default {
         this.currentEmployeeSelected = employee;
       }
     },
-    onFileUploaderChange: function () {
-      console.log(this.$refs["file"]);
-      this.fileUploaded = this.$refs["file"].files;
-    },
-    importEmployees: function () {
-      console.log(this.fileUploaded);
-      this.modalImportEmployeesOpen = false;
-      var formData = new FormData();
-      formData.append("file", this.fileUploaded.item(0));
-      this.importData({ companyId: this.actualCompany.item.id, file: formData });
-    },
+    // onFileUploaderChange() {
+    //   console.log(this.$refs["file"]);
+    //   this.fileUploaded = this.$refs["file"].files;
+    // },
+    // importEmployees() {
+    //   console.log(this.fileUploaded);
+    //   this.modalImportEmployeesOpen = false;
+    //   var formData = new FormData();
+    //   formData.append("file", this.fileUploaded.item(0));
+    //   this.importData({ companyId: this.actualCompany.item.id, file: formData });
+    // },
   },
   
   computed: {
     ...mapState("employee", ["allEmployees", "actualEmployee"]),
     ...mapState("company", ["actualCompany"]),
 
-    fileName() {
-      return this.fileUploaded.item(0).name;
-    },
+    // fileName() {
+    //   return this.fileUploaded.item(0).name;
+    // },
     nColsTable_calculator: function() {
       if(this.actualEmployee){
         return 8;

@@ -42,7 +42,7 @@
       <profilo-location v-if="actualLocation && actualLocation.item"/> 
     </v-row>
 
-    <modal v-show="modalImportLocationsOpen">
+    <!-- <modal v-show="modalImportLocationsOpen">
 
       <template v-slot:header> Importa Sedi </template>
 
@@ -95,7 +95,7 @@
             Importa Sedi
           </v-btn>
       </template>
-    </modal>
+    </modal> -->
   </div>
 </template>
 
@@ -103,11 +103,11 @@
 import ProfiloLocation from "./Location.vue";
 import { mapState, mapActions } from "vuex";
 import GenericTable from "@/components/data-table/GenericTable.vue";
-import Modal from "@/components/modal/ModalStructure.vue";
+// import Modal from "@/components/modal/ModalStructure.vue";
 
 export default {
   name: "Locations",
-  components: { ProfiloLocation, GenericTable, Modal },
+  components: { ProfiloLocation, GenericTable },
   data: function () {
     return {
       headerColumns: [{text:"Identificativo", value:"id"}, {text:"Cittá", value:"city"}, {text:"Indirizzo", value:"address"}, {text:"Numero", value:"streetNumber"}],
@@ -121,7 +121,7 @@ export default {
       deleteModalVisible: false,
       editModalVisible: false,
       submitStatus: null,
-      fileUploaded: null,
+      // fileUploaded: null,
       inDragArea: false,
       oldLocation:null
     };
@@ -189,13 +189,13 @@ export default {
         locationId: this.actualLocation.item.id,
       });
     },
-    importLocations: function () {
-      console.log(this.fileUploaded);
-      this.modalImportLocationsOpen = false;
-      var formData = new FormData();
-      formData.append("file", this.fileUploaded.item(0));
-      this.importData({ companyId: this.actualCompany.item.id, file: formData });
-    },
+    // importLocations: function () {
+    //   console.log(this.fileUploaded);
+    //   this.modalImportLocationsOpen = false;
+    //   var formData = new FormData();
+    //   formData.append("file", this.fileUploaded.item(0));
+    //   this.importData({ companyId: this.actualCompany.item.id, file: formData });
+    // },
   },
 
   computed: {
@@ -203,9 +203,9 @@ export default {
     ...mapState("company", ["actualCompany"]),
     ...mapState("account", ["role"]),
 
-    fileName() {
-      return this.fileUploaded.item(0).name;
-    },
+    // fileName() {
+    //   return this.fileUploaded.item(0).name;
+    // },
     nColsTable_calculator: function() {
       if(this.actualLocation != null && this.actualLocation != undefined && this.actualLocation.item != null){
         return 8;

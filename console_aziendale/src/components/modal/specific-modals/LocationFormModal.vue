@@ -558,6 +558,7 @@ export default {
             console.log("Modalità AGGIUNGI");
 
         }else if (this.typeCall == "edit") {
+          if (this.actualLocation.item)
             this.copyFormValues(this.actualLocation.item);
             this.popup.title = "Modifica Sede";
             console.log("Modalità MODIFICA");
@@ -668,7 +669,6 @@ export default {
   watch: {
     typeCall: function(){
         this.setModalData();
-
         if(this.typeCall == "add"){
           this.disabled = false;
         }else if (this.typeCall == "edit") {
