@@ -144,7 +144,7 @@ public class CompanyService {
 	 */
 	public Company createCompany(Company company) throws InconsistentDataException {
 		if (findByCode(company.getCode()).isPresent()) {
-			throw new InconsistentDataException("Duplicate company creation", "INVALID_COMPANY_DATA");
+			throw new InconsistentDataException("Duplicate company creation", "INVALID_COMPANY_DATA_DUPLICATE_CODE");
 		}
 		
 		return companyRepo.save(company);
@@ -241,7 +241,7 @@ public class CompanyService {
 			if (company.getLocations() == null) company.setLocations(Collections.singletonList(location));
 			else {
 				int idx = company.getLocations().indexOf(location);
-				if (idx >= 0) throw new InconsistentDataException("Duplicate location", "INVALID_COMPANY_DATA");
+				if (idx >= 0) throw new InconsistentDataException("Duplicate location", "INVALID_COMPANY_DATA_DUPLICATE_LOCATION");
 				else company.getLocations().add(location);
 			}
 			companyRepo.save(company);
@@ -302,7 +302,7 @@ public class CompanyService {
 		employee.setCompanyId(companyId);
 		Employee existing = employeeRepo.findByCompanyIdAndCode(companyId, employee.getCode()).stream().findAny().orElse(null);
 		if (existing != null) {
-			throw new InconsistentDataException("Duplicate user creation", "INVALID_USER_DATA");
+			throw new InconsistentDataException("Duplicate user creation", "INVALID_COMPANY_DATA_DUPLICATE_EMPLOYEE");
 		}
 		return employeeRepo.save(employee);
 	}
@@ -342,7 +342,7 @@ public class CompanyService {
 	 * @return
 	 */
 	public Optional<Company> findByCode(String code) {
-		return companyRepo.findOneByCode(code);
+		return companyRepo.findByCode(code).stream().findFirst();
 	}
 
 	/**
@@ -362,8 +362,13 @@ public class CompanyService {
 		} catch (Exception e) {
 			lines = readCSV(new ByteArrayInputStream(bytes), ';', 4);
 		}
-		lines.forEach(l -> {
-			Employee existing = employeeRepo.findByCompanyIdAndCode(companyId, l[2]).stream().findAny().orElse(null);
+		Set<String> codes = new HashSet<>();
+		for (String[] l: lines) {
+			String code = l[2];
+			if (codes.contains(code)) {
+				throw new InconsistentDataException("Duplicate employees", "INVALID_CSV_DUPLICATE_EMPLOYEES");				
+			}
+			Employee existing = employeeRepo.findByCompanyIdAndCode(companyId, code).stream().findAny().orElse(null);
 			if (existing != null) {
 				existing.setLocation(l[3]);
 				existing.setName(l[0]);
@@ -371,14 +376,15 @@ public class CompanyService {
 				employeeRepo.save(existing);
 			} else {
 				Employee e = new Employee();
-				e.setCode(l[2]);
+				e.setCode(code);
 				e.setName(l[0]);
 				e.setSurname(l[1]);
 				e.setCompanyId(companyId);
 				e.setLocation(l[3]);
 				employeeRepo.save(e);
 			}
-		});
+			codes.add(code);
+		}
 	}
 
 	private List<String[]> readCSV(InputStream is, char separator, int columns) throws Exception {
@@ -418,7 +424,7 @@ public class CompanyService {
 			CompanyLocation loc = new CompanyLocation();
 			String id = stringValue(l[0], i+1, 0, true);
 			if (locationIds.contains(id)) {
-				throw new InconsistentDataException("Duplicate locations", "INVALID_CSV");				
+				throw new InconsistentDataException("Duplicate locations", "INVALID_CSV_DUPLICATE_LOCATIONS");				
 			}
 			locationIds.add(id);
 			
