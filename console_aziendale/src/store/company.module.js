@@ -194,8 +194,8 @@ const mutations = {
     getAllSuccess(state, companies) {
         state.allCompanies = { items: companies };
     },
-    getAllFailure(state, error) {
-        state.allCompanies = { error };
+    getAllFailure() {
+       // state.allCompanies = { error };
     },
     getCompanyById(state) {
         state.actualCompany = { loading: true };
@@ -203,8 +203,8 @@ const mutations = {
     getCompanyByIdSuccess(state, company) {
         state.actualCompany = { item: company };
     },
-    getCompanyByIdFailure(state, error) {
-        state.actualCompany = { error };
+    getCompanyByIdFailure() {
+        //state.actualCompany = { error };
     },
     addCompany(state) {
         state.actualCompany = { loading: true };
@@ -242,8 +242,8 @@ const mutations = {
                 return company.id != element.id
             })
     },
-    deleteCompanyFailure(state, error) {
-        state.actualCompany = { error };
+    deleteCompanyFailure() {
+        //state.actualCompany = { error };
     },
     users(state) {
         state.adminCompanyUsers = { loading: true };
@@ -253,8 +253,8 @@ const mutations = {
         state.adminCompanyUsers = { items: users };
 
     },
-    usersFailure(state, error) {
-        state.adminCompanyUsers.items = { error };
+    usersFailure() {
+        //state.adminCompanyUsers.items = { error };
     },
     addUser() {
         // state.adminCompanyUsers.items = { loading: true };
