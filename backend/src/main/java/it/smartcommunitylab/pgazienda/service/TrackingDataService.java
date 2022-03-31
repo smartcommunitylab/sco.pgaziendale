@@ -683,7 +683,7 @@ public class TrackingDataService {
 					r.getSubscriptions().stream()
 					.filter(s -> s.getCampaign().equals(campaignId))
 					.forEach(s -> {
-						Company company = companyCache.getOrDefault(s.getCompanyCode(), companyRepo.findOneByCode(s.getCompanyCode()).orElse(null));
+						Company company = companyCache.getOrDefault(s.getCompanyCode(), companyRepo.findByCode(s.getCompanyCode()).stream().findFirst().orElse(null));
 						companyCache.put(s.getCompanyCode(), company);
 						if (company != null) {
 							Employee e = employeeRepo.findByCompanyIdAndCode(company.getId(), s.getKey()).stream().findAny().orElse(null);

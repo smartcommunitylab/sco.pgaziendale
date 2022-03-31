@@ -117,6 +117,9 @@ public class UserResource {
         	if (companyRoles.size() > 1 || companyRoles.size() == 1 && !companyRoles.contains(companyId)) {
         		throw new UserAnotherOrgException();
         	}
+        	else if (companyRoles.size() > 1 || companyRoles.size() == 1 && companyRoles.contains(companyId)) {
+        		throw new InconsistentDataException("User already exists in the company", "INVALID_COMPANY_DATA_DUPLICATE_USER");
+        	}
         	userDTO.setId(old.get().getId());
         	User newUser = userService.updateUser(userDTO, companyId).orElse(null);
             return ResponseEntity.ok(newUser);
