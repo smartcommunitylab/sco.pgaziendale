@@ -29,7 +29,7 @@
                             <v-icon>mdi-format-list-text</v-icon>
                         </v-list-item-icon>
                         <v-list-item-content>
-                            <v-list-item-title v-if="actualEmployee.item.campaigns.lenght == 0" v-text="actualEmployee.item.campaigns"></v-list-item-title>
+                            <v-list-item-title v-if="actualEmployee.item.campaigns.length == 0" v-text="actualEmployee.item.campaigns"></v-list-item-title>
                             <v-list-item-title v-else>Nessuna campagna associata</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
