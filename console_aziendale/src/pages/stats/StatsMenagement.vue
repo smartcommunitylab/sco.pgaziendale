@@ -435,7 +435,7 @@ export default {
       this.getStatFromServer(selection);
       setTimeout(() => {
         this.loader.hide();
-      }, 10000);
+      }, 5000);
     },
     exportCsv() {
       this.downloadCsv(this.localSelection);
@@ -467,7 +467,7 @@ export default {
         role: this.role,
         temporaryAdmin: this.temporaryAdmin,
       });
-      console.log(this.configurations.items);
+      //console.log(this.configurations.items);
     },
 
     submit() {

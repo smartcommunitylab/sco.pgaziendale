@@ -664,7 +664,7 @@ public class TrackingDataService {
 					r.getSubscriptions().stream()
 					.filter(s -> s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(companyCode))
 					.forEach(s -> {
-						Employee e = employeeRepo.findOneByCompanyIdAndCode(companyId, s.getKey()).orElse(null);
+						Employee e = employeeRepo.findByCompanyIdAndCode(companyId, s.getKey()).stream().findAny().orElse(null);
 						if (e != null) res.add(e);
 					});
 				}
@@ -683,10 +683,10 @@ public class TrackingDataService {
 					r.getSubscriptions().stream()
 					.filter(s -> s.getCampaign().equals(campaignId))
 					.forEach(s -> {
-						Company company = companyCache.getOrDefault(s.getCompanyCode(), companyRepo.findOneByCode(s.getCompanyCode()).orElse(null));
+						Company company = companyCache.getOrDefault(s.getCompanyCode(), companyRepo.findByCode(s.getCompanyCode()).stream().findFirst().orElse(null));
 						companyCache.put(s.getCompanyCode(), company);
 						if (company != null) {
-							Employee e = employeeRepo.findOneByCompanyIdAndCode(company.getId(), s.getKey()).orElse(null);
+							Employee e = employeeRepo.findByCompanyIdAndCode(company.getId(), s.getKey()).stream().findAny().orElse(null);
 							if (e != null) res.add(e);
 						}
 					});

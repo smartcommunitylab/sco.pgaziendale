@@ -1,6 +1,6 @@
 <template>
   <v-col cols="4">
-    <v-card elevation="2" class="frosted-glass">
+    <v-card elevation="2" class="frosted-glass" v-if="actualCompany && actualCompany.item">
         <v-card-title>{{ actualCompany.item.name }}</v-card-title>
         
         <v-img

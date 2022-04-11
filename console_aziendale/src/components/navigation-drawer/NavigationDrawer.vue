@@ -109,7 +109,7 @@ pagine dall'utente in base al suo login.
             to="/GestioneDipendenti"
             v-if="
               (role == 'ROLE_ADMIN' && adminCompany != null) ||
-              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
+              (role == 'ROLE_COMPANY_ADMIN' && actualCompany != null)
             "
           >
         <v-list-item link>
@@ -162,7 +162,7 @@ pagine dall'utente in base al suo login.
           <v-list-item-title :class="{ active: isActiveStatistiche }">Statistiche</v-list-item-title>
         </v-list-item>
       </router-link>
-      <router-link
+      <!-- <router-link
             to="/StatisticheOLD"
             v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
           >
@@ -179,7 +179,7 @@ pagine dall'utente in base al suo login.
           </v-list-item-icon>
           <v-list-item-title :class="{ active: isActiveStatistiche }">StatisticheOld</v-list-item-title>
         </v-list-item>
-      </router-link>
+      </router-link> -->
       <router-link to="/" v-on:click.native="logout">
         <v-list-item link>
           <v-list-item-icon>

@@ -5,49 +5,35 @@ quando chiamato e avviato, gestire i messaggi lanciati dall'applicativo e farli 
 all'utente come una snackbar.
 -->
 <template>
-    <div v-if="snackbarOpen">
-        <v-snackbar v-model="snackbar" class="up">
-            {{ alert.message }}
-            <v-btn
-                color="primary"
-                text
-                @click="snackbarOpen = false"
-            >
-                Chiudi
-            </v-btn>
-        </v-snackbar>
-    </div>
+  <v-snackbar v-model="snackbar" class="up" :color="type=='success'?'':type" :timeout="5000">
+    {{ message }}
+    <v-btn :color="type=='success'? 'primary': 'alert'" text @click="clearAlert"> Chiudi </v-btn>
+  </v-snackbar>
 </template>
 
 <script>
 import { mapActions, mapState } from "vuex";
 
 export default {
-    data() {
-        return{
-            snackbarOpen: true,
-        }
+  data() {
+    return {
+      snackbar: false,
+    };
+  },
+  methods: {
+    ...mapActions("alert", { clearAlert: "clear" }),
+  },
+  computed: {
+    ...mapState("alert", ["message","type"]),
+  },
+  watch: {
+    message(newMsg) {
+      if (newMsg)
+      this.snackbar = true;
+      else this.snackbar = false;
     },
-
-    methods: {
-        ...mapActions("alert", { clearAlert: "clear" }),
-    },
-
-    computed: {
-        ...mapState({alert: (state) => state.alert}),
-        ...mapState('alert', ['message']),
-
-        snackbar: Boolean,
-        text: String,
-    },
-
-    watch: {
-        message(newAlert,oldAlert){
-            console.log(JSON.stringify(newAlert) + JSON.stringify(oldAlert));
-            setTimeout(()=>this.clearAlert(),2500)
-        },
-    },
-}
+  },
+};
 </script>
 
 <style>

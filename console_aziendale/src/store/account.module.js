@@ -45,7 +45,7 @@ const actions = {
                 },
                 error => {
                     commit('loginFailure', error);
-                    dispatch('alert/error', error.response.data.type, { root: true });
+                    dispatch('alert/error', error, { root: true });
                 }
             );
     },
@@ -79,7 +79,7 @@ const actions = {
 
         } ,function(error){
             commit('changePasswordFailure', error);
-            dispatch('alert/error', error.response.data.type, { root: true });
+            dispatch('alert/error', error, { root: true });
         })
     },
     resetPasswordInit({ commit, dispatch },username){
@@ -90,7 +90,7 @@ const actions = {
 
         } ,function(error){
             commit('resetPasswordInitFailure', error);
-            dispatch('alert/error', error.response.data.type, { root: true });
+            dispatch('alert/error', error, { root: true });
         })
     },
     resetPasswordFinish({ commit, dispatch },{key,newPassword}){
@@ -101,7 +101,7 @@ const actions = {
 
         } ,function(error){
             commit('cresetPasswordFinishFailure', error);
-            dispatch('alert/error', error.response.data.type, { root: true });
+            dispatch('alert/error', error, { root: true });
         })
     },
 

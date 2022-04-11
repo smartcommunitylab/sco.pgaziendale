@@ -35,7 +35,8 @@ const actions = {
   },
   getStat({ commit, dispatch,state }, configuration) {
     commit("getStat");
-    statService.getStat(configuration,state.currentCampaign.item).then(
+    if (state.currentCampaign)
+      statService.getStat(configuration,state.currentCampaign.item).then(
       (statistics) => {
         commit("getStatSuccess", statistics);
         dispatch("alert/success", "Recuperate le statistiche con successo.", {
