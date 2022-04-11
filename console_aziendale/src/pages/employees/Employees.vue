@@ -192,7 +192,8 @@ export default {
       importData: "importEmployees",
     }),
     ...mapActions("navigation", { changePage: "changePage" }),
-
+    ...mapActions("campaign", {
+      getAllCampaigns: "getAll"}),
     showModal(title) {
       this.editModalVisible = true;
       this.newEmployee = true;
@@ -250,6 +251,7 @@ export default {
   computed: {
     ...mapState("employee", ["allEmployees", "actualEmployee"]),
     ...mapState("company", ["actualCompany"]),
+     ...mapState("campaign", ["allCampaigns"]),
 
     // fileName() {
     //   return this.fileUploaded.item(0).name;
@@ -269,6 +271,7 @@ export default {
     this.changePage({ title: "", route: "/GestioneDipendenti" });
     if (this.actualCompany && this.actualCompany.item)
       this.getAllEmployees(this.actualCompany.item.id);
+    this.getAllCampaigns();
   },
 };
 </script>
