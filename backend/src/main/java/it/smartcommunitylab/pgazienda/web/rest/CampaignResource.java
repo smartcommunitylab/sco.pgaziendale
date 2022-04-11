@@ -42,7 +42,9 @@ import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.service.CampaignService;
 import it.smartcommunitylab.pgazienda.service.CompanyService;
 import it.smartcommunitylab.pgazienda.service.UserService;
-import it.smartcommunitylab.pgazienda.web.rest.errors.RepeatingSubscriptionException;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionException;
+import it.smartcommunitylab.pgazienda.web.rest.errors.BadRequestAlertException;
 
 /**
  * @author raman
@@ -64,13 +66,14 @@ public class CampaignResource {
      * Create a new campaign
      * @param company
      * @return
+     * @throws BadRequestAlertException 
      */
     @PostMapping("/campaigns")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-	public ResponseEntity<Campaign> createCampaign(@Valid @RequestBody Campaign campaign) {
+	public ResponseEntity<Campaign> createCampaign(@Valid @RequestBody Campaign campaign) throws BadRequestAlertException {
     	log.debug("Creating a campaign {} ", campaign);
     	if(campaignService.getCampaign(campaign.getId()).isPresent()) {
-    		throw new IllegalArgumentException("A campaign with the specified ID already exists");
+    		throw new BadRequestAlertException("A campaign with the specified ID already exists");
     	}
     	return ResponseEntity.ok(campaignService.saveCampaign(campaign));
 	}
@@ -203,9 +206,10 @@ public class CampaignResource {
      * Subscribe to campaign 
      * @param company
      * @return
+     * @throws InconsistentDataException 
      */
     @PutMapping("/campaigns/{campaignId:.*}/subscribe/{companyCode}/{key}")
-	public ResponseEntity<Void> subscribeCampaign(@PathVariable String campaignId, @PathVariable String companyCode, @PathVariable String key) throws RepeatingSubscriptionException {
+	public ResponseEntity<Void> subscribeCampaign(@PathVariable String campaignId, @PathVariable String companyCode, @PathVariable String key) throws RepeatingSubscriptionException, InconsistentDataException {
     	log.debug("Subscriving to campaign {} / {} / {}", campaignId, companyCode, key);
     	campaignService.subscribe(key, companyCode, campaignId);
     	return ResponseEntity.ok(null);
@@ -215,9 +219,10 @@ public class CampaignResource {
      * Subscribe to campaign 
      * @param company
      * @return
+     * @throws InconsistentDataException 
      */
     @DeleteMapping("/campaigns/{campaignId:.*}/unsubscribe")
-	public ResponseEntity<Void> unsubscribeCampaign(@PathVariable String campaignId) {
+	public ResponseEntity<Void> unsubscribeCampaign(@PathVariable String campaignId) throws InconsistentDataException {
     	log.debug("Subscriving to campaign {}", campaignId);
     	campaignService.unsubscribe(campaignId);
     	return ResponseEntity.ok(null);

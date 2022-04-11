@@ -40,6 +40,7 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.service.CompanyService;
 import it.smartcommunitylab.pgazienda.service.UserService;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.web.rest.errors.BadRequestAlertException;
 
 /**
@@ -85,10 +86,11 @@ public class CompanyResource {
      * @param company
      * @return
      * @throws BadRequestAlertException 
+     * @throws InconsistentDataException 
      */
     @PostMapping("/companies")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
-	public ResponseEntity<Company> createCompany(@Valid @RequestBody Company company) throws BadRequestAlertException {
+	public ResponseEntity<Company> createCompany(@Valid @RequestBody Company company) throws BadRequestAlertException, InconsistentDataException {
     	log.debug("Creating company {}", company);
     	if (company.getId() != null) {
     		throw new BadRequestAlertException("A new company cannot already have an ID");

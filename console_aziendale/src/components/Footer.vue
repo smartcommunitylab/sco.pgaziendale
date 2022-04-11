@@ -1,67 +1,80 @@
+<!-- 
+DESCRIZIONE:
+Il "Footer.vue" contiene il Footer dell'applicativo.
+-->
 <template>
-  <footer class="absolute w-full bg-gray-900 pb-6 ">
-    <div class=" bg-white text-primary px-4 lg:ml-64">
-      <hr class="mb-6 border-b-1 border-white" />
-      <div
-        class="flex flex-wrap items-center md:justify-between justify-center"
-      >
-         <div class="w-full lg:w-2/12 px-4 text-center lg:text-right">
-          <div class="text-sm text-primary font-semibold py-1">
-            Creato da:
+  <v-footer
+    padless
+  >
+  <v-row>
+    <v-col cols="12" class="p-0 m-0">
+    <v-card
+      flat
+      class="white--text d-flex mx-2"
+    >
+      <v-row class="riga-colore">
+        <v-col cols="7">
+          <v-card-text class="float-left">
+            <strong>Play & Go © </strong> {{ new Date().getFullYear() }}
+            design by <a class="link" href="https://www.fbk.eu/it/" target="_blank">FBK</a>. Nell'ambito del progetto: <a class="link" href="https://airbreakferrara.net/" target="_blank">Airbreak</a> e <a class="link" href="https://uia-initiative.eu/en" target="_blank">Urban Innovative Actions</a>
+          </v-card-text>
+        </v-col>
+        <v-col>
+          <div class="float-right mt-2">
+            <v-btn
+              v-for="icon in icons"
+              :key="icon.name"
+              class="mx-4 white--text "
+              icon
+              style="overflow:auto"
+              :href="icon.link"
+              target="_blank"
+            >
+              <v-icon size="24px">
+                {{ icon.name }}
+              </v-icon>
+            </v-btn>
           </div>
-        </div>
-        <div class="w-full lg:w-2/12 px-4">
-          <div class="text-sm text-primary font-semibold py-1">
-            <img src="@/assets/images/fbk.png" alt="fbk" class="object-contain h-12 w-auto p-1 m-auto lg:ml-1" @click="openTab('https://www.fbk.eu')"    />
-          </div>
-        </div>
-        
-        <div class="w-full lg:w-4/12 px-4  text-center lg:text-right">
-          <div class="text-sm text-primary font-semibold py-1">
-            Nell'ambito del progetto:
-          </div>
-        </div>
-        <div class="w-full lg:w-4/12 px-4">
-          <div
-            class="grid grid-cols-2 list-none lg:justify-end  justify-center mt-2"
-          >
-            <div class="">
-             <img src="@/assets/images/airbreak.png" alt="Airbreak" class="  object-contain  h-12 w-auto max-w-32 lg:m-auto ml-auto mr-1" @click="openTab('https://www.uia-initiative.eu/en/uia-cities/ferrara-0')" />
-
-            </div>
-            <div>
-             <img src="@/assets/images/eu.png" alt="Urban Innovative Actions" class="object-contain  h-12 w-auto max-w-32 lg:m-auto mr-auto ml-1" @click="openTab('https://www.uia-initiative.eu')"/>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </footer>
+        </v-col>
+      </v-row>
+    </v-card>
+    </v-col>
+  </v-row>
+  </v-footer>
 </template>
+
 <script>
 export default {
   data() {
     return {
-      date: new Date().getFullYear()
+      date: new Date().getFullYear(),
+      icons: [
+        {name:'mdi-facebook', link:'https://www.facebook.com/FutureBuiltonKnowledge/'},
+        {name:'mdi-instagram', link:'https://www.instagram.com/fbkresearch/?hl=it'},
+        {name:'mdi-twitter', link:'https://twitter.com/FBK_research?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor'},
+        {name:'mdi-linkedin', link:'https://www.linkedin.com/company/fbkresearch/?originalSubdomain=it'},
+        {name:'mdi-youtube', link:'https://www.youtube.com/user/comunicazionefbk'},
+      ],
     }
   },
-    methods: {
+
+  methods: {
     openTab(url){
       window.open(url, '_blank');
     }
   },
 }
 </script>
-<style>
-footer{
-  /* z-index: 999; */
-  color: #1970b7;
-  background-color: white;
-      clear: both;
-    position: relative;
-    height: 100px;
-    margin-top: -100px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 
+<style>
+
+.link {
+  text-decoration: none;
+}
+.link:hover {
+  text-decoration: underline;
+}
+.riga-colore{
+  background-color: #212121;
 }
 </style>

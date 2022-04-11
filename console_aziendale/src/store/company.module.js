@@ -46,6 +46,7 @@ const actions = {
             companyService.getCompanyById(companyId).then(
                 company => {
                     commit('choooseCompanyAdmin', { item: company });
+                    dispatch('account/temporaryCompanyAdmin', company, { root: true });
                     dispatch('getUsers', company);
                     dispatch('alert/success', "Azienda selezionata", { root: true });
                 },
@@ -71,12 +72,14 @@ const actions = {
     },
     chooseCompanyAdmin({ commit, dispatch }, company) {
         commit('choooseCompanyAdmin', company);
+        dispatch('account/temporaryCompanyAdmin', company, { root: true });
         dispatch('getUsers', company.item);
         dispatch('campaign/removeActualCampaign', null, { root: true });
         dispatch('alert/success', "Azienda selezionata. Ora sei Amministratore", { root: true });
     },
     resetCompanyAdmin({ commit, dispatch }) {
         commit('resetCompanyAdmin');
+        dispatch('account/removedCompanyAdmin', null, { root: true });
         //dispatch('campaign/removeActualCampaign', null, { root: true });
         // dispatch('company/logout', null, { root: true });
         dispatch('campaign/logout', null, { root: true });
@@ -180,6 +183,7 @@ const mutations = {
     resetCompanyAdmin(state) {
         state.adminCompany = null;
         state.actualCompany = null;
+        state.adminCompanyUsers =null;
     },
     removeActualCompany(state) {
         state.actualCompany = null;
@@ -190,8 +194,8 @@ const mutations = {
     getAllSuccess(state, companies) {
         state.allCompanies = { items: companies };
     },
-    getAllFailure(state, error) {
-        state.allCompanies = { error };
+    getAllFailure() {
+       // state.allCompanies = { error };
     },
     getCompanyById(state) {
         state.actualCompany = { loading: true };
@@ -199,8 +203,8 @@ const mutations = {
     getCompanyByIdSuccess(state, company) {
         state.actualCompany = { item: company };
     },
-    getCompanyByIdFailure(state, error) {
-        state.actualCompany = { error };
+    getCompanyByIdFailure() {
+        //state.actualCompany = { error };
     },
     addCompany(state) {
         state.actualCompany = { loading: true };
@@ -238,8 +242,8 @@ const mutations = {
                 return company.id != element.id
             })
     },
-    deleteCompanyFailure(state, error) {
-        state.actualCompany = { error };
+    deleteCompanyFailure() {
+        //state.actualCompany = { error };
     },
     users(state) {
         state.adminCompanyUsers = { loading: true };
@@ -249,8 +253,8 @@ const mutations = {
         state.adminCompanyUsers = { items: users };
 
     },
-    usersFailure(state, error) {
-        state.adminCompanyUsers.items = { error };
+    usersFailure() {
+        //state.adminCompanyUsers.items = { error };
     },
     addUser() {
         // state.adminCompanyUsers.items = { loading: true };

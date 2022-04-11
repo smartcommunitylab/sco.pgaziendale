@@ -39,7 +39,7 @@ public interface CompanyRepository  extends MongoRepository<Company, String> {
 	 * @param companyCode
 	 * @return
 	 */
-	Optional<Company> findOneByCode(String companyCode);
+	List<Company> findByCode(String companyCode);
 
 	@Query("{campaigns:?0}")
 	List<Company> findByCampaign(String id);

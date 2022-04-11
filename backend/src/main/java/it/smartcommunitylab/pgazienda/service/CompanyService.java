@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -53,6 +54,8 @@ import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
+import it.smartcommunitylab.pgazienda.service.errors.ImportDataException;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 /**
  * @author raman
@@ -137,8 +140,13 @@ public class CompanyService {
 	/**
 	 * @param company
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public Company createCompany(Company company) {
+	public Company createCompany(Company company) throws InconsistentDataException {
+		if (findByCode(company.getCode()).isPresent()) {
+			throw new InconsistentDataException("Duplicate company creation", "INVALID_COMPANY_DATA_DUPLICATE_CODE");
+		}
+		
 		return companyRepo.save(company);
 	}
 
@@ -222,20 +230,22 @@ public class CompanyService {
 	 * @param companyId
 	 * @param location
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public CompanyLocation createLocation(String companyId, CompanyLocation location) {
+	public CompanyLocation createLocation(String companyId, CompanyLocation location) throws InconsistentDataException {
 		if (location.getId() == null) {
-			throw new IllegalArgumentException("Empty location ID");
+			throw new InconsistentDataException("Empty location ID", "NO_LOCATION");
 		}
-		companyRepo.findById(companyId).ifPresent(company -> {
+		Company company = companyRepo.findById(companyId).orElse(null);
+		if (company != null) {
 			if (company.getLocations() == null) company.setLocations(Collections.singletonList(location));
 			else {
 				int idx = company.getLocations().indexOf(location);
-				if (idx >= 0) company.getLocations().set(idx, location);
+				if (idx >= 0) throw new InconsistentDataException("Duplicate location", "INVALID_COMPANY_DATA_DUPLICATE_LOCATION");
 				else company.getLocations().add(location);
 			}
 			companyRepo.save(company);
-		});
+		}
 		return location;
 	}
 
@@ -243,10 +253,11 @@ public class CompanyService {
 	 * @param companyId
 	 * @param campaign
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public CompanyLocation updateLocation(String companyId, CompanyLocation location) {
+	public CompanyLocation updateLocation(String companyId, CompanyLocation location) throws InconsistentDataException {
 		if (location.getId() == null) {
-			throw new IllegalArgumentException("Empty location ID");
+			throw new InconsistentDataException("Empty location ID", "NO_LOCATION");
 		}
 		companyRepo.findById(companyId).ifPresent(company -> {
 			if (company.getLocations() != null) {
@@ -285,9 +296,14 @@ public class CompanyService {
 	 * @param companyId
 	 * @param employee
 	 * @return
+	 * @throws InconsistentDataException 
 	 */
-	public Employee createEmployee(String companyId, @Valid Employee employee) {
+	public Employee createEmployee(String companyId, @Valid Employee employee) throws InconsistentDataException {
 		employee.setCompanyId(companyId);
+		Employee existing = employeeRepo.findByCompanyIdAndCode(companyId, employee.getCode()).stream().findAny().orElse(null);
+		if (existing != null) {
+			throw new InconsistentDataException("Duplicate user creation", "INVALID_COMPANY_DATA_DUPLICATE_EMPLOYEE");
+		}
 		return employeeRepo.save(employee);
 	}
 
@@ -326,7 +342,7 @@ public class CompanyService {
 	 * @return
 	 */
 	public Optional<Company> findByCode(String code) {
-		return companyRepo.findOneByCode(code);
+		return companyRepo.findByCode(code).stream().findFirst();
 	}
 
 	/**
@@ -346,8 +362,13 @@ public class CompanyService {
 		} catch (Exception e) {
 			lines = readCSV(new ByteArrayInputStream(bytes), ';', 4);
 		}
-		lines.forEach(l -> {
-			Employee existing = employeeRepo.findOneByCompanyIdAndCode(companyId, l[2]).orElse(null);
+		Set<String> codes = new HashSet<>();
+		for (String[] l: lines) {
+			String code = l[2];
+			if (codes.contains(code)) {
+				throw new InconsistentDataException("Duplicate employees", "INVALID_CSV_DUPLICATE_EMPLOYEES");				
+			}
+			Employee existing = employeeRepo.findByCompanyIdAndCode(companyId, code).stream().findAny().orElse(null);
 			if (existing != null) {
 				existing.setLocation(l[3]);
 				existing.setName(l[0]);
@@ -355,14 +376,15 @@ public class CompanyService {
 				employeeRepo.save(existing);
 			} else {
 				Employee e = new Employee();
-				e.setCode(l[2]);
+				e.setCode(code);
 				e.setName(l[0]);
 				e.setSurname(l[1]);
 				e.setCompanyId(companyId);
 				e.setLocation(l[3]);
 				employeeRepo.save(e);
 			}
-		});
+			codes.add(code);
+		}
 	}
 
 	private List<String[]> readCSV(InputStream is, char separator, int columns) throws Exception {
@@ -378,7 +400,7 @@ public class CompanyService {
 		
 		List<String[]> list = csvReader.readAll();
 		if (list.size() > 0 && list.get(0).length != columns) {
-			throw new IllegalArgumentException("Invalid CSV format");
+			throw new InconsistentDataException("Invalid CSV format", "INVALID_CSV");
 		}
 		
 		return list;
@@ -397,9 +419,16 @@ public class CompanyService {
 		}
 		int i = 0;
 		List<CompanyLocation> locations = new LinkedList<>();
+		Set<String> locationIds = new HashSet<>();
 		for (String[] l : lines) {
 			CompanyLocation loc = new CompanyLocation();
-			loc.setId(stringValue(l[0], i+1, 0, true));
+			String id = stringValue(l[0], i+1, 0, true);
+			if (locationIds.contains(id)) {
+				throw new InconsistentDataException("Duplicate locations", "INVALID_CSV_DUPLICATE_LOCATIONS");				
+			}
+			locationIds.add(id);
+			
+			loc.setId(id);
 			loc.setAddress(stringValue(l[1], i+1, 1, true));
 			loc.setStreetNumber(stringValue(l[2], i+1, 2, false));
 			loc.setZip(stringValue(l[3], i+1, 3, true));

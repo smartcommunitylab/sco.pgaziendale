@@ -24,9 +24,11 @@ import org.springframework.stereotype.Service;
 
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Company;
+import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 /**
  * Global data bootstrap helper service
@@ -46,7 +48,7 @@ public class AdminService {
 	private CampaignService campaignService;
 	
 	
-	public void loadData(DataModelDTO model) {
+	public void loadData(DataModelDTO model) throws InconsistentDataException {
 		validateApps(model);
 		model.getApps().forEach(app -> appService.updateApp(app));
 		
@@ -54,7 +56,7 @@ public class AdminService {
 		model.getCampaigns().forEach(c -> campaignService.saveCampaign(c));
 		
 		validateCompanies(model);
-		model.getCompanies().forEach(c -> {
+		for (Company c:  model.getCompanies()) {
 			Company existing = companyService.findByCode(c.getCode()).orElse(null);
 			if (existing == null) {
 				companyService.createCompany(c);
@@ -62,12 +64,12 @@ public class AdminService {
 				c.setId(existing.getId());
 				companyService.updateCompany(c);
 				if (c.getLocations() != null) {
-					c.getLocations().forEach(l -> {
+					for (CompanyLocation l : c.getLocations()) {
 						companyService.createLocation(c.getId(), l);
-					});
+					}
 				}
 			}
-		});
+		}
 		
 		validateUsers(model);
 		model.getCompanyUsers().forEach(u -> {
@@ -92,41 +94,45 @@ public class AdminService {
 	/**
 	 * Check data consistency considering both stored and new data
 	 * @param model
+	 * @throws InconsistentDataException 
 	 */
-	private void validateUsers(DataModelDTO model) {
-		if (model.getCompanyUsers().stream().anyMatch(u -> !Constants.ROLE_COMPANY_ADMIN.equals(u.getRole()) && !Constants.ROLE_MOBILITY_MANAGER.equals(u.getRole()))) throw new IllegalArgumentException("Invalid user roles");
-		if (model.getCompanyUsers().stream().anyMatch(u -> StringUtils.isAnyEmpty(u.getUsername(), u.getName(), u.getSurname(), u.getPassword()))) throw new IllegalArgumentException("Invalid user definition");
-		if (model.getCompanyUsers().stream().anyMatch(u -> companyService.findByCode(u.getCompanyCode()).isEmpty())) throw new IllegalArgumentException("Invalid user definition: non existing company");
+	private void validateUsers(DataModelDTO model) throws InconsistentDataException {
+		if (model.getCompanyUsers().stream().anyMatch(u -> !Constants.ROLE_COMPANY_ADMIN.equals(u.getRole()) && !Constants.ROLE_MOBILITY_MANAGER.equals(u.getRole()))) throw new InconsistentDataException("Invalid user roles", "INVALID_ROLES");
+		if (model.getCompanyUsers().stream().anyMatch(u -> StringUtils.isAnyEmpty(u.getUsername(), u.getName(), u.getSurname(), u.getPassword()))) throw new InconsistentDataException("Invalid user definition", "INVALID_USER_DATA");
+		if (model.getCompanyUsers().stream().anyMatch(u -> companyService.findByCode(u.getCompanyCode()).isEmpty())) throw new InconsistentDataException("Invalid user definition: non existing company", "NO_COMPANY");
 		
 	}
 
 
 	/**
 	 * @param model
+	 * @throws InconsistentDataException 
 	 */
-	private void validateCompanies(DataModelDTO model) {
-		if (model.getCompanies().stream().anyMatch(c -> StringUtils.isAnyEmpty(c.getCode(), c.getName()))) throw new IllegalArgumentException("Invalid company definition"); 
-		if (model.getCompanies().stream().anyMatch(c -> c.getEnabledApps()== null || c.getEnabledApps().isEmpty())) throw new IllegalArgumentException("Invalid company definition: missing app");
-		if (model.getCompanies().stream().anyMatch(c -> c.getEnabledApps().stream().anyMatch(a -> appService.getApp(a).isEmpty()))) throw new IllegalArgumentException("Invalid company definition: non existing app");
-		if (model.getCompanies().stream().anyMatch(c -> c.getCampaigns() != null && c.getCampaigns().stream().anyMatch(campaign -> campaignService.getCampaign(campaign).isEmpty()))) throw new IllegalArgumentException("Invalid company definition: non existing campaign");
+	private void validateCompanies(DataModelDTO model) throws InconsistentDataException {
+		if (model.getCompanies().stream().anyMatch(c -> StringUtils.isAnyEmpty(c.getCode(), c.getName()))) throw new InconsistentDataException("Invalid company definition", "INVALID_COMPANY_DATA"); 
+		if (model.getCompanies().stream().anyMatch(c -> c.getEnabledApps()== null || c.getEnabledApps().isEmpty())) throw new InconsistentDataException("Invalid company definition: missing app", "NO_APP");
+		if (model.getCompanies().stream().anyMatch(c -> c.getEnabledApps().stream().anyMatch(a -> appService.getApp(a).isEmpty()))) throw new InconsistentDataException("Invalid company definition: non existing app", "NO_APP");
+		if (model.getCompanies().stream().anyMatch(c -> c.getCampaigns() != null && c.getCampaigns().stream().anyMatch(campaign -> campaignService.getCampaign(campaign).isEmpty()))) throw new InconsistentDataException("Invalid company definition: non existing campaign", "NO_CAMPAIGN");
 	}
 
 
 	/**
 	 * @param model
+	 * @throws InconsistentDataException 
 	 */
-	private void validateCampaigns(DataModelDTO model) {
-		if (model.getCampaigns().stream().anyMatch(c -> StringUtils.isAnyEmpty(c.getId(), c.getTitle()))) throw new IllegalArgumentException("Invalid campaign definition");
-		if (model.getCampaigns().stream().anyMatch(c -> c.getFrom() == null)) throw new IllegalArgumentException("Invalid campaign definition: missing start date");
-		if (model.getCampaigns().stream().anyMatch(c -> appService.getApp(c.getApplication()).isEmpty())) throw new IllegalArgumentException("Invalid campaign definition: non existing app");
+	private void validateCampaigns(DataModelDTO model) throws InconsistentDataException {
+		if (model.getCampaigns().stream().anyMatch(c -> StringUtils.isAnyEmpty(c.getId(), c.getTitle()))) throw new InconsistentDataException("Invalid campaign definition", "INVALID_CAMPAIGN_DATA");
+		if (model.getCampaigns().stream().anyMatch(c -> c.getFrom() == null)) throw new InconsistentDataException("Invalid campaign definition: missing start date", "NO_START_DATE");
+		if (model.getCampaigns().stream().anyMatch(c -> appService.getApp(c.getApplication()).isEmpty())) throw new InconsistentDataException("Invalid campaign definition: non existing app", "NO_APP");
 	}
 
 
 	/**
 	 * @param model
+	 * @throws InconsistentDataException 
 	 */
-	private void validateApps(DataModelDTO model) {
-		if (model.getApps().stream().anyMatch(a -> StringUtils.isAnyEmpty(a.getId(), a.getName()))) throw new IllegalArgumentException("Invalid apps definition");
+	private void validateApps(DataModelDTO model) throws InconsistentDataException {
+		if (model.getApps().stream().anyMatch(a -> StringUtils.isAnyEmpty(a.getId(), a.getName()))) throw new InconsistentDataException("Invalid apps definition", "INVALID_APP_DATA");
 	}
 
 }

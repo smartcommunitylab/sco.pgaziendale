@@ -35,7 +35,8 @@ import './assets/styles/index.css';
 import Vuelidate from 'vuelidate'
 import { VueEditor } from "vue2-editor";
 import { LMap, LTileLayer, LMarker,LPopup,LCircle} from 'vue2-leaflet';
-
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 
 // import VGeosearch from 'vue2-leaflet-geosearch';
 
@@ -49,6 +50,7 @@ Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 import moment from 'moment'
+import vuetify from './plugins/vuetify'
 
 Vue.prototype.moment = moment
 
@@ -132,9 +134,10 @@ axios.interceptors.response.use(
   }
 )
 Vue.use(Vuelidate)
-
+Vue.use(Loading);
 new Vue({
   render: h => h(App),
   router,
-  store:store,
+  vuetify,
+  store:store
 }).$mount('#app')

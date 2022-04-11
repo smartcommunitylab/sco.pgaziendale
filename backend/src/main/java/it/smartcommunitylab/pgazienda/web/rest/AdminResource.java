@@ -35,6 +35,7 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
 import it.smartcommunitylab.pgazienda.service.AdminService;
 import it.smartcommunitylab.pgazienda.service.TrackingDataService;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 /**
  * @author raman
@@ -51,7 +52,7 @@ public class AdminResource {
 	
 	@PostMapping("/admin/load")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-	public @ResponseBody ResponseEntity<Void> uploadModel(@Valid @RequestBody DataModelDTO model) {
+	public @ResponseBody ResponseEntity<Void> uploadModel(@Valid @RequestBody DataModelDTO model) throws InconsistentDataException {
 		service.loadData(model);
 		return ResponseEntity.ok(null);
 	}
