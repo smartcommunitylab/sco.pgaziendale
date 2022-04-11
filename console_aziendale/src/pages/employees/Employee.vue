@@ -29,7 +29,7 @@
                             <v-icon>mdi-format-list-text</v-icon>
                         </v-list-item-icon>
                         <v-list-item-content>
-                            <v-list-item-title v-if="actualEmployee.item.campaigns.length == 0" v-text="actualEmployee.item.campaigns"></v-list-item-title>
+                            <v-list-item-title v-if="actualEmployee.item.campaigns.length != 0" v-html="getCampaings(actualEmployee.item.campaigns)"></v-list-item-title>
                             <v-list-item-title v-else>Nessuna campagna associata</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
@@ -57,21 +57,31 @@ export default {
 
   methods: {
     ...mapActions("modal", {openModal:"openModal"}),
-
+    //  ...mapActions("campaign", {
+    //   getCampaignTitleById: "getCampaignTitleById"}),
 	editEmployee() {
 	},
     getCampaings(campaigns) {
-        var returnCampaigns=" ";
-        campaigns.forEach(element => {
-        returnCampaigns+="<div> "+element+" </div>";
+        var returnCampaigns=" "; 
+        campaigns.forEach((element) => {
+        return returnCampaigns+="<div> "+  this.getCampaignTitle(element) +" </div>";
         });
         return returnCampaigns;
-    }
+    },
+      getCampaignTitle(campaignId) {
+         return  this.getCampaignTitleById(campaignId);
+    },
+     getCampaignTitleById(id){
+        if (this.allCampaigns && this.allCampaigns.items)
+            return (this.allCampaigns.items.find(element => element.id === id).title);
+        return ''
+    },
   },
 
   computed: {
     ...mapState("employee", ["actualEmployee"]),
     ...mapState("company", ["actualCompany"]),
+    ...mapState("campaign", ["allCampaigns"]),
   },
 };
 </script>

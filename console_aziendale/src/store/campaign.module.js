@@ -27,6 +27,7 @@ const actions = {
                 }
             );
     },
+
     getPublicCampaigns({ commit, dispatch }) {
         commit('getPublicCampaigns');
 
