@@ -179,7 +179,7 @@ function getCompanyName(id) {
 }
 function getEmployeeName(id) {
   if (mapEmployees[id])
-    return Promise.resolve(mapEmployees[id].name + ' ' + mapEmployees[id].surname);
+    return Promise.resolve(mapEmployees[id].surname+' '+mapEmployees[id].name);
   return Promise.resolve("");
 }
 function getLocationName(id) {

@@ -195,7 +195,7 @@
                     id="typeData"
                     v-model="localSelection.puntualAggregationItems"
                     :items="localSelection.itemsAggreation"
-                    item-text="name"
+                    :item-text="getItemText"
                     return-object
                     outlined
                     multiple
@@ -432,10 +432,19 @@ export default {
         backgroundColor: "#000",
         color: "#fff",
       });
-      this.getStatFromServer(selection);
-      setTimeout(() => {
-        this.loader.hide();
-      }, 5000);
+      try{
+        this.getStatFromServer(selection)
+        } finally {
+            setTimeout(() => {
+              this.loader.hide();
+            }, 5000);
+        }
+
+    },
+    getItemText(item){
+        if (item.surname)
+          return `${item.surname} ${item.name}`;
+        return `${item.name}`
     },
     exportCsv() {
       this.downloadCsv(this.localSelection);
