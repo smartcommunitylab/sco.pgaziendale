@@ -67,7 +67,8 @@
                 ><br /><span
                   v-for="(agg, index) in activeSelection.puntualAggregationItems"
                   :key="index"
-                  >{{ agg.name }}<br /></span></template
+                  >{{ agg.name }} {{ agg.surname ? agg.surname : null
+                  }} </span></template
               ><template v-else><br /><span>Nessuna</span></template>
             </p>
           </v-card-text>
@@ -100,7 +101,7 @@
             </div>
 
             <div v-if="activeViewType">
-              <v-row >
+              <v-row>
                 <v-col cols="4" class="pl-5 pr-20">
                   <p class="text-subtitle-1">Vista: {{ activeViewType.item }}</p>
                 </v-col>
@@ -133,7 +134,7 @@
               </v-col>
 
               <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1 ">Unità temporale</p>
+                <p class="text-subtitle-1">Unità temporale</p>
                 <v-autocomplete
                   label="Unità Temporale"
                   placeholder="Unità Temporale"
@@ -355,18 +356,23 @@ export default {
     view() {
       console.log("La vista è: ");
       let view = null;
-      if (this.getConfigurationById && this.getConfigurationById.views)
+      if (
+        this.getConfigurationById &&
+        this.getConfigurationById.views &&
+        this.activeViewType!=null
+      ) {
         view = this.getConfigurationById.views.find(
           (element) => element.type === this.activeViewType.item
         );
-      console.log(view);
+        console.log(view);
+      }
 
       return view;
     },
 
     getConfigurationById() {
       let conf = {};
-      if (this.configurations && this.configurations.items)
+      if (this.configurations && this.configurations.items && this.activeConfiguration)
         this.configurations.items.forEach((configuration) => {
           if (configuration.id == this.activeConfiguration.items) {
             conf = configuration;
@@ -432,19 +438,17 @@ export default {
         backgroundColor: "#000",
         color: "#fff",
       });
-      try{
-        this.getStatFromServer(selection)
-        } finally {
-            setTimeout(() => {
-              this.loader.hide();
-            }, 5000);
-        }
-
+      try {
+        this.getStatFromServer(selection);
+      } finally {
+        setTimeout(() => {
+          this.loader.hide();
+        }, 5000);
+      }
     },
-    getItemText(item){
-        if (item.surname)
-          return `${item.surname} ${item.name}`;
-        return `${item.name}`
+    getItemText(item) {
+      if (item.surname) return `${item.surname} ${item.name}`;
+      return `${item.name}`;
     },
     exportCsv() {
       this.downloadCsv(this.localSelection);
@@ -462,7 +466,11 @@ export default {
       this.setActiveSelection({ selection: this.localSelection });
     },
     updatePuntualAggregationChange() {
-      if (this.localSelection.puntualAggregationSelected.value == "NONE")
+      if (
+        this.localSelection &&
+        this.localSelection.puntualAggregationSelected &&
+        this.localSelection.puntualAggregationSelected.value == "NONE"
+      )
         this.localSelection.puntualAggregationItems = [];
       else this.getItemsAggregation();
       this.setActiveSelection({ selection: this.localSelection });
@@ -490,7 +498,13 @@ export default {
       this.checkbox = false;
     },
     getItemsAggregation() {
-      if (this.localSelection)
+      if (this.localSelection){if (!this.localSelection.puntualAggregationSelected){
+        this.localSelection.puntualAggregationSelected= {
+          function: "",
+          label: "Nessuna",
+          value: "NONE",
+        }
+      }
         statService
           .getItemsAggregation(
             this.localSelection.puntualAggregationSelected.value,
@@ -506,6 +520,7 @@ export default {
               console.log(err);
             }
           );
+      }
     },
     getDataRange() {
       this.localSelection.selectedDateFrom = this.currentCampaign.item.from;
