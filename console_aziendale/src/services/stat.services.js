@@ -55,7 +55,7 @@ function getAllLocationsStat(configuration) {
   return locationService.getAllLocations(configuration.company.id).then(values => {
     configuration.puntualAggregationItems = values;
     if (values)
-        viewStatService.setMapLocation(values);
+        viewStatService.setMapLocations(values);
     return aggregateByLocationStat(configuration)
       })
 }
