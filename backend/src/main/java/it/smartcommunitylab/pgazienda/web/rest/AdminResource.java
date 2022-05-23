@@ -33,9 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
 import it.smartcommunitylab.pgazienda.service.AdminService;
+import it.smartcommunitylab.pgazienda.service.CampaignService;
 import it.smartcommunitylab.pgazienda.service.TrackingDataService;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionException;
 
 /**
  * @author raman
@@ -49,6 +53,8 @@ public class AdminResource {
 	private AdminService service;
 	@Autowired
 	private TrackingDataService trackingDataService;
+	@Autowired
+	private CampaignService campaignService;
 	
 	@PostMapping("/admin/load")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
@@ -71,4 +77,41 @@ public class AdminResource {
 		return ResponseEntity.ok(null);
 	}
 
+	@PostMapping("/admin/subscribe/{campaignId}/{playerId}/{companyKey}/{code}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public @ResponseBody ResponseEntity<Void> subscribeCampaign(
+			@PathVariable String campaignId, 
+			@PathVariable String playerId, 
+			@PathVariable String companyKey,
+			@PathVariable String code) throws InconsistentDataException, RepeatingSubscriptionException 
+	{
+		service.subscribeCampaign(campaignId, playerId, companyKey, code);
+		return ResponseEntity.ok(null);
+	}
+
+	@PostMapping("/admin/campaignsync")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public @ResponseBody ResponseEntity<Void> syncCampaigns() {
+		campaignService.syncExternalCampaigns();
+		return ResponseEntity.ok(null);
+	}
+	
+	@PostMapping("/admin/unsubscribe/{campaignId}/{playerId}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public @ResponseBody ResponseEntity<Void> unsubscribeCampaign(
+			@PathVariable String campaignId, 
+			@PathVariable String playerId) throws InconsistentDataException, RepeatingSubscriptionException 
+	{
+		service.unsubscribeCampaign(campaignId, playerId);
+		return ResponseEntity.ok(null);
+	}
+
+	@PostMapping("/admin/validate/{campaignId}/{playerId}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public @ResponseBody ResponseEntity<TrackValidityDTO> validate(@PathVariable String campaignId, 
+			@PathVariable String playerId, @RequestBody TrackDTO body) 
+	{
+		return ResponseEntity.ok(service.validateTrack(playerId, campaignId, body));
+	}
+	
 }

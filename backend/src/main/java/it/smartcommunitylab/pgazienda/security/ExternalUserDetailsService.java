@@ -128,6 +128,26 @@ public class ExternalUserDetailsService {
                 grantedAuthorities));
         return authenticationToken;
     }
+    
+    public User checkOrRegister(String playerId) throws InconsistentDataException {
+    	String username = playerId;
+    	if (StringUtils.isEmpty(username)) throw new SecurityException("Missing username");
+    	if (!StringUtils.isEmpty(userDomain)) {
+    		username += userDomain;
+    	}
+	
+    	User user = userService.getUserWithAuthoritiesByUsername(username.toLowerCase()).orElse(null);
+    	if (user == null) {
+    		log.info("Registering new User externally: " + username);
+    		
+    		User userDTO = new User();
+    		userDTO.setUsername(username);
+    		userDTO.setPlayerId(playerId);
+    		userDTO.setRoles(Collections.singletonList(UserRole.createAppUserRole()));
+			user = userService.createUser(userDTO, null);
+    	}
+    	return user;
+    }
 
 	/**
 	 * @param token
