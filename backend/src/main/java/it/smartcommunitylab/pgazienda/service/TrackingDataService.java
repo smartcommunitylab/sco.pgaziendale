@@ -54,6 +54,7 @@ import com.google.common.collect.Multimaps;
 import com.opencsv.CSVWriter;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Circle;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Constants;
@@ -62,8 +63,15 @@ import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.DayStat.Distances;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.PGApp;
+import it.smartcommunitylab.pgazienda.domain.Shape;
+import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.TrackingData;
 import it.smartcommunitylab.pgazienda.domain.User;
+import it.smartcommunitylab.pgazienda.domain.UserRole;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO.TrackValidityLegDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
@@ -72,6 +80,7 @@ import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.util.LimitsUtils;
+import it.smartcommunitylab.pgazienda.util.TrackUtils;
 
 /**
  * @author raman
@@ -103,19 +112,20 @@ public class TrackingDataService {
 	private MongoTemplate template;
 
 //	@PostConstruct
-	public void init() {
-		dayStatRepo.findByEmptyLimitedDistances().forEach(ds -> {
-			Campaign campaign = campaignRepo.findById(ds.getCampaign()).orElse(null);
-			if (campaign != null) {
-				limitDistances(campaign, ds.getPlayerId(), ds);
-				dayStatRepo.save(ds);
-			}
-		});
-	}	
+//	public void init() {
+//		dayStatRepo.findByEmptyLimitedDistances().forEach(ds -> {
+//			Campaign campaign = campaignRepo.findById(ds.getCampaign()).orElse(null);
+//			if (campaign != null) {
+//				limitDistances(campaign, ds.getPlayerId(), ds);
+//				dayStatRepo.save(ds);
+//			}
+//		});
+//	}	
 	
 	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*2)
 	public void synchronizeApps() {
 		appRepo.findAll().forEach(a -> {
+			if (Boolean.TRUE.equals(a.getSupportPushValidation())) return;
 			
 			logger.info("Syncronizing app: " + a.getId());
 			
@@ -162,6 +172,7 @@ public class TrackingDataService {
 	 */
 	private void syncCompanyData(PGApp a, Campaign campaign, Company company, LocalDate dayFrom, LocalDate dayTo) {
 		try {
+			if (Boolean.TRUE.equals(a.getSupportPushValidation())) return;
 
 			logger.info("Syncronizing app campaign company: " + company.getCode());
 			// company employees subscribed to this campaign 
@@ -249,6 +260,105 @@ public class TrackingDataService {
 		}
 	}
 
+	public TrackValidityDTO validate(String campaignId, String playerId, TrackDTO track) throws InconsistentDataException {
+		// campaign
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) {
+			throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		} 
+		// user, should be registered
+		User user = userRepo.findByPlayerId(playerId).orElse(null);
+		if (user == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		} 
+		UserRole role = user.findRole(it.smartcommunitylab.pgazienda.Constants.ROLE_APP_USER).orElse(null);
+		if (role == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId)).findAny().orElse(null);
+		if (subscription == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		
+		// company
+		List<Company> companies = companyRepo.findByCode(subscription.getCompanyCode());
+		if (companies.size() == 0) {
+			throw new InconsistentDataException("Invalid company: " + subscription.getCompanyCode(), "NO_COMPANY");
+		}
+		Company company = companies.get(0);
+		
+		// employee matching subscription
+		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		// locations
+		List<Shape> locations = 
+				company.getLocations().stream()
+				.filter(l -> checkWorking(l, LocalDate.parse(track.getDate())))
+				.map(l -> new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius()))
+				.collect(Collectors.toList());
+		
+		// legs with matching means
+		List<TrackLegDTO> matchingLegs = track.getLegs().stream().filter(leg -> campaign.getMeans().indexOf(leg.getMean()) >= 0).collect(Collectors.toList());
+		// no locations, no legs with appropriate means, trip does not match any location
+		if (locations.size() == 0) {
+			return TrackValidityDTO.errLocations();
+		} else if (matchingLegs.size() == 0 || !TrackUtils.matchLocations(track, locations)) {
+			return TrackValidityDTO.errMatches();
+		} else {
+			// stat of current date
+			DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(playerId, campaign.getId(), company.getId(), track.getDate());
+			// new empty day stat
+			if (stat == null) {
+				stat = new DayStat();
+				stat.setPlayerId(playerId);
+				stat.setCampaign(campaign.getId());
+				stat.setCompany(company.getId());
+				stat.setDate(track.getDate());
+				stat.setTrackCount(0);
+				stat.setMonth(LocalDate.parse(track.getDate()).format(MONTH_PATTERN));
+			}
+			// distances of the travel
+			Distances newDistances = Distances.fromMap(matchingLegs.stream().collect(Collectors.groupingBy(t -> t.getMean(), Collectors.summingDouble(t -> t.getDistance()))));
+			// update distances of the existing one
+			if (stat.getDistances() != null) {
+				stat.getDistances().mergeDistances(newDistances);
+			} else {
+				stat.setDistances(newDistances);
+			}
+			stat.setCo2saved(stat.computeCO2());
+			// update number of tracks
+			stat.setTrackCount(stat.getTrackCount() + matchingLegs.size());
+
+			final Distances original = Distances.copy(stat.getDistances());
+			limitDistances(campaign, playerId, stat);
+			dayStatRepo.save(stat);
+			
+			// create result
+			TrackValidityDTO validity = new TrackValidityDTO();
+			validity.setValid(true);
+			validity.setLegs(new LinkedList<>());
+			for (TrackLegDTO l : matchingLegs) {
+				TrackValidityLegDTO leg = new TrackValidityLegDTO();
+				leg.setMean(l.getMean());
+				leg.setDistance(l.getDistance());
+				leg.setId(l.getId());
+				// put valid value considering max imposed by the limit
+				MEAN mean = MEAN.valueOf(l.getMean());
+				double max = stat.getDistances().meanValue(mean);
+				double curr = original.meanValue(mean);
+				if ((curr + l.getDistance()) < max) {
+					leg.setValidDistance(l.getDistance());
+				} else if (curr < max ) {
+					leg.setValidDistance(max - curr);
+				} else {
+					leg.setValidDistance(0d);
+				}
+				original.updateValue(mean, curr + l.getDistance());
+				validity.getLegs().add(leg);
+			}
+			return validity;
+		}
+	}  
 	/**
 	 * @param campaign
 	 * @param playerId
@@ -260,7 +370,7 @@ public class TrackingDataService {
 		criteria = Criteria.where("playerId").is(playerId).and("date").lt(stat.getDate()).gte(LocalDate.parse(stat.getDate()).withDayOfMonth(1).toString());
 		List<DayStat> currMonthAgg = doAggregation(campaign, criteria, true, false);
 		stat.setLimitedDistances(LimitsUtils.applyLimits(stat.getDistances(), currMonthAgg, totalAgg, campaign));
-		System.err.println(stat.getDistances().getBike() +" -> "+ stat.getLimitedDistances().getBike());
+		// System.err.println(stat.getDistances().getBike() +" -> "+ stat.getLimitedDistances().getBike());
 	}
 	
 	/**

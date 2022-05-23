@@ -28,7 +28,11 @@ import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
+import it.smartcommunitylab.pgazienda.security.ExternalUserDetailsService;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionException;
 
 /**
  * Global data bootstrap helper service
@@ -43,9 +47,13 @@ public class AdminService {
 	@Autowired
 	private UserService userService;
 	@Autowired
+	private ExternalUserDetailsService extUserService;
+	@Autowired
 	private CompanyService companyService;
 	@Autowired
 	private CampaignService campaignService;
+	@Autowired
+	private TrackingDataService trackService;
 	
 	
 	public void loadData(DataModelDTO model) throws InconsistentDataException {
@@ -62,6 +70,7 @@ public class AdminService {
 				companyService.createCompany(c);
 			} else {
 				c.setId(existing.getId());
+				c.setLocations(Collections.emptyList());
 				companyService.updateCompany(c);
 				if (c.getLocations() != null) {
 					for (CompanyLocation l : c.getLocations()) {
@@ -135,4 +144,39 @@ public class AdminService {
 		if (model.getApps().stream().anyMatch(a -> StringUtils.isAnyEmpty(a.getId(), a.getName()))) throw new InconsistentDataException("Invalid apps definition", "INVALID_APP_DATA");
 	}
 
+
+	/**
+	 * Subscribe a user with the given campaign, player id, company key, and employee code
+	 * @param campaignId
+	 * @param playerId
+	 * @param companyKey
+	 * @param code
+	 * @throws InconsistentDataException
+	 * @throws RepeatingSubscriptionException
+	 */
+	public void subscribeCampaign(String campaignId, String playerId, String companyKey, String code) throws InconsistentDataException, RepeatingSubscriptionException {
+		User user = extUserService.checkOrRegister(playerId);
+		campaignService.subscribeUser(user, code, companyKey, campaignId);
+	} 
+	
+	/**
+	 * Unsubscribe specified user
+	 * @param campaignId
+	 * @param playerId
+	 */
+	public void unsubscribeCampaign(String campaignId, String playerId) {
+		User user = userService.getUserByPlayerId(playerId);
+		if (user != null) {
+			campaignService.unsubscribeUser(user, campaignId);
+		}
+	}
+	
+	public TrackValidityDTO validateTrack(String playerId, String campaignId, TrackDTO track) {
+		try {
+			return trackService.validate(campaignId, playerId, track);
+		} catch (InconsistentDataException e) {
+			return new TrackValidityDTO(e.getDetails());
+		}
+	}
+	
 }

@@ -35,7 +35,8 @@ const actions = {
   },
   getStat({ commit, dispatch,state }, configuration) {
     commit("getStat");
-    statService.getStat(configuration,state.currentCampaign.item).then(
+    if (state.currentCampaign)
+      statService.getStat(configuration,state.currentCampaign.item).then(
       (statistics) => {
         commit("getStatSuccess", statistics);
         dispatch("alert/success", "Recuperate le statistiche con successo.", {
@@ -44,7 +45,7 @@ const actions = {
       },
       (error) => {
         commit("getStatFailure", error);
-        dispatch("alert/error", "Errore nel recupero delle statistiche.", {
+        dispatch("alert/error", error, {
           root: true,
         });
       }
@@ -63,7 +64,7 @@ const actions = {
       },
       (error) => {
         commit("getCsvFailure", error);
-        dispatch("alert/error", "Errore nel recupero delle statistiche.", {
+        dispatch("alert/error", error, {
           root: true,
         });
       }

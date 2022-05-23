@@ -348,6 +348,9 @@ public class UserService {
     public List<User> getUserByEmployeeCode(String campaign, String companyCode, String userCode) {
         return userRepository.findByCampaignAndCompanyAndEmployeeCode(campaign, companyCode, Collections.singleton(userCode));
     }
+    public User getUserByPlayerId(String playerId) {
+    	return userRepository.findByPlayerId(playerId).orElse(null);
+    }
 
     /**
      * Not activated users should be automatically deleted after 3 days.

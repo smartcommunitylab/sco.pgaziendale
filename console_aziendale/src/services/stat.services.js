@@ -55,16 +55,30 @@ function getAllLocationsStat(configuration) {
   return locationService.getAllLocations(configuration.company.id).then(values => {
     configuration.puntualAggregationItems = values;
     if (values)
-        viewStatService.setMapLocation(values);
+        viewStatService.setMapLocations(values);
     return aggregateByLocationStat(configuration)
       })
 }
 function getAllEmployeesStat(configuration) {
   //getAll  employeesid of company and call aggregateByEmployeeStat
   return employeeService.getAllEmployees(configuration.company.id).then(values => {
-    configuration.puntualAggregationItems = values;
-    if (values)
-        viewStatService.setMapEmployees(values);
+    let newValues = values.sort((a,b) => (a.surname > b.surname) ? 1 : ((b.surname > a.surname) ? -1 : 0));
+    newValues = newValues.map(element => {
+      if (element.name)
+      element.name =element.name.charAt(0).toUpperCase() + element.name.substring(1).toLowerCase();
+       return element;
+     }
+     )
+     newValues = newValues.map(element => {
+      if (element.surname)
+      element.surname= element.surname.charAt(0).toUpperCase() + element.surname.substring(1).toLowerCase();
+       return element;
+     }
+     )
+    configuration.puntualAggregationItems = newValues;
+
+    if (newValues)
+        viewStatService.setMapEmployees(newValues);
     return aggregateByEmployeeStat(configuration)
   })
 }
@@ -91,7 +105,7 @@ function aggregateByEmployeeStat(configuration) {
     return Promise.resolve(returnArray);
   })).catch(errors => {
     console.log(errors)
-    return Promise.reject();
+    return Promise.reject(errors);
 
   })
 
@@ -116,7 +130,7 @@ function aggregateByLocationStat(configuration) {
     return Promise.resolve(returnArray);
   })).catch(errors => {
     console.log(errors)
-    return Promise.reject();
+    return Promise.reject(errors);
 
   })
 
@@ -138,7 +152,7 @@ function aggregateCompanyStat(configuration) {
     return Promise.resolve(responses);
   })).catch(errors => {
     console.log(errors)
-    return Promise.reject();
+    return Promise.reject(errors);
 
   })
 
@@ -339,7 +353,7 @@ function getAllCompaniesCampaignStat({ campaignId, from, to, groupBy }) {
     return Promise.resolve(returnData);
   })).catch(errors => {
     console.log(errors)
-    return Promise.reject();
+    return Promise.reject(errors);
   })
 }
 function aggregateCompany(allStat) {
@@ -417,7 +431,7 @@ function getCampaignStat({ campaignId, from, to, groupBy }) {
     return Promise.resolve(returnData);
   })).catch(errors => {
     console.log(errors)
-    return Promise.reject();
+    return Promise.reject(errors);
   })
 }
 
@@ -474,7 +488,7 @@ function getCompanyStat(
     return Promise.resolve(combinedItem);
   })).catch(errors => {
     console.log(errors)
-    return Promise.reject();
+    return Promise.reject(errors);
   })
   
 }
@@ -537,7 +551,7 @@ function getLocationStat(
     return Promise.resolve(combinedItem);
   })).catch(errors => {
     console.log(errors)
-    return Promise.reject();
+    return Promise.reject(errors);
   })
   
 }
@@ -615,7 +629,7 @@ function getEmployeeStat({
     return Promise.resolve(combinedItem);
   })).catch(errors => {
     console.log(errors)
-    return Promise.reject();
+    return Promise.reject(errors);
   })
 }
 function createEmployeeData(res){

@@ -1,0 +1,43 @@
+{
+  "active": true,
+  "banner": {
+    "contentType": "image/png",
+    "url": "http://localhost/image.png"
+  },
+  "campaignId": "Campaign1",
+  "communications": true,
+  "description": "description",
+  "details": [
+    {
+      "content": "Lorem ipsum faq",
+      "extUrl": "string",
+      "name": "string",
+      "type": "faq"
+    },
+    {
+      "content": "Lorem ipsum rules",
+      "extUrl": "string",
+      "name": "string",
+      "type": "rules"
+    },
+    {
+      "content": "Lorem ipsum privacy",
+      "extUrl": "string",
+      "name": "string",
+      "type": "privacy"
+    }
+    
+  ],
+  "gameId": "game",
+  "logo": {
+    "contentType": "image/png",
+    "url": "http://localhost/image.png"
+  },
+  "name": "Campaign 1",
+  "startDayOfWeek": 0,
+  "territoryId": "territory",
+  "type": "company",
+  "validationData": {
+    "means": ["bus", "bike"]
+  }
+}

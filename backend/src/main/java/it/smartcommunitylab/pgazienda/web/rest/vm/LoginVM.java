@@ -57,11 +57,4 @@ public class LoginVM {
         this.rememberMe = rememberMe;
     }
 
-    @Override
-    public String toString() {
-        return "LoginVM{" +
-            "username='" + username + '\'' +
-            ", rememberMe=" + rememberMe +
-            '}';
-    }
 }
