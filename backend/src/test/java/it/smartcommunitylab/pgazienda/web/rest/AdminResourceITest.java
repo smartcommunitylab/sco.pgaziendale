@@ -27,8 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Map;
@@ -232,8 +230,7 @@ public class AdminResourceITest {
         
         
     	TrackDTO track = new TrackDTO();
-    	track.setDate(LocalDate.now().toString());
-    	track.setTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+    	track.setStartTime(System.currentTimeMillis());
     	track.setLegs(new LinkedList<>());
     	TrackLegDTO leg = new TrackLegDTO();
     	leg.setDistance(1000d);

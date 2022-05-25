@@ -18,7 +18,9 @@ package it.smartcommunitylab.pgazienda.service;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -89,6 +91,10 @@ import it.smartcommunitylab.pgazienda.util.TrackUtils;
 @Service
 public class TrackingDataService {
 
+	/**
+	 * 
+	 */
+	private static final String DEFAULT_TIME_ZONE = "Europe/Rome";
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
 	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
 	
@@ -293,7 +299,7 @@ public class TrackingDataService {
 		// locations
 		List<Shape> locations = 
 				company.getLocations().stream()
-				.filter(l -> checkWorking(l, LocalDate.parse(track.getDate())))
+				.filter(l -> checkWorking(l, toLocalDate(track.getStartTime())))
 				.map(l -> new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius()))
 				.collect(Collectors.toList());
 		
@@ -305,17 +311,18 @@ public class TrackingDataService {
 		} else if (matchingLegs.size() == 0 || !TrackUtils.matchLocations(track, locations)) {
 			return TrackValidityDTO.errMatches();
 		} else {
+			LocalDate date = toLocalDate(track.getStartTime());
 			// stat of current date
-			DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(playerId, campaign.getId(), company.getId(), track.getDate());
+			DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(playerId, campaign.getId(), company.getId(), date.toString());
 			// new empty day stat
 			if (stat == null) {
 				stat = new DayStat();
 				stat.setPlayerId(playerId);
 				stat.setCampaign(campaign.getId());
 				stat.setCompany(company.getId());
-				stat.setDate(track.getDate());
+				stat.setDate(date.toString());
 				stat.setTrackCount(0);
-				stat.setMonth(LocalDate.parse(track.getDate()).format(MONTH_PATTERN));
+				stat.setMonth(date.format(MONTH_PATTERN));
 			}
 			// distances of the travel
 			Distances newDistances = Distances.fromMap(matchingLegs.stream().collect(Collectors.groupingBy(t -> t.getMean(), Collectors.summingDouble(t -> t.getDistance()))));
@@ -359,6 +366,14 @@ public class TrackingDataService {
 			return validity;
 		}
 	}  
+	/**
+	 * @param startTime
+	 * @return
+	 */
+	private LocalDate toLocalDate(Long startTime) {
+		return Instant.ofEpochMilli(startTime).atZone(ZoneId.of(DEFAULT_TIME_ZONE)).toLocalDate();
+	}
+	
 	/**
 	 * @param campaign
 	 * @param playerId
