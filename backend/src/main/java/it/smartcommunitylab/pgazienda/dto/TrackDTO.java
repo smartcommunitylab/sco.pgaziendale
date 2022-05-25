@@ -24,30 +24,17 @@ import java.util.List;
  */
 public class TrackDTO {
 
-	private String date;
-	private String time;
+	private Long startTime;
 
 	private List<TrackLegDTO> legs;
 	
-	public String getDate() {
-		return date;
+	public Long getStartTime() {
+		return startTime;
 	}
 
-
-	public void setDate(String date) {
-		this.date = date;
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
 	}
-
-
-	public String getTime() {
-		return time;
-	}
-
-
-	public void setTime(String time) {
-		this.time = time;
-	}
-
 
 	public List<TrackLegDTO> getLegs() {
 		return legs;
