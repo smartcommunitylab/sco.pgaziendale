@@ -26,6 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -113,5 +114,21 @@ public class AdminResource {
 	{
 		return ResponseEntity.ok(service.validateTrack(playerId, campaignId, body));
 	}
-	
+
+	@PutMapping("/admin/invalidate/{campaignId}/{playerId}/{trackId}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public @ResponseBody ResponseEntity<TrackValidityDTO> invalidate(@PathVariable String campaignId, 
+			@PathVariable String playerId, @PathVariable String trackId) 
+	{
+		return ResponseEntity.ok(service.invalidateTrack(playerId, campaignId, trackId));
+	}
+
+	@PutMapping("/admin/update/{campaignId}/{playerId}/{trackId}/{inc}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public @ResponseBody ResponseEntity<TrackValidityDTO> update(@PathVariable String campaignId, 
+			@PathVariable String playerId, @PathVariable String trackId, @PathVariable Double inc) 
+	{
+		return ResponseEntity.ok(service.update(playerId, campaignId, trackId, inc));
+	}
+
 }

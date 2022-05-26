@@ -336,9 +336,8 @@ public class TrackingDataService {
 			// update number of tracks
 			stat.setTrackCount(stat.getTrackCount() + matchingLegs.size());
 
-			final Distances original = Distances.copy(stat.getDistances());
+			final Distances original = new Distances();
 			limitDistances(campaign, playerId, stat);
-			dayStatRepo.save(stat);
 			
 			// create result
 			TrackValidityDTO validity = new TrackValidityDTO();
@@ -351,21 +350,157 @@ public class TrackingDataService {
 				leg.setId(l.getId());
 				// put valid value considering max imposed by the limit
 				MEAN mean = MEAN.valueOf(l.getMean());
-				double max = stat.getDistances().meanValue(mean);
+				double max = stat.getLimitedDistances().meanValue(mean);
 				double curr = original.meanValue(mean);
-				if ((curr + l.getDistance()) < max) {
+				if ((curr + l.getDistance()) <= max) {
 					leg.setValidDistance(l.getDistance());
-				} else if (curr < max ) {
+				} else if (curr <= max ) {
 					leg.setValidDistance(max - curr);
 				} else {
 					leg.setValidDistance(0d);
 				}
 				original.updateValue(mean, curr + l.getDistance());
 				validity.getLegs().add(leg);
+				
+				TrackingData td = new TrackingData();
+				td.setMode(mean.name());
+				td.setTrackId(l.getId());
+				td.setPlayerId(playerId);
+				td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
+				td.setDistance(l.getDistance());
+				stat.getTracks().add(td);
 			}
+			dayStatRepo.save(stat);
+
 			return validity;
 		}
 	}  
+	
+	/**
+	 * @param campaignId
+	 * @param playerId
+	 * @param trackId
+	 * @return
+	 */
+	public TrackValidityDTO invalidate(String campaignId, String playerId, String trackId) throws InconsistentDataException {
+		// campaign
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) {
+			throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		} 
+		// user, should be registered
+		User user = userRepo.findByPlayerId(playerId).orElse(null);
+		if (user == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		} 
+		UserRole role = user.findRole(it.smartcommunitylab.pgazienda.Constants.ROLE_APP_USER).orElse(null);
+		if (role == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId)).findAny().orElse(null);
+		if (subscription == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		
+		// company
+		List<Company> companies = companyRepo.findByCode(subscription.getCompanyCode());
+		if (companies.size() == 0) {
+			throw new InconsistentDataException("Invalid company: " + subscription.getCompanyCode(), "NO_COMPANY");
+		}
+		Company company = companies.get(0);
+		
+		// employee matching subscription
+		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		
+		DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndTrack(playerId, campaign.getId(), company.getId(), trackId);
+		if (stat != null) {
+			TrackingData track = stat.getTracks().stream().filter(t -> trackId.equals(trackId)).findAny().get();
+			stat.setTrackCount(stat.getTrackCount()-1);
+			MEAN mean = MEAN.valueOf(track.getMode());
+			stat.getDistances().updateValue(mean, stat.getDistances().meanValue(mean) - track.getDistance());
+			stat.setCo2saved(stat.computeCO2());
+			stat.getLimitedDistances().updateValue(mean, stat.getLimitedDistances().meanValue(mean) - track.getDistance());
+			stat.setTracks(stat.getTracks().stream().filter(t -> !t.getTrackId().equals(trackId)).collect(Collectors.toList()));
+			dayStatRepo.save(stat);
+		}
+
+		return TrackValidityDTO.errInvalidated();
+	}
+
+	/**
+	 * @param campaignId
+	 * @param playerId
+	 * @param trackId
+	 * @return
+	 */
+	public TrackValidityDTO update(String campaignId, String playerId, String trackId, Double inc) throws InconsistentDataException {
+		// campaign
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) {
+			throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		} 
+		// user, should be registered
+		User user = userRepo.findByPlayerId(playerId).orElse(null);
+		if (user == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		} 
+		UserRole role = user.findRole(it.smartcommunitylab.pgazienda.Constants.ROLE_APP_USER).orElse(null);
+		if (role == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId)).findAny().orElse(null);
+		if (subscription == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		
+		// company
+		List<Company> companies = companyRepo.findByCode(subscription.getCompanyCode());
+		if (companies.size() == 0) {
+			throw new InconsistentDataException("Invalid company: " + subscription.getCompanyCode(), "NO_COMPANY");
+		}
+		Company company = companies.get(0);
+		
+		// employee matching subscription
+		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		
+		DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndTrack(playerId, campaign.getId(), company.getId(), trackId);
+		if (stat != null) {
+			TrackingData track = stat.getTracks().stream().filter(t -> trackId.equals(trackId)).findAny().get();
+			track.setDistance(track.getDistance() + inc);
+			MEAN mean = MEAN.valueOf(track.getMode());
+			stat.getDistances().updateValue(mean, stat.getDistances().meanValue(mean) + inc);
+			stat.setCo2saved(stat.computeCO2());
+			final Distances original = Distances.copy(stat.getDistances());
+			limitDistances(campaign, playerId, stat); 
+			dayStatRepo.save(stat);
+			
+			TrackValidityDTO validity = new TrackValidityDTO();
+			validity.setValid(true);
+			TrackValidityLegDTO leg = new TrackValidityLegDTO();
+			validity.setLegs(Collections.singletonList(leg));
+			leg.setMean(track.getMode());
+			leg.setDistance(track.getDistance());
+			leg.setId(track.getTrackId());
+			// put valid value considering max imposed by the limit
+			double max = stat.getLimitedDistances().meanValue(mean);
+
+			double curr = original.meanValue(mean);
+			if (curr == max) {
+				leg.setValidDistance(track.getDistance());
+			} else if (curr > max ) {
+				leg.setValidDistance(track.getDistance() - (curr - max));
+			} else {
+				leg.setValidDistance(0d);
+			}
+			
+			return validity;
+		}
+		
+		return TrackValidityDTO.errData();
+	}
+	
 	/**
 	 * @param startTime
 	 * @return

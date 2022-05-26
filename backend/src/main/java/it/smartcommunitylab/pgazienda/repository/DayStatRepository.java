@@ -40,5 +40,9 @@ public interface DayStatRepository  extends MongoRepository<DayStat, String> {
 	@Query("{playerId:?0, campaign:?1, company:?2, date : ?3}")
 	public DayStat findOneByPlayerIdAndCampaignAndCompanyAndDate(String playerId, String campaign, String company, String date);
 
+	@Query("{playerId:?0, campaign:?1, company:?2, 'tracks.trackId' : ?3}")
+	public DayStat findOneByPlayerIdAndCampaignAndCompanyAndTrack(String playerId, String campaign, String company, String trackId);
+	
+	
 	public void deleteByCampaign(String campaignId);
 }
