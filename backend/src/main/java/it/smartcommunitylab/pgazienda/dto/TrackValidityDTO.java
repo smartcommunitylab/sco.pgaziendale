@@ -25,9 +25,10 @@ import java.util.List;
  */
 public class TrackValidityDTO {
 
-	public static String ERR_DATA = "INVALID_DATA";
-	public static String ERR_NO_LOCATIONS = "NO_LOCATIONS";
-	public static String ERR_NO_MATCHES = "NO_MATCHES";
+	public static final String ERR_INVALIDATED = "ERR_INVALIDATED";
+	public static final String ERR_DATA = "INVALID_DATA";
+	public static final String ERR_NO_LOCATIONS = "NO_LOCATIONS";
+	public static final String ERR_NO_MATCHES = "NO_MATCHES";
 	
 	private boolean valid;
 	private String errorCode;
@@ -42,6 +43,10 @@ public class TrackValidityDTO {
 	public static TrackValidityDTO errMatches() {
 		return new TrackValidityDTO(ERR_NO_MATCHES);
 	}
+	public static TrackValidityDTO errInvalidated() {
+		return new TrackValidityDTO(ERR_INVALIDATED);
+	}
+
 	
 	public TrackValidityDTO() {
 		super();
@@ -108,4 +113,5 @@ public class TrackValidityDTO {
 			this.mean = mean;
 		} 
 	}
+
 }

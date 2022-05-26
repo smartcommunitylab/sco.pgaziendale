@@ -178,5 +178,36 @@ public class AdminService {
 			return new TrackValidityDTO(e.getDetails());
 		}
 	}
+
+
+	/**
+	 * @param playerId
+	 * @param campaignId
+	 * @param trackId
+	 * @return
+	 */
+	public TrackValidityDTO invalidateTrack(String playerId, String campaignId, String trackId) {
+		try {
+			return trackService.invalidate(campaignId, playerId, trackId);
+		} catch (InconsistentDataException e) {
+			return new TrackValidityDTO(e.getDetails());
+		}
+	}
+
+
+	/**
+	 * @param playerId
+	 * @param campaignId
+	 * @param trackId
+	 * @param inc
+	 * @return
+	 */
+	public TrackValidityDTO update(String playerId, String campaignId, String trackId, Double inc) {
+		try {
+			return trackService.update(campaignId, playerId, trackId, inc);
+		} catch (InconsistentDataException e) {
+			return new TrackValidityDTO(e.getDetails());
+		}
+	}
 	
 }

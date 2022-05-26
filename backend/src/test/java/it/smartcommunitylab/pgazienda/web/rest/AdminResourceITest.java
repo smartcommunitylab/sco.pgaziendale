@@ -21,6 +21,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -253,8 +254,116 @@ public class AdminResourceITest {
                     .content(TestUtil.convertObjectToJsonBytes(track)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.valid").value("true"));
+                .andExpect(jsonPath("$.valid").value("true"))
+                .andExpect(jsonPath("$.legs[0].distance").value("1000.0"))
+                .andExpect(jsonPath("$.legs[0].validDistance").value("1000.0"));
     	
+    }
+
+    @Test
+    public void testInvalidate() throws Exception {
+    	Campaign obj = testCampaign();
+    	obj = campaignRepo.save(obj);
+    
+    	Company company = testCompany();
+    	company.setCampaigns(Collections.singletonList(obj.getId()));
+    	company = companyRepo.save(company);
+    	
+    	Employee e = testEmployee(company);
+    	e = employeeRepo.save(e);
+    	
+        restMockMvc.perform(
+                post("/api/admin/subscribe/{campaignId}/{playerId}/{companyKey}/{code}", obj.getId(), "1234", company.getCode(), e.getCode()))
+                .andExpect(status().isOk());
+        
+        
+    	TrackDTO track = new TrackDTO();
+    	track.setStartTime(System.currentTimeMillis());
+    	track.setLegs(new LinkedList<>());
+    	TrackLegDTO leg = new TrackLegDTO();
+    	leg.setDistance(1000d);
+    	leg.setMean("bike");
+    	leg.setId("123456");
+    	leg.setPoints(new LinkedList<>());
+    	for (int i = 0; i < 10; i++) {
+    		TrackPointDTO point = new TrackPointDTO();
+    		point.setAccuracy(1l);
+    		point.setRecorded_at(System.currentTimeMillis());
+    		point.setLatitude(company.getLocations().get(0).getLatitude());
+    		point.setLongitude(company.getLocations().get(0).getLongitude());
+    		leg.getPoints().add(point);
+    	}
+    	track.getLegs().add(leg);
+    	
+        restMockMvc.perform(
+                post("/api/admin/validate/{campaignId}/{playerId}", obj.getId(), "1234")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(track)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.valid").value("true"));
+        
+        restMockMvc.perform(
+                put("/api/admin/invalidate/{campaignId}/{playerId}/{trackId}", obj.getId(), "1234", "123456")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(track)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.valid").value("false"))
+                .andExpect(jsonPath("$.errorCode").value("ERR_INVALIDATED"));
+    }
+    
+    @Test
+    public void testUpdate() throws Exception {
+    	Campaign obj = testCampaign();
+    	obj = campaignRepo.save(obj);
+    
+    	Company company = testCompany();
+    	company.setCampaigns(Collections.singletonList(obj.getId()));
+    	company = companyRepo.save(company);
+    	
+    	Employee e = testEmployee(company);
+    	e = employeeRepo.save(e);
+    	
+        restMockMvc.perform(
+                post("/api/admin/subscribe/{campaignId}/{playerId}/{companyKey}/{code}", obj.getId(), "1234", company.getCode(), e.getCode()))
+                .andExpect(status().isOk());
+        
+        
+    	TrackDTO track = new TrackDTO();
+    	track.setStartTime(System.currentTimeMillis());
+    	track.setLegs(new LinkedList<>());
+    	TrackLegDTO leg = new TrackLegDTO();
+    	leg.setDistance(1000d);
+    	leg.setMean("bike");
+    	leg.setId("123456");
+    	leg.setPoints(new LinkedList<>());
+    	for (int i = 0; i < 10; i++) {
+    		TrackPointDTO point = new TrackPointDTO();
+    		point.setAccuracy(1l);
+    		point.setRecorded_at(System.currentTimeMillis());
+    		point.setLatitude(company.getLocations().get(0).getLatitude());
+    		point.setLongitude(company.getLocations().get(0).getLongitude());
+    		leg.getPoints().add(point);
+    	}
+    	track.getLegs().add(leg);
+    	
+        restMockMvc.perform(
+                post("/api/admin/validate/{campaignId}/{playerId}", obj.getId(), "1234")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(track)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.valid").value("true"));
+        
+        restMockMvc.perform(
+                put("/api/admin/update/{campaignId}/{playerId}/{trackId}/{inc}", obj.getId(), "1234", "123456", "100")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(track)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.valid").value("true"))
+                .andExpect(jsonPath("$.legs[0].distance").value("1100.0"));
     }
 
     
