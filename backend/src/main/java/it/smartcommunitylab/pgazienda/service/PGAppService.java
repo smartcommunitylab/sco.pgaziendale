@@ -16,7 +16,9 @@
 
 package it.smartcommunitylab.pgazienda.service;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Constants;
 import it.smartcommunitylab.pgazienda.domain.PGApp;
 import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 
@@ -99,7 +102,7 @@ public class PGAppService {
 		c.setActive(true);
 		c.setId((String) cm.get("campaignId"));
 		c.setDescription((String) cm.get("description"));
-		c.setFrom(LocalDate.parse((String) cm.get("dateFrom")));
+		c.setFrom(Instant.ofEpochMilli((Long)cm.get("dateFrom")).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate());
 		c.setLogo((String) ((Map)cm.get("logo")).get("url"));
 		c.setMeans((List<String>) ((Map)cm.getOrDefault("validationData", Collections.emptyMap())).get("means"));
 		if (cm.containsKey("privacy")) {
@@ -113,7 +116,7 @@ public class PGAppService {
 			c.setPrivacy(extractDetails(cm.get("details"), "rules"));
 		}
 		c.setTitle((String) cm.get("name"));
-		c.setTo(LocalDate.parse((String) cm.get("dateTo")));
+		c.setTo(Instant.ofEpochMilli((Long)cm.get("dateTo")).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate());
 		return c;
 	}
 
