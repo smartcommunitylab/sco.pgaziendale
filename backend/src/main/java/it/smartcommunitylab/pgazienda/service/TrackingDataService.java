@@ -94,7 +94,6 @@ public class TrackingDataService {
 	/**
 	 * 
 	 */
-	private static final String DEFAULT_TIME_ZONE = "Europe/Rome";
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
 	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
 	
@@ -506,7 +505,7 @@ public class TrackingDataService {
 	 * @return
 	 */
 	private LocalDate toLocalDate(Long startTime) {
-		return Instant.ofEpochMilli(startTime).atZone(ZoneId.of(DEFAULT_TIME_ZONE)).toLocalDate();
+		return Instant.ofEpochMilli(startTime).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
 	}
 	
 	/**
