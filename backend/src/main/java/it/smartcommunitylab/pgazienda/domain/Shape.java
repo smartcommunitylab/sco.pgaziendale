@@ -20,16 +20,8 @@ package it.smartcommunitylab.pgazienda.domain;
  * @author raman
  *
  */
-public class Constants {
+public abstract class Shape {
 
-	public static final String DEFAULT_TIME_ZONE = "Europe/Rome";
-
-	public static final String AGG_DAY = "day";
-	public static final String AGG_MONTH = "month";
-	public static final String AGG_TOTAL = "total";	
+	public abstract boolean inside(double x, double y);
 	
-	public static final String[] AGG_ARRAY = new String[] {AGG_DAY, AGG_MONTH, AGG_TOTAL};
-	
-	public enum MEAN {bike, car, walk, bus, train, boat};
-
 }
