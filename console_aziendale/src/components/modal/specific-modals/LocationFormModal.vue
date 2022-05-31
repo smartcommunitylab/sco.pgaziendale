@@ -36,6 +36,8 @@
             class="p-0 mx-1"
             justify="center"
           >
+
+          <v-col>
             <v-text-field
               label="Raggio"
               placeholder="Raggio *"
@@ -43,13 +45,17 @@
               name="campaignRadius"
               id="campaignRadius"
               v-model.trim="$v.radius.$model"
-              :error-messages="radiusErrors"                                
+              :error-messages="radiusErrors"
+              :disabled ="$v.radius.$model ==200"                      
               required
               @input="$v.radius.$touch()"
               @blur="$v.radius.$touch()"
               outlined
             >
-              <template v-slot:append>
+
+            </v-text-field>
+            </v-col>
+            <v-col>
                 <v-tooltip
                   bottom
                   nudge-bottom="10"
@@ -60,10 +66,9 @@
                       mdi-help-circle-outline
                     </v-icon>
                   </template>
-                  Distanza in metri all'interno di cui i viaggi dei dipendenti risultano essere validi
+                  Distanza in metri dalla sede all'interno di cui i viaggi dei dipendenti risultano essere validi
                 </v-tooltip>
-              </template>
-            </v-text-field>
+                </v-col>
           </v-row>           
           <v-row
             class="p-0 mx-1"

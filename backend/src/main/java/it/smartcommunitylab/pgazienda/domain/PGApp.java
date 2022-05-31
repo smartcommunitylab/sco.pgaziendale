@@ -30,6 +30,9 @@ public class PGApp {
 	private String password;
 	private String endpoint;
 	
+	private Boolean supportCampaignMgmt;
+	private Boolean supportPushValidation;
+	
 	/**
 	 * @return the id
 	 */
@@ -86,6 +89,17 @@ public class PGApp {
 	public void setEndpoint(String endpoint) {
 		this.endpoint = endpoint;
 	}
-	
+	public Boolean getSupportCampaignMgmt() {
+		return supportCampaignMgmt;
+	}
+	public void setSupportCampaignMgmt(Boolean supportCampaignMgmt) {
+		this.supportCampaignMgmt = supportCampaignMgmt;
+	}
+	public Boolean getSupportPushValidation() {
+		return supportPushValidation;
+	}
+	public void setSupportPushValidation(Boolean supportPushValidation) {
+		this.supportPushValidation = supportPushValidation;
+	}
 	
 }
