@@ -103,8 +103,7 @@ export default {
       setTimeout(() => {
        if (this.actualLocation)
         this.position ={ lat: this.actualLocation.item.latitude, lng: this.actualLocation.item.longitude };
-         this.zoom=14;
-        
+        this.zoom=14;
         this.$refs.map.mapObject.invalidateSize();
       }, 250);
     },
