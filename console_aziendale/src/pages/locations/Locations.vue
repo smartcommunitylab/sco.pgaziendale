@@ -152,14 +152,14 @@ export default {
         if (this.actualLocation.item == location) {
           this.selectActualLocation(null);
 
-          this.actualLocation = undefined;
+          //this.actualLocation = undefined;
         } else {
           this.selectActualLocation(location);
-          this.actualLocation = location;
+          //this.actualLocation = location;
         }
       }else{
         this.selectActualLocation(location);
-        this.actualLocation = location;
+        //this.actualLocation = location;
       }
     },
     showModal(title) {

@@ -16,7 +16,7 @@
         <v-col
           cols="8"
         >
-          <div class="map-style">
+          <div class="map-style" v-if="locationSelected">
             <geolocation-selector
               v-model="locationSelected"
               :key="key"
@@ -520,7 +520,7 @@ export default {
       this.createLocation();
     },
     initLocation() {
-      
+      this.locationSelected = null;
       this.id = "";
       this.address = "";
       this.streetNumber = "";
