@@ -7,7 +7,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="openModal({type:'locationFormAdd', object:null})"
+          @click="[selectActualLocation(null), openModal({type:'locationFormAdd', object:null})]"
           class="mr-4"
         >
           <v-icon left>mdi-plus</v-icon>
