@@ -31,5 +31,30 @@
       
        }
     },
+    watch: {
+    dataTableData: {
+      handler() {
+        if (this.dataTableData){
+          this.dataTableData.data.forEach(row => {
+            const props = Object.keys(row);
+            props.forEach(prop => {
+               if(typeof row[prop] == 'number'){
+                  // row[prop] =  -7.275957614183426e-12;
+                  Math.abs(Math.round(row[prop]));
+                }
+            })
+        });
+        }
+       // console.log(this.dataTableData.data)
+
+        //this.correctDataTableData = this.allOptions.indexOf(this.currentQuestion.correct_answer);
+        
+      },
+      immediate: true,
+    }
+  },
+  mounted() {
+    console.log("ciao"+this.dataTableData)
+  },
   }
 </script>
