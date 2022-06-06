@@ -31,25 +31,5 @@
       
        }
     },
-    watch: {
-    dataTableData: {
-      handler() {
-        if (this.dataTableData){
-          this.dataTableData.data.forEach(row => {
-            const props = Object.keys(row);
-            props.forEach(prop => {
-               if(typeof row[prop] == 'number'){
-                  Math.abs(Math.round(row[prop]));
-                }
-            })
-        });
-        }
-        
-      },
-      immediate: true,
-    }
-  },
-  mounted() {
-  },
   }
 </script>
