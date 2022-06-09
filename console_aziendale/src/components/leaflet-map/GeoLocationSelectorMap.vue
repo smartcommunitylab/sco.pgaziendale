@@ -35,6 +35,7 @@
 import { LMap, LMarker, LTileLayer, LTooltip } from "vue2-leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import GeoSearch from '@/components/leaflet-map/Geosearch.vue'
+import { mapState } from 'vuex';
 
 export default {
   name: "LocationInput",
@@ -92,17 +93,17 @@ export default {
           '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       },
-      zoom: 12,
+      zoom: 10,
       dragging: false,
     };
   },
 
   methods: {
-    initMap(location) {
+    initMap() {
       setTimeout(() => {
-        if (location)
-          {this.position ={ lat: location.latitude, lng: location.longitude };
-        this.zoom=location.radius;}
+       if (this.actualLocation)
+{        this.position ={ lat: this.actualLocation?.item?.latitude, lng: this.actualLocation?.item?.longitude };
+}        this.zoom=14;
         this.$refs.map.mapObject.invalidateSize();
       }, 250);
     },
@@ -172,6 +173,8 @@ export default {
   },
 
   computed: {
+    ...mapState("location", ["actualLocation"]),
+          ...mapState("modal", ["active"]),
     tooltipContent() {
       if (this.dragging) return "...";
       if (this.loading) return "Loading...";
@@ -186,6 +189,18 @@ export default {
   },
 
   watch: {
+     actualLocation: {
+      deep: true,
+      async handler() {
+        this.initMap()
+      },
+    },
+    active: {
+      deep: true,
+      async handler() {
+        this.initMap()
+      },
+    },
     position: {
       deep: true,
       async handler(value) {
@@ -200,7 +215,10 @@ export default {
     //   this.position = this.latLng;
     // },
   },
-
+  activated() {
+    this.initMap();
+  },
+  
   mounted() {
     this.getUserPosition();
     this.$refs.map.mapObject.on("geosearch/showlocation", this.onSearch);
