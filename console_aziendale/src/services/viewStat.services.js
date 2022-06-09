@@ -227,9 +227,9 @@ function isKm(field){
 function getValueByField(value) {
   if (value) {
     if (!isNaN(value)) {
-      return value
+      return Math.abs(Math.round(value));
     }
-    else return Object.values(value).reduce((a, b) => a + b);
+    else return Object.values(value).reduce((a, b) => Math.abs(Math.round(a + b)));
   }
   return value;
 }

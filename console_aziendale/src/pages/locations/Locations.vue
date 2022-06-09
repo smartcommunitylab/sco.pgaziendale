@@ -7,7 +7,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="openModal({type:'locationFormAdd', object:null})"
+          @click="[selectActualLocation(null), openModal({type:'locationFormAdd', object:null})]"
           class="mr-4"
         >
           <v-icon left>mdi-plus</v-icon>
@@ -152,14 +152,14 @@ export default {
         if (this.actualLocation.item == location) {
           this.selectActualLocation(null);
 
-          this.actualLocation = undefined;
+          //this.actualLocation = undefined;
         } else {
           this.selectActualLocation(location);
-          this.actualLocation = location;
+          //this.actualLocation = location;
         }
       }else{
         this.selectActualLocation(location);
-        this.actualLocation = location;
+        //this.actualLocation = location;
       }
     },
     showModal(title) {
