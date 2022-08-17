@@ -414,4 +414,16 @@ public class UserService {
 		userRepository.saveAll(users);
 	}
 
+	public void markAsUpgraded(String legacyId, String campaignId) {
+		User user = getUserByPlayerId(legacyId);
+		if (user != null) {
+			Optional<UserRole> role = user.findRole(Constants.ROLE_APP_USER);
+			if (role != null) {
+				role.get().getSubscriptions().stream()
+				.filter(s -> s.getCampaign().equals(campaignId))
+				.forEach(s -> s.setUpgraded(true));
+				userRepository.save(user);
+			}
+		}
+	}
 }

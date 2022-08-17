@@ -16,7 +16,17 @@
 
 package it.smartcommunitylab.pgazienda.service;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +65,21 @@ public class AdminService {
 	@Autowired
 	private TrackingDataService trackService;
 	
+	private static Map<String, String> legacyIds = new HashMap<>();
+	
+	@PostConstruct
+	public void initLegacyData() {
+		try {
+			InputStream is = AdminService.class.getResourceAsStream("/legacyplayers.txt");
+			Stream<String> lines = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines();
+			lines.forEach(l -> {
+				String[] arr = l.split(",");
+				legacyIds.put(arr[0], arr[1]);
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public void loadData(DataModelDTO model) throws InconsistentDataException {
 		validateApps(model);
@@ -173,10 +198,26 @@ public class AdminService {
 	
 	public TrackValidityDTO validateTrack(String playerId, String campaignId, TrackDTO track) {
 		try {
-			return trackService.validate(campaignId, playerId, track);
+			String legacyPlayerId = checkLegacyPlayer(playerId, campaignId);
+			return trackService.validate(campaignId, legacyPlayerId, track);
 		} catch (InconsistentDataException e) {
 			return new TrackValidityDTO(e.getDetails());
 		}
+	}
+
+
+	/**
+	 * @param playerId
+	 * @param campaignId
+	 * @return
+	 */
+	private String checkLegacyPlayer(String playerId, String campaignId) {
+		if (legacyIds.containsKey(playerId)) {
+			String legacyId =legacyIds.get(playerId); 
+			userService.markAsUpgraded(legacyId, campaignId);
+			return legacyId;
+		}
+		return playerId;
 	}
 
 
