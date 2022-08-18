@@ -124,7 +124,7 @@ public class CampaignService {
 		// find user
 		User user = userService.getUserWithAuthorities().orElse(null);
 		if (user == null) throw new InconsistentDataException("Invalid user", "NO_USER");
-		subscribeUser(user, key, companyCode, campaignId);
+		subscribeUser(user, key, companyCode, campaignId, false);
 	}
 	
 	/**
@@ -133,10 +133,11 @@ public class CampaignService {
 	 * @param key
 	 * @param companyCode
 	 * @param campaignId
+	 * @param upgraded 
 	 * @throws RepeatingSubscriptionException 
 	 * @throws InconsistentDataException 
 	 */
-	public void subscribeUser(User user, String key, String companyCode, String campaignId) throws RepeatingSubscriptionException, InconsistentDataException {
+	public void subscribeUser(User user, String key, String companyCode, String campaignId, boolean upgraded) throws RepeatingSubscriptionException, InconsistentDataException {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign", "NO_CAMPAIGN");
 		Company company = companyRepo.findByCode(companyCode).stream().findFirst().orElse(null);
@@ -169,6 +170,7 @@ public class CampaignService {
 			s.setCampaign(campaignId);
 			s.setKey(key);
 			s.setCompanyCode(companyCode);
+			if (upgraded) s.setUpgraded(true);
 			userService.addAppSubscription(user.getId(), s);
 		}
 	}

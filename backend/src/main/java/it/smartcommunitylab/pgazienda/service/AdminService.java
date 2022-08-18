@@ -187,7 +187,7 @@ public class AdminService {
 	 */
 	public void subscribeCampaign(String campaignId, String playerId, String companyKey, String code) throws InconsistentDataException, RepeatingSubscriptionException {
 		User user = extUserService.checkOrRegister(playerId);
-		campaignService.subscribeUser(user, code, companyKey, campaignId);
+		campaignService.subscribeUser(user, code, companyKey, campaignId, true);
 	} 
 	
 	/**
