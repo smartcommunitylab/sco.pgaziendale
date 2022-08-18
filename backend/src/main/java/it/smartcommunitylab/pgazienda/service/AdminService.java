@@ -30,16 +30,19 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
+import it.smartcommunitylab.pgazienda.domain.LegacyPlayerMapping;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
+import it.smartcommunitylab.pgazienda.repository.LegacyPlayerMappingRepository;
 import it.smartcommunitylab.pgazienda.security.ExternalUserDetailsService;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionException;
@@ -64,17 +67,20 @@ public class AdminService {
 	private CampaignService campaignService;
 	@Autowired
 	private TrackingDataService trackService;
+	@Autowired
+	private LegacyPlayerMappingRepository legacyRepo;
 	
 	private static Map<String, String> legacyIds = new HashMap<>();
 	
+	@Value("${app.legacyCampaign}")
+	private String legacyCampaignId;
+
 	@PostConstruct
 	public void initLegacyData() {
 		try {
-			InputStream is = AdminService.class.getResourceAsStream("/legacyplayers.txt");
-			Stream<String> lines = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines();
-			lines.forEach(l -> {
-				String[] arr = l.split(",");
-				legacyIds.put(arr[0], arr[1]);
+			legacyIds = new HashMap<>();
+			legacyRepo.findById(legacyCampaignId).ifPresent(lpm -> {
+				legacyIds.putAll(lpm.getPlayers());
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -250,5 +256,16 @@ public class AdminService {
 			return new TrackValidityDTO(e.getDetails());
 		}
 	}
-	
+
+	public void loadLegacyData(String campaignId, InputStream is) {
+		LegacyPlayerMapping lpm = new LegacyPlayerMapping();
+		lpm.setCampaignId(campaignId);
+		lpm.setPlayers(new HashMap<>());
+		new BufferedReader(new InputStreamReader(is)).lines().forEach(l -> {
+			String[] arr = l.split(",");
+			lpm.getPlayers().put(arr[0].trim(), arr[1].trim());
+		});
+		legacyRepo.save(lpm);
+		initLegacyData();
+	}
 }
