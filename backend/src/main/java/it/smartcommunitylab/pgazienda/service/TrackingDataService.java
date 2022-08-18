@@ -184,8 +184,8 @@ public class TrackingDataService {
 			List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(company.getId(), campaign.getId());
 			if (employees.isEmpty()) return;
 			Set<String> codeSet = employees.stream().map(e -> e.getCode()).collect(Collectors.toSet());
-			// users corresponding to this employees
-			List<User>  users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaign.getId(), company.getCode(), codeSet);
+			// users corresponding to this employees not upgraded from legacy campaign
+			List<User>  users = userRepo.findByCampaignAndCompanyAndEmployeeCodeNotUpgraded(campaign.getId(), company.getCode(), codeSet);
 			if (users.isEmpty()) return;
 			List<String> playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
 			logger.info("Styncronizing app campaign company users: " + playerIds);

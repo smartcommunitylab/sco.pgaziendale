@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -67,6 +68,9 @@ public class CampaignService {
 	private TrackingDataService trackingDataService;
 	@Autowired
 	private PGAppService appService;
+	
+	@Value("${app.legacyCampaign}")
+	private String legacyCampaignId;
 	/**
 	 * List of all companies, paginated
 	 * @param page
@@ -311,6 +315,9 @@ public class CampaignService {
 	public void syncExternalCampaigns() {
 		List<Campaign> campaigns = appService.retrieveExternalCampaigns();
 		for (Campaign c : campaigns) {
+			// do not overwrite legacy campaign data
+			if (c.getId().equals(legacyCampaignId)) continue;
+			
 			campaignRepo.save(c);
 		}
 	}

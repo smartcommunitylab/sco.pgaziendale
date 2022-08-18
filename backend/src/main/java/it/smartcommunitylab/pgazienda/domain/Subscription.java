@@ -23,6 +23,8 @@ package it.smartcommunitylab.pgazienda.domain;
  */
 public class Subscription {
 	private String companyCode, campaign, key;
+	// to keep track of upgrade from legacy campaign
+	private Boolean upgraded;
 
 	/**
 	 * @return the companyCode
@@ -66,4 +68,13 @@ public class Subscription {
 		this.key = key;
 	}
 
+	public Boolean getUpgraded() {
+		return upgraded;
+	}
+
+	public void setUpgraded(Boolean upgraded) {
+		this.upgraded = upgraded;
+	}
+
+	
 } 
