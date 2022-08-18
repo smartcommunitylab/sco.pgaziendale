@@ -419,10 +419,13 @@ public class UserService {
 		if (user != null) {
 			Optional<UserRole> role = user.findRole(Constants.ROLE_APP_USER);
 			if (role != null) {
-				role.get().getSubscriptions().stream()
-				.filter(s -> s.getCampaign().equals(campaignId))
-				.forEach(s -> s.setUpgraded(true));
-				userRepository.save(user);
+				List<Subscription> subs = role.get().getSubscriptions().stream()
+				.filter(s -> s.getCampaign().equals(campaignId) && !Boolean.TRUE.equals(s.getUpgraded()))
+				.collect(Collectors.toList());
+				if (subs.size() > 0) {
+					subs.forEach(s -> s.setUpgraded(true));
+					userRepository.save(user);
+				}
 			}
 		}
 	}
