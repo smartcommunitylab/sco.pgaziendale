@@ -584,7 +584,10 @@ function getEmployeeStat({
           ...({ noLimits: true }),
         },
       }
-    ))
+    ).catch(()=>{
+      Promise.resolve(null);
+
+    }))
   // limits
   multiple.push(axios
     .get(
@@ -603,11 +606,13 @@ function getEmployeeStat({
           ...({ noLimits: false }),
         },
       }
-    ))
+    ).catch(()=>{
+      Promise.resolve(null);
+    }))
 
   return axios.all(multiple).then(axios.spread((...responses) => {
     //order responses.data
-    
+    if (responses[0] && responses[1]){
     let unlimitsData=createEmployeeData(responses[0]);
     unlimitsData.values=unlimitsData.values.sort(dynamicSort(groupBy=='day'?'date':'month'))
     let limitsData=createEmployeeData(responses[1])
@@ -627,6 +632,8 @@ function getEmployeeStat({
           combinedElement['trackCountNolimits'] = unlimitsData.values[subindex]['trackCount'];
           combinedItem.values.push(combinedElement);        })
     return Promise.resolve(combinedItem);
+        }     return Promise.resolve(null);
+ 
   })).catch(errors => {
     console.log(errors)
     return Promise.reject(errors);
