@@ -16,20 +16,33 @@
 
 package it.smartcommunitylab.pgazienda.service;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
+import it.smartcommunitylab.pgazienda.domain.LegacyPlayerMapping;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
+import it.smartcommunitylab.pgazienda.repository.LegacyPlayerMappingRepository;
 import it.smartcommunitylab.pgazienda.security.ExternalUserDetailsService;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionException;
@@ -54,7 +67,25 @@ public class AdminService {
 	private CampaignService campaignService;
 	@Autowired
 	private TrackingDataService trackService;
+	@Autowired
+	private LegacyPlayerMappingRepository legacyRepo;
 	
+	private static Map<String, String> legacyIds = new HashMap<>();
+	
+	@Value("${app.legacyCampaign}")
+	private String legacyCampaignId;
+
+	@PostConstruct
+	public void initLegacyData() {
+		try {
+			legacyIds = new HashMap<>();
+			legacyRepo.findById(legacyCampaignId).ifPresent(lpm -> {
+				legacyIds.putAll(lpm.getPlayers());
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public void loadData(DataModelDTO model) throws InconsistentDataException {
 		validateApps(model);
@@ -156,7 +187,7 @@ public class AdminService {
 	 */
 	public void subscribeCampaign(String campaignId, String playerId, String companyKey, String code) throws InconsistentDataException, RepeatingSubscriptionException {
 		User user = extUserService.checkOrRegister(playerId);
-		campaignService.subscribeUser(user, code, companyKey, campaignId);
+		campaignService.subscribeUser(user, code, companyKey, campaignId, true);
 	} 
 	
 	/**
@@ -173,10 +204,26 @@ public class AdminService {
 	
 	public TrackValidityDTO validateTrack(String playerId, String campaignId, TrackDTO track) {
 		try {
-			return trackService.validate(campaignId, playerId, track);
+			String legacyPlayerId = checkLegacyPlayer(playerId, campaignId);
+			return trackService.validate(campaignId, legacyPlayerId, track);
 		} catch (InconsistentDataException e) {
 			return new TrackValidityDTO(e.getDetails());
 		}
+	}
+
+
+	/**
+	 * @param playerId
+	 * @param campaignId
+	 * @return
+	 */
+	private String checkLegacyPlayer(String playerId, String campaignId) {
+		if (legacyIds.containsKey(playerId)) {
+			String legacyId =legacyIds.get(playerId); 
+			userService.markAsUpgraded(legacyId, campaignId);
+			return legacyId;
+		}
+		return playerId;
 	}
 
 
@@ -209,5 +256,16 @@ public class AdminService {
 			return new TrackValidityDTO(e.getDetails());
 		}
 	}
-	
+
+	public void loadLegacyData(String campaignId, InputStream is) {
+		LegacyPlayerMapping lpm = new LegacyPlayerMapping();
+		lpm.setCampaignId(campaignId);
+		lpm.setPlayers(new HashMap<>());
+		new BufferedReader(new InputStreamReader(is)).lines().forEach(l -> {
+			String[] arr = l.split(",");
+			lpm.getPlayers().put(arr[0].trim(), arr[1].trim());
+		});
+		legacyRepo.save(lpm);
+		initLegacyData();
+	}
 }

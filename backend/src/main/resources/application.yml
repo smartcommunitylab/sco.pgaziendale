@@ -63,3 +63,6 @@ app:
       name-field: ${SECURITY_EXT_USERINFO_NAME_FIELD:first_name}
       surname-field: ${SECURITY_EXT_USERINFO_SURNAME_FIELD:last_name}
       domain: ${SECURITY_EXT_USERINFO_DOMAIN:}
+  legacyCampaign: ferrara_bike2work
+      
+      

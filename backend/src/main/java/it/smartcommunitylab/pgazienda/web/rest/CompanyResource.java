@@ -82,6 +82,16 @@ public class CompanyResource {
     }
     
     /**
+     * List of companies assigned to the campaign
+     * @param campaignId
+     * @return
+     */
+    @GetMapping("/public/campaigns/{campaignId}/companies")
+    public ResponseEntity<List<Company>> getPublicCampaignCompanies(@PathVariable String campaignId) {
+    	return ResponseEntity.ok(companyService.getCampaignCompanies(campaignId));
+    }
+
+    /**
      * Create a new company
      * @param company
      * @return

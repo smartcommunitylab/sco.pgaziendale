@@ -101,7 +101,10 @@ public class PGAppService {
 		Campaign c = new Campaign();
 		c.setActive(true);
 		c.setId((String) cm.get("campaignId"));
-		c.setDescription((String) cm.get("description"));
+		Map<String, Object> values = (Map<String, Object>) cm.get("description");
+		if (values != null) {
+			c.setDescription((String) values.getOrDefault("it", values.get("en")));
+		}
 		c.setFrom(Instant.ofEpochMilli((Long)cm.get("dateFrom")).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate());
 		c.setLogo((String) ((Map)cm.get("logo")).get("url"));
 		c.setMeans((List<String>) ((Map)cm.getOrDefault("validationData", Collections.emptyMap())).get("means"));
@@ -115,7 +118,8 @@ public class PGAppService {
 		} else {
 			c.setPrivacy(extractDetails(cm.get("details"), "rules"));
 		}
-		c.setTitle((String) cm.get("name"));
+		values = (Map<String, Object>) cm.get("name");
+		c.setTitle((String) values.getOrDefault("it", values.get("en")));
 		c.setTo(Instant.ofEpochMilli((Long)cm.get("dateTo")).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate());
 		return c;
 	}
@@ -128,7 +132,9 @@ public class PGAppService {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private String extractDetails(Object details, String type) {
 		if (details == null) return null;
+		details = ((Map<String, Object>)details).getOrDefault("it", ((Map<String, Object>)details).get("en"));
 		List<Object> list = (List) details;
+		if (details == null) return null;
 		for (Object detail : list) {
 			Map<String, Object> map = (Map<String, Object>) detail;
 			if (type.equals(map.get("type"))) {
