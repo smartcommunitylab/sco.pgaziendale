@@ -45,7 +45,7 @@ const actions = {
       },
       (error) => {
         commit("getStatFailure", error);
-        dispatch("alert/error", "Errore nel recupero delle statistiche.", {
+        dispatch("alert/error", error, {
           root: true,
         });
       }
@@ -64,7 +64,7 @@ const actions = {
       },
       (error) => {
         commit("getCsvFailure", error);
-        dispatch("alert/error", "Errore nel recupero delle statistiche.", {
+        dispatch("alert/error", error, {
           root: true,
         });
       }

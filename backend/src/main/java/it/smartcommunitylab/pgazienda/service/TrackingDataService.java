@@ -18,7 +18,9 @@ package it.smartcommunitylab.pgazienda.service;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,6 +56,7 @@ import com.google.common.collect.Multimaps;
 import com.opencsv.CSVWriter;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Circle;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Constants;
@@ -62,8 +65,15 @@ import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.DayStat.Distances;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.PGApp;
+import it.smartcommunitylab.pgazienda.domain.Shape;
+import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.TrackingData;
 import it.smartcommunitylab.pgazienda.domain.User;
+import it.smartcommunitylab.pgazienda.domain.UserRole;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO.TrackValidityLegDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
@@ -72,6 +82,7 @@ import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.util.LimitsUtils;
+import it.smartcommunitylab.pgazienda.util.TrackUtils;
 
 /**
  * @author raman
@@ -80,6 +91,9 @@ import it.smartcommunitylab.pgazienda.util.LimitsUtils;
 @Service
 public class TrackingDataService {
 
+	/**
+	 * 
+	 */
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
 	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
 	
@@ -103,19 +117,20 @@ public class TrackingDataService {
 	private MongoTemplate template;
 
 //	@PostConstruct
-	public void init() {
-		dayStatRepo.findByEmptyLimitedDistances().forEach(ds -> {
-			Campaign campaign = campaignRepo.findById(ds.getCampaign()).orElse(null);
-			if (campaign != null) {
-				limitDistances(campaign, ds.getPlayerId(), ds);
-				dayStatRepo.save(ds);
-			}
-		});
-	}	
+//	public void init() {
+//		dayStatRepo.findByEmptyLimitedDistances().forEach(ds -> {
+//			Campaign campaign = campaignRepo.findById(ds.getCampaign()).orElse(null);
+//			if (campaign != null) {
+//				limitDistances(campaign, ds.getPlayerId(), ds);
+//				dayStatRepo.save(ds);
+//			}
+//		});
+//	}	
 	
 	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*2)
 	public void synchronizeApps() {
 		appRepo.findAll().forEach(a -> {
+			if (Boolean.TRUE.equals(a.getSupportPushValidation())) return;
 			
 			logger.info("Syncronizing app: " + a.getId());
 			
@@ -162,14 +177,15 @@ public class TrackingDataService {
 	 */
 	private void syncCompanyData(PGApp a, Campaign campaign, Company company, LocalDate dayFrom, LocalDate dayTo) {
 		try {
+			if (Boolean.TRUE.equals(a.getSupportPushValidation())) return;
 
 			logger.info("Syncronizing app campaign company: " + company.getCode());
 			// company employees subscribed to this campaign 
 			List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(company.getId(), campaign.getId());
 			if (employees.isEmpty()) return;
 			Set<String> codeSet = employees.stream().map(e -> e.getCode()).collect(Collectors.toSet());
-			// users corresponding to this employees
-			List<User>  users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaign.getId(), company.getCode(), codeSet);
+			// users corresponding to this employees not upgraded from legacy campaign
+			List<User>  users = userRepo.findByCampaignAndCompanyAndEmployeeCodeNotUpgraded(campaign.getId(), company.getCode(), codeSet);
 			if (users.isEmpty()) return;
 			List<String> playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
 			logger.info("Styncronizing app campaign company users: " + playerIds);
@@ -249,6 +265,249 @@ public class TrackingDataService {
 		}
 	}
 
+	public TrackValidityDTO validate(String campaignId, String playerId, TrackDTO track) throws InconsistentDataException {
+		// campaign
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) {
+			throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		} 
+		// user, should be registered
+		User user = userRepo.findByPlayerId(playerId).orElse(null);
+		if (user == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		} 
+		UserRole role = user.findRole(it.smartcommunitylab.pgazienda.Constants.ROLE_APP_USER).orElse(null);
+		if (role == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId)).findAny().orElse(null);
+		if (subscription == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		
+		// company
+		List<Company> companies = companyRepo.findByCode(subscription.getCompanyCode());
+		if (companies.size() == 0) {
+			throw new InconsistentDataException("Invalid company: " + subscription.getCompanyCode(), "NO_COMPANY");
+		}
+		Company company = companies.get(0);
+		
+		// employee matching subscription
+		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		// locations
+		List<Shape> locations = 
+				company.getLocations().stream()
+				.filter(l -> checkWorking(l, toLocalDate(track.getStartTime())))
+				.map(l -> new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius()))
+				.collect(Collectors.toList());
+		
+		// legs with matching means
+		List<TrackLegDTO> matchingLegs = track.getLegs().stream().filter(leg -> campaign.getMeans().indexOf(leg.getMean()) >= 0).collect(Collectors.toList());
+		// no locations, no legs with appropriate means, trip does not match any location
+		if (locations.size() == 0) {
+			return TrackValidityDTO.errLocations();
+		} else if (matchingLegs.size() == 0 || !TrackUtils.matchLocations(track, locations)) {
+			return TrackValidityDTO.errMatches();
+		} else {
+			LocalDate date = toLocalDate(track.getStartTime());
+			// stat of current date
+			DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(playerId, campaign.getId(), company.getId(), date.toString());
+			// new empty day stat
+			if (stat == null) {
+				stat = new DayStat();
+				stat.setPlayerId(playerId);
+				stat.setCampaign(campaign.getId());
+				stat.setCompany(company.getId());
+				stat.setDate(date.toString());
+				stat.setTrackCount(0);
+				stat.setMonth(date.format(MONTH_PATTERN));
+			}
+			// distances of the travel
+			Distances newDistances = Distances.fromMap(matchingLegs.stream().collect(Collectors.groupingBy(t -> t.getMean(), Collectors.summingDouble(t -> t.getDistance()))));
+			// update distances of the existing one
+			if (stat.getDistances() != null) {
+				stat.getDistances().mergeDistances(newDistances);
+			} else {
+				stat.setDistances(newDistances);
+			}
+			stat.setCo2saved(stat.computeCO2());
+			// update number of tracks
+			stat.setTrackCount(stat.getTrackCount() + matchingLegs.size());
+
+			final Distances original = new Distances();
+			limitDistances(campaign, playerId, stat);
+			
+			// create result
+			TrackValidityDTO validity = new TrackValidityDTO();
+			validity.setValid(true);
+			validity.setLegs(new LinkedList<>());
+			for (TrackLegDTO l : matchingLegs) {
+				TrackValidityLegDTO leg = new TrackValidityLegDTO();
+				leg.setMean(l.getMean());
+				leg.setDistance(l.getDistance());
+				leg.setId(l.getId());
+				// put valid value considering max imposed by the limit
+				MEAN mean = MEAN.valueOf(l.getMean());
+				double max = stat.getLimitedDistances().meanValue(mean);
+				double curr = original.meanValue(mean);
+				if ((curr + l.getDistance()) <= max) {
+					leg.setValidDistance(l.getDistance());
+				} else if (curr <= max ) {
+					leg.setValidDistance(max - curr);
+				} else {
+					leg.setValidDistance(0d);
+				}
+				original.updateValue(mean, curr + l.getDistance());
+				validity.getLegs().add(leg);
+				
+				TrackingData td = new TrackingData();
+				td.setMode(mean.name());
+				td.setTrackId(l.getId());
+				td.setPlayerId(playerId);
+				td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
+				td.setDistance(l.getDistance());
+				stat.getTracks().add(td);
+			}
+			dayStatRepo.save(stat);
+
+			return validity;
+		}
+	}  
+	
+	/**
+	 * @param campaignId
+	 * @param playerId
+	 * @param trackId
+	 * @return
+	 */
+	public TrackValidityDTO invalidate(String campaignId, String playerId, String trackId) throws InconsistentDataException {
+		// campaign
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) {
+			throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		} 
+		// user, should be registered
+		User user = userRepo.findByPlayerId(playerId).orElse(null);
+		if (user == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		} 
+		UserRole role = user.findRole(it.smartcommunitylab.pgazienda.Constants.ROLE_APP_USER).orElse(null);
+		if (role == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId)).findAny().orElse(null);
+		if (subscription == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		
+		// company
+		List<Company> companies = companyRepo.findByCode(subscription.getCompanyCode());
+		if (companies.size() == 0) {
+			throw new InconsistentDataException("Invalid company: " + subscription.getCompanyCode(), "NO_COMPANY");
+		}
+		Company company = companies.get(0);
+		
+		// employee matching subscription
+		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		
+		DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndTrack(playerId, campaign.getId(), company.getId(), trackId);
+		if (stat != null) {
+			TrackingData track = stat.getTracks().stream().filter(t -> trackId.equals(trackId)).findAny().get();
+			stat.setTrackCount(stat.getTrackCount()-1);
+			MEAN mean = MEAN.valueOf(track.getMode());
+			stat.getDistances().updateValue(mean, stat.getDistances().meanValue(mean) - track.getDistance());
+			stat.setCo2saved(stat.computeCO2());
+			stat.getLimitedDistances().updateValue(mean, stat.getLimitedDistances().meanValue(mean) - track.getDistance());
+			stat.setTracks(stat.getTracks().stream().filter(t -> !t.getTrackId().equals(trackId)).collect(Collectors.toList()));
+			dayStatRepo.save(stat);
+		}
+
+		return TrackValidityDTO.errInvalidated();
+	}
+
+	/**
+	 * @param campaignId
+	 * @param playerId
+	 * @param trackId
+	 * @return
+	 */
+	public TrackValidityDTO update(String campaignId, String playerId, String trackId, Double inc) throws InconsistentDataException {
+		// campaign
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) {
+			throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		} 
+		// user, should be registered
+		User user = userRepo.findByPlayerId(playerId).orElse(null);
+		if (user == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		} 
+		UserRole role = user.findRole(it.smartcommunitylab.pgazienda.Constants.ROLE_APP_USER).orElse(null);
+		if (role == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId)).findAny().orElse(null);
+		if (subscription == null) {
+			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		}
+		
+		// company
+		List<Company> companies = companyRepo.findByCode(subscription.getCompanyCode());
+		if (companies.size() == 0) {
+			throw new InconsistentDataException("Invalid company: " + subscription.getCompanyCode(), "NO_COMPANY");
+		}
+		Company company = companies.get(0);
+		
+		// employee matching subscription
+		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		
+		DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndTrack(playerId, campaign.getId(), company.getId(), trackId);
+		if (stat != null) {
+			TrackingData track = stat.getTracks().stream().filter(t -> trackId.equals(trackId)).findAny().get();
+			track.setDistance(track.getDistance() + inc);
+			MEAN mean = MEAN.valueOf(track.getMode());
+			stat.getDistances().updateValue(mean, stat.getDistances().meanValue(mean) + inc);
+			stat.setCo2saved(stat.computeCO2());
+			final Distances original = Distances.copy(stat.getDistances());
+			limitDistances(campaign, playerId, stat); 
+			dayStatRepo.save(stat);
+			
+			TrackValidityDTO validity = new TrackValidityDTO();
+			validity.setValid(true);
+			TrackValidityLegDTO leg = new TrackValidityLegDTO();
+			validity.setLegs(Collections.singletonList(leg));
+			leg.setMean(track.getMode());
+			leg.setDistance(track.getDistance());
+			leg.setId(track.getTrackId());
+			// put valid value considering max imposed by the limit
+			double max = stat.getLimitedDistances().meanValue(mean);
+
+			double curr = original.meanValue(mean);
+			if (curr == max) {
+				leg.setValidDistance(track.getDistance());
+			} else if (curr > max ) {
+				leg.setValidDistance(track.getDistance() - (curr - max));
+			} else {
+				leg.setValidDistance(0d);
+			}
+			
+			return validity;
+		}
+		
+		return TrackValidityDTO.errData();
+	}
+	
+	/**
+	 * @param startTime
+	 * @return
+	 */
+	private LocalDate toLocalDate(Long startTime) {
+		return Instant.ofEpochMilli(startTime).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
+	}
+	
 	/**
 	 * @param campaign
 	 * @param playerId
@@ -260,7 +519,7 @@ public class TrackingDataService {
 		criteria = Criteria.where("playerId").is(playerId).and("date").lt(stat.getDate()).gte(LocalDate.parse(stat.getDate()).withDayOfMonth(1).toString());
 		List<DayStat> currMonthAgg = doAggregation(campaign, criteria, true, false);
 		stat.setLimitedDistances(LimitsUtils.applyLimits(stat.getDistances(), currMonthAgg, totalAgg, campaign));
-		System.err.println(stat.getDistances().getBike() +" -> "+ stat.getLimitedDistances().getBike());
+		// System.err.println(stat.getDistances().getBike() +" -> "+ stat.getLimitedDistances().getBike());
 	}
 	
 	/**

@@ -306,15 +306,17 @@ public class DayStat {
 		}
 		
 		public Double meanValue(MEAN mean) {
+			Double res = 0d;
 			switch(mean) {
-			case bike: return getBike();
-			case boat: return getBoat();
-			case bus: return getBus();
-			case car: return getCar();
-			case train: return getTrain();
-			case walk: return getWalk();
+			case bike: res = getBike(); break;
+			case boat: res = getBoat(); break;
+			case bus: res = getBus(); break;
+			case car: res = getCar(); break;
+			case train: res = getTrain(); break;
+			case walk: res = getWalk(); break;
 			}
-			return null;
+			if (res == null) res = 0d;
+			return res;
 		}
 		public void updateValue(MEAN mean, Double value) {
 			switch(mean) {

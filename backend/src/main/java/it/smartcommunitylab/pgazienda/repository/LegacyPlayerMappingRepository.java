@@ -14,22 +14,16 @@
  *    limitations under the License.
  ******************************************************************************/
 
-package it.smartcommunitylab.pgazienda.domain;
+package it.smartcommunitylab.pgazienda.repository;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+import it.smartcommunitylab.pgazienda.domain.LegacyPlayerMapping;
 
 /**
  * @author raman
  *
  */
-public class Constants {
-
-	public static final String DEFAULT_TIME_ZONE = "Europe/Rome";
-
-	public static final String AGG_DAY = "day";
-	public static final String AGG_MONTH = "month";
-	public static final String AGG_TOTAL = "total";	
-	
-	public static final String[] AGG_ARRAY = new String[] {AGG_DAY, AGG_MONTH, AGG_TOTAL};
-	
-	public enum MEAN {bike, car, walk, bus, train, boat};
+public interface LegacyPlayerMappingRepository  extends MongoRepository<LegacyPlayerMapping, String> {
 
 }

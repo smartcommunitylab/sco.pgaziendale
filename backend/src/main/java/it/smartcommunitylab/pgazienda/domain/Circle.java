@@ -16,20 +16,45 @@
 
 package it.smartcommunitylab.pgazienda.domain;
 
+import it.smartcommunitylab.pgazienda.util.TrackUtils;
+
 /**
  * @author raman
  *
  */
-public class Constants {
+public class Circle extends Shape {
 
-	public static final String DEFAULT_TIME_ZONE = "Europe/Rome";
+	private double[] center;
+	private double radius;
 
-	public static final String AGG_DAY = "day";
-	public static final String AGG_MONTH = "month";
-	public static final String AGG_TOTAL = "total";	
-	
-	public static final String[] AGG_ARRAY = new String[] {AGG_DAY, AGG_MONTH, AGG_TOTAL};
-	
-	public enum MEAN {bike, car, walk, bus, train, boat};
+	public Circle() {
+	}
+	public Circle(double[] center, double radius) {
+		super();
+		this.center = center;
+		this.radius = radius;
+	}
+
+
+	public double[] getCenter() {
+		return center;
+	}
+
+	public void setCenter(double[] center) {
+		this.center = center;
+	}
+
+	public double getRadius() {
+		return radius;
+	}
+
+	public void setRadius(double radius) {
+		this.radius = radius;
+	}
+
+	@Override
+	public boolean inside(double lat, double lon) {
+		return TrackUtils.harvesineDistance(center[0], center[1], lat, lon) <= radius;
+	}
 
 }

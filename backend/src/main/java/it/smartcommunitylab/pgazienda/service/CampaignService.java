@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,6 +37,7 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.Employee;
+import it.smartcommunitylab.pgazienda.domain.PGApp;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
@@ -64,7 +66,11 @@ public class CampaignService {
 	private UserService userService;
 	@Autowired
 	private TrackingDataService trackingDataService;
+	@Autowired
+	private PGAppService appService;
 	
+	@Value("${app.legacyCampaign}")
+	private String legacyCampaignId;
 	/**
 	 * List of all companies, paginated
 	 * @param page
@@ -118,6 +124,20 @@ public class CampaignService {
 		// find user
 		User user = userService.getUserWithAuthorities().orElse(null);
 		if (user == null) throw new InconsistentDataException("Invalid user", "NO_USER");
+		subscribeUser(user, key, companyCode, campaignId, false);
+	}
+	
+	/**
+	 * Subscribe a campaign for the specified user. The user should exist, the campaign should 
+	 * exist, the company should exist and should adhere to the campaign 
+	 * @param key
+	 * @param companyCode
+	 * @param campaignId
+	 * @param upgraded 
+	 * @throws RepeatingSubscriptionException 
+	 * @throws InconsistentDataException 
+	 */
+	public void subscribeUser(User user, String key, String companyCode, String campaignId, boolean upgraded) throws RepeatingSubscriptionException, InconsistentDataException {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign", "NO_CAMPAIGN");
 		Company company = companyRepo.findByCode(companyCode).stream().findFirst().orElse(null);
@@ -131,13 +151,12 @@ public class CampaignService {
 			throw new InconsistentDataException("User code already in use: " + campaignId +", " + companyCode + ", " + key, "CODE_IN_USE");			
 		}
 		
-		;// not yet subscribed
+		// not yet subscribed
 		if (role == null || role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId))) {
 			Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), key).stream().findAny().orElse(null);
 			if (employee == null ) throw new InconsistentDataException("Invalid user key", "NO_CODE");
 			if (employee.getCampaigns() == null) employee.setCampaigns(new LinkedList<>());
 			
-			// TODO check
 			boolean hasCampaignData = trackingDataService.hasCampaignData(user.getPlayerId(), campaignId);
 			if (hasCampaignData) {
 				throw new RepeatingSubscriptionException("Previous subscription exists: " + campaignId +", "+user.getPlayerId());
@@ -151,6 +170,7 @@ public class CampaignService {
 			s.setCampaign(campaignId);
 			s.setKey(key);
 			s.setCompanyCode(companyCode);
+			if (upgraded) s.setUpgraded(true);
 			userService.addAppSubscription(user.getId(), s);
 		}
 	}
@@ -164,6 +184,10 @@ public class CampaignService {
 		// find user
 		User user = userService.getUserWithAuthorities().orElse(null);
 		if (user == null) throw new InconsistentDataException("Invalid user", "NO_USER");
+		unsubscribeUser(user, campaignId);
+	}
+
+	public void unsubscribeUser(User user, String campaignId) {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) return;
 		// app user role
@@ -184,6 +208,7 @@ public class CampaignService {
 		}
 	}
 	
+	
 	/**
 	 * List of company campaigns
 	 * @param id
@@ -202,6 +227,10 @@ public class CampaignService {
 	 * @return
 	 */
 	public Campaign saveCampaign(Campaign campaign) {
+		Optional<PGApp> app = appService.getApp(campaign.getApplication());
+		if (app.isPresent() && Boolean.TRUE.equals(app.get().getSupportCampaignMgmt())) {
+			return campaign;
+		}
 		return campaignRepo.save(campaign);
 	}
 	
@@ -210,6 +239,14 @@ public class CampaignService {
 	 * @return
 	 */
 	public Campaign resetCampaign(String campaignId) {
+		Campaign campaign = getCampaign(campaignId).orElse(null);
+		if (campaign == null) return null;
+		
+		Optional<PGApp> app = appService.getApp(campaign.getApplication());
+		if (app.isPresent() && Boolean.TRUE.equals(app.get().getSupportCampaignMgmt())) {
+			return campaign;
+		}
+
 		userService.cleanSubscriptions(campaignId);
 		List<Employee> employees = employeeRepo.findByCampaigns(campaignId);
 		employees.forEach(e -> e.getCampaigns().remove(campaignId));
@@ -223,6 +260,14 @@ public class CampaignService {
 	 * @return
 	 */
 	public void deleteCampaign(String campaignId) {
+		Campaign campaign = getCampaign(campaignId).orElse(null);
+		if (campaign == null) return;
+		
+		Optional<PGApp> app = appService.getApp(campaign.getApplication());
+		if (app.isPresent() && Boolean.TRUE.equals(app.get().getSupportCampaignMgmt())) {
+			return;
+		}
+		
 		campaignRepo.deleteById(campaignId);
 	}
 	
@@ -267,5 +312,18 @@ public class CampaignService {
 			});
 		});
 	}
+	
+	@Scheduled(fixedDelay=1000*60*60*24) 
+	public void syncExternalCampaigns() {
+		List<Campaign> campaigns = appService.retrieveExternalCampaigns();
+		for (Campaign c : campaigns) {
+			// do not overwrite legacy campaign data
+			if (c.getId().equals(legacyCampaignId)) continue;
+			
+			campaignRepo.save(c);
+		}
+	}
 
+	// TODO external subscribe and unsubscribe
+	
 }

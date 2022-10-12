@@ -348,6 +348,9 @@ public class UserService {
     public List<User> getUserByEmployeeCode(String campaign, String companyCode, String userCode) {
         return userRepository.findByCampaignAndCompanyAndEmployeeCode(campaign, companyCode, Collections.singleton(userCode));
     }
+    public User getUserByPlayerId(String playerId) {
+    	return userRepository.findByPlayerId(playerId).orElse(null);
+    }
 
     /**
      * Not activated users should be automatically deleted after 3 days.
@@ -411,4 +414,19 @@ public class UserService {
 		userRepository.saveAll(users);
 	}
 
+	public void markAsUpgraded(String legacyId, String campaignId) {
+		User user = getUserByPlayerId(legacyId);
+		if (user != null) {
+			Optional<UserRole> role = user.findRole(Constants.ROLE_APP_USER);
+			if (role != null) {
+				List<Subscription> subs = role.get().getSubscriptions().stream()
+				.filter(s -> s.getCampaign().equals(campaignId) && !Boolean.TRUE.equals(s.getUpgraded()))
+				.collect(Collectors.toList());
+				if (subs.size() > 0) {
+					subs.forEach(s -> s.setUpgraded(true));
+					userRepository.save(user);
+				}
+			}
+		}
+	}
 }

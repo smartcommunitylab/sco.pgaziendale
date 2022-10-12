@@ -16,20 +16,38 @@
 
 package it.smartcommunitylab.pgazienda.domain;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.data.annotation.Id;
+
 /**
  * @author raman
  *
  */
-public class Constants {
+public class LegacyPlayerMapping {
 
-	public static final String DEFAULT_TIME_ZONE = "Europe/Rome";
-
-	public static final String AGG_DAY = "day";
-	public static final String AGG_MONTH = "month";
-	public static final String AGG_TOTAL = "total";	
+	@Id
+	private String campaignId;
 	
-	public static final String[] AGG_ARRAY = new String[] {AGG_DAY, AGG_MONTH, AGG_TOTAL};
-	
-	public enum MEAN {bike, car, walk, bus, train, boat};
+	private Map<String,String> players;
 
+	public String getCampaignId() {
+		return campaignId;
+	}
+
+	public void setCampaignId(String campaignId) {
+		this.campaignId = campaignId;
+	}
+
+	public Map<String, String> getPlayers() {
+		if (players == null) players = new HashMap<>();
+		return players;
+	}
+
+	public void setPlayers(Map<String, String> players) {
+		this.players = players;
+	}
+	
+	
 }
