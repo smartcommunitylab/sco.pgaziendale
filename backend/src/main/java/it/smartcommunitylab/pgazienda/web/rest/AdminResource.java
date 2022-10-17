@@ -144,7 +144,7 @@ public class AdminResource {
 			@RequestParam(required = false) String groupMode,
 			@RequestParam(required = false) String mean,
 			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateFrom,
-			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateTo) 
+			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateTo)  throws InconsistentDataException
 	{
 		return trackingDataService.getPlayerTransportStatsGroupByMean(playerId, campaignId, groupMode, mean, dateFrom, dateTo);
 	}	
