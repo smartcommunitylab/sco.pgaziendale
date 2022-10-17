@@ -217,7 +217,7 @@ public class AdminService {
 	 * @param campaignId
 	 * @return
 	 */
-	private String checkLegacyPlayer(String playerId, String campaignId) {
+	public String checkLegacyPlayer(String playerId, String campaignId) {
 		if (legacyIds.containsKey(playerId)) {
 			String legacyId =legacyIds.get(playerId); 
 			userService.markAsUpgraded(legacyId, campaignId);
@@ -268,4 +268,5 @@ public class AdminService {
 		legacyRepo.save(lpm);
 		initLegacyData();
 	}
+
 }
