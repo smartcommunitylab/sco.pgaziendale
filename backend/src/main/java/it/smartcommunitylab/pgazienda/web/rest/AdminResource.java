@@ -146,7 +146,7 @@ public class AdminResource {
 			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateFrom,
 			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateTo)  throws InconsistentDataException
 	{
-		return trackingDataService.getPlayerTransportStatsGroupByMean(service.checkLegacyPlayer(playerId, campaignId), campaignId, groupMode, mean, dateFrom, dateTo);
+		return trackingDataService.getPlayerTransportStatsGroupByMean(service.getLegacyPlayer(playerId, campaignId), campaignId, groupMode, mean, dateFrom, dateTo);
 	}	
 
     @PostMapping("/admin/legacy/{campaignId}/csv")
