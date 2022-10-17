@@ -17,6 +17,7 @@
 package it.smartcommunitylab.pgazienda.web.rest;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -35,10 +36,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.annotations.ApiParam;
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
+import it.smartcommunitylab.pgazienda.dto.TransportStatDTO;
 import it.smartcommunitylab.pgazienda.service.AdminService;
 import it.smartcommunitylab.pgazienda.service.CampaignService;
 import it.smartcommunitylab.pgazienda.service.TrackingDataService;
@@ -134,8 +137,20 @@ public class AdminResource {
 		return ResponseEntity.ok(service.update(playerId, campaignId, trackId, inc));
 	}
 
+	@GetMapping("/admin/report/player/transport/stats")
+	public List<TransportStatDTO> getPlayerTransportStatsGroupByMean(
+			@RequestParam String campaignId,
+			@RequestParam String playerId,
+			@RequestParam(required = false) String groupMode,
+			@RequestParam(required = false) String mean,
+			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateFrom,
+			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateTo) 
+	{
+		return trackingDataService.getPlayerTransportStatsGroupByMean(playerId, campaignId, groupMode, mean, dateFrom, dateTo);
+	}	
 
     @PostMapping("/admin/legacy/{campaignId}/csv")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
     public ResponseEntity<Void> uploadLegacy(@PathVariable String campaignId, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws Exception {
     	service.loadLegacyData(campaignId, file.getInputStream());
     	return ResponseEntity.ok(null);
