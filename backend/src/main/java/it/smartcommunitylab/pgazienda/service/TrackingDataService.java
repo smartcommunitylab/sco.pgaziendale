@@ -16,6 +16,7 @@
 
 package it.smartcommunitylab.pgazienda.service;
 
+import java.awt.RenderingHints.Key;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.Instant;
@@ -29,6 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.Multimaps;
+import com.opencsv.CSVWriter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +56,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Multimaps;
-import com.opencsv.CSVWriter;
-
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Circle;
 import it.smartcommunitylab.pgazienda.domain.Company;
@@ -74,6 +75,7 @@ import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO.TrackValidityLegDTO;
+import it.smartcommunitylab.pgazienda.dto.TransportStatDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
@@ -96,6 +98,7 @@ public class TrackingDataService {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
 	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
+	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww");
 	
 	@Autowired
 	private RestTemplate restTemplate;
@@ -1010,6 +1013,44 @@ public class TrackingDataService {
 			return stat;
 		}).collect(Collectors.toList());
 	}
+	
+	public List<TransportStatDTO> getPlayerTransportStatsGroupByMean(String playerId, String campaignId, String groupMode, String meanStr, String dateFrom, String dateTo) throws InconsistentDataException {
+		MEAN mean = MEAN.valueOf(meanStr);
+		if ("day".equals(groupMode) || "month".equals(groupMode)) {
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, LocalDate.parse(dateFrom), LocalDate.parse(dateTo), groupMode, false, false);
+			return list.stream().map(ds -> {
+				TransportStatDTO dto = new TransportStatDTO();
+				dto.setPeriod( "month".equals(groupMode) ? ds.getMonth() : ds.getDate());
+				dto.setValue(ds.getDistances().meanValue(mean));
+				return dto;
+			}).collect(Collectors.toList());
+		} else if ("week".equals(groupMode)) {
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, LocalDate.parse(dateFrom), LocalDate.parse(dateTo), "day", false, false);
+			final Map<String, List<TransportStatDTO>> res = list.stream().map(ds -> {
+				TransportStatDTO dto = new TransportStatDTO();
+				dto.setPeriod(ds.getDate());
+				dto.setValue(ds.getDistances().meanValue(mean));
+				return dto;
+			})
+			.collect(Collectors.groupingBy(dto -> LocalDate.parse(dto.getPeriod()).format(MONTH_PATTERN)));
+			return res.keySet().stream().map(key -> {
+				TransportStatDTO dto = new TransportStatDTO();
+				dto.setPeriod(key);
+				dto.setValue(res.get(key).stream().collect(Collectors.summingDouble(e -> e.getValue())));
+				return dto;
+			}).sorted((a,b) -> a.getPeriod().compareTo(b.getPeriod())).collect(Collectors.toList());
+		} else {
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, LocalDate.parse(dateFrom), LocalDate.parse(dateTo), Constants.AGG_TOTAL, false, false);
+			return list.stream().map(ds -> {
+				TransportStatDTO dto = new TransportStatDTO();
+				dto.setPeriod(ds.getDate());
+				dto.setValue(ds.getDistances().meanValue(mean));
+				return dto;
+			}).collect(Collectors.toList());
+		}
+	}
+
+
 	
 	public boolean hasCampaignData(String playerId, String campaignId) {
 		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId);

@@ -19,12 +19,9 @@ package it.smartcommunitylab.pgazienda.service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
@@ -226,6 +223,14 @@ public class AdminService {
 		return playerId;
 	}
 
+	
+	public String getLegacyPlayer(String playerId, String campaignId) {
+		if (legacyIds.containsKey(playerId)) {
+			String legacyId =legacyIds.get(playerId); 
+			return legacyId;
+		}
+		return playerId;
+	}
 
 	/**
 	 * @param playerId
@@ -268,4 +273,5 @@ public class AdminService {
 		legacyRepo.save(lpm);
 		initLegacyData();
 	}
+
 }
