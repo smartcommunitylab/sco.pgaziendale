@@ -121,16 +121,17 @@ function getPeriodBetweenDates(startDate, endDate, type) {
 async function getData(currentCampaign, headers, subheaders, selection, values) {
   let data = []
   // console.log(headers, selection, values);
-  if (values)
-    for (let rowIndex = 0; rowIndex < getRowByValues(values); rowIndex++) {
+  let valuesFiltered = values.filter(val => val!=null);
+  if (valuesFiltered)
+    for (let rowIndex = 0; rowIndex < getRowByValues(valuesFiltered); rowIndex++) {
       //set detail name (it should be done more generic getting a function that could be company or locations or employees)
       // let currentCompany = await companyService.getCompanyById(values[rowIndex][selection.dataLevel.value])
-      let name = await getRowName(values[rowIndex], selection.dataLevel.value, currentCampaign)
+      let name = await getRowName(valuesFiltered[rowIndex], selection.dataLevel.value, currentCampaign)
       let row = { name: name };
       for (let columnIndex = 0; columnIndex < headers.length; columnIndex++) {
         //set values for that row for every dataColumns
         for (let dataColumnsIndex = 0; dataColumnsIndex < selection.dataColumns.length; dataColumnsIndex++) {
-          let found = findElementInValues(values, rowIndex, selection, headers, columnIndex);
+          let found = findElementInValues(valuesFiltered, rowIndex, selection, headers, columnIndex);
           row[selection.dataColumns[dataColumnsIndex].value + headers[columnIndex]] = (found ? parseInt(getValueByField(found[selection.dataColumns[dataColumnsIndex].apiField])/(isKm(selection.dataColumns[dataColumnsIndex].apiField)?1000:1)) : 0)
         }
       }
@@ -217,7 +218,7 @@ function findElementInValues(values, rowIndex, selection, headers, columnIndex) 
         }
       return newObj
     }
-    return (values.find(el => el[selection.timeUnit.value] === headers[columnIndex]))
+    return (values.find(el => el? el[selection?.timeUnit?.value] === headers[columnIndex]:false))
   }
 }
 function isKm(field){
