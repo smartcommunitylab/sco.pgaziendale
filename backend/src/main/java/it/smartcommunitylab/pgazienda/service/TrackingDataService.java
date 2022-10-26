@@ -1032,7 +1032,7 @@ public class TrackingDataService {
 				dto.setValue(ds.getDistances().meanValue(mean));
 				return dto;
 			})
-			.collect(Collectors.groupingBy(dto -> LocalDate.parse(dto.getPeriod()).format(MONTH_PATTERN)));
+			.collect(Collectors.groupingBy(dto -> LocalDate.parse(dto.getPeriod()).format(WEEK_PATTERN)));
 			return res.keySet().stream().map(key -> {
 				TransportStatDTO dto = new TransportStatDTO();
 				dto.setPeriod(key);
