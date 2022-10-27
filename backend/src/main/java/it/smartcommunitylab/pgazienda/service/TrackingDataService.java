@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -98,7 +99,7 @@ public class TrackingDataService {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
 	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
-	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("YYYY-ww");
+	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("YYYY-ww", Locale.ITALY);
 	
 	@Autowired
 	private RestTemplate restTemplate;
