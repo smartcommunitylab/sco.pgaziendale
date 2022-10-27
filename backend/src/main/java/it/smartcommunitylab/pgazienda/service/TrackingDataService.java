@@ -16,7 +16,6 @@
 
 package it.smartcommunitylab.pgazienda.service;
 
-import java.awt.RenderingHints.Key;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.Instant;
@@ -98,7 +97,7 @@ public class TrackingDataService {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
 	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
-	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww");
+	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("YYYY-ww", Constants.DEFAULT_LOCALE);
 	
 	@Autowired
 	private RestTemplate restTemplate;
