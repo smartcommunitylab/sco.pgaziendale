@@ -7,6 +7,7 @@ spring:
     mongodb:
       uri: ${MONGO_URI:mongodb://localhost:27017}
       database: ${MONGO_DATABASE:pgazienda}
+      
   mail:
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
@@ -63,6 +64,9 @@ app:
       name-field: ${SECURITY_EXT_USERINFO_NAME_FIELD:first_name}
       surname-field: ${SECURITY_EXT_USERINFO_SURNAME_FIELD:last_name}
       domain: ${SECURITY_EXT_USERINFO_DOMAIN:}
+      issuer-uri: ${AAC_ISSUER_URI:}
+      client-id: ${AAC_CLIENT_ID:}
+      jwk-uri: ${AAC_JWK_URI:}
   legacyCampaign: ferrara_bike2work
       
       

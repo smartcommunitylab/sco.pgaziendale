@@ -17,12 +17,22 @@
 package it.smartcommunitylab.pgazienda.security.jwt;
 
 import java.security.Key;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.UrlJwkProvider;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +48,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
@@ -57,12 +68,22 @@ public class TokenProvider {
     @Value("${app.security.authentication.jwt.token-validity-in-seconds-for-remember-me}")
     private long tokenValidityInSecondsForRememberMe;
 
+    @Value("${app.security.ext.issuer-uri}")
+    private String extJwtIssuerUri;
+    @Value("${app.security.ext.client-id}")
+    private String extJwtAudience;
+    @Value("${app.security.ext.jwk-uri}")
+    private String extJwkUri;
+    
+    JwkProvider provider;
+
     @PostConstruct
     public void init() {
         byte[] keyBytes;
         log.debug("Using a Base64-encoded JWT secret key");
         keyBytes = Decoders.BASE64.decode(tokenSecret);
         this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.provider = new UrlJwkProvider(extJwkUri);
     }
 
     public String createToken(Authentication authentication, boolean rememberMe) {
@@ -86,32 +107,63 @@ public class TokenProvider {
             .compact();
     }
 
-    @SuppressWarnings("deprecation")
 	public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parser()
+        Claims claims = Jwts.parserBuilder()
             .setSigningKey(key)
+            .build()
             .parseClaimsJws(token)
             .getBody();
 
+        
         Collection<? extends GrantedAuthority> authorities =
-            Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+        		claims.containsKey(AUTHORITIES_KEY) 
+        	? Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                 .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+            : Collections.singletonList(new SimpleGrantedAuthority("ROLE_APP_USER"));
 
         User principal = new User(claims.getSubject(), "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
-    @SuppressWarnings("deprecation")
 	public boolean validateToken(String authToken) {
         try {
-            Jwts.parser().setSigningKey(key).parseClaimsJws(authToken);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
             return true;
+        } catch (SignatureException se) {
+        	if (validateExtToken(authToken)) {
+        		return true;
+        	}
         } catch (JwtException | IllegalArgumentException e) {
             log.info("Invalid JWT token.");
             log.trace("Invalid JWT token trace.", e);
         }
         return false;
+    }
+    
+	private boolean validateExtToken(String token) {
+    	DecodedJWT jwt = JWT.decode(token);
+    	Algorithm algorithm = null;
+		try {
+			Jwk jwk = provider.get(jwt.getKeyId());
+			algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
+		} catch (Exception e) {
+  		  log.error("Token exception", e);
+		}
+    	algorithm.verify(jwt);
+    	if (jwt.getExpiresAt().before(Calendar.getInstance().getTime())) {
+    		  log.info("Expired token");
+    		  return false;
+		}
+    	if (!jwt.getAudience().contains(extJwtAudience)) {
+    		log.info("Invalid audience");
+    		return false;
+    	}
+    	if (!jwt.getIssuer().equals(extJwtIssuerUri)) {
+    		log.info("Invalid issuer");
+    		return false;
+    	}
+    	return true;
     }
 }
