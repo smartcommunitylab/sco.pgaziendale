@@ -16,6 +16,8 @@
  ******************************************************************************/
 package it.smartcommunitylab.pgazienda.security.jwt;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.Key;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
@@ -48,9 +50,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 
 @Component
 public class TokenProvider {
@@ -75,15 +78,16 @@ public class TokenProvider {
     @Value("${app.security.ext.jwk-uri}")
     private String extJwkUri;
     
-    JwkProvider provider;
+    private JwkProvider provider;
 
     @PostConstruct
-    public void init() {
+    public void init() throws MalformedURLException {
         byte[] keyBytes;
         log.debug("Using a Base64-encoded JWT secret key");
         keyBytes = Decoders.BASE64.decode(tokenSecret);
         this.key = Keys.hmacShaKeyFor(keyBytes);
-        this.provider = new UrlJwkProvider(extJwkUri);
+        this.provider = new UrlJwkProvider(new URL(extJwkUri));
+        if (extJwtIssuerUri.endsWith("/")) extJwtIssuerUri = extJwtIssuerUri.substring(0, extJwtIssuerUri.length() - 1);
     }
 
     public String createToken(Authentication authentication, boolean rememberMe) {
@@ -108,21 +112,16 @@ public class TokenProvider {
     }
 
 	public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder()
-            .setSigningKey(key)
-            .build()
-            .parseClaimsJws(token)
-            .getBody();
-
+    	DecodedJWT jwt = JWT.decode(token);
         
         Collection<? extends GrantedAuthority> authorities =
-        		claims.containsKey(AUTHORITIES_KEY) 
-        	? Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+        		jwt.getClaims().containsKey(AUTHORITIES_KEY) 
+        	? Arrays.stream(jwt.getClaims().get(AUTHORITIES_KEY).toString().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList())
             : Collections.singletonList(new SimpleGrantedAuthority("ROLE_APP_USER"));
 
-        User principal = new User(claims.getSubject(), "", authorities);
+        User principal = new User(jwt.getSubject(), "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
@@ -131,7 +130,7 @@ public class TokenProvider {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
             return true;
-        } catch (SignatureException se) {
+        } catch (SignatureException | UnsupportedJwtException se) {
         	if (validateExtToken(authToken)) {
         		return true;
         	}

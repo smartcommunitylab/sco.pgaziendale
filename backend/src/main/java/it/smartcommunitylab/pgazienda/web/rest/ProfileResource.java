@@ -57,9 +57,10 @@ public class ProfileResource {
 		        		dto.setUsername(m.getUsername());
 		        		return dto;
 		        	}).collect(Collectors.toList()));
+		    		return ResponseEntity.ok(profile);
 		        }
 			} 
 		}
-		return ResponseEntity.ok(profile);
+		return ResponseEntity.notFound().build();
 	}
 }
