@@ -116,7 +116,7 @@ public class TokenProvider {
         
         Collection<? extends GrantedAuthority> authorities =
         		jwt.getClaims().containsKey(AUTHORITIES_KEY) 
-        	? Arrays.stream(jwt.getClaims().get(AUTHORITIES_KEY).toString().split(","))
+        	? Arrays.stream(jwt.getClaims().get(AUTHORITIES_KEY).toString().replace("\"", "").split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList())
             : Collections.singletonList(new SimpleGrantedAuthority("ROLE_APP_USER"));
