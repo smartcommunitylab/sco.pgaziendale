@@ -325,32 +325,46 @@ public class TrackingDataService {
 				stat.setTrackCount(0);
 				stat.setMonth(date.format(MONTH_PATTERN));
 			}
-			// distances of the travel
-			Distances newDistances = Distances.fromMap(matchingLegs.stream().collect(Collectors.groupingBy(t -> t.getMean(), Collectors.summingDouble(t -> t.getDistance()))));
-			// update distances of the existing one
-			if (stat.getDistances() != null) {
-				stat.getDistances().mergeDistances(newDistances);
-			} else {
-				stat.setDistances(newDistances);
-			}
-			stat.setCo2saved(stat.computeCO2());
-			// update number of tracks
-			stat.setTrackCount(stat.getTrackCount() + matchingLegs.size());
 
-			final Distances original = new Distances();
+			for (TrackLegDTO l : matchingLegs) {
+				MEAN mean = MEAN.valueOf(l.getMean());
+				// identify track data validated or re-validated
+				TrackingData td = stat.getTracks().stream().filter(t -> t.getTrackId().equals(l.getId())).findAny().orElse(null);
+				if (td == null) {
+					td = new TrackingData();
+					td.setMode(mean.name());
+					td.setTrackId(l.getId());
+					td.setPlayerId(playerId);
+					td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
+					td.setDistance(l.getDistance());
+					stat.getTracks().add(td);
+				} else {
+					td.setMode(mean.name());
+					td.setDistance(l.getDistance());
+				}
+			}
+			dayStatRepo.save(stat);
+
+			// recalculate the distances from updated track list
+			Distances newDistances = Distances.fromMap(stat.getTracks().stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance()))));
+			stat.setDistances(newDistances);
 			limitDistances(campaign, playerId, stat);
+			// update number of tracks
+			stat.setTrackCount(stat.getTracks().size());
+			stat.setCo2saved(stat.computeCO2());
 			
+			final Distances original = new Distances();
 			// create result
 			TrackValidityDTO validity = new TrackValidityDTO();
 			validity.setValid(true);
 			validity.setLegs(new LinkedList<>());
 			for (TrackLegDTO l : matchingLegs) {
+				MEAN mean = MEAN.valueOf(l.getMean());
 				TrackValidityLegDTO leg = new TrackValidityLegDTO();
 				leg.setMean(l.getMean());
 				leg.setDistance(l.getDistance());
 				leg.setId(l.getId());
 				// put valid value considering max imposed by the limit
-				MEAN mean = MEAN.valueOf(l.getMean());
 				double max = stat.getLimitedDistances().meanValue(mean);
 				double curr = original.meanValue(mean);
 				if ((curr + l.getDistance()) <= max) {
@@ -361,17 +375,8 @@ public class TrackingDataService {
 					leg.setValidDistance(0d);
 				}
 				original.updateValue(mean, curr + l.getDistance());
-				validity.getLegs().add(leg);
-				
-				TrackingData td = new TrackingData();
-				td.setMode(mean.name());
-				td.setTrackId(l.getId());
-				td.setPlayerId(playerId);
-				td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
-				td.setDistance(l.getDistance());
-				stat.getTracks().add(td);
+				validity.getLegs().add(leg);				
 			}
-			dayStatRepo.save(stat);
 
 			return validity;
 		}
@@ -416,12 +421,12 @@ public class TrackingDataService {
 		
 		DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndTrack(playerId, campaign.getId(), company.getId(), trackId);
 		if (stat != null) {
-			TrackingData track = stat.getTracks().stream().filter(t -> trackId.equals(trackId)).findAny().get();
+			TrackingData track = stat.getTracks().stream().filter(t -> t.getTrackId().equals(trackId)).findAny().get();
 			stat.setTrackCount(stat.getTrackCount()-1);
 			MEAN mean = MEAN.valueOf(track.getMode());
 			stat.getDistances().updateValue(mean, stat.getDistances().meanValue(mean) - track.getDistance());
 			stat.setCo2saved(stat.computeCO2());
-			stat.getLimitedDistances().updateValue(mean, stat.getLimitedDistances().meanValue(mean) - track.getDistance());
+			limitDistances(campaign, playerId, stat);
 			stat.setTracks(stat.getTracks().stream().filter(t -> !t.getTrackId().equals(trackId)).collect(Collectors.toList()));
 			dayStatRepo.save(stat);
 		}
