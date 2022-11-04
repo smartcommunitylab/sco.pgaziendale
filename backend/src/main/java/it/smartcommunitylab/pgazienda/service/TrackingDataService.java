@@ -343,8 +343,6 @@ public class TrackingDataService {
 					td.setDistance(l.getDistance());
 				}
 			}
-			dayStatRepo.save(stat);
-
 			// recalculate the distances from updated track list
 			Distances newDistances = Distances.fromMap(stat.getTracks().stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance()))));
 			stat.setDistances(newDistances);
@@ -352,6 +350,7 @@ public class TrackingDataService {
 			// update number of tracks
 			stat.setTrackCount(stat.getTracks().size());
 			stat.setCo2saved(stat.computeCO2());
+			dayStatRepo.save(stat);
 			
 			final Distances original = new Distances();
 			// create result
@@ -562,6 +561,7 @@ public class TrackingDataService {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 
+		if (to == null) to = LocalDate.now();
 		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) criteria = criteria.gte(from.toString());
 		List<DayStat> res = null;
@@ -1021,7 +1021,7 @@ public class TrackingDataService {
 	public List<TransportStatDTO> getPlayerTransportStatsGroupByMean(String playerId, String campaignId, String groupMode, String meanStr, String dateFrom, String dateTo) throws InconsistentDataException {
 		MEAN mean = MEAN.valueOf(meanStr);
 		if ("day".equals(groupMode) || "month".equals(groupMode)) {
-			List<DayStat> list = getUserCampaignData(playerId, campaignId, LocalDate.parse(dateFrom), LocalDate.parse(dateTo), groupMode, false, false);
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null : LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), groupMode, false, false);
 			return list.stream().map(ds -> {
 				TransportStatDTO dto = new TransportStatDTO();
 				dto.setPeriod( "month".equals(groupMode) ? ds.getMonth() : ds.getDate());
@@ -1029,7 +1029,7 @@ public class TrackingDataService {
 				return dto;
 			}).collect(Collectors.toList());
 		} else if ("week".equals(groupMode)) {
-			List<DayStat> list = getUserCampaignData(playerId, campaignId, LocalDate.parse(dateFrom), LocalDate.parse(dateTo), "day", false, false);
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null :LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), "day", false, false);
 			final Map<String, List<TransportStatDTO>> res = list.stream().map(ds -> {
 				TransportStatDTO dto = new TransportStatDTO();
 				dto.setPeriod(ds.getDate());
@@ -1044,7 +1044,7 @@ public class TrackingDataService {
 				return dto;
 			}).sorted((a,b) -> a.getPeriod().compareTo(b.getPeriod())).collect(Collectors.toList());
 		} else {
-			List<DayStat> list = getUserCampaignData(playerId, campaignId, LocalDate.parse(dateFrom), LocalDate.parse(dateTo), Constants.AGG_TOTAL, false, false);
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null :LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), Constants.AGG_TOTAL, false, false);
 			return list.stream().map(ds -> {
 				TransportStatDTO dto = new TransportStatDTO();
 				dto.setPeriod(ds.getDate());
