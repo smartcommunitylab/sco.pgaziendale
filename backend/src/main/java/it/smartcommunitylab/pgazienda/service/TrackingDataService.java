@@ -268,6 +268,8 @@ public class TrackingDataService {
 	}
 
 	public TrackValidityDTO validate(String campaignId, String playerId, TrackDTO track) throws InconsistentDataException {
+		logger.info("Validating track service for campaign {} player {}, track count {}", campaignId, playerId, track.getLegs().size());
+		
 		// campaign
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) {

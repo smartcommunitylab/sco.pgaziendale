@@ -36,6 +36,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,6 +79,9 @@ public class TokenProvider {
     @Value("${app.security.ext.jwk-uri}")
     private String extJwkUri;
     
+    @Value("${app.security.ext.domain:}")
+    private String userDomain;
+
     private JwkProvider provider;
 
     @PostConstruct
@@ -121,7 +125,15 @@ public class TokenProvider {
                 .collect(Collectors.toList())
             : Collections.singletonList(new SimpleGrantedAuthority("ROLE_APP_USER"));
 
-        User principal = new User(jwt.getSubject(), "", authorities);
+        String subj = jwt.getSubject();
+        // external subj
+        if (jwt.getIssuer().equals(extJwtIssuerUri)) {
+        	if (!StringUtils.isEmpty(userDomain)) {
+        		subj = subj + userDomain;
+        	}
+        }
+        
+        User principal = new User(subj, "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
