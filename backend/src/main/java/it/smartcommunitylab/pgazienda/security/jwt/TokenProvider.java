@@ -127,7 +127,7 @@ public class TokenProvider {
 
         String subj = jwt.getSubject();
         // external subj
-        if (jwt.getIssuer().equals(extJwtIssuerUri)) {
+        if (jwt.getIssuer() != null && jwt.getIssuer().equals(extJwtIssuerUri)) {
         	if (!StringUtils.isEmpty(userDomain)) {
         		subj = subj + userDomain;
         	}
