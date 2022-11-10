@@ -268,6 +268,8 @@ public class TrackingDataService {
 	}
 
 	public TrackValidityDTO validate(String campaignId, String playerId, TrackDTO track) throws InconsistentDataException {
+		logger.info("Validating track service for campaign {} player {}, track count {}", campaignId, playerId, track.getLegs().size());
+		
 		// campaign
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) {
@@ -325,32 +327,45 @@ public class TrackingDataService {
 				stat.setTrackCount(0);
 				stat.setMonth(date.format(MONTH_PATTERN));
 			}
-			// distances of the travel
-			Distances newDistances = Distances.fromMap(matchingLegs.stream().collect(Collectors.groupingBy(t -> t.getMean(), Collectors.summingDouble(t -> t.getDistance()))));
-			// update distances of the existing one
-			if (stat.getDistances() != null) {
-				stat.getDistances().mergeDistances(newDistances);
-			} else {
-				stat.setDistances(newDistances);
-			}
-			stat.setCo2saved(stat.computeCO2());
-			// update number of tracks
-			stat.setTrackCount(stat.getTrackCount() + matchingLegs.size());
 
-			final Distances original = new Distances();
+			for (TrackLegDTO l : matchingLegs) {
+				MEAN mean = MEAN.valueOf(l.getMean());
+				// identify track data validated or re-validated
+				TrackingData td = stat.getTracks().stream().filter(t -> t.getTrackId().equals(l.getId())).findAny().orElse(null);
+				if (td == null) {
+					td = new TrackingData();
+					td.setMode(mean.name());
+					td.setTrackId(l.getId());
+					td.setPlayerId(playerId);
+					td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
+					td.setDistance(l.getDistance());
+					stat.getTracks().add(td);
+				} else {
+					td.setMode(mean.name());
+					td.setDistance(l.getDistance());
+				}
+			}
+			// recalculate the distances from updated track list
+			Distances newDistances = Distances.fromMap(stat.getTracks().stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance()))));
+			stat.setDistances(newDistances);
 			limitDistances(campaign, playerId, stat);
+			// update number of tracks
+			stat.setTrackCount(stat.getTracks().size());
+			stat.setCo2saved(stat.computeCO2());
+			dayStatRepo.save(stat);
 			
+			final Distances original = new Distances();
 			// create result
 			TrackValidityDTO validity = new TrackValidityDTO();
 			validity.setValid(true);
 			validity.setLegs(new LinkedList<>());
 			for (TrackLegDTO l : matchingLegs) {
+				MEAN mean = MEAN.valueOf(l.getMean());
 				TrackValidityLegDTO leg = new TrackValidityLegDTO();
 				leg.setMean(l.getMean());
 				leg.setDistance(l.getDistance());
 				leg.setId(l.getId());
 				// put valid value considering max imposed by the limit
-				MEAN mean = MEAN.valueOf(l.getMean());
 				double max = stat.getLimitedDistances().meanValue(mean);
 				double curr = original.meanValue(mean);
 				if ((curr + l.getDistance()) <= max) {
@@ -361,17 +376,8 @@ public class TrackingDataService {
 					leg.setValidDistance(0d);
 				}
 				original.updateValue(mean, curr + l.getDistance());
-				validity.getLegs().add(leg);
-				
-				TrackingData td = new TrackingData();
-				td.setMode(mean.name());
-				td.setTrackId(l.getId());
-				td.setPlayerId(playerId);
-				td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
-				td.setDistance(l.getDistance());
-				stat.getTracks().add(td);
+				validity.getLegs().add(leg);				
 			}
-			dayStatRepo.save(stat);
 
 			return validity;
 		}
@@ -416,12 +422,12 @@ public class TrackingDataService {
 		
 		DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndTrack(playerId, campaign.getId(), company.getId(), trackId);
 		if (stat != null) {
-			TrackingData track = stat.getTracks().stream().filter(t -> trackId.equals(trackId)).findAny().get();
+			TrackingData track = stat.getTracks().stream().filter(t -> t.getTrackId().equals(trackId)).findAny().get();
 			stat.setTrackCount(stat.getTrackCount()-1);
 			MEAN mean = MEAN.valueOf(track.getMode());
 			stat.getDistances().updateValue(mean, stat.getDistances().meanValue(mean) - track.getDistance());
 			stat.setCo2saved(stat.computeCO2());
-			stat.getLimitedDistances().updateValue(mean, stat.getLimitedDistances().meanValue(mean) - track.getDistance());
+			limitDistances(campaign, playerId, stat);
 			stat.setTracks(stat.getTracks().stream().filter(t -> !t.getTrackId().equals(trackId)).collect(Collectors.toList()));
 			dayStatRepo.save(stat);
 		}
@@ -557,6 +563,7 @@ public class TrackingDataService {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 
+		if (to == null) to = LocalDate.now();
 		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) criteria = criteria.gte(from.toString());
 		List<DayStat> res = null;
@@ -1016,7 +1023,7 @@ public class TrackingDataService {
 	public List<TransportStatDTO> getPlayerTransportStatsGroupByMean(String playerId, String campaignId, String groupMode, String meanStr, String dateFrom, String dateTo) throws InconsistentDataException {
 		MEAN mean = MEAN.valueOf(meanStr);
 		if ("day".equals(groupMode) || "month".equals(groupMode)) {
-			List<DayStat> list = getUserCampaignData(playerId, campaignId, LocalDate.parse(dateFrom), LocalDate.parse(dateTo), groupMode, false, false);
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null : LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), groupMode, false, false);
 			return list.stream().map(ds -> {
 				TransportStatDTO dto = new TransportStatDTO();
 				dto.setPeriod( "month".equals(groupMode) ? ds.getMonth() : ds.getDate());
@@ -1024,7 +1031,7 @@ public class TrackingDataService {
 				return dto;
 			}).collect(Collectors.toList());
 		} else if ("week".equals(groupMode)) {
-			List<DayStat> list = getUserCampaignData(playerId, campaignId, LocalDate.parse(dateFrom), LocalDate.parse(dateTo), "day", false, false);
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null :LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), "day", false, false);
 			final Map<String, List<TransportStatDTO>> res = list.stream().map(ds -> {
 				TransportStatDTO dto = new TransportStatDTO();
 				dto.setPeriod(ds.getDate());
@@ -1039,7 +1046,7 @@ public class TrackingDataService {
 				return dto;
 			}).sorted((a,b) -> a.getPeriod().compareTo(b.getPeriod())).collect(Collectors.toList());
 		} else {
-			List<DayStat> list = getUserCampaignData(playerId, campaignId, LocalDate.parse(dateFrom), LocalDate.parse(dateTo), Constants.AGG_TOTAL, false, false);
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null :LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), Constants.AGG_TOTAL, false, false);
 			return list.stream().map(ds -> {
 				TransportStatDTO dto = new TransportStatDTO();
 				dto.setPeriod(ds.getDate());

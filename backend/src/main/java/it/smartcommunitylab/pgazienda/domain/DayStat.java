@@ -296,12 +296,12 @@ public class DayStat {
 		 */
 		public static Distances fromMap(Map<Object, Double> map) {
 			Distances distances = new Distances();
-			distances.setBike(map.getOrDefault("bike", 0d));
-			distances.setBoat(map.getOrDefault("boat", 0d));
-			distances.setBus(map.getOrDefault("bus", 0d));
-			distances.setTrain(map.getOrDefault("train", 0d));
-			distances.setCar(map.getOrDefault("car", 0d));
-			distances.setWalk(map.getOrDefault("walk", 0d));
+			distances.setBike(((Number)map.getOrDefault("bike", 0d)).doubleValue());
+			distances.setBoat(((Number)map.getOrDefault("boat", 0d)).doubleValue());
+			distances.setBus(((Number)map.getOrDefault("bus", 0d)).doubleValue());
+			distances.setTrain(((Number)map.getOrDefault("train", 0d)).doubleValue());
+			distances.setCar(((Number)map.getOrDefault("car", 0d)).doubleValue());
+			distances.setWalk(((Number)map.getOrDefault("walk", 0d)).doubleValue());
 			return distances;
 		}
 		

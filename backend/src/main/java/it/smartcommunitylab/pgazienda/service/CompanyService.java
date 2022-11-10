@@ -226,6 +226,15 @@ public class CompanyService {
 	}
 
 
+	public CompanyLocation getLocation(String id, String location) {
+		Company company = companyRepo.findById(id).orElse(null);
+		if (company != null) {
+			return company.getLocations().stream().filter(l -> l.getId().equals(location)).findAny().orElse(null);
+		}
+		return null;
+	}
+	
+
 	/**
 	 * @param companyId
 	 * @param location
@@ -307,6 +316,12 @@ public class CompanyService {
 		return employeeRepo.save(employee);
 	}
 
+	public Employee getEmployeeByCode(String companyId, String code) {
+		List<Employee> employeeList = employeeRepo.findByCompanyIdAndCode(companyId, code);
+		if (employeeList != null) return employeeList.get(0);
+		return null;
+	}
+	
 	/**
 	 * @param companyId
 	 * @param employee
@@ -513,5 +528,6 @@ public class CompanyService {
 			else return "";
 		} else return v.trim();
 	}
-	
+
+
 }

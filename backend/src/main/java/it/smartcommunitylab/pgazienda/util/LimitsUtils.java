@@ -64,6 +64,7 @@ public class LimitsUtils {
 		String currentMonth = null;
 		
 		for (DayStat ds: res) {
+			if (ds.getDistances() == null) ds.setDistances(new Distances());
 			if (ds.getMonth() != null && !ds.getMonth().equals(currentMonth)) {
 				// reset counters
 				for (MEAN m: MEAN.values()) currentMonthCounters.put(m.toString(), 0d);
@@ -109,7 +110,6 @@ public class LimitsUtils {
 			Map<String, Double> monthCounters, Map<String, Double> monthLimits, 
 			Map<String, Double> totalCounters, Map<String, Double> totalLimits) 
 	{
-		
 		for (MEAN m : MEAN.values()) {
 			Double dist = distances.meanValue(m);
 			String mean =  m.toString();

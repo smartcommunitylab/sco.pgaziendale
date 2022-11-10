@@ -22,6 +22,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -62,6 +64,8 @@ public class AdminResource {
 	private TrackingDataService trackingDataService;
 	@Autowired
 	private CampaignService campaignService;
+	
+	private static final Logger logger = LoggerFactory.getLogger(AdminResource.class); 
 	
 	@PostMapping("/admin/load")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
@@ -118,6 +122,7 @@ public class AdminResource {
 	public @ResponseBody ResponseEntity<TrackValidityDTO> validate(@PathVariable String campaignId, 
 			@PathVariable String playerId, @RequestBody TrackDTO body) 
 	{
+		logger.info("Validating track for campaign {} player {}", campaignId, playerId);
 		return ResponseEntity.ok(service.validateTrack(playerId, campaignId, body));
 	}
 
