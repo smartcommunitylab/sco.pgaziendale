@@ -4,7 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +23,8 @@ import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.dto.ProfileDTO;
 import it.smartcommunitylab.pgazienda.dto.UserDTO;
+import it.smartcommunitylab.pgazienda.security.SecurityUtils;
+import it.smartcommunitylab.pgazienda.service.AdminService;
 import it.smartcommunitylab.pgazienda.service.CompanyService;
 import it.smartcommunitylab.pgazienda.service.UserService;
 
@@ -26,14 +32,35 @@ import it.smartcommunitylab.pgazienda.service.UserService;
 @RequestMapping("/api")
 public class ProfileResource {
 
+	private static final Logger logger = LoggerFactory.getLogger(ProfileResource.class);
+	
     @Autowired
     private UserService userService;
     @Autowired
     private CompanyService companyService;
+    @Autowired
+    private AdminService adminService;
+    @Value("${app.security.ext.domain:}")
+    private String userDomain;
+
 
 	@GetMapping("/profile/campaign/{campaign}")
 	public ResponseEntity<ProfileDTO> getProfile(@PathVariable String campaign) {
-		Optional<User> userWithAuthorities = userService.getUserWithAuthorities();
+		String login = SecurityUtils.getCurrentUserLogin().orElse(null);
+		if (login == null) return ResponseEntity.notFound().build();
+		
+		logger.info("Profile for user " + login);
+		if (!StringUtils.isEmpty(userDomain)) {
+			login = login.substring(0, login.indexOf(userDomain));
+		}
+		login = adminService.getLegacyPlayer(login, campaign);
+		if (!StringUtils.isEmpty(userDomain)) {
+			login += userDomain;
+		}
+		logger.info("Real profile for user " + login);
+		
+		Optional<User> userWithAuthorities = userService.getUserWithAuthoritiesByUsername(login);
+		
 		ProfileDTO profile = new ProfileDTO();
 		if (userWithAuthorities.isPresent()) {
 			User user = userWithAuthorities.get();
