@@ -157,10 +157,10 @@ public class CampaignService {
 			if (employee == null ) throw new InconsistentDataException("Invalid user key", "NO_CODE");
 			if (employee.getCampaigns() == null) employee.setCampaigns(new LinkedList<>());
 			
-			boolean hasCampaignData = trackingDataService.hasCampaignData(user.getPlayerId(), campaignId);
-			if (hasCampaignData) {
-				throw new RepeatingSubscriptionException("Previous subscription exists: " + campaignId +", "+user.getPlayerId());
-			}
+//			boolean hasCampaignData = trackingDataService.hasCampaignData(user.getPlayerId(), campaignId);
+//			if (hasCampaignData) {
+//				throw new RepeatingSubscriptionException("Previous subscription exists: " + campaignId +", "+user.getPlayerId());
+//			}
 			
 			if (!employee.getCampaigns().contains(campaignId)) {
 				employee.getCampaigns().add(campaignId);
