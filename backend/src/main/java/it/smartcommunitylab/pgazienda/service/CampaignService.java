@@ -153,7 +153,7 @@ public class CampaignService {
 		
 		// not yet subscribed
 		if (role == null || role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId))) {
-			Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), key).stream().findAny().orElse(null);
+			Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), key).stream().findAny().orElse(null);
 			if (employee == null ) throw new InconsistentDataException("Invalid user key", "NO_CODE");
 			if (employee.getCampaigns() == null) employee.setCampaigns(new LinkedList<>());
 			
@@ -197,7 +197,7 @@ public class CampaignService {
 			role.getSubscriptions().forEach(s -> {
 				Company company = companyRepo.findByCode(s.getCompanyCode()).stream().findFirst().orElse(null);
 				if (company != null) {
-					Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), s.getKey()).stream().findAny().orElse(null);					
+					Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), s.getKey()).stream().findAny().orElse(null);					
 					if (employee != null && employee.getCampaigns().contains(campaignId)) {
 						employee.getCampaigns().remove(campaignId);
 						employeeRepo.save(employee);
@@ -299,7 +299,7 @@ public class CampaignService {
 						List<User> user = userService.getUserByEmployeeCode(campaignId, company.getCode(), code);
 						if (user != null && !user.isEmpty()) {
 							logger.info("Non-sychronized employee found: {}, {}", company.getCode(), code);
-							Optional<Employee> employee = employeeRepo.findByCompanyIdAndCode(company.getId(), code).stream().findAny();
+							Optional<Employee> employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), code).stream().findAny();
 							if (employee.isPresent()) {
 								Employee obj = employee.get();
 								obj.getCampaigns().add(campaignId);

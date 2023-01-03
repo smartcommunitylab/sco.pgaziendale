@@ -297,7 +297,7 @@ public class TrackingDataService {
 		Company company = companies.get(0);
 		
 		// employee matching subscription
-		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
 		if (employee == null ) throw new InconsistentDataException("Invalid user key: " + playerId, "NO_USER");
 		// locations
 		List<Shape> locations = 
@@ -417,7 +417,7 @@ public class TrackingDataService {
 		Company company = companies.get(0);
 		
 		// employee matching subscription
-		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
 		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
 		
 		DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndTrack(playerId, campaign.getId(), company.getId(), trackId);
@@ -469,7 +469,7 @@ public class TrackingDataService {
 		Company company = companies.get(0);
 		
 		// employee matching subscription
-		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
 		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
 		
 		DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndTrack(playerId, campaign.getId(), company.getId(), trackId);
@@ -932,7 +932,7 @@ public class TrackingDataService {
 					r.getSubscriptions().stream()
 					.filter(s -> s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(companyCode))
 					.forEach(s -> {
-						Employee e = employeeRepo.findByCompanyIdAndCode(companyId, s.getKey()).stream().findAny().orElse(null);
+						Employee e = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, s.getKey()).stream().findAny().orElse(null);
 						if (e != null) res.add(e);
 					});
 				}
@@ -954,7 +954,7 @@ public class TrackingDataService {
 						Company company = companyCache.getOrDefault(s.getCompanyCode(), companyRepo.findByCode(s.getCompanyCode()).stream().findFirst().orElse(null));
 						companyCache.put(s.getCompanyCode(), company);
 						if (company != null) {
-							Employee e = employeeRepo.findByCompanyIdAndCode(company.getId(), s.getKey()).stream().findAny().orElse(null);
+							Employee e = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), s.getKey()).stream().findAny().orElse(null);
 							if (e != null) res.add(e);
 						}
 					});
