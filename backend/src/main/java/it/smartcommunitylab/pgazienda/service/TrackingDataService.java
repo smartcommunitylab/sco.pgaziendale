@@ -282,11 +282,11 @@ public class TrackingDataService {
 		} 
 		UserRole role = user.findRole(it.smartcommunitylab.pgazienda.Constants.ROLE_APP_USER).orElse(null);
 		if (role == null) {
-			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+			throw new InconsistentDataException("Invalid user role: " + playerId, "NO_USER");
 		}
 		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId)).findAny().orElse(null);
 		if (subscription == null) {
-			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+			throw new InconsistentDataException("Invalid user subscription: " + playerId, "NO_USER");
 		}
 		
 		// company
@@ -298,7 +298,7 @@ public class TrackingDataService {
 		
 		// employee matching subscription
 		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
-		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		if (employee == null ) throw new InconsistentDataException("Invalid user key: " + playerId, "NO_USER");
 		// locations
 		List<Shape> locations = 
 				company.getLocations().stream()
