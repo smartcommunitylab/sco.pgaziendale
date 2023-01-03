@@ -26,6 +26,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -51,6 +53,8 @@ import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionExcept
  */
 @Service
 public class AdminService {
+	
+	private final static Logger log = LoggerFactory.getLogger(AdminService.class);
 	
 	@Autowired
 	private PGAppService appService;
@@ -204,6 +208,7 @@ public class AdminService {
 			String legacyPlayerId = checkLegacyPlayer(playerId, campaignId);
 			return trackService.validate(campaignId, legacyPlayerId, track);
 		} catch (InconsistentDataException e) {
+			log.error("Error validating: " + e.getMessage());
 			return new TrackValidityDTO(e.getDetails());
 		}
 	}
