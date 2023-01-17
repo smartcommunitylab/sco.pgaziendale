@@ -134,7 +134,7 @@ public class MailService {
             message.setText(content, true);
             javaMailSender.send(mimeMessage);
             log.debug("Sent email to User '{}'", receiver);
-        }  catch (MailException | MessagingException e) {
+        }  catch (Exception e) {
             log.warn("Email could not be sent to user '{}'", receiver, e);
 //            throw new RequestEmailFailureException();
         }
