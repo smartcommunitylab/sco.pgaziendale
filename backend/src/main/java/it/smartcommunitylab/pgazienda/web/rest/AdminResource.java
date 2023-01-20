@@ -83,8 +83,13 @@ public class AdminResource {
 
 	@GetMapping("/admin/datasync/{campaignId}/{companyId}/{from}/{to}")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-	public @ResponseBody ResponseEntity<Void> syncCompanyTrackingData(@PathVariable String campaignId, @PathVariable String companyId, @PathVariable String from, @PathVariable String to) {
-		trackingDataService.syncCompanyData(campaignId, companyId, LocalDate.parse(from), LocalDate.parse(to));
+	public @ResponseBody ResponseEntity<Void> syncCompanyTrackingData(
+			@PathVariable String campaignId, 
+			@PathVariable String companyId, 
+			@PathVariable String from, 
+			@PathVariable String to,
+			@RequestParam(required = false, defaultValue = "false") boolean forse) {
+		trackingDataService.syncCompanyData(campaignId, companyId, LocalDate.parse(from), LocalDate.parse(to), forse);
 		return ResponseEntity.ok(null);
 	}
 

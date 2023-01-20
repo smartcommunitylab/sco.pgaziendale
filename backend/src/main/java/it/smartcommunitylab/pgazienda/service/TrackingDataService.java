@@ -147,7 +147,7 @@ public class TrackingDataService {
 				List<Company> companies = companyRepo.findByCampaign(campaign.getId());
 				companies.forEach(company -> {
 					LocalDate today = LocalDate.now();
-					syncCompanyData(a, campaign, company, today, today);	
+					syncCompanyData(a, campaign, company, today, today, false);	
 				});
 			});
 		});
@@ -159,12 +159,13 @@ public class TrackingDataService {
 	 * @param companyId
 	 * @param dayFrom
 	 * @param dayTo
+	 * @param forse to enforce the validation even for migrated users
 	 */
-	public void syncCompanyData(String campaignId, String companyId, LocalDate dayFrom, LocalDate dayTo) {
+	public void syncCompanyData(String campaignId, String companyId, LocalDate dayFrom, LocalDate dayTo, boolean forse) {
 		campaignRepo.findById(campaignId).ifPresent(campaign -> {
 			companyRepo.findById(companyId).ifPresent(company -> {
 				appRepo.findById(campaign.getApplication()).ifPresent(a -> {
-					syncCompanyData(a, campaign, company, dayFrom, dayTo);
+					syncCompanyData(a, campaign, company, dayFrom, dayTo, forse);
 				});
 			});
 		});
@@ -175,9 +176,10 @@ public class TrackingDataService {
 	 * @param campaigns
 	 * @param campaign
 	 * @param company
+	 * @param forse 
 	 * @param day
 	 */
-	private void syncCompanyData(PGApp a, Campaign campaign, Company company, LocalDate dayFrom, LocalDate dayTo) {
+	private void syncCompanyData(PGApp a, Campaign campaign, Company company, LocalDate dayFrom, LocalDate dayTo, boolean forse) {
 		try {
 			if (Boolean.TRUE.equals(a.getSupportPushValidation())) return;
 
@@ -187,7 +189,9 @@ public class TrackingDataService {
 			if (employees.isEmpty()) return;
 			Set<String> codeSet = employees.stream().map(e -> e.getCode()).collect(Collectors.toSet());
 			// users corresponding to this employees not upgraded from legacy campaign
-			List<User>  users = userRepo.findByCampaignAndCompanyAndEmployeeCodeNotUpgraded(campaign.getId(), company.getCode(), codeSet);
+			List<User>  users = forse 
+					? userRepo.findByCampaignAndCompanyAndEmployeeCode(campaign.getId(), company.getCode(), codeSet)
+					: userRepo.findByCampaignAndCompanyAndEmployeeCodeNotUpgraded(campaign.getId(), company.getCode(), codeSet);
 			if (users.isEmpty()) return;
 			List<String> playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
 			logger.info("Styncronizing app campaign company users: " + playerIds);
