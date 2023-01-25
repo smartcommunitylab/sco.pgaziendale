@@ -139,22 +139,32 @@ public class CampaignService {
 	 */
 	public void subscribeUser(User user, String key, String companyCode, String campaignId, boolean upgraded) throws RepeatingSubscriptionException, InconsistentDataException {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new InconsistentDataException("Invalid campaign", "NO_CAMPAIGN");
+		if (campaign == null) {
+			logger.error("Invalid campaignn subscription (" + campaignId+")");
+			throw new InconsistentDataException("Invalid campaign", "NO_CAMPAIGN");
+		}
 		Company company = companyRepo.findByCode(companyCode).stream().findFirst().orElse(null);
-		if (company == null || company.getCampaigns() == null || !company.getCampaigns().contains(campaignId)) throw new InconsistentDataException("Invalid company", "NO_COMPANY");
+		if (company == null || company.getCampaigns() == null || !company.getCampaigns().contains(campaignId)) {
+			logger.error("Invalid company subscription (" + companyCode +")");
+			throw new InconsistentDataException("Invalid company", "NO_COMPANY");
+		}
 		// app user role
 		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 
 		// control key already used
 		List<User> registered = userService.getUserByEmployeeCode(campaignId, companyCode, key);
 		if (registered != null && registered.size() > 0 && !registered.get(0).getId().equals(user.getId())) {
-			throw new InconsistentDataException("User code already in use: " + campaignId +", " + companyCode + ", " + key, "CODE_IN_USE");			
+			logger.error("Invalid company subscription user code in use (" + key +"@" + companyCode+")");
+			throw new InconsistentDataException("User code already in use (" + campaignId +", " + companyCode + ", " + key, "CODE_IN_USE");			
 		}
 		
 		// not yet subscribed
 		if (role == null || role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId))) {
 			Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), key).stream().findAny().orElse(null);
-			if (employee == null ) throw new InconsistentDataException("Invalid user key", "NO_CODE");
+			if (employee == null ) {
+				logger.error("Invalid company subscription no code (" + key +"@" + companyCode+")");
+				throw new InconsistentDataException("Invalid user key", "NO_CODE");
+			}
 			if (employee.getCampaigns() == null) employee.setCampaigns(new LinkedList<>());
 			
 //			boolean hasCampaignData = trackingDataService.hasCampaignData(user.getPlayerId(), campaignId);
