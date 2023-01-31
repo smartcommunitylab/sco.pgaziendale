@@ -147,7 +147,7 @@ public class TrackingDataService {
 				List<Company> companies = companyRepo.findByCampaign(campaign.getId());
 				companies.forEach(company -> {
 					LocalDate today = LocalDate.now();
-					syncCompanyData(a, campaign, company, today, today, false);	
+					syncCompanyData(a, campaign, company, today, today, false, null);	
 				});
 			});
 		});
@@ -161,11 +161,11 @@ public class TrackingDataService {
 	 * @param dayTo
 	 * @param forse to enforce the validation even for migrated users
 	 */
-	public void syncCompanyData(String campaignId, String companyId, LocalDate dayFrom, LocalDate dayTo, boolean forse) {
+	public void syncCompanyData(String campaignId, String companyId, LocalDate dayFrom, LocalDate dayTo, boolean forse, String playerId) {
 		campaignRepo.findById(campaignId).ifPresent(campaign -> {
 			companyRepo.findById(companyId).ifPresent(company -> {
 				appRepo.findById(campaign.getApplication()).ifPresent(a -> {
-					syncCompanyData(a, campaign, company, dayFrom, dayTo, forse);
+					syncCompanyData(a, campaign, company, dayFrom, dayTo, forse, playerId);
 				});
 			});
 		});
@@ -179,21 +179,26 @@ public class TrackingDataService {
 	 * @param forse 
 	 * @param day
 	 */
-	private void syncCompanyData(PGApp a, Campaign campaign, Company company, LocalDate dayFrom, LocalDate dayTo, boolean forse) {
+	private void syncCompanyData(PGApp a, Campaign campaign, Company company, LocalDate dayFrom, LocalDate dayTo, boolean forse, String playerId) {
 		try {
 			if (Boolean.TRUE.equals(a.getSupportPushValidation())) return;
 
 			logger.info("Syncronizing app campaign company: " + company.getCode());
 			// company employees subscribed to this campaign 
-			List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(company.getId(), campaign.getId());
-			if (employees.isEmpty()) return;
-			Set<String> codeSet = employees.stream().map(e -> e.getCode()).collect(Collectors.toSet());
-			// users corresponding to this employees not upgraded from legacy campaign
-			List<User>  users = forse 
-					? userRepo.findByCampaignAndCompanyAndEmployeeCode(campaign.getId(), company.getCode(), codeSet)
-					: userRepo.findByCampaignAndCompanyAndEmployeeCodeNotUpgraded(campaign.getId(), company.getCode(), codeSet);
-			if (users.isEmpty()) return;
-			List<String> playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+			List<String> playerIds = null;
+			if (playerId != null) {
+				playerIds = Collections.singletonList(playerId);
+			} else {
+				List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(company.getId(), campaign.getId());
+				if (employees.isEmpty()) return;
+				Set<String> codeSet = employees.stream().map(e -> e.getCode()).collect(Collectors.toSet());
+				// users corresponding to this employees not upgraded from legacy campaign
+				List<User>  users = forse 
+						? userRepo.findByCampaignAndCompanyAndEmployeeCode(campaign.getId(), company.getCode(), codeSet)
+						: userRepo.findByCampaignAndCompanyAndEmployeeCodeNotUpgraded(campaign.getId(), company.getCode(), codeSet);
+				if (users.isEmpty()) return;
+				playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+			}
 			logger.info("Styncronizing app campaign company users: " + playerIds);
 
 			LocalDate d = dayFrom;

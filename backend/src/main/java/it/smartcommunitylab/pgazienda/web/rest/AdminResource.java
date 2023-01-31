@@ -88,8 +88,9 @@ public class AdminResource {
 			@PathVariable String companyId, 
 			@PathVariable String from, 
 			@PathVariable String to,
+			@RequestParam(required = false) String playerId,
 			@RequestParam(required = false, defaultValue = "false") boolean forse) {
-		trackingDataService.syncCompanyData(campaignId, companyId, LocalDate.parse(from), LocalDate.parse(to), forse);
+		trackingDataService.syncCompanyData(campaignId, companyId, LocalDate.parse(from), LocalDate.parse(to), forse, playerId);
 		return ResponseEntity.ok(null);
 	}
 
