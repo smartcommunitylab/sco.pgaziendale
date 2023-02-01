@@ -129,7 +129,7 @@ public class TrackingDataService {
 //		});
 //	}	
 	
-	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*2)
+//	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*2)
 	public void synchronizeApps() {
 		appRepo.findAll().forEach(a -> {
 			if (Boolean.TRUE.equals(a.getSupportPushValidation())) return;
