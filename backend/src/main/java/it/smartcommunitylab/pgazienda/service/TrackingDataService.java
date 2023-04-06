@@ -53,6 +53,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
@@ -1030,7 +1031,7 @@ public class TrackingDataService {
 	}
 	
 	public List<TransportStatDTO> getPlayerTransportStatsGroupByMean(String playerId, String campaignId, String groupMode, String meanStr, String dateFrom, String dateTo) throws InconsistentDataException {
-		MEAN mean = MEAN.valueOf(meanStr);
+		MEAN mean = StringUtils.hasText(meanStr) ? MEAN.valueOf(meanStr) : MEAN.bike;
 		if ("day".equals(groupMode) || "month".equals(groupMode)) {
 			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null : LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), groupMode, false, false);
 			return list.stream().map(ds -> {
