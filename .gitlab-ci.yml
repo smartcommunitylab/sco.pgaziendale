@@ -1,31 +1,42 @@
 image: docker:latest
+
 services:
   - docker:dind
-variables:
-  DOCKER_DRIVER: overlay
 
 stages:
   - build
+  - test
   - deploy
 
+include:
+  - template: Security/Container-Scanning.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+
 variables:
+  DOCKER_DRIVER: overlay
+  DS_JAVA_VERSION: 11
+  SAST_JAVA_VERSION: 11
   CONTAINER_BACKEND_PROD_IMAGE: smartcommunitylab/pgaziendale-backend:prod-$CI_COMMIT_SHORT_SHA
   CONTAINER_BACKEND_PROD_IMAGE_LATEST: smartcommunitylab/pgaziendale-backend:latest
   CONTAINER_BACKEND_DEV_IMAGE: smartcommunitylab/pgaziendale-backend:dev-$CI_COMMIT_SHORT_SHA
   CONTAINER_BACKEND_DEV_IMAGE_LATEST: smartcommunitylab/pgaziendale-backend:dev-latest
 
-build_backend_prod:
+update-backend-cache-image:
   stage: build
+  variables:
+    BUILDKIT_PROGRESS: plain
+    DOCKER_BUILDKIT: 1 
   script:
     - cd backend
     - docker login -u $DHUB_USER -p $DHUB_PASS
-    - DOCKER_BUILDKIT=1 docker build -f Dockerfile -t $CONTAINER_BACKEND_PROD_IMAGE -t $CONTAINER_BACKEND_PROD_IMAGE_LATEST .
-    - docker push $CONTAINER_BACKEND_PROD_IMAGE
-    - docker push $CONTAINER_BACKEND_PROD_IMAGE_LATEST
-  only:
-    - prod-backend
+    - docker build -f Dockerfile-cache -t $CONTAINER_CACHE_IMAGE .
+    - docker push $CONTAINER_CACHE_IMAGE
+  rules:
+    - changes:
+      - backend/pom.xml
 
-build_backend_dev:
+backend-container-build:
   stage: build
   script:
     - cd backend
@@ -35,6 +46,42 @@ build_backend_dev:
     - docker push $CONTAINER_BACKEND_DEV_IMAGE_LATEST
   only:
     - dev-backend
+    - prod-backend
+    - main
+
+spotbugs-sast:
+  rules:
+     - if: '$CI_COMMIT_REF_NAME == "main"'
+
+semgrep-sast:
+  rules:
+     - if: '$CI_COMMIT_REF_NAME == "main"'
+
+nodejs-scan-sast:
+  rules:
+     - if: '$CI_COMMIT_REF_NAME == "main"'
+
+gemnasium-maven-dependency_scanning:
+  rules:
+     - if: '$CI_COMMIT_REF_NAME == "main"'
+
+gemnasium-dependency_scanning:
+  rules:
+     - if: '$CI_COMMIT_REF_NAME == "main"'
+
+container_scanning:
+  stage: test
+  variables:
+    DOCKER_IMAGE: smartcommunitylab/pgaziendale-backend:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+    DOCKERFILE_PATH: "backend/Dockerfile"
+    GIT_STRATEGY: fetch
+    DOCKER_USER: ""
+    DOCKER_PASSWORD: ""
+  dependencies:
+    - backend-container-build
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main"'
+
 
 deploy_backend_prod:
   stage: deploy

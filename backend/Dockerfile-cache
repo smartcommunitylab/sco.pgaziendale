@@ -1,7 +1,8 @@
 FROM maven:3-jdk-11 AS mvn
-COPY . /tmp
+COPY ./src /tmp/src
+COPY ./pom.xml /tmp/pom.xml
 WORKDIR /tmp
 RUN mvn install -DskipTests
 
-FROM alpine
+FROM scratch
 COPY --from=mvn /root/.m2 /root/.m2
