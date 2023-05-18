@@ -19,16 +19,15 @@ package it.smartcommunitylab.pgazienda.service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -54,6 +53,8 @@ import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionExcept
  */
 @Service
 public class AdminService {
+	
+	private final static Logger log = LoggerFactory.getLogger(AdminService.class);
 	
 	@Autowired
 	private PGAppService appService;
@@ -196,7 +197,8 @@ public class AdminService {
 	 * @param playerId
 	 */
 	public void unsubscribeCampaign(String campaignId, String playerId) {
-		User user = userService.getUserByPlayerId(playerId);
+		String legacyPlayerId = checkLegacyPlayer(playerId, campaignId);
+		User user = userService.getUserByPlayerId(legacyPlayerId);
 		if (user != null) {
 			campaignService.unsubscribeUser(user, campaignId);
 		}
@@ -207,6 +209,7 @@ public class AdminService {
 			String legacyPlayerId = checkLegacyPlayer(playerId, campaignId);
 			return trackService.validate(campaignId, legacyPlayerId, track);
 		} catch (InconsistentDataException e) {
+			log.error("Error validating: " + e.getMessage());
 			return new TrackValidityDTO(e.getDetails());
 		}
 	}
@@ -226,6 +229,14 @@ public class AdminService {
 		return playerId;
 	}
 
+	
+	public String getLegacyPlayer(String playerId, String campaignId) {
+		if (legacyIds.containsKey(playerId)) {
+			String legacyId =legacyIds.get(playerId); 
+			return legacyId;
+		}
+		return playerId;
+	}
 
 	/**
 	 * @param playerId
@@ -268,4 +279,5 @@ public class AdminService {
 		legacyRepo.save(lpm);
 		initLegacyData();
 	}
+
 }

@@ -30,6 +30,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.Multimaps;
+import com.opencsv.CSVWriter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +53,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Multimaps;
-import com.opencsv.CSVWriter;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Circle;
@@ -74,6 +75,7 @@ import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO.TrackValidityLegDTO;
+import it.smartcommunitylab.pgazienda.dto.TransportStatDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
@@ -96,6 +98,7 @@ public class TrackingDataService {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
 	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
+	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("YYYY-ww", Constants.DEFAULT_LOCALE);
 	
 	@Autowired
 	private RestTemplate restTemplate;
@@ -127,7 +130,7 @@ public class TrackingDataService {
 //		});
 //	}	
 	
-	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*2)
+//	@Scheduled(initialDelay=5000, fixedDelay=1000*60*60*2)
 	public void synchronizeApps() {
 		appRepo.findAll().forEach(a -> {
 			if (Boolean.TRUE.equals(a.getSupportPushValidation())) return;
@@ -145,7 +148,7 @@ public class TrackingDataService {
 				List<Company> companies = companyRepo.findByCampaign(campaign.getId());
 				companies.forEach(company -> {
 					LocalDate today = LocalDate.now();
-					syncCompanyData(a, campaign, company, today, today);	
+					syncCompanyData(a, campaign, company, today, today, false, null);	
 				});
 			});
 		});
@@ -157,12 +160,13 @@ public class TrackingDataService {
 	 * @param companyId
 	 * @param dayFrom
 	 * @param dayTo
+	 * @param forse to enforce the validation even for migrated users
 	 */
-	public void syncCompanyData(String campaignId, String companyId, LocalDate dayFrom, LocalDate dayTo) {
+	public void syncCompanyData(String campaignId, String companyId, LocalDate dayFrom, LocalDate dayTo, boolean forse, String playerId) {
 		campaignRepo.findById(campaignId).ifPresent(campaign -> {
 			companyRepo.findById(companyId).ifPresent(company -> {
 				appRepo.findById(campaign.getApplication()).ifPresent(a -> {
-					syncCompanyData(a, campaign, company, dayFrom, dayTo);
+					syncCompanyData(a, campaign, company, dayFrom, dayTo, forse, playerId);
 				});
 			});
 		});
@@ -173,21 +177,29 @@ public class TrackingDataService {
 	 * @param campaigns
 	 * @param campaign
 	 * @param company
+	 * @param forse 
 	 * @param day
 	 */
-	private void syncCompanyData(PGApp a, Campaign campaign, Company company, LocalDate dayFrom, LocalDate dayTo) {
+	private void syncCompanyData(PGApp a, Campaign campaign, Company company, LocalDate dayFrom, LocalDate dayTo, boolean forse, String playerId) {
 		try {
 			if (Boolean.TRUE.equals(a.getSupportPushValidation())) return;
 
 			logger.info("Syncronizing app campaign company: " + company.getCode());
 			// company employees subscribed to this campaign 
-			List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(company.getId(), campaign.getId());
-			if (employees.isEmpty()) return;
-			Set<String> codeSet = employees.stream().map(e -> e.getCode()).collect(Collectors.toSet());
-			// users corresponding to this employees not upgraded from legacy campaign
-			List<User>  users = userRepo.findByCampaignAndCompanyAndEmployeeCodeNotUpgraded(campaign.getId(), company.getCode(), codeSet);
-			if (users.isEmpty()) return;
-			List<String> playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+			List<String> playerIds = null;
+			if (playerId != null) {
+				playerIds = Collections.singletonList(playerId);
+			} else {
+				List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(company.getId(), campaign.getId());
+				if (employees.isEmpty()) return;
+				Set<String> codeSet = employees.stream().map(e -> e.getCode()).collect(Collectors.toSet());
+				// users corresponding to this employees not upgraded from legacy campaign
+				List<User>  users = forse 
+						? userRepo.findByCampaignAndCompanyAndEmployeeCode(campaign.getId(), company.getCode(), codeSet)
+						: userRepo.findByCampaignAndCompanyAndEmployeeCodeNotUpgraded(campaign.getId(), company.getCode(), codeSet);
+				if (users.isEmpty()) return;
+				playerIds = users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+			}
 			logger.info("Styncronizing app campaign company users: " + playerIds);
 
 			LocalDate d = dayFrom;
@@ -266,6 +278,8 @@ public class TrackingDataService {
 	}
 
 	public TrackValidityDTO validate(String campaignId, String playerId, TrackDTO track) throws InconsistentDataException {
+		logger.info("Validating track service for campaign {} player {}, track count {}", campaignId, playerId, track.getLegs().size());
+		
 		// campaign
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) {
@@ -278,11 +292,11 @@ public class TrackingDataService {
 		} 
 		UserRole role = user.findRole(it.smartcommunitylab.pgazienda.Constants.ROLE_APP_USER).orElse(null);
 		if (role == null) {
-			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+			throw new InconsistentDataException("Invalid user role: " + playerId, "NO_USER");
 		}
 		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId)).findAny().orElse(null);
 		if (subscription == null) {
-			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+			throw new InconsistentDataException("Invalid user subscription: " + playerId, "NO_USER");
 		}
 		
 		// company
@@ -293,8 +307,8 @@ public class TrackingDataService {
 		Company company = companies.get(0);
 		
 		// employee matching subscription
-		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
-		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
+		Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		if (employee == null ) throw new InconsistentDataException("Invalid user key: " + playerId, "NO_USER");
 		// locations
 		List<Shape> locations = 
 				company.getLocations().stream()
@@ -323,32 +337,45 @@ public class TrackingDataService {
 				stat.setTrackCount(0);
 				stat.setMonth(date.format(MONTH_PATTERN));
 			}
-			// distances of the travel
-			Distances newDistances = Distances.fromMap(matchingLegs.stream().collect(Collectors.groupingBy(t -> t.getMean(), Collectors.summingDouble(t -> t.getDistance()))));
-			// update distances of the existing one
-			if (stat.getDistances() != null) {
-				stat.getDistances().mergeDistances(newDistances);
-			} else {
-				stat.setDistances(newDistances);
-			}
-			stat.setCo2saved(stat.computeCO2());
-			// update number of tracks
-			stat.setTrackCount(stat.getTrackCount() + matchingLegs.size());
 
-			final Distances original = new Distances();
+			for (TrackLegDTO l : matchingLegs) {
+				MEAN mean = MEAN.valueOf(l.getMean());
+				// identify track data validated or re-validated
+				TrackingData td = stat.getTracks().stream().filter(t -> t.getTrackId().equals(l.getId())).findAny().orElse(null);
+				if (td == null) {
+					td = new TrackingData();
+					td.setMode(mean.name());
+					td.setTrackId(l.getId());
+					td.setPlayerId(playerId);
+					td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
+					td.setDistance(l.getDistance());
+					stat.getTracks().add(td);
+				} else {
+					td.setMode(mean.name());
+					td.setDistance(l.getDistance());
+				}
+			}
+			// recalculate the distances from updated track list
+			Distances newDistances = Distances.fromMap(stat.getTracks().stream().collect(Collectors.groupingBy(t -> t.getMode(), Collectors.summingDouble(t -> t.getDistance()))));
+			stat.setDistances(newDistances);
 			limitDistances(campaign, playerId, stat);
+			// update number of tracks
+			stat.setTrackCount(stat.getTracks().size());
+			stat.setCo2saved(stat.computeCO2());
+			dayStatRepo.save(stat);
 			
+			final Distances original = new Distances();
 			// create result
 			TrackValidityDTO validity = new TrackValidityDTO();
 			validity.setValid(true);
 			validity.setLegs(new LinkedList<>());
 			for (TrackLegDTO l : matchingLegs) {
+				MEAN mean = MEAN.valueOf(l.getMean());
 				TrackValidityLegDTO leg = new TrackValidityLegDTO();
 				leg.setMean(l.getMean());
 				leg.setDistance(l.getDistance());
 				leg.setId(l.getId());
 				// put valid value considering max imposed by the limit
-				MEAN mean = MEAN.valueOf(l.getMean());
 				double max = stat.getLimitedDistances().meanValue(mean);
 				double curr = original.meanValue(mean);
 				if ((curr + l.getDistance()) <= max) {
@@ -359,17 +386,8 @@ public class TrackingDataService {
 					leg.setValidDistance(0d);
 				}
 				original.updateValue(mean, curr + l.getDistance());
-				validity.getLegs().add(leg);
-				
-				TrackingData td = new TrackingData();
-				td.setMode(mean.name());
-				td.setTrackId(l.getId());
-				td.setPlayerId(playerId);
-				td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
-				td.setDistance(l.getDistance());
-				stat.getTracks().add(td);
+				validity.getLegs().add(leg);				
 			}
-			dayStatRepo.save(stat);
 
 			return validity;
 		}
@@ -409,17 +427,17 @@ public class TrackingDataService {
 		Company company = companies.get(0);
 		
 		// employee matching subscription
-		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
 		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
 		
 		DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndTrack(playerId, campaign.getId(), company.getId(), trackId);
 		if (stat != null) {
-			TrackingData track = stat.getTracks().stream().filter(t -> trackId.equals(trackId)).findAny().get();
+			TrackingData track = stat.getTracks().stream().filter(t -> t.getTrackId().equals(trackId)).findAny().get();
 			stat.setTrackCount(stat.getTrackCount()-1);
 			MEAN mean = MEAN.valueOf(track.getMode());
 			stat.getDistances().updateValue(mean, stat.getDistances().meanValue(mean) - track.getDistance());
 			stat.setCo2saved(stat.computeCO2());
-			stat.getLimitedDistances().updateValue(mean, stat.getLimitedDistances().meanValue(mean) - track.getDistance());
+			limitDistances(campaign, playerId, stat);
 			stat.setTracks(stat.getTracks().stream().filter(t -> !t.getTrackId().equals(trackId)).collect(Collectors.toList()));
 			dayStatRepo.save(stat);
 		}
@@ -461,7 +479,7 @@ public class TrackingDataService {
 		Company company = companies.get(0);
 		
 		// employee matching subscription
-		Employee employee = employeeRepo.findByCompanyIdAndCode(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
+		Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
 		if (employee == null ) throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
 		
 		DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndTrack(playerId, campaign.getId(), company.getId(), trackId);
@@ -555,6 +573,7 @@ public class TrackingDataService {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 
+		if (to == null) to = LocalDate.now();
 		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString());
 		if (from != null) criteria = criteria.gte(from.toString());
 		List<DayStat> res = null;
@@ -923,7 +942,7 @@ public class TrackingDataService {
 					r.getSubscriptions().stream()
 					.filter(s -> s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(companyCode))
 					.forEach(s -> {
-						Employee e = employeeRepo.findByCompanyIdAndCode(companyId, s.getKey()).stream().findAny().orElse(null);
+						Employee e = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, s.getKey()).stream().findAny().orElse(null);
 						if (e != null) res.add(e);
 					});
 				}
@@ -945,7 +964,7 @@ public class TrackingDataService {
 						Company company = companyCache.getOrDefault(s.getCompanyCode(), companyRepo.findByCode(s.getCompanyCode()).stream().findFirst().orElse(null));
 						companyCache.put(s.getCompanyCode(), company);
 						if (company != null) {
-							Employee e = employeeRepo.findByCompanyIdAndCode(company.getId(), s.getKey()).stream().findAny().orElse(null);
+							Employee e = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), s.getKey()).stream().findAny().orElse(null);
 							if (e != null) res.add(e);
 						}
 					});
@@ -1010,6 +1029,44 @@ public class TrackingDataService {
 			return stat;
 		}).collect(Collectors.toList());
 	}
+	
+	public List<TransportStatDTO> getPlayerTransportStatsGroupByMean(String playerId, String campaignId, String groupMode, String meanStr, String dateFrom, String dateTo) throws InconsistentDataException {
+		MEAN mean = StringUtils.hasText(meanStr) ? MEAN.valueOf(meanStr) : MEAN.bike;
+		if ("day".equals(groupMode) || "month".equals(groupMode)) {
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null : LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), groupMode, false, false);
+			return list.stream().map(ds -> {
+				TransportStatDTO dto = new TransportStatDTO();
+				dto.setPeriod( "month".equals(groupMode) ? ds.getMonth() : ds.getDate());
+				dto.setValue(ds.getDistances().meanValue(mean));
+				return dto;
+			}).collect(Collectors.toList());
+		} else if ("week".equals(groupMode)) {
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null :LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), "day", false, false);
+			final Map<String, List<TransportStatDTO>> res = list.stream().map(ds -> {
+				TransportStatDTO dto = new TransportStatDTO();
+				dto.setPeriod(ds.getDate());
+				dto.setValue(ds.getDistances().meanValue(mean));
+				return dto;
+			})
+			.collect(Collectors.groupingBy(dto -> LocalDate.parse(dto.getPeriod()).format(WEEK_PATTERN)));
+			return res.keySet().stream().map(key -> {
+				TransportStatDTO dto = new TransportStatDTO();
+				dto.setPeriod(key);
+				dto.setValue(res.get(key).stream().collect(Collectors.summingDouble(e -> e.getValue())));
+				return dto;
+			}).sorted((a,b) -> a.getPeriod().compareTo(b.getPeriod())).collect(Collectors.toList());
+		} else {
+			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null :LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), Constants.AGG_TOTAL, false, false);
+			return list.stream().map(ds -> {
+				TransportStatDTO dto = new TransportStatDTO();
+				dto.setPeriod(ds.getDate());
+				dto.setValue(ds.getDistances().meanValue(mean));
+				return dto;
+			}).collect(Collectors.toList());
+		}
+	}
+
+
 	
 	public boolean hasCampaignData(String playerId, String campaignId) {
 		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId);

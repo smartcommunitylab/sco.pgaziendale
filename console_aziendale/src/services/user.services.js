@@ -137,7 +137,7 @@ function changePassword(oldPassword, newPassword) {
 }
 function resetPasswordInit(username) {
     return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_GET_ACCOUNT_API + '/' + process.env.VUE_APP_INIT_RESET_PASSWORD_API,
-        username,{
+        '"'+username+'"',{
         headers: {
             'Content-Type': 'application/json',
             'Accept':'application/json',

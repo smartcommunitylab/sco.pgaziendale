@@ -226,6 +226,15 @@ public class CompanyService {
 	}
 
 
+	public CompanyLocation getLocation(String id, String location) {
+		Company company = companyRepo.findById(id).orElse(null);
+		if (company != null) {
+			return company.getLocations().stream().filter(l -> l.getId().equals(location)).findAny().orElse(null);
+		}
+		return null;
+	}
+	
+
 	/**
 	 * @param companyId
 	 * @param location
@@ -300,13 +309,19 @@ public class CompanyService {
 	 */
 	public Employee createEmployee(String companyId, @Valid Employee employee) throws InconsistentDataException {
 		employee.setCompanyId(companyId);
-		Employee existing = employeeRepo.findByCompanyIdAndCode(companyId, employee.getCode()).stream().findAny().orElse(null);
+		Employee existing = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, employee.getCode()).stream().findAny().orElse(null);
 		if (existing != null) {
 			throw new InconsistentDataException("Duplicate user creation", "INVALID_COMPANY_DATA_DUPLICATE_EMPLOYEE");
 		}
 		return employeeRepo.save(employee);
 	}
 
+	public Employee getEmployeeByCode(String companyId, String code) {
+		List<Employee> employeeList = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, code);
+		if (employeeList != null) return employeeList.get(0);
+		return null;
+	}
+	
 	/**
 	 * @param companyId
 	 * @param employee
@@ -368,7 +383,7 @@ public class CompanyService {
 			if (codes.contains(code)) {
 				throw new InconsistentDataException("Duplicate employees", "INVALID_CSV_DUPLICATE_EMPLOYEES");				
 			}
-			Employee existing = employeeRepo.findByCompanyIdAndCode(companyId, code).stream().findAny().orElse(null);
+			Employee existing = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, code).stream().findAny().orElse(null);
 			if (existing != null) {
 				existing.setLocation(l[3]);
 				existing.setName(l[0]);
@@ -513,5 +528,6 @@ public class CompanyService {
 			else return "";
 		} else return v.trim();
 	}
-	
+
+
 }

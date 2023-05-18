@@ -17,10 +17,13 @@
 package it.smartcommunitylab.pgazienda.web.rest;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,10 +38,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.annotations.ApiParam;
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
+import it.smartcommunitylab.pgazienda.dto.TransportStatDTO;
 import it.smartcommunitylab.pgazienda.service.AdminService;
 import it.smartcommunitylab.pgazienda.service.CampaignService;
 import it.smartcommunitylab.pgazienda.service.TrackingDataService;
@@ -60,6 +65,8 @@ public class AdminResource {
 	@Autowired
 	private CampaignService campaignService;
 	
+	private static final Logger logger = LoggerFactory.getLogger(AdminResource.class); 
+	
 	@PostMapping("/admin/load")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
 	public @ResponseBody ResponseEntity<Void> uploadModel(@Valid @RequestBody DataModelDTO model) throws InconsistentDataException {
@@ -76,8 +83,14 @@ public class AdminResource {
 
 	@GetMapping("/admin/datasync/{campaignId}/{companyId}/{from}/{to}")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-	public @ResponseBody ResponseEntity<Void> syncCompanyTrackingData(@PathVariable String campaignId, @PathVariable String companyId, @PathVariable String from, @PathVariable String to) {
-		trackingDataService.syncCompanyData(campaignId, companyId, LocalDate.parse(from), LocalDate.parse(to));
+	public @ResponseBody ResponseEntity<Void> syncCompanyTrackingData(
+			@PathVariable String campaignId, 
+			@PathVariable String companyId, 
+			@PathVariable String from, 
+			@PathVariable String to,
+			@RequestParam(required = false) String playerId,
+			@RequestParam(required = false, defaultValue = "false") boolean forse) {
+		trackingDataService.syncCompanyData(campaignId, companyId, LocalDate.parse(from), LocalDate.parse(to), forse, playerId);
 		return ResponseEntity.ok(null);
 	}
 
@@ -115,6 +128,7 @@ public class AdminResource {
 	public @ResponseBody ResponseEntity<TrackValidityDTO> validate(@PathVariable String campaignId, 
 			@PathVariable String playerId, @RequestBody TrackDTO body) 
 	{
+		logger.info("Validating track for campaign {} player {}", campaignId, playerId);
 		return ResponseEntity.ok(service.validateTrack(playerId, campaignId, body));
 	}
 
@@ -134,8 +148,20 @@ public class AdminResource {
 		return ResponseEntity.ok(service.update(playerId, campaignId, trackId, inc));
 	}
 
+	@GetMapping("/admin/report/player/transport/stats")
+	public List<TransportStatDTO> getPlayerTransportStatsGroupByMean(
+			@RequestParam String campaignId,
+			@RequestParam String playerId,
+			@RequestParam(required = false) String groupMode,
+			@RequestParam(required = false) String mean,
+			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateFrom,
+			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateTo)  throws InconsistentDataException
+	{
+		return trackingDataService.getPlayerTransportStatsGroupByMean(service.getLegacyPlayer(playerId, campaignId), campaignId, groupMode, mean, dateFrom, dateTo);
+	}	
 
     @PostMapping("/admin/legacy/{campaignId}/csv")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
     public ResponseEntity<Void> uploadLegacy(@PathVariable String campaignId, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws Exception {
     	service.loadLegacyData(campaignId, file.getInputStream());
     	return ResponseEntity.ok(null);

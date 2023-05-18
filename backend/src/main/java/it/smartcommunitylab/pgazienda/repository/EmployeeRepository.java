@@ -32,7 +32,7 @@ public interface EmployeeRepository  extends MongoRepository<Employee, String> {
 
 	public Page<Employee> findByCompanyId(String companyId, Pageable pageable);
 	public Page<Employee> findByCompanyIdAndLocation(String id, String location, Pageable pageable);
-	public List<Employee> findByCompanyIdAndCode(String id, String key);
+	public List<Employee> findByCompanyIdAndCodeIgnoreCase(String id, String key);
 	public List<Employee> findByCompanyIdAndCampaigns(String companyId, String campaignId);
 
 	public List<Employee> findByCampaigns(String campaignId);

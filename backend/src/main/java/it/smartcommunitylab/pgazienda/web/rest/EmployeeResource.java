@@ -120,6 +120,7 @@ public class EmployeeResource {
     @PostMapping("/companies/{companyId}/employees/csv")
     public ResponseEntity<Void> uploadEmployees(@PathVariable String companyId, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws Exception {
     	log.debug("import csv empoloyees {}", companyId);
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
     	companyService.importEmployees(companyId, file.getInputStream());
     	return ResponseEntity.ok(null);
     }

@@ -346,7 +346,7 @@ public class UserService {
         return SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneByUsernameIgnoreCase);
     }
     public List<User> getUserByEmployeeCode(String campaign, String companyCode, String userCode) {
-        return userRepository.findByCampaignAndCompanyAndEmployeeCode(campaign, companyCode, Collections.singleton(userCode));
+        return userRepository.findByCampaignAndCompanyAndEmployeeCode(campaign, companyCode, "^" + userCode+"$");
     }
     public User getUserByPlayerId(String playerId) {
     	return userRepository.findByPlayerId(playerId).orElse(null);
