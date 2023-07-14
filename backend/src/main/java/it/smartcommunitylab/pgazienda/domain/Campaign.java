@@ -25,6 +25,8 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
 
+import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
+
 /**
  * @author raman
  *
@@ -51,7 +53,11 @@ public class Campaign {
 	
 	private String rules, privacy;
 	
-	private List<Limit> limits; 
+	// private List<Limit> limits; 
+	private List<Limit> trackLimits = new LinkedList<>(); 
+	private List<Limit> scoreLimits;
+
+	private VirtualScore virtualScore;
 	
 	/**
 	 * @return the id
@@ -186,24 +192,58 @@ public class Campaign {
 		this.privacy = privacy;
 	}
 	
-	/**
-	 * @return the limits
-	 */
-	public List<Limit> getLimits() {
-		if (limits == null) {
-			limits = new LinkedList<>();
-			limits.add(new Limit(Constants.AGG_DAY, Constants.MEAN.bike.toString(), 20000d)); 
-			limits.add(new Limit(Constants.AGG_MONTH, Constants.MEAN.bike.toString(), 250000d));
-		}
-		return limits;
+	// /**
+	//  * @return the limits
+	//  */
+	// public List<Limit> getLimits() {
+	// 	if (limits == null) {
+	// 		limits = new LinkedList<>();
+	// 		limits.add(new Limit(Constants.AGG_DAY, Constants.MEAN.bike.toString(), 20000d)); 
+	// 		limits.add(new Limit(Constants.AGG_MONTH, Constants.MEAN.bike.toString(), 250000d));
+	// 	}
+	// 	return limits;
+	// }
+	// /**
+	//  * @param limits the limits to set
+	//  */
+	// public void setLimits(List<Limit> limits) {
+	// 	this.limits = limits;
+	// }
+	
+
+	public List<Limit> getTrackLimits() {
+		return trackLimits;
 	}
-	/**
-	 * @param limits the limits to set
-	 */
-	public void setLimits(List<Limit> limits) {
-		this.limits = limits;
+	public void setTrackLimits(List<Limit> trackLimits) {
+		this.trackLimits = trackLimits;
+	}
+	public List<Limit> getScoreLimits() {
+		if (scoreLimits == null) {
+			scoreLimits = new LinkedList<>();
+			scoreLimits.add(new Limit(Constants.AGG_DAY, null, 20000d)); 
+			scoreLimits.add(new Limit(Constants.AGG_MONTH, null, 250000d));
+		}
+
+		return scoreLimits;
+	}
+	public void setScoreLimits(List<Limit> scoreLimits) {
+		this.scoreLimits = scoreLimits;
 	}
 
+
+	public VirtualScore getVirtualScore() {
+		if (virtualScore == null) {
+			virtualScore = new VirtualScore();
+			virtualScore.setBike(new VirtualScoreValue());
+			virtualScore.getBike().coefficient = 1d;
+			virtualScore.getBike().metric = Constants.METRIC_DISTANCE;
+
+		}
+		return virtualScore;
+	}
+	public void setVirtualScore(VirtualScore virtualScore) {
+		this.virtualScore = virtualScore;
+	}
 
 
 	public static class Limit {
@@ -267,5 +307,91 @@ public class Campaign {
 		}
 		
 	}
+
+	public static class VirtualScore {
+		private String label;
+		private VirtualScoreValue bike, car, walk, bus, train, boat;
+		public String getLabel() {
+			return label;
+		}
+		public void setLabel(String label) {
+			this.label = label;
+		}
+		public VirtualScoreValue getBike() {
+			return bike;
+		}
+		public void setBike(VirtualScoreValue bike) {
+			this.bike = bike;
+		}
+		public VirtualScoreValue getCar() {
+			return car;
+		}
+		public void setCar(VirtualScoreValue car) {
+			this.car = car;
+		}
+		public VirtualScoreValue getWalk() {
+			return walk;
+		}
+		public void setWalk(VirtualScoreValue walk) {
+			this.walk = walk;
+		}
+		public VirtualScoreValue getBus() {
+			return bus;
+		}
+		public void setBus(VirtualScoreValue bus) {
+			this.bus = bus;
+		}
+		public VirtualScoreValue getTrain() {
+			return train;
+		}
+		public void setTrain(VirtualScoreValue train) {
+			this.train = train;
+		}
+		public VirtualScoreValue getBoat() {
+			return boat;
+		}
+		public void setBoat(VirtualScoreValue boat) {
+			this.boat = boat;
+		}
+
+		public VirtualScoreValue meanValue(MEAN mean) {
+			VirtualScoreValue res = null;
+			switch(mean) {
+			case bike: res = getBike(); break;
+			case boat: res = getBoat(); break;
+			case bus: res = getBus(); break;
+			case car: res = getCar(); break;
+			case train: res = getTrain(); break;
+			case walk: res = getWalk(); break;
+			}
+			if (res == null) res = null;
+			return res;
+		}
+	}
 	
+	public static class VirtualScoreValue {
+		private String metric;
+		private Double coefficient;
+		
+		public VirtualScoreValue() {
+		}
+		public VirtualScoreValue(String metric, Double coefficient) {
+			this.metric = metric;
+			this.coefficient = coefficient;
+		}
+		public String getMetric() {
+			return metric;
+		}
+		public void setMetric(String metric) {
+			this.metric = metric;
+		}
+		public Double getCoefficient() {
+			return coefficient;
+		}
+		public void setCoefficient(Double coefficient) {
+			this.coefficient = coefficient;
+		}
+
+		
+	}
 }

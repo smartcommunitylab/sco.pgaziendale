@@ -9,7 +9,9 @@ spring:
     baseurl: http://localhost:8080/
   messages:
     basename: i18n/messages
-
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
 app:
   security:
     authentication:
@@ -26,6 +28,10 @@ app:
       name-field: name
       surname-field: surname
       domain: '@local.com'
+      issuer-uri: https://aac.platform.smartcommunitylab.it
+      client-id: 123
+      jwk-uri: https://aac.platform.smartcommunitylab.it/jwk
+
 
 admin:
   username: ${ADMIN_USERNAME:admin}

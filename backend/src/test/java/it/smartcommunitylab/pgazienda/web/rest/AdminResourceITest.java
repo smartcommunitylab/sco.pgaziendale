@@ -52,6 +52,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.PGAziendaApp;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Campaign.Limit;
+import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Employee;
@@ -145,30 +147,6 @@ public class AdminResourceITest {
 
     }
     
-    @SuppressWarnings("unchecked")
-	@Test
-    public void testCampaignSync() throws Exception {
-    	PGApp app = testApp();
-    	appRepo.save(app);
-
-    	Map<String, Object> campaign = TestUtil.readObject(getClass().getResourceAsStream("/campaign.json"), Map.class);
-    	campaign.put("dateFrom", LocalDate.now().minusDays(30).toString());
-    	campaign.put("dateTo", LocalDate.now().plusDays(30).toString());
-    	
-    	mockServer.expect(requestTo(new URI("http://endpoint")))
-        .andExpect(method(HttpMethod.GET))
-        .andRespond(withStatus(HttpStatus.OK)
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(new ObjectMapper().writeValueAsString(Collections.singletonList(campaign))));
-
-    	
-        restMockMvc.perform(
-                post("/api/admin/campaignsync"))
-                .andExpect(status().isOk());
-        Optional<Campaign> campaignOpt = campaignRepo.findById((String) campaign.get("campaignId"));
-        Assert.notNull(campaignOpt.get(), "Campaign is not saved");
-    }
-    
     @Test
     public void testSubscribe() throws Exception {
     	Campaign obj = testCampaign();
@@ -256,7 +234,7 @@ public class AdminResourceITest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.valid").value("true"))
                 .andExpect(jsonPath("$.legs[0].distance").value("1000.0"))
-                .andExpect(jsonPath("$.legs[0].validDistance").value("1000.0"));
+                .andExpect(jsonPath("$.legs[0].virtualScore").value("1.0"));
     	
     }
 
@@ -357,26 +335,14 @@ public class AdminResourceITest {
                 .andExpect(jsonPath("$.valid").value("true"));
         
         restMockMvc.perform(
-                put("/api/admin/update/{campaignId}/{playerId}/{trackId}/{inc}", obj.getId(), "1234", "123456", "100")
+                post("/api/admin/validate/{campaignId}/{playerId}", obj.getId(), "1234")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(TestUtil.convertObjectToJsonBytes(track)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.valid").value("true"))
-                .andExpect(jsonPath("$.legs[0].distance").value("1100.0"));
+                .andExpect(jsonPath("$.valid").value("true"));
     }
 
-    
-    private PGApp testApp() {
-    	PGApp app = new PGApp();
-    	app.setName("test app");
-    	app.setId("externalAppId");
-    	app.setEndpoint("http://endpoint");
-    	app.setPassword("password");
-    	app.setSupportCampaignMgmt(true);
-    	app.setSupportPushValidation(true);
-    	return app;
-    }
     
     private Company testCompany() {
     	Company c = new Company();
@@ -409,6 +375,17 @@ public class AdminResourceITest {
     	c.setFrom(LocalDate.now().minusDays(10));
     	c.setTo(LocalDate.now().plusDays(10));
     	c.setMeans(Collections.singletonList("bike"));
+
+		LinkedList<Limit> limits = new LinkedList<>();
+		limits.add(new Limit(it.smartcommunitylab.pgazienda.domain.Constants.AGG_DAY, it.smartcommunitylab.pgazienda.domain.Constants.MEAN.bike.toString(), 20d)); 
+		limits.add(new Limit(it.smartcommunitylab.pgazienda.domain.Constants.AGG_MONTH, it.smartcommunitylab.pgazienda.domain.Constants.MEAN.bike.toString(), 250d));
+		c.setScoreLimits(limits);
+		limits = new LinkedList<>();
+		limits.add(new Limit(it.smartcommunitylab.pgazienda.domain.Constants.AGG_DAY, it.smartcommunitylab.pgazienda.domain.Constants.MEAN.bike.toString(), 4d)); 
+		c.setTrackLimits(limits);
+    	
+		c.getVirtualScore().setBike(new VirtualScoreValue(it.smartcommunitylab.pgazienda.domain.Constants.METRIC_DISTANCE, 0.001));
+
     	return c;
     }
     

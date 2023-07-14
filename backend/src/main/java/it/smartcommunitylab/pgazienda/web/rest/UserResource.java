@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.User;
-import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.service.MailService;
 import it.smartcommunitylab.pgazienda.service.UserService;

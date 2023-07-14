@@ -69,7 +69,7 @@ public class CampaignService {
 	@Autowired
 	private PGAppService appService;
 	
-	@Value("${app.legacyCampaign}")
+	@Value("${app.legacyCampaign:}")
 	private String legacyCampaignId;
 	/**
 	 * List of all companies, paginated
@@ -334,6 +334,4 @@ public class CampaignService {
 		}
 	}
 
-	// TODO external subscribe and unsubscribe
-	
 }

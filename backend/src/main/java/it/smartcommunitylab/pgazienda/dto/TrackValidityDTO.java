@@ -33,6 +33,7 @@ public class TrackValidityDTO {
 	private boolean valid;
 	private String errorCode;
 	private List<TrackValidityLegDTO> legs;
+	private boolean virtualTrack;
 	
 	public static TrackValidityDTO errData() {
 		return new TrackValidityDTO(ERR_DATA);
@@ -81,12 +82,19 @@ public class TrackValidityDTO {
 	public void setLegs(List<TrackValidityLegDTO> legs) {
 		this.legs = legs;
 	}
+	public boolean isVirtualTrack() {
+		return virtualTrack;
+	}
+	public void setVirtualTrack(boolean virtualTrack) {
+		this.virtualTrack = virtualTrack;
+	}
 
 	public static class TrackValidityLegDTO {
 		private String id;
 		private Double distance;
 		private Double validDistance;
 		private String mean;
+		private double virtualScore;
 		
 		public String getId() {
 			return id;
@@ -111,7 +119,26 @@ public class TrackValidityDTO {
 		}
 		public void setMean(String mean) {
 			this.mean = mean;
-		} 
+		}
+		public double getVirtualScore() {
+			return virtualScore;
+		}
+		public void setVirtualScore(double virtualScore) {
+			this.virtualScore = virtualScore;
+		}
+	}
+
+	public static String getErrInvalidated() {
+		return ERR_INVALIDATED;
+	}
+	public static String getErrData() {
+		return ERR_DATA;
+	}
+	public static String getErrNoLocations() {
+		return ERR_NO_LOCATIONS;
+	}
+	public static String getErrNoMatches() {
+		return ERR_NO_MATCHES;
 	}
 
 }

@@ -16,7 +16,6 @@
 
 package it.smartcommunitylab.pgazienda.web.rest;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +37,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.ApiParam;
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO;
@@ -71,26 +69,6 @@ public class AdminResource {
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
 	public @ResponseBody ResponseEntity<Void> uploadModel(@Valid @RequestBody DataModelDTO model) throws InconsistentDataException {
 		service.loadData(model);
-		return ResponseEntity.ok(null);
-	}
-
-	@GetMapping("/admin/datasync")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-	public @ResponseBody ResponseEntity<Void> syncTrackingData() {
-		trackingDataService.synchronizeApps();
-		return ResponseEntity.ok(null);
-	}
-
-	@GetMapping("/admin/datasync/{campaignId}/{companyId}/{from}/{to}")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-	public @ResponseBody ResponseEntity<Void> syncCompanyTrackingData(
-			@PathVariable String campaignId, 
-			@PathVariable String companyId, 
-			@PathVariable String from, 
-			@PathVariable String to,
-			@RequestParam(required = false) String playerId,
-			@RequestParam(required = false, defaultValue = "false") boolean forse) {
-		trackingDataService.syncCompanyData(campaignId, companyId, LocalDate.parse(from), LocalDate.parse(to), forse, playerId);
 		return ResponseEntity.ok(null);
 	}
 
@@ -140,22 +118,14 @@ public class AdminResource {
 		return ResponseEntity.ok(service.invalidateTrack(playerId, campaignId, trackId));
 	}
 
-	@PutMapping("/admin/update/{campaignId}/{playerId}/{trackId}/{inc}")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-	public @ResponseBody ResponseEntity<TrackValidityDTO> update(@PathVariable String campaignId, 
-			@PathVariable String playerId, @PathVariable String trackId, @PathVariable Double inc) 
-	{
-		return ResponseEntity.ok(service.update(playerId, campaignId, trackId, inc));
-	}
-
 	@GetMapping("/admin/report/player/transport/stats")
 	public List<TransportStatDTO> getPlayerTransportStatsGroupByMean(
 			@RequestParam String campaignId,
 			@RequestParam String playerId,
 			@RequestParam(required = false) String groupMode,
 			@RequestParam(required = false) String mean,
-			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateFrom,
-			@RequestParam(required = false) @ApiParam(value = "yyyy-MM-dd") String dateTo)  throws InconsistentDataException
+			@RequestParam(required = false) String dateFrom,
+			@RequestParam(required = false) String dateTo)  throws InconsistentDataException
 	{
 		return trackingDataService.getPlayerTransportStatsGroupByMean(service.getLegacyPlayer(playerId, campaignId), campaignId, groupMode, mean, dateFrom, dateTo);
 	}	

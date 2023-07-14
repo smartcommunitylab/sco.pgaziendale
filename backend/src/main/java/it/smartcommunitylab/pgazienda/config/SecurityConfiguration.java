@@ -34,6 +34,7 @@ import it.smartcommunitylab.pgazienda.security.jwt.TokenProvider;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@Deprecated
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
@@ -52,6 +53,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/i18n/**")
             .antMatchers("/content/**")
             .antMatchers("/swagger-ui/index.html")
+            .antMatchers("/v3/api-docs/**")
             .antMatchers("/test/**");
     }
     

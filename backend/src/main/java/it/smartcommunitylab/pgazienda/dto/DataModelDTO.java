@@ -22,7 +22,6 @@ import java.util.List;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.PGApp;
-import it.smartcommunitylab.pgazienda.domain.User;
 
 /**
  * @author raman

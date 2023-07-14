@@ -73,7 +73,7 @@ public class AdminService {
 	
 	private static Map<String, String> legacyIds = new HashMap<>();
 	
-	@Value("${app.legacyCampaign}")
+	@Value("${app.legacyCampaign:}")
 	private String legacyCampaignId;
 
 	@PostConstruct
@@ -252,21 +252,6 @@ public class AdminService {
 		}
 	}
 
-
-	/**
-	 * @param playerId
-	 * @param campaignId
-	 * @param trackId
-	 * @param inc
-	 * @return
-	 */
-	public TrackValidityDTO update(String playerId, String campaignId, String trackId, Double inc) {
-		try {
-			return trackService.update(campaignId, playerId, trackId, inc);
-		} catch (InconsistentDataException e) {
-			return new TrackValidityDTO(e.getDetails());
-		}
-	}
 
 	public void loadLegacyData(String campaignId, InputStream is) {
 		LegacyPlayerMapping lpm = new LegacyPlayerMapping();

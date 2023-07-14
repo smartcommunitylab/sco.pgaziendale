@@ -133,7 +133,7 @@ public class CompanyService {
 	 * @return
 	 */
 	public Page<Employee> findEmployees(String id, String locationId, Pageable pageable) {
-		if (StringUtils.isEmpty(locationId)) return employeeRepo.findByCompanyId(id, pageable);
+		if (!StringUtils.hasText(locationId)) return employeeRepo.findByCompanyId(id, pageable);
 		else return employeeRepo.findByCompanyIdAndLocation(id, locationId, pageable);
 	}
 	
@@ -510,7 +510,7 @@ public class CompanyService {
 	 * @return
 	 */
 	private Double doubeValue(String v, int row, int col, boolean required) throws ImportDataException {
-		if (StringUtils.isEmpty(v)) {
+		if (!StringUtils.hasText(v)) {
 			if (required) throw new ImportDataException(row, col);
 			else return null;
 		} else {
@@ -523,7 +523,7 @@ public class CompanyService {
 	}
 
 	private String stringValue(String v, int row, int col, boolean required) throws ImportDataException {
-		if (StringUtils.isEmpty(v)) {
+		if (!StringUtils.hasText(v)) {
 			if (required) throw new ImportDataException(row, col);
 			else return "";
 		} else return v.trim();
