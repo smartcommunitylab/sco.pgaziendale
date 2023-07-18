@@ -32,6 +32,10 @@ import org.springframework.web.client.RestTemplate;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Constants;
 import it.smartcommunitylab.pgazienda.domain.PGApp;
+import it.smartcommunitylab.pgazienda.domain.Campaign.Limit;
+import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScore;
+import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
+import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
 import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 
 /**
@@ -120,8 +124,38 @@ public class PGAppService {
 		values = (Map<String, Object>) cm.get("name");
 		c.setTitle((String) values.getOrDefault("it", values.get("en")));
 		c.setTo(Instant.ofEpochMilli((Long)cm.get("dateTo")).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate());
+
+		c.setVirtualScore(extractVirtualScore((Map<String, Object>)((Map<String, Object>)cm.get("specificData")).get("virtualScore")));
+		c.setTrackLimits(c.getVirtualScore().trackLimits());
+		c.setScoreLimits(c.getVirtualScore().scoreLimits());
 		return c;
 	}
+
+	@SuppressWarnings("unchecked")
+	private VirtualScore extractVirtualScore(Map<String, Object> map) {
+		VirtualScore score = new VirtualScore();
+		score.setLabel((String)map.getOrDefault("label", "km"));
+		score.setScoreDailyLimit((Double)map.get("scoreDailyLimit"));
+		score.setScoreWeeklyLimit((Double)map.get("scoreWeeklyLimit"));
+		score.setScoreMonthlyLimit((Double)map.get("scoreMonthlyLimit"));
+		score.setTrackDailyLimit((Integer)map.get("trackDailyLimit"));
+		score.setTrackWeeklyLimit((Integer)map.get("trackWeeklyLimit"));
+		score.setTrackMonthlyLimit((Integer)map.get("trackMonthlyLimit"));
+		for (MEAN m : MEAN.values()) {
+			if (map.get(m.name()) != null) {
+				Map<String, Object> sv = (Map<String, Object>) map.get(m.name());
+				VirtualScoreValue vsv = new VirtualScoreValue((String) sv.get("metric"), (Double) sv.get("coefficient"));
+				if (MEAN.bike.equals(m)) score.setBike(vsv);
+				if (MEAN.bus.equals(m)) score.setBus(vsv);
+				if (MEAN.train.equals(m)) score.setTrain(vsv);
+				if (MEAN.car.equals(m)) score.setCar(vsv);
+				if (MEAN.walk.equals(m)) score.setWalk(vsv);
+				if (MEAN.boat.equals(m)) score.setBoat(vsv);
+			}
+		}
+		return score;
+	}
+
 
 	/**
 	 * @param object

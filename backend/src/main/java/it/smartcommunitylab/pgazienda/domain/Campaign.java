@@ -311,6 +311,9 @@ public class Campaign {
 	public static class VirtualScore {
 		private String label;
 		private VirtualScoreValue bike, car, walk, bus, train, boat;
+		private Double scoreDailyLimit, scoreWeeklyLimit, scoreMonthlyLimit;
+		private Integer trackDailyLimit, trackWeeklyLimit, trackMonthlyLimit;
+		
 		public String getLabel() {
 			return label;
 		}
@@ -367,6 +370,68 @@ public class Campaign {
 			if (res == null) res = null;
 			return res;
 		}
+		public Double getScoreDailyLimit() {
+			return scoreDailyLimit;
+		}
+		public void setScoreDailyLimit(Double scoreDailyLimit) {
+			this.scoreDailyLimit = scoreDailyLimit;
+		}
+		public Double getScoreWeeklyLimit() {
+			return scoreWeeklyLimit;
+		}
+		public void setScoreWeeklyLimit(Double scoreWeeklyLimit) {
+			this.scoreWeeklyLimit = scoreWeeklyLimit;
+		}
+		public Double getScoreMonthlyLimit() {
+			return scoreMonthlyLimit;
+		}
+		public void setScoreMonthlyLimit(Double scoreMonthlyLimit) {
+			this.scoreMonthlyLimit = scoreMonthlyLimit;
+		}
+		public Integer getTrackDailyLimit() {
+			return trackDailyLimit;
+		}
+		public void setTrackDailyLimit(Integer trackDailyLimit) {
+			this.trackDailyLimit = trackDailyLimit;
+		}
+		public Integer getTrackWeeklyLimit() {
+			return trackWeeklyLimit;
+		}
+		public void setTrackWeeklyLimit(Integer trackWeeklyLimit) {
+			this.trackWeeklyLimit = trackWeeklyLimit;
+		}
+		public Integer getTrackMonthlyLimit() {
+			return trackMonthlyLimit;
+		}
+		public void setTrackMonthlyLimit(Integer trackMonthlyLimit) {
+			this.trackMonthlyLimit = trackMonthlyLimit;
+		}
+        public List<Limit> trackLimits() {
+			List<Limit> limits = new LinkedList<>();
+			if (getTrackDailyLimit() != null && getTrackDailyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_DAY, null, getTrackDailyLimit().doubleValue())); 
+			}
+			if (getTrackWeeklyLimit() != null && getTrackWeeklyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_WEEK, null, getTrackWeeklyLimit().doubleValue())); 
+			}
+			if (getTrackMonthlyLimit() != null && getTrackMonthlyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_MONTH, null, getTrackMonthlyLimit().doubleValue())); 
+			}
+            return limits;
+        }
+        public List<Limit> scoreLimits() {
+			List<Limit> limits = new LinkedList<>();
+			if (getScoreDailyLimit() != null && getScoreDailyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_DAY, null, getScoreDailyLimit().doubleValue())); 
+			}
+			if (getScoreWeeklyLimit() != null && getScoreWeeklyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_WEEK, null, getScoreWeeklyLimit().doubleValue())); 
+			}
+			if (getScoreMonthlyLimit() != null && getScoreMonthlyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_MONTH, null, getScoreMonthlyLimit().doubleValue())); 
+			}
+            return limits;
+        }
 	}
 	
 	public static class VirtualScoreValue {
