@@ -328,7 +328,7 @@ public class CampaignService {
 		List<Campaign> campaigns = appService.retrieveExternalCampaigns();
 		for (Campaign c : campaigns) {
 			// do not overwrite legacy campaign data
-			if (c.getId().equals(legacyCampaignId)) continue;
+			// if (c.getId().equals(legacyCampaignId)) continue;
 			
 			campaignRepo.save(c);
 		}

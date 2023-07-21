@@ -144,7 +144,7 @@ public class PGAppService {
 		for (MEAN m : MEAN.values()) {
 			if (map.get(m.name()) != null) {
 				Map<String, Object> sv = (Map<String, Object>) map.get(m.name());
-				VirtualScoreValue vsv = new VirtualScoreValue((String) sv.get("metric"), (Double) sv.get("coefficient"));
+				VirtualScoreValue vsv = new VirtualScoreValue((String) sv.get("metric"), ((Number)sv.get("coefficient")).doubleValue());
 				if (MEAN.bike.equals(m)) score.setBike(vsv);
 				if (MEAN.bus.equals(m)) score.setBus(vsv);
 				if (MEAN.train.equals(m)) score.setTrain(vsv);
