@@ -34,8 +34,9 @@ public class Constants {
 	
 	public static final String[] AGG_ARRAY = new String[] {AGG_DAY, AGG_MONTH, AGG_WEEK, AGG_TOTAL};
 	public static final String METRIC_DISTANCE = "distance";
-	public static final String METRIC_DURATION = "duration";
+	public static final String METRIC_DURATION = "time";
 	public static final String METRIC_CO2 = "co2";
+	public static final String METRIC_TRACK = "tracks";
 	
 	public enum MEAN {bike, car, walk, bus, train, boat};
 

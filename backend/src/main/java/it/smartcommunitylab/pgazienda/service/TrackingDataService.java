@@ -373,6 +373,9 @@ public class TrackingDataService {
 		if (Constants.METRIC_CO2.equals(vsv.getMetric())) {
 			return co2 * vsv.getCoefficient();
 		}
+		if (Constants.METRIC_TRACK.equals(vsv.getMetric())) {
+			return 1 * vsv.getCoefficient();
+		}
 		return 0d;
 	}
 

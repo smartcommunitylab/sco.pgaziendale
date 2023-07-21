@@ -220,8 +220,8 @@ public class Campaign {
 	public List<Limit> getScoreLimits() {
 		if (scoreLimits == null) {
 			scoreLimits = new LinkedList<>();
-			scoreLimits.add(new Limit(Constants.AGG_DAY, null, 20000d)); 
-			scoreLimits.add(new Limit(Constants.AGG_MONTH, null, 250000d));
+			scoreLimits.add(new Limit(Constants.AGG_DAY, null, 20d)); 
+			scoreLimits.add(new Limit(Constants.AGG_MONTH, null, 250d));
 		}
 
 		return scoreLimits;
@@ -235,7 +235,7 @@ public class Campaign {
 		if (virtualScore == null) {
 			virtualScore = new VirtualScore();
 			virtualScore.setBike(new VirtualScoreValue());
-			virtualScore.getBike().coefficient = 1d;
+			virtualScore.getBike().coefficient = 0.001d;
 			virtualScore.getBike().metric = Constants.METRIC_DISTANCE;
 
 		}

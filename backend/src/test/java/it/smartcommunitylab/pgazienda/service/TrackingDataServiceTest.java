@@ -251,7 +251,7 @@ public class TrackingDataServiceTest {
 
 			TrackingData td = new TrackingData();
 			td.setMode("bike");
-			td.setDistance(1000 * i);
+			td.setDistance(1000 * i + 100);
 			td.setDuration(1000);
 			td.setCo2(10);
 			td.setMultimodalId("mm" + i);
