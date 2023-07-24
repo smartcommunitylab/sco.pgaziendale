@@ -206,7 +206,8 @@ public class TrackingDataService {
 			TrackValidityDTO validity = new TrackValidityDTO();
 			validity.setValid(true);
 			validity.setLegs(new LinkedList<>());
-			validity.setVirtualTrack(!stat.getTrackCount().equals(stat.getLimitedTrackCount()));
+			// virtual in this case means recognized and should be count for stats
+			validity.setVirtualTrack(stat.getTrackCount().equals(stat.getLimitedTrackCount()));
 			for (TrackLegDTO l : matchingLegs) {
 				TrackValidityLegDTO leg = new TrackValidityLegDTO();
 				leg.setMean(l.getMean());
