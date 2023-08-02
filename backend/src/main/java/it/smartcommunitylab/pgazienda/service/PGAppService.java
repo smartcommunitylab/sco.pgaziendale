@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
@@ -135,12 +136,14 @@ public class PGAppService {
 	private VirtualScore extractVirtualScore(Map<String, Object> map) {
 		VirtualScore score = new VirtualScore();
 		score.setLabel((String)map.getOrDefault("label", "km"));
-		score.setScoreDailyLimit(Double.parseDouble(map.getOrDefault("scoreDailyLimit", "0").toString()));
-		score.setScoreWeeklyLimit(Double.parseDouble(map.getOrDefault("scoreWeeklyLimit", "0").toString()));
-		score.setScoreMonthlyLimit(Double.parseDouble(map.getOrDefault("scoreMonthlyLimit", "0").toString()));
-		score.setTrackDailyLimit(Integer.parseInt(map.getOrDefault("trackDailyLimit", "0").toString()));
-		score.setTrackWeeklyLimit(Integer.parseInt(map.getOrDefault("trackWeeklyLimit", "0").toString()));
-		score.setTrackMonthlyLimit(Integer.parseInt(map.getOrDefault("trackMonthlyLimit", "0").toString()));
+		score.setScoreDailyLimit(getNumValue(map, "scoreDailyLimit").doubleValue());
+		score.setScoreWeeklyLimit(getNumValue(map, "scoreWeeklyLimit").doubleValue());
+		score.setScoreMonthlyLimit(getNumValue(map, "scoreMonthlyLimit").doubleValue());
+
+		score.setTrackDailyLimit(getNumValue(map, "trackDailyLimit").intValue());
+		score.setTrackWeeklyLimit(getNumValue(map, "trackWeeklyLimit").intValue());
+		score.setTrackMonthlyLimit(getNumValue(map, "trackMonthlyLimit").intValue());
+
 		for (MEAN m : MEAN.values()) {
 			if (map.get(m.name()) != null) {
 				Map<String, Object> sv = (Map<String, Object>) map.get(m.name());
@@ -156,6 +159,15 @@ public class PGAppService {
 		return score;
 	}
 
+	private Number getNumValue(Map<String, Object> map, String key) {
+		String v = map.getOrDefault(key, "0").toString();
+		if (!StringUtils.hasText(v)) return 0;
+		try {
+			return Double.parseDouble(v);
+		} catch (Exception e) {
+			return 0;
+		}	
+	}
 
 	/**
 	 * @param object
