@@ -323,7 +323,7 @@ public class CampaignService {
 		});
 	}
 	
-	@Scheduled(fixedDelay=1000*60*60*24) 
+	@Scheduled(fixedDelay=1000*60*60) 
 	public void syncExternalCampaigns() {
 		List<Campaign> campaigns = appService.retrieveExternalCampaigns();
 		for (Campaign c : campaigns) {

@@ -135,12 +135,12 @@ public class PGAppService {
 	private VirtualScore extractVirtualScore(Map<String, Object> map) {
 		VirtualScore score = new VirtualScore();
 		score.setLabel((String)map.getOrDefault("label", "km"));
-		score.setScoreDailyLimit((Double)map.get("scoreDailyLimit"));
-		score.setScoreWeeklyLimit((Double)map.get("scoreWeeklyLimit"));
-		score.setScoreMonthlyLimit((Double)map.get("scoreMonthlyLimit"));
-		score.setTrackDailyLimit((Integer)map.get("trackDailyLimit"));
-		score.setTrackWeeklyLimit((Integer)map.get("trackWeeklyLimit"));
-		score.setTrackMonthlyLimit((Integer)map.get("trackMonthlyLimit"));
+		score.setScoreDailyLimit(((Number)map.get("scoreDailyLimit")).doubleValue());
+		score.setScoreWeeklyLimit(((Number)map.get("scoreWeeklyLimit")).doubleValue());
+		score.setScoreMonthlyLimit(((Number)map.get("scoreMonthlyLimit")).doubleValue());
+		score.setTrackDailyLimit(((Number)map.get("trackDailyLimit")).intValue());
+		score.setTrackWeeklyLimit(((Number)map.get("trackWeeklyLimit")).intValue());
+		score.setTrackMonthlyLimit(((Number)map.get("trackMonthlyLimit")).intValue());
 		for (MEAN m : MEAN.values()) {
 			if (map.get(m.name()) != null) {
 				Map<String, Object> sv = (Map<String, Object>) map.get(m.name());
