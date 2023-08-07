@@ -214,6 +214,7 @@ public class AdminResourceITest {
     	TrackLegDTO leg = new TrackLegDTO();
     	leg.setDistance(1000d);
     	leg.setMean("bike");
+		leg.setValid(true);
     	leg.setId("123456");
     	leg.setPoints(new LinkedList<>());
     	for (int i = 0; i < 10; i++) {
@@ -262,6 +263,7 @@ public class AdminResourceITest {
     	leg.setDistance(1000d);
     	leg.setMean("bike");
     	leg.setId("123456");
+		leg.setValid(true);
     	leg.setPoints(new LinkedList<>());
     	for (int i = 0; i < 10; i++) {
     		TrackPointDTO point = new TrackPointDTO();
@@ -315,6 +317,7 @@ public class AdminResourceITest {
     	leg.setDistance(1000d);
     	leg.setMean("bike");
     	leg.setId("123456");
+		leg.setValid(true);
     	leg.setPoints(new LinkedList<>());
     	for (int i = 0; i < 10; i++) {
     		TrackPointDTO point = new TrackPointDTO();

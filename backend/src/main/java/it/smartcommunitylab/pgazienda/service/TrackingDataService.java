@@ -155,14 +155,40 @@ public class TrackingDataService {
 				.map(l -> new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius()))
 				.collect(Collectors.toList());
 		
-		// legs with matching means
-		List<TrackLegDTO> matchingLegs = track.getLegs().stream().filter(leg -> campaign.getMeans().indexOf(leg.getMean()) >= 0).collect(Collectors.toList());
+		// index of matching leg (first or last of the trip)
+		int matchingLegIndex = -1;
 		// no locations, no legs with appropriate means, trip does not match any location
 		if (locations.size() == 0) {
 			return TrackValidityDTO.errLocations();
-		} else if (matchingLegs.size() == 0 || !TrackUtils.matchLocations(track, locations)) {
+		} else if ((matchingLegIndex = TrackUtils.matchLocations(track, locations)) < 0) {
 			return TrackValidityDTO.errMatches();
 		} else {
+			List<TrackLegDTO> validTrack = new LinkedList<>();
+			// limit to valid legs towards the location
+			if (matchingLegIndex == 0) {
+				for (int i = 0; i < track.getLegs().size(); i++) {
+					TrackLegDTO leg = track.getLegs().get(i);
+					if (!Boolean.TRUE.equals(leg.getValid())) break;
+					validTrack.add(leg);
+				}
+			} else {
+				for (int i = track.getLegs().size() - 1; i >= 0; i--) {
+					TrackLegDTO leg = track.getLegs().get(i);
+					if (!Boolean.TRUE.equals(leg.getValid())) break;
+					validTrack.add(leg);
+				}
+				Collections.reverse(validTrack);
+			}
+			if (validTrack.size() == 0) {
+				return TrackValidityDTO.errMatches();
+			}
+
+			// legs with matching means
+			List<TrackLegDTO> matchingLegs = validTrack.stream().filter(leg -> campaign.getMeans().indexOf(leg.getMean()) >= 0).collect(Collectors.toList());
+			if (matchingLegs.size() == 0) {
+				return TrackValidityDTO.errMatches();
+			}
+
 			LocalDate date = toLocalDate(track.getStartTime());
 			// stat of current date
 			DayStat stat = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate(playerId, campaign.getId(), company.getId(), date.toString());

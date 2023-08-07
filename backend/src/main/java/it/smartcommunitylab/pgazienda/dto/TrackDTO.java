@@ -61,6 +61,7 @@ public class TrackDTO {
 		private Double distance;
 		private long duration;
 		private double co2;
+		private Boolean valid;
 		
 		private List<TrackPointDTO> points;
 		
@@ -100,7 +101,14 @@ public class TrackDTO {
 		public void setCo2(double co2) {
 			this.co2 = co2;
 		}
-		
+				
+		public Boolean getValid() {
+			return valid;
+		}
+		public void setValid(Boolean valid) {
+			this.valid = valid;
+		}
+
 	}
 	
 	
