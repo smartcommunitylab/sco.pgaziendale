@@ -116,13 +116,13 @@ export default {
       if (this.role == "ROLE_ADMIN" && this.adminCompany && this.adminCompany.item) {
         this.getAllCampaigns(this.adminCompany.item.id);
         campaignService.getAllCampaigns().then((campaigns) => {
-          this.campaigns = campaigns;
+          this.campaigns = campaigns.filter(c => c.territoryId === this.actualCompany.item.territoryId);
         });
       } else {
         if (this.actualCompany && this.actualCompany.item) {
           this.getAllCampaigns(this.actualCompany.item.id);
           campaignService.getPublicCampaigns().then((campaigns) => {
-            this.campaigns = campaigns;
+            this.campaigns = campaigns.filter(c => c.territoryId === this.actualCompany.item.territoryId);
           });
         }
       }

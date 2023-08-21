@@ -1,5 +1,4 @@
 <template>
-  <v-col cols="4">
     <v-card elevation="2" class="frosted-glass" v-if="actualCompany && actualCompany.item">
         <v-card-title>{{ actualCompany.item.name }}</v-card-title>
         
@@ -84,6 +83,11 @@
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
 
+            <v-btn icon
+            @click="openModal({type:'updateCompanyState', object:null})">
+                <v-icon>{{actualCompany.item.state ? 'mdi-close' : 'mdi-check'}}</v-icon>
+            </v-btn>
+
             <v-btn icon v-show="$route.name !== 'ProfiloAzienda'"
             @click="openModal({type:'deleteAzienda', object:null})">
                 <v-icon>mdi-delete</v-icon>
@@ -91,7 +95,6 @@
 
         </v-card-actions>
     </v-card>
-  </v-col>
 </template>
 
 <script>

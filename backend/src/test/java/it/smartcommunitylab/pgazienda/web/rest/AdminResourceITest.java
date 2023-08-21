@@ -57,7 +57,6 @@ import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Employee;
-import it.smartcommunitylab.pgazienda.domain.PGApp;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
@@ -69,7 +68,6 @@ import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
-import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 
 /**
@@ -83,8 +81,6 @@ public class AdminResourceITest {
 
 	static final String ADMIN = "admin";
 
-    @Autowired
-    private PGAppRepository appRepo;
 	@Autowired
 	private CampaignRepository campaignRepo;
 	@Autowired
@@ -106,7 +102,6 @@ public class AdminResourceITest {
     @BeforeEach
     public void setup() {
         mockServer = MockRestServiceServer.createServer(restTemplate);
-        appRepo.deleteAll();
     	campaignRepo.deleteAll();
     	companyRepo.deleteAll();
     	employeeRepo.deleteAll();
@@ -373,7 +368,7 @@ public class AdminResourceITest {
     	Campaign c = new Campaign();
     	c.setTitle("campaign");
     	c.setId("externalCampaignId");
-    	c.setApplication("externalAppId");
+    	c.setTerritoryId("TAA");
     	c.setDescription("description");
     	c.setFrom(LocalDate.now().minusDays(10));
     	c.setTo(LocalDate.now().plusDays(10));

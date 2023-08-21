@@ -3,7 +3,8 @@ import { campaignService } from '../services';
 const state = {
     allCampaigns: null,
     actualCampaign: null,
-    publicCampaigns: null
+    publicCampaigns: null,
+    territories: null
 };
 
 const actions = {
@@ -36,6 +37,18 @@ const actions = {
                 campaigns => commit('getPublicCampaignsSuccess', campaigns),
                 error => {
                     commit('getPublicCampaignsFailure', error);
+                    dispatch('alert/error', error, { root: true });
+                }
+            );
+    },
+    getTerritories({ commit, dispatch }) {
+        commit('getTerritories');
+
+        campaignService.getTerritories()
+            .then(
+                territories => commit('getTerritoriesSuccess', territories),
+                error => {
+                    commit('getTerritoriesFailure', error);
                     dispatch('alert/error', error, { root: true });
                 }
             );
@@ -146,6 +159,17 @@ const mutations = {
     },
     getPublicCampaignsFailure(state, error) {
         state.publicCampaigns = { error };
+    },
+    getTerritories(state) {
+
+        state.territories = { loading: true };
+    },
+    getTerritoriesSuccess(state, territories) {
+        console.log(territories);
+        state.territories = { items: territories };
+    },
+    getTerritoriesFailure(state, error) {
+        state.territories = { error };
     },
     removeActualCampaign(state) {
         state.actualCampaign = null;

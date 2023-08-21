@@ -62,21 +62,6 @@ public class CampaignResource {
 	private CampaignService campaignService;
 	@Autowired
 	private UserService userService;
-    /**
-     * Create a new campaign
-     * @param company
-     * @return
-     * @throws BadRequestAlertException 
-     */
-    @PostMapping("/campaigns")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-	public ResponseEntity<Campaign> createCampaign(@Valid @RequestBody Campaign campaign) throws BadRequestAlertException {
-    	log.debug("Creating a campaign {} ", campaign);
-    	if(campaignService.getCampaign(campaign.getId()).isPresent()) {
-    		throw new BadRequestAlertException("A campaign with the specified ID already exists");
-    	}
-    	return ResponseEntity.ok(campaignService.saveCampaign(campaign));
-	}
 
     /**
      * List campaigns
@@ -88,18 +73,6 @@ public class CampaignResource {
 	public ResponseEntity<Page<Campaign>> listCampaign(Pageable pageable) {
     	log.debug("List all campaigns ");
     	return ResponseEntity.ok(campaignService.getCampaigns(pageable));
-	}
-    /**
-     * Update basic campaign info
-     * @param company
-     * @return
-     */
-    @PutMapping("/campaigns/{campaignId:.*}")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-	public ResponseEntity<Campaign> updateCampaign( @PathVariable String campaignId, @Valid @RequestBody Campaign campaign) {
-    	log.debug("Updating a campaign {}", campaignId);
-    	campaign.setId(campaignId);
-    	return ResponseEntity.ok(campaignService.saveCampaign(campaign));
 	}
     
     /**
@@ -114,31 +87,6 @@ public class CampaignResource {
     	return ResponseEntity.ok(campaignService.resetCampaign(campaignId));
 	}
     
-    /**
-     * Delete a campaign
-     * @param campaignId
-     * @return
-     */
-    @DeleteMapping("/campaigns/{campaignId:.*}")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
-	public ResponseEntity<Void> deleteCampaign(@PathVariable String campaignId) {
-    	log.debug("Updating a campaign {}", campaignId);
-    	campaignService.deleteCampaign(campaignId);
-    	return ResponseEntity.ok(null);
-	}
-    /**
-     * Activate / deactivate a campaign
-     * @param companyId
-     * @param campaignId
-     * @return
-     */
-    @PutMapping("/campaigns/{campaignId:.*}/active/{val}")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN  +"\")")
-	public ResponseEntity<Void> changeActiveState(@PathVariable String campaignId, @PathVariable boolean val) {
-    	log.debug("Changing a campaign state {}", campaignId);
-    	campaignService.toggleState(campaignId, val);
-    	return ResponseEntity.ok(null);
-	}
     /**
      * Read all company campaigns
      * @param companyId

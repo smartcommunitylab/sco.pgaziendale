@@ -16,8 +16,10 @@
 
 package it.smartcommunitylab.pgazienda.domain;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 
@@ -33,6 +35,8 @@ public class Employee {
 	private String name, surname, companyEmail, companyId, code;
 	private String location;
 	private List<String> campaigns;
+
+	private Map<String, TrackingRecord> trackingRecord = new HashMap<>();
 
 	/**
 	 * @return the id
@@ -145,5 +149,45 @@ public class Employee {
 	 */
 	public void setLocation(String location) {
 		this.location = location;
+	}
+
+	public Map<String, TrackingRecord> getTrackingRecord() {
+		return trackingRecord;
+	}
+
+	public void setTrackingRecord(Map<String, TrackingRecord> trackingRecord) {
+		this.trackingRecord = trackingRecord;
+	}
+
+
+
+	public static class TrackingRecord {
+
+		public Long getRegistration() {
+			return registration;
+		}
+
+		public void setRegistration(Long registration) {
+			this.registration = registration;
+		}
+
+		public Long getLeave() {
+			return leave;
+		}
+
+		public void setLeave(Long leave) {
+			this.leave = leave;
+		}
+
+		public Long getTracking() {
+			return tracking;
+		}
+
+		public void setTracking(Long tracking) {
+			this.tracking = tracking;
+		}
+
+		public Long registration, leave, tracking;
+
 	}
 }

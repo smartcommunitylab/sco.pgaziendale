@@ -144,6 +144,20 @@ public class CompanyResource {
     	company.setId(companyId);
 		return ResponseEntity.of(companyService.updateCompany(company));
 	}
+
+    /**
+     * Update company verification state
+     * @param companyId
+     * @param company
+     * @return
+     */
+    @PutMapping("/companies/{companyId}/{state}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
+	public ResponseEntity<Company> updateCompanyState(@PathVariable String companyId, @PathVariable Boolean state) {
+    	log.debug("Updating company state {}, state {}", companyId, state);
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+		return ResponseEntity.ok(companyService.updateCompanyState(companyId, state));
+	}
     /**
      * Delete a company
      * @param companyId

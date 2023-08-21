@@ -40,9 +40,8 @@ public class Campaign {
 	private String title;
 	private String description;
 	private String logo;
-	
-	@NotEmpty
-	private String application;
+	private String territoryId;
+
 
 	@NotNull
 	private LocalDate from;
@@ -58,6 +57,7 @@ public class Campaign {
 	private List<Limit> scoreLimits;
 
 	private VirtualScore virtualScore;
+	
 	
 	/**
 	 * @return the id
@@ -132,18 +132,6 @@ public class Campaign {
 		this.means = means;
 	}
 	/**
-	 * @return the application
-	 */
-	public String getApplication() {
-		return application;
-	}
-	/**
-	 * @param application the application to set
-	 */
-	public void setApplication(String application) {
-		this.application = application;
-	}
-	/**
 	 * @return the description
 	 */
 	public String getDescription() {
@@ -190,6 +178,13 @@ public class Campaign {
 	 */
 	public void setPrivacy(String privacy) {
 		this.privacy = privacy;
+	}
+
+	public String getTerritoryId() {
+		return territoryId;
+	}
+	public void setTerritoryId(String territoryId) {
+		this.territoryId = territoryId;
 	}
 	
 	// /**

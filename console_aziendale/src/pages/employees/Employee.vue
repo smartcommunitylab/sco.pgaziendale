@@ -29,7 +29,19 @@
                             <v-icon>mdi-format-list-text</v-icon>
                         </v-list-item-icon>
                         <v-list-item-content>
-                            <v-list-item-title v-if="actualEmployee.item.campaigns.length != 0" v-html="getCampaings(actualEmployee.item.campaigns)"></v-list-item-title>
+                            <div v-if="employeeCampaigns && employeeCampaigns.length > 0">
+                                <v-list-item-title>Iscrizioni</v-list-item-title>
+                                <v-simple-table>
+                                    <thead>
+                                        <tr><th></th><th>Iscritto</th><th>Uscito</th><th>Ultima traccia</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr  v-for="tr in employeeCampaigns" :key="tr.id">
+                                            <td>{{tr.title}}</td><td>{{toD(tr.registration)}}</td><td>{{toD(tr.leave)}}</td><td>{{toDT(tr.tracking)}}</td>
+                                        </tr>
+                                    </tbody>
+                                </v-simple-table>
+                            </div>
                             <v-list-item-title v-else>Nessuna campagna associata</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
@@ -51,9 +63,15 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
+import moment from "moment";
 
 export default {
   name: "ProfiloEmployee",
+  data() {
+    return {
+        employeeCampaigns: null
+    }
+  },
 
   methods: {
     ...mapActions("modal", {openModal:"openModal"}),
@@ -61,21 +79,27 @@ export default {
     //   getCampaignTitleById: "getCampaignTitleById"}),
 	editEmployee() {
 	},
-    getCampaings(campaigns) {
-        var returnCampaigns=" "; 
-        campaigns.forEach((element) => {
-        return returnCampaigns+="<div> "+  this.getCampaignTitle(element) +" </div>";
-        });
-        return returnCampaigns;
+
+    toD(time) {
+        return moment(time).format('DD-MM-YY');
     },
-      getCampaignTitle(campaignId) {
-         return  this.getCampaignTitleById(campaignId);
+    toDT(time) {
+        return moment(time).format('DD-MM-YY HH:mm');
+
     },
-     getCampaignTitleById(id){
-        if (this.allCampaigns && this.allCampaigns.items)
-            return (this.allCampaigns.items.find(element => element.id === id).title);
-        return ''
-    },
+
+    updateEmployeeData() {
+        if (this.actualEmployee && this.actualEmployee.item && this.allCampaigns && this.allCampaigns.items) {
+            console.log('updating');
+            let list = (this.actualEmployee.item.campaigns || []).concat(this.actualEmployee.item.trackingRecord ? Object.keys(this.actualEmployee.item.trackingRecord) : []);
+            this.employeeCampaigns = list.map(cId => {
+                let tr = this.actualEmployee.item.trackingRecord && this.actualEmployee.item.trackingRecord[cId] ? this.actualEmployee.item.trackingRecord[cId] : {registration: new Date().getTime()}
+                tr.id = cId;
+                tr.title = (this.allCampaigns.items.find(c => c.id === cId) || {title: cId}).title;
+                return tr;
+            });
+        }
+    }
   },
 
   computed: {
@@ -83,6 +107,14 @@ export default {
     ...mapState("company", ["actualCompany"]),
     ...mapState("campaign", ["allCampaigns"]),
   },
+  watch: {
+    actualEmployee() {
+        this.updateEmployeeData();
+    },
+    allCampaigns() {
+        this.updateEmployeeData();
+    }
+  }
 };
 </script>
 

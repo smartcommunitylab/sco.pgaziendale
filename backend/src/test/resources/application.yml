@@ -31,7 +31,7 @@ app:
       issuer-uri: https://aac.platform.smartcommunitylab.it
       client-id: 123
       jwk-uri: https://aac.platform.smartcommunitylab.it/jwk
-
+  engineEndpoint: http://localhost:8080/api/
 
 admin:
   username: ${ADMIN_USERNAME:admin}

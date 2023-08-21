@@ -57,6 +57,7 @@ import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.DayStat.MeanScore;
 import it.smartcommunitylab.pgazienda.domain.DayStat.Score;
 import it.smartcommunitylab.pgazienda.domain.Employee;
+import it.smartcommunitylab.pgazienda.domain.Employee.TrackingRecord;
 import it.smartcommunitylab.pgazienda.domain.Shape;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.TrackingData;
@@ -244,6 +245,15 @@ public class TrackingDataService {
 				leg.setVirtualScore(td.getLimitedScore());
 				validity.getLegs().add(leg);				
 			}
+
+			TrackingRecord rec = employee.getTrackingRecord().get(campaignId);
+			if (rec == null) {
+				rec = new TrackingRecord();
+				rec.setRegistration(System.currentTimeMillis());
+				employee.getTrackingRecord().put(campaignId, rec);
+			}
+			rec.setTracking(System.currentTimeMillis());
+			employeeRepo.save(employee);
 
 			return validity;
 		}

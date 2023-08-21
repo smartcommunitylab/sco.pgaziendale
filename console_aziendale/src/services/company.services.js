@@ -5,6 +5,7 @@ export const companyService = {
     getCompanyById,
     addCompany,
     updateCompany,
+    updateCompanyState,
     deleteCompany,
     getUsers,
     addUser,
@@ -72,7 +73,21 @@ function updateCompany(company){
 
     )
 }
-// update an old company
+// update an old company state
+function updateCompanyState(company){
+    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+company.id +'/'+company.state).then(
+        res => {
+            if (res && res.data) {
+                return Promise.resolve(res.data);
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+// delete an old company
 function deleteCompany(company){
     return axios.delete(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+company.id).then(
         res => {

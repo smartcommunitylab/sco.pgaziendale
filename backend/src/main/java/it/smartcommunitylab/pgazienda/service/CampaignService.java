@@ -37,10 +37,10 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.Employee;
-import it.smartcommunitylab.pgazienda.domain.PGApp;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
+import it.smartcommunitylab.pgazienda.domain.Employee.TrackingRecord;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
@@ -174,6 +174,12 @@ public class CampaignService {
 			
 			if (!employee.getCampaigns().contains(campaignId)) {
 				employee.getCampaigns().add(campaignId);
+				TrackingRecord rec = employee.getTrackingRecord().get(campaignId);
+				if (rec == null) {
+					rec = new TrackingRecord();
+					employee.getTrackingRecord().put(campaignId, rec);
+				}
+				rec.setRegistration(System.currentTimeMillis());
 				employeeRepo.save(employee);
 			}
 			Subscription s = new Subscription();
@@ -210,6 +216,12 @@ public class CampaignService {
 					Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), s.getKey()).stream().findAny().orElse(null);					
 					if (employee != null && employee.getCampaigns().contains(campaignId)) {
 						employee.getCampaigns().remove(campaignId);
+						TrackingRecord rec = employee.getTrackingRecord().get(campaignId);
+						if (rec == null) {
+							rec = new TrackingRecord();
+							employee.getTrackingRecord().put(campaignId, rec);
+						}
+						rec.setLeave(System.currentTimeMillis());
 						employeeRepo.save(employee);
 					}
 					userService.removeAppSubscription(user.getId(), s.getKey(), s.getCompanyCode(), campaignId);
@@ -237,10 +249,7 @@ public class CampaignService {
 	 * @return
 	 */
 	public Campaign saveCampaign(Campaign campaign) {
-		Optional<PGApp> app = appService.getApp(campaign.getApplication());
-		if (app.isPresent() && Boolean.TRUE.equals(app.get().getSupportCampaignMgmt())) {
-			return campaign;
-		}
+		// throw new UnsupportedOperationException();
 		return campaignRepo.save(campaign);
 	}
 	
@@ -252,11 +261,6 @@ public class CampaignService {
 		Campaign campaign = getCampaign(campaignId).orElse(null);
 		if (campaign == null) return null;
 		
-		Optional<PGApp> app = appService.getApp(campaign.getApplication());
-		if (app.isPresent() && Boolean.TRUE.equals(app.get().getSupportCampaignMgmt())) {
-			return campaign;
-		}
-
 		userService.cleanSubscriptions(campaignId);
 		List<Employee> employees = employeeRepo.findByCampaigns(campaignId);
 		employees.forEach(e -> e.getCampaigns().remove(campaignId));
@@ -270,15 +274,7 @@ public class CampaignService {
 	 * @return
 	 */
 	public void deleteCampaign(String campaignId) {
-		Campaign campaign = getCampaign(campaignId).orElse(null);
-		if (campaign == null) return;
-		
-		Optional<PGApp> app = appService.getApp(campaign.getApplication());
-		if (app.isPresent() && Boolean.TRUE.equals(app.get().getSupportCampaignMgmt())) {
-			return;
-		}
-		
-		campaignRepo.deleteById(campaignId);
+		throw new UnsupportedOperationException();
 	}
 	
 	/**
@@ -288,11 +284,7 @@ public class CampaignService {
 	 * @return
 	 */
 	public Campaign toggleState(String campaignId, boolean val) {
-		campaignRepo.findById(campaignId).ifPresent(campaign -> {
-			campaign.setActive(val);
-			campaignRepo.save(campaign);
-		});
-		return campaignRepo.findById(campaignId).orElse(null);
+		throw new UnsupportedOperationException();
 	}
 
 	@Scheduled(fixedDelay=1000*60*60*24) 

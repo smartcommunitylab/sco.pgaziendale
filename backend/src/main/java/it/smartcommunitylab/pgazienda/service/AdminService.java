@@ -36,6 +36,7 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.LegacyPlayerMapping;
+import it.smartcommunitylab.pgazienda.domain.Territory;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
@@ -89,9 +90,7 @@ public class AdminService {
 	}
 	
 	public void loadData(DataModelDTO model) throws InconsistentDataException {
-		validateApps(model);
-		model.getApps().forEach(app -> appService.updateApp(app));
-		
+		appService.setTerritories(model.getTerritories());
 		validateCampaigns(model);
 		model.getCampaigns().forEach(c -> campaignService.saveCampaign(c));
 		
@@ -151,8 +150,6 @@ public class AdminService {
 	 */
 	private void validateCompanies(DataModelDTO model) throws InconsistentDataException {
 		if (model.getCompanies().stream().anyMatch(c -> StringUtils.isAnyEmpty(c.getCode(), c.getName()))) throw new InconsistentDataException("Invalid company definition", "INVALID_COMPANY_DATA"); 
-		if (model.getCompanies().stream().anyMatch(c -> c.getEnabledApps()== null || c.getEnabledApps().isEmpty())) throw new InconsistentDataException("Invalid company definition: missing app", "NO_APP");
-		if (model.getCompanies().stream().anyMatch(c -> c.getEnabledApps().stream().anyMatch(a -> appService.getApp(a).isEmpty()))) throw new InconsistentDataException("Invalid company definition: non existing app", "NO_APP");
 		if (model.getCompanies().stream().anyMatch(c -> c.getCampaigns() != null && c.getCampaigns().stream().anyMatch(campaign -> campaignService.getCampaign(campaign).isEmpty()))) throw new InconsistentDataException("Invalid company definition: non existing campaign", "NO_CAMPAIGN");
 	}
 
@@ -164,16 +161,7 @@ public class AdminService {
 	private void validateCampaigns(DataModelDTO model) throws InconsistentDataException {
 		if (model.getCampaigns().stream().anyMatch(c -> StringUtils.isAnyEmpty(c.getId(), c.getTitle()))) throw new InconsistentDataException("Invalid campaign definition", "INVALID_CAMPAIGN_DATA");
 		if (model.getCampaigns().stream().anyMatch(c -> c.getFrom() == null)) throw new InconsistentDataException("Invalid campaign definition: missing start date", "NO_START_DATE");
-		if (model.getCampaigns().stream().anyMatch(c -> appService.getApp(c.getApplication()).isEmpty())) throw new InconsistentDataException("Invalid campaign definition: non existing app", "NO_APP");
-	}
-
-
-	/**
-	 * @param model
-	 * @throws InconsistentDataException 
-	 */
-	private void validateApps(DataModelDTO model) throws InconsistentDataException {
-		if (model.getApps().stream().anyMatch(a -> StringUtils.isAnyEmpty(a.getId(), a.getName()))) throw new InconsistentDataException("Invalid apps definition", "INVALID_APP_DATA");
+		if (model.getCampaigns().stream().anyMatch(c -> appService.getTerritory(c.getTerritoryId()) == null)) throw new InconsistentDataException("Invalid campaign definition: non existing territoriy", "NO_TERRITORY");
 	}
 
 

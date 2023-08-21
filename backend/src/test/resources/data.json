@@ -1,16 +1,14 @@
 {
-  "apps": [
+  "territories": [
     {
-      "id": "ferraraplaygo2020",
-      "name": "Ferrara Play&Go",
-      "password": "password",
-      "endpoint": "https://ferrara.smartcommunitylab.it/playandgo/gamification/trackingdata"
+      "territoryId": "TAA",
+      "name": {"en":"Trentino"}
     }
   ],
   "campaigns": [
     {
       "active": true,
-      "application": "ferraraplaygo2020",
+      "territoryId": "TAA",
       "description": "Ferrara Play&Go Aziendale Bici",
       "logo": "http://www.ferrarainbici.it/static/pix/ferrarainbici/ferrara-in-bici.png",
       "from": "2020-11-01",
@@ -31,9 +29,7 @@
       "code": "comunediferrara",
       "contactEmail": "urp@comune.fe.it",
       "contactPhone": "+390532419111",
-      "enabledApps": [
-        "ferraraplaygo2020"
-      ],
+      "territoryId": "TAA",
       "locations": [
         {
           "address": "Piazza del Municipio",

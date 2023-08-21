@@ -23,7 +23,7 @@
                             ></v-text-field>
                         </v-col>
                         <v-col
-                        cols="6"
+                        cols="3"
                         >
                             <v-text-field
                                 label="Codice Azienda"
@@ -52,6 +52,23 @@
                                     </v-tooltip>
                                 </template>
                             </v-text-field>
+                        </v-col>
+                        <v-col cols="3">
+                            <v-autocomplete
+                                label="Territorio"
+                                placeholder="Territorio *"
+                                name="territory"
+                                id="territory"
+                                v-model.trim="$v.territory.$model"
+                                :items="territoryIds"
+                                item-text="name.it"
+                                item-value="territoryId"
+                                :error-messages="territoryErrors"                                
+                                required
+                                @input="$v.territory.$touch()"
+                                @blur="$v.territory.$touch()"
+                                outlined
+                            ></v-autocomplete>
                         </v-col>
                         <v-col
                         cols="6"
@@ -294,6 +311,9 @@ export default {
         code: {
             required,
         },
+        territory: {
+            required,
+        },
         address: {
             required,
         },
@@ -350,6 +370,8 @@ export default {
             id: null,
             name: "",
             code: "",
+            territory: "",
+            territoryIds: [],
             address: "",
             streetNumber: "",
             city: "",
@@ -371,11 +393,9 @@ export default {
     methods: {
         ...mapActions("modal", { closeModal:"closeModal" }),
         ...mapActions("company", {addCompany:"addCompany", updateCompany:"updateCompany"}),
+        ...mapActions("campaign", {getTerritories:"getTerritories"}),
 
         copyFormValues(company) {
-            console.log("Sono nel For");
-            console.log("Questa è la company:");
-            console.log(company);
             for (const [key] of Object.entries(company)) {
                 this[key] = company[key];
             }
@@ -399,6 +419,7 @@ export default {
             this.id = null;
             this.name = "";
             this.code = "";
+            this.territory = "";
             this.address = "";
             this.streetNumber = "";
             this.city = "";
@@ -416,6 +437,7 @@ export default {
                 id: this.id,
                 name: this.name,
                 code: this.code,
+                territoryId: this.territory,
                 address: this.address,
                 streetNumber: this.streetNumber,
                 city: this.city,
@@ -467,6 +489,7 @@ export default {
 
     computed: {
         ...mapState("company", ["actualCompany"]),
+        ...mapState("campaign", ["territories"]),
 
         //Controls for form validation 
         nameErrors () {
@@ -540,7 +563,13 @@ export default {
             const errors = []
             if (!this.$v.web.$dirty) return errors
             !this.$v.web.required && errors.push('Url richiesto.')
-            !this.isURL(this.web) && errors.push('Inserisci un url con "Http://" o "Https://".')
+            !this.isURL(this.web) && errors.push('Inserisci un url con "http://" o "https://".')
+            return errors
+        },
+        territoryErrors () {
+            const errors = []
+            if (!this.$v.territory.$dirty) return errors
+            !this.$v.territory.required && errors.push('Campo richiesto.')
             return errors
         },
     },
@@ -551,11 +580,18 @@ export default {
         },
         actualCompany: function(){
             this.setModalData();
-        }
-    },
+        },
+        territories(res) {
+            if (res.items)
+                {
+                    this.territoryIds = res.items.map(t => t);
+                }
+            },
+        },
 
     created() {
         this.setModalData();
+        this.getTerritories();
     },
 }
 </script>

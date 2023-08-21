@@ -167,9 +167,9 @@ public class CompanyService {
 		Company old = companyRepo.findById(company.getId()).orElse(null);
 		if (old != null) {
 			old.setAddress(company.getAddress());
+			old.setTerritoryId(company.getTerritoryId());
 			old.setContactEmail(company.getContactEmail());
 			old.setContactPhone(company.getContactPhone());
-			old.setEnabledApps(company.getEnabledApps());
 			old.setLogo(company.getLogo());
 			old.setName(company.getName());
 			old.setWeb(company.getWeb());
@@ -185,6 +185,21 @@ public class CompanyService {
 		return Optional.empty();
 	}
 
+
+	/**
+	 * Update state field
+	 * @param companyId
+	 * @param state
+	 * @return
+	 */
+    public Company updateCompanyState(String companyId, Boolean state) {
+		Company old = companyRepo.findById(companyId).orElse(null);
+		if (old != null) {
+			old.setState(state);
+			return companyRepo.save(old);
+		}
+        return null;
+    }
 
 	/**
 	 * List of companies assigned to a campaign
@@ -334,7 +349,7 @@ public class CompanyService {
 				e.setCode(employee.getCode());
 				e.setLocation(employee.getLocation());
 				e.setName(employee.getName());
-				e.setSurname(e.getSurname());
+				e.setSurname(employee.getSurname());
 				employeeRepo.save(e);
 			}
 		});
@@ -528,6 +543,7 @@ public class CompanyService {
 			else return "";
 		} else return v.trim();
 	}
+
 
 
 }

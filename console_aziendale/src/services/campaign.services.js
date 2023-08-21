@@ -7,7 +7,7 @@ export const campaignService = {
     deleteCampaign,
     getTextOfMeans,
     getArrayMeans,
-    getApplications,
+    getTerritories,
     getAllCompaniesOfCampaign,
     getPublicCampaigns,
     getMonthsForCampaign,
@@ -79,7 +79,6 @@ function getPublicCampaigns() {
         }
 
     )
-
 }
 function getAllCompaniesOfCampaign(campaignId) {
     return axios.get(process.env.VUE_APP_BASE_URL+ process.env.VUE_APP_COMPANIES_API + '/' +process.env.VUE_APP_COMPANIES_IN_CAMPAIGN_API+ '/' +campaignId ).then(
@@ -94,6 +93,22 @@ function getAllCompaniesOfCampaign(campaignId) {
 
     )
 }
+// get all the territories present
+function getTerritories() {
+    return axios.get(process.env.VUE_APP_BASE_URL+ process.env.VUE_APP_TERRITORIES_API)
+    .then(
+        res => {
+            if (res && res.data) {
+                return Promise.resolve(res.data);                
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+    )
+}
+
+
 function addCampaign(companyId = null, campaign) {
     var url = process.env.VUE_APP_BASE_URL;
     if (companyId)
@@ -146,36 +161,20 @@ function deleteCampaign( companyId = null, campaignId) {
 
     )
 }
-// get all the applications present
-function getApplications() {
-    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_APPS_API ).then(
-        res => {
-            if (res && res.data) {
-                return Promise.resolve(res.data);                
-            }
-            else return Promise.reject(null);
-        }, err => {
-            return Promise.reject(err);
-        }
-
-    )
-}
 function getArrayMeans() {
     return arrayMeans;
 }
 //get list of means and return string of means using arraymeans
 function getTextOfMeans(means) {
-    var returnText="";
-    means.forEach(element => {
-        if (arrayMeans.filter(e=> {
-            return e.value == element
-        }).length>0)
-        returnText+=" "+arrayMeans.filter(e=> {
-            return e.value == element
-        })[0].text
-        
-    });
-    return returnText;
+    // var returnText="";
+
+    return means
+    
+    .map(e => arrayMeans.find(ae => ae.value === e))
+    .filter(e => e != null)
+    .map(e => e.text)
+    .sort()
+    .join(', ');
 }
 
 

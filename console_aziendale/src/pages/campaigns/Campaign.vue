@@ -1,5 +1,4 @@
 <template>
-  <v-col cols="4">
     <v-card elevation="2">
       <v-card-title>{{ actualCampaign.item.title }}</v-card-title>
       
@@ -35,13 +34,62 @@
           </v-col>
         </v-row>
 
+        <v-row class="my-0">
+          <v-col
+            cols="12"
+            class="mt-0 mb-0 py-0"
+          >
+            <p class="text-subtitle-2 ml-2 mb-0"> Limiti </p>
+            <v-spacer></v-spacer>
+            <div class="ml-2">
+              <v-simple-table>
+                <tbody>
+                <tr>
+                  <td>Punti ({{actualCampaign.item.virtualScore.label}}):</td>
+                  <td cols="auto" v-for="lim in actualCampaign.item.scoreLimits" :key="lim.span">{{lim.value}} per {{lim.span == 'day' ? 'giorno': lim.span == 'week' ? 'settimana' : 'mese'}}</td>
+                </tr>
+                <tr>
+                  <td>Viaggi:</td>
+                  <td cols="auto" v-for="lim in actualCampaign.item.trackLimits" :key="lim.span">{{lim.value}} per {{lim.span == 'day' ? 'giorno': lim.span == 'week' ? 'settimana' : 'mese'}}</td>
+                </tr>
+                </tbody>
+              </v-simple-table>
+            </div>
+          </v-col>
+        </v-row>
+        <v-row class="my-0">
+          <v-col
+            cols="12"
+            class="mt-0 mb-0"
+          >
+            <p class="text-subtitle-2 ml-2"> Calcolo </p>
+            <v-spacer></v-spacer>
+            <div class="ml-2">
+              <v-simple-table>
+                <tbody>
+                <tr>
+                  <td cols="auto" v-for="m in means" :key="m.value">
+                    {{m.text}} 
+                  </td>
+                </tr>
+                <tr>
+                  <td cols="auto" v-for="m in means" :key="m.value">
+                    <span v-if="actualCampaign.item.virtualScore[m.value]">1 {{getMetricLabel(actualCampaign.item.virtualScore[m.value].metric)}} = {{actualCampaign.item.virtualScore[m.value].coefficient}} {{actualCampaign.item.virtualScore.label}}</span>
+                    <span v-else> - </span></td>
+                </tr>
+                </tbody>
+              </v-simple-table>
+            </div>
+          </v-col>
+        </v-row>
+
         <v-expansion-panels>
           <v-expansion-panel>
             <v-expansion-panel-header>
               Descrizione
             </v-expansion-panel-header>
             <v-expansion-panel-content>
-              {{ actualCampaign.item.description }}
+              <div v-html="actualCampaign.item.description"></div>
             </v-expansion-panel-content>
           </v-expansion-panel>        
           <v-expansion-panel>
@@ -66,7 +114,7 @@
           </v-expansion-panel>
         </v-expansion-panels>
       </v-card-text>
-      <v-card-actions>
+      <!-- <v-card-actions>
           <v-spacer></v-spacer>
 
           <v-btn icon @click="openModal({type:'campaignFormEdit', object:null})">
@@ -77,9 +125,8 @@
               <v-icon>mdi-delete</v-icon>
           </v-btn>
 
-      </v-card-actions>
+      </v-card-actions> -->
     </v-card>
-  </v-col>
 </template>
 
 <script>
@@ -88,6 +135,11 @@ import { campaignService } from "@/services";
 
 export default {
   name: "ProfiloCampagna",
+  data(){
+    return {
+      means: campaignService.getArrayMeans()
+    }
+  },
 
   methods: {
     ...mapActions("modal", {openModal: "openModal"}),
@@ -95,6 +147,9 @@ export default {
     getListOfMeans() {
       return campaignService.getTextOfMeans(this.actualCampaign.item.means);
     },
+    getMetricLabel(m) {
+      return m == 'distance' ? 'm' : m == 'co2' ? 'CO2' : m == 'time' ? 'sec' : 'viaggio'
+    }
   },
 
   computed: {

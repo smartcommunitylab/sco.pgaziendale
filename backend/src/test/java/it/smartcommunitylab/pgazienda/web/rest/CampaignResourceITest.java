@@ -45,15 +45,15 @@ import it.smartcommunitylab.pgazienda.PGAziendaApp;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.Employee;
-import it.smartcommunitylab.pgazienda.domain.PGApp;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
+import it.smartcommunitylab.pgazienda.domain.Territory;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
-import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
+import it.smartcommunitylab.pgazienda.service.PGAppService;
 
 /**
  * @author raman
@@ -67,15 +67,11 @@ public class CampaignResourceITest {
     /**
 	 * 
 	 */
-	private static final String APP_ID = "externalAppId";
+	private static final String T_ID = "TAA";
 
 	static final String ADMIN = "admin";
 
-	private static final String CAMPAIGN_ID = "campaignId";
-
-    @Autowired
-    private PGAppRepository appRepo;
-    
+	private static final String CAMPAIGN_ID = "campaignId";    
     @Autowired
     private CampaignRepository campaignRepo;
     @Autowired
@@ -84,105 +80,24 @@ public class CampaignResourceITest {
     private EmployeeRepository employeeRepo;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PGAppService service;
 
     @Autowired
     private MockMvc restMockMvc;
 
     @BeforeEach
     public void setup() {
-        appRepo.deleteAll();
-    	PGApp app = testApp();
-    	appRepo.save(app);
-    	campaignRepo.deleteAll();
+    	Territory t = testTerritory();
+        service.setTerritories(Collections.singletonList(t));
+        campaignRepo.deleteAll();
     	companyRepo.deleteAll();
     	employeeRepo.deleteAll();
     	userRepository.findAll().stream().filter(u -> u.getUsername().equalsIgnoreCase("login@example.com")).forEach(u -> {
         	userRepository.delete(u);
     	});
     }
-    
-    @Test
-    public void testCreate() throws Exception {
-    	Campaign obj = testCampaign();
 
-        restMockMvc.perform(
-                post("/api/campaigns")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(obj)))
-                .andExpect(status().isOk());
-
-        	Campaign updated = campaignRepo.findAll().stream().findAny().orElse(null);
-            assertThat(updated).isNotNull();
-            
-            assertThat(updated.getTitle()).isEqualTo(obj.getTitle());
-    }
-    
-    @Test
-    public void testUpdate() throws Exception {
-    	Campaign obj = testCampaign();
-    	obj = campaignRepo.save(obj);
-    	
-
-        restMockMvc.perform(
-                put("/api/campaigns/{campaignId}", obj.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(obj)))
-                .andExpect(status().isOk());
-
-    	Campaign updated = campaignRepo.findById(obj.getId()).orElse(null);
-        assertThat(updated).isNotNull();
-        
-        assertThat(updated.getTitle()).isEqualTo(obj.getTitle());
-    }
-    
-    
-    @Test
-    public void testActive() throws Exception {
-    	Campaign obj = testCampaign();
-    	obj = campaignRepo.save(obj);
-    	
-        restMockMvc.perform(
-                put("/api/campaigns/{campaignId}", obj.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(obj)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.active").value(false));
-
-        restMockMvc.perform(
-                put("/api/campaigns/{campaignId}/active/true", obj.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(obj)))
-                .andExpect(status().isOk());
-
-    	Campaign updated = campaignRepo.findById(obj.getId()).orElse(null);
-        assertThat(updated).isNotNull();
-        assertThat(updated.getActive()).isEqualTo(true);
-
-        
-        restMockMvc.perform(
-                put("/api/campaigns/{campaignId}/active/false", obj.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(obj)))
-                .andExpect(status().isOk());
-
-
-        updated = campaignRepo.findById(obj.getId()).orElse(null);
-        assertThat(updated).isNotNull();
-        assertThat(updated.getActive()).isEqualTo(false);
-    }
-    
-    @Test
-    public void testDelete() throws Exception {
-    	Campaign obj = testCampaign();
-    	obj = campaignRepo.save(obj);
-
-        restMockMvc.perform(
-                delete("/api/campaigns/{campaignId}", obj.getId()))
-                .andExpect(status().isOk());
-
-            List<Campaign> updated = campaignRepo.findAll();
-            assertThat(updated.size()).isEqualTo(0);
-    }
     
     @Test
     public void testRead() throws Exception {
@@ -345,13 +260,13 @@ public class CampaignResourceITest {
                 .andExpect(jsonPath("$", hasSize(1)));
     }
     
-    
-    private PGApp testApp() {
-    	PGApp app = new PGApp();
-    	app.setName("test app");
-    	app.setId(APP_ID);
-    	return app;
+    private Territory testTerritory() {
+    	Territory t = new Territory();
+    	t.setName(Collections.singletonMap("en", "Trentino"));
+    	t.setTerritoryId(T_ID);
+    	return t;
     }
+
     
 
     private Company testCompany() {
@@ -361,6 +276,7 @@ public class CampaignResourceITest {
     	c.setContactEmail("email");
     	c.setContactPhone("123");
     	c.setLogo("logo");
+        c.setTerritoryId(T_ID);
     	c.setName("company");
     	c.setWeb("web");
     	return c;
@@ -371,7 +287,7 @@ public class CampaignResourceITest {
     	Campaign c = new Campaign();
     	c.setTitle("campaign");
     	c.setId(CAMPAIGN_ID);
-    	c.setApplication(APP_ID);
+    	c.setTerritoryId(T_ID);
     	c.setDescription("description");
     	c.setFrom(LocalDate.now().minusDays(10));
     	c.setTo(LocalDate.now().plusDays(10));

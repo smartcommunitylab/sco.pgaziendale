@@ -629,6 +629,7 @@ export default {
       }
     },
     saveLocation() {
+      console.log(this.address);
       if (!this.$v.$invalid) {
         this.createLocation();
         if (this.typeCall == "add") {

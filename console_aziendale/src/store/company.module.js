@@ -101,6 +101,20 @@ const actions = {
             }
         );
     },
+    updateCompanyState({ commit, dispatch }, company) {
+        commit('updateCompanyState');
+        companyService.updateCompanyState(company).then(
+            company => {
+                commit('updateCompanySuccess', company);
+                dispatch('alert/success', "Azienda modificata con successo", { root: true });
+            },
+            error => {
+                commit('getAllFailure', error);
+                dispatch('alert/error', error, { root: true });
+            }
+        );
+
+    },
     deleteCompany({ commit, dispatch }, company) {
         commit('deleteCompany');
         companyService.deleteCompany(company).then(
@@ -224,10 +238,15 @@ const mutations = {
     updateCompanySuccess(state, company) {
         state.actualCompany = { item: company };
         //update allCompanies
-        if (state.allCompanies.items)
-            state.allCompanies.items = state.allCompanies.items.map(function (element) {
-                return company.id == element.id ? company : element
-            })
+        if (state.allCompanies.items) {
+            let idx = state.allCompanies.items.findIndex(c => c.id === company.id);
+            if (idx >= 0) {
+                state.allCompanies.items.splice(idx, 1, company);
+            }
+        }
+    },
+    updateCompanyState(state) {
+        state.actualCompany = { loading: true };
     },
     updateCompanyFailure() {
         // state.actualCompany = { error };

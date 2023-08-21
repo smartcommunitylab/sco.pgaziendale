@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import static org.hamcrest.Matchers.*;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -40,8 +41,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.PGAziendaApp;
-import it.smartcommunitylab.pgazienda.domain.PGApp;
-import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
+import it.smartcommunitylab.pgazienda.domain.Territory;
+import it.smartcommunitylab.pgazienda.service.PGAppService;
 
 /**
  * @author raman
@@ -50,107 +51,43 @@ import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 @AutoConfigureMockMvc
 @WithMockUser(username = "admin", authorities = Constants.ROLE_ADMIN)
 @SpringBootTest(classes = PGAziendaApp.class)
-public class AppResourceITest {
+public class TerritoryResourceITest {
 
     /**
 	 * 
 	 */
-	private static final String APP_ID = "externalAppId";
+	private static final String T_ID = "TAA";
 
 	static final String ADMIN = "admin";
-
-    @Autowired
-    private PGAppRepository appRepo;
     
     @Autowired
     private MockMvc restMockMvc;
-
-    @BeforeEach
-    public void setup() {
-        appRepo.deleteAll();
-    }
+    @Autowired
+    private PGAppService service;
     
     @Test
-    public void testCreate() throws Exception {
-    	PGApp app = testApp();
-
+    public void testReadTerritories() throws Exception {
+        service.resetTerritories();
         restMockMvc.perform(
-                post("/api/apps")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(app)))
-                .andExpect(status().isOk());
-
-            PGApp updatedApp = appRepo.findById(app.getId()).orElse(null);
-            assertThat(updatedApp).isNotNull();
-            
-            assertThat(updatedApp.getName()).isEqualTo(app.getName());
-    }
-    
-    @Test
-    public void testUpdate() throws Exception {
-    	PGApp app = testApp();
-    	app = appRepo.save(app);
-    	
-
-        restMockMvc.perform(
-                put("/api/apps/{appId}", app.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(app)))
-                .andExpect(status().isOk());
-
-            PGApp updatedApp = appRepo.findById(app.getId()).orElse(null);
-            assertThat(updatedApp).isNotNull();
-            assertThat(updatedApp.getName()).isEqualTo(app.getName());
-    }
-    
-    @Test
-    public void testDelete() throws Exception {
-    	PGApp app = testApp();
-    	app = appRepo.save(app);
-
-        restMockMvc.perform(
-                delete("/api/apps/{appId}", app.getId()))
-                .andExpect(status().isOk());
-
-            List<PGApp> updated = appRepo.findAll();
-            assertThat(updated.size()).isEqualTo(0);
-    }
-    
-    @Test
-    public void testReadApps() throws Exception {
-        restMockMvc.perform(
-                get("/api/apps"))
+                get("/api/territories"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$", hasSize(0)));
 
-    	PGApp app = testApp();
-    	app = appRepo.save(app);
-    	
+    	Territory t = testTerritory();
+        service.setTerritories(Collections.singletonList(t));
+        
         restMockMvc.perform(
-                get("/api/apps"))
+                get("/api/territories"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$", hasSize(1)));
     }
     
-    @Test
-    @WithUnauthenticatedMockUser
-    public void testReadAppsPublic() throws Exception {
-    	PGApp app = testApp();
-    	app = appRepo.save(app);
-    	
-        restMockMvc.perform(
-                get("/api/public/apps"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$", hasSize(1)));
-    }
-
-    private PGApp testApp() {
-    	PGApp app = new PGApp();
-    	app.setName("test app");
-    	app.setId(APP_ID);
-    	return app;
+    private Territory testTerritory() {
+    	Territory t = new Territory();
+    	t.setName(Collections.singletonMap("en", "Trentino"));
+    	t.setTerritoryId(T_ID);
+    	return t;
     }
 }

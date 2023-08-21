@@ -15,6 +15,7 @@ fa in base alla variabile "modalType" che permette l'avvio del modale corretto.
         <company-form-modal v-if="modalType == 'aziendaFormAdd'" typeCall="add"/>
         <company-form-modal v-if="modalType == 'aziendaFormEdit'" typeCall="edit"/>
         <delete-modal v-if="modalType == 'deleteAzienda'" typeCall="azienda"/>
+        <state-toggle-modal v-if="modalType == 'updateCompanyState'"/>
         
         <!-- MODALI per l' User -->
         <user-form-modal v-if="modalType == 'userFormAdd'" typeCall="add"/>
@@ -54,6 +55,7 @@ import LocationFormModal from "@/components/modal/specific-modals/LocationFormMo
 import ChangePasswordModal from "@/components/modal/specific-modals/ChangePasswordModal.vue";
 import DissociateFormModal from '@/components/modal/specific-modals/DissociateFormModal.vue';
 import ImportModal from '@/components/modal/specific-modals/ImportModal.vue';
+import StateToggleModal from '@/components/modal/specific-modals/StateToggleModal.vue';
 
 export default {
     components: {
@@ -68,6 +70,7 @@ export default {
         "change-password-modal": ChangePasswordModal,
         "dissociate-form-modal": DissociateFormModal,
         "import-modal": ImportModal,
+        "state-toggle-modal": StateToggleModal,
     },
     
     props: {
