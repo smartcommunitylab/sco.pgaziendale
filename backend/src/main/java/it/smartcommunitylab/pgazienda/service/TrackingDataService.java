@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import com.opencsv.CSVWriter;
 
 import org.slf4j.Logger;
@@ -52,7 +54,10 @@ import it.smartcommunitylab.pgazienda.domain.Circle;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Constants;
+import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
+import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
+import it.smartcommunitylab.pgazienda.domain.Constants.STAT_FIELD;
 import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.DayStat.MeanScore;
 import it.smartcommunitylab.pgazienda.domain.DayStat.Score;
@@ -105,6 +110,15 @@ public class TrackingDataService {
 
 	@Autowired
 	private MongoTemplate template;
+
+	@PostConstruct
+	public void update() {
+		List<DayStat> list = dayStatRepo.findAll();
+		for (DayStat ds : list) {
+			ds.recalculate();
+		}
+		dayStatRepo.saveAll(list);
+	}
 
 	/**
 	 * Validate multimodal track. 
@@ -227,6 +241,7 @@ public class TrackingDataService {
 			}
 			// recalculate the score from updated track list
 			limitScore(campaign, playerId, stat);
+			stat.recalculate();
 			dayStatRepo.save(stat);
 			
 			// create result
@@ -432,6 +447,251 @@ public class TrackingDataService {
 		}
 		
 		return res;
+	}
+
+	/**
+	 * Generate statistics
+	 * @param campaignId
+	 * @param companyId (optional) filter by company
+	 * @param location (optional) filter by location. Requires companyId 
+	 * @param employeeId (optional) filter by employee
+	 * @param timeGroupBy group by for time: day, month, week, total. Default month 
+	 * @param dataGroupBy grouping of data: employee, location, company, total. Default total
+	 * @param fields data fields to include: score (total points), limitedScore (with limits), trackCount, limitedTrackCount, co2, meanScore, limitedMeanScore, meanDistance, meanDuration, meanCo2 
+	 * @param from starting date
+	 * @param to ending date
+	 * @return List of stat objects
+	 * @throws InconsistentDataException
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public List<DayStat> statistics(
+			String campaignId,
+			String companyId,
+			String location,
+			String employeeId,			
+			GROUP_BY_TIME timeGroupBy,
+			GROUP_BY_DATA dataGroupBy,
+			Set<STAT_FIELD> fields,
+			LocalDate from, 
+			LocalDate to
+	) throws InconsistentDataException {
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+
+		Criteria criteria = Criteria
+				.where("campaign").is(campaignId)
+				.and("date").lte(to.toString()).gte(from.toString());
+
+		if (companyId != null) {
+			criteria = criteria.and("company").is(companyId);
+		}
+		if (employeeId != null) {
+			Employee e = employeeRepo.findById(employeeId).orElse(null);
+			if (e == null) {
+				throw new InconsistentDataException("Invalid employee: " + employeeId, "NO_USER");
+			}
+			Company c = companyRepo.findById(e.getCompanyId()).orElse(null);
+			if (c == null) {
+				throw new InconsistentDataException("Invalid company: " + e.getCompanyId(), "NO_COMPANY");
+			}
+			List<User> users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, c.getCode(), e.getCode());
+			criteria = criteria.and("playerId").in(users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList()));
+		} else if (location != null && companyId != null) {
+			Company company = companyRepo.findById(companyId).orElse(null);
+			if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
+			Set<String> employeeKeys = employeeRepo.findByCompanyIdAndLocation(companyId, location).stream().map(e -> e.getCode()).collect(Collectors.toSet());
+			List<String> users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, company.getCode(), employeeKeys).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
+			criteria = criteria.and("playerId").in(users);
+		}
+
+		MatchOperation filterOperation = Aggregation.match(criteria);
+		List<String> group = new LinkedList<>();
+		group.add("campaign");
+		if (!GROUP_BY_TIME.total.equals(timeGroupBy)) group.add(timeGroupBy.name());
+
+		if (GROUP_BY_DATA.company.equals(dataGroupBy)) group.add("company");
+		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) group.add("playerId");
+		if (GROUP_BY_DATA.location.equals(dataGroupBy)) group.add("playerId");
+		
+		GroupOperation groupByOperation = Aggregation.group(group.toArray(new String[group.size()]));
+		Set<STAT_FIELD> meanFields = new HashSet<>(fields);
+		if (fields == null || fields.isEmpty()) {
+			fields = Collections.singleton(STAT_FIELD.score);
+		}
+		if (fields.contains(STAT_FIELD.score)) {
+			groupByOperation = groupByOperation.sum("score.score").as("score");
+			meanFields.remove(STAT_FIELD.score);
+		}
+		if (fields.contains(STAT_FIELD.limitedScore)) {
+			groupByOperation = groupByOperation.sum("limitedScore.score").as("limitedScore");
+			meanFields.remove(STAT_FIELD.limitedScore);
+		}
+		if (fields.contains(STAT_FIELD.trackCount)) {
+			groupByOperation = groupByOperation.sum("trackCount").as("trackCount");
+			meanFields.remove(STAT_FIELD.trackCount);
+		}
+		if (fields.contains(STAT_FIELD.limitedTrackCount)) {
+			groupByOperation = groupByOperation.sum("limitedTrackCount").as("limitedTrackCount");
+			meanFields.remove(STAT_FIELD.limitedTrackCount);
+		}
+		if (fields.contains(STAT_FIELD.co2)) {
+			groupByOperation = groupByOperation.sum("co2saved").as("co2saved");
+			meanFields.remove(STAT_FIELD.co2);
+		}
+		List<MEAN> means = campaign.getMeans().stream().map(m -> MEAN.valueOf(m)).collect(Collectors.toList());
+		for (STAT_FIELD f: meanFields) {
+			groupByOperation = groupByMean(f.name(), means, groupByOperation);
+		}
+	
+		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
+		AggregationResults<Map> aggResult = template.aggregate(aggregation, DayStat.class, Map.class);
+		List<DayStat> res = new LinkedList<>();
+		for (Map m : aggResult.getMappedResults()) {
+			DayStat stat = new DayStat();
+			populateKeyFields(stat, m, group);
+			stat.setCo2saved(((Number)m.getOrDefault("co2saved", 0d)).doubleValue());
+			stat.setTrackCount(((Number)m.getOrDefault("trackCount", 0)).intValue());
+			stat.setLimitedTrackCount(((Number)m.getOrDefault("limitedTrackCount", 0)).intValue());
+			stat.getScore().setScore(((Number)m.getOrDefault("score", 0d)).doubleValue());
+			stat.getLimitedScore().setScore(((Number)m.getOrDefault("limitedScore", 0d)).doubleValue());
+			for (STAT_FIELD f: meanFields) {
+				populateMeanFields(stat, m, f, means);
+			}
+			res.add(stat);
+		}
+
+		// Special case: group by location. Map employees to locations and sum
+		if (GROUP_BY_DATA.location.equals(dataGroupBy)) {
+			Company company = companyRepo.findById(companyId).orElse(null);
+			if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
+
+			// get the players involved
+			Set<String> players = res.stream().map(ds -> ds.getPlayerId()).collect(Collectors.toSet());
+			List<User> users = userRepo.findByPlayerIdIn(players);
+			// get the company employes subscribing the campaign
+			List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(companyId, campaignId);
+			// map the players to location using the codes of the employees in subscriptions
+			Map<String, String> employeeLocationMap = new HashMap<>();
+			Map<String, String> playerLocationMap = new HashMap<>();
+			employees.forEach(e -> employeeLocationMap.put(e.getCode(), e.getLocation()));
+			users.forEach(u -> {
+				u.companyRoles().forEach(r -> {
+					if (r.getSubscriptions() != null) {
+						r.getSubscriptions().forEach(s -> {
+							if (s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(company.getCode()) && employeeLocationMap.containsKey(s.getKey())) {
+								playerLocationMap.put(u.getPlayerId(), employeeLocationMap.get(s.getKey()));
+							}
+						});
+					}
+				});
+			});
+			List<DayStat> locationRes = new LinkedList<>();
+			Map<String, Map<String,DayStat>> locationStats = new HashMap<>();
+			for (DayStat ds: res) {
+				String pid = ds.getPlayerId();
+				String lid = playerLocationMap.get(pid);
+				if (lid == null) continue;
+				String key = getAggKey(ds, timeGroupBy);
+				Map<String,DayStat> lsMap = locationStats.get(lid);
+				if (lsMap == null) {
+					lsMap = new HashMap<>();
+					locationStats.put(lid, lsMap);
+				}
+				DayStat ls = lsMap.get(key);
+				if (ls == null) {
+					ls = new DayStat();
+					ls.setCampaign(campaignId);
+					ls.setCompany(companyId);
+					ls.setPlayerId(lid);
+					ls.setDate(ds.getDate());
+					ls.setWeek(ds.getWeek());
+					ls.setMonth(ds.getMonth());
+
+					ls.setCo2saved(ds.getCo2saved());
+					ls.setTrackCount(ds.getTrackCount());
+					ls.setLimitedTrackCount(ds.getLimitedTrackCount());
+					ls.setScore(Score.copy(ds.getScore()));
+					ls.setLimitedScore(Score.copy(ds.getLimitedScore()));
+					ls.setMeanScore(MeanScore.copy(ds.getMeanScore()));
+					ls.setLimitedMeanScore(MeanScore.copy(ds.getLimitedMeanScore()));
+					ls.setMeanCo2(MeanScore.copy(ds.getMeanCo2()));
+					ls.setMeanDistance(MeanScore.copy(ds.getMeanDistance()));
+					ls.setMeanDuration(MeanScore.copy(ds.getMeanDuration()));
+					ls.setMeanTracks(MeanScore.copy(ds.getMeanTracks()));
+					lsMap.put(key, ls);
+					locationRes.add(ls);
+				} else {
+					ls.setCo2saved(ls.getCo2saved() + ds.getCo2saved());
+					ls.setTrackCount(ls.getTrackCount() + ds.getTrackCount());
+					ls.setLimitedTrackCount(ls.getLimitedTrackCount() + ds.getLimitedTrackCount());
+					ls.getScore().mergeScore(ds.getScore());
+					ls.getLimitedScore().mergeScore(ds.getLimitedScore());
+					ls.getMeanScore().mergeScore(ds.getMeanScore());
+					ls.getLimitedMeanScore().mergeScore(ds.getLimitedMeanScore());
+					ls.getMeanCo2().mergeScore(ds.getMeanCo2());
+					ls.getMeanDistance().mergeScore(ds.getMeanDistance());
+					ls.getMeanDuration().mergeScore(ds.getMeanDuration());
+					ls.getMeanTracks().mergeScore(ds.getMeanTracks());
+				}
+			}
+			return locationRes;
+		}
+
+		return res;
+	}
+
+	private String getAggKey(DayStat ds, GROUP_BY_TIME timeGroupBy) {
+		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return ds.getDate();
+		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return ds.getWeek();
+		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return ds.getMonth();
+		return "";
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void populateKeyFields(DayStat stat, Map m, List<String> group) {
+		if (group.size() == 1) {
+			stat.setCampaign((String)m.get("_id"));
+		} else {
+			Map<String, String> idMap = (Map<String, String>) m.get("_id");
+			stat.setCampaign((String)idMap.get("campaign"));
+			stat.setCompany(idMap.getOrDefault("company", null));
+			stat.setPlayerId(idMap.getOrDefault("playerId", null));
+			if (idMap.containsKey("date")) {
+				stat.setDate((String)idMap.get("date"));
+				LocalDate ld = LocalDate.parse(stat.getDate());
+				stat.setMonth(ld.format(MONTH_PATTERN));
+				stat.setWeek(ld.format(WEEK_PATTERN));
+			}
+			if (idMap.containsKey("week")) {
+				stat.setWeek((String)idMap.get("week"));
+				LocalDate ld = LocalDate.parse(stat.getWeek(), WEEK_PATTERN);
+				stat.setMonth(ld.format(MONTH_PATTERN));
+			}
+			if (idMap.containsKey("month")) {
+				stat.setMonth((String)idMap.get("month"));
+			}
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void populateMeanFields(DayStat stat, Map map, STAT_FIELD field, List<MEAN> means) {
+		Map<Object, Double> values = new HashMap<>();
+		for(MEAN m : means) {
+			values.put(m.name(), ((Number)map.getOrDefault(field.name() + "_" + m.name(), 0d)).doubleValue());
+		}
+		if (STAT_FIELD.meanScore.equals(field)) stat.setMeanScore(MeanScore.fromMap(values));
+		if (STAT_FIELD.limitedMeanScore.equals(field)) stat.setLimitedMeanScore(MeanScore.fromMap(values));
+		if (STAT_FIELD.meanCo2.equals(field)) stat.setMeanCo2(MeanScore.fromMap(values));
+		if (STAT_FIELD.meanDistance.equals(field)) stat.setMeanDistance(MeanScore.fromMap(values));
+		if (STAT_FIELD.meanDuration.equals(field)) stat.setMeanDuration(MeanScore.fromMap(values));
+		if (STAT_FIELD.meanTracks.equals(field)) stat.setMeanTracks(MeanScore.fromMap(values));
+	}
+
+	private GroupOperation groupByMean(String field, List<MEAN> means, GroupOperation groupByOperation) {
+		for(MEAN m : means) {
+			groupByOperation = groupByOperation.sum(field+ "." + m.name()).as(field + "_" + m.name());
+		}
+		return groupByOperation;
 	}
 
 	/**

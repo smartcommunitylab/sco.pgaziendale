@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,6 +40,9 @@ import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.User;
+import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
+import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
+import it.smartcommunitylab.pgazienda.domain.Constants.STAT_FIELD;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.TrackingDataService;
@@ -80,6 +84,40 @@ public class TrackingDataResource {
     	return ResponseEntity.ok(dataService.getUserCampaignData(userService.getUserWithAuthorities().get().getPlayerId(), campaignId, LocalDate.parse(from), LocalDate.parse(to), groupBy, withTracks, noLimits));
 	}
 
+
+	/**
+	 * Read all the statistics of the campaign with filters and aggregation
+	 * @param campaignId
+	 * @param companyId
+	 * @param location
+	 * @param employeeId
+	 * @param timeGroupBy
+	 * @param dataGroupBy
+	 * @param fields
+	 * @param from
+	 * @param to
+	 * @return List of records representing the stats
+	 * @throws IOException
+	 * @throws InconsistentDataException
+	 */
+    @GetMapping("/campaigns/{campaignId}/stats/all")
+	public ResponseEntity<List<DayStat>> statistics(
+		@PathVariable String campaignId, 
+		@RequestParam(required=false) String companyId,
+		@RequestParam(required=false) String location,
+		@RequestParam(required=false) String employeeId,			
+		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
+		@RequestParam(required=false, defaultValue = "total") GROUP_BY_DATA dataGroupBy,
+		@RequestParam(required=false, defaultValue = "score") Set<STAT_FIELD> fields,
+		@RequestParam(required=false) String from, 
+		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
+	{
+        log.debug("REST request to get statistics");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	return ResponseEntity.ok(dataService.statistics(campaignId, companyId, location, employeeId, timeGroupBy, dataGroupBy, fields, fromDate, toDate));
+
+	}
 
     /**
      * Read all company locations

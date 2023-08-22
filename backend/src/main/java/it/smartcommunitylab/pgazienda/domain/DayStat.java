@@ -51,6 +51,11 @@ public class DayStat {
 	private MeanScore meanScore = new MeanScore();
 	private MeanScore limitedMeanScore = new MeanScore();
 
+	private MeanScore meanDistance = new MeanScore();
+	private MeanScore meanDuration = new MeanScore();
+	private MeanScore meanCo2 = new MeanScore();
+	private MeanScore meanTracks = new MeanScore();
+
 	/**
 	 * @return the id
 	 */
@@ -128,7 +133,7 @@ public class DayStat {
 	 * @return the trackCount
 	 */
 	public Integer getTrackCount() {
-		return trackCount;
+		return trackCount == null ? 0 : trackCount;
 	}
 	/**
 	 * @param trackCount the trackCount to set
@@ -213,7 +218,7 @@ public class DayStat {
 	}
 	
 	public Integer getLimitedTrackCount() {
-		return limitedTrackCount;
+		return limitedTrackCount == null ? 0 : limitedTrackCount;
 	}
 	public void setLimitedTrackCount(Integer limitedTrackCount) {
 		this.limitedTrackCount = limitedTrackCount;
@@ -239,6 +244,41 @@ public class DayStat {
 	public void setLimitedMeanScore(MeanScore limitedMeanScore) {
 		this.limitedMeanScore = limitedMeanScore;
 	}
+
+	public MeanScore getMeanDistance() {
+		return meanDistance;
+	}
+	public void setMeanDistance(MeanScore meanDistance) {
+		this.meanDistance = meanDistance;
+	}
+	public MeanScore getMeanDuration() {
+		return meanDuration;
+	}
+	public void setMeanDuration(MeanScore meanDuration) {
+		this.meanDuration = meanDuration;
+	}
+	public MeanScore getMeanCo2() {
+		return meanCo2;
+	}
+	public void setMeanCo2(MeanScore meanCo2) {
+		this.meanCo2 = meanCo2;
+	}	
+	public MeanScore getMeanTracks() {
+		return meanTracks;
+	}
+	public void setMeanTracks(MeanScore meanTracks) {
+		this.meanTracks = meanTracks;
+	}	
+
+    public void recalculate() {
+		for (TrackingData td: tracks) {
+			MEAN mean = MEAN.valueOf(td.getMode());
+			meanDistance.updateValue(mean, meanDistance.meanValue(mean) + td.getDistance());
+			meanDuration.updateValue(mean, meanDuration.meanValue(mean) + td.getDuration());
+			if (td.getCo2() != null) meanCo2.updateValue(mean, meanCo2.meanValue(mean) + td.getCo2());
+			meanTracks.updateValue(mean, meanTracks.meanValue(mean) + 1);
+		}
+    }
 
 	public static class MeanScore {
 		private Double bike, car, walk, bus, train, boat;
@@ -328,6 +368,7 @@ public class DayStat {
 		}
 
 		public static MeanScore copy(MeanScore src) {
+			if (src == null) return null;
 			MeanScore res = new MeanScore();
 			res.setBike(src.getBike());
 			res.setBoat(src.getBoat());
@@ -430,6 +471,8 @@ public class DayStat {
 		}
 
 		public static Score copy(Score src) {
+			if (src == null) return null;
+
 			Score res = new Score();
 			res.setScore(src.getScore());
 			return res;
@@ -456,5 +499,6 @@ public class DayStat {
 			res.setScore(res.getScore()   + (src.getScore()  == null ? 0d : src.getScore()));
 		}
 	}
+
 
 }
