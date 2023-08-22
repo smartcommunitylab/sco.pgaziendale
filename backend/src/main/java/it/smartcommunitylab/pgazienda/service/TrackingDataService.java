@@ -478,6 +478,8 @@ public class TrackingDataService {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 
+		if (from == null) from = campaign.getFrom();
+		
 		Criteria criteria = Criteria
 				.where("campaign").is(campaignId)
 				.and("date").lte(to.toString()).gte(from.toString());
