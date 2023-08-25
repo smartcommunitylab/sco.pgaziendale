@@ -2,7 +2,7 @@ import { VARIABLES } from "../../variables";
 
 export const statsConfigurations = [
   /*
-  / Configurazione - Km Fatti e Utili
+  / Configurazione - Punti Fatti e Utili
   / Specifica per l'ADMIN -> Amministratore di Sistema
   */
   {
@@ -17,7 +17,6 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.CAMPAIGN,
             value: "campaign",
             api: "getCampaignStats",
-            exportCSV: false,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value:  'NONE'
@@ -27,7 +26,6 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES,
             value: "companies",
             api: "getCampaignCompanyStats",
-            exportCSV: true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
@@ -39,31 +37,17 @@ export const statsConfigurations = [
             }]
           },
         ],
-        dataColumns: [
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
-            value: "Km utili",
-            apiField: "distances",
-            apiFunction:""
-          },
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED, 
-            value:  "Km percorsi",
-            apiField: "distancesNolimits",
-            apiFunction:""
-          },
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL, 
-            value: "Viaggi utili",
-            apiField: "trackCount",
-            apiFunction:""
-          },
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-             value: "Viaggi totali",
-            apiField: "trackCountNolimits",
-            apiFunction:""
-          },
+        dataColumns: [ 
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_COUNTING_POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DISTANCE,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DURATION,
+
         ],
         timeUnit: [
           // VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
@@ -71,57 +55,33 @@ export const statsConfigurations = [
           {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",
-            apiField: "month",
-            apiFunction:""
+            apiField: "month"
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
             value: "campaign",
-            apiField: "month",
-            apiFunction:"aggregate"
+            apiField: "total"
           }
         ],
         timePeriod: [
           {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
             value: "ALL",
-            apiField: "",
-            apiFunction:""
+            apiField: ""
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC,
             value: "SPECIFIC",
-            apiField: "month",
-            apiFunction:""
+            apiField: "month"
           },
         ],
         
         default: {
           dataColumns: [
-            {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED,
-              value: "Km utili",
-              apiField: "distances",
-              apiFunction:""
-            },
-            {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM, 
-              value:  "Km percorsi",
-              apiField: "distancesNolimits",
-              apiFunction:""
-            },
-            {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL, 
-              value: "Viaggi utili",
-              apiField: "trackCount",
-              apiFunction:""
-            },
-            {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-               value: "Viaggi totali",
-              apiField: "trackCountNolimits",
-              apiFunction:""
-            },
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL
           ],
           puntualAggregationSelected:{
             label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
@@ -132,7 +92,6 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES,
             value: "companies",
             api: "getCampaignCompanyStats",
-            exportCSV: true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
@@ -146,17 +105,13 @@ export const statsConfigurations = [
           timeUnit:  {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",
-            apiField: "month",
-            apiFunction:""
+            apiField: "month"
           },
           timePeriod: {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
             value: "ALL",
-            apiField: "",
-            apiFunction:""
-          },
-        
-        exportCSV: true,
+            apiField: ""
+          },        
       }
     }
     ],
@@ -177,7 +132,6 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
             value: "company",
             api: "getCompanyStats",
-            exportCSV: false,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value:  'NONE'
@@ -187,7 +141,6 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
             value: "locations",
             api: "getLocationsStats",
-            exportCSV: true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
@@ -198,7 +151,6 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES,
             value: "employees",
             api: "getEmployeesStats",
-            exportCSV: true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
@@ -211,75 +163,51 @@ export const statsConfigurations = [
           }
         ],
         dataColumns: [
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
-            value: "Km utili",
-            apiField: "distances",
-            apiFunction:""
-          },
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED, 
-            value:  "Km percorsi",
-            apiField: "distancesNolimits",
-            apiFunction:""
-          },
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL, 
-            value: "Viaggi utili",
-            apiField: "trackCount",
-            apiFunction:""
-          },
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-             value: "Viaggi totali",
-            apiField: "trackCountNolimits",
-            apiFunction:""
-          },
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_COUNTING_POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DISTANCE,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DURATION,
         ],
         timeUnit: [
           {
+            label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
+            value: "campaign",
+            apiField: "total"
+          },
+          {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",
-            apiField: "month",
-            apiFunction:""
+            apiField: "month"
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
             value: "date",
-            apiField: "day",
-            apiFunction:""
+            apiField: "day"
           }
         ],
         timePeriod: [
           {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
             value: "ALL",
-            apiField: "",
-            apiFunction:""
+            apiField: ""
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC,
             value: "SPECIFIC",
-            apiField: "month",
-            apiFunction:""
+            apiField: "month"
           },
         ],
         
         default: {
           dataColumns: [
-            {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_KM,
-              value: "Km utili",
-              apiField: "distances",
-              apiFunction:""
-            },
-            {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED, 
-              value:  "Km percorsi",
-              apiField: "distancesNolimits",
-              apiFunction:""
-            }
-          ],
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
+            ],
           puntualAggregationSelected:{
             label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
             value: 'NONE',
@@ -289,7 +217,6 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES,
             value: "employees",
             api: "getEmployeesStats",
-            exportCSV:true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
@@ -303,14 +230,12 @@ export const statsConfigurations = [
           timeUnit:  {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",
-            apiField: "month",
-            apiFunction:""
+            apiField: "month"
           },
           timePeriod: {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
             value: "ALL",
-            apiField: "",
-            apiFunction:""
+            apiField: ""
           },
       }
     },
@@ -318,7 +243,7 @@ export const statsConfigurations = [
     ],
   },
   /*
-  / Configurazione - Km Fatti e Utili
+  / Configurazione - Punti Fatti e Utili
   / Specifica per il COMPANY ADMIN -> Amministratore Aziendale
   */
   {
@@ -333,7 +258,6 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
             value: "company",
             api: "getCompanyStats",
-            exportCSV: false,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value:  'NONE'
@@ -343,7 +267,6 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
             value: "locations",
             api: "getLocationsStats",
-            exportCSV: true,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
@@ -352,37 +275,23 @@ export const statsConfigurations = [
           }
         ],
         dataColumns: [
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-             value: "Viaggi totali",
-            apiField: "trackCountNolimits",
-            apiFunction:""
-          },
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED, 
-            value:  "Km percorsi",
-            apiField: "distancesNolimits",
-            apiFunction:""
-          },
-          {
-            label: VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED,
-             value: "CO2",
-            apiField: "co2saved",
-            apiFunction:""
-          }
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_CO2_SAVED,
         ],
         timeUnit: [
           {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",
-            apiField: "month",
-            apiFunction:""
+            apiField: "month"
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
             value: "campaign",
-            apiField: "month",
-            apiFunction:"aggregate"
+            apiField: "total"
           }
 
         ],
@@ -390,37 +299,21 @@ export const statsConfigurations = [
           {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
             value: "ALL",
-            apiField: "",
-            apiFunction:""
+            apiField: ""
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC,
             value: "SPECIFIC",
-            apiField: "month",
-            apiFunction:""
+            apiField: "month"
           },
         ],
         
         default: {
           dataColumns: [
-            {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-               value: "Viaggi totali",
-              apiField: "trackCountNolimits",
-              apiFunction:""
-            },
-            {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.KM_TRAVELED, 
-              value:  "Km percorsi",
-              apiField: "distancesNolimits",
-              apiFunction:""
-            },
-            {
-              label: VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED,
-               value: "CO2",
-              apiField: "co2saved",
-              apiFunction:""
-            }
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED
+  
           ],
           puntualAggregationSelected:{
             label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
@@ -431,7 +324,6 @@ export const statsConfigurations = [
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
             value: "company",
             api: "getCompanyStats",
-            exportCSV: false,
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value:  'NONE'
@@ -440,14 +332,12 @@ export const statsConfigurations = [
           timeUnit:  {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",
-            apiField: "month",
-            apiFunction:""
+            apiField: "month"
           },
           timePeriod: {
             label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
             value: "ALL",
-            apiField: "",
-            apiFunction:""
+            apiField: ""
           },
       }
     },

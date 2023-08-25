@@ -118,18 +118,6 @@ public class AdminResource {
 		return ResponseEntity.ok(service.invalidateTrack(playerId, campaignId, trackId));
 	}
 
-	@GetMapping("/admin/report/player/transport/stats")
-	public List<TransportStatDTO> getPlayerTransportStatsGroupByMean(
-			@RequestParam String campaignId,
-			@RequestParam String playerId,
-			@RequestParam(required = false) String groupMode,
-			@RequestParam(required = false) String mean,
-			@RequestParam(required = false) String dateFrom,
-			@RequestParam(required = false) String dateTo)  throws InconsistentDataException
-	{
-		return trackingDataService.getPlayerTransportStatsGroupByMean(service.getLegacyPlayer(playerId, campaignId), campaignId, groupMode, mean, dateFrom, dateTo);
-	}	
-
     @PostMapping("/admin/legacy/{campaignId}/csv")
     @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
     public ResponseEntity<Void> uploadLegacy(@PathVariable String campaignId, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws Exception {

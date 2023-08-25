@@ -81,7 +81,6 @@
           <v-btn
             color="primary"
             @click="exportCsv"
-            :disabled="!activeSelection.dataLevel.exportCSV"
           >
             Download CSV
           </v-btn>
@@ -354,7 +353,6 @@ export default {
       );
     },
     view() {
-      console.log("La vista è: ");
       let view = null;
       if (
         this.getConfigurationById &&
@@ -364,7 +362,6 @@ export default {
         view = this.getConfigurationById.views.find(
           (element) => element.type === this.activeViewType.item
         );
-        console.log(view);
       }
 
       return view;
@@ -514,7 +511,6 @@ export default {
           .then(
             (values) => {
               this.localSelection.itemsAggreation = values;
-              console.log(values);
             },
             (err) => {
               console.log(err);
@@ -598,37 +594,12 @@ export default {
 
     currentCampaign: {
       handler: function (newValue, oldValue) {
-        if (!oldValue && newValue) {
-          // if (!this.activeSelection.campaign)
-          //   this.setDefaultCampaign();
-          // else
+        if (!oldValue && newValue || oldValue.item.id !== newValue.item.id) {
           this.initiSelection();
         }
       },
       deep: true,
     },
-    // actualCompany: {
-    //   handler: function (newValue, oldValue) {
-    //     if (!oldValue && newValue) {
-    //       // if (!this.activeSelection.campaign)
-    //       //   this.setDefaultCampaign();
-    //       // else
-    //       this.initiSelection();
-    //     }
-    //   },
-    //   deep: true,
-    // },
-    // activeSelection: {
-    //   handler: function (newValue,oldValue) {
-    //     if (!oldValue && newValue && this.localSelection && this.activeSelection ) {
-    //       if (!this.activeSelection.campaign)
-    //         this.setDefaultCampaign();
-    //       else
-    //         this.initiSelection();
-    //     }
-    //   },
-    //   deep: true,
-    // },
 
     $route() {
       console.log("E' cambiata la root, ora sei in: ");

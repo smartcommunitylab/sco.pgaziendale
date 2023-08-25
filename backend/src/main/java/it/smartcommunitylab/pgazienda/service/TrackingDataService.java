@@ -17,12 +17,14 @@
 package it.smartcommunitylab.pgazienda.service;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +36,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.opencsv.CSVWriter;
 
 import org.slf4j.Logger;
@@ -457,9 +461,10 @@ public class TrackingDataService {
 	 * @param employeeId (optional) filter by employee
 	 * @param timeGroupBy group by for time: day, month, week, total. Default month 
 	 * @param dataGroupBy grouping of data: employee, location, company, total. Default total
-	 * @param fields data fields to include: score (total points), limitedScore (with limits), trackCount, limitedTrackCount, co2, meanScore, limitedMeanScore, meanDistance, meanDuration, meanCo2 
+	 * @param fields data fields to include: score (total points), limitedScore (with limits), trackCount, limitedTrackCount, co2saved, meanScore, limitedMeanScore, meanDistance, meanDuration, meanCo2 
 	 * @param from starting date
 	 * @param to ending date
+	 * @param all whether to take all the items, even without data
 	 * @return List of stat objects
 	 * @throws InconsistentDataException
 	 */
@@ -468,12 +473,13 @@ public class TrackingDataService {
 			String campaignId,
 			String companyId,
 			String location,
-			String employeeId,			
+			Set<String> employeeId,			
 			GROUP_BY_TIME timeGroupBy,
 			GROUP_BY_DATA dataGroupBy,
-			Set<STAT_FIELD> fields,
+			List<STAT_FIELD> fields,
 			LocalDate from, 
-			LocalDate to
+			LocalDate to,
+			boolean all
 	) throws InconsistentDataException {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
@@ -487,16 +493,19 @@ public class TrackingDataService {
 		if (companyId != null) {
 			criteria = criteria.and("company").is(companyId);
 		}
-		if (employeeId != null) {
-			Employee e = employeeRepo.findById(employeeId).orElse(null);
-			if (e == null) {
-				throw new InconsistentDataException("Invalid employee: " + employeeId, "NO_USER");
+		if (employeeId != null && companyId != null) {
+			List<Employee> employees = employeeRepo.findByIdIn(employeeId);
+			if (employees.isEmpty()) {
+				throw new InconsistentDataException("Invalid employees: " + employeeId, "NO_USER");
 			}
-			Company c = companyRepo.findById(e.getCompanyId()).orElse(null);
+			Company c = companyRepo.findById(companyId).orElse(null);
 			if (c == null) {
-				throw new InconsistentDataException("Invalid company: " + e.getCompanyId(), "NO_COMPANY");
+				throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
 			}
-			List<User> users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, c.getCode(), e.getCode());
+			List<User> users = new LinkedList<>();
+			for (Employee e: employees) {
+				users.addAll(userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, c.getCode(), e.getCode()));
+			}
 			criteria = criteria.and("playerId").in(users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList()));
 		} else if (location != null && companyId != null) {
 			Company company = companyRepo.findById(companyId).orElse(null);
@@ -518,7 +527,7 @@ public class TrackingDataService {
 		GroupOperation groupByOperation = Aggregation.group(group.toArray(new String[group.size()]));
 		Set<STAT_FIELD> meanFields = new HashSet<>(fields);
 		if (fields == null || fields.isEmpty()) {
-			fields = Collections.singleton(STAT_FIELD.score);
+			fields = Collections.singletonList(STAT_FIELD.score);
 		}
 		if (fields.contains(STAT_FIELD.score)) {
 			groupByOperation = groupByOperation.sum("score.score").as("score");
@@ -536,9 +545,9 @@ public class TrackingDataService {
 			groupByOperation = groupByOperation.sum("limitedTrackCount").as("limitedTrackCount");
 			meanFields.remove(STAT_FIELD.limitedTrackCount);
 		}
-		if (fields.contains(STAT_FIELD.co2)) {
+		if (fields.contains(STAT_FIELD.co2saved)) {
 			groupByOperation = groupByOperation.sum("co2saved").as("co2saved");
-			meanFields.remove(STAT_FIELD.co2);
+			meanFields.remove(STAT_FIELD.co2saved);
 		}
 		List<MEAN> means = campaign.getMeans().stream().map(m -> MEAN.valueOf(m)).collect(Collectors.toList());
 		for (STAT_FIELD f: meanFields) {
@@ -562,10 +571,98 @@ public class TrackingDataService {
 			res.add(stat);
 		}
 
+		// grouping by company
+		if (GROUP_BY_DATA.company.equals(dataGroupBy)) {
+			List<Company> list = 
+			  all && companyId == null 
+			? companyRepo.findByCampaign(campaignId) 
+			: companyRepo.findByIdIn(res.stream().map(ds -> ds.getCompany()).collect(Collectors.toSet()));
+			Map<String, Company> companies = list.stream().collect(Collectors.toMap(c -> c.getId(), c -> c));
+			Set<String> companyIds = new HashSet<>(companies.keySet());
+			res.forEach(ds -> {
+				companyIds.remove(ds.getCompany());
+				if (companies.containsKey(ds.getCompany())) ds.setPlayerId(companies.get(ds.getCompany()).getName());
+			});
+			if (all && !companyIds.isEmpty()) {
+				res.addAll(companyIds.stream().map(id -> {
+					DayStat ds = new DayStat();
+					ds.setCompany(id);
+					ds.setPlayerId(companies.get(id).getName());
+					return ds;
+				}).collect(Collectors.toList()));
+			}
+		}
+		if (GROUP_BY_DATA.campaign.equals(dataGroupBy)) {
+			res.forEach(ds -> {
+				ds.setPlayerId(campaign.getTitle());
+			});
+			if (res.isEmpty()) {
+				DayStat ds = new DayStat();
+				ds.setCampaign(campaignId);
+				ds.setPlayerId(campaign.getTitle());
+				res.add(ds);
+			}
+		}
+		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) {
+			Company company = companyRepo.findById(companyId).orElse(null);
+			if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
+
+			Set<String> players = res.stream().map(ds -> ds.getPlayerId()).collect(Collectors.toSet());
+			List<User> users = userRepo.findByPlayerIdIn(players);
+			// get the company employes subscribing the campaign
+			List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(companyId, campaignId);
+			Map<String, Employee> employeeMap = new HashMap<>();
+			Map<String, Employee> playerEmployeeMap = new HashMap<>();
+			employees.forEach(e -> employeeMap.put(e.getCode(), e));
+			users.forEach(u -> {
+				u.getRoles().forEach(r -> {
+					if (r.getSubscriptions() != null) {
+						r.getSubscriptions().forEach(s -> {
+							if (s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(company.getCode()) && employeeMap.containsKey(s.getKey())) {
+								playerEmployeeMap.put(u.getPlayerId(), employeeMap.get(s.getKey()));
+							}
+						});
+					}
+				});
+			});
+			Set<String> employeesWithData = new HashSet<>();
+			res.forEach(ds -> {
+				if (playerEmployeeMap.containsKey(ds.getPlayerId())) {
+					Employee e = playerEmployeeMap.get(ds.getPlayerId());
+					if (e != null) {
+						ds.setPlayerId(e.getSurname()+ " " + e.getName());
+						employeesWithData.add(e.getId());
+					}
+				}
+			});
+			if (all && (employeeId == null || employeeId.isEmpty())) {
+				employees.forEach(e -> {
+					if (!employeesWithData.contains(e.getId())) {
+						DayStat ds = new DayStat();
+						ds.setCampaign(campaignId);
+						ds.setCompany(company.getId());
+						ds.setPlayerId(e.getSurname()+ " " + e.getName());
+						res.add(ds);
+					}
+				});
+			} else if (employeeId != null && !employeeId.isEmpty()) {
+				employees.forEach(e -> {
+					if (employeeId.contains(e.getId()) && !employeesWithData.contains(e.getId())) {
+						DayStat ds = new DayStat();
+						ds.setCampaign(campaignId);
+						ds.setCompany(company.getId());
+						ds.setPlayerId(e.getSurname()+ " " + e.getName());
+						res.add(ds);
+					}
+				});
+			}
+		}
+
 		// Special case: group by location. Map employees to locations and sum
 		if (GROUP_BY_DATA.location.equals(dataGroupBy)) {
 			Company company = companyRepo.findById(companyId).orElse(null);
 			if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
+			// Map<String, CompanyLocation> locations = company.getLocations().stream().collect(Collectors.toMap(l -> l.getId(), l -> l));
 
 			// get the players involved
 			Set<String> players = res.stream().map(ds -> ds.getPlayerId()).collect(Collectors.toSet());
@@ -577,7 +674,7 @@ public class TrackingDataService {
 			Map<String, String> playerLocationMap = new HashMap<>();
 			employees.forEach(e -> employeeLocationMap.put(e.getCode(), e.getLocation()));
 			users.forEach(u -> {
-				u.companyRoles().forEach(r -> {
+				u.getRoles().forEach(r -> {
 					if (r.getSubscriptions() != null) {
 						r.getSubscriptions().forEach(s -> {
 							if (s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(company.getCode()) && employeeLocationMap.containsKey(s.getKey())) {
@@ -589,10 +686,12 @@ public class TrackingDataService {
 			});
 			List<DayStat> locationRes = new LinkedList<>();
 			Map<String, Map<String,DayStat>> locationStats = new HashMap<>();
+			Set<String> locationsWithData = new HashSet<>();
 			for (DayStat ds: res) {
 				String pid = ds.getPlayerId();
 				String lid = playerLocationMap.get(pid);
 				if (lid == null) continue;
+				locationsWithData.add(lid);
 				String key = getAggKey(ds, timeGroupBy);
 				Map<String,DayStat> lsMap = locationStats.get(lid);
 				if (lsMap == null) {
@@ -635,6 +734,17 @@ public class TrackingDataService {
 					ls.getMeanDuration().mergeScore(ds.getMeanDuration());
 					ls.getMeanTracks().mergeScore(ds.getMeanTracks());
 				}
+			}
+			if (all && location == null) {
+				company.getLocations().forEach(l -> {
+					if (!locationsWithData.contains(l.getId())) {
+						DayStat ls = new DayStat();
+						ls.setCampaign(campaignId);
+						ls.setCompany(companyId);
+						ls.setPlayerId(l.getId());
+						locationRes.add(ls);
+					}
+				});
 			}
 			return locationRes;
 		}
@@ -696,459 +806,6 @@ public class TrackingDataService {
 		return groupByOperation;
 	}
 
-	/**
-	 * Retrieve aggregated statistics
-	 * @param playerId
-	 * @param campaignId
-	 * @param from date from (including)
-	 * @param to date to  (including)
-	 * @param groupBy (day o month)
-	 * @param withTracks (to inlcude tracks or not, applicable for day aggregation only)
-	 * @return
-	 * @throws InconsistentDataException 
-	 */
-	public List<DayStat> getUserCampaignData(String playerId, String campaignId, LocalDate from, LocalDate to, String groupBy, Boolean withTracks, Boolean noLimits) throws InconsistentDataException {
-		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
-
-		if (to == null) to = LocalDate.now();
-		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId).and("date").lte(to.toString());
-		if (from != null) criteria = criteria.gte(from.toString());
-		List<DayStat> res = null;
-		if (Constants.AGG_DAY.equals(groupBy)) {
-			Query q = Query.query(criteria);
-			if (!withTracks) q.fields().exclude("tracks");
-			res = template.find(q, DayStat.class);
-			if (!Boolean.TRUE.equals(noLimits)) {
-				res.forEach(ds -> ds.setMeanScore(ds.getLimitedMeanScore()));
-				// LimitsUtils.applyLimits(res, groupBy, campaign);
-			} 
-		} else if (Constants.AGG_MONTH.equals(groupBy) || Constants.AGG_TOTAL.equals(groupBy) || Constants.AGG_WEEK.equals(groupBy)){
-			res = doAggregation(campaign, criteria, groupBy, noLimits);
-		} else {
-			throw new InconsistentDataException("Incorrect grouping: " + groupBy, "INVALID_GROUPING_DATA");
-		} 
-		res.forEach(stat -> {
-			stat.setCampaign(campaignId);
-		});
-		return res;
-	}
-	
-	/**
-	 * Collect campaign statistics
-	 * @param campaignId
-	 * @param groupBy
-	 * @param from
-	 * @param to
-	 * @param noLimits
-	 * @return
-	 * @throws InconsistentDataException 
-	 */
-	public List<DayStat> createCampaignStats(String campaignId, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) throws InconsistentDataException {
-		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
-		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
-		if (from != null) criteria = criteria.gte(from.toString());
-
-		return extractStats(groupBy, false, noLimits, campaign, criteria);		
-	}
-	
-	/**
-	 * Collect campaign statistics
-	 * @param campaignId
-	 * @param groupBy
-	 * @param from
-	 * @param to
-	 * @param noLimits
-	 * @return
-	 * @throws InconsistentDataException 
-	 */
-	public List<DayStat> createCampaignCompanyStats(String campaignId, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) throws InconsistentDataException {
-		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
-		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
-		if (from != null) criteria = criteria.gte(from.toString());
-
-		return extractStats(groupBy, true, noLimits, campaign, criteria);		
-	}
-
-	/**
-	 * Collect company statistics
-	 * @param campaignId
-	 * @param groupBy
-	 * @param from
-	 * @param to
-	 * @param noLimits
-	 * @return
-	 * @throws InconsistentDataException 
-	 */
-	public List<DayStat> createCompanyStats(String campaignId, String companyId, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) throws InconsistentDataException {
-		Company company = companyRepo.findById(companyId).orElse(null);
-		if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
-
-		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
-		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
-		if (from != null) criteria = criteria.gte(from.toString());
-		
-		List<String> users = userRepo.findByCampaignAndCompany(campaignId, company.getCode()).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
-		criteria = criteria.and("playerId").in(users);
-		return extractStats(groupBy, false, noLimits, campaign, criteria);		
-	}
-
-	/**
-	 * Collect location statistics
-	 * @param campaignId
-	 * @param groupBy
-	 * @param from
-	 * @param to
-	 * @param noLimits
-	 * @return
-	 * @throws InconsistentDataException 
-	 */
-	public List<DayStat> createCompanyLocationStats(String campaignId, String companyId, String location, String groupBy, LocalDate from, LocalDate to, Boolean noLimits) throws InconsistentDataException {
-		Company company = companyRepo.findById(companyId).orElse(null);
-		if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
-
-		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
-		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
-		if (from != null) criteria = criteria.gte(from.toString());
-		
-		Set<String> employeeKeys = employeeRepo.findByCompanyIdAndLocation(companyId, location).stream().map(e -> e.getCode()).collect(Collectors.toSet());
-		
-		List<String> users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, company.getCode(), employeeKeys).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
-		criteria = criteria.and("playerId").in(users);
-		return extractStats(groupBy, false, noLimits, campaign, criteria);		
-	}
-	/**
-	 * @param groupBy
-	 * @param noLimits
-	 * @param campaign
-	 * @param group
-	 * @param criteria
-	 * @return
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private List<DayStat> extractStats(String groupBy, boolean company, Boolean noLimits, Campaign campaign, Criteria criteria) {
-		
-		String group = Constants.AGG_TOTAL.equals(groupBy) 
-			? "campaign"
-			: Constants.AGG_MONTH.equals(groupBy) 
-			? "month" 
-			: Constants.AGG_WEEK.equals(groupBy)
-			? "week"
-			: "date";
-
-		MatchOperation filterOperation = Aggregation.match(criteria);
-		String src = Boolean.TRUE.equals(noLimits) ? "meanScore" : "limitedMeanScore";
-
-		String[] groupArray = company ? new String[]{"company", group} : new String[]{group};
-		
-		GroupOperation groupByOperation = Aggregation.group(groupArray)
-				.sum("co2saved").as("co2saved")
-				.sum("trackCount").as("trackCount")
-				.sum("limitedTrackCount").as("limitedTrackCount");
-		
-		for (String mean: campaign.getMeans()) groupByOperation = groupByOperation.sum(src + "." + mean).as(mean);
-		
-		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
-		AggregationResults<Map> aggResult = template.aggregate(aggregation, DayStat.class, Map.class);
-		return aggResult.getMappedResults().stream().map(m -> {
-			DayStat stat = new DayStat();
-			stat.setCo2saved(((Number)m.getOrDefault("co2saved", 0d)).doubleValue());
-			stat.setMeanScore(MeanScore.fromMap(m));
-			stat.setTrackCount((Integer) m.getOrDefault("trackCount", 0));
-			stat.setLimitedTrackCount((Integer) m.getOrDefault("limitedTrackCount", 0));
-			
-			if (company) {
-				Map<String, String> idMap = (Map<String, String>) m.get("_id");
-				stat.setCompany((String)idMap.get("company"));
-				if (Constants.AGG_DAY.equals(groupBy)) {
-					stat.setDate((String)idMap.get("date"));
-					LocalDate ld = LocalDate.parse(stat.getDate());
-					stat.setMonth(ld.format(MONTH_PATTERN));
-					stat.setWeek(ld.format(WEEK_PATTERN));
-				}
-				if (Constants.AGG_MONTH.equals(groupBy)) {
-					stat.setMonth((String)idMap.get("month"));
-				}
-				if (Constants.AGG_WEEK.equals(groupBy)) {
-					stat.setWeek((String)idMap.get("week"));
-					LocalDate ld = LocalDate.parse(stat.getWeek(), WEEK_PATTERN);
-					stat.setMonth(ld.format(MONTH_PATTERN));
-				}
-			} else {
-				if (Constants.AGG_DAY.equals(groupBy)) {
-					stat.setDate((String)m.get("_id"));
-					LocalDate ld = LocalDate.parse(stat.getDate());
-					stat.setMonth(ld.format(MONTH_PATTERN));
-					stat.setWeek(ld.format(WEEK_PATTERN));
-				}
-				if (Constants.AGG_MONTH.equals(groupBy)) {
-					stat.setMonth((String)m.get("_id"));
-				}
-				if (Constants.AGG_WEEK.equals(groupBy)) {
-					stat.setWeek((String)m.get("_id"));
-					LocalDate ld = LocalDate.parse(stat.getWeek(), WEEK_PATTERN);
-					stat.setMonth(ld.format(MONTH_PATTERN));
-				}			
-			}
-
-			return stat;
-		}).sorted((a,b) -> {
-			if (a.getDate() != null) return a.getDate().compareTo(b.getDate());
-			if (a.getMonth() != null) return a.getMonth().compareTo(b.getMonth());
-			return 0;
-		}).collect(Collectors.toList());
-	}
-
-	/**
-	 * Create company stats for every single employee within given period
-	 * @param writer
-	 * @param campaignId
-	 * @param companyId
-	 * @param from
-	 * @param to
-	 * @throws InconsistentDataException 
-	 */
-	public void createEmployeeStatsCSV(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) throws InconsistentDataException {
-		Company company = companyRepo.findById(companyId).orElse(null);
-		if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
-		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
-		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
-
-		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
-		String header = "Nome;Cognome;CodiceSede;ViaggiValidi";
-		for (int i = 0; i < campaign.getMeans().size(); i++) header += ";KmTotValidi_" + campaign.getMeans().get(i);
-		
-		csvWriter.writeNext(header.split(";"));
-		stats.forEach(ds -> {
-			List<Employee> employees = findCompanyEmployees(ds.getPlayerId(), campaignId, company.getCode(), companyId);
-			if (employees == null) return;
-			// filter company employee: should be only one for playerId
-			Employee employee = employees.stream().filter(e -> e.getCompanyId().equals(companyId)).findFirst().orElse(null);
-			if (employee == null) return;
-			
-			String[] rec = new String[4 + campaign.getMeans().size()];
-			rec[0] = employee.getName();
-			rec[1] = employee.getSurname();
-			rec[2] = employee.getLocation();
-			rec[3] = ds.getTrackCount() == null ? "0": ds.getTrackCount().toString();
-			for (int i = 0; i < campaign.getMeans().size(); i++) {
-				Double mv = ds.getMeanScore().meanValue(MEAN.valueOf(campaign.getMeans().get(i)));
-				if (mv == null) mv = 0d;
-				// mv = mv / 1000;
-				rec[i + 4] = mv.toString();
-			}
-			csvWriter.writeNext(rec);
-		});
-		try {
-			csvWriter.close();
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
-	/**
-	 * Create company stats for each location
-	 * @param writer
-	 * @param campaignId
-	 * @param companyId
-	 * @param from
-	 * @param to
-	 * @throws InconsistentDataException 
-	 */
-	public void createLocationStatsCSV(Writer writer, String campaignId, String companyId, LocalDate from, LocalDate to) throws InconsistentDataException {
-		Company company = companyRepo.findById(companyId).orElse(null);
-		if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
-		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
-		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
-
-		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
-		String header = "Indentificativo;Indirizzo;Numero;CAP;Comune;Provincia;ViaggiValidi";
-		for (int i = 0; i < campaign.getMeans().size(); i++) header += ";KmTotValidi_" + campaign.getMeans().get(i);
-		
-		csvWriter.writeNext(header.split(";"));
-		
-		Map<String, List<DayStat>> locationStats = stats.stream().map(ds -> {
-			List<Employee> employees = findCompanyEmployees(ds.getPlayerId(), campaignId, company.getCode(), companyId);
-			if (employees == null) return ds;
-			// filter company employee: should be only one for playerId
-			Employee employee = employees.stream().filter(e -> e.getCompanyId().equals(companyId)).findFirst().orElse(null);
-			if (employee == null) return ds;
-			// trick to pass location for aggregation
-			ds.setCompany(employee.getLocation());
-			return ds;
-		}).filter(ds -> ds.getCompany() != null).collect(Collectors.groupingBy(DayStat::getCompany));
-		
-		locationStats.keySet().forEach(locationId -> {
-			CompanyLocation location = company.getLocations().stream().filter(l -> locationId.equals(l.getId())).findFirst().orElse(null);
-			if (location == null) return;
-			
-			String[] rec = new String[7 + campaign.getMeans().size()];
-			rec[0] = locationId;
-			rec[1] = location.getAddress();
-			rec[2] = location.getStreetNumber();
-			rec[3] = location.getZip();
-			rec[4] = location.getCity();
-			rec[5] = location.getProvince();
-			
-			MeanScore d = new MeanScore();
-			int totalTrips = 0;
-			for (DayStat ds: locationStats.get(locationId)) {
-				d.mergeScore(ds.getMeanScore());
-				totalTrips += (ds.getTrackCount() == null ? 0 : ds.getTrackCount());
-			}
-			
-			rec[6] = ""+totalTrips;
-			for (int i = 0; i < campaign.getMeans().size(); i++) {
-				Double mv = d.meanValue(MEAN.valueOf(campaign.getMeans().get(i)));
-				if (mv == null) mv = 0d;
-				// mv = mv / 1000;
-				rec[i + 7] = mv.toString();
-			}
-			csvWriter.writeNext(rec);
-		});
-
-
-		try {
-			csvWriter.close();
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}	
-	
-	
-	public void createCampaignStatsCSV(Writer writer, String campaignId, LocalDate from, LocalDate to) throws InconsistentDataException {
-		List<DayStat> stats = doPlayerAggregation(campaignId, from, to);
-		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
-
-		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
-		String header = "Azienda;ViaggiValidi";
-		for (int i = 0; i < campaign.getMeans().size(); i++) header += ";KmTotValidi_" + campaign.getMeans().get(i);
-		
-		csvWriter.writeNext(header.split(";"));
-		
-		final List<DayStat> newStats = new LinkedList<>();
-		final Map<String, Company> companyCache = new HashMap<>();
-		stats.forEach(ds -> {
-			List<Employee> employees = findEmployees(ds.getPlayerId(), campaignId, companyCache);
-			if (employees != null) {
-				employees.forEach(e -> {
-					DayStat newDs = new DayStat();
-					newDs.setMeanScore(DayStat.MeanScore.copy(ds.getMeanScore()));
-					newDs.setCompany(e.getCompanyId());
-					newDs.setTrackCount(ds.getTrackCount());
-					newStats.add(newDs);
-				});
-			}
-			
-		});
-		
-		
-		Map<String, List<DayStat>> companyStats = newStats.stream().filter(ds -> ds.getCompany() != null).collect(Collectors.groupingBy(DayStat::getCompany));
-				
-		
-		companyStats.keySet().forEach(companyId -> {
-			Company company = companyRepo.findById(companyId).orElse(null);
-			if (company == null) return;
-			
-			String[] rec = new String[2 + campaign.getMeans().size()];
-			rec[0] = company.getName();
-			MeanScore d = new MeanScore();
-			int totalTrips = 0;
-			for (DayStat ds: companyStats.get(companyId)) {
-				d.mergeScore(ds.getMeanScore());
-				totalTrips += (ds.getTrackCount() == null ? 0 : ds.getTrackCount());
-			}
-			
-			rec[1] = ""+totalTrips;
-			for (int i = 0; i < campaign.getMeans().size(); i++) {
-				Double mv = d.meanValue(MEAN.valueOf(campaign.getMeans().get(i)));
-				if (mv == null) mv = 0d;
-				// mv = mv / 1000;
-				rec[i + 2] = mv.toString();
-			}
-			csvWriter.writeNext(rec);
-		});
-
-
-		try {
-			csvWriter.close();
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}	
-	/**
-	 * Find employees prefiltered for specified company
-	 * @param playerId
-	 * @param campaignId
-	 * @param companyCode
-	 * @param companyId
-	 * @return
-	 */
-	private List<Employee> findCompanyEmployees(String playerId, String campaignId, String companyCode, String companyId) {
-		User user = userRepo.findByPlayerId(playerId).orElse(null);
-		if (user != null && user.getRoles() != null) {
-			final List<Employee> res = new LinkedList<>();
-			user.getRoles().forEach(r -> {
-				if (r.getSubscriptions() != null) {
-					r.getSubscriptions().stream()
-					.filter(s -> s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(companyCode))
-					.forEach(s -> {
-						Employee e = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, s.getKey()).stream().findAny().orElse(null);
-						if (e != null) res.add(e);
-					});
-				}
-			});
-			return res;
-		}
-		return Collections.emptyList();
-	}
-	
-	private List<Employee> findEmployees(String playerId, String campaignId, Map<String, Company> companyCache) {
-		User user = userRepo.findByPlayerId(playerId).orElse(null);
-		if (user != null && user.getRoles() != null) {
-			final List<Employee> res = new LinkedList<>();
-			user.getRoles().forEach(r -> {
-				if (r.getSubscriptions() != null) {
-					r.getSubscriptions().stream()
-					.filter(s -> s.getCampaign().equals(campaignId))
-					.forEach(s -> {
-						Company company = companyCache.getOrDefault(s.getCompanyCode(), companyRepo.findByCode(s.getCompanyCode()).stream().findFirst().orElse(null));
-						companyCache.put(s.getCompanyCode(), company);
-						if (company != null) {
-							Employee e = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), s.getKey()).stream().findAny().orElse(null);
-							if (e != null) res.add(e);
-						}
-					});
-				}
-			});
-			return res;
-		}
-		return Collections.emptyList();
-	}
-
-	public List<DayStat> doPlayerAggregation(String campaignId, LocalDate from, LocalDate to) throws InconsistentDataException {
-		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
-		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
-
-		Criteria criteria = new Criteria("campaign").is(campaignId).and("date").lte(to.toString());
-		if (from != null) {
-			criteria = criteria.gte(from.toString());
-		}		
-		List<DayStat> aggregation = doAggregation(campaign, criteria, null, false);
-		final Map<String, List<DayStat>> playerStatMap = aggregation.stream().collect(Collectors.groupingBy(DayStat::getPlayerId));
-		return playerStatMap.keySet().stream().map(playerId -> {
-			List<DayStat> playerStats = playerStatMap.get(playerId);
-			return playerStats.get(0);
-		}).collect(Collectors.toList());
-	}
-	
 
 	/**
 	 * @param playerId
@@ -1193,36 +850,6 @@ public class TrackingDataService {
 			return stat;
 		}).collect(Collectors.toList());
 	}
-	
-	public List<TransportStatDTO> getPlayerTransportStatsGroupByMean(String playerId, String campaignId, String groupMode, String meanStr, String dateFrom, String dateTo) throws InconsistentDataException {
-		MEAN mean = StringUtils.hasText(meanStr) ? MEAN.valueOf(meanStr) : MEAN.bike;
-		if ("day".equals(groupMode) || "month".equals(groupMode) || "week".equals(groupMode)) {
-			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null : LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), groupMode, false, false);
-			return list.stream().map(ds -> {
-				TransportStatDTO dto = new TransportStatDTO();
-				dto.setPeriod( "month".equals(groupMode) ? ds.getMonth() : "week".equals(groupMode) ? ds.getWeek() : ds.getDate());
-				dto.setValue(ds.getMeanScore().meanValue(mean));
-				return dto;
-			}).collect(Collectors.toList());
-		} else {
-			List<DayStat> list = getUserCampaignData(playerId, campaignId, dateFrom == null ? null :LocalDate.parse(dateFrom), dateTo == null ? null : LocalDate.parse(dateTo), Constants.AGG_TOTAL, false, false);
-			return list.stream().map(ds -> {
-				TransportStatDTO dto = new TransportStatDTO();
-				dto.setPeriod(ds.getDate());
-				dto.setValue(ds.getMeanScore().meanValue(mean));
-				return dto;
-			}).collect(Collectors.toList());
-		}
-	}
-
-
-	
-	public boolean hasCampaignData(String playerId, String campaignId) {
-		Criteria criteria = new Criteria("playerId").is(playerId).and("campaign").is(campaignId);
-		DayStat stat = template.findOne(Query.query(criteria), DayStat.class);
-		return stat != null;
-	}
-	
 
 	/**
 	 * @param campaignId
@@ -1230,5 +857,211 @@ public class TrackingDataService {
 	public void cleanCampaign(String campaignId) {
 		dayStatRepo.deleteByCampaign(campaignId);
 	}
-	
+
+	public void csvStatistics(
+			PrintWriter writer, 			
+			String campaignId,
+			String companyId,
+			String location,
+			Set<String> employeeId,			
+			GROUP_BY_TIME timeGroupBy,
+			GROUP_BY_DATA dataGroupBy,
+			List<STAT_FIELD> fields,
+			LocalDate from, 
+			LocalDate to,
+			boolean all
+	) throws InconsistentDataException {
+		try {
+			Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+			if (from == null) from = campaign.getFrom();
+			if (to == null) to = LocalDate.now();
+
+			if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+
+			CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+			List<DayStat> res = statistics(campaignId, companyId, location, employeeId, timeGroupBy, dataGroupBy, fields, from, to, all);
+			
+			// headers
+			List<String> headers = createHeaders(timeGroupBy, from, to);
+			List<String> fieldHeaders = createSubheaders(headers, fields, campaign);
+			String nameHeader = getNameHeader(dataGroupBy);
+			// write headers
+			if (!headers.isEmpty()) {
+				String s = ";";
+				for (String h: headers) {
+					s += h;
+					for (String f: fieldHeaders) {
+						s += ";";
+					}
+				}
+				csvWriter.writeNext(s.split(";"));
+			}
+			String ss = nameHeader;
+			for (int i = 0; i < Math.max(headers.size(), 1); i++){
+				for (String f: fieldHeaders) {
+					ss += ";" +f;
+				}
+			}
+			csvWriter.writeNext(ss.split(";"));
+			Multimap<String, DayStat> mm = Multimaps.index(res, ds -> ds.getPlayerId());
+			List<String[]> table = new LinkedList<>();
+			mm.keySet().forEach(id -> {
+				List<String> values = extractValues(id, mm.get(id), timeGroupBy, fields, headers, campaign);
+				table.add(values.toArray(new String[values.size()]));
+			});
+			table.sort((a,b) -> a[0].compareToIgnoreCase(b[0]));
+			table.forEach(l -> {
+				csvWriter.writeNext(l);
+			});
+		} finally  {
+			if (writer != null) {
+				try {
+					writer.close();					
+				} catch (Exception e) {
+				}
+			}
+		}
+
+	}
+
+	private List<String> extractValues(String id, Collection<DayStat> list, GROUP_BY_TIME timeGroupBy, List<STAT_FIELD> fields, List<String> headers, Campaign campaign) {
+		List<String> res = new LinkedList<>();
+		res.add(id);
+		// total aggregation, assume one record exists
+		if (headers.isEmpty()) {
+			res.addAll(extractValuesForHeader("", list.iterator().next(), fields, campaign));
+		} else {
+			Map<String, DayStat> objectMap = new HashMap<>();
+			list.forEach(ds -> {
+				if (GROUP_BY_TIME.day.equals(timeGroupBy)) {
+					objectMap.put(ds.getDate(), ds);
+				}
+				else if (GROUP_BY_TIME.week.equals(timeGroupBy)) {
+					objectMap.put(ds.getWeek(), ds);
+				}
+				else if (GROUP_BY_TIME.month.equals(timeGroupBy)) {
+					objectMap.put(ds.getMonth(), ds);
+				}
+			});
+			headers.forEach(h -> {
+				res.addAll(extractValuesForHeader(h, objectMap.get(h), fields, campaign));
+			});
+		}
+		return res;
+	}
+
+	private List<String> extractValuesForHeader(String h, DayStat inds, List<STAT_FIELD> fields, Campaign campaign) {
+		List<String> res = new LinkedList<>();
+		final DayStat ds = inds == null ? new DayStat() : inds;
+		fields.forEach(f -> {
+			switch (f) {
+				case score:
+					res.add(normalizedValue(ds.getScore().getScore(), 1)); break;
+				case limitedScore:
+					res.add(normalizedValue(ds.getLimitedScore().getScore(), 1)); break;
+				case trackCount:
+					res.add(normalizedValue(ds.getTrackCount(), 1)); break;
+				case limitedTrackCount:
+					res.add(normalizedValue(ds.getLimitedTrackCount(), 1)); break;
+				case co2saved:
+					res.add(normalizedValue(ds.getCo2saved(), 1)); break;
+				case meanScore: 
+					campaign.getMeans().forEach(ms -> {
+						MEAN m = MEAN.valueOf(ms);
+						res.add(normalizedValue(ds.getMeanScore().meanValue(m), 1)); 					
+					});
+					break;
+				case limitedMeanScore:
+					campaign.getMeans().forEach(ms -> {
+						MEAN m = MEAN.valueOf(ms);
+						res.add(normalizedValue(ds.getLimitedMeanScore().meanValue(m), 1)); 					
+					});
+					break;
+				case meanDistance: 
+					campaign.getMeans().forEach(ms -> {
+						MEAN m = MEAN.valueOf(ms);
+						res.add(normalizedValue(ds.getMeanDistance().meanValue(m), 0.001)); 					
+					});
+					break;
+				case meanDuration: //, , 
+					campaign.getMeans().forEach(ms -> {
+						MEAN m = MEAN.valueOf(ms);
+						res.add(normalizedValue(ds.getMeanDuration().meanValue(m), 1/3600)); 					
+					});
+					break;
+				case meanCo2: 
+					campaign.getMeans().forEach(ms -> {
+						MEAN m = MEAN.valueOf(ms);
+						res.add(normalizedValue(ds.getMeanCo2().meanValue(m), 1)); 					
+					});
+					break;
+				case meanTracks: 
+					campaign.getMeans().forEach(ms -> {
+						MEAN m = MEAN.valueOf(ms);
+						res.add(normalizedValue(ds.getMeanCo2().meanValue(m), 1)); 					
+					});
+					break;
+			}
+		});
+		return res;
+	}
+
+	private String normalizedValue(Number score, double multiplier) {
+		return score != null ? ""+(score.doubleValue() * multiplier) : "0";
+	}
+
+	private List<String> createHeaders(GROUP_BY_TIME timeGroupBy, LocalDate from, LocalDate to) {
+		List<String> list = new LinkedList<>();
+		if (GROUP_BY_TIME.day.equals(timeGroupBy)) {
+			LocalDate curr = from;
+			while (!curr.isAfter(to)) {
+				list.add(curr.toString());
+				curr = curr.plusDays(1);
+			}
+		}
+		else if (GROUP_BY_TIME.week.equals(timeGroupBy)) {
+			LocalDate curr = from;
+			while (!curr.isAfter(to)) {
+				list.add(curr.format(WEEK_PATTERN));
+				curr = curr.plusWeeks(1);
+			}
+		}
+		else if (GROUP_BY_TIME.month.equals(timeGroupBy)) {
+			LocalDate curr = from;
+			while (!curr.isAfter(to)) {
+				list.add(curr.format(MONTH_PATTERN));
+				curr = curr.plusMonths(1);
+			}
+		}
+		return list;
+	}
+	private List<String> createSubheaders(List<String> headers, List<STAT_FIELD> fields, Campaign campaign) {
+		List<String> fList = new LinkedList<>();
+		fields.forEach(f -> {
+			switch (f) {
+				case score:
+				case limitedScore:
+				case trackCount:
+				case limitedTrackCount:
+				case co2saved:
+					fList.add(f.name());
+					break;
+				default:
+					campaign.getMeans().forEach(m -> {
+						fList.add(f.name() + "_" + m);
+					});
+					break;
+			}
+		});
+		return fList;
+	}
+	private String getNameHeader(GROUP_BY_DATA dataGroupBy) {
+		switch (dataGroupBy) {
+			case employee: return "Dipendente";
+			case location: return "Sede";
+			case company: return "Azienda";
+			case campaign: return "Campagna";
+		}
+		return dataGroupBy.name();
+	}
 }

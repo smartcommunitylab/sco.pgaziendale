@@ -26,8 +26,8 @@ export default {
     return {
       selectionCards: [
         {
-          title: "Km fatti e utili",
-          description: "Visualizzazione Km totali fatti per unitá temporale",
+          title: "Punti fatti e utili",
+          description: "Visualizzazione punti virtuali totali fatti per unitá temporale",
           method: this.pippo,
         },
         {

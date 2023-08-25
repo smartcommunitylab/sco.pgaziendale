@@ -110,14 +110,10 @@ const actions = {
     commit("setCurrentCampaign", campaign);
   },
   setActiveSelection({ commit }, { selection }) {
-    console.log("active Selection:");
-    console.log(selection);
     commit("setActiveSelection", selection);
     //call and get stats?
   },
   setActiveConfiguration({ commit, dispatch, state }, { configurationId }) {
-    console.log("configurationID:");
-    console.log(configurationId);
     commit("setActiveConfiguration");
     statService.getActiveConfiguration(configurationId).then(
       (configurationId) => {
@@ -142,8 +138,6 @@ const actions = {
   },
 
   setActiveViewType({ commit, dispatch }, { activeViewType }) {
-    console.log("activeViewType:");
-    console.log(activeViewType);
     commit("setActiveViewType");
     statService.setActiveViewType(activeViewType).then(
       (activeViewType) => {

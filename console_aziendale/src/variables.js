@@ -12,7 +12,7 @@ export const VARIABLES = {
     NAME: {
       EMPLOYEES_PARTECIPATION: "Partecipazione Dipendenti",
       ENVIRONMENTAL_IMPACT: "Impatto Ambientale",
-      KM_COUNTED: "Km fatti e utili",
+      KM_COUNTED: "Punti totali e utili",
     },
     VIEWS: {
       TYPE: {
@@ -29,13 +29,67 @@ export const VARIABLES = {
         INACTIVE_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti iscritti inattivi", value: "% dipendenti iscritti inattivi" },
         NOT_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti non iscritti", value: "% dipendenti non iscritti" },
         PERCENTAGE_EMPLOYEES: { label: "% dipendenti", value: "% dipendenti" },
-        TOTAL_TRAVEL: { label: "Totale viaggi", value: "totalTrackCount" },
-        KM_TRAVELED: "Km percorsi",
-        COUNTING_KM: "Km utili",
-        DISCARDED_KM:  "Km scartati",
-        N_TRAVEL:  "Numero viaggi",
-        N_COUNTING_TRAVEL:  "Numero viaggi utili", 
-        CO2_SAVED: "CO2 salvata", 
+        CO2_SAVED: {
+          label: "CO2 salvata",
+          value: "co2saved",
+          apiField: "co2saved"
+        }, 
+        POINTS: {
+          label: "Punti totali",
+          value: "score",
+          apiField: "score"
+        },
+        COUNTING_POINTS: {
+          label:  "Punti utili", 
+          value:  "limitedScore",
+          apiField: "limitedScore"
+        },
+        N_COUNTING_TRAVEL: {
+          label:  "Viaggi utili", 
+          value: "limitedTrackCount",
+          apiField: "limitedTrackCount"
+        },
+        N_TRAVEL: {
+          label: "Viaggi totali",
+          value: "trackCount",
+          apiField: "trackCount"
+        },
+        MEAN_POINTS: {
+          label: "Punti totali per mezzo",
+          value: "meanScore",
+          apiField: "meanScore",
+          mean: true
+        },
+        MEAN_COUNTING_POINTS: {
+          label: "Punti utili per mezzo",
+          value: "limitedMeanScore",
+          apiField: "limitedMeanScore",
+          mean: true
+        },
+        MEAN_DISTANCE: {
+          label: "Km per mezzo",
+          value: "meanDistance",
+          apiField: "meanDistance",
+          mean: true
+        },
+        MEAN_DURATION: {
+          label: "Ore per mezzo",
+          value: "meanDuration",
+          apiField: "meanDuration",
+          mean: true
+        },
+        MEAN_CO2_SAVED: {
+          label: "CO2 salvata per mezzo",
+          value: "meanCo2",
+          apiField: "meanCo2",
+          mean: true
+        },
+        MEAN_N_TRAVEL: {
+          label: "Viaggi per mezzo",
+          value: "meanTracks",
+          apiField: "meanTracks",
+          mean: true
+        },
       },
       DATALEVEL: {
         LOCATIONS:  "Sedi",

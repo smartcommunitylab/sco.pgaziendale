@@ -11,6 +11,7 @@
         item-value="id"
         :items="allCampaigns.items"
         @change="updateCampaign"
+        :return-object="true"
         outlined
       ></v-autocomplete>
     </v-col>
@@ -48,6 +49,7 @@ export default {
     if (this.isAdmin) {
       if (this.allCampaigns && this.allCampaigns.items) {
         this.localCampaign = this.allCampaigns.items[0];
+        console.log('mounted',this.localCampaign);
         this.updateCampaign();
       } else {
         this.getAllCampaigns();
@@ -62,6 +64,7 @@ export default {
       handler: function (newValue, oldValue) {
         if (oldValue && oldValue.loading && newValue.items) {
           this.localCampaign = newValue.items[0];
+          console.log('watched',this.localCampaign);
           this.updateCampaign();
         }
       },
@@ -75,10 +78,10 @@ export default {
     ...mapActions("stat", {
       setCurrentCampaign: "setCurrentCampaign",
     }),
-    updateCampaign(value) {
-      console.log(value);
+    updateCampaign() {
       if (this.activeSelection && this.localCampaign) {
         // this.activeSelection.campaign = this.localCampaign;
+        console.log('updated',this.localCampaign);
         this.setCurrentCampaign({ campaign: this.localCampaign });
       }
     },
