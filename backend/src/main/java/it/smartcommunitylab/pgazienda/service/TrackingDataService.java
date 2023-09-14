@@ -16,9 +16,7 @@
 
 package it.smartcommunitylab.pgazienda.service;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -34,8 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.opencsv.CSVWriter;
@@ -49,10 +45,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Circle;
 import it.smartcommunitylab.pgazienda.domain.Company;
@@ -77,7 +70,6 @@ import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO.TrackValidityLegDTO;
-import it.smartcommunitylab.pgazienda.dto.TransportStatDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
@@ -115,14 +107,14 @@ public class TrackingDataService {
 	@Autowired
 	private MongoTemplate template;
 
-	@PostConstruct
-	public void update() {
-		List<DayStat> list = dayStatRepo.findAll();
-		for (DayStat ds : list) {
-			ds.recalculate();
-		}
-		dayStatRepo.saveAll(list);
-	}
+	// @PostConstruct
+	// public void update() {
+	// 	List<DayStat> list = dayStatRepo.findAll();
+	// 	for (DayStat ds : list) {
+	// 		ds.recalculate();
+	// 	}
+	// 	dayStatRepo.saveAll(list);
+	// }
 
 	/**
 	 * Validate multimodal track. 
@@ -224,7 +216,7 @@ public class TrackingDataService {
 				stat.setScore(new Score());
 			}
 
-			Map<TrackLegDTO, TrackingData> trackMap = new HashMap<>();
+			Map<String, TrackingData> trackMap = new HashMap<>();
 			for (TrackLegDTO l : matchingLegs) {
 				MEAN mean = MEAN.valueOf(l.getMean());
 				// identify track data validated or re-validated
@@ -241,7 +233,7 @@ public class TrackingDataService {
 				td.setDuration(l.getDuration());
 				td.setCo2(l.getCo2());
 				td.setMultimodalId(track.getMultimodalId());
-				trackMap.put(l, td);
+				trackMap.put(l.getId(), td);
 			}
 			// recalculate the score from updated track list
 			limitScore(campaign, playerId, stat);
@@ -259,7 +251,7 @@ public class TrackingDataService {
 				leg.setMean(l.getMean());
 				leg.setDistance(l.getDistance());
 				leg.setId(l.getId());
-				TrackingData td = trackMap.get(l);
+				TrackingData td = trackMap.get(l.getId());
 				// put valid value considering max imposed by the limit
 				leg.setVirtualScore(td.getLimitedScore());
 				validity.getLegs().add(leg);				
@@ -369,17 +361,18 @@ public class TrackingDataService {
 		// recalculate scores of the tracking data
 		Set<String> mmIds = new HashSet<>();
 		double score = 0d, limitedScore = 0d;
-		for (TrackingData td : stat.getTracks()) {			
+		for (TrackingData td : stat.getTracks()) {
+			String mmId = td.getMultimodalId() != null ? td.getMultimodalId() : ("" + td.hashCode());
 			VirtualScoreValue vsv = campaign.getVirtualScore().meanValue(MEAN.valueOf(td.getMode()));
 			if (vsv != null) {
 				double tds = getScore(td.getDistance(), td.getDuration(), td.getCo2(), vsv);
 				td.setScore(tds);
 				score += tds;
-				if (mmIds.size() < stat.getLimitedTrackCount()) {
+				if (mmIds.contains(mmId) || mmIds.size() < stat.getLimitedTrackCount()) {
 					limitedScore += tds;
 				}
 			}
-			mmIds.add(td.getMultimodalId() != null ? td.getMultimodalId() : ("" + td.hashCode()));
+			mmIds.add(mmId);
 		}
 		stat.setScore(new Score(score));
 		// apply limites to the score
