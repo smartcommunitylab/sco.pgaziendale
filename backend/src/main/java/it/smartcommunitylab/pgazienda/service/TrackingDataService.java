@@ -512,7 +512,9 @@ public class TrackingDataService {
 		MatchOperation filterOperation = Aggregation.match(criteria);
 		List<String> group = new LinkedList<>();
 		group.add("campaign");
-		if (!GROUP_BY_TIME.total.equals(timeGroupBy)) group.add(timeGroupBy.name());
+		if (GROUP_BY_TIME.day.equals(timeGroupBy)) group.add("date");
+		if (GROUP_BY_TIME.week.equals(timeGroupBy)) group.add("week");
+		if (!GROUP_BY_TIME.month.equals(timeGroupBy)) group.add("month");
 
 		if (GROUP_BY_DATA.company.equals(dataGroupBy)) group.add("company");
 		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) group.add("playerId");
