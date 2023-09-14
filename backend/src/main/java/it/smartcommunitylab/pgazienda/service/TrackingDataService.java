@@ -128,7 +128,7 @@ public class TrackingDataService {
 	 * @throws InconsistentDataException
 	 */
 	public TrackValidityDTO validate(String campaignId, String playerId, TrackDTO track) throws InconsistentDataException {
-		logger.info("Validating track service for campaign {} player {}, track count {}", campaignId, playerId, track.getLegs().size());
+		logger.info("Validating track service for campaign {} player {}, tracks {}", campaignId, playerId, track.getLegs().stream().map(t -> t.getId()).collect(Collectors.toList()));
 		
 		// campaign
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
@@ -266,6 +266,7 @@ public class TrackingDataService {
 			rec.setTracking(System.currentTimeMillis());
 			employeeRepo.save(employee);
 
+			logger.info("Validation result {}", validity.toString());
 			return validity;
 		}
 	}  

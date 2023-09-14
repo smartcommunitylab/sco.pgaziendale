@@ -49,6 +49,11 @@ public class TrackValidityDTO {
 	}
 
 	
+	@Override
+	public String toString() {
+		return "TrackValidityDTO [valid=" + valid + ", errorCode=" + errorCode + ", legs=" + legs + ", virtualTrack="
+				+ virtualTrack + "]";
+	}
 	public TrackValidityDTO() {
 		super();
 	}
@@ -125,6 +130,11 @@ public class TrackValidityDTO {
 		}
 		public void setVirtualScore(double virtualScore) {
 			this.virtualScore = virtualScore;
+		}
+		@Override
+		public String toString() {
+			return "TrackValidityLegDTO [id=" + id + ", distance=" + distance + ", validDistance=" + validDistance
+					+ ", mean=" + mean + ", virtualScore=" + virtualScore + "]";
 		}
 	}
 
