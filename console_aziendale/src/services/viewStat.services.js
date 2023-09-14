@@ -41,8 +41,8 @@ async function fillTheViewWithValues(values, view, selection, currentCampaign) {
   switch (view.item) {
     case 'Tabella':
       viewData.headers = getHeadersTable(values, selection, currentCampaign)
-      viewData.headerNumber = selection.dataColumns.length;
       viewData.subheaders = getSubHeaders(viewData.headers, selection, currentCampaign)
+      viewData.headerNumber = viewData.subheaders.length / viewData.headers.length;
       viewData.data = await getData(viewData.headers, selection, values, currentCampaign)
       break;
 
