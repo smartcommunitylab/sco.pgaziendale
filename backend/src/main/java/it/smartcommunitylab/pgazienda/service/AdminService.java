@@ -209,7 +209,7 @@ public class AdminService {
 	 * @return
 	 */
 	private String checkLegacyPlayer(String playerId, String campaignId) {
-		if (legacyIds.containsKey(playerId)) {
+		if (legacyIds.containsKey(playerId) && campaignId.equals(legacyCampaignId)) {
 			String legacyId =legacyIds.get(playerId); 
 			userService.markAsUpgraded(legacyId, campaignId);
 			return legacyId;
@@ -219,7 +219,7 @@ public class AdminService {
 
 	
 	public String getLegacyPlayer(String playerId, String campaignId) {
-		if (legacyIds.containsKey(playerId)) {
+		if (legacyIds.containsKey(playerId) && campaignId.equals(legacyCampaignId)) {
 			String legacyId =legacyIds.get(playerId); 
 			return legacyId;
 		}
