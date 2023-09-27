@@ -388,6 +388,8 @@ public class TrackingDataService {
 
 		Score original = new Score(0d);
 
+		stat.getMeanScore().reset();
+		stat.getLimitedMeanScore().reset();
 		for (TrackingData td : stat.getTracks()) {
 				MEAN mean = MEAN.valueOf(td.getMode());
 				// put valid value considering max imposed by the limit

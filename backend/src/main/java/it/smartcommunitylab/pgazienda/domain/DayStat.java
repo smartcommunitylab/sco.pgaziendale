@@ -271,6 +271,11 @@ public class DayStat {
 	}	
 
     public void recalculate() {
+		meanDistance.reset();
+		meanDuration.reset();
+		meanTracks.reset();
+		meanCo2.reset();
+
 		for (TrackingData td: tracks) {
 			MEAN mean = MEAN.valueOf(td.getMode());
 			meanDistance.updateValue(mean, meanDistance.meanValue(mean) + td.getDistance());
@@ -416,6 +421,14 @@ public class DayStat {
 			case train: setTrain(value); break;
 			case walk: setWalk(value); break;
 			}
+		}
+		public void reset() {
+			if (getBike() != null) setBike(0d);
+			if (getBoat() != null) setBoat(0d);
+			if (getBus() != null) setBus(0d);
+			if (getCar() != null) setCar(0d);
+			if (getTrain() != null) setTrain(0d);
+			if (getWalk() != null) setWalk(0d);
 		}
 		
 		/**
