@@ -123,37 +123,61 @@ public class TrackingDataService {
 	@PostConstruct
 	public void reval() throws InconsistentDataException {
 
-		dayStatRepo.findByCampaign("64ca04e1ae5fd728e00a2bca").forEach(stat -> {
+		// dayStatRepo.findByCampaign("").forEach(stat -> {
 			
-			if (stat.getLimitedScore().getScore() < 0) stat.getLimitedScore().setScore(0d);
+		// 	if (stat.getLimitedScore().getScore() < 0) stat.getLimitedScore().setScore(0d);
 
-			stat.recalculate();
+		// 	stat.recalculate();
 
-			Score original = new Score(0d);
+		// 	Score original = new Score(0d);
 
-			stat.getMeanScore().reset();
-			stat.getLimitedMeanScore().reset();
-			for (TrackingData td : stat.getTracks()) {
-					MEAN mean = MEAN.valueOf(td.getMode());
-					// put valid value considering max imposed by the limit
-					double max = stat.getLimitedScore().getScore();
-					double curr = original.getScore();
-					double ls = td.getScore();
-					double limited = 0d;
-					if ((curr + ls) <= max) {
-						limited = ls;
-					} else if (curr <= max ) {
-						limited = max - curr;
-					}
-					td.setLimitedScore(limited);
-					stat.getLimitedMeanScore().updateValue(mean, limited + stat.getLimitedMeanScore().meanValue(mean));
-					stat.getMeanScore().updateValue(mean, ls + stat.getMeanScore().meanValue(mean));
-					original.setScore(curr + ls);
-			}
+		// 	stat.getMeanScore().reset();
+		// 	stat.getLimitedMeanScore().reset();
+		// 	for (TrackingData td : stat.getTracks()) {
+		// 			MEAN mean = MEAN.valueOf(td.getMode());
+		// 			// put valid value considering max imposed by the limit
+		// 			double max = stat.getLimitedScore().getScore();
+		// 			double curr = original.getScore();
+		// 			double ls = td.getScore();
+		// 			double limited = 0d;
+		// 			if ((curr + ls) <= max) {
+		// 				limited = ls;
+		// 			} else if (curr <= max ) {
+		// 				limited = max - curr;
+		// 			}
+		// 			td.setLimitedScore(limited);
+		// 			stat.getLimitedMeanScore().updateValue(mean, limited + stat.getLimitedMeanScore().meanValue(mean));
+		// 			stat.getMeanScore().updateValue(mean, ls + stat.getMeanScore().meanValue(mean));
+		// 			original.setScore(curr + ls);
+		// 	}
 
-			dayStatRepo.save(stat);
+		// 	dayStatRepo.save(stat);
 
-		});
+		// });
+
+		// DayStat st = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate("", "", "", "2023-09-26");
+		// TrackDTO track = new TrackDTO();
+		// CompanyLocation l = companyRepo.findById("").get().getLocations().get(0);
+		// track.setStartTime(LocalDateTime.parse("2023-09-26T10:07:38.437").atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+		// TrackPointDTO p = new TrackPointDTO();
+		// p.setLatitude(l.getLatitude());
+		// p.setLongitude(l.getLongitude());
+		// p.setRecorded_at(track.getStartTime());
+		// track.setMultimodalId("");;
+		// track.setLegs(new LinkedList<>());
+		// st.getTracks().forEach(t -> {
+		// 	TrackLegDTO tl = new TrackLegDTO();
+		// 	tl.setId(t.getTrackId());
+		// 	tl.setMean(t.getMode());
+		// 	tl.setDistance(t.getDistance());
+		// 	tl.setDuration(t.getDuration());
+		// 	tl.setCo2(t.getCo2());
+		// 	tl.setValid(true);
+		// 	tl.setPoints(new LinkedList<>());
+		// 	tl.getPoints().add(p);
+		// 	track.getLegs().add(tl); 
+		// });
+		// this.validate("", "", track);
 	}
 
 	/**
@@ -377,13 +401,13 @@ public class TrackingDataService {
 	 * @param stat
 	 */
 	public void limitScore(Campaign campaign, String playerId, DayStat stat) {
-		Criteria criteria = Criteria.where("playerId").is(playerId).and("date").lt(stat.getDate());
+		Criteria criteria = Criteria.where("playerId").is(playerId).and("campaign").is(campaign.getId()).and("date").lt(stat.getDate());
 		List<DayStat> totalAgg = doAggregation(campaign, criteria, null);
 
-		criteria = Criteria.where("playerId").is(playerId).and("date").lt(stat.getDate()).gte(LocalDate.parse(stat.getDate()).withDayOfMonth(1).toString());
+		criteria = Criteria.where("playerId").is(playerId).and("campaign").is(campaign.getId()).and("date").lt(stat.getDate()).gte(LocalDate.parse(stat.getDate()).withDayOfMonth(1).toString());
 		List<DayStat> currMonthAgg = doAggregation(campaign, criteria, Constants.AGG_MONTH);
 
-		criteria = Criteria.where("playerId").is(playerId).and("date").lt(stat.getDate()).gte(LocalDate.parse(stat.getDate()).with(WeekFields.ISO.dayOfWeek(), 1).toString());
+		criteria = Criteria.where("playerId").is(playerId).and("campaign").is(campaign.getId()).and("date").lt(stat.getDate()).gte(LocalDate.parse(stat.getDate()).with(WeekFields.ISO.dayOfWeek(), 1).toString());
 		List<DayStat> currWeekAgg = doAggregation(campaign, criteria, Constants.AGG_WEEK);
 
 		// number of multimodal tracks
