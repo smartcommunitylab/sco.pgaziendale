@@ -45,4 +45,6 @@ public interface DayStatRepository  extends MongoRepository<DayStat, String> {
 	
 	
 	public void deleteByCampaign(String campaignId);
+
+	public List<DayStat> findByCampaign(String campaignId);
 }

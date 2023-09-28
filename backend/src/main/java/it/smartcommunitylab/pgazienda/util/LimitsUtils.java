@@ -82,6 +82,7 @@ public class LimitsUtils {
 				Double value = week;
 				Double dayValue = dayLimited;
 				Double newValue = Math.min(dayValue, l.getValue() - value + dayValue);
+				if (newValue < 0) newValue = 0d;
 				dayLimited = newValue;
 			}
 		}
@@ -90,6 +91,7 @@ public class LimitsUtils {
 				Double value = month;
 				Double dayValue = dayLimited;
 				Double newValue = Math.min(dayValue, l.getValue() - value + dayValue);
+				if (newValue < 0) newValue = 0d;
 				dayLimited = newValue;
 			}
 		}
@@ -98,6 +100,7 @@ public class LimitsUtils {
 				Double value = total;
 				Double dayValue = dayLimited;
 				Double newValue = Math.min(dayValue, l.getValue() - value + dayValue);
+				if (newValue < 0) newValue = 0d;
 				dayLimited = newValue;
 			}
 		}

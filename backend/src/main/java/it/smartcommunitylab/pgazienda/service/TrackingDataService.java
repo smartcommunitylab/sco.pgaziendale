@@ -19,6 +19,7 @@ package it.smartcommunitylab.pgazienda.service;
 import java.io.PrintWriter;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
@@ -31,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -68,6 +71,7 @@ import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackPointDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO.TrackValidityLegDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
@@ -114,7 +118,43 @@ public class TrackingDataService {
 	// 		ds.recalculate();
 	// 	}
 	// 	dayStatRepo.saveAll(list);
-	// }
+	// } //{"mode":"bike","co2":0.16107355494667425,"trackId":"6512c91a96c8612943ad29d5","multimodalId":"multimodal_1695722858437","score":1.3328386838781485,"startedAt":"2023-09-26T10:07:38.437Z","duration":427,"distance":666.4193419390742,"limitedScore":0,"playerId":"u_894d81d0825046a4bbc574de4131832c"}
+
+	@PostConstruct
+	public void reval() throws InconsistentDataException {
+
+		dayStatRepo.findByCampaign("64ca04e1ae5fd728e00a2bca").forEach(stat -> {
+			
+			if (stat.getLimitedScore().getScore() < 0) stat.getLimitedScore().setScore(0d);
+
+			stat.recalculate();
+
+			Score original = new Score(0d);
+
+			stat.getMeanScore().reset();
+			stat.getLimitedMeanScore().reset();
+			for (TrackingData td : stat.getTracks()) {
+					MEAN mean = MEAN.valueOf(td.getMode());
+					// put valid value considering max imposed by the limit
+					double max = stat.getLimitedScore().getScore();
+					double curr = original.getScore();
+					double ls = td.getScore();
+					double limited = 0d;
+					if ((curr + ls) <= max) {
+						limited = ls;
+					} else if (curr <= max ) {
+						limited = max - curr;
+					}
+					td.setLimitedScore(limited);
+					stat.getLimitedMeanScore().updateValue(mean, limited + stat.getLimitedMeanScore().meanValue(mean));
+					stat.getMeanScore().updateValue(mean, ls + stat.getMeanScore().meanValue(mean));
+					original.setScore(curr + ls);
+			}
+
+			dayStatRepo.save(stat);
+
+		});
+	}
 
 	/**
 	 * Validate multimodal track. 
@@ -338,13 +378,13 @@ public class TrackingDataService {
 	 */
 	public void limitScore(Campaign campaign, String playerId, DayStat stat) {
 		Criteria criteria = Criteria.where("playerId").is(playerId).and("date").lt(stat.getDate());
-		List<DayStat> totalAgg = doAggregation(campaign, criteria, null,  false);
+		List<DayStat> totalAgg = doAggregation(campaign, criteria, null);
 
 		criteria = Criteria.where("playerId").is(playerId).and("date").lt(stat.getDate()).gte(LocalDate.parse(stat.getDate()).withDayOfMonth(1).toString());
-		List<DayStat> currMonthAgg = doAggregation(campaign, criteria, Constants.AGG_MONTH, false);
+		List<DayStat> currMonthAgg = doAggregation(campaign, criteria, Constants.AGG_MONTH);
 
 		criteria = Criteria.where("playerId").is(playerId).and("date").lt(stat.getDate()).gte(LocalDate.parse(stat.getDate()).with(WeekFields.ISO.dayOfWeek(), 1).toString());
-		List<DayStat> currWeekAgg = doAggregation(campaign, criteria, Constants.AGG_WEEK, false);
+		List<DayStat> currWeekAgg = doAggregation(campaign, criteria, Constants.AGG_WEEK);
 
 		// number of multimodal tracks
 		Set<Object> set = stat.getTracks().stream().map(td -> td.getMultimodalId() != null ? td.getMultimodalId() : td.hashCode()).collect(Collectors.toSet());
@@ -814,9 +854,9 @@ public class TrackingDataService {
 	 * @return
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private List<DayStat> doAggregation(Campaign campaign, Criteria criteria, String agg, Boolean noLimits) {
+	private List<DayStat> doAggregation(Campaign campaign, Criteria criteria, String agg) {
 		MatchOperation filterOperation = Aggregation.match(criteria);
-		String src = Boolean.TRUE.equals(noLimits) ? "meanScore" : "limitedMeanScore";
+		String src = "limitedMeanScore";
 		
 		GroupOperation groupByOperation = agg != null ? Aggregation.group("playerId", agg) : Aggregation.group("playerId");
 		
