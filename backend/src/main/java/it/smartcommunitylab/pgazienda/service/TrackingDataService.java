@@ -122,6 +122,21 @@ public class TrackingDataService {
 
 	@PostConstruct
 	public void reval() throws InconsistentDataException {
+		// List<DayStat> list = dayStatRepo.findAll();
+		// for (DayStat ds : list) {
+		// 	User user = userRepo.findByPlayerId(ds.getPlayerId()).orElse(null);
+		// 	if (user != null) {
+		// 		for (UserRole r : user.getRoles()) {
+		// 			for (Subscription s : r.getSubscriptions()) {
+		// 				List<Employee> elist = employeeRepo.findByCompanyIdAndCodeIgnoreCase(ds.getCompany(), s.getKey());
+		// 				if (elist.size() > 0) {
+		// 					ds.setEmployeeCode(elist.get(0).getCode());
+		// 					dayStatRepo.save(ds);
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 
 		// dayStatRepo.findByCampaign("").forEach(stat -> {
 			
@@ -273,6 +288,7 @@ public class TrackingDataService {
 				stat.setPlayerId(playerId);
 				stat.setCampaign(campaign.getId());
 				stat.setCompany(company.getId());
+				stat.setEmployeeCode(employee.getCode());
 				stat.setDate(date.toString());
 				stat.setTrackCount(0);
 				stat.setMonth(date.format(MONTH_PATTERN));
@@ -583,8 +599,8 @@ public class TrackingDataService {
 		if (GROUP_BY_TIME.month.equals(timeGroupBy)) group.add("month");
 
 		if (GROUP_BY_DATA.company.equals(dataGroupBy)) group.add("company");
-		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) group.add("playerId");
-		if (GROUP_BY_DATA.location.equals(dataGroupBy)) group.add("playerId");
+		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) { group.add("playerId"); group.add("employeeCode"); }
+		if (GROUP_BY_DATA.location.equals(dataGroupBy)) { group.add("playerId"); group.add("employeeCode"); }
 		
 		GroupOperation groupByOperation = Aggregation.group(group.toArray(new String[group.size()]));
 		Set<STAT_FIELD> meanFields = new HashSet<>(fields);
@@ -691,6 +707,9 @@ public class TrackingDataService {
 			res.forEach(ds -> {
 				if (playerEmployeeMap.containsKey(ds.getPlayerId())) {
 					Employee e = playerEmployeeMap.get(ds.getPlayerId());
+					if (e == null) {
+						e = employeeMap.get(ds.getEmployeeCode());
+					}
 					if (e != null) {
 						ds.setPlayerId(e.getSurname()+ " " + e.getName());
 						employeesWithData.add(e.getId());
@@ -830,6 +849,7 @@ public class TrackingDataService {
 			stat.setCampaign((String)idMap.get("campaign"));
 			stat.setCompany(idMap.getOrDefault("company", null));
 			stat.setPlayerId(idMap.getOrDefault("playerId", null));
+			stat.setEmployeeCode(idMap.getOrDefault("employeeCode", null));
 			if (idMap.containsKey("date")) {
 				stat.setDate((String)idMap.get("date"));
 				LocalDate ld = LocalDate.parse(stat.getDate());
