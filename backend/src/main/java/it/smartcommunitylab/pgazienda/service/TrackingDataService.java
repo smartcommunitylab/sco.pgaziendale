@@ -122,21 +122,21 @@ public class TrackingDataService {
 
 	@PostConstruct
 	public void reval() throws InconsistentDataException {
-		List<DayStat> list = dayStatRepo.findAll();
-		for (DayStat ds : list) {
-			User user = userRepo.findByPlayerId(ds.getPlayerId()).orElse(null);
-			if (user != null) {
-				for (UserRole r : user.getRoles()) {
-					for (Subscription s : r.getSubscriptions()) {
-						List<Employee> elist = employeeRepo.findByCompanyIdAndCodeIgnoreCase(ds.getCompany(), s.getKey());
-						if (elist.size() > 0) {
-							ds.setEmployeeCode(elist.get(0).getCode());
-							dayStatRepo.save(ds);
-						}
-					}
-				}
-			}
-		}
+		// List<DayStat> list = dayStatRepo.findAll();
+		// for (DayStat ds : list) {
+		// 	User user = userRepo.findByPlayerId(ds.getPlayerId()).orElse(null);
+		// 	if (user != null) {
+		// 		for (UserRole r : user.getRoles()) {
+		// 			for (Subscription s : r.getSubscriptions()) {
+		// 				List<Employee> elist = employeeRepo.findByCompanyIdAndCodeIgnoreCase(ds.getCompany(), s.getKey());
+		// 				if (elist.size() > 0) {
+		// 					ds.setEmployeeCode(elist.get(0).getCode());
+		// 					dayStatRepo.save(ds);
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 
 		// dayStatRepo.findByCampaign("").forEach(stat -> {
 			

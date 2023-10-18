@@ -25,19 +25,16 @@
                         </v-list-item-content>
                     </v-list-item>
                     <v-list-item>
-                        <v-list-item-icon>
-                            <v-icon>mdi-format-list-text</v-icon>
-                        </v-list-item-icon>
                         <v-list-item-content>
                             <div v-if="employeeCampaigns && employeeCampaigns.length > 0">
-                                <v-list-item-title>Iscrizioni</v-list-item-title>
+                                <p class="text-h6">Iscrizioni</p>
                                 <v-simple-table>
                                     <thead>
-                                        <tr><th></th><th>Iscritto</th><th>Uscito</th><th>Ultima traccia</th></tr>
+                                        <tr><th></th><th>Iscrizione</th><th>Abbandono</th><th>Ultima attività</th></tr>
                                     </thead>
                                     <tbody>
                                         <tr  v-for="tr in employeeCampaigns" :key="tr.id">
-                                            <td>{{tr.title}}</td><td>{{toD(tr.registration)}}</td><td>{{toD(tr.leave)}}</td><td>{{toDT(tr.tracking)}}</td>
+                                            <td>{{tr.title}}</td><td>{{toD(tr.registration)}}</td><td>{{toD(tr.leave)}}</td><td>{{toD(tr.tracking)}}</td>
                                         </tr>
                                     </tbody>
                                 </v-simple-table>
@@ -81,18 +78,19 @@ export default {
 	},
 
     toD(time) {
-        return moment(time).format('DD-MM-YY');
+        return time ? moment(time).format('DD-MM-YY') : '-';
     },
     toDT(time) {
-        return moment(time).format('DD-MM-YY HH:mm');
+        return time ? moment(time).format('DD-MM-YY HH:mm') : '-';
 
     },
 
     updateEmployeeData() {
+        console.log('triggering');
         if (this.actualEmployee && this.actualEmployee.item && this.allCampaigns && this.allCampaigns.items) {
             console.log('updating');
             let list = (this.actualEmployee.item.campaigns || []).concat(this.actualEmployee.item.trackingRecord ? Object.keys(this.actualEmployee.item.trackingRecord) : []);
-            this.employeeCampaigns = list.map(cId => {
+            this.employeeCampaigns =  Array.from(new Set(list)).map(cId => {
                 let tr = this.actualEmployee.item.trackingRecord && this.actualEmployee.item.trackingRecord[cId] ? this.actualEmployee.item.trackingRecord[cId] : {registration: new Date().getTime()}
                 tr.id = cId;
                 tr.title = (this.allCampaigns.items.find(c => c.id === cId) || {title: cId}).title;
@@ -101,7 +99,9 @@ export default {
         }
     }
   },
-
+  mounted() {
+    this.updateEmployeeData();
+  },  
   computed: {
     ...mapState("employee", ["actualEmployee"]),
     ...mapState("company", ["actualCompany"]),

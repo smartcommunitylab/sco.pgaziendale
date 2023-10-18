@@ -55,7 +55,7 @@
           class="flex-none bg-secondary text-white pr-20 sm:pr-48 m-2 sm:pt-2 text-right md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/4 md:m-auto rounded-md md:shadow-lg lg:m-auto"
         >
           <p class="font-semibold text-6xl -mb-4">{{ co2_saved.toFixed(2) }}Kg</p>
-          <p class="font-semibold text-lg pb-2">CO2 salvata</p>
+          <p class="font-semibold text-lg pb-2">kg CO2 risparmiata</p>
         </div>
         <div
           class="flex-none bg-primary text-white pl-20 sm:pl-48 m-2 sm:pt-2 text-left md:text-center md:p-0 md:my-2 md:w-3/4 lg:w-1/4 md:m-auto rounded-md md:shadow-lg lg:m-auto"

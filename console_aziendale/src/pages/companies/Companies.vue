@@ -179,9 +179,9 @@ export default {
     allCampaigns() {
       this.updateList();
       let list = this.allCampaigns.items;
-      // if (list) {
-      //   list.splice(0, 0, {id: '', title: 'Tutte'});
-      // }
+      if (list) {
+        list.splice(0, 0, {id: '', title: 'Tutte'});
+      }
       this.campaignList = list;
     },
   },

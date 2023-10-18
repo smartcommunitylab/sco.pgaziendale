@@ -36,7 +36,7 @@
       <div>
         <v-card v-if="activeViewType && activeSelection">
           <div>
-            <v-card-title> Filtri - {{ activeViewType.item }} </v-card-title>
+            <v-card-title> Impostazioni {{ activeViewType.item }} </v-card-title>
           </div>
           <v-card-text class="px-5 py-4" v-if="activeSelection">
             <p v-if="activeSelection.dataLevel" class="p-0">
@@ -88,6 +88,7 @@
         <!-- Gestore di inserimento dati (MODALE) -->
         <v-bottom-sheet v-model="sheet">
           <v-sheet height="100vh" class="p-4">
+            <p class="text-h4 text-center">Impostazione parametri {{ activeViewType ? activeViewType.item.toLowerCase() :'' }}</p> 
             <div class="text-center">
               <v-btn
                 class="my-6"

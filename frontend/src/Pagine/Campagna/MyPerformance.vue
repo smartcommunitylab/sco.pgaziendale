@@ -340,7 +340,7 @@ export default {
     },
     options() {
       return [
-        { name: "co2saved", view_name: "CO2 Salvata", default: false },
+        { name: "co2saved", view_name: "kg CO2 risparmiata", default: false },
         { name: "trackCount", view_name: "Viaggi Validi", default: false },
       ].concat(
         this.campagna.means.map((x) => {

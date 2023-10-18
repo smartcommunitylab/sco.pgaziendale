@@ -39,7 +39,7 @@ export default {
           title="Km effettivi"
           break;
         case "co2saved":
-          title="CO2 salvata"
+          title="kg CO2 risparmiata"
           break;
                   case "trackCount":
           title="Numero di viaggi"

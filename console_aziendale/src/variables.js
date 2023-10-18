@@ -30,7 +30,7 @@ export const VARIABLES = {
         NOT_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti non iscritti", value: "% dipendenti non iscritti" },
         PERCENTAGE_EMPLOYEES: { label: "% dipendenti", value: "% dipendenti" },
         CO2_SAVED: {
-          label: "CO2 salvata",
+          label: "kg CO2 risparmiata",
           value: "co2saved",
           apiField: "co2saved"
         }, 
@@ -109,7 +109,7 @@ export const VARIABLES = {
         SPECIFIC: "Periodo specifico" 
       },
       PUNTUALAGGREGATION: {
-        NONE:  "Nessuna", 
+        NONE:  "Nessuno", 
         EMPLOYEES:  "Dipendente", 
         LOCATIONS: "Sedi", 
         COMPANIES: "Aziende"

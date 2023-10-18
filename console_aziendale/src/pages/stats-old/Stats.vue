@@ -275,7 +275,7 @@
               <option disabled value="">Seleziona un tipo di dato</option>
               <option value="km_valid">Chilometri validi</option>
               <option value="km_true">Chilometri effettivi</option>
-              <option value="co2saved">CO2 salvata</option>
+              <option value="co2saved">kg CO2 risparmiata</option>
               <option value="trackCount">Numero di viaggi</option>
             </select>
           </div>

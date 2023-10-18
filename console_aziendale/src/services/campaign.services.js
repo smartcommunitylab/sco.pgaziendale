@@ -14,12 +14,12 @@ export const campaignService = {
     getMeansForCampaign
 };
 const arrayMeans= [
-    { value: "bike", text: "Bici" },
-    { value: "car", text: "Auto" },
-    { value: "train", text: "Treno" },
-    { value: "walk", text: "Piedi" },
-    { value: "bus", text: "Autobus" },
-    { value: "boat", text: "Barca" },
+    { value: "bike", text: "Bici", order: 2 },
+    { value: "car", text: "Auto", order: 5 },
+    { value: "train", text: "Treno", order: 4 },
+    { value: "walk", text: "Piedi", order: 1 },
+    { value: "bus", text: "Autobus", order: 3 },
+    { value: "boat", text: "Barca", order: 6 },
   ]
 //get all campaigns of the company, if companyId null get all the campaigns
 function getMonthsForCampaign(campaign) {
@@ -172,8 +172,8 @@ function getTextOfMeans(means) {
     
     .map(e => arrayMeans.find(ae => ae.value === e))
     .filter(e => e != null)
+    .sort((a,b) => a.order - b.order)
     .map(e => e.text)
-    .sort()
     .join(', ');
 }
 
