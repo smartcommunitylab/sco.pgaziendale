@@ -106,7 +106,7 @@ export const VARIABLES = {
       },
       TIMEPERIOD: {
         ALL:  "Intera durata campagna", 
-        SPECIFIC: "Periodo specifico" 
+        SPECIFIC: "Imposta periodo" 
       },
       PUNTUALAGGREGATION: {
         NONE:  "Nessuno", 

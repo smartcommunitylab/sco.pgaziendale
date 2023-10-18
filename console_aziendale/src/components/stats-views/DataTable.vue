@@ -15,6 +15,11 @@
     </thead>
   </template>
 
+    <template v-slot:item.name="{ item }">
+        <span style="white-space: nowrap;">{{ item.name }}</span>
+    </template>
+
+
   </v-data-table>
 
 
