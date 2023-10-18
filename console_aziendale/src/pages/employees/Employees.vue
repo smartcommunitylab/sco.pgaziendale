@@ -21,7 +21,7 @@
           @click="openModal({type:'employeeImport', object:null})"
         >
           <v-icon left>mdi-file-import</v-icon>
-          IMPORTA
+          Aggiungi da file
         </v-btn>
       </v-col>
     </v-row>
