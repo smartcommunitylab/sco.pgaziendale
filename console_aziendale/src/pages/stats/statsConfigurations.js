@@ -53,9 +53,19 @@ export const statsConfigurations = [
           // VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
           // VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
           {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+            value: "week",
+            apiField: "week"
+          },
+          {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",
             apiField: "month"
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.YEAR,
+            value: "year",
+            apiField: "year"
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
@@ -145,7 +155,13 @@ export const statsConfigurations = [
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
               function:''
-            }]
+            }
+            // ,{
+            //   label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.LOCATIONS,
+            //   value: 'LOCATIONS',
+            //   function:''
+            // }
+            ]
           },
           {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES,
@@ -180,15 +196,25 @@ export const statsConfigurations = [
             apiField: "total"
           },
           {
+            label:VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
+            value: "date",
+            apiField: "day"
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+            value: "week",
+            apiField: "week"
+          },
+          {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",
             apiField: "month"
           },
           {
-            label:VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
-            value: "date",
-            apiField: "day"
-          }
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.YEAR,
+            value: "year",
+            apiField: "year"
+          },
         ],
         timePeriod: [
           {
@@ -289,6 +315,10 @@ export const statsConfigurations = [
             apiField: "month"
           },
           {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.YEAR,
+            value: "year",
+            apiField: "year"
+          },          {
             label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
             value: "campaign",
             apiField: "total"

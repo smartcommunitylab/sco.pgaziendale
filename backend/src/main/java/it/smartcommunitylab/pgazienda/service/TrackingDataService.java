@@ -95,7 +95,8 @@ public class TrackingDataService {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
 	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
-	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("YYYY-ww", Constants.DEFAULT_LOCALE);
+	private static final DateTimeFormatter YEAR_PATTERN = DateTimeFormatter.ofPattern("yyyy");
+	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww", Constants.DEFAULT_LOCALE);
 	
 	@Autowired
 	private CampaignRepository campaignRepo;
@@ -111,14 +112,16 @@ public class TrackingDataService {
 	@Autowired
 	private MongoTemplate template;
 
-	// @PostConstruct
-	// public void update() {
-	// 	List<DayStat> list = dayStatRepo.findAll();
-	// 	for (DayStat ds : list) {
-	// 		ds.recalculate();
-	// 	}
-	// 	dayStatRepo.saveAll(list);
-	// } //{"mode":"bike","co2":0.16107355494667425,"trackId":"6512c91a96c8612943ad29d5","multimodalId":"multimodal_1695722858437","score":1.3328386838781485,"startedAt":"2023-09-26T10:07:38.437Z","duration":427,"distance":666.4193419390742,"limitedScore":0,"playerId":"u_894d81d0825046a4bbc574de4131832c"}
+	@PostConstruct
+	public void update() {
+		List<DayStat> list = dayStatRepo.findAll();
+		for (DayStat ds : list) {
+			ds.setWeek(LocalDate.parse(ds.getDate()).format(WEEK_PATTERN));
+			ds.setMonth(LocalDate.parse(ds.getDate()).format(MONTH_PATTERN));
+			ds.setYear(LocalDate.parse(ds.getDate()).format(YEAR_PATTERN));
+		}
+		dayStatRepo.saveAll(list);
+	} //{"mode":"bike","co2":0.16107355494667425,"trackId":"6512c91a96c8612943ad29d5","multimodalId":"multimodal_1695722858437","score":1.3328386838781485,"startedAt":"2023-09-26T10:07:38.437Z","duration":427,"distance":666.4193419390742,"limitedScore":0,"playerId":"u_894d81d0825046a4bbc574de4131832c"}
 
 	@PostConstruct
 	public void reval() throws InconsistentDataException {
@@ -293,6 +296,7 @@ public class TrackingDataService {
 				stat.setTrackCount(0);
 				stat.setMonth(date.format(MONTH_PATTERN));
 				stat.setWeek(date.format(WEEK_PATTERN));
+				stat.setYear(date.format(YEAR_PATTERN));
 				stat.setScore(new Score());
 			}
 
@@ -597,6 +601,7 @@ public class TrackingDataService {
 		if (GROUP_BY_TIME.day.equals(timeGroupBy)) group.add("date");
 		if (GROUP_BY_TIME.week.equals(timeGroupBy)) group.add("week");
 		if (GROUP_BY_TIME.month.equals(timeGroupBy)) group.add("month");
+		if (GROUP_BY_TIME.year.equals(timeGroupBy)) group.add("year");
 
 		if (GROUP_BY_DATA.company.equals(dataGroupBy)) group.add("company");
 		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) { group.add("playerId"); group.add("employeeCode"); }
@@ -837,6 +842,7 @@ public class TrackingDataService {
 		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return ds.getDate();
 		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return ds.getWeek();
 		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return ds.getMonth();
+		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return ds.getYear();
 		return "";
 	}
 
@@ -858,11 +864,14 @@ public class TrackingDataService {
 			}
 			if (idMap.containsKey("week")) {
 				stat.setWeek((String)idMap.get("week"));
-				LocalDate ld = LocalDate.parse(stat.getWeek(), WEEK_PATTERN);
-				stat.setMonth(ld.format(MONTH_PATTERN));
+				// LocalDate ld = LocalDate.parse(stat.getWeek(), WEEK_PATTERN);
+				// stat.setMonth(ld.format(MONTH_PATTERN));
 			}
 			if (idMap.containsKey("month")) {
 				stat.setMonth((String)idMap.get("month"));
+			}
+			if (idMap.containsKey("year")) {
+				stat.setYear((String)idMap.get("year"));
 			}
 		}
 	}
@@ -1024,6 +1033,9 @@ public class TrackingDataService {
 				else if (GROUP_BY_TIME.month.equals(timeGroupBy)) {
 					objectMap.put(ds.getMonth(), ds);
 				}
+				else if (GROUP_BY_TIME.year.equals(timeGroupBy)) {
+					objectMap.put(ds.getYear(), ds);
+				}
 			});
 			headers.forEach(h -> {
 				res.addAll(extractValuesForHeader(h, objectMap.get(h), fields, campaign));
@@ -1113,6 +1125,13 @@ public class TrackingDataService {
 			while (!curr.isAfter(to)) {
 				list.add(curr.format(MONTH_PATTERN));
 				curr = curr.plusMonths(1);
+			}
+		}
+		else if (GROUP_BY_TIME.year.equals(timeGroupBy)) {
+			LocalDate curr = from;
+			while (!curr.isAfter(to)) {
+				list.add(curr.format(YEAR_PATTERN));
+				curr = curr.plusYears(1);
 			}
 		}
 		return list;

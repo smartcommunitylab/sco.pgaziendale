@@ -62,9 +62,17 @@ function getHeadersTable(values, selection, currentCampaign) {
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'month'));
       break;
+    case 'year':
+      //get all month from selection.company.from to selection.company.to 
+      headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'year'));
+      break;
     case 'date':
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'day'));
+      break;
+    case 'week':
+      //get all month from selection.company.from to selection.company.to 
+      headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'week'));
       break;
     case 'campaign':
       headers.push('');
@@ -99,6 +107,18 @@ function getPeriodBetweenDates(startDate, endDate, type) {
       while (endDate > startDate || startDate.format('M') === endDate.format('M')) {
         timeValues.push(startDate.format('YYYY-MM'));
         startDate.add(1, 'month');
+      }
+      break;
+    case 'year':
+      while (endDate > startDate || startDate.format('YYYY') === endDate.format('YYYY')) {
+        timeValues.push(startDate.format('YYYY'));
+        startDate.add(1, 'year');
+      }
+      break;
+    case 'week':
+      while (endDate > startDate || startDate.format('YYYY-WW') === endDate.format('YYYY-WW')) {
+        timeValues.push(startDate.format('YYYY-WW'));
+        startDate.add(1, 'week');
       }
       break;
     case 'day':

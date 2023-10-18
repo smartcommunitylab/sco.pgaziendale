@@ -40,7 +40,7 @@ public class Constants {
 	
 	public enum MEAN {bike, car, walk, bus, train, boat};
 
-	public enum GROUP_BY_TIME {day, week, month, total};
+	public enum GROUP_BY_TIME {day, week, month, year, total};
 	public enum GROUP_BY_DATA {company, location, employee, campaign};
 	public enum STAT_FIELD  {score, limitedScore, trackCount, limitedTrackCount, co2saved, meanScore, limitedMeanScore, meanDistance, meanDuration, meanCo2, meanTracks }
 }

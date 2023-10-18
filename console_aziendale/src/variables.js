@@ -100,8 +100,9 @@ export const VARIABLES = {
       },
       TIMEUNIT: {
         DAY: "Giorno", 
-        // WEEK: { label: "Settimana", value: "week" },
+        WEEK: "Settimana",
         MONTH: "Mese", 
+        YEAR: "Anno",
         CAMPAIGN:  "Campagna", 
       },
       TIMEPERIOD: {
@@ -110,7 +111,7 @@ export const VARIABLES = {
       },
       PUNTUALAGGREGATION: {
         NONE:  "Nessuno", 
-        EMPLOYEES:  "Dipendente", 
+        EMPLOYEES:  "Selezione dipendente/i", 
         LOCATIONS: "Sedi", 
         COMPANIES: "Aziende"
       },

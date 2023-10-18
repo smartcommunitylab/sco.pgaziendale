@@ -1,10 +1,9 @@
 <template>
   <v-data-table v-if="dataTableData"
-  
     :headers="dataTableData.subheaders"
     :items="dataTableData.data"
     :items-per-page="10"
-    class="elevation-1"
+    class="statstable elevation-1"
   >
     <template v-slot:header >
     <thead>
@@ -38,3 +37,20 @@
     },
   }
 </script>
+<style>
+  .statstable table > tbody > tr > td:nth-child(1), 
+  .statstable table > thead > tr > th:nth-child(1) {
+    position: sticky !important; 
+    position: -webkit-sticky !important; 
+    left: 0; 
+    z-index: 2;
+    background: white;
+  }
+  .statstable table > tbody > tr:hover > td:nth-child(1) {
+    background: #eeeeee !important;
+  }
+  .statstable table > tbody > tr > td:not(nth-child(1)) {
+        z-index: 1;
+  } 
+
+</style>

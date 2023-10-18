@@ -21,7 +21,7 @@
             </v-tabs>
           </v-col>
           <v-col cols="6">
-            <div class="text-center m-2" v-if="activeSelection && activeSelection.dataLevel">
+            <div class="text-right m-2" v-if="activeSelection && activeSelection.dataLevel">
               <v-btn
                 color="primary"
                 @click="exportCsv"
@@ -51,7 +51,7 @@
       <div>
         <v-card v-if="activeViewType && activeSelection">
           <div>
-            <v-card-title> Impostazioni {{ activeViewType.item.toLowerCase() }} </v-card-title>
+            <v-card-title> Impostazioni {{activeViewType ? activeViewType.item.toLowerCase() : '' }} </v-card-title>
           </div>
           <v-card-text class="px-5 py-4" v-if="activeSelection">
             <p v-if="activeSelection.dataLevel" class="p-0">
@@ -108,10 +108,10 @@
 
             <v-row justify="center">
               <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Livello Aggregazione</p>
+                <p class="text-subtitle-1">Livello aggregazione</p>
 
                 <v-autocomplete
-                  label="Livello Aggregazione"
+                  label="Livello aggregazione"
                   name="livelloaggregazione"
                   id="livelloaggregazione"
                   v-model="localSelection.dataLevel"
@@ -122,7 +122,7 @@
                 ></v-autocomplete>
 
                 <div
-                class="pl-5 pr-20"
+                class="pl-5"
                 v-if="localSelection && localSelection.puntualAggregationSelected"
               >
                 <p class="text-subtitle-1">Filtri</p>
@@ -587,6 +587,8 @@ export default {
     },
     activeConfiguration() {
       this.tab = this.activeViewType;
+      this.baseSelection = this.copy(this.activeSelection);
+
       this.initiSelection();
       if (this.activeSelection && this.currentCampaign) {
         this.getLocalStat(this.localSelection);

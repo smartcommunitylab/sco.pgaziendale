@@ -1,5 +1,8 @@
 <template>
-  <v-row justify="center" align="center" >
+  <v-row align="center" >
+    <v-col cols="2" class="pl-5 pr-20" v-if="!isAdmin && localCompany">
+      <p class="text-subtitle-1"> {{ localCompany.name }}</p>
+    </v-col>
     <v-col cols="4" class="pl-5 pr-20" v-if="allCampaigns && allCampaigns.items">
 
       <v-autocomplete
@@ -15,10 +18,20 @@
         outlined
       ></v-autocomplete>
     </v-col>
-
-    <v-col cols="4" class="pl-5 pr-20" v-if="!isAdmin && localCompany">
-      <p class="text-subtitle-1"> {{ localCompany.name }}</p>
+    <v-col cols="4" class="pl-5 pr-20" v-if="configurations && configurations.items">
+      <v-select
+        label="Profilo statistiche"
+        name="profili"
+        id="idprofili"
+        v-model="selectedConfiguration"
+        :items="configurations.items"
+        item-text="name"
+        item-value="id"
+         @change="selectConfiguration"
+        outlined
+      ></v-select>
     </v-col>
+
   </v-row>
 </template>
 
@@ -30,6 +43,7 @@ export default {
     return {
       localCompany: null,
       localCampaign: null,
+      selectedConfiguration: null
     };
   },
   computed: {
@@ -39,7 +53,7 @@ export default {
       "actualCampaign",
       "getAllCompaniesOfCampaignCall",
     ]),
-    ...mapState("stat", ["activeSelection"]),
+    ...mapState("stat", ["activeSelection", "configurations", "activeConfiguration"]),
     ...mapState("account", ["role", "temporaryAdmin"]),
     isAdmin() {
       return this.role == "ROLE_ADMIN" && !this.temporaryAdmin;
@@ -58,6 +72,7 @@ export default {
       this.localCompany = this.actualCompany.item;
       this.getAllCampaigns(this.actualCompany.item.id);
     }
+    this.loadConfiguration();
   },
   watch: {
     allCampaigns: {
@@ -70,6 +85,11 @@ export default {
       },
       deep: true,
     },
+    activeConfiguration() {
+      if (this.activeConfiguration) {
+        this.selectedConfiguration = this.activeConfiguration.items;
+      }
+    }
   },
   methods: {
     ...mapActions("campaign", {
@@ -77,11 +97,19 @@ export default {
     }),
     ...mapActions("stat", {
       setCurrentCampaign: "setCurrentCampaign",
+      getConfigurationByRole:"getConfigurationByRole",
+      setActiveConfiguration:"setActiveConfiguration"
     }),
+
+    loadConfiguration(){
+      this.getConfigurationByRole({role:this.role,temporaryAdmin:this.temporaryAdmin});
+    },
+    selectConfiguration(){
+      this.setActiveConfiguration({configurationId: this.selectedConfiguration})
+    },
     updateCampaign() {
       if (this.activeSelection && this.localCampaign) {
         // this.activeSelection.campaign = this.localCampaign;
-        console.log('updated',this.localCampaign);
         this.setCurrentCampaign({ campaign: this.localCampaign });
       }
     },

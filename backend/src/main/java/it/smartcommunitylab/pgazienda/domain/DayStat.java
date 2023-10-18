@@ -33,7 +33,7 @@ public class DayStat {
 	@Id
 	private String id;
 	
-	private String campaign, playerId, date, month, week, company, employeeCode;
+	private String campaign, playerId, date, year, month, week, company, employeeCode;
 	
 	private Double co2saved;
 	private Integer trackCount;
@@ -111,6 +111,13 @@ public class DayStat {
 	public void setDate(String date) {
 		this.date = date;
 	}
+	public String getYear() {
+		return year;
+	}
+	public void setYear(String year) {
+		this.year = year;
+	}
+
 	/**
 	 * @return the co2saved
 	 */
