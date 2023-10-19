@@ -107,9 +107,6 @@ public class ExternalUserDetailsService {
 			user = userService.createUser(userDTO, null);
     	} else {
     		log.info("Updating existing User: " + userInfo);
-    		if (user.findRole(Constants.ROLE_APP_USER).isEmpty())  {
-        		user.getRoles().add(UserRole.createAppUserRole());
-    		}
     		user.setName(name);
     		user.setSurname(surname);
     		user.setPlayerId(playerId);
