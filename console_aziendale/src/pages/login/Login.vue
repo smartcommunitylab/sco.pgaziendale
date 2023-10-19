@@ -98,7 +98,7 @@
                     type="button"
                     @click="signinOAuth"
                   >
-                    Entrac con Play&Go
+                    Entra con Play&Go
                   </v-btn>
                 </v-col>
               </v-row> 

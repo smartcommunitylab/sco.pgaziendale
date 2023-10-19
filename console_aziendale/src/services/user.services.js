@@ -92,7 +92,7 @@ function getRole(user) {
         if (user.roles[i].role == 'ROLE_COMPANY_ADMIN' && role!='ROLE_ADMIN') {
             role='ROLE_COMPANY_ADMIN';
         }
-        if (user.roles[i].role == 'ROLE_MOBILITY_MANAGER'&& (role!='ROLE_ADMIN'|| role!='ROLE_COMPANY_ADMIN')) {
+        if (user.roles[i].role == 'ROLE_MOBILITY_MANAGER'&& role!='ROLE_ADMIN' && role!='ROLE_COMPANY_ADMIN') {
             role='ROLE_MOBILITY_MANAGER';
         }
     }
