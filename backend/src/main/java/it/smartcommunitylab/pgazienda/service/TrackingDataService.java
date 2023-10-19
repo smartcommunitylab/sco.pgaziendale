@@ -19,7 +19,6 @@ package it.smartcommunitylab.pgazienda.service;
 import java.io.PrintWriter;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
@@ -71,7 +70,6 @@ import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
-import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackPointDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO.TrackValidityLegDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
@@ -114,90 +112,14 @@ public class TrackingDataService {
 
 	@PostConstruct
 	public void update() {
-		List<DayStat> list = dayStatRepo.findAll();
-		for (DayStat ds : list) {
-			ds.setWeek(LocalDate.parse(ds.getDate()).format(WEEK_PATTERN));
-			ds.setMonth(LocalDate.parse(ds.getDate()).format(MONTH_PATTERN));
-			ds.setYear(LocalDate.parse(ds.getDate()).format(YEAR_PATTERN));
-		}
-		dayStatRepo.saveAll(list);
-	} //{"mode":"bike","co2":0.16107355494667425,"trackId":"6512c91a96c8612943ad29d5","multimodalId":"multimodal_1695722858437","score":1.3328386838781485,"startedAt":"2023-09-26T10:07:38.437Z","duration":427,"distance":666.4193419390742,"limitedScore":0,"playerId":"u_894d81d0825046a4bbc574de4131832c"}
-
-	@PostConstruct
-	public void reval() throws InconsistentDataException {
 		// List<DayStat> list = dayStatRepo.findAll();
 		// for (DayStat ds : list) {
-		// 	User user = userRepo.findByPlayerId(ds.getPlayerId()).orElse(null);
-		// 	if (user != null) {
-		// 		for (UserRole r : user.getRoles()) {
-		// 			for (Subscription s : r.getSubscriptions()) {
-		// 				List<Employee> elist = employeeRepo.findByCompanyIdAndCodeIgnoreCase(ds.getCompany(), s.getKey());
-		// 				if (elist.size() > 0) {
-		// 					ds.setEmployeeCode(elist.get(0).getCode());
-		// 					dayStatRepo.save(ds);
-		// 				}
-		// 			}
-		// 		}
-		// 	}
+		// 	ds.setWeek(LocalDate.parse(ds.getDate()).format(WEEK_PATTERN));
+		// 	ds.setMonth(LocalDate.parse(ds.getDate()).format(MONTH_PATTERN));
+		// 	ds.setYear(LocalDate.parse(ds.getDate()).format(YEAR_PATTERN));
 		// }
-
-		// dayStatRepo.findByCampaign("").forEach(stat -> {
-			
-		// 	if (stat.getLimitedScore().getScore() < 0) stat.getLimitedScore().setScore(0d);
-
-		// 	stat.recalculate();
-
-		// 	Score original = new Score(0d);
-
-		// 	stat.getMeanScore().reset();
-		// 	stat.getLimitedMeanScore().reset();
-		// 	for (TrackingData td : stat.getTracks()) {
-		// 			MEAN mean = MEAN.valueOf(td.getMode());
-		// 			// put valid value considering max imposed by the limit
-		// 			double max = stat.getLimitedScore().getScore();
-		// 			double curr = original.getScore();
-		// 			double ls = td.getScore();
-		// 			double limited = 0d;
-		// 			if ((curr + ls) <= max) {
-		// 				limited = ls;
-		// 			} else if (curr <= max ) {
-		// 				limited = max - curr;
-		// 			}
-		// 			td.setLimitedScore(limited);
-		// 			stat.getLimitedMeanScore().updateValue(mean, limited + stat.getLimitedMeanScore().meanValue(mean));
-		// 			stat.getMeanScore().updateValue(mean, ls + stat.getMeanScore().meanValue(mean));
-		// 			original.setScore(curr + ls);
-		// 	}
-
-		// 	dayStatRepo.save(stat);
-
-		// });
-
-		// DayStat st = dayStatRepo.findOneByPlayerIdAndCampaignAndCompanyAndDate("", "", "", "2023-09-26");
-		// TrackDTO track = new TrackDTO();
-		// CompanyLocation l = companyRepo.findById("").get().getLocations().get(0);
-		// track.setStartTime(LocalDateTime.parse("2023-09-26T10:07:38.437").atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-		// TrackPointDTO p = new TrackPointDTO();
-		// p.setLatitude(l.getLatitude());
-		// p.setLongitude(l.getLongitude());
-		// p.setRecorded_at(track.getStartTime());
-		// track.setMultimodalId("");;
-		// track.setLegs(new LinkedList<>());
-		// st.getTracks().forEach(t -> {
-		// 	TrackLegDTO tl = new TrackLegDTO();
-		// 	tl.setId(t.getTrackId());
-		// 	tl.setMean(t.getMode());
-		// 	tl.setDistance(t.getDistance());
-		// 	tl.setDuration(t.getDuration());
-		// 	tl.setCo2(t.getCo2());
-		// 	tl.setValid(true);
-		// 	tl.setPoints(new LinkedList<>());
-		// 	tl.getPoints().add(p);
-		// 	track.getLegs().add(tl); 
-		// });
-		// this.validate("", "", track);
-	}
-
+		// dayStatRepo.saveAll(list);
+	} 
 	/**
 	 * Validate multimodal track. 
 	 * 1. Check track starts/ends within the open campaign location areas.

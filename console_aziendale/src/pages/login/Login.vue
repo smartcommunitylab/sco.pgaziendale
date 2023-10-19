@@ -87,6 +87,22 @@
                   </v-btn>
                 </v-col>
               </v-row> 
+              <v-row>
+                <v-col
+                  cols="12"
+                >
+                  <v-btn
+                    depressed
+                    color="primary"
+                    class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-10 rounded text-center w-full"
+                    type="button"
+                    @click="signinOAuth"
+                  >
+                    Entrac con Play&Go
+                  </v-btn>
+                </v-col>
+              </v-row> 
+
             </v-col>
           </v-row>  
         </div>
@@ -96,6 +112,7 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
+import { oauthService } from '@/services/oauth.services';
 
 export default {
   data() {
@@ -121,6 +138,10 @@ export default {
       if (username && password) {
         this.login({ username, password });
       }
+    },
+    signinOAuth() {
+      
+      return oauthService.signin();
     },
     resetPwd(){
       this.$router.push('/resetpwd');

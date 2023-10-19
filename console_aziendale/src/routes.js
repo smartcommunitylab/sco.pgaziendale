@@ -6,6 +6,7 @@ import Login from "@/pages/login/Login.vue"
 import Locations from "@/pages/locations/Locations.vue"
 // import StatsOLD from "@/pages/stats-old/Stats.vue"
 import Stats from "@/pages/stats/Stats.vue"
+import Callback from "@/pages/login/Callback.vue"
 import GestioneDipendenti from "@/pages/employees/Employees.vue"
 import GestioneCampagne from "@/pages/campaigns/Campaigns.vue"
 import GestioneUtenti from "@/pages/users/Users.vue"
@@ -70,6 +71,12 @@ const routes = [
   name: 'ProfiloAzienda',
   component: Azienda
 },
+{
+  path: '/Callback',
+  name: 'callback',
+  component: Callback
+},
+
     { 
         path: '/404', 
         component: NotFound 
@@ -86,7 +93,7 @@ const routes = [
     routes})
     router.beforeEach((to, from, next) => {
       // redirect to login page if not logged in and trying to access a restricted page
-      const publicPages = ['/Login'];
+      const publicPages = ['/Login', '/Callback'];
       const authRequired = !publicPages.includes(to.path);
       const loggedIn = localStorage.getItem('user');
     

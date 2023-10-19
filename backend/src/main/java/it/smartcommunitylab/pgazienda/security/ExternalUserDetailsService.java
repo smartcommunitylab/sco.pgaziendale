@@ -63,9 +63,9 @@ public class ExternalUserDetailsService {
     private String playerField;
     @Value("${app.security.ext.username-field:sub}")
     private String userNameField;
-    @Value("${app.security.ext.name-field:first_name}")
+    @Value("${app.security.ext.name-field:given_name}")
     private String nameField;
-    @Value("${app.security.ext.surname-field:last_name}")
+    @Value("${app.security.ext.surname-field:family_name}")
     private String surnameField;
     @Value("${app.security.ext.domain:}")
     private String userDomain;

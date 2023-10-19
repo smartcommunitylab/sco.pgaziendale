@@ -1,4 +1,5 @@
 import { userService } from '../services';
+import { oauthService } from '../services/oauth.services';
 import { router } from '../routes';
 
 const user = JSON.parse(localStorage.getItem('user'));
@@ -11,6 +12,33 @@ function isCompanyAdmin(role){
     return true
     return false
 }
+
+function handleToken(commit, dispatch, token) {
+    //todo reset old values
+    commit('loginSuccess', token);
+    userService.getAccount().then(user => {
+        commit('userLogged', user);
+        var role = userService.getRole(user);
+        commit('roleUser', role);
+        var page = userService.getHome(role);
+        commit('homeUser', page);
+        var userCompanies = userService.getCompanies(user);
+        if (userCompanies.length > 0){
+            dispatch('company/getCompanyById', userCompanies[0], { root: true });
+            if (isCompanyAdmin(role))
+            {
+            dispatch('company/initCompanyAdmin', userCompanies[0], { root: true }); 
+            dispatch('campaign/getAll',userCompanies[0], { root: true });
+            }
+            dispatch('employee/getAll', userCompanies[0], { root: true });
+
+            
+        }
+        dispatch('navigation/changePage', page, { root: true });
+        router.push(page.route);
+    })
+}
+
 const actions = {
 
     login({ dispatch, commit }, { username, password }) {
@@ -19,29 +47,7 @@ const actions = {
         userService.login(username, password)
             .then(
                 token => {
-                    //todo reset old values
-                    commit('loginSuccess', token);
-                    userService.getAccount().then(user => {
-                        commit('userLogged', user);
-                        var role = userService.getRole(user);
-                        commit('roleUser', role);
-                        var page = userService.getHome(role);
-                        commit('homeUser', page);
-                        var userCompanies = userService.getCompanies(user);
-                        if (userCompanies.length > 0){
-                            dispatch('company/getCompanyById', userCompanies[0], { root: true });
-                            if (isCompanyAdmin(role))
-                            {
-                            dispatch('company/initCompanyAdmin', userCompanies[0], { root: true }); 
-                            dispatch('campaign/getAll',userCompanies[0], { root: true });
-                            }
-                            dispatch('employee/getAll', userCompanies[0], { root: true });
-
-                            
-                        }
-                        dispatch('navigation/changePage', page, { root: true });
-                        router.push(page.route);
-                    })
+                    handleToken(commit, dispatch, token);
                 },
                 error => {
                     commit('loginFailure', error);
@@ -49,7 +55,23 @@ const actions = {
                 }
             );
     },
+    loginOAuth({ dispatch, commit }, {access_token}) {
+        commit('loginRequest', { username: access_token });
+        userService.loginOAuth(access_token)
+        .then(
+            token => {
+                handleToken(commit, dispatch, token);
+            },
+            error => {
+                commit('loginFailure', error);
+                dispatch('alert/error', error, { root: true });
+                oauthService.signout();
+            }
+        );
+    }
+    ,
     logout({ commit, dispatch }) {
+        const oauthLogin = ('true' == localStorage.getItem('oauth_login'));
         userService.logout();
         commit('logout');
         dispatch('alert/success', "Utente uscito con successo", { root: true });
@@ -58,7 +80,8 @@ const actions = {
         dispatch('employee/logout', null, { root: true });
         dispatch('location/logout', null, { root: true });
         dispatch('stat/logout', null, { root: true });
-        router.push('/Login');
+        if (oauthLogin) oauthService.signout();
+        else router.push('/Login');
     },
     temporaryCompanyAdmin({ commit }) {
         commit('temporaryCompanyAdmin');

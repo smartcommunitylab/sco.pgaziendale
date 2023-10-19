@@ -17,6 +17,7 @@
     "leaflet": "^1.7.1",
     "leaflet-geosearch": "^3.3.0",
     "moment": "^2.29.1",
+    "oidc-client-ts": "^2.3.0",
     "postcss": "^7.0.35",
     "quill-image-drop-module": "^1.0.3",
     "quill-image-resize-vue": "^1.0.4",

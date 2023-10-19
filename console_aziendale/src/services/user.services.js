@@ -2,6 +2,7 @@ import axios from "axios";
 
 export const userService = {
     login,
+    loginOAuth,
     logout,
     getAccount,
     getHome,
@@ -14,7 +15,6 @@ export const userService = {
 };
 
 function login(username, password) {
-    console.log(process.env.VUE_APP_BASE_URL);
     return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_LOGIN_API, {
         "password": password,
         "rememberMe": true,
@@ -23,6 +23,25 @@ function login(username, password) {
         res => {
             if (res && res.data && res.data.id_token) {
                 localStorage.setItem('token', res.data.id_token);
+                return Promise.resolve(res.data.id_token);
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+function loginOAuth(access_token) {
+    return axios.get(process.env.VUE_APP_BASE_URL + 'authenticate/extjwt', {
+        headers: {
+            Authorization: access_token
+        }
+    }).then(
+        res => {
+            if (res && res.data && res.data.id_token) {
+                localStorage.setItem('token', res.data.id_token);
+                localStorage.setItem('oauth_login', true);
                 return Promise.resolve(res.data.id_token);
             }
             else return Promise.reject(null);
@@ -51,6 +70,7 @@ function logout() {
     // remove user from local storage to log user out
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('oauth_login');
     sessionStorage.clear();
     localStorage.clear();
 }
