@@ -78,7 +78,7 @@
             -->
 
             <!-- PROVA nuovo Modifica con nuovo MODAL -->
-            <v-btn icon v-if="role == 'ROLE_ADMIN'"
+            <v-btn icon
             @click="openModal({type:'aziendaFormEdit', object:null})">
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>

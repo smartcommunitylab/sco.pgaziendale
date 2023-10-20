@@ -73,6 +73,12 @@ const actions = {
     ,
     logout({ commit, dispatch }) {
         const oauthLogin = ('true' == localStorage.getItem('oauth_login'));
+        if (oauthLogin) oauthService.signout();
+        else {
+            this.logoutLocal({ commit, dispatch });
+        }
+    },
+    logoutLocal({ commit, dispatch }) { 
         userService.logout();
         commit('logout');
         dispatch('alert/success', "Utente uscito con successo", { root: true });
@@ -81,9 +87,9 @@ const actions = {
         dispatch('employee/logout', null, { root: true });
         dispatch('location/logout', null, { root: true });
         dispatch('stat/logout', null, { root: true });
-        if (oauthLogin) oauthService.signout();
-        else router.push('/Login');
+        router.push('/Login');
     },
+
     temporaryCompanyAdmin({ commit }) {
         commit('temporaryCompanyAdmin');
     },

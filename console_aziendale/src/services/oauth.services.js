@@ -5,7 +5,7 @@ const settings = {
   authority: process.env.VUE_APP_OAUTH_AUTHORITY,
   client_id: process.env.VUE_APP_OAUTH_CLIENT_ID,
   redirect_uri: `${loc}/Callback`,
-  post_logout_redirect_uri: `${loc}`,
+  post_logout_redirect_uri: `${loc}/Endsession`,
   response_type: 'code',
   scope: 'email openid profile'
 };

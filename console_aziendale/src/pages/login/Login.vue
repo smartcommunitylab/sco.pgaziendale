@@ -86,25 +86,40 @@
                     Login
                   </v-btn>
                 </v-col>
-              </v-row> 
-              <v-row>
+              </v-row>  
+
+            </v-col>
+          </v-row>
+
+         <br/>
+         <br/>
+         <br/>
+
+          <v-row
+            class="align-content-center justify-center"
+          >
+            <v-col
+              cols="10"
+              class="border-t-12 rounded-lg  m-0"
+            >  
+            <v-row>
                 <v-col
                   cols="12"
                 >
                   <v-btn
-                    depressed
-                    color="primary"
-                    class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-10 rounded text-center w-full"
+                    outlined
+                    color="white"
+                    class=" py-2 px-10 rounded text-center w-full"
                     type="button"
                     @click="signinOAuth"
                   >
-                    Entra con Play&Go
+                    Accesso amministratori
                   </v-btn>
                 </v-col>
-              </v-row> 
-
+              </v-row>
             </v-col>
-          </v-row>  
+          </v-row>
+          
         </div>
       </div>
     </div>

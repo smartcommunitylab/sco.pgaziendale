@@ -40,12 +40,12 @@ export const VARIABLES = {
           apiField: "score"
         },
         COUNTING_POINTS: {
-          label:  "Punti utili", 
+          label:  "Punti", 
           value:  "limitedScore",
           apiField: "limitedScore"
         },
         N_COUNTING_TRAVEL: {
-          label:  "Viaggi utili", 
+          label:  "Viaggi", 
           value: "limitedTrackCount",
           apiField: "limitedTrackCount"
         },
@@ -61,7 +61,7 @@ export const VARIABLES = {
           mean: true
         },
         MEAN_COUNTING_POINTS: {
-          label: "Punti utili per mezzo",
+          label: "Punti per mezzo",
           value: "limitedMeanScore",
           apiField: "limitedMeanScore",
           mean: true

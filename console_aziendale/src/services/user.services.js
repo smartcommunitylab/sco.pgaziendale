@@ -117,7 +117,7 @@ function getHome(role) {
             };
         case 'ROLE_COMPANY_ADMIN':
             return {
-                title: 'Gestione campagne',
+                title: 'Campagne disponibili',
                 route: '/GestioneCampagne'
             };
         case 'ROLE_MOBILITY_MANAGER':

@@ -7,7 +7,8 @@
             </div>
         </template>
         <template v-slot:body>
-          <p class="text-subtitle-1">Sei sicuro di voler cambiare lo stato di compilazione?</p>
+          <p v-if="!actualCompany.item.state" class="text-subtitle-1">Cambiando lo stato attesti che i dati aziendali, quali profilo aziendale, associazione campagne, sedi aziendali, lista dipendenti, sono stati inseriti e controllati. Sei sicuro di voler cambiare lo stato di compilazione in <b>'verificato'</b>?</p>
+          <p v-if="actualCompany.item.state" class="text-subtitle-1">Sei sicuro di voler cambiare lo stato di compilazione in <b>'da verificare'</b>?</p>
         </template>
         <template v-slot:footer>
           <v-btn

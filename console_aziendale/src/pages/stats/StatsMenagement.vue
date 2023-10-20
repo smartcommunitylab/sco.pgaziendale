@@ -51,11 +51,11 @@
       <div>
         <v-card v-if="activeViewType && activeSelection">
           <div>
-            <v-card-title> Impostazioni {{activeViewType ? activeViewType.item.toLowerCase() : '' }} </v-card-title>
+            <v-card-title> Impostazioni</v-card-title>
           </div>
           <v-card-text class="px-5 py-4" v-if="activeSelection">
             <p v-if="activeSelection.dataLevel" class="p-0">
-              <b>Livello</b>: {{ activeSelection.dataLevel.label }}
+              <b>Livello aggregazione</b>: {{ activeSelection.dataLevel.label }}
             </p>
             <p v-if="activeSelection.timeUnit" class="p-0">
               <b>Aggregazione temporale</b>:<br />
@@ -89,7 +89,7 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-btn color="primary" text @click="sheet = !sheet"> Modifica filtri </v-btn>
+            <v-btn color="primary" text @click="sheet = !sheet"> Modifica </v-btn>
           </v-card-actions>
         </v-card>
 
@@ -99,7 +99,7 @@
           max-width="1200px">
           <v-card>
           <v-card-title>
-            <span class="text-h4 text-center">Impostazione parametri {{ activeViewType ? activeViewType.item.toLowerCase() :'' }}</span>
+            <span class="text-h4 text-center">Impostazioni</span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -262,14 +262,14 @@
                 text
                 @click="initiSelection()"
               >
-                Azzera filtri
+                Reimposta
               </v-btn>
               <v-btn
                 color="blue darken-1"
                 text
                 @click="saveFiltersAndRefreshStat()"
               >
-                Salva filtri
+                Applica
               </v-btn>
             </v-card-actions>
           </v-card>

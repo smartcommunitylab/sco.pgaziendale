@@ -19,6 +19,7 @@
                                 required
                                 @input="$v.name.$touch()"
                                 @blur="$v.name.$touch()"
+                                :disabled="role != 'ROLE_ADMIN'"
                                 outlined
                             ></v-text-field>
                         </v-col>
@@ -34,6 +35,7 @@
                                 v-model.trim="$v.code.$model"
                                 :error-messages="codeErrors"                                
                                 required
+                                :disabled="role != 'ROLE_ADMIN'"
                                 @input="$v.code.$touch()"
                                 @blur="$v.code.$touch()"
                                 outlined
@@ -63,6 +65,7 @@
                                 item-text="name.it"
                                 item-value="territoryId"
                                 :error-messages="territoryErrors"                                
+                                :disabled="role != 'ROLE_ADMIN'"
                                 required
                                 outlined
                             ></v-select>
@@ -490,6 +493,7 @@ export default {
         ...mapState("company", ["actualCompany"]),
         ...mapState("campaign", ["territories"]),
         ...mapState("modal", ["type"]),
+        ...mapState("account", ["role"]),
 
         //Controls for form validation 
         nameErrors () {

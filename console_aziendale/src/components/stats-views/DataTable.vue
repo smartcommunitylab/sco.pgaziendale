@@ -65,7 +65,7 @@
    .statstable table .cell-agg {
     border-right: 1px solid rgba(0, 0, 0, 0.12);
    }
-   .statstable table td  {
+   .statstable table td, .statstable table th {
     white-space: nowrap;
    }
 

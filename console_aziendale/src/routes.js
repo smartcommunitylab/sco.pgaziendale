@@ -7,6 +7,7 @@ import Locations from "@/pages/locations/Locations.vue"
 // import StatsOLD from "@/pages/stats-old/Stats.vue"
 import Stats from "@/pages/stats/Stats.vue"
 import Callback from "@/pages/login/Callback.vue"
+import Endsession from "@/pages/login/Endsession.vue"
 import GestioneDipendenti from "@/pages/employees/Employees.vue"
 import GestioneCampagne from "@/pages/campaigns/Campaigns.vue"
 import GestioneUtenti from "@/pages/users/Users.vue"
@@ -75,6 +76,11 @@ const routes = [
   path: '/Callback',
   name: 'callback',
   component: Callback
+},
+{
+  path: '/Endsession',
+  name: 'endsession',
+  component: Endsession
 },
 
     { 

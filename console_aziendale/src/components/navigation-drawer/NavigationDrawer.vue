@@ -141,7 +141,7 @@ pagine dall'utente in base al suo login.
             >mdi-clipboard-text-multiple-outline
             </v-icon>
           </v-list-item-icon>
-          <v-list-item-title :class="{ active: isActiveGestioneCamagne }">Gestione Campagne</v-list-item-title>
+          <v-list-item-title :class="{ active: isActiveGestioneCamagne }">Campagne disponibili</v-list-item-title>
         </v-list-item>
       </router-link>
       <router-link
