@@ -136,12 +136,14 @@ export default {
             let empList = this.allEmployees.items.slice();
             empList.forEach(e => {
               let list = (e.campaigns || []).concat(e.trackingRecord ? Object.keys(e.trackingRecord) : []);
-              e.employeeCampaigns = Array.from(new Set(list)).map(cId => {
+              const arr = Array.from(new Set(list)).map(cId => {
                   let tr = e.trackingRecord && e.trackingRecord[cId] ? e.trackingRecord[cId] : {registration: new Date().getTime()}
                   tr.id = cId;
                   tr.title = (this.allCampaigns.items.find(c => c.id === cId) || {title: cId}).title;
                   return tr;
-              }).map(c => c.title).join(', ');
+              }).map(c => c.title)
+              arr.sort();
+              e.employeeCampaigns = arr.join(', ');
             });
             this.employees = empList;
         }

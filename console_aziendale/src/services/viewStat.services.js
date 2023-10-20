@@ -42,7 +42,11 @@ async function fillTheViewWithValues(values, view, selection, currentCampaign) {
     case 'Tabella':
       viewData.headers = getHeadersTable(values, selection, currentCampaign)
       viewData.subheaders = getSubHeaders(viewData.headers, selection, currentCampaign)
-      viewData.headerNumber = viewData.subheaders.length / viewData.headers.length;
+      viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
+      for (let i = 0; i < viewData.subheaders.length; i++) {
+        let s = viewData.subheaders[i];
+        s.class = (i == 0 || (i % viewData.headerNumber == 0)) ? 'cell-agg': '';
+      }
       viewData.data = await getData(viewData.headers, selection, values, currentCampaign)
       break;
 
@@ -85,15 +89,15 @@ function getHeadersTable(values, selection, currentCampaign) {
 }
 //based on configuration, return the subheader=header.length*selection.dataColumns
 function getSubHeaders(headers, selection, currentCampaign) {
-  let subheaders = [{ text: 'Nome', value: 'name' }];
+  let subheaders = [{ text: 'Nome', value: 'name', class: 'cell-agg'}];
   for (let i = 0; i < headers.length; i++) {
     for (let k = 0; k < selection.dataColumns.length; k++) {
       let dc = selection.dataColumns[k];
       if (!dc.mean) {
-        subheaders.push({ text: dc.label, value: dc.value + headers[i] })
+        subheaders.push({ text: dc.label, value: dc.value + headers[i]})
       } else {
         currentCampaign.means.forEach(m => {
-          subheaders.push({ text: dc.label + ' ('+ m +')', value: dc.value + m + headers[i] })
+          subheaders.push({ text: dc.label + ' ('+ m +')', value: dc.value + m + headers[i]})
         });
       }
     }

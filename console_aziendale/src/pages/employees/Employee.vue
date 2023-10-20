@@ -90,12 +90,14 @@ export default {
         if (this.actualEmployee && this.actualEmployee.item && this.allCampaigns && this.allCampaigns.items) {
             console.log('updating');
             let list = (this.actualEmployee.item.campaigns || []).concat(this.actualEmployee.item.trackingRecord ? Object.keys(this.actualEmployee.item.trackingRecord) : []);
-            this.employeeCampaigns =  Array.from(new Set(list)).map(cId => {
+            const arr = Array.from(new Set(list)).map(cId => {
                 let tr = this.actualEmployee.item.trackingRecord && this.actualEmployee.item.trackingRecord[cId] ? this.actualEmployee.item.trackingRecord[cId] : {registration: new Date().getTime()}
                 tr.id = cId;
                 tr.title = (this.allCampaigns.items.find(c => c.id === cId) || {title: cId}).title;
                 return tr;
             });
+            arr.sort((a,b) => a.title.localeCompare(b.title));
+            this.employeeCampaigns = arr;
         }
     }
   },

@@ -54,21 +54,18 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="3">
-                            <v-autocomplete
+                            <v-select
                                 label="Territorio"
-                                placeholder="Territorio *"
-                                name="territory"
-                                id="territory"
-                                v-model.trim="$v.territory.$model"
+                                name="territoryId"
+                                id="territoryId"
+                                v-model.trim="$v.territoryId.$model"
                                 :items="territoryIds"
                                 item-text="name.it"
                                 item-value="territoryId"
                                 :error-messages="territoryErrors"                                
                                 required
-                                @input="$v.territory.$touch()"
-                                @blur="$v.territory.$touch()"
                                 outlined
-                            ></v-autocomplete>
+                            ></v-select>
                         </v-col>
                         <v-col
                         cols="6"
@@ -311,7 +308,7 @@ export default {
         code: {
             required,
         },
-        territory: {
+        territoryId: {
             required,
         },
         address: {
@@ -370,7 +367,7 @@ export default {
             id: null,
             name: "",
             code: "",
-            territory: "",
+            territoryId: "",
             territoryIds: [],
             address: "",
             streetNumber: "",
@@ -396,6 +393,7 @@ export default {
         ...mapActions("campaign", {getTerritories:"getTerritories"}),
 
         copyFormValues(company) {
+            if (!company) return;
             for (const [key] of Object.entries(company)) {
                 this[key] = company[key];
             }
@@ -419,7 +417,7 @@ export default {
             this.id = null;
             this.name = "";
             this.code = "";
-            this.territory = "";
+            this.territoryId = "";
             this.address = "";
             this.streetNumber = "";
             this.city = "";
@@ -437,7 +435,7 @@ export default {
                 id: this.id,
                 name: this.name,
                 code: this.code,
-                territoryId: this.territory,
+                territoryId: this.territoryId,
                 address: this.address,
                 streetNumber: this.streetNumber,
                 city: this.city,
@@ -452,6 +450,7 @@ export default {
             };
         },     
         closeThisModal(){
+            console.log(this.type);
             this.initCompany();
             this.$v.$reset();
             this.closeModal();
@@ -479,7 +478,7 @@ export default {
                 this.popup.title = "Aggiungi Azienda";
                 console.log("Modalità AGGIUNGI");
 
-            }else if (this.typeCall == "edit") {
+            }else if (this.typeCall == "edit" && this.actualCompany && this.actualCompany.item) {
                 this.copyFormValues(this.actualCompany.item);
                 this.popup.title = "Modifica Azienda";
                 console.log("Modalità MODIFICA");
@@ -490,6 +489,7 @@ export default {
     computed: {
         ...mapState("company", ["actualCompany"]),
         ...mapState("campaign", ["territories"]),
+        ...mapState("modal", ["type"]),
 
         //Controls for form validation 
         nameErrors () {
@@ -568,28 +568,28 @@ export default {
         },
         territoryErrors () {
             const errors = []
-            if (!this.$v.territory.$dirty) return errors
-            !this.$v.territory.required && errors.push('Campo richiesto.')
+            if (!this.$v.territoryId.$dirty) return errors
+            !this.$v.territoryId.required && errors.push('Campo richiesto.')
             return errors
         },
     },
 
     watch: {
-        typeCall: function(){
+        type: function(){
             this.setModalData();
         },
-        actualCompany: function(){
+        typeCall: function(){
             this.setModalData();
         },
         territories(res) {
             if (res.items)
                 {
-                    this.territoryIds = res.items.map(t => t);
+                    this.territoryIds = res.items.filter(t => t.territoryId);
                 }
             },
         },
 
-    created() {
+    mounted() {
         this.setModalData();
         this.getTerritories();
     },

@@ -31,7 +31,7 @@
                             <v-list-item-title v-else>Nessun sito web inserito</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item :href="`mailto:${actualCompany.item.contactEmail}`">
+                    <v-list-item :href="`mailto:${actualCompany.item.contactEmail}`" target="_blank">
                         <v-list-item-icon>
                             <v-icon>mdi-email</v-icon>
                         </v-list-item-icon>
@@ -39,7 +39,7 @@
                             <v-list-item-title v-text="actualCompany.item.contactEmail"></v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item :href="`tel:${actualCompany.item.contactPhone}`">
+                    <v-list-item :href="`tel:${actualCompany.item.contactPhone}`" target="_blank">
                         <v-list-item-icon>
                             <v-icon>mdi-phone</v-icon>
                         </v-list-item-icon>
@@ -83,7 +83,7 @@
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
 
-            <v-btn icon
+            <v-btn icon v-show="$route.name !== 'ProfiloAzienda'"
             @click="openModal({type:'updateCompanyState', object:null})">
                 <v-icon>{{actualCompany.item.state ? 'mdi-close' : 'mdi-check'}}</v-icon>
             </v-btn>
