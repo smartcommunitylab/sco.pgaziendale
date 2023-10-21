@@ -12,7 +12,7 @@ export const VARIABLES = {
     NAME: {
       EMPLOYEES_PARTECIPATION: "Partecipazione Dipendenti",
       ENVIRONMENTAL_IMPACT: "Impatto Ambientale",
-      KM_COUNTED: "Punti totali e utili",
+      KM_COUNTED: "Punteggio Campagna",
     },
     VIEWS: {
       TYPE: {
@@ -40,12 +40,12 @@ export const VARIABLES = {
           apiField: "score"
         },
         COUNTING_POINTS: {
-          label:  "Punti", 
+          label:  "Punti utili", 
           value:  "limitedScore",
           apiField: "limitedScore"
         },
         N_COUNTING_TRAVEL: {
-          label:  "Viaggi", 
+          label:  "Viaggi utili", 
           value: "limitedTrackCount",
           apiField: "limitedTrackCount"
         },
@@ -61,7 +61,7 @@ export const VARIABLES = {
           mean: true
         },
         MEAN_COUNTING_POINTS: {
-          label: "Punti per mezzo",
+          label: "Punti utili per mezzo",
           value: "limitedMeanScore",
           apiField: "limitedMeanScore",
           mean: true
@@ -85,7 +85,7 @@ export const VARIABLES = {
           mean: true
         },
         MEAN_N_TRAVEL: {
-          label: "Viaggi per mezzo",
+          label: "Tratte per mezzo",
           value: "meanTracks",
           apiField: "meanTracks",
           mean: true

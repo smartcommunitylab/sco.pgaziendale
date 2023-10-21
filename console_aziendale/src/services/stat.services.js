@@ -1,7 +1,7 @@
 import axios from "axios";
 import { statsConfigurations } from "../pages/stats/statsConfigurations";
 // import { VARIABLES } from "../variables";
-import { campaignService } from '.';
+import { campaignService, locationService } from '.';
 // import { companyService } from ".";
 import { employeeService } from ".";
 // import { viewStatService } from "./viewStat.services";
@@ -39,11 +39,28 @@ function getConfigurationByRole(ROLE, temporaryAdmin) {
 function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
   switch (itemAggregationValue) {
     case "EMPLOYEES":
-      return employeeService.getAllEmployees(companyId);
+      return employeeService.getAllEmployees(companyId).then((content) => {
+        return content.filter(e => e.campaigns.indexOf(campaignId) >= 0)
+        .map(e => {
+          e.label = (e.surname) ? `${e.surname} ${e.name}` : `${e.name}`;
+          return e;
+        });
+      });
     case "LOCATIONS":
-      return;
+      return locationService.getAllLocations(companyId).then(content => {
+        return content.map(l => {
+          l.label = l.id;
+          return l;
+        });
+  
+      })
     case "COMPANIES":
-      return campaignService.getAllCompaniesOfCampaign(campaignId);
+      return campaignService.getAllCompaniesOfCampaign(campaignId).then(content => {
+          return content.map(c => {
+            c.label = c.companyId;
+            return c;
+          });
+        });
     default:
       return Promise.resolve(null);
 
@@ -236,6 +253,22 @@ function aggregateByEmployeeStat(configuration) {
     configuration.csv
   );  
 }
+function aggregateByLocationStat(configuration) {
+  console.log('aggregateByLocationStat', configuration);
+  return callStatsAPI(
+    configuration.campaign.id, 
+    configuration.company.id, 
+    null, 
+    null, 
+    configuration.timeUnit.apiField, 
+    'location', 
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+    getFields(configuration),
+    true,
+    configuration.csv
+  );  
+}
 
 function getCampaignCompanyStats(configuration) {
   console.log('getCampaignCompanyStats', configuration);
@@ -330,6 +363,13 @@ function getStat(configuration) {
       return getAllEmployeesStats(configuration);
     case "aggregateByemployee":
       return aggregateByEmployeeStat(configuration);
+    case "aggregateByLocation":
+      return aggregateByLocationStat(configuration).then(res => {
+        console.log('RES', res);
+        const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(l => l.id) : [];
+        if (arr.length == 0) return res;
+        return res.filter(l => arr.indexOf(l.key) >= 0);
+      });
     case "getLocationsStats":
       return getAllLocationsStats(configuration);
     case "getCompanyStats":

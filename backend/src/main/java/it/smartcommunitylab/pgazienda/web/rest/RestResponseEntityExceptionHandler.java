@@ -146,6 +146,7 @@ public class RestResponseEntityExceptionHandler
 			super();
 			this.message = message;
 			this.errorData = errorData;
+      this.type = type;
 		}
 
 		public ErrorMsg() {

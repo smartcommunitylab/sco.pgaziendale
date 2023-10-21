@@ -113,12 +113,12 @@ export default {
     status(newCount, oldCount) {
       console.log(JSON.stringify(newCount) + JSON.stringify(oldCount));
     },
-    message(newAlert,oldAlert){
-      console.log(JSON.stringify(newAlert) + JSON.stringify(oldAlert));
+    message(){
+      // console.log('Message:' + this.message + ',' + this.active);
       // setTimeout(()=>this.clearAlert(),2500)
     },
     // eslint-disable-next-line no-unused-vars
-    $route(to, from) {
+    $route() {
       // clear alert on location change
       setTimeout(()=>this.clearAlert(),2500);
       window.scrollTo(0,0);

@@ -393,27 +393,32 @@ public class CompanyService {
 			lines = readCSV(new ByteArrayInputStream(bytes), ';', 4);
 		}
 		Set<String> codes = new HashSet<>();
+		int i = 0;
 		for (String[] l: lines) {
-			String code = l[2];
+			String code = stringValue(l[2], i + 1, 3, true);
 			if (codes.contains(code)) {
 				throw new InconsistentDataException("Duplicate employees", "INVALID_CSV_DUPLICATE_EMPLOYEES");				
 			}
 			Employee existing = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, code).stream().findAny().orElse(null);
+			String location = stringValue(l[3], i + 1, 4, true);
+			String name = stringValue(l[0], i + 1, 1, true);
+			String surname = stringValue(l[1], i + 1, 2, true);
 			if (existing != null) {
-				existing.setLocation(l[3]);
-				existing.setName(l[0]);
-				existing.setSurname(l[1]);
+				existing.setLocation(location);
+				existing.setName(name);
+				existing.setSurname(surname);
 				employeeRepo.save(existing);
 			} else {
 				Employee e = new Employee();
 				e.setCode(code);
-				e.setName(l[0]);
-				e.setSurname(l[1]);
+				e.setName(name);
+				e.setSurname(surname);
 				e.setCompanyId(companyId);
-				e.setLocation(l[3]);
+				e.setLocation(location);
 				employeeRepo.save(e);
 			}
 			codes.add(code);
+			i++;
 		}
 	}
 
@@ -511,6 +516,12 @@ public class CompanyService {
 		if (locations.size() > 0) {
 			Company c = companyRepo.findById(companyId).orElse(null);
 			if (c != null) {
+				Map<String, CompanyLocation> map = locations.stream().collect(Collectors.toMap(l -> l.getId(), l -> l));
+				if (c.getLocations() != null) {
+					for (CompanyLocation l : c.getLocations()) {
+						if (!map.containsKey(l.getId())) locations.add(l);
+					}
+				}
 				c.setLocations(locations);
 				companyRepo.save(c);
 			}

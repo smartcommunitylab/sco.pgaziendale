@@ -82,8 +82,7 @@
                 ><br /><span
                   v-for="(agg, index) in activeSelection.puntualAggregationItems"
                   :key="index"
-                  >{{ agg.name }} {{ agg.surname ? agg.surname : null
-                  }} </span></template
+                  >{{ agg.label }} </span></template
               ><template v-else><br /><span>Nessuno</span></template>
             </p>
           </v-card-text>
@@ -119,6 +118,7 @@
                   item-text="label"
                   return-object
                   outlined
+                  @change="resetPunctualAggregation"
                 ></v-autocomplete>
 
                 <div
@@ -438,6 +438,11 @@ export default {
       this.getLocalStat(this.localSelection);
     },
 
+    resetPunctualAggregation() {
+      this.puntualAggregationSelected = 'NONE';
+      this.updatePuntualAggregationChange();
+    },
+
     fillTheViewWithValues(values, view, activeSelection, currentCampaign, loader) {
       viewStatService
         .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
@@ -461,8 +466,7 @@ export default {
       }
     },
     getItemText(item) {
-      if (item.surname) return `${item.surname} ${item.name}`;
-      return `${item.name}`;
+      return item.label;
     },
     exportCsv() {
       this.downloadCsv(this.localSelection);

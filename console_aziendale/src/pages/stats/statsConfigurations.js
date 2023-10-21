@@ -155,11 +155,11 @@ export const statsConfigurations = [
               value: 'NONE',
               function:''
             }
-            // ,{
-            //   label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.LOCATIONS,
-            //   value: 'LOCATIONS',
-            //   function:''
-            // }
+            ,{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.LOCATIONS,
+              value: 'LOCATIONS',
+              function:'aggregateByLocation'
+            }
             ]
           },
           {
@@ -295,6 +295,10 @@ export const statsConfigurations = [
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
               function:''
+            },{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.LOCATIONS,
+              value: 'LOCATIONS',
+              function:'aggregateByLocation'
             }]
           }
         ],
