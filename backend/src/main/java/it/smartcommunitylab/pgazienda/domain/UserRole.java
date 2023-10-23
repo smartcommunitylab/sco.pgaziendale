@@ -29,6 +29,8 @@ public class UserRole {
 
 	private String role;
 	private String companyId;
+	private String territoryId;
+	private String campaignId;
 	private List<String> locations;
 	private List<Subscription> subscriptions;
 	
@@ -109,8 +111,36 @@ public class UserRole {
 		}
 		return role;
 	}
+	
+	public static UserRole createCampaignManager(String campaignId) {
+		UserRole role = new UserRole();
+		role.setRole(Constants.ROLE_CAMPAIGN_MANAGER);
+		role.setCompanyId(campaignId);
+		return role;
+	}
 
+	public static UserRole createTerritoryManager(String territoryId) {
+		UserRole role = new UserRole();
+		role.setRole(Constants.ROLE_TERRITORY_MANAGER);
+		role.setTerritoryId(territoryId);
+		return role;
+	}
+	
 	public String key() {
-		return role + (companyId != null ? ("@" + companyId) : "");
+		return role + (territoryId != null ? ("@" + territoryId) : "") 
+				+ (campaignId != null ? ("@" + campaignId) : "")
+				+ (companyId != null ? ("@" + companyId) : "");
+	}
+	public String getTerritoryId() {
+		return territoryId;
+	}
+	public void setTerritoryId(String territoryId) {
+		this.territoryId = territoryId;
+	}
+	public String getCampaignId() {
+		return campaignId;
+	}
+	public void setCampaignId(String campaignId) {
+		this.campaignId = campaignId;
 	}
 }
