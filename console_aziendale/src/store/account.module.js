@@ -75,7 +75,7 @@ const actions = {
         const oauthLogin = ('true' == localStorage.getItem('oauth_login'));
         if (oauthLogin) oauthService.signout();
         else {
-            this.logoutLocal({ commit, dispatch });
+            actions.logoutLocal({ commit, dispatch });
         }
     },
     logoutLocal({ commit, dispatch }) { 
@@ -167,6 +167,7 @@ const mutations = {
         state.role = null;
         state.home = null;
         state.temporaryAdmin=false;
+        state.token = null;
     },
     logout(state) {
         state.status = {};
@@ -174,6 +175,7 @@ const mutations = {
         state.role = null;
         state.home = null;
         state.temporaryAdmin=false;
+        state.token = null;
     },
     temporaryCompanyAdmin(state) {
         state.temporaryAdmin=true;
