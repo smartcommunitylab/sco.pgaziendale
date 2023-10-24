@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,7 +38,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import it.smartcommunitylab.pgazienda.Constants;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.service.UserService;
@@ -70,18 +73,28 @@ public class ExternalUserDetailsService {
     @Value("${app.security.ext.domain:}")
     private String userDomain;
     
+    @Value("${app.engineEndpoint}")
+    private String engineEndpoint;
+    
     @Autowired
     private RestTemplate template;
     
     @Autowired
     private UserService userService;
+    
+    private ObjectMapper mapper = new ObjectMapper();
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	public Authentication externalAuthentication(String token) throws InconsistentDataException {
     	HttpHeaders headers = new HttpHeaders();
     	headers.set("Authorization", "Bearer " + extractToken(token));
     	HttpEntity entity = new HttpEntity(headers);
-		Map<String, ?> userInfo = template.exchange(URI.create(userInfoEndpoint), HttpMethod.GET, entity , Map.class).getBody();
+    	log.debug("get user info:" + headers);
+    	ResponseEntity<Map> responseInfo = template.exchange(URI.create(userInfoEndpoint), HttpMethod.GET, entity , Map.class);
+    	if(!responseInfo.getStatusCode().is2xxSuccessful()) {
+    		log.warn("get user info error:" + responseInfo.getStatusCodeValue());
+    	}
+		Map<String, ?> userInfo = responseInfo.getBody();
 		
     	if (userInfo == null) throw new SecurityException("Missing user data");
     	String username = (String) userInfo.get(userNameField);
@@ -103,15 +116,27 @@ public class ExternalUserDetailsService {
     		userDTO.setSurname(surname);
     		userDTO.setUsername(username);
     		userDTO.setPlayerId(playerId);
-    		userDTO.setRoles(Collections.singletonList(UserRole.createAppUserRole()));
+    		//userDTO.setRoles(Collections.singletonList(UserRole.createAppUserRole()));
 			user = userService.createUser(userDTO, null);
     	} else {
     		log.info("Updating existing User: " + userInfo);
     		user.setName(name);
     		user.setSurname(surname);
     		user.setPlayerId(playerId);
-    		user = userService.updateUser(user, null).orElse(null);
     	}
+    	//get playandgo roles
+    	ResponseEntity<String> responseEntity = template.exchange(URI.create(engineEndpoint + "api/console/role/my"), HttpMethod.GET, entity , String.class);
+    	if(responseEntity.getStatusCode().is2xxSuccessful()) {
+    		try {
+				JsonNode rootNode = mapper.readTree(responseEntity.getBody());
+				for (JsonNode jsonNode : rootNode) {
+					mergeRoles(user, jsonNode);
+				}
+			} catch (Exception e) {
+				log.warn("externalAuthentication: playandgo roles error:" + e.getMessage());
+			}
+    	}
+    	user = userService.updateUser(user, null).orElse(null);
 		log.debug("With fields: " + nameField +", " + surnameField +", " + userNameField +", " + playerField);
         List<GrantedAuthority> grantedAuthorities = user.getRoles().stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getRole()))
@@ -124,6 +149,29 @@ public class ExternalUserDetailsService {
                 user.getPassword(),
                 grantedAuthorities));
         return authenticationToken;
+    }
+    
+    private void mergeRoles(User user, JsonNode jsonNode) {
+		String entityId = jsonNode.get("entityId").asText();
+		String role = jsonNode.get("role").asText();
+		if(StringUtils.isNotBlank(role)) {
+			switch (role) {
+			case "admin":
+				if(!user.isAdmin()) 
+					user.getRoles().add(UserRole.createAdminRole());
+				break;
+			case "territory":
+				if(!user.hasTerritoryRole(entityId))
+					user.getRoles().add(UserRole.createTerritoryManager(entityId));
+				break;
+			case "campaign":
+				if(!user.hasCampaignRole(entityId))
+					user.getRoles().add(UserRole.createCampaignManager(entityId));
+				break;
+			default:
+				break;
+			}
+		}
     }
     
     public User checkOrRegister(String playerId) throws InconsistentDataException {

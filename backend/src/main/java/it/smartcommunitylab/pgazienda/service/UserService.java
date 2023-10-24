@@ -46,9 +46,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import it.smartcommunitylab.pgazienda.Constants;
+import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
+import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.security.SecurityUtils;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
@@ -65,6 +67,8 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+	@Autowired
+	private CompanyRepository companyRepo;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -197,6 +201,8 @@ public class UserService {
                 List<UserRole> roles = userDTO.getRoles().stream().filter((r -> companyId.equals(r.getCompanyId()))).collect(Collectors.toList());
                 user.setRoles(mergeRoles(companyId, roles, user.getRoles()));
                 if (user.getRoles().isEmpty()) throw new InconsistentDataException("Empty company roles", "EMPTY_ROLES");
+            } else {
+            	user.setRoles(userDTO.getRoles());
             }
             
             userRepository.save(user);
@@ -394,11 +400,27 @@ public class UserService {
 		User user = getUserWithAuthorities().orElse(null);
 		Set<String> set = Sets.newHashSet(roles);
 		if (user != null) {
-			return user.getRoles().stream().anyMatch(r -> Constants.ROLE_ADMIN.equals(r.getRole()) || set.contains(r.getRole()) && companyId.equals(r.getCompanyId()));
+			Company company = companyRepo.findById(companyId).orElse(null);
+			if(company != null) {
+				String territoryId = company.getTerritoryId();
+				return user.getRoles().stream().anyMatch(r -> {
+					if(Constants.ROLE_ADMIN.equals(r.getRole()))
+						return true;
+					if(set.contains(r.getRole())) {
+						if(Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && territoryId.equals(r.getTerritoryId()))
+							return true;
+						if(Constants.ROLE_COMPANY_ADMIN.equals(r.getRole()) && companyId.equals(r.getCompanyId()))
+							return true;
+						if(Constants.ROLE_MOBILITY_MANAGER.equals(r.getRole()) && companyId.equals(r.getCompanyId()))
+							return true;
+					}
+					return false;
+				});				
+			}
 		}
 		return false;
 	}
-
+	
 	/**
 	 * @param campaignId
 	 */

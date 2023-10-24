@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,10 +63,10 @@ public class LocationResource {
      * @throws InconsistentDataException 
      */
     @PostMapping("/companies/{companyId}/locations")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
+    //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
 	public ResponseEntity<CompanyLocation> createLocation(@PathVariable String companyId, @Valid @RequestBody CompanyLocation location) throws InconsistentDataException {
     	log.debug("Creating a location {} / {}", companyId, location);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.createLocation(companyId, location));
 	}
 
@@ -79,10 +78,10 @@ public class LocationResource {
      * @throws InconsistentDataException 
      */
     @PutMapping("/companies/{companyId}/locations/{locationId:.*}")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
+    //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
 	public ResponseEntity<CompanyLocation> updateLocation(@PathVariable String companyId, @PathVariable String locationId, @Valid @RequestBody CompanyLocation location) throws InconsistentDataException {
     	log.debug("Updating a location {} / {}", companyId, locationId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.updateLocation(companyId, location));
 	}
     /**
@@ -92,10 +91,10 @@ public class LocationResource {
      * @return
      */
     @DeleteMapping("/companies/{companyId}/locations/{locationId:.*}")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN  +"\")")
+    //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN  +"\")")
 	public ResponseEntity<Void> deleteLocation(@PathVariable String companyId, @PathVariable String locationId) {
     	log.debug("Deleting a location {} / {}", companyId, locationId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
     	companyService.deleteLocation(companyId, locationId);
     	return ResponseEntity.ok(null);
 	}
@@ -106,10 +105,10 @@ public class LocationResource {
      * @return
      */
     @GetMapping("/companies/{companyId}/locations")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN  + "\", \""+Constants.ROLE_MOBILITY_MANAGER +"\")")
+    //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN  + "\", \""+Constants.ROLE_MOBILITY_MANAGER +"\")")
 	public ResponseEntity<List<CompanyLocation>> getLocations(@PathVariable String companyId) {
     	log.debug("Read locations {}", companyId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.readlocations(companyId));
 	}
 
