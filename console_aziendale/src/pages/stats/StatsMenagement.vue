@@ -54,18 +54,15 @@
             <v-card-title> Impostazioni</v-card-title>
           </div>
           <v-card-text class="px-5 py-4" v-if="activeSelection">
-            <p v-if="activeSelection.dataLevel" class="p-0">
-              <b>Livello aggregazione</b>: {{ activeSelection.dataLevel.label }}
-            </p>
-            <p v-if="activeSelection.timeUnit" class="p-0">
-              <b>Aggregazione temporale</b>:<br />
-              {{ activeSelection.timeUnit.label }}
-            </p>
             <p v-if="activeSelection.dataColumns" class="p-0">
               <b>Colonne dati</b>:
               <span v-for="(column, index) in activeSelection.dataColumns" :key="index"
                 ><br />{{ column.label }}</span
               >
+            </p>
+            <p v-if="activeSelection.timeUnit" class="p-0">
+              <b>Aggregazione temporale</b>:<br />
+              {{ activeSelection.timeUnit.label }}
             </p>
             <p v-if="activeSelection.timePeriod" class="p-0">
               <b>Periodo di tempo</b>:
@@ -75,6 +72,9 @@
               ><template v-else
                 ><br /><span>{{ activeSelection.timePeriod.label }}</span></template
               >
+            </p>
+            <p v-if="activeSelection.dataLevel" class="p-0">
+              <b>Livello aggregazione</b>: {{ activeSelection.dataLevel.label }}
             </p>
             <p v-if="activeSelection.puntualAggregationSelected" class="p-0">
               <b>Filtri</b>:

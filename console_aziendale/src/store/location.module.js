@@ -57,9 +57,9 @@ const actions = {
             }
         );
     },
-    updateLocation({ commit, dispatch }, { companyId, location,oldLocation }) {
+    updateLocation({ commit, dispatch }, { companyId, location, oldLocation }) {
         commit('updateLocation');
-        locationService.updateLocation(companyId, location,oldLocation).then(
+        locationService.updateLocation(companyId, location, oldLocation).then(
             location => {
                 commit('updateLocationSuccess', {location, oldLocation});
                 dispatch('alert/success', "Sede modificata con successo", { root: true });

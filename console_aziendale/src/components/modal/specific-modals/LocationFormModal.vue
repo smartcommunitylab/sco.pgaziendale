@@ -306,6 +306,9 @@ export default {
   validations: {
     id: {
       required,
+      unique() {
+        return this.id === this.actualLocation.item.id || !this.allLocations.items.find(l=> l.id === this.id);
+      }
     },
     address: {
       required,
@@ -516,7 +519,6 @@ export default {
           7: "Domenica",
         },
       ],
-      oldLocation: {},
       disabled: false,
     };
   },
@@ -613,10 +615,6 @@ export default {
         radius: Number.parseInt(this.radius),
       };
     },
-    createOldLocation() {
-      console.log("ho creato una OLD Location");
-      this.oldLocation = this.actualLocation.item;
-    },
     setModalData() {
       if (this.typeCall == "add") {
         this.initLocation();
@@ -629,7 +627,6 @@ export default {
       }
     },
     saveLocation() {
-      console.log(this.address);
       if (!this.$v.$invalid) {
         this.createLocation();
         if (this.typeCall == "add") {
@@ -643,7 +640,7 @@ export default {
           this.updateLocation({
             companyId: this.actualCompany.item.id,
             location: this.locationSelected,
-            oldLocation: this.oldLocation,
+            oldLocation: this.actualLocation.item,
           });
           this.closeModal();
         }
@@ -659,7 +656,7 @@ export default {
   },
 
   computed: {
-    ...mapState("location", ["actualLocation"]),
+    ...mapState("location", ["actualLocation", "allLocations"]),
     ...mapState("modal", ["active"]),
     ...mapState("company", ["actualCompany"]),
 
@@ -688,6 +685,7 @@ export default {
       const errors = [];
       if (!this.$v.id.$dirty) return errors;
       !this.$v.id.required && errors.push("Campo richiesto.");
+      !this.$v.id.unique && errors.push("Valore gia' in uso.");
       return errors;
     },
     addressErrors() {
@@ -759,7 +757,6 @@ export default {
 
     actualLocation: function () {
       this.setModalData();
-      this.createOldLocation();
     },
   },
 
