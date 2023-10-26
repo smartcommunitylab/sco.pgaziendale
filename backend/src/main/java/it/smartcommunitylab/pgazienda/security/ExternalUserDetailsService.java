@@ -145,9 +145,7 @@ public class ExternalUserDetailsService {
     	
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), grantedAuthorities);
-        authenticationToken.setDetails(new org.springframework.security.core.userdetails.User(user.getUsername(),
-                user.getPassword(),
-                grantedAuthorities));
+        authenticationToken.setDetails(user);
         return authenticationToken;
     }
     

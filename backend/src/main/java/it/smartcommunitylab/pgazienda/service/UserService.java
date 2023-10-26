@@ -53,6 +53,7 @@ import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.security.SecurityUtils;
+import it.smartcommunitylab.pgazienda.security.UserInfo;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.service.errors.InvalidPasswordException;
 import it.smartcommunitylab.pgazienda.util.RandomUtil;
@@ -351,6 +352,9 @@ public class UserService {
     public Optional<User> getUserWithAuthorities() {
         return SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneByUsernameIgnoreCase);
     }
+    public UserInfo getUserDetail() {
+    	return SecurityUtils.getCurrentUserInfo();
+    }
     public List<User> getUserByEmployeeCode(String campaign, String companyCode, String userCode) {
         return userRepository.findByCampaignAndCompanyAndEmployeeCode(campaign, companyCode, "^" + userCode+"$");
     }
@@ -397,7 +401,7 @@ public class UserService {
 	 * @return true if the user is a platform admin or has the specified role for the specified company
 	 */
 	public boolean isInCompanyRole(String companyId, String ... roles) {
-		User user = getUserWithAuthorities().orElse(null);
+		UserInfo user = getUserDetail();
 		Set<String> set = Sets.newHashSet(roles);
 		if (user != null) {
 			Company company = companyRepo.findById(companyId).orElse(null);

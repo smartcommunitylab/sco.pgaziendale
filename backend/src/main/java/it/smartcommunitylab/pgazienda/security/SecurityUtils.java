@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import it.smartcommunitylab.pgazienda.Constants;
+import it.smartcommunitylab.pgazienda.domain.User;
 
 /**
  * Utility class for Spring Security.
@@ -43,6 +44,15 @@ public final class SecurityUtils {
     public static Optional<String> getCurrentUserLogin() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         return Optional.ofNullable(extractPrincipal(securityContext.getAuthentication()));
+    }
+    
+    public static UserInfo getCurrentUserInfo() {
+    	SecurityContext securityContext = SecurityContextHolder.getContext();
+    	Authentication authentication = securityContext.getAuthentication();
+    	if(authentication.getDetails() instanceof UserInfo) {
+    		return (UserInfo) authentication.getDetails(); 
+    	}
+    	return null;
     }
 
     private static String extractPrincipal(Authentication authentication) {

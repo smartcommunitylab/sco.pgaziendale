@@ -35,6 +35,8 @@ import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -54,6 +56,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import it.smartcommunitylab.pgazienda.security.UserInfo;
 
 @Component
 public class TokenProvider {
@@ -61,6 +64,7 @@ public class TokenProvider {
     private final Logger log = LoggerFactory.getLogger(TokenProvider.class);
 
     private static final String AUTHORITIES_KEY = "auth";
+    private static final String CUSTOM_INFO = "custom_info";
 
     private Key key;
 
@@ -82,6 +86,8 @@ public class TokenProvider {
     private String userDomain;
 
     private JwkProvider provider;
+    
+    private ObjectMapper mapper = new ObjectMapper();
 
     @PostConstruct
     public void init() throws MalformedURLException {
@@ -105,10 +111,19 @@ public class TokenProvider {
         } else {
             validity = new Date(now + this.tokenValidityInSeconds * 1000);
         }
+        
+        UserInfo info = new UserInfo();
+        if(authentication.getDetails() instanceof it.smartcommunitylab.pgazienda.domain.User) {
+        	it.smartcommunitylab.pgazienda.domain.User user = (it.smartcommunitylab.pgazienda.domain.User) authentication.getDetails();
+        	info.setPlayerId(user.getPlayerId());
+        	info.setUsername(user.getUsername());
+        	info.getRoles().addAll(user.getRoles());
+    	}
 
         return Jwts.builder()
             .setSubject(authentication.getName())
             .claim(AUTHORITIES_KEY, authorities)
+            .claim(CUSTOM_INFO, info)
             .signWith(key, SignatureAlgorithm.HS512)
             .setExpiration(validity)
             .compact();
@@ -133,8 +148,20 @@ public class TokenProvider {
         }
         
         User principal = new User(subj, "", authorities);
-
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        
+        UsernamePasswordAuthenticationToken authenticationToken = 
+        		new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        if(jwt.getClaims().containsKey(CUSTOM_INFO)) {
+        	String json = jwt.getClaims().get(CUSTOM_INFO).toString();
+			try {
+				UserInfo info = mapper.readValue(json, UserInfo.class);
+	        	authenticationToken.setDetails(info);
+			} catch (JsonProcessingException e) {
+				log.info("Invalid JWT token detail.");
+			}
+        }
+        	
+        return authenticationToken;
     }
 
 	public boolean validateToken(String authToken) {
