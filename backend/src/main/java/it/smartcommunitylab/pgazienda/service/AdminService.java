@@ -36,7 +36,6 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.LegacyPlayerMapping;
-import it.smartcommunitylab.pgazienda.domain.Territory;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
@@ -122,7 +121,7 @@ public class AdminService {
 				user.setUsername(u.getUsername());
 				user.setPassword(u.getPassword());
 				String companyId = companyService.findByCode(u.getCompanyCode()).orElse(null).getId();
-				UserRole role = (Constants.ROLE_COMPANY_ADMIN.equals(u.getRole())) ? UserRole.createCompanyAdminRole(companyId) : UserRole.createMobilityManager(companyId, u.getLocations());
+				UserRole role = UserRole.createMobilityManager(companyId);
 				user.setRoles(Collections.singletonList(role));
 				userService.createUser(user);
 			}
@@ -137,7 +136,7 @@ public class AdminService {
 	 * @throws InconsistentDataException 
 	 */
 	private void validateUsers(DataModelDTO model) throws InconsistentDataException {
-		if (model.getCompanyUsers().stream().anyMatch(u -> !Constants.ROLE_COMPANY_ADMIN.equals(u.getRole()) && !Constants.ROLE_MOBILITY_MANAGER.equals(u.getRole()))) throw new InconsistentDataException("Invalid user roles", "INVALID_ROLES");
+		if (model.getCompanyUsers().stream().anyMatch(u -> !Constants.ROLE_MOBILITY_MANAGER.equals(u.getRole()))) throw new InconsistentDataException("Invalid user roles", "INVALID_ROLES");
 		if (model.getCompanyUsers().stream().anyMatch(u -> StringUtils.isAnyEmpty(u.getUsername(), u.getName(), u.getSurname(), u.getPassword()))) throw new InconsistentDataException("Invalid user definition", "INVALID_USER_DATA");
 		if (model.getCompanyUsers().stream().anyMatch(u -> companyService.findByCode(u.getCompanyCode()).isEmpty())) throw new InconsistentDataException("Invalid user definition: non existing company", "NO_COMPANY");
 		

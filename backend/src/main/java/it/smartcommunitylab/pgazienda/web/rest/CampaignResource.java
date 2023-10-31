@@ -64,7 +64,7 @@ public class CampaignResource {
      * @return
      */
     @GetMapping("/campaigns")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \"" + Constants.ROLE_TERRITORY_MANAGER  + "\", \"" + Constants.ROLE_CAMPAIGN_MANAGER + "\", \"" + Constants.ROLE_COMPANY_ADMIN  + "\", \"" + Constants.ROLE_MOBILITY_MANAGER +"\")")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \"" + Constants.ROLE_TERRITORY_MANAGER  + "\", \"" + Constants.ROLE_CAMPAIGN_MANAGER + "\", \"" + Constants.ROLE_MOBILITY_MANAGER +"\")")
 	public ResponseEntity<Page<Campaign>> listCampaign(Pageable pageable) {
     	log.debug("List all campaigns ");
     	return ResponseEntity.ok(campaignService.getCampaigns(pageable));
@@ -91,7 +91,7 @@ public class CampaignResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN  + "\", \""+Constants.ROLE_MOBILITY_MANAGER +"\")")
 	public ResponseEntity<List<Campaign>> getCampaigns(@PathVariable String companyId) {
     	log.debug("Read campaigns {}", companyId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(campaignService.getCompanyCampaigns(companyId));
 	}
 
@@ -126,7 +126,8 @@ public class CampaignResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
 	public ResponseEntity<Company> createCompanyCampaign(@PathVariable String companyId, @PathVariable String campaignId) {
     	log.debug("Adding a campaign to company {} / {}", companyId, campaignId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER) &&
+    			!userService.isInCampaignRole(campaignId)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.assignCampaign(companyId, campaignId));
 	}
 
@@ -140,7 +141,8 @@ public class CampaignResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN +"\")")
 	public ResponseEntity<Void> deleteCompanyCampaign(@PathVariable String companyId, @PathVariable String campaignId) {
     	log.debug("Deleting a campaign from company {} / {}", companyId, campaignId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER) && 
+    			!userService.isInCampaignRole(campaignId)) throw new SecurityException("Insufficient rights");
     	companyService.deleteCampaign(companyId, campaignId);
     	return ResponseEntity.ok(null);
 	}

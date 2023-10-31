@@ -126,7 +126,7 @@ public class CompanyResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN  + "\", \""+Constants.ROLE_MOBILITY_MANAGER +"\")")
 	public ResponseEntity<Company> getCompany(@PathVariable String companyId) {
     	log.debug("Reading company {}", companyId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.of(companyService.getCompany(companyId));
 	}
 
@@ -140,7 +140,7 @@ public class CompanyResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
 	public ResponseEntity<Company> updateCompany(@PathVariable String companyId, @RequestBody Company company) {
     	log.debug("Updating company {}", companyId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	company.setId(companyId);
 		return ResponseEntity.of(companyService.updateCompany(company));
 	}
@@ -155,7 +155,7 @@ public class CompanyResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
 	public ResponseEntity<Company> updateCompanyState(@PathVariable String companyId, @PathVariable Boolean state) {
     	log.debug("Updating company state {}, state {}", companyId, state);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
 		return ResponseEntity.ok(companyService.updateCompanyState(companyId, state));
 	}
     /**
@@ -167,7 +167,7 @@ public class CompanyResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
 	public ResponseEntity<Void> deleteCompany(@PathVariable String companyId) {
     	log.debug("Deleting company {}", companyId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
 		companyService.deleteCompany(companyId);
 		return ResponseEntity.ok(null);
 	}

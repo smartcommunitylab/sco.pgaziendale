@@ -68,7 +68,7 @@ public class EmployeeResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN + "\", \""+Constants.ROLE_MOBILITY_MANAGER+"\")")
 	public ResponseEntity<Employee> createEmployee(@PathVariable String companyId, @Valid @RequestBody Employee employee) throws BadRequestAlertException, InconsistentDataException {
     	log.debug("Creating a employee {} / {}", companyId, employee);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	if (employee.getId() != null) {
     		throw new BadRequestAlertException("A new emplyee cannot already have an ID");
     	}
@@ -85,7 +85,7 @@ public class EmployeeResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN + "\", \""+Constants.ROLE_MOBILITY_MANAGER+"\")")
 	public ResponseEntity<Employee> updateEmployee(@PathVariable String companyId, @PathVariable String employeeId, @Valid @RequestBody Employee employee) {
     	log.debug("Updating a employee {} / {}", companyId, employeeId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.updateEmployee(companyId, employee));
 	}
     /**
@@ -98,7 +98,7 @@ public class EmployeeResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN + "\", \""+Constants.ROLE_MOBILITY_MANAGER  +"\")")
 	public ResponseEntity<Void> deleteEmployee(@PathVariable String companyId, @PathVariable String employeeId) {
     	log.debug("Deleting a employee {} / {}", companyId, employeeId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	companyService.deleteEmployee(companyId, employeeId);
     	return ResponseEntity.ok(null);
 	}
@@ -112,14 +112,14 @@ public class EmployeeResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN  + "\", \""+Constants.ROLE_MOBILITY_MANAGER +"\")")
 	public ResponseEntity<Page<Employee>> getEmployees(@PathVariable String companyId, @RequestParam(required=false) String location, Pageable pageable) {
     	log.debug("Read employees {}", companyId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.findEmployees(companyId, location, pageable));
 	}
 
     @PostMapping("/companies/{companyId}/employees/csv")
     public ResponseEntity<Void> uploadEmployees(@PathVariable String companyId, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws Exception {
     	log.debug("import csv empoloyees {}", companyId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	companyService.importEmployees(companyId, file.getInputStream());
     	return ResponseEntity.ok(null);
     }

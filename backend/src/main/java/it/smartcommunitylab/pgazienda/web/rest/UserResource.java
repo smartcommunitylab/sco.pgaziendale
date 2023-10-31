@@ -104,7 +104,7 @@ public class UserResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
     public ResponseEntity<User> createUser(@PathVariable String companyId, @Valid @RequestBody User userDTO) throws URISyntaxException, BadRequestAlertException, UsernameAlreadyUsedException, InconsistentDataException {
         log.debug("REST request to save User : {}", userDTO);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
 
     	Optional<User> old = null;
         if (userDTO.getId() != null) {
@@ -141,7 +141,7 @@ public class UserResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
     public ResponseEntity<User> updateUser(@PathVariable String companyId, @Valid @RequestBody User userDTO) throws UsernameAlreadyUsedException, InconsistentDataException {
         log.debug("REST request to update User : {}", userDTO);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
         Optional<User> existingUser = userRepository.findOneByUsernameIgnoreCase(userDTO.getUsername().toLowerCase());
         if (existingUser.isPresent() && (!existingUser.get().getId().equals(userDTO.getId()))) {
             throw new UsernameAlreadyUsedException();
@@ -160,7 +160,7 @@ public class UserResource {
     @GetMapping("/companies/{companyId}/users")
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
     public ResponseEntity<List<User>> getAllUsers(@PathVariable String companyId) {
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
         final List<User> page = userService.getAllManagedUsers(companyId);
         return ResponseEntity.ok(page);
     }
@@ -175,7 +175,7 @@ public class UserResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
     public ResponseEntity<Void> deleteUser(@PathVariable String companyId, @PathVariable String login) {
         log.debug("REST request to delete User: {}", login);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_COMPANY_ADMIN)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
         userService.deleteUser(companyId, login);
         return ResponseEntity.ok(null);
     }

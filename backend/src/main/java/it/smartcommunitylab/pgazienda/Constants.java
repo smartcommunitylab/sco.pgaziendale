@@ -23,7 +23,7 @@ package it.smartcommunitylab.pgazienda;
 public class Constants {
 
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
-	public static final String ROLE_COMPANY_ADMIN = "ROLE_COMPANY_ADMIN";
+	//public static final String ROLE_COMPANY_ADMIN = "ROLE_COMPANY_ADMIN";
 	public static final String ROLE_MOBILITY_MANAGER = "ROLE_MOBILITY_MANAGER";
 	public static final String ROLE_APP_USER = "ROLE_APP_USER";
 	public static final String ROLE_CAMPAIGN_MANAGER = "ROLE_CAMPAIGN_MANAGER";

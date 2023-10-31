@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -299,15 +298,6 @@ public class UserService {
 			// keep roles of other companies or global roles
 			if (!companyId.equals(r.getCompanyId())) {
 				map.put(key, r);
-
-			// merge locations	
-			} else if (map.containsKey(key)) {
-				UserRole toMerge = map.get(key);
-				if (r.getLocations() != null) {
-					Set<String> set =  new HashSet<>(r.getLocations());
-					if (toMerge.getLocations() != null) set.addAll(toMerge.getLocations());
-					toMerge.setLocations(new LinkedList<>(set));
-				}
 			}
 		});
 		return new LinkedList<>(map.values());
@@ -413,14 +403,26 @@ public class UserService {
 					if(set.contains(r.getRole())) {
 						if(Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && territoryId.equals(r.getTerritoryId()))
 							return true;
-						if(Constants.ROLE_COMPANY_ADMIN.equals(r.getRole()) && companyId.equals(r.getCompanyId()))
-							return true;
 						if(Constants.ROLE_MOBILITY_MANAGER.equals(r.getRole()) && companyId.equals(r.getCompanyId()))
 							return true;
 					}
 					return false;
 				});				
 			}
+		}
+		return false;
+	}
+	
+	public boolean isInCampaignRole(String campaignId) {
+		UserInfo user = getUserDetail();
+		if (user != null) {
+			return user.getRoles().stream().anyMatch(r -> {
+				if(Constants.ROLE_ADMIN.equals(r.getRole()))
+					return true;
+				if(Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole()) && campaignId.equals(r.getCampaignId()))
+					return true;
+				return false;
+			});				
 		}
 		return false;
 	}

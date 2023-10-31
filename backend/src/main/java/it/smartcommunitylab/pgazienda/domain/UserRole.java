@@ -31,7 +31,6 @@ public class UserRole {
 	private String companyId;
 	private String territoryId;
 	private String campaignId;
-	private List<String> locations;
 	private List<Subscription> subscriptions;
 	
 	/**
@@ -58,18 +57,6 @@ public class UserRole {
 	public void setCompanyId(String companyId) {
 		this.companyId = companyId;
 	}
-	/**
-	 * @return the locations
-	 */
-	public List<String> getLocations() {
-		return locations;
-	}
-	/**
-	 * @param locations the locations to set
-	 */
-	public void setLocations(List<String> locations) {
-		this.locations = locations;
-	}
 	
 	/**
 	 * @return the subscriptions
@@ -88,17 +75,10 @@ public class UserRole {
 		role.setRole(Constants.ROLE_ADMIN);
 		return role;
 	}
-	public static UserRole createCompanyAdminRole(String companyId) {
-		UserRole role = new UserRole();
-		role.setRole(Constants.ROLE_COMPANY_ADMIN);
-		role.setCompanyId(companyId);
-		return role;
-	}
-	public static UserRole createMobilityManager(String companyId, List<String> locations) {
+	public static UserRole createMobilityManager(String companyId) {
 		UserRole role = new UserRole();
 		role.setRole(Constants.ROLE_MOBILITY_MANAGER);
 		role.setCompanyId(companyId);
-		role.setLocations(locations);
 		return role;
 	}
 	
