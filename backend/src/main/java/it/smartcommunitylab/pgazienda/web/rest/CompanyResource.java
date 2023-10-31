@@ -65,7 +65,7 @@ public class CompanyResource {
 	 * @return
 	 */
     @GetMapping("/companies")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
+    //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN+"\")")
 	public ResponseEntity<Page<Company>> getCompanies(Pageable pageable) {
     	log.debug("List companies");
 		return ResponseEntity.ok(companyService.getCompanies(pageable));

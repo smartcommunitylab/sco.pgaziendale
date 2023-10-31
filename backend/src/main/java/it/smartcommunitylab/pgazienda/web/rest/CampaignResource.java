@@ -64,7 +64,7 @@ public class CampaignResource {
      * @return
      */
     @GetMapping("/campaigns")
-    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \"" + Constants.ROLE_TERRITORY_MANAGER  + "\", \"" + Constants.ROLE_CAMPAIGN_MANAGER + "\", \"" + Constants.ROLE_MOBILITY_MANAGER +"\")")
+    //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \"" + Constants.ROLE_TERRITORY_MANAGER  + "\", \"" + Constants.ROLE_CAMPAIGN_MANAGER + "\", \"" + Constants.ROLE_MOBILITY_MANAGER +"\")")
 	public ResponseEntity<Page<Campaign>> listCampaign(Pageable pageable) {
     	log.debug("List all campaigns ");
     	return ResponseEntity.ok(campaignService.getCampaigns(pageable));

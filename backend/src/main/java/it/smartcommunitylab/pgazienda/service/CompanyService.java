@@ -39,6 +39,7 @@ import javax.validation.Valid;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -68,6 +69,9 @@ public class CompanyService {
 	private CompanyRepository companyRepo;
 	@Autowired
 	private EmployeeRepository employeeRepo;
+	@Autowired
+	private UserService userService;
+	
 	private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
 	private static final Map<String, Integer> DW = new LinkedHashMap<>();
@@ -114,7 +118,9 @@ public class CompanyService {
 	 * @return
 	 */
 	public Page<Company> getCompanies(Pageable page) {
-		return companyRepo.findAll(page);
+		List<Company> companies = companyRepo.findAll();
+		List<Company> result = companies.stream().filter(c -> userService.isCompanyVisible(c)).collect(Collectors.toList());
+		return new PageImpl<>(result, page, result.size());
 	}
 
 	/**
@@ -123,7 +129,12 @@ public class CompanyService {
 	 * @return
 	 */
 	public Optional<Company> getCompany(String id) {
-		return companyRepo.findById(id);
+		Optional<Company> opt = companyRepo.findById(id);
+		if(opt.isPresent()) {
+			if(!userService.isCompanyVisible(opt.get()))
+				return Optional.empty();
+		}
+		return opt;
 	}
 	
 	/**

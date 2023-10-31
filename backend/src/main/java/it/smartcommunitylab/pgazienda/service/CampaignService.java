@@ -89,7 +89,12 @@ public class CampaignService {
 	 * @return
 	 */
 	public Optional<Campaign> getCampaign(String id) {
-		return campaignRepo.findById(id);
+		Optional<Campaign> opt = campaignRepo.findById(id);
+		if(opt.isPresent()) {
+			if(!userService.isCampaignVisible(opt.get()))
+				return Optional.empty();
+		}
+		return opt;
 	}
 
 	/**

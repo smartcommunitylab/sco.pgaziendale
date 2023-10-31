@@ -451,6 +451,26 @@ public class UserService {
 		return false;
 	}
 	
+	public boolean isCompanyVisible(Company company) {
+		UserInfo user = getUserDetail();
+		if ((user != null) && (company != null)) {
+			return user.getRoles().stream().anyMatch(r -> {
+				if(Constants.ROLE_ADMIN.equals(r.getRole()))
+					return true;
+				if(Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && company.getTerritoryId().equals(r.getTerritoryId()))
+					return true;
+				if(Constants.ROLE_MOBILITY_MANAGER.equals(r.getRole()) && company.getId().equals(r.getCompanyId()))
+					return true;
+				if(Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole())) {
+					if(company.getCampaigns().contains(r.getCampaignId()))
+						return true;
+				}
+				return false;
+			});
+		}
+		return false;
+	}
+	
 	/**
 	 * @param campaignId
 	 */
