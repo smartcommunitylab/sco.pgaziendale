@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -77,7 +78,9 @@ public class CampaignService {
 	 * @return
 	 */
 	public Page<Campaign> getCampaigns(Pageable page) {
-		return campaignRepo.findAll(page);
+		List<Campaign> campaigns = campaignRepo.findAll();
+		List<Campaign> result = campaigns.stream().filter(c -> userService.isCampaignVisible(c)).collect(Collectors.toList());
+		return new PageImpl<>(result, page, result.size());
 	}
 
 	/**

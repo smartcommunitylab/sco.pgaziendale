@@ -45,6 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import it.smartcommunitylab.pgazienda.Constants;
+import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
@@ -423,6 +424,29 @@ public class UserService {
 					return true;
 				return false;
 			});				
+		}
+		return false;
+	}
+	
+	public boolean isCampaignVisible(Campaign campaign) {
+		UserInfo user = getUserDetail();
+		if ((user != null) && (campaign != null)) {
+			return user.getRoles().stream().anyMatch(r -> {
+				if(Constants.ROLE_ADMIN.equals(r.getRole()))
+					return true;
+				if(Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && campaign.getTerritoryId().equals(r.getTerritoryId()))
+					return true;
+				if(Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole()) && campaign.getId().equals(r.getCampaignId()))
+					return true;
+				if(Constants.ROLE_MOBILITY_MANAGER.equals(r.getRole())) {
+					Company company = companyRepo.findById(r.getCompanyId()).orElse(null);
+					if(company != null) {
+						if(company.getCampaigns().contains(campaign.getId()))
+							return true;
+					}
+				}
+				return false;
+			});
 		}
 		return false;
 	}
