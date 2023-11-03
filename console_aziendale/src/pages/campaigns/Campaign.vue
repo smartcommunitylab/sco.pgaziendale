@@ -216,7 +216,7 @@ export default {
 
   computed: {
     ...mapState("campaign", ["actualCampaign"]),
-    ...mapState("account", [ "role"]),
+    ...mapState("account", [ "user"]),
     ...mapState("company", [ "adminCompany"]),
 
   },

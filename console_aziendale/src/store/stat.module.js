@@ -71,12 +71,12 @@ const actions = {
     );
   },
 
-  initConfigurationByRole({ commit, dispatch }, { role, temporaryAdmin }) {
+  initConfigurationByUser({ commit, dispatch }, { user, temporaryAdmin }) {
      commit("resetStat");
-    commit("getConfigurationByRole");
-    statService.getConfigurationByRole(role, temporaryAdmin).then(
+    commit("getConfigurationByUser");
+    statService.getConfigurationByUser(user, temporaryAdmin).then(
       (configurations) => {
-        commit("getConfigurationByRoleSuccess", configurations);
+        commit("getConfigurationByUserSuccess", configurations);
         dispatch("setActiveConfiguration", {
           configurationId: configurations[0].id,
         });
@@ -86,22 +86,22 @@ const actions = {
           });
       },
       (error) => {
-        commit("getConfigurationByRoleFailure", error),
+        commit("getConfigurationByUserFailure", error),
           dispatch("alert/error", error, { root: true });
       }
     );
   },
-  getConfigurationByRole({ commit, dispatch }, { role, temporaryAdmin }) {
-    commit("getConfigurationByRole");
-    statService.getConfigurationByRole(role, temporaryAdmin).then(
+  getConfigurationByUser({ commit, dispatch }, { user, temporaryAdmin }) {
+    commit("getConfigurationByUser");
+    statService.getConfigurationByUser(user, temporaryAdmin).then(
       (configurations) => {
-        commit("getConfigurationByRoleSuccess", configurations);
+        commit("getConfigurationByUserSuccess", configurations);
         dispatch("setActiveConfiguration", {
           configurationId: configurations[0].id,
         });
       },
       (error) => {
-        commit("getConfigurationByRoleFailure", error),
+        commit("getConfigurationByUserFailure", error),
           dispatch("alert/error", error, { root: true });
       }
     );
@@ -185,17 +185,17 @@ const mutations = {
     state.activeViewType =null;
     state.activeSelection=null;
   },
-  getConfigurationByRole() {
+  getConfigurationByUser() {
     state.configurations = { loading: true };
   },
-  getConfigurationByRoleSuccess(state, configurations) {
+  getConfigurationByUserSuccess(state, configurations) {
     // state.statValues = null;
     // state.activeConfiguration = null;
     // state.activeViewType =null;
     // state.activeSelection=null;
     state.configurations = { items: configurations };
   },
-  getConfigurationByRoleFailure(state, error) {
+  getConfigurationByUserFailure(state, error) {
     state.configurations = { error };
   },
   setActiveConfiguration() {

@@ -5,8 +5,6 @@ export const userService = {
     loginOAuth,
     logout,
     getAccount,
-    getHome,
-    getRole,
     update,
     getCompanies,
     changePassword,
@@ -83,59 +81,15 @@ function update(user) {
         }
     )
 }
-function getRole(user) {
-    var role='';
-    for (var i = 0; i < user.roles.length; i++) {
-        if (user.roles[i].role == 'ROLE_ADMIN') {
-            role='ROLE_ADMIN';
-        }
-        if (user.roles[i].role == 'ROLE_COMPANY_ADMIN' && role!='ROLE_ADMIN') {
-            role='ROLE_COMPANY_ADMIN';
-        }
-        if (user.roles[i].role == 'ROLE_MOBILITY_MANAGER'&& role!='ROLE_ADMIN' && role!='ROLE_COMPANY_ADMIN') {
-            role='ROLE_MOBILITY_MANAGER';
-        }
-    }
-    return role;
-}
 
 function getCompanies(user) {
     var companies = [];
     for (var i = 0; i < user.roles.length; i++) {
-        if (user.roles[i].role != 'ROLE_ADMIN') {
+        if (user.roles[i].companyId) {
             companies.push(user.roles[i].companyId);
         }
     }
     return companies;
-}
-function getHome(role) {
-    switch (role) {
-        case 'ROLE_ADMIN':
-            return {
-                title: 'Gestione aziende',
-                route: '/GestioneAziende'
-            };
-        case 'ROLE_COMPANY_ADMIN':
-            return {
-                title: 'Campagne disponibili',
-                route: '/GestioneCampagne'
-            };
-        case 'ROLE_MOBILITY_MANAGER':
-            return {
-                title: 'Gestione dipendenti',
-                route: '/GestioneDipendenti'
-            };
-        case 'ROLE_APP_USER':
-            return {
-                title: 'aziende',
-                route: '/GestioneAziende'
-            };
-        default:
-            return {
-                title: 'aziende',
-                route: '/GestioneAziende'
-            };
-    }
 }
 
 function changePassword(oldPassword, newPassword) {

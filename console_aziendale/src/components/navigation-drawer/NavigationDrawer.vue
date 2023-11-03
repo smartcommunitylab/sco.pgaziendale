@@ -22,7 +22,7 @@ pagine dall'utente in base al suo login.
       nav
       dense
     >
-      <router-link to="/GestioneAziende" v-if="role == 'ROLE_ADMIN' && adminCompany == null" >
+      <router-link to="/GestioneAziende" v-if="user.canDo('list', 'companies') && adminCompany == null" >
         <v-list-item link >
           <v-list-item-icon>
             <v-icon
@@ -40,11 +40,7 @@ pagine dall'utente in base al suo login.
       </router-link>
       <router-link
             to="/ProfiloAzienda"
-            v-if="
-              role == 'ROLE_COMPANY_ADMIN' ||
-              (role == 'ROLE_ADMIN' && adminCompany != null) ||
-              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
-            "
+            v-if="adminCompany && user.canDo('manage', 'company', adminCompany.item.id)"
           >
         <v-list-item link >
           <v-list-item-icon>
@@ -63,11 +59,7 @@ pagine dall'utente in base al suo login.
 
       <router-link
             to="/GestioneUtenti"
-            v-if="
-              role == 'ROLE_COMPANY_ADMIN' ||
-              (role == 'ROLE_ADMIN' && adminCompany != null) ||
-              (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
-            "
+            v-if="adminCompany && user.canDo('manage', 'users', adminCompany.item.id)"
           >
         <v-list-item link >
           <v-list-item-icon>
@@ -86,10 +78,7 @@ pagine dall'utente in base al suo login.
 
       <router-link
             to="/GestioneSedi"
-            v-if="
-              (role == 'ROLE_ADMIN' && adminCompany != null) ||
-              (role == 'ROLE_COMPANY_ADMIN' && actualCompany != null)
-            "
+            v-if="adminCompany && user.canDo('manage', 'locations', adminCompany.item.id)"
           >
         <v-list-item link>
           <v-list-item-icon>
@@ -107,10 +96,7 @@ pagine dall'utente in base al suo login.
       </router-link>
       <router-link
             to="/GestioneDipendenti"
-            v-if="
-              (role == 'ROLE_ADMIN' && adminCompany != null) ||
-              (role == 'ROLE_COMPANY_ADMIN' && actualCompany != null)
-            "
+            v-if="adminCompany && user.canDo('manage', 'employees', adminCompany.item.id)"
           >
         <v-list-item link>
           <v-list-item-icon>
@@ -127,8 +113,8 @@ pagine dall'utente in base al suo login.
         </v-list-item>
       </router-link>
       <router-link
+            v-if="adminCompany &&  user.canDo('view', 'campaigns', adminCompany.item.id)"
             to="/GestioneCampagne"
-            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
           >
         <v-list-item link>
           <v-list-item-icon>
@@ -141,12 +127,12 @@ pagine dall'utente in base al suo login.
             >mdi-clipboard-text-multiple-outline
             </v-icon>
           </v-list-item-icon>
-          <v-list-item-title :class="{ active: isActiveGestioneCamagne }">Campagne disponibili</v-list-item-title>
+          <v-list-item-title :class="{ active: isActiveGestioneCamagne }">Campagne</v-list-item-title>
         </v-list-item>
       </router-link>
       <router-link
             to="/Statistiche"
-            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
+            v-if="user.canDo('view', 'stats', adminCompany ? adminCompany.item.id : null)"
           >
         <v-list-item link>
           <v-list-item-icon>
@@ -162,24 +148,6 @@ pagine dall'utente in base al suo login.
           <v-list-item-title :class="{ active: isActiveStatistiche }">Statistiche</v-list-item-title>
         </v-list-item>
       </router-link>
-      <!-- <router-link
-            to="/StatisticheOLD"
-            v-if="role == 'ROLE_COMPANY_ADMIN' || role == 'ROLE_ADMIN'"
-          >
-        <v-list-item link>
-          <v-list-item-icon>
-            <v-icon
-              color = "primary"
-              v-if = "isActiveStatistiche"
-            >mdi-chart-line</v-icon>
-            <v-icon
-              v-else
-            >mdi-chart-line
-            </v-icon>
-          </v-list-item-icon>
-          <v-list-item-title :class="{ active: isActiveStatistiche }">StatisticheOld</v-list-item-title>
-        </v-list-item>
-      </router-link> -->
       <router-link to="/" v-on:click.native="logout">
         <v-list-item link>
           <v-list-item-icon>
@@ -227,7 +195,7 @@ export default {
       this.resetCompanyAdmin();
     },
     goHome() {
-      if ( this.role == 'ROLE_ADMIN' && this.adminCompany == null){
+      if (this.adminCompany == null){
         this.$router.push("/GestioneAziende");
       }
       else {
@@ -277,7 +245,7 @@ export default {
   },
 
   computed: {
-    ...mapState("account", ["status", "user", "role"]),
+    ...mapState("account", ["status", "user"]),
     ...mapState("navigation", ["page"]),
     ...mapState("company", ["adminCompany", "actualCompany"]),
   },

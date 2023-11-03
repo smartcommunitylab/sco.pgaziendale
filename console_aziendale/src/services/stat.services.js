@@ -10,7 +10,7 @@ import { employeeService } from ".";
 export const statService = {
   setActiveViewType,
   getActiveConfiguration,
-  getConfigurationByRole,
+  getConfigurationByUser,
   getStat,
   getCsv,
   getItemsAggregation,
@@ -25,15 +25,17 @@ function getActiveConfiguration(configurationId) {
   return Promise.resolve(configurationId);
 }
 
-function getConfigurationByRole(ROLE, temporaryAdmin) {
+function getConfigurationByUser(user, temporaryAdmin) {
   let array = [];
-  if (temporaryAdmin) ROLE = 'ROLE_COMPANY_ADMIN';
+  let profile = '';
+  if (temporaryAdmin) profile = 'company';
+  else if (user.canDo('view', 'stats')) profile = 'global';
   statsConfigurations.forEach((config) => {
-    if (config.profile === ROLE) {
+    if (config.profile === profile) {
       array.push(config);
     }
   });
-
+  console.log(array);
   return Promise.resolve(array);
 }
 function getItemsAggregation(itemAggregationValue, campaignId, companyId) {

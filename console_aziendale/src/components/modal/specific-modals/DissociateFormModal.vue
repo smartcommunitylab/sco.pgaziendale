@@ -49,7 +49,7 @@ export default {
           this.closeModal();
       },
       disassocia(campaign) {
-          if (this.role == "ROLE_ADMIN" && this.adminCompany && this.adminCompany.item) {
+          if (this.adminCompany && this.user.canDo('manage', 'campaigns', this.adminCompany.item.id)) {
               this.deleteCompanyCampaign({
               companyId: this.adminCompany.item.id,
               campaign: campaign,
@@ -65,7 +65,7 @@ export default {
   
   computed: {
       ...mapState("modal", ['object']),
-      ...mapState("account", ["role"]),
+      ...mapState("account", ["user"]),
       ...mapState("company", ["actualCompany", "adminCompany"]),
       ...mapState("campaign", ["allCampaigns"]),
   }

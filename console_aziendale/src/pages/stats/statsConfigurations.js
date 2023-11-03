@@ -8,7 +8,7 @@ export const statsConfigurations = [
   {
     id: 0,
     name: VARIABLES.STATS.NAME.KM_COUNTED,
-    profile: VARIABLES.ROLE.ADMIN,
+    profile: 'global',
     views: [
       {
         type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
@@ -132,7 +132,7 @@ export const statsConfigurations = [
   {
     id: 1,
     name: VARIABLES.STATS.NAME.KM_COUNTED,
-    profile: VARIABLES.ROLE.COMPANY_ADMIN,
+    profile: 'company',
     views: [
       {
         type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
@@ -273,7 +273,7 @@ export const statsConfigurations = [
   {
     id: 2,
     name: VARIABLES.STATS.NAME.ENVIRONMENTAL_IMPACT,
-    profile: VARIABLES.ROLE.COMPANY_ADMIN,
+    profile: 'company',
     views: [
       {
         type: VARIABLES.STATS.VIEWS.TYPE.TABLE,

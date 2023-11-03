@@ -102,8 +102,10 @@ function deleteCompany(company){
 }
 function getRole(role){
     switch (role) {
-        case 'ROLE_COMPANY_ADMIN':
-            return 'Amministratore Aziendale';
+        case 'ROLE_CAMPAIGN_MANAGER':
+            return 'Amministratore delle campagne';
+        case 'ROLE_TERRITORY_ADMIN':
+            return 'Amministratore del territorio';
         case 'ROLE_MOBILITY_MANAGER':
             return 'Mobility Manager';
         default:

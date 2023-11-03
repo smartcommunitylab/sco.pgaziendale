@@ -42,14 +42,13 @@ import SelectionCard from "@/components/card/SelectionCard.vue";
     },
     computed:{
       ...mapState("stat", ["configurations"]),
-      ...mapState("account", ["role","temporaryAdmin"])
+      ...mapState("account", ["user","temporaryAdmin"])
     },
     methods: {
-      ...mapActions("stat",{getConfigurationByRole:"getConfigurationByRole"}),
+      ...mapActions("stat",{getConfigurationByUser:"getConfigurationByUser"}),
 
       loadConfiguration(){
-        this.getConfigurationByRole({role:this.role,temporaryAdmin:this.temporaryAdmin});
-        //console.log(this.configurations.items);
+        this.getConfigurationByUser({user: this.user, temporaryAdmin: this.temporaryAdmin});
       },
     },
     mounted(){

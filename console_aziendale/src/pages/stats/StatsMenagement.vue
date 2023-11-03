@@ -352,7 +352,7 @@ export default {
     ...mapState("company", ["actualCompany"]),
     ...mapState("navigation", ["page"]),
     ...mapState("navigation", ["page"]),
-    ...mapState("account", ["role", "temporaryAdmin"]),
+    ...mapState("account", ["user", "temporaryAdmin"]),
     timeSelected() {
       return (
         this.activeSelection &&
@@ -417,13 +417,13 @@ export default {
 
   methods: {
     ...mapActions("stat", {
-      initConfigurationByRole: "initConfigurationByRole",
+      initConfigurationByUser: "initConfigurationByUser",
       setActiveViewType: "setActiveViewType",
       setActiveSelection: "setActiveSelection",
       getStatFromServer: "getStat",
       downloadCsv: "getCsv",
     }),
-    ...mapActions("stat", { getConfigurationByRole: "getConfigurationByRole" }),
+    ...mapActions("stat", { getConfigurationByUser: "getConfigurationByUser" }),
 
     comparator(a, b) {
       return a.value === b.value;
@@ -492,8 +492,8 @@ export default {
     },
 
     initConfigurationStat() {
-      this.initConfigurationByRole({
-        role: this.role,
+      this.initConfigurationByUser({
+        user: this.user,
         temporaryAdmin: this.temporaryAdmin,
       });
       //console.log(this.configurations.items);

@@ -21,21 +21,7 @@
           <v-col
           cols="4"
           >
-              <div class="font-bold">Ruoli:</div>
-              <div
-                v-for="role in user.roles"
-                :key="JSON.stringify(role)"
-              >
-                <label v-if="role.role == 'ROLE_COMPANY_ADMIN'"
-                  >AMMINISTRATORE AZIENDALE</label
-                >
-                  <label v-if="role.role == 'ROLE_MOBILITY_MANAGER'"
-                  >MOBILITY MANAGER</label
-                >
-                <label v-if="role.role == 'ROLE_ADMIN'"
-                  >AMMINISTRATORE DEL SISTEMA</label
-                >
-              </div>
+            <label>{{ roleList }}</label>
           </v-col>
         </v-row>
         <v-divider> </v-divider>
@@ -107,7 +93,17 @@ export default {
   },
 
   computed: {
-    ...mapState("account", ["status", "user", "role"]),
+    ...mapState("account", ["status", "user"]),
+    roleList() {
+      return Array.from(new Set(this.user.roles.filter(r => r.role != 'ROLE_APP_USER').map(r => {
+        switch(r.role) {
+          case 'ROLE_ADMIN': return 'AMMINISTRATORE DEL SISTEMA'
+          case 'ROLE_MOBILITY_MANAGER': return 'MOBILITY MANAGER'
+          case 'ROLE_TERRITORY_MANAGER': return 'AMMINISTRATORE DEL TERRITORIO'
+          case 'ROLE_CAMPAIGN_MANAGER': return 'AMMINISTRATORE DELLA CAMPAGNA'
+        }
+      }))).join(', ');
+    }
   }, 
 }
 </script>

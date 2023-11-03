@@ -9,7 +9,7 @@ l'apposita icona, tornare allo stato di admin globale.
 -->
 <template>
   <div>
-    <div v-if="role=='ROLE_ADMIN'">
+    <div v-if="user.canDo('manage', 'companies')">
       <div v-if="adminCompany!=null">
         <v-list-item link @click="resetCompany">
           <v-list-item-icon >
@@ -48,7 +48,7 @@ export default {
   },
 
   computed: {
-      ...mapState('account', ['role']),
+      ...mapState('account', ['user']),
       ...mapState('company',['adminCompany','actualCompany'])
   },
 }

@@ -54,7 +54,7 @@
     {
       "companyCode": "comunediferrara",
       "name": "Admin",
-      "role": "ROLE_COMPANY_ADMIN",
+      "role": "ROLE_MOBILITY_MANAGER",
       "surname": "ComuneDiFerrara",
       "username": "bike2work@comune.fe.it",
       "password": "123456"

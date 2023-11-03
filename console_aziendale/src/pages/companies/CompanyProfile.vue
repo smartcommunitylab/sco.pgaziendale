@@ -31,7 +31,7 @@ export default {
   
   computed: {
     ...mapState("company", ["adminCompany","actualCompany"]),
-    ...mapState("account", ["role","user"]),
+    ...mapState("account", ["user"]),
   },
 
   methods: {
@@ -52,7 +52,6 @@ export default {
     if (!this.actualCompany) {
       //get company Id from profile
       this.setDefaultCompany(this.user);
-      //this.actualCompany = this.getCompanyById(this.role)
     }
   },
 

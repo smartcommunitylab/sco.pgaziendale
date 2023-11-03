@@ -1,6 +1,6 @@
 <template>
   <v-row align="center" >
-    <v-col cols="2" class="pl-5 pr-20" v-if="!isAdmin && localCompany">
+    <v-col cols="2" class="pl-5 pr-20" v-if="localCompany">
       <p class="text-subtitle-1"> {{ localCompany.name }}</p>
     </v-col>
     <v-col cols="4" class="pl-5 pr-20" v-if="allCampaigns && allCampaigns.items">
@@ -54,13 +54,10 @@ export default {
       "getAllCompaniesOfCampaignCall",
     ]),
     ...mapState("stat", ["activeSelection", "configurations", "activeConfiguration"]),
-    ...mapState("account", ["role", "temporaryAdmin"]),
-    isAdmin() {
-      return this.role == "ROLE_ADMIN" && !this.temporaryAdmin;
-    },
+    ...mapState("account", ["user", "temporaryAdmin"]),
   },
   mounted: function () {
-    if (this.isAdmin) {
+    if (!this.actualCompany) {
       if (this.allCampaigns && this.allCampaigns.items) {
         this.localCampaign = this.allCampaigns.items[0];
         console.log('mounted',this.localCampaign);
@@ -97,12 +94,12 @@ export default {
     }),
     ...mapActions("stat", {
       setCurrentCampaign: "setCurrentCampaign",
-      getConfigurationByRole:"getConfigurationByRole",
+      getConfigurationByUser:"getConfigurationByUser",
       setActiveConfiguration:"setActiveConfiguration"
     }),
 
     loadConfiguration(){
-      this.getConfigurationByRole({role:this.role,temporaryAdmin:this.temporaryAdmin});
+      this.getConfigurationByUser({user: this.user, temporaryAdmin: this.temporaryAdmin});
     },
     selectConfiguration(){
       this.setActiveConfiguration({configurationId: this.selectedConfiguration})

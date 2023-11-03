@@ -488,7 +488,7 @@ export default {
     },
   },
   computed: {
-    ...mapState("account", ["status", "user", "role"]),
+    ...mapState("account", ["status", "user" ]),
     ...mapState("campaign", ["actualCampaign"]),
     ...mapState("company", ["actualCompany","adminCompany"]),
 
@@ -575,16 +575,6 @@ export default {
   },
 
   mounted() {
-    if (this.role == 'ROLE_ADMIN' && this.adminCompany == null){
-    campaignService.getApplications().then((res) => {
-      console.log(this.applications);
-      this.applications = res;
-      for (let i=0;i<this.applications.length; i++){
-          this.listaApplications.push(this.applications[i].name)      
-      }
-      console.log(JSON.stringify(this.listaApplications))
-    });
-    }
     this.arrayMeans = campaignService.getArrayMeans();
   },
 };

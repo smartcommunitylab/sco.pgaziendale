@@ -147,7 +147,7 @@ export default {
   computed: {
     ...mapState("location", ["allLocations", "actualLocation"]),
     ...mapState("company", ["actualCompany"]),
-    ...mapState("account", ["role"]),
+    ...mapState("account", ["user"]),
 
     // fileName() {
     //   return this.fileUploaded.item(0).name;

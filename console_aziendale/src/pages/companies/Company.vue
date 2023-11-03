@@ -52,7 +52,7 @@
         </v-card-text>
         <v-card-actions>
             <v-btn
-                v-if="!adminCompany && actualCompany && role == 'ROLE_ADMIN'"
+                v-if="!adminCompany && actualCompany && user.canDo('manage', 'company', actualCompany.item.id)"
                 text
                 color="primary"
                 @click="chooseCompanyAdmin"
@@ -70,25 +70,22 @@
 
             <v-spacer></v-spacer>
 
-            <!-- BACKUP MODO DI MODIFICA MODAL - edit Azienda
-            <v-btn icon v-if="role == 'ROLE_ADMIN'"
-            @click="editAzienda">
-                <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-            -->
-
-            <!-- PROVA nuovo Modifica con nuovo MODAL -->
-            <v-btn icon v-if="role == 'ROLE_ADMIN'"
+            <v-btn icon v-if="user.canDo('manage', 'company', actualCompany.item.id)"
             @click="openModal({type:'aziendaFormEdit', object:null})">
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
 
-            <v-btn icon v-show="$route.name !== 'ProfiloAzienda' && role == 'ROLE_ADMIN'"
+            <v-btn icon v-if="$route.name !== 'ProfiloAzienda' && user.canDo('manage', 'campaigns', actualCompany.item.id)"
+            @click="openModal({type:'associateForm', object:null})">
+                <v-icon>mdi-clipboard-text-multiple-outline</v-icon>
+            </v-btn>
+
+            <v-btn icon v-show="$route.name !== 'ProfiloAzienda' && user.canDo('manage', 'company', actualCompany.item.id)"
             @click="openModal({type:'updateCompanyState', object:null})">
                 <v-icon>{{actualCompany.item.state ? 'mdi-close' : 'mdi-check'}}</v-icon>
             </v-btn>
 
-            <v-btn icon v-show="$route.name !== 'ProfiloAzienda' && role == 'ROLE_ADMIN'"
+            <v-btn icon v-show="$route.name !== 'ProfiloAzienda' && user.canDo('manage', 'company', actualCompany.item.id)"
             @click="openModal({type:'deleteAzienda', object:null})">
                 <v-icon>mdi-delete</v-icon>
             </v-btn>
@@ -118,7 +115,7 @@ export default {
 
   computed: {
     ...mapState("company", ["adminCompany", "actualCompany"]),
-    ...mapState("account", ["role"]),
+    ...mapState("account", ["user"]),
 
     isAdmin: function(){
         if(this.adminCompany){

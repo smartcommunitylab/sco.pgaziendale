@@ -78,19 +78,6 @@ export default {
     }),
     
     associa(campaign) {
-      /*
-      if (this.role == "ROLE_ADMIN" && this.adminCompany && this.adminCompany.item) {
-        this.createCompanyCampaign({
-          companyId: this.adminCompany.item.id,
-          campaign: campaign,
-        });
-      } else {
-        this.createCompanyCampaign({
-          companyId: this.actualCompany.item.id,
-          campaign: campaign,
-        });
-      }
-      */
       this.createCompanyCampaign({
         companyId: this.actualCompany.item.id,
         campaign: campaign,
@@ -106,14 +93,14 @@ export default {
   },
 
   computed: {
-    ...mapState("account", ["role"]),
+    ...mapState("account", ["user"]),
     ...mapState("company", ["actualCompany", "adminCompany"]),
     ...mapState("campaign", ["allCampaigns"]),
   },
 
   mounted() {
       //get all public
-      if (this.role == "ROLE_ADMIN" && this.adminCompany && this.adminCompany.item) {
+      if (this.adminCompany && this.adminCompany.item) {
         this.getAllCampaigns(this.adminCompany.item.id);
         campaignService.getAllCampaigns().then((campaigns) => {
           this.campaigns = campaigns.filter(c => c.territoryId === this.actualCompany.item.territoryId);
