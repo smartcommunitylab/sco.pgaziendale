@@ -50,6 +50,7 @@ import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
+import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.security.SecurityUtils;
@@ -70,6 +71,8 @@ public class UserService {
     private UserRepository userRepository;
 	@Autowired
 	private CompanyRepository companyRepo;
+	@Autowired
+	private CampaignRepository campaignRepo;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -417,13 +420,19 @@ public class UserService {
 	public boolean isInCampaignRole(String campaignId) {
 		UserInfo user = getUserDetail();
 		if (user != null) {
-			return user.getRoles().stream().anyMatch(r -> {
-				if(Constants.ROLE_ADMIN.equals(r.getRole()))
-					return true;
-				if(Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole()) && campaignId.equals(r.getCampaignId()))
-					return true;
-				return false;
-			});				
+			Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+			if(campaign != null) {
+				String territoryId = campaign.getTerritoryId();
+				return user.getRoles().stream().anyMatch(r -> {
+					if(Constants.ROLE_ADMIN.equals(r.getRole()))
+						return true;
+					if(Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && territoryId.equals(r.getTerritoryId()))
+						return true;
+					if(Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole()) && campaignId.equals(r.getCampaignId()))
+						return true;
+					return false;
+				});								
+			}
 		}
 		return false;
 	}
