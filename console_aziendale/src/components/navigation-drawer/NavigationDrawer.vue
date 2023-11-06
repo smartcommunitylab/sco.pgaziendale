@@ -19,10 +19,11 @@ pagine dall'utente in base al suo login.
     <v-divider></v-divider>
 
     <v-list
+      v-if="user"
       nav
       dense
     >
-      <router-link to="/GestioneAziende" v-if="user.canDo('list', 'companies') && adminCompany == null" >
+      <router-link to="/GestioneAziende" v-if="adminCompany == null && user.canDo('list', 'companies')" >
         <v-list-item link >
           <v-list-item-icon>
             <v-icon
