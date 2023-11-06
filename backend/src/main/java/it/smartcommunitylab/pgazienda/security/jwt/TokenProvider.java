@@ -56,6 +56,8 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import it.smartcommunitylab.pgazienda.Constants;
+import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.security.UserInfo;
 
 @Component
@@ -118,7 +120,10 @@ public class TokenProvider {
         	info.setPlayerId(user.getPlayerId());
         	info.setUsername(user.getUsername());
         	info.getRoles().addAll(user.getRoles());
-    	}
+    	} else if (authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(a -> a.equals(Constants.ROLE_ADMIN))) {
+        	info.setUsername(authentication.getName());
+        	info.getRoles().add(UserRole.createAdminRole());
+        }
 
         return Jwts.builder()
             .setSubject(authentication.getName())
