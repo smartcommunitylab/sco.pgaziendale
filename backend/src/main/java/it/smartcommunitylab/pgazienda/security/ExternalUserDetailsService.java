@@ -18,6 +18,7 @@ package it.smartcommunitylab.pgazienda.security;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.service.UserService;
@@ -152,6 +154,7 @@ public class ExternalUserDetailsService {
     private void mergeRoles(User user, JsonNode jsonNode) {
 		String entityId = jsonNode.get("entityId").asText();
 		String role = jsonNode.get("role").asText();
+		user.setRoles(new LinkedList<>(user.getRoles().stream().filter(r -> r.getRole().equals(Constants.ROLE_ADMIN) || r.getRole().equals(Constants.ROLE_MOBILITY_MANAGER) || r.getRole().equals(Constants.ROLE_APP_USER)).collect(Collectors.toList())));
 		if(StringUtils.isNotBlank(role)) {
 			switch (role) {
 			case "admin":
