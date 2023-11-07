@@ -392,7 +392,7 @@ public class UserService {
 
 	/**
 	 * @param companyId
-	 * @return true if the user is a platform admin or has the specified role for the specified company
+	 * @return true if the user is a platform admin or has the specified role for the specified company, its territory or campaign
 	 */
 	public boolean isInCompanyRole(String companyId, String ... roles) {
 		UserInfo user = getUserDetail();
@@ -408,6 +408,8 @@ public class UserService {
 						if(Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && territoryId.equals(r.getTerritoryId()))
 							return true;
 						if(Constants.ROLE_MOBILITY_MANAGER.equals(r.getRole()) && companyId.equals(r.getCompanyId()))
+							return true;
+						if(Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole()) && company.getCampaigns().contains(r.getCampaignId()))
 							return true;
 					}
 					return false;

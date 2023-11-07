@@ -95,7 +95,7 @@ public class UserRole {
 	public static UserRole createCampaignManager(String campaignId) {
 		UserRole role = new UserRole();
 		role.setRole(Constants.ROLE_CAMPAIGN_MANAGER);
-		role.setCompanyId(campaignId);
+		role.setCampaignId(campaignId);
 		return role;
 	}
 

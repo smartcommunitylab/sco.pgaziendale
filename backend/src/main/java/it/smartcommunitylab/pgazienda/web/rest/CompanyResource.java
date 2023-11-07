@@ -126,7 +126,7 @@ public class CompanyResource {
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN  + "\", \""+Constants.ROLE_MOBILITY_MANAGER +"\")")
 	public ResponseEntity<Company> getCompany(@PathVariable String companyId) {
     	log.debug("Reading company {}", companyId);
-    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER, Constants.ROLE_CAMPAIGN_MANAGER)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.of(companyService.getCompany(companyId));
 	}
 
