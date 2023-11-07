@@ -9,7 +9,6 @@ export const campaignService = {
     getArrayMeans,
     getTerritories,
     getAllCompaniesOfCampaign,
-    getPublicCampaigns,
     getMonthsForCampaign,
     getMeansForCampaign
 };
@@ -67,19 +66,7 @@ function getAllCampaigns(companyId = null) {
 
     )
 }
-function getPublicCampaigns() {
-    return  axios.get(process.env.VUE_APP_BASE_URL+process.env.VUE_APP_PUBLIC_CAMPAIGNS_API).then(
-        res => {
-            if (res && res.data ) {
-                return Promise.resolve(res.data.content);                
-            }
-            else return Promise.reject(null);
-        }, err => {
-            return Promise.reject(err);
-        }
 
-    )
-}
 function getAllCompaniesOfCampaign(campaignId) {
     return axios.get(process.env.VUE_APP_BASE_URL+ process.env.VUE_APP_COMPANIES_API + '/' +process.env.VUE_APP_COMPANIES_IN_CAMPAIGN_API+ '/' +campaignId ).then(
         res => {

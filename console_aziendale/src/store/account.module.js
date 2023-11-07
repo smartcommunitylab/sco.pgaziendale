@@ -38,7 +38,10 @@ function extendUserWithPermissions(user) {
         if (['users', 'employees', 'locations', 'stats', 'company'].indexOf(resource) >= 0 && user.permissions.companies.indexOf(companyId) >= 0) return true;
         // campaign manager may see the global stats
         if ('stats' == resource && !companyId && user.permissions.campaigns.length > 0) return true; 
+        // everybody can see the campaigns
         if ('campaigns' == resource && op == 'view') return true;
+        // campaign manager can view companies
+        if ('companies' == resource && op == 'view') return user.permissions.campaigns.length > 0;
         return false;
     }
     user.appuseronly = !user.admin && user.permissions.territories.length == 0 && user.permissions.campaigns.length == 0 && user.permissions.companies.length == 0;

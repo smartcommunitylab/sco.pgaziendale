@@ -9,23 +9,13 @@ l'apposita icona, tornare allo stato di admin globale.
 -->
 <template>
   <div>
-    <div v-if="user.canDo('manage', 'companies')">
+    <div v-if="user.canDo('view', 'companies')">
       <div v-if="adminCompany!=null">
         <v-list-item link @click="resetCompany">
           <v-list-item-icon >
             <v-icon>mdi-account-arrow-left</v-icon>
           </v-list-item-icon>
           <v-list-item-title>{{adminCompany.item.name}}</v-list-item-title>
-        </v-list-item>
-      </div>
-      <div v-else>
-        <v-list-item link>
-          <v-list-item-icon>
-            <v-icon>mdi-account-key</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>
-            Amministratore
-          </v-list-item-title>
         </v-list-item>
       </div>
     </div>

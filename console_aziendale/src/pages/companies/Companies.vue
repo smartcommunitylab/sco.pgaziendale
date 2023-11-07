@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row>
+    <v-row v-if="user.canDo('manage', 'companies')">
       <v-col>
         <v-btn
           x-large
@@ -172,6 +172,7 @@ export default {
       this.updateList();
       let list = this.territories.items;
       if (list) {
+        list = list.slice();
         list.splice(0, 0, {territoryId: '', name: {'it': 'Tutti'}});
       }
       this.territoryList = list;
@@ -180,6 +181,7 @@ export default {
       this.updateList();
       let list = this.allCampaigns.items;
       if (list) {
+        list = list.slice();
         list.splice(0, 0, {id: '', title: 'Tutte'});
       }
       this.campaignList = list;
@@ -189,6 +191,7 @@ export default {
   computed: {
     ...mapState("company", ["allCompanies", "actualCompany", "adminCompany"]),
     ...mapState("campaign", ["territories", "allCampaigns"]),
+    ...mapState("account", ["user"]),
 
     nColsTable_calculator: function() {
       if(this.actualCompany){

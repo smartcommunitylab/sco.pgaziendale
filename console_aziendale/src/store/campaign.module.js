@@ -3,7 +3,6 @@ import { campaignService } from '../services';
 const state = {
     allCampaigns: null,
     actualCampaign: null,
-    publicCampaigns: null,
     territories: null
 };
 
@@ -29,18 +28,7 @@ const actions = {
             );
     },
 
-    getPublicCampaigns({ commit, dispatch }) {
-        commit('getPublicCampaigns');
 
-        campaignService.getPublicCampaigns()
-            .then(
-                campaigns => commit('getPublicCampaignsSuccess', campaigns),
-                error => {
-                    commit('getPublicCampaignsFailure', error);
-                    dispatch('alert/error', error, { root: true });
-                }
-            );
-    },
     getTerritories({ commit, dispatch }) {
         commit('getTerritories');
 
@@ -149,16 +137,6 @@ const mutations = {
     },
     getAllFailure(state, error) {
         state.allCampaigns = { error };
-    },
-    getPublicCampaigns(state) {
-
-        state.publicCampaigns = { loading: true };
-    },
-    getPublicCampaignsSuccess(state, campaigns) {
-        state.publicCampaigns = { items: campaigns };
-    },
-    getPublicCampaignsFailure(state, error) {
-        state.publicCampaigns = { error };
     },
     getTerritories(state) {
 

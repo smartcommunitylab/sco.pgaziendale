@@ -47,7 +47,7 @@ export default {
     };
   },
   computed: {
-    ...mapState("company", ["allCompanies", "actualCompany", "adminCompany"]),
+    ...mapState("company", ["allCompanies", "adminCompany"]),
     ...mapState("campaign", [
       "allCampaigns",
       "actualCampaign",
@@ -57,7 +57,7 @@ export default {
     ...mapState("account", ["user", "temporaryAdmin"]),
   },
   mounted: function () {
-    if (!this.actualCompany) {
+    if (!this.adminCompany) {
       if (this.allCampaigns && this.allCampaigns.items) {
         this.localCampaign = this.allCampaigns.items[0];
         console.log('mounted',this.localCampaign);
@@ -66,8 +66,8 @@ export default {
         this.getAllCampaigns();
       }
     } else {
-      this.localCompany = this.actualCompany.item;
-      this.getAllCampaigns(this.actualCompany.item.id);
+      this.localCompany = this.adminCompany.item;
+      this.getAllCampaigns(this.adminCompany.item.id);
     }
     this.loadConfiguration();
   },
@@ -105,6 +105,7 @@ export default {
       this.setActiveConfiguration({configurationId: this.selectedConfiguration})
     },
     updateCampaign() {
+      console.log('campaign', this.localCampaign);
       if (this.activeSelection && this.localCampaign) {
         // this.activeSelection.campaign = this.localCampaign;
         this.setCurrentCampaign({ campaign: this.localCampaign });

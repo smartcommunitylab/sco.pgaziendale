@@ -23,7 +23,7 @@ pagine dall'utente in base al suo login.
       nav
       dense
     >
-      <router-link to="/GestioneAziende" v-if="adminCompany == null && user.canDo('list', 'companies')" >
+      <router-link to="/GestioneAziende" v-if="adminCompany == null && user.canDo('view', 'companies')" >
         <v-list-item link >
           <v-list-item-icon>
             <v-icon
@@ -114,7 +114,7 @@ pagine dall'utente in base al suo login.
         </v-list-item>
       </router-link>
       <router-link
-            v-if="adminCompany &&  user.canDo('view', 'campaigns', adminCompany.item.id)"
+            v-if="adminCompany && user.canDo('view', 'campaigns', adminCompany.item.id) || !adminCompany && user.canDo('view', 'campaigns')"
             to="/GestioneCampagne"
           >
         <v-list-item link>

@@ -73,7 +73,7 @@ export default {
     ...mapActions("modal", {openModal: 'openModal', closeModal: 'closeModal'}),
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
-      getPublicCampaigns: "getPublicCampaigns",
+      // getPublicCampaigns: "getPublicCampaigns",
       createCompanyCampaign: "createCompanyCampaign",
     }),
     
@@ -108,7 +108,7 @@ export default {
       } else {
         if (this.actualCompany && this.actualCompany.item) {
           this.getAllCampaigns(this.actualCompany.item.id);
-          campaignService.getPublicCampaigns().then((campaigns) => {
+          campaignService.getAllCampaigns().then((campaigns) => {
             this.campaigns = campaigns.filter(c => c.territoryId === this.actualCompany.item.territoryId);
           });
         }

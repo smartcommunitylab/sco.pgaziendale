@@ -85,7 +85,7 @@
                 <v-icon>{{actualCompany.item.state ? 'mdi-close' : 'mdi-check'}}</v-icon>
             </v-btn>
 
-            <v-btn icon v-show="$route.name !== 'ProfiloAzienda' && user.canDo('manage', 'company', actualCompany.item.id)"
+            <v-btn icon v-show="$route.name !== 'ProfiloAzienda' && user.canDo('manage', 'companies')"
             @click="openModal({type:'deleteAzienda', object:null})">
                 <v-icon>mdi-delete</v-icon>
             </v-btn>
