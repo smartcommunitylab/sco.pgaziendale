@@ -135,10 +135,11 @@ public class CompanyResource {
      * @param companyId
      * @param company
      * @return
+     * @throws InconsistentDataException 
      */
     @PutMapping("/companies/{companyId:.*}")
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN+"\")")
-	public ResponseEntity<Company> updateCompany(@PathVariable String companyId, @RequestBody Company company) {
+	public ResponseEntity<Company> updateCompany(@PathVariable String companyId, @RequestBody Company company) throws InconsistentDataException {
     	log.debug("Updating company {}", companyId);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	company.setId(companyId);

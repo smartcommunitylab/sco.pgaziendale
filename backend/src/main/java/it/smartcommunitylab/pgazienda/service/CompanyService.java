@@ -174,11 +174,19 @@ public class CompanyService {
 	 * @param company
 	 * @return
 	 */
-	public Optional<Company> updateCompany(Company company) {
+	public Optional<Company> updateCompany(Company company) throws InconsistentDataException {
 		Company old = companyRepo.findById(company.getId()).orElse(null);
 		if (old != null) {
+			if(!old.getTerritoryId().equals(company.getTerritoryId()) || !old.getCode().equals(company.getCode())) {
+				if(userService.countCompanySubscription(old.getCode()) > 0) 
+					throw new InconsistentDataException("Company subscriptions", "INVALID_COMPANY_DATA_SUBSCRIPTION");
+			}
+			if (findByCode(company.getCode()).isPresent()) {
+				throw new InconsistentDataException("Duplicate company creation", "INVALID_COMPANY_DATA_DUPLICATE_CODE");
+			}
 			old.setAddress(company.getAddress());
 			old.setTerritoryId(company.getTerritoryId());
+			old.setCode(company.getCode());
 			old.setContactEmail(company.getContactEmail());
 			old.setContactPhone(company.getContactPhone());
 			old.setLogo(company.getLogo());

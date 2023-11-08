@@ -31,7 +31,7 @@ public class UserRole {
 	private String companyId;
 	private String territoryId;
 	private String campaignId;
-	private List<Subscription> subscriptions;
+	private List<Subscription> subscriptions = new LinkedList<>();
 	
 	/**
 	 * @return the role

@@ -34,6 +34,9 @@ public interface UserRepository  extends MongoRepository<User, String> {
 
 	@Query("{'roles.companyId': ?0}")
 	List<User> findByCompanyId(String id);
+	
+	@Query(value = "{'roles.subscriptions.companyCode': ?0}", count = true)
+	long countSubscriptionByCompanyCode(String companyCode);
 
 	Optional<User> findByUsername(String username);
 

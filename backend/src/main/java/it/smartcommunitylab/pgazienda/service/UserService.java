@@ -512,4 +512,8 @@ public class UserService {
 			}
 		}
 	}
+	
+	public long countCompanySubscription(String companyCode) {
+		return userRepository.countSubscriptionByCompanyCode(companyCode);
+	}
 }
