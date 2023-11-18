@@ -59,7 +59,7 @@ function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
     case "COMPANIES":
       return campaignService.getAllCompaniesOfCampaign(campaignId).then(content => {
           return content.map(c => {
-            c.label = c.companyId;
+            c.label = c.name;
             return c;
           });
         });
