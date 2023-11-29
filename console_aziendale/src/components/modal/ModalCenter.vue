@@ -34,6 +34,7 @@ fa in base alla variabile "modalType" che permette l'avvio del modale corretto.
         <employee-form-modal v-if="modalType == 'employeeFormEdit'" typeCall="edit"/>
         <import-modal v-if="modalType == 'employeeImport'" typeCall='employee'/>
         <delete-modal v-if="modalType == 'deleteEmployee'" typeCall="employee"/>
+        <delete-modal v-if="modalType == 'blockEmployee'" typeCall="employee-block"/>
 
         <!-- MODALI per le Location -->
         <location-form-modal v-if="modalType == 'locationFormAdd'" typeCall="add"/>

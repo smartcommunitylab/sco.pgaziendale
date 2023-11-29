@@ -16,6 +16,7 @@
 
 package it.smartcommunitylab.pgazienda.service;
 
+import java.net.URI;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collection;
@@ -24,23 +25,29 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
-import it.smartcommunitylab.pgazienda.domain.Constants;
-import it.smartcommunitylab.pgazienda.domain.Territory;
 import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScore;
 import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
+import it.smartcommunitylab.pgazienda.domain.Constants;
 import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
+import it.smartcommunitylab.pgazienda.domain.Territory;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 /**
  * @author raman
@@ -201,7 +208,25 @@ public class PGAppService {
 		}	
 	}
 
-	public void resetTerritories() {
+	public void resetTerritories() throws InconsistentDataException {
 		this.territories.clear();;
 	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void unsubscribePlayer(String playerId, String campaignId) throws InconsistentDataException {
+		//TODO get API token
+		String token = "";
+    	HttpHeaders headers = new HttpHeaders();
+    	headers.set("Authorization", "Bearer " + token);
+    	HttpEntity entity = new HttpEntity(headers);
+		String uri = engineEndpoint + "/api/ext/campaign/unsubscribe/player?campaignId=" + campaignId + "&playerId=" + playerId; 	    	
+		try {
+			ResponseEntity<Void> response = restTemplate.exchange(URI.create(uri), HttpMethod.DELETE, entity, Void.class);
+			if(!response.getStatusCode().is2xxSuccessful())
+				throw new InconsistentDataException(String.format("error calling %s:%s", uri, response.getStatusCodeValue()), "");
+		} catch (RestClientException e) {
+			throw new InconsistentDataException(String.format("error calling %s:%s", uri, e.getMessage()), "");
+		}
+	}
+	
 }

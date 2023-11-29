@@ -173,6 +173,10 @@ public class CampaignService {
 				logger.error("Invalid company subscription no code (" + key +"@" + companyCode+")");
 				throw new InconsistentDataException("Invalid user key", "NO_CODE");
 			}
+			if(employee.isBlocked()) {
+				logger.error("Invalid company subscription user is blocked (" + key +"@" + companyCode+")");
+				throw new InconsistentDataException("User is blocked", "USER_BLOCKED");				
+			}
 			if (employee.getCampaigns() == null) employee.setCampaigns(new LinkedList<>());
 			
 //			boolean hasCampaignData = trackingDataService.hasCampaignData(user.getPlayerId(), campaignId);
@@ -332,6 +336,10 @@ public class CampaignService {
 			
 			campaignRepo.save(c);
 		}
+	}
+	
+	public void unsubscribePlayer(String campainId, String playerId) throws InconsistentDataException {
+		appService.unsubscribePlayer(playerId, campainId);
 	}
 
 }

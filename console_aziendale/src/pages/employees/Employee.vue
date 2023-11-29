@@ -25,6 +25,14 @@
                         </v-list-item-content>
                     </v-list-item>
                     <v-list-item>
+                        <v-list-item-icon>
+                            <v-icon>mdi-account-cancel</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                            <v-list-item-title v-text="actualEmployee.item.blocked"></v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
                         <v-list-item-content>
                             <div v-if="employeeCampaigns && employeeCampaigns.length > 0">
                                 <p class="text-h6">Iscrizioni</p>
@@ -52,6 +60,9 @@
             </v-btn>
             <v-btn icon @click="openModal({type:'deleteEmployee', object:{actCompany: actualCompany, actEmployee: actualEmployee}})">
                 <v-icon>mdi-delete</v-icon>
+            </v-btn>
+            <v-btn icon @click="openModal({type:'blockEmployee', object:{actCompany: actualCompany, actEmployee: actualEmployee}})">
+                <v-icon>mdi-account-cancel</v-icon>
             </v-btn>
         </v-card-actions>
     </v-card>

@@ -5,7 +5,8 @@ export const employeeService = {
     getAllEmployees,
     addEmployee,
     updateEmployee,
-    deleteEmployee
+    deleteEmployee,
+    blockEmployee
 };
 
 function importEmployees(companyId,file) {
@@ -101,7 +102,18 @@ function deleteEmployee(companyId, employeeId) {
 
     )
 }
+function blockEmployee(companyId, employeeId, blocked) {
+    return axios.put(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_EMPLOYEES_API + '/' + employeeId + '/blocked/' + blocked).then(
+        res => {
+            if (res && res.data) {
+                return Promise.resolve(res.data);
+            }
+        }, err => {
+            return Promise.reject(err);
+        }
 
+    )
+}
 
 
 

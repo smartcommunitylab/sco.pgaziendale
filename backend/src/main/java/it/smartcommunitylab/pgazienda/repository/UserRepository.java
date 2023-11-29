@@ -71,4 +71,7 @@ public interface UserRepository  extends MongoRepository<User, String> {
 	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1}}}")
 	List<User> findByCampaignAndCompany(String campaign, String companyCode);
 	
+	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1, key:?2}}}")
+	Optional<User> findOneByCampaignAndCompanyAndKey(String campaign, String companyCode, String key);
+	
 }

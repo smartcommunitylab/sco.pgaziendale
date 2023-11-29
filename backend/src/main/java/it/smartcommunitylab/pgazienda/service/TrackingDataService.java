@@ -163,6 +163,7 @@ public class TrackingDataService {
 		// employee matching subscription
 		Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), subscription.getKey()).stream().findAny().orElse(null);
 		if (employee == null ) throw new InconsistentDataException("Invalid user key: " + playerId, "NO_USER");
+		if (employee.isBlocked()) throw new InconsistentDataException("User is blocked: " + playerId, "USER_BLOCKED");
 		// locations
 		List<Shape> locations = 
 				company.getLocations().stream()

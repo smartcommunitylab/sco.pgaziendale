@@ -88,6 +88,13 @@ public class EmployeeResource {
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.updateEmployee(companyId, employee));
 	}
+    
+    @PutMapping("/companies/{companyId}/employees/{employeeId:.*}/blocked/{blocked}")
+    public ResponseEntity<Employee> blockEmployee(@PathVariable String companyId, @PathVariable String employeeId, @PathVariable boolean blocked) throws InconsistentDataException {
+    	log.debug("Block a employee {} / {}", companyId, employeeId);
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	return ResponseEntity.ok(companyService.setBlockedEmployee(companyId, employeeId, blocked));
+    }
     /**
      * Delete a employee
      * @param companyId

@@ -37,6 +37,8 @@ public class Employee {
 	private List<String> campaigns;
 
 	private Map<String, TrackingRecord> trackingRecord = new HashMap<>();
+	
+	private boolean blocked = false;
 
 	/**
 	 * @return the id
@@ -189,5 +191,15 @@ public class Employee {
 
 		public Long registration, leave, tracking;
 
+	}
+
+
+
+	public boolean isBlocked() {
+		return blocked;
+	}
+
+	public void setBlocked(boolean blocked) {
+		this.blocked = blocked;
 	}
 }

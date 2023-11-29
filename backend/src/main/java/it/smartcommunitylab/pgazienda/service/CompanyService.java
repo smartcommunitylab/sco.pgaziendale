@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -37,6 +39,8 @@ import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -53,6 +57,7 @@ import com.opencsv.exceptions.CsvException;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Employee;
+import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.ImportDataException;
@@ -64,13 +69,16 @@ import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
  */
 @Service
 public class CompanyService {
-
+	private static final Logger logger = LoggerFactory.getLogger(CompanyService.class);
+	
 	@Autowired
 	private CompanyRepository companyRepo;
 	@Autowired
 	private EmployeeRepository employeeRepo;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private CampaignService campaignService;
 	
 	private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
@@ -572,6 +580,35 @@ public class CompanyService {
 			if (required) throw new ImportDataException(row, col);
 			else return "";
 		} else return v.trim();
+	}
+
+
+	public Employee setBlockedEmployee(String companyId, String employeeId, boolean blocked) throws InconsistentDataException {
+		Employee employee = employeeRepo.findById(employeeId).orElse(null);
+		if(employee == null) 
+			throw new InconsistentDataException("Invalid employee", "NO_EMPLOYEE");
+		Company company = companyRepo.findById(companyId).orElse(null);
+		if(company == null)
+			throw new InconsistentDataException("Invalid company", "NO_COMPANY");
+		if(blocked) {
+			List<String> campaigns = new ArrayList<>(employee.getCampaigns());
+			for(String campaignId : campaigns) {
+				Optional<User> opt = userService.getUserByCampaignAndCompanyAndKey(campaignId, company.getCode(), employee.getCode());
+				if(opt.isPresent()) {
+					User user = opt.get();
+					try {
+						//campaignService.unsubscribePlayer(campaignId, user.getPlayerId());
+						campaignService.unsubscribeUser(user, campaignId);
+					} catch (Exception e) {
+						logger.info("error unsubscibing employee to campaign: {}, {}, {}: {}", company.getCode(), employee.getCode(), campaignId, e.getMessage());
+					}
+				}
+			}
+			employee = employeeRepo.findById(employeeId).orElse(null);
+		}
+		employee.setBlocked(blocked);
+		employeeRepo.save(employee);
+		return employee;
 	}
 
 
