@@ -212,10 +212,10 @@ public class CampaignService {
 		// find user
 		User user = userService.getUserWithAuthorities().orElse(null);
 		if (user == null) throw new InconsistentDataException("Invalid user", "NO_USER");
-		unsubscribeUser(user, campaignId);
+		unsubscribeUser(user, campaignId, false);
 	}
 
-	public void unsubscribeUser(User user, String campaignId) {
+	public void unsubscribeUser(User user, String campaignId, boolean blocked) {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) return;
 		// app user role
@@ -232,6 +232,9 @@ public class CampaignService {
 						if (rec == null) {
 							rec = new TrackingRecord();
 							employee.getTrackingRecord().put(campaignId, rec);
+						}
+						if(blocked) {
+							rec.setBlocked(true);
 						}
 						rec.setLeave(System.currentTimeMillis());
 						employeeRepo.save(employee);

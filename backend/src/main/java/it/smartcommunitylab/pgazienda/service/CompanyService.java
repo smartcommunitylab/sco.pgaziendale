@@ -58,6 +58,7 @@ import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.User;
+import it.smartcommunitylab.pgazienda.domain.Employee.TrackingRecord;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.ImportDataException;
@@ -598,13 +599,23 @@ public class CompanyService {
 					User user = opt.get();
 					try {
 						//campaignService.unsubscribePlayer(campaignId, user.getPlayerId());
-						campaignService.unsubscribeUser(user, campaignId);
+						campaignService.unsubscribeUser(user, campaignId, blocked);
 					} catch (Exception e) {
 						logger.info("error unsubscibing employee to campaign: {}, {}, {}: {}", company.getCode(), employee.getCode(), campaignId, e.getMessage());
 					}
 				}
 			}
 			employee = employeeRepo.findById(employeeId).orElse(null);
+		} else {
+			//check if previous tracking was blocked
+			for(String campaignId : employee.getTrackingRecord().keySet()) {
+				if(company.getCampaigns().contains(campaignId)) {
+					TrackingRecord rec = employee.getTrackingRecord().get(campaignId);
+					if(rec.isBlocked()) {
+						rec.setBlocked(false);
+					}
+				}
+			}
 		}
 		employee.setBlocked(blocked);
 		employeeRepo.save(employee);

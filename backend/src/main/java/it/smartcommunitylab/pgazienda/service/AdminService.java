@@ -187,7 +187,7 @@ public class AdminService {
 		String legacyPlayerId = checkLegacyPlayer(playerId, campaignId);
 		User user = userService.getUserByPlayerId(legacyPlayerId);
 		if (user != null) {
-			campaignService.unsubscribeUser(user, campaignId);
+			campaignService.unsubscribeUser(user, campaignId, false);
 		}
 	}
 	
