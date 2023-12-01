@@ -187,7 +187,7 @@ public class AdminService {
 		String legacyPlayerId = checkLegacyPlayer(playerId, campaignId);
 		User user = userService.getUserByPlayerId(legacyPlayerId);
 		if (user != null) {
-			campaignService.unsubscribeUser(user, campaignId, false);
+			campaignService.unsubscribeUser(user, campaignId);
 		}
 	}
 	
@@ -250,6 +250,10 @@ public class AdminService {
 		});
 		legacyRepo.save(lpm);
 		initLegacyData();
+	}
+	
+	public void unregisterPlayer(String playerId) throws InconsistentDataException {
+		//TODO
 	}
 
 }
