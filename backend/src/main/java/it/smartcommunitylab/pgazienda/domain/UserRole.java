@@ -123,4 +123,26 @@ public class UserRole {
 	public void setCampaignId(String campaignId) {
 		this.campaignId = campaignId;
 	}
+	
+	public Subscription containsSubscription(Subscription s) {
+		for(Subscription sub : subscriptions) {
+			if(sub.getCampaign().equals(s.getCampaign()) 
+					&& sub.getCompanyCode().equalsIgnoreCase(s.getCompanyCode()) 
+					&& sub.getKey().equalsIgnoreCase(s.getKey())) {
+				return sub;
+			}
+		}
+		return null;
+	}
+	
+	public Subscription containsSubscription(String companyCode, String campaign, String key) {
+		for(Subscription sub : subscriptions) {
+			if(sub.getCampaign().equals(campaign) 
+					&& sub.getCompanyCode().equalsIgnoreCase(companyCode) 
+					&& sub.getKey().equalsIgnoreCase(key)) {
+				return sub;
+			}
+		}
+		return null;
+	}
 }

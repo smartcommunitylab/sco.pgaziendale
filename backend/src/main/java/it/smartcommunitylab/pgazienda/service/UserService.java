@@ -236,7 +236,13 @@ public class UserService {
 				role = UserRole.createAppUserRole(s);
 				user.getRoles().add(role);
 			} else {
-				role.getSubscriptions().add(s);
+				Subscription sub = role.containsSubscription(s);
+				if(sub != null) {
+					sub.setAbandoned(false);
+					sub.setUpgraded(s.getUpgraded());
+				} else {
+					role.getSubscriptions().add(s);	
+				}
 			}
 			userRepository.save(user);
 		}
@@ -254,9 +260,11 @@ public class UserService {
 		if (user != null) {
 			UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 			if (role != null) {
-				if (role.getSubscriptions().removeIf(s -> s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(companyCode) && s.getKey().equals(key))) {
-					userRepository.save(user);
+				Subscription s = role.containsSubscription(companyCode, campaignId, key);
+				if(s != null) {
+					s.setAbandoned(true);
 				}
+				userRepository.save(user);
 			}
 		}
 	}
@@ -319,6 +327,15 @@ public class UserService {
         	}
         });
     }
+	
+//	public void deleteUser(String playerId) {
+//		Optional<User> opt = 
+//		if(opt.isPresent()) {
+//			User user = opt.get();
+//			
+//			campaignService.unsubscribeUser(user, campaignId);
+//		}
+//	}
 
     public void changePassword(String currentClearTextPassword, String newPassword) {
         SecurityUtils.getCurrentUserLogin()
@@ -518,5 +535,9 @@ public class UserService {
 	
 	public long countCompanySubscription(String companyCode) {
 		return userRepository.countSubscriptionByCompanyCode(companyCode);
+	}
+	
+	public User saveUser(User user) {
+		return userRepository.save(user);
 	}
 }

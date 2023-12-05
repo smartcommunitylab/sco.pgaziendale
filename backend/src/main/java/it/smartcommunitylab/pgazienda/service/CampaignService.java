@@ -113,7 +113,7 @@ public class CampaignService {
 		if (user != null) {
 			UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 			if (role != null) {
-				return campaignRepo.findByIdIn(role.getSubscriptions().stream().map(s -> s.getCampaign()).collect(Collectors.toSet()));
+				return campaignRepo.findByIdIn(role.getSubscriptions().stream().filter(s -> !s.isAbandoned()).map(s -> s.getCampaign()).collect(Collectors.toSet()));
 			}
 		}
 		return Collections.emptyList();
@@ -161,13 +161,19 @@ public class CampaignService {
 
 		// control key already used
 		List<User> registered = userService.getUserByEmployeeCode(campaignId, companyCode, key);
-		if (registered != null && registered.size() > 0 && !registered.get(0).getId().equals(user.getId())) {
-			logger.error("Invalid company subscription user code in use (" + key +"@" + companyCode+")");
-			throw new InconsistentDataException("User code already in use (" + campaignId +", " + companyCode + ", " + key, "CODE_IN_USE");			
+		if (registered != null && registered.size() > 0) {
+			for(User u : registered) {
+				if(!u.getId().equals(user.getId())) {
+					if(u.findActiveSubscription(campaignId, companyCode, key).isPresent()) {
+						logger.error("Invalid company subscription user code in use (" + key +"@" + companyCode+")");
+						throw new InconsistentDataException("User code already in use (" + campaignId +", " + companyCode + ", " + key, "CODE_IN_USE");									
+					}
+				}
+			}
 		}
 		
 		// not yet subscribed
-		if (role == null || role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId))) {
+		if (role == null || role.getSubscriptions().stream().noneMatch(s -> s.getCampaign().equals(campaignId) && !s.isAbandoned())) {
 			Employee employee = employeeRepo.findByCompanyIdAndCodeIgnoreCase(company.getId(), key).stream().findAny().orElse(null);
 			if (employee == null ) {
 				logger.error("Invalid company subscription no code (" + key +"@" + companyCode+")");
@@ -221,7 +227,7 @@ public class CampaignService {
 		// app user role
 		UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 		// not yet subscribed
-		if (role != null && role.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaignId))) {
+		if (role != null && role.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaignId) && !s.isAbandoned())) {
 			role.getSubscriptions().forEach(s -> {
 				Company company = companyRepo.findByCode(s.getCompanyCode()).stream().findFirst().orElse(null);
 				if (company != null) {

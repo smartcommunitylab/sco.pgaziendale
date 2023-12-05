@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -253,7 +255,21 @@ public class AdminService {
 	}
 	
 	public void unregisterPlayer(String playerId) throws InconsistentDataException {
-		//TODO
+		User user = userService.getUserByPlayerId(playerId);
+		if(user != null) {
+			UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
+			if(role != null) {
+				List<String> campaigns = role.getSubscriptions().stream().filter(s -> !s.isAbandoned()).map(s -> s.getCampaign())
+						.collect(Collectors.toList());
+				campaigns.forEach(campaign -> {
+					User u = userService.getUserByPlayerId(playerId);
+					campaignService.unsubscribeUser(u, campaign);
+				});
+			}
+			user = userService.getUserByPlayerId(playerId);
+			user.setDeleted(true);
+			userService.saveUser(user);
+		}
 	}
 
 }

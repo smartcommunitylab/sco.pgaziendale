@@ -148,7 +148,7 @@ public class TrackingDataService {
 		if (role == null) {
 			throw new InconsistentDataException("Invalid user role: " + playerId, "NO_USER");
 		}
-		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId)).findAny().orElse(null);
+		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId) && !s.isAbandoned()).findAny().orElse(null);
 		if (subscription == null) {
 			throw new InconsistentDataException("Invalid user subscription: " + playerId, "NO_USER");
 		}
@@ -299,7 +299,7 @@ public class TrackingDataService {
 		if (role == null) {
 			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
 		}
-		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId)).findAny().orElse(null);
+		Subscription subscription = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaignId) && !s.isAbandoned()).findAny().orElse(null);
 		if (subscription == null) {
 			throw new InconsistentDataException("Invalid user: " + playerId, "NO_USER");
 		}

@@ -64,7 +64,8 @@ public class ProfileResource {
 		if (userWithAuthorities.isPresent()) {
 			User user = userWithAuthorities.get();
 			logger.info("Real profile for user " + userWithAuthorities.get().getPlayerId());
-			UserRole role = user.getRoles().stream().filter(r -> r.getRole().equals(Constants.ROLE_APP_USER) && !r.getSubscriptions().isEmpty() && r.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaign))).findAny().orElse(null);
+			UserRole role = user.getRoles().stream().filter(r -> r.getRole().equals(Constants.ROLE_APP_USER) && !r.getSubscriptions().isEmpty() 
+					&& r.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaign) && !s.isAbandoned())).findAny().orElse(null);
 			if (role != null) {
 				logger.info("User role " + role.getSubscriptions());
 				Subscription sub = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaign)).findAny().orElse(null);

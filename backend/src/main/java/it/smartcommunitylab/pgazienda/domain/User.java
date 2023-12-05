@@ -61,6 +61,8 @@ public class User extends AbstractAuditingEntity {
     @JsonIgnore
     private String resetKey;
     private Instant resetDate = null;
+    
+    private boolean deleted;
 
 	
 	/**
@@ -231,6 +233,19 @@ public class User extends AbstractAuditingEntity {
 	public boolean isAdmin() {
 		return roles.stream().anyMatch(r -> Constants.ROLE_ADMIN.equals(r.getRole()));
 	}
+	public Optional<Subscription> findActiveSubscription(String campaign, String companyCode, String key) {
+		for(UserRole r : roles) {
+			if(Constants.ROLE_APP_USER.equals(r.getRole())) {
+				for(Subscription s : r.getSubscriptions()) {
+					if(s.getCampaign().equals(campaign) && s.getCompanyCode().equalsIgnoreCase(companyCode)
+							&& s.getKey().equalsIgnoreCase(key) && !s.isAbandoned()) {
+						return Optional.of(s);
+					}
+				}
+			}
+		}
+		return Optional.empty();
+	}
 
 	@Override
 	public int hashCode() {
@@ -254,6 +269,12 @@ public class User extends AbstractAuditingEntity {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+	public boolean isDeleted() {
+		return deleted;
+	}
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	

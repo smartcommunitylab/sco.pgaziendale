@@ -16,8 +16,6 @@
 
 package it.smartcommunitylab.pgazienda.web.rest;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -26,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -41,10 +38,8 @@ import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.dto.DataModelDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
-import it.smartcommunitylab.pgazienda.dto.TransportStatDTO;
 import it.smartcommunitylab.pgazienda.service.AdminService;
 import it.smartcommunitylab.pgazienda.service.CampaignService;
-import it.smartcommunitylab.pgazienda.service.TrackingDataService;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionException;
 
@@ -58,8 +53,6 @@ public class AdminResource {
 
 	@Autowired
 	private AdminService service;
-	@Autowired
-	private TrackingDataService trackingDataService;
 	@Autowired
 	private CampaignService campaignService;
 	
@@ -124,4 +117,14 @@ public class AdminResource {
     	service.loadLegacyData(campaignId, file.getInputStream());
     	return ResponseEntity.ok(null);
     }
+    
+	@PostMapping("/admin/unregister/player/{playerId}")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public @ResponseBody ResponseEntity<Void> unregisterPlayer(
+			@PathVariable String playerId) throws InconsistentDataException 
+	{
+		service.unregisterPlayer(playerId);
+		return ResponseEntity.ok(null);
+	}
+    
 }
