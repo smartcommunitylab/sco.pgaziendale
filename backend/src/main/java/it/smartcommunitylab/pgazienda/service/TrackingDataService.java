@@ -598,6 +598,7 @@ public class TrackingDataService {
 				}).collect(Collectors.toList()));
 			}
 		}
+		// grouping by campaign
 		if (GROUP_BY_DATA.campaign.equals(dataGroupBy)) {
 			res.forEach(ds -> {
 				ds.setPlayerId(campaign.getTitle());
@@ -609,17 +610,20 @@ public class TrackingDataService {
 				res.add(ds);
 			}
 		}
+		// grouping by employee
 		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) {
 			Company company = companyRepo.findById(companyId).orElse(null);
 			if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
 
 			Set<String> players = res.stream().map(ds -> ds.getPlayerId()).collect(Collectors.toSet());
 			List<User> users = userRepo.findByPlayerIdIn(players);
-			// get the company employes subscribing the campaign
-			List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(companyId, campaignId);
+			// get all the company employees
 			Map<String, Employee> employeeMap = new HashMap<>();
-			Map<String, Employee> playerEmployeeMap = new HashMap<>();
+			List<Employee> employees = employeeRepo.findByCompanyId(companyId);
 			employees.forEach(e -> employeeMap.put(e.getCode(), e));
+
+			// mapping players to employees
+			Map<String, Employee> playerEmployeeMap = new HashMap<>();
 			users.forEach(u -> {
 				u.getRoles().forEach(r -> {
 					if (r.getSubscriptions() != null) {
@@ -631,13 +635,17 @@ public class TrackingDataService {
 					}
 				});
 			});
+
 			Set<String> employeesWithData = new HashSet<>();
 			res.forEach(ds -> {
+				// existing employee
 				if (playerEmployeeMap.containsKey(ds.getPlayerId())) {
 					Employee e = playerEmployeeMap.get(ds.getPlayerId());
+					// any employee with that code for the company (should never happen)
 					if (e == null) {
 						e = employeeMap.get(ds.getEmployeeCode());
 					}
+					// employee not found, pult playerId (should never happen)
 					if (e != null) {
 						ds.setPlayerId(e.getSurname()+ " " + e.getName());
 						employeesWithData.add(e.getId());
@@ -677,7 +685,7 @@ public class TrackingDataService {
 			Set<String> players = res.stream().map(ds -> ds.getPlayerId()).collect(Collectors.toSet());
 			List<User> users = userRepo.findByPlayerIdIn(players);
 			// get the company employes subscribing the campaign
-			List<Employee> employees = employeeRepo.findByCompanyIdAndCampaigns(companyId, campaignId);
+			List<Employee> employees = employeeRepo.findByCompanyId(companyId);
 			// map the players to location using the codes of the employees in subscriptions
 			Map<String, String> employeeLocationMap = new HashMap<>();
 			Map<String, String> playerLocationMap = new HashMap<>();
