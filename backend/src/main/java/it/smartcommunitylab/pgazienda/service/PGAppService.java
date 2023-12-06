@@ -221,7 +221,6 @@ public class PGAppService {
 			if(!response.getStatusCode().is2xxSuccessful())
 				throw new InconsistentDataException(String.format("error calling %s:%s", uri, response.getStatusCodeValue()), "");			
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new InconsistentDataException(String.format("error calling %s:%s", uri, e.getMessage()), "");
 		}
 	}
