@@ -23,6 +23,17 @@ spring:
   messages:
     basename: i18n/messages
 
+  security:
+    oauth2:
+      client:
+        registration:
+          custom:
+            client-id: ${AAC_CLIENT_ID:}
+            client-secret: ${AAC_CLIENT_SECRET:}
+            authorization-grant-type: client_credentials
+        provider:
+          custom:
+            token-uri: ${AAC_TOKEN_URI:https://aac.platform.smartcommunitylab.it/oauth/token}    
 management:
    server:
       port: ${MANAGEMENT_PORT:7878}
@@ -69,5 +80,4 @@ app:
       jwk-uri: ${AAC_JWK_URI:https://aac.platform.smartcommunitylab.it/jwk}
   legacyCampaign: ferrara_bike2work
   engineEndpoint: ${ENGINE_ENDPOINT:https://backenddev.playngo.it/playandgo/}
-      
       

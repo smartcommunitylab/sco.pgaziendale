@@ -596,15 +596,15 @@ public class CompanyService {
 				if(opt.isPresent()) {
 					User user = opt.get();
 					try {
-						//TODO campaignService.unsubscribePlayer(campaignId, user.getPlayerId());
+						campaignService.unsubscribePlayer(campaignId, user.getPlayerId());
 						campaignService.unsubscribeUser(user, campaignId);
 					} catch (Exception e) {
 						logger.info("error unsubscibing employee to campaign: {}, {}, {}: {}", company.getCode(), employee.getCode(), campaignId, e.getMessage());
 					}
 				}
 			}
-			employee = employeeRepo.findById(employeeId).orElse(null);
 		}
+		employee = employeeRepo.findById(employeeId).orElse(null);
 		employee.setBlocked(blocked);
 		employeeRepo.save(employee);
 		return employee;

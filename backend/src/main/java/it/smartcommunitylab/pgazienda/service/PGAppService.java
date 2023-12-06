@@ -16,7 +16,6 @@
 
 package it.smartcommunitylab.pgazienda.service;
 
-import java.net.URI;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collection;
@@ -31,15 +30,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScore;
@@ -62,6 +59,9 @@ public class PGAppService {
 
 	@Autowired
 	private RestTemplate restTemplate = new RestTemplate();
+	
+	@Autowired
+	private WebClient webClient;
 	
 	@Value("${app.engineEndpoint}")
 	private String engineEndpoint;
@@ -212,19 +212,16 @@ public class PGAppService {
 		this.territories.clear();;
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void unsubscribePlayer(String playerId, String campaignId) throws InconsistentDataException {
-		//TODO get API token
-		String token = "";
-    	HttpHeaders headers = new HttpHeaders();
-    	headers.set("Authorization", "Bearer " + token);
-    	HttpEntity entity = new HttpEntity(headers);
-		String uri = engineEndpoint + "/api/ext/campaign/unsubscribe/player?campaignId=" + campaignId + "&playerId=" + playerId; 	    	
+		String uri = new String(engineEndpoint);
+		if(!engineEndpoint.endsWith("/")) uri += "/";
+		uri += "api/ext/campaign/unsubscribe/player?campaignId=" + campaignId + "&playerId=" + playerId; 	    	
 		try {
-			ResponseEntity<Void> response = restTemplate.exchange(URI.create(uri), HttpMethod.DELETE, entity, Void.class);
+			ResponseEntity<Void> response = webClient.delete().uri(uri).retrieve().toEntity(Void.class).block();
 			if(!response.getStatusCode().is2xxSuccessful())
-				throw new InconsistentDataException(String.format("error calling %s:%s", uri, response.getStatusCodeValue()), "");
-		} catch (RestClientException e) {
+				throw new InconsistentDataException(String.format("error calling %s:%s", uri, response.getStatusCodeValue()), "");			
+		} catch (Exception e) {
+			e.printStackTrace();
 			throw new InconsistentDataException(String.format("error calling %s:%s", uri, e.getMessage()), "");
 		}
 	}

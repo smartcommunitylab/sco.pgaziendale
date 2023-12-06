@@ -25,7 +25,7 @@ public class Subscription {
 	private String companyCode, campaign, key;
 	// to keep track of upgrade from legacy campaign
 	private Boolean upgraded;
-	private Boolean abandoned = false;
+	private boolean abandoned = false;
 
 	/**
 	 * @return the companyCode
