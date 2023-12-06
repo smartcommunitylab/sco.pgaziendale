@@ -58,6 +58,7 @@ import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
+import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.ImportDataException;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
@@ -74,6 +75,8 @@ public class CompanyService {
 	private CompanyRepository companyRepo;
 	@Autowired
 	private EmployeeRepository employeeRepo;
+	@Autowired
+	private DayStatRepository statRepo;
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -386,11 +389,22 @@ public class CompanyService {
 	 * @param companyId
 	 * @param employeeId
 	 */
-	public void deleteEmployee(String companyId, String employeeId) {
-		employeeRepo.findById(employeeId).ifPresent(e -> {
-			employeeRepo.delete(e);
-		});
-		
+	public void deleteEmployee(String companyId, String employeeId) throws InconsistentDataException {
+		Employee employee = employeeRepo.findById(employeeId).orElse(null);
+		if(employee != null) {
+			if(employee.getCampaigns().size() > 0) {
+				throw new InconsistentDataException("Employee has subscriptions", "INVALID_COMPANY_DATA_EMPLOYEE");
+			}
+			Company company = companyRepo.findById(companyId).orElse(null);
+			Optional<User> user = userService.findOneByCompanyCodeAndEmployeeCodeAndActive(company.getCode(), employee.getCode());
+			if(user.isPresent()) {
+				long count = statRepo.countByPlayerIdAndCompany(user.get().getPlayerId(), companyId);
+				if(count > 0) {
+					throw new InconsistentDataException("Employee has tracks", "INVALID_COMPANY_DATA_EMPLOYEE");
+				}
+			}
+			employeeRepo.delete(employee);
+		}
 	}
 
 	/**

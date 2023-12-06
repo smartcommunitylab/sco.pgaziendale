@@ -103,7 +103,7 @@ public class EmployeeResource {
      */
     @DeleteMapping("/companies/{companyId}/employees/{employeeId:.*}")
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN + "\", \""+Constants.ROLE_MOBILITY_MANAGER  +"\")")
-	public ResponseEntity<Void> deleteEmployee(@PathVariable String companyId, @PathVariable String employeeId) {
+	public ResponseEntity<Void> deleteEmployee(@PathVariable String companyId, @PathVariable String employeeId) throws InconsistentDataException {
     	log.debug("Deleting a employee {} / {}", companyId, employeeId);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	companyService.deleteEmployee(companyId, employeeId);

@@ -540,4 +540,8 @@ public class UserService {
 	public User saveUser(User user) {
 		return userRepository.save(user);
 	}
+	
+	public Optional<User> findOneByCompanyCodeAndEmployeeCodeAndActive(String companyCode, String key) {
+		return userRepository.findOneByCompanyCodeAndEmployeeCodeAndActive(companyCode, key);
+	}
 }
