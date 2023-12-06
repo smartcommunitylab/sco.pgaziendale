@@ -213,9 +213,8 @@ public class PGAppService {
 	}
 	
 	public void unsubscribePlayer(String playerId, String campaignId) throws InconsistentDataException {
-		String uri = new String(engineEndpoint);
-		if(!engineEndpoint.endsWith("/")) uri += "/";
-		uri += "api/ext/campaign/unsubscribe/player?campaignId=" + campaignId + "&playerId=" + playerId; 	    	
+		String uri = engineEndpoint.endsWith("/") ? engineEndpoint : engineEndpoint + "/";
+		uri = uri + "api/ext/campaign/unsubscribe/player?campaignId=" + campaignId + "&playerId=" + playerId; 	    	
 		try {
 			ResponseEntity<Void> response = webClient.delete().uri(uri).retrieve().toEntity(Void.class).block();
 			if(!response.getStatusCode().is2xxSuccessful())
