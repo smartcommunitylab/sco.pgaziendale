@@ -191,7 +191,8 @@ public class CompanyService {
 				if(userService.countCompanySubscription(old.getCode()) > 0) 
 					throw new InconsistentDataException("Company subscriptions", "INVALID_COMPANY_DATA_SUBSCRIPTION");
 			}
-			if (findByCode(company.getCode()).isPresent()) {
+			Company byCode = findByCode(company.getCode()).orElse(null);
+			if (byCode != null && !byCode.getId().equals(company.getId())) {
 				throw new InconsistentDataException("Duplicate company creation", "INVALID_COMPANY_DATA_DUPLICATE_CODE");
 			}
 			old.setAddress(company.getAddress());

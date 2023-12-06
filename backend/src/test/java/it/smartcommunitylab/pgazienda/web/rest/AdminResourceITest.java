@@ -162,8 +162,8 @@ public class AdminResourceITest {
         assertThat(user).isNotNull();
         UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 		assertThat(role).isNotNull();
-		assertThat(role.getSubscriptions().size()).isEqualTo(1);
-		Subscription s = role.getSubscriptions().get(0);
+		assertThat(role.activeSubscriptions().size()).isEqualTo(1);
+		Subscription s = role.activeSubscriptions().get(0);
 		assertThat(s.getCampaign()).isEqualTo(obj.getId());
 		assertThat(s.getKey()).isEqualTo(e.getCode());
 		assertThat(s.getCompanyCode()).isEqualTo(company.getCode());
@@ -179,7 +179,7 @@ public class AdminResourceITest {
         assertThat(user).isNotNull();
         role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 		assertThat(role).isNotNull();
-		assertThat(role.getSubscriptions().size()).isEqualTo(0);
+		assertThat(role.activeSubscriptions().size()).isEqualTo(0);
 		e = employeeRepo.findById(e.getId()).orElse(null);
 		assertThat(e).isNotNull();
 		assertThat(e.getCampaigns()).doesNotContain(obj.getId());

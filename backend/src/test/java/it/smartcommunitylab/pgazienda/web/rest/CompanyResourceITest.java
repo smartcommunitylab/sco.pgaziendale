@@ -110,6 +110,7 @@ public class CompanyResourceITest {
     	c.setLogo("logo1");
     	c.setName("company1");
     	c.setWeb("web1");
+        c.setCode("code");
     	c.setTerritoryId(T_ID);
     	c = companyRepo.save(c);
     	

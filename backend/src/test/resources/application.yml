@@ -12,6 +12,20 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
+  security:
+    oauth2:
+      client:
+        registration:
+          custom:
+            client-id: 123
+            client-secret: abc
+            authorization-grant-type: client_credentials
+        provider:
+          custom:
+            token-uri: https://aac.platform.smartcommunitylab.it/oauth/token
+            jwk-set-uri: https://aac.platform.smartcommunitylab.it/jwk
+            issuer-uri: https://aac.platform.smartcommunitylab.it
+            user-info-uri: https://aac.platform.smartcommunitylab.it/userinfo
 app:
   security:
     authentication:
@@ -22,15 +36,11 @@ app:
         token-validity-in-seconds: 86400
         token-validity-in-seconds-for-remember-me: 2592000
     ext:
-      endpoint-userinfo: http://localhost:8080/aac/basicprofile/me
       username-field: userId
       player-field: userId
       name-field: name
       surname-field: surname
       domain: '@local.com'
-      issuer-uri: https://aac.platform.smartcommunitylab.it
-      client-id: 123
-      jwk-uri: https://aac.platform.smartcommunitylab.it/jwk
   engineEndpoint: http://localhost:8080/api/
 
 admin:

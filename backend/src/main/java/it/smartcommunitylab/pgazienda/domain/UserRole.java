@@ -16,8 +16,10 @@
 
 package it.smartcommunitylab.pgazienda.domain;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import it.smartcommunitylab.pgazienda.Constants;
 
@@ -32,7 +34,14 @@ public class UserRole {
 	private String territoryId;
 	private String campaignId;
 	private List<Subscription> subscriptions = new LinkedList<>();
-	
+
+	public UserRole() {
+	}
+
+	public UserRole(String role) {
+		this.role = role;
+	}
+
 	/**
 	 * @return the role
 	 */
@@ -64,6 +73,11 @@ public class UserRole {
 	public List<Subscription> getSubscriptions() {
 		return subscriptions;
 	}
+
+	public List<Subscription> activeSubscriptions() {
+		return subscriptions != null ? subscriptions.stream().filter(s -> !s.isAbandoned()).collect(Collectors.toList()) : Collections.emptyList();
+	}
+
 	/**
 	 * @param subscriptions the subscriptions to set
 	 */

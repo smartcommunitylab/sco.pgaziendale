@@ -61,7 +61,7 @@ public class ExternalUserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(ExternalUserDetailsService.class);
 
-    @Value("${app.security.ext.endpoint-userinfo}")
+    @Value("${spring.security.oauth2.client.provider.custom.user-info-uri}")
     private String userInfoEndpoint;
     
     @Value("${app.security.ext.player-field:username}")

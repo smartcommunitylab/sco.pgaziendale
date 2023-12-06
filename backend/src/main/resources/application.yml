@@ -33,7 +33,11 @@ spring:
             authorization-grant-type: client_credentials
         provider:
           custom:
-            token-uri: ${AAC_TOKEN_URI:https://aac.platform.smartcommunitylab.it/oauth/token}    
+            token-uri: ${AAC_TOKEN_URI:https://aac.platform.smartcommunitylab.it/oauth/token}
+            jwk-set-uri: ${AAC_JWK_URI:https://aac.platform.smartcommunitylab.it/jwk}
+            issuer-uri: ${AAC_ISSUER_URI:https://aac.platform.smartcommunitylab.it}
+            user-info-uri: ${SECURITY_EXT_USERINFO_ENDPOINT:https://aac.platform.smartcommunitylab.it/userinfo}
+
 management:
    server:
       port: ${MANAGEMENT_PORT:7878}
@@ -69,15 +73,12 @@ app:
         token-validity-in-seconds: 86400
         token-validity-in-seconds-for-remember-me: 2592000
     ext:
-      endpoint-userinfo: ${SECURITY_EXT_USERINFO_ENDPOINT:https://aac.platform.smartcommunitylab.it/userinfo}
       player-field: ${SECURITY_EXT_USERINFO_PLAYER_FIELD:sub}
       username-field: ${SECURITY_EXT_USERINFO_USERNAME_FIELD:preferred_username}
       name-field: ${SECURITY_EXT_USERINFO_NAME_FIELD:given_name}
       surname-field: ${SECURITY_EXT_USERINFO_SURNAME_FIELD:family_name}
       domain: ${SECURITY_EXT_USERINFO_DOMAIN:}
-      issuer-uri: ${AAC_ISSUER_URI:https://aac.platform.smartcommunitylab.it}
-      client-id: ${AAC_CLIENT_ID:}
-      jwk-uri: ${AAC_JWK_URI:https://aac.platform.smartcommunitylab.it/jwk}
+
   legacyCampaign: ferrara_bike2work
   engineEndpoint: ${ENGINE_ENDPOINT:https://backenddev.playngo.it/playandgo/}
       

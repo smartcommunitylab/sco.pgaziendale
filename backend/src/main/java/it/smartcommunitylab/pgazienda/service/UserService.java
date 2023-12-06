@@ -416,8 +416,9 @@ public class UserService {
 	 */
 	public boolean isInCompanyRole(String companyId, String ... roles) {
 		UserInfo user = getUserDetail();
-		Set<String> set = Sets.newHashSet(roles);
 		if (user != null) {
+			if (user.getRoles().stream().anyMatch(r -> Constants.ROLE_ADMIN.equals(r.getRole()))) return true;
+			Set<String> set = Sets.newHashSet(roles);
 			Company company = companyRepo.findById(companyId).orElse(null);
 			if(company != null) {
 				String territoryId = company.getTerritoryId();

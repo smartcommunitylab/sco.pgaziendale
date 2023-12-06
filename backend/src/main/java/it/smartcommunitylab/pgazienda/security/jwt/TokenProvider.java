@@ -77,11 +77,11 @@ public class TokenProvider {
     @Value("${app.security.authentication.jwt.token-validity-in-seconds-for-remember-me}")
     private long tokenValidityInSecondsForRememberMe;
 
-    @Value("${app.security.ext.issuer-uri}")
+    @Value("${spring.security.oauth2.client.provider.custom.issuer-uri}")
     private String extJwtIssuerUri;
-    @Value("${app.security.ext.client-id}")
+    @Value("${spring.security.oauth2.client.registration.custom.client-id}")
     private String extJwtAudience;
-    @Value("${app.security.ext.jwk-uri}")
+    @Value("${spring.security.oauth2.client.provider.custom.jwk-set-uri}")
     private String extJwkUri;
     
     @Value("${app.security.ext.domain:}")

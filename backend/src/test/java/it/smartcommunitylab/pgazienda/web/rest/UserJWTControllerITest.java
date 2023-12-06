@@ -77,8 +77,10 @@ public class UserJWTControllerITest {
     
     private MockRestServiceServer mockServer;
     
-    @Value("${app.security.ext.endpoint-userinfo}")
+    @Value("${spring.security.oauth2.client.provider.custom.user-info-uri}")
     private String userInfoEndpoint;
+    @Value("${app.engineEndpoint}")
+    private String engineEndpoint;
 
     
     @BeforeEach
@@ -164,7 +166,14 @@ public class UserJWTControllerITest {
     	          .contentType(MediaType.APPLICATION_JSON)
     	          .body(new ObjectMapper().writeValueAsString(map))
     	        );
-    	
+
+    	mockServer.expect(requestTo(new URI(engineEndpoint + "api/console/role/my")))
+    	          .andExpect(method(HttpMethod.GET))
+    	          .andRespond(withStatus(HttpStatus.OK)
+    	          .contentType(MediaType.APPLICATION_JSON)
+    	          .body("{}")
+    	        );
+                
         mockMvc.perform(get("/api/authenticate/extjwt")
         		.header("Authorization", "Bearer 123456"))
                 .andExpect(status().is2xxSuccessful())
