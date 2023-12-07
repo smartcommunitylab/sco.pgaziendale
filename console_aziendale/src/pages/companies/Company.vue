@@ -47,6 +47,25 @@
                             <v-list-item-title v-text="actualCompany.item.contactPhone"></v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
+
+                    <v-list-item>
+                        <v-list-item-content>
+                            <div v-if="adminCompanyUsers && adminCompanyUsers.items && adminCompanyUsers.items.length > 0">
+                                <p class="text-h6">Manager</p>
+                                <v-simple-table>
+                                    <thead>
+                                        <tr><th>Cognome</th><th>Nome</th><th>Username</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr  v-for="tr in adminCompanyUsers.items" :key="tr.id">
+                                            <td>{{tr.surname}}</td><td>{{tr.name}}</td><td><a target="_blank" :href="'mailto:'+tr.username">{{tr.username}}</a></td>
+                                        </tr>
+                                    </tbody>
+                                </v-simple-table>
+                            </div>
+                            <v-list-item-title v-else>Nessun manager definito</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
                 </v-list-item-group>
             </v-list>
         </v-card-text>
@@ -103,6 +122,7 @@ export default {
   methods: {
     ...mapActions("company", {
       getCompanyById: "getCompanyById",
+      getUsers: "getUsers",
       chooseCompanyAdminCall: "chooseCompanyAdmin",
     }),
     ...mapActions("modal", {openModal: "openModal"}),
@@ -113,8 +133,25 @@ export default {
     },
   },
 
+  mounted() {
+    if (this.actualCompany) {
+        this.getUsers(this.actualCompany.item);
+    } else if (this.adminCompany) {
+        this.getUsers(this.adminCompany.item);
+    }
+  },
+
+  watch: {
+    actualCompany() {
+        this.getUsers(this.actualCompany.item);
+    },
+    adminCompany() {
+        this.getUsers(this.adminCompany.item);
+    },
+  },
+
   computed: {
-    ...mapState("company", ["adminCompany", "actualCompany"]),
+    ...mapState("company", ["adminCompany", "actualCompany", "adminCompanyUsers"]),
     ...mapState("account", ["user"]),
 
     isAdmin: function(){
