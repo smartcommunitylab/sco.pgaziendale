@@ -29,7 +29,7 @@
                             <v-icon>mdi-account-cancel</v-icon>
                         </v-list-item-icon>
                         <v-list-item-content>
-                            <v-list-item-title v-text="actualEmployee.item.blocked"></v-list-item-title>
+                            <v-list-item-title v-text="actualEmployee.item.blocked ? 'Utente bloccato' : 'Utente attivo'"></v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
                     <v-list-item>

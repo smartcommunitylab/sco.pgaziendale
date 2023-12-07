@@ -60,6 +60,7 @@
                   v-model.trim="$v.latitude.$model"
                   :error-messages="latitudeErrors"
                   required
+                  :disabled="true"
                   @input="$v.latitude.$touch()"
                   @blur="$v.latitude.$touch()"
                   outlined
@@ -75,6 +76,7 @@
                   v-model.trim="$v.longitude.$model"
                   :error-messages="longitudeErrors"
                   required
+                  :disabled="true"
                   @input="$v.longitude.$touch()"
                   @blur="$v.longitude.$touch()"
                   outlined
@@ -531,10 +533,11 @@ export default {
     }),
 
     locationChanged(input) {
+      console.log('Changed', input.address);
       this.locationSelected = input.address;
       this.latitude = this.locationSelected.pos.lat;
       this.longitude = this.locationSelected.pos.lng;
-      if (this.locationSelected && this.locationSelected.structuredValue)
+      if (!this.address && this.locationSelected && this.locationSelected.structuredValue)
         this.changeParamForm(this.locationSelected.structuredValue);
     },
     changeParamForm(structuredValue) {
@@ -544,7 +547,7 @@ export default {
       if (structuredValue.country) this.country = structuredValue.country;
       if (structuredValue.postcode) this.zip = structuredValue.postcode;
       if (structuredValue.state) this.region = structuredValue.state;
-      if (structuredValue.county) this.region = structuredValue.county;
+      if (!this.region && structuredValue.county) this.region = structuredValue.county;
     },
     stopTheEvent(event) {
       console.log(event);
