@@ -42,7 +42,7 @@ backend-container-build:
     - docker login -u $DHUB_USER -p $DHUB_PASS
     - DOCKER_BUILDKIT=1 docker build -f Dockerfile -t $CONTAINER_BACKEND_IMAGE -t $CONTAINER_BACKEND_IMAGE_LATEST .
     - docker push $CONTAINER_BACKEND_IMAGE
-    - docker push $CONTAINER_BACKEND_IMAGE
+    - docker push CONTAINER_BACKEND_IMAGE_LATEST
   only:
     - dev-backend
     - prod-backend
@@ -86,11 +86,11 @@ deploy_backend_prod:
   stage: deploy
   image: smartcommunitylab/kubectl-alpine:latest
   environment:
-    name: platform-new
+    name: dslab
   script:
     - echo "deploy"
-    - kubectl -n pgaziendale set image deployments/pgaziendale-backend-prod pgaziendale-backend-prod=$CONTAINER_BACKEND_IMAGE --record=true
-    - kubectl -n pgaziendale rollout status deployment pgaziendale-backend-prod
+    - kubectl -n pgaziendale-prod set image deployments/pgaziendale-backend-prod pgaziendale-backend-prod=$CONTAINER_BACKEND_IMAGE --record=true
+    - kubectl -n pgaziendale-prod rollout status deployment pgaziendale-backend-prod
   only:
     - prod-backend
 
@@ -98,10 +98,10 @@ deploy_backend_dev:
   stage: deploy
   image: smartcommunitylab/kubectl-alpine:latest
   environment:
-    name: platform-new
+    name: dslab
   script:
     - echo "deploy"
-    - kubectl -n pgaziendale set image deployments/pgaziendale-backend-dev pgaziendale-backend-dev=$CONTAINER_BACKEND_IMAGE --record=true
-    - kubectl -n pgaziendale rollout status deployment pgaziendale-backend-dev
+    - kubectl -n pgaziendale-dev set image deployments/pgaziendale-backend-dev pgaziendale-backend-dev=$CONTAINER_BACKEND_IMAGE --record=true
+    - kubectl -n pgaziendale-dev rollout status deployment pgaziendale-backend-dev
   only:
     - dev-backend
