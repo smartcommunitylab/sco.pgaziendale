@@ -42,7 +42,7 @@ backend-container-build:
     - docker login -u $DHUB_USER -p $DHUB_PASS
     - DOCKER_BUILDKIT=1 docker build -f Dockerfile -t $CONTAINER_BACKEND_IMAGE -t $CONTAINER_BACKEND_IMAGE_LATEST .
     - docker push $CONTAINER_BACKEND_IMAGE
-    - docker push CONTAINER_BACKEND_IMAGE_LATEST
+    - docker push $CONTAINER_BACKEND_IMAGE_LATEST
   only:
     - dev-backend
     - prod-backend
