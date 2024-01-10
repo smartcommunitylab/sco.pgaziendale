@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +37,10 @@ import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Constants;
 import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackPointDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
 import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
@@ -50,6 +55,7 @@ import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.util.TrackUtils;
 
 /**
  * @author raman
@@ -111,6 +117,9 @@ public class TrackingDataServiceTest {
     	loc.setStreetNumber("1");
     	loc.setCity("somecity");
     	loc.setProvince("someprovince");
+		loc.setLatitude(10d);
+		loc.setLongitude(10d);
+		loc.setRadius(0.2);
     	loc.setZip("123456");
     	company.setLocations(Collections.singletonList(loc));
     	company = companyRepo.save(company);
@@ -138,7 +147,81 @@ public class TrackingDataServiceTest {
 		prepareStatData();
     }
 
+
+	@Test
+	public void testValidation() throws InconsistentDataException {
+		// nominal case: valid as starts at location
+		TrackDTO track = prepareTrack(MEAN.bike);
+		TrackValidityDTO validity = tds.validate("biketowork", "test", track);
+		assertEquals(true, validity.isValid());
+		
+		// multi-location - should fail as not finishes at location
+		campaign.setUseMultiLocation(true);
+		campaign = campaignRepo.save(campaign);
+		validity = tds.validate("biketowork", "test", track);
+		assertEquals(false, validity.isValid());
+		
+		// multi-location - should succeed as the new location added at the end of the trip
+		List<CompanyLocation> locations = new LinkedList<>(company.getLocations());
+		CompanyLocation loc = new CompanyLocation();
+    	loc.setId("testlocation2");
+    	loc.setAddress("someaddress");
+    	loc.setStreetNumber("1");
+    	loc.setCity("somecity");
+    	loc.setProvince("someprovince");
+		loc.setLatitude(19d);
+		loc.setLongitude(19d);
+		loc.setRadius(0.2);
+    	loc.setZip("123456");
+		locations.add(loc);
+    	company.setLocations(locations);
+    	company = companyRepo.save(company);
+		validity = tds.validate("biketowork", "test", track);
+		assertEquals(true, validity.isValid());
+
+
+		// multi-location with user locations - should succeed
+		campaign.setUseEmployeeLocation(true);
+		campaign = campaignRepo.save(campaign);
+		validity = tds.validate("biketowork", "test", track);
+		assertEquals(true, validity.isValid());
+
+	}
     
+	private TrackDTO prepareTrack(MEAN ... means) {
+		TrackDTO track = new TrackDTO();
+		List<TrackLegDTO> legs = new ArrayList<>();
+		double lat = 10d, lon = 10d;
+		for (MEAN m : means) {
+			TrackLegDTO leg = new TrackLegDTO();
+			double dist = 0d;
+			leg.setId("1");
+			leg.setMean(m.toString());
+			leg.setValid(true);
+			List<TrackPointDTO> points = new ArrayList<>();
+			for (int i = 0; i < 10; i++) {
+				TrackPointDTO point = new TrackPointDTO();
+				point.setRecorded_at(System.currentTimeMillis() + i);
+				point.setLatitude(lat);
+				point.setLongitude(lon);
+				lat++;
+				lon++;
+				dist += TrackUtils.harvesineDistance(point.getLatitude(), point.getLongitude(), lat, lon);
+				points.add(point);
+			}
+
+			leg.setPoints(points);
+			leg.setDistance(dist);
+			leg.setDuration(10);
+			legs.add(leg);
+		}
+		track.setStartTime(legs.get(0).getPoints().get(0).getRecorded_at());		
+		track.setMultimodalId("123");
+		track.setLegs(legs);
+		return track;
+
+	}
+
 	/**
 	 * 
 	 */

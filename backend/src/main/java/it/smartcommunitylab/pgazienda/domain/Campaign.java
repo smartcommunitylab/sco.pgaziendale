@@ -57,7 +57,10 @@ public class Campaign {
 	private List<Limit> scoreLimits;
 
 	private VirtualScore virtualScore;
+
+	private Boolean useMultiLocation;
 	
+	private Boolean useEmployeeLocation;
 	
 	/**
 	 * @return the id
@@ -240,6 +243,20 @@ public class Campaign {
 		this.virtualScore = virtualScore;
 	}
 
+	public Boolean getUseEmployeeLocation() {
+		return useEmployeeLocation;
+	}
+	public void setUseEmployeeLocation(Boolean useEmployeeLocation) {
+		this.useEmployeeLocation = useEmployeeLocation;
+	}
+	public Boolean getUseMultiLocation() {
+		return useMultiLocation;
+	}
+	public void setUseMultiLocation(Boolean useMultiLocation) {
+		this.useMultiLocation = useMultiLocation;
+	}
+
+	
 
 	public static class Limit {
 		private String span;

@@ -17,6 +17,7 @@
 package it.smartcommunitylab.pgazienda.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class TrackUtils {
 		return matchPoints(areas, arr);
 	}
 
-	public static int matchLocations(TrackDTO track, List<Shape> areas) {
+	public static int matchLocations(TrackDTO track, List<Shape> areas, Boolean useMulti, Shape requiredArea) {
 		TrackLegDTO startLeg = track.getLegs().get(0);
 		startLeg.getPoints().sort((a,b) -> {
 			return a.getRecorded_at().compareTo(b.getRecorded_at()); 
@@ -56,14 +57,31 @@ public class TrackUtils {
 		List<TrackPointDTO> points = new LinkedList<>();
 		if (startLeg.getPoints().size() > 5) points.addAll(startLeg.getPoints().subList(0, 5));
 		else points.addAll(startLeg.getPoints());
-		if (matchPoints(areas, points.toArray())) return 0;
+		boolean matchStart = matchPoints(areas, points.toArray());
 
-		points = new LinkedList<>();
-		if (endLeg.getPoints().size() > 5) points.addAll(endLeg.getPoints().subList(endLeg.getPoints().size() - 5, endLeg.getPoints().size()));
-		else points.addAll(endLeg.getPoints());
-		if (matchPoints(areas, points.toArray())) return track.getLegs().size() - 1;
+		List<TrackPointDTO> points2 = new LinkedList<>();
+		if (endLeg.getPoints().size() > 5) points2.addAll(endLeg.getPoints().subList(endLeg.getPoints().size() - 5, endLeg.getPoints().size()));
+		else points2.addAll(endLeg.getPoints());
+		boolean matchEnd = matchPoints(areas, points2.toArray());
 
-		return -1;
+		// first or last should match required area if specified
+		boolean matchRequired = requiredArea == null 
+		? true 
+		: matchPoints(Collections.singletonList(requiredArea), points.toArray()) || matchPoints(Collections.singletonList(requiredArea), points2.toArray());
+
+		if (!matchRequired) return -1;
+
+		// if useMulti should start and end in one of the locations
+		if (!Boolean.TRUE.equals(useMulti)) {
+			if (matchStart) return 0;
+			if (matchEnd) return track.getLegs().size() - 1;
+			return -1;
+		} else {
+			if (matchStart && matchEnd) return 0;
+			return -1;
+		}
+		
+
 	}
 	
 	private static boolean matchPoints(List<Shape> areas, Object[] arr) {

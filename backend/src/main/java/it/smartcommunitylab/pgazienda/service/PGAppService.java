@@ -110,9 +110,12 @@ public class PGAppService {
 		c.setTitle((String) values.getOrDefault("it", values.get("en")));
 		c.setTo(Instant.ofEpochMilli((Long)cm.get("dateTo")).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate());
 
-		c.setVirtualScore(extractVirtualScore((Map<String, Object>)((Map<String, Object>)cm.get("specificData")).get("virtualScore")));
+		Map<String, Object> specificData = (Map<String, Object>)cm.get("specificData");
+		c.setVirtualScore(extractVirtualScore((Map<String, Object>)specificData.get("virtualScore")));
 		c.setTrackLimits(c.getVirtualScore().trackLimits());
 		c.setScoreLimits(c.getVirtualScore().scoreLimits());
+		c.setUseEmployeeLocation((Boolean)specificData.getOrDefault("useEmployeeLocation", false));
+		c.setUseMultiLocation((Boolean)specificData.getOrDefault("useMultiLocation", false));
 		return c;
 	}
 

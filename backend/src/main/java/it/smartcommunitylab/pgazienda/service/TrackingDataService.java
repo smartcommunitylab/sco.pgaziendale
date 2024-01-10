@@ -170,13 +170,16 @@ public class TrackingDataService {
 				.filter(l -> checkWorking(l, toLocalDate(track.getStartTime())))
 				.map(l -> new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius()))
 				.collect(Collectors.toList());
+		Shape employeeLocation = Boolean.TRUE.equals(campaign.getUseEmployeeLocation()) && employee.getLocation() != null 
+		? company.getLocations().stream().filter(l -> l.getId().equals(employee.getLocation())).map(l -> new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius())).findFirst().orElse(null) 
+		: null;
 		
 		// index of matching leg (first or last of the trip)
 		int matchingLegIndex = -1;
 		// no locations, no legs with appropriate means, trip does not match any location
 		if (locations.size() == 0) {
 			return TrackValidityDTO.errLocations();
-		} else if ((matchingLegIndex = TrackUtils.matchLocations(track, locations)) < 0) {
+		} else if ((matchingLegIndex = TrackUtils.matchLocations(track, locations, campaign.getUseMultiLocation(), employeeLocation)) < 0) {
 			return TrackValidityDTO.errMatches();
 		} else {
 			List<TrackLegDTO> validTrack = new LinkedList<>();
