@@ -309,7 +309,7 @@ export default {
     id: {
       required,
       unique() {
-        return this.id === this.actualLocation.item.id || !this.allLocations.items.find(l=> l.id === this.id);
+        return this.actualLocation && this.actualLocation.item && this.id === this.actualLocation.item.id || !this.allLocations.items.find(l=> l.id === this.id);
       }
     },
     address: {
