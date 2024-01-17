@@ -110,8 +110,11 @@ public class ExternalUserDetailsService {
     	String playerId = (String)userInfo.get(playerField);
     	if (playerId == null) playerId = username;
     	User user = userService.getUserWithAuthoritiesByUsername(username.toLowerCase()).orElse(null);
+		if (user == null) {
+			user = userService.getUserByPlayerId(playerId);
+		}
     	if (user == null) {
-    		log.info("Registering new User: " + userInfo);
+			log.info("Registering new User: " + userInfo);
     		
     		User userDTO = new User();
     		userDTO.setName(name);
