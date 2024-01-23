@@ -186,6 +186,10 @@ public class ExternalUserDetailsService {
     	}
 	
     	User user = userService.getUserWithAuthoritiesByUsername(username.toLowerCase()).orElse(null);
+		if (user == null) {
+			user = userService.getUserByPlayerId(playerId);
+		}
+
     	if (user == null) {
     		log.info("Registering new User externally: " + username);
     		
