@@ -127,6 +127,7 @@ public class ExternalUserDetailsService {
     		log.info("Updating existing User: " + userInfo);
     		user.setName(name);
     		user.setSurname(surname);
+			user.setUsername(username);
     		user.setPlayerId(playerId);
     	}
     	//get playandgo roles
