@@ -353,7 +353,11 @@ public class UserService {
     }
 
     public Optional<User> getUserWithAuthoritiesByUsername(String login) {
-        return userRepository.findOneByUsernameIgnoreCase(login);
+        Optional<User> user = userRepository.findOneByUsernameIgnoreCase(login);
+		if (user.isEmpty()) {
+				user = Optional.ofNullable(getUserByPlayerId(login));
+		}
+		return user;
     }
 
     public Optional<User> getUserWithAuthorities(String id) {
