@@ -59,7 +59,7 @@ export default {
   data: function () {
     return {
       tableTitle: "Dipendenti",
-      headerColumns: [{text:"Nome", value:"name"}, {text:"Cognome", value:"surname"}, {text:"Sede", value:"location"}, {text:"Codice", value:"code"}, {text: 'Bloccato', value: 'blocked'}, {text: 'Iscrizioni', value: "employeeCampaigns"}],
+      headerColumns: [{text:"Nome", value:"name"}, {text:"Cognome", value:"surname"}, {text:"Sede", value:"location"}, {text:"Codice", value:"code"}, {text: 'Bloccato', value: 'blockedStr'}, {text: 'Iscrizioni', value: "employeeCampaigns"}],
       editModalVisible: false,
       deleteModalVisible: false,
       currentEmployeeSelected: undefined,
@@ -144,7 +144,7 @@ export default {
               }).map(c => c.title)
               arr.sort();
               e.employeeCampaigns = arr.join(', ');
-              e.blocked = e.blocked ? 'Si' : 'No'
+              e.blockedStr = e.blocked ? 'Si' : 'No'
             });
             this.employees = empList;
         }
