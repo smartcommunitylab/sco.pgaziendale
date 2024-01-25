@@ -54,7 +54,8 @@ public class Circle extends Shape {
 
 	@Override
 	public boolean inside(double lat, double lon) {
-		return TrackUtils.harvesineDistance(center[0], center[1], lat, lon) <= radius;
+		// consider the radius in meters!
+		return TrackUtils.harvesineDistance(center[0], center[1], lat, lon) <= radius / 1000;
 	}
 
 }
