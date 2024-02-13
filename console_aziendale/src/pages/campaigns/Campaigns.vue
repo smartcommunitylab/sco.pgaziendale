@@ -1,47 +1,10 @@
 <template>
   <div>
     <v-row>
-      <v-col>
-        <v-btn
-          v-if="
-            !(role == 'ROLE_COMPANY_ADMIN' ||
-            (role == 'ROLE_ADMIN' && adminCompany != null) ||
-            (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null))
-          "
-          class="mr-4"
-          x-large
-          color="secondary"
-          rounded
-          elevation="6"
-          @click="openModal({type:'campaignFormAdd', object:null})"
-        >
-          <v-icon left>mdi-plus</v-icon>
-          AGGIUNGI
-        </v-btn>
-
-        <v-btn
-          v-if="
-            role == 'ROLE_COMPANY_ADMIN' ||
-            (role == 'ROLE_ADMIN' && adminCompany != null) ||
-            (role == 'ROLE_MOBILITY_MANAGER' && actualCompany != null)
-          "
-          x-large
-          color="secondary"
-          rounded
-          elevation="6"
-          @click="openModal({type:'associateForm', object:null})"
-        >
-          <v-icon left>mdi-wrench</v-icon>
-          ASSOCIA / DISASSOCIA
-        </v-btn>
-
-      </v-col>
-    </v-row>
-    <v-row>
       <v-col :cols="nColsTable_calculator">
         <div v-if="allCampaigns && allCampaigns.items && allCampaigns.items.length > 0">
           <generic-table
-            :items.sync="allCampaigns.items"
+            :items.sync="mappedCampaigns"
             :headers="headerColumns"
             :title="tableTitle"
             :method="showCampaignInfo"
@@ -51,7 +14,9 @@
         <div v-else class="empty-list">Non ci sono Campagne</div>
       </v-col>
       <!-- TODO: Profilo Campagna -->
-      <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
+      <v-col cols="5"> 
+        <profilo-campagna v-if="actualCampaign &&  actualCampaign.item" />
+      </v-col>
     </v-row>
   </div>
 </template>
@@ -67,7 +32,7 @@ export default {
   data: function () {
     return {
       tableTitle: "Campagne",
-      headerColumns: [{text:"Nome", value:"title"}, {text:"Inizio", value:"from"}, {text:"Fine", value:"to"}, {text:"Stato", value:"active"}],
+      headerColumns: [{text:"Nome", value:"title"}, {text:"Territorio", value:"territoryId"}, {text:"Inizio", value:"from"}, {text:"Fine", value:"to"}, {text:"Stato", value:"active"}],
       currentCampaignSelected: undefined,
       popup: {
         title: "",
@@ -113,11 +78,17 @@ export default {
   computed: {
     ...mapState("company", ["actualCompany", "adminCompany"]),
     ...mapState("campaign", ["allCampaigns", "actualCampaign"]),
-    ...mapState("account", ["role"]),
+    ...mapState("account", ["user"]),
+    mappedCampaigns() {
+      return this.allCampaigns && this.allCampaigns.items ? this.allCampaigns.items.map(c => {
+        c.active = c.active ? 'Attiva' : 'Non attiva';
+        return c;
+      }) : [];
+    },
 
-    nColsTable_calculator: function() {
+    nColsTable_calculator() {
       if(this.actualCampaign){
-        return 8;
+        return 7;
       }else if(this.actualCampaign == null){
         return 12;
       }else{
@@ -136,15 +107,9 @@ export default {
 
   mounted: function () {
     this.changePage({ title: "Lista campagne", route: "/GestioneCampagne" });
-    // console.log(this.adminCompany)
-    // if (this.adminCompany && this.adminCompany.item) {
-    //   this.getAllCampaigns(this.adminCompany.item.id);
-    // }
-    // console.log(this.adminCompany)
     if (this.adminCompany && this.adminCompany.item) {
       this.getAllCampaigns(this.actualCompany.item.id);
-    }
-    if (this.role == "ROLE_ADMIN" && this.adminCompany == null ) {
+    } else {
       this.getAllCampaigns(null);
     }
   },

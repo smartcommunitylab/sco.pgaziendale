@@ -131,7 +131,7 @@ export default {
     },
 
     computed: {
-      ...mapState("account", ["status", "user", "role"]),
+      ...mapState("account", ["status", "user"]),
     },
 }
 </script>

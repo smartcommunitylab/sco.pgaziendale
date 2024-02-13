@@ -25,6 +25,7 @@ public class Subscription {
 	private String companyCode, campaign, key;
 	// to keep track of upgrade from legacy campaign
 	private Boolean upgraded;
+	private boolean abandoned = false;
 
 	/**
 	 * @return the companyCode
@@ -74,6 +75,14 @@ public class Subscription {
 
 	public void setUpgraded(Boolean upgraded) {
 		this.upgraded = upgraded;
+	}
+
+	public boolean isAbandoned() {
+		return abandoned;
+	}
+
+	public void setAbandoned(boolean abandoned) {
+		this.abandoned = abandoned;
 	}
 
 	

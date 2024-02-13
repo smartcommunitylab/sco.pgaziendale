@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,11 +45,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import it.smartcommunitylab.pgazienda.Constants;
+import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
+import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
+import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.security.SecurityUtils;
+import it.smartcommunitylab.pgazienda.security.UserInfo;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.service.errors.InvalidPasswordException;
 import it.smartcommunitylab.pgazienda.util.RandomUtil;
@@ -65,6 +69,10 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+	@Autowired
+	private CompanyRepository companyRepo;
+	@Autowired
+	private CampaignRepository campaignRepo;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -197,6 +205,8 @@ public class UserService {
                 List<UserRole> roles = userDTO.getRoles().stream().filter((r -> companyId.equals(r.getCompanyId()))).collect(Collectors.toList());
                 user.setRoles(mergeRoles(companyId, roles, user.getRoles()));
                 if (user.getRoles().isEmpty()) throw new InconsistentDataException("Empty company roles", "EMPTY_ROLES");
+            } else {
+            	user.setRoles(userDTO.getRoles());
             }
             
             userRepository.save(user);
@@ -226,7 +236,13 @@ public class UserService {
 				role = UserRole.createAppUserRole(s);
 				user.getRoles().add(role);
 			} else {
-				role.getSubscriptions().add(s);
+				Subscription sub = role.containsSubscription(s);
+				if(sub != null) {
+					sub.setAbandoned(false);
+					sub.setUpgraded(s.getUpgraded());
+				} else {
+					role.getSubscriptions().add(s);	
+				}
 			}
 			userRepository.save(user);
 		}
@@ -244,9 +260,11 @@ public class UserService {
 		if (user != null) {
 			UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 			if (role != null) {
-				if (role.getSubscriptions().removeIf(s -> s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(companyCode) && s.getKey().equals(key))) {
-					userRepository.save(user);
+				Subscription s = role.containsSubscription(companyCode, campaignId, key);
+				if(s != null) {
+					s.setAbandoned(true);
 				}
+				userRepository.save(user);
 			}
 		}
 	}
@@ -292,15 +310,6 @@ public class UserService {
 			// keep roles of other companies or global roles
 			if (!companyId.equals(r.getCompanyId())) {
 				map.put(key, r);
-
-			// merge locations	
-			} else if (map.containsKey(key)) {
-				UserRole toMerge = map.get(key);
-				if (r.getLocations() != null) {
-					Set<String> set =  new HashSet<>(r.getLocations());
-					if (toMerge.getLocations() != null) set.addAll(toMerge.getLocations());
-					toMerge.setLocations(new LinkedList<>(set));
-				}
 			}
 		});
 		return new LinkedList<>(map.values());
@@ -318,6 +327,15 @@ public class UserService {
         	}
         });
     }
+	
+//	public void deleteUser(String playerId) {
+//		Optional<User> opt = 
+//		if(opt.isPresent()) {
+//			User user = opt.get();
+//			
+//			campaignService.unsubscribeUser(user, campaignId);
+//		}
+//	}
 
     public void changePassword(String currentClearTextPassword, String newPassword) {
         SecurityUtils.getCurrentUserLogin()
@@ -335,7 +353,11 @@ public class UserService {
     }
 
     public Optional<User> getUserWithAuthoritiesByUsername(String login) {
-        return userRepository.findOneByUsernameIgnoreCase(login);
+        Optional<User> user = userRepository.findOneByUsernameIgnoreCase(login);
+		if (user.isEmpty()) {
+				user = Optional.ofNullable(getUserByPlayerId(login));
+		}
+		return user;
     }
 
     public Optional<User> getUserWithAuthorities(String id) {
@@ -345,8 +367,14 @@ public class UserService {
     public Optional<User> getUserWithAuthorities() {
         return SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneByUsernameIgnoreCase);
     }
+    public UserInfo getUserDetail() {
+    	return SecurityUtils.getCurrentUserInfo();
+    }
     public List<User> getUserByEmployeeCode(String campaign, String companyCode, String userCode) {
         return userRepository.findByCampaignAndCompanyAndEmployeeCode(campaign, companyCode, "^" + userCode+"$");
+    }
+    public Optional<User> getUserByCampaignAndCompanyAndKey(String campaign, String companyCode, String userCode) {
+    	return userRepository.findOneByCampaignAndCompanyAndKey(campaign, companyCode, userCode);
     }
     public User getUserByPlayerId(String playerId) {
     	return userRepository.findByPlayerId(playerId).orElse(null);
@@ -388,17 +416,97 @@ public class UserService {
 
 	/**
 	 * @param companyId
-	 * @return true if the user is a platform admin or has the specified role for the specified company
+	 * @return true if the user is a platform admin or has the specified role for the specified company, its territory or campaign
 	 */
 	public boolean isInCompanyRole(String companyId, String ... roles) {
-		User user = getUserWithAuthorities().orElse(null);
-		Set<String> set = Sets.newHashSet(roles);
+		UserInfo user = getUserDetail();
 		if (user != null) {
-			return user.getRoles().stream().anyMatch(r -> Constants.ROLE_ADMIN.equals(r.getRole()) || set.contains(r.getRole()) && companyId.equals(r.getCompanyId()));
+			if (user.getRoles().stream().anyMatch(r -> Constants.ROLE_ADMIN.equals(r.getRole()))) return true;
+			Set<String> set = Sets.newHashSet(roles);
+			Company company = companyRepo.findById(companyId).orElse(null);
+			if(company != null) {
+				String territoryId = company.getTerritoryId();
+				return user.getRoles().stream().anyMatch(r -> {
+					if(Constants.ROLE_ADMIN.equals(r.getRole()))
+						return true;
+					if(set.contains(r.getRole())) {
+						if(Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && territoryId.equals(r.getTerritoryId()))
+							return true;
+						if(Constants.ROLE_MOBILITY_MANAGER.equals(r.getRole()) && companyId.equals(r.getCompanyId()))
+							return true;
+						if(Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole()) && company.getCampaigns().contains(r.getCampaignId()))
+							return true;
+					}
+					return false;
+				});				
+			}
 		}
 		return false;
 	}
-
+	
+	public boolean isInCampaignRole(String campaignId) {
+		UserInfo user = getUserDetail();
+		if (user != null) {
+			Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+			if(campaign != null) {
+				String territoryId = campaign.getTerritoryId();
+				return user.getRoles().stream().anyMatch(r -> {
+					if(Constants.ROLE_ADMIN.equals(r.getRole()))
+						return true;
+					if(Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && territoryId.equals(r.getTerritoryId()))
+						return true;
+					if(Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole()) && campaignId.equals(r.getCampaignId()))
+						return true;
+					return false;
+				});								
+			}
+		}
+		return false;
+	}
+	
+	public boolean isCampaignVisible(Campaign campaign) {
+		UserInfo user = getUserDetail();
+		if ((user != null) && (campaign != null)) {
+			return user.getRoles().stream().anyMatch(r -> {
+				if(Constants.ROLE_ADMIN.equals(r.getRole()))
+					return true;
+				if(Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && campaign.getTerritoryId().equals(r.getTerritoryId()))
+					return true;
+				if(Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole()) && campaign.getId().equals(r.getCampaignId()))
+					return true;
+				if(Constants.ROLE_MOBILITY_MANAGER.equals(r.getRole())) {
+					Company company = companyRepo.findById(r.getCompanyId()).orElse(null);
+					if(company != null) {
+						if(company.getCampaigns().contains(campaign.getId()))
+							return true;
+					}
+				}
+				return false;
+			});
+		}
+		return false;
+	}
+	
+	public boolean isCompanyVisible(Company company) {
+		UserInfo user = getUserDetail();
+		if ((user != null) && (company != null)) {
+			return user.getRoles().stream().anyMatch(r -> {
+				if(Constants.ROLE_ADMIN.equals(r.getRole()))
+					return true;
+				if(Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && company.getTerritoryId().equals(r.getTerritoryId()))
+					return true;
+				if(Constants.ROLE_MOBILITY_MANAGER.equals(r.getRole()) && company.getId().equals(r.getCompanyId()))
+					return true;
+				if(Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole())) {
+					if(company.getCampaigns().contains(r.getCampaignId()))
+						return true;
+				}
+				return false;
+			});
+		}
+		return false;
+	}
+	
 	/**
 	 * @param campaignId
 	 */
@@ -428,5 +536,17 @@ public class UserService {
 				}
 			}
 		}
+	}
+	
+	public long countCompanySubscription(String companyCode) {
+		return userRepository.countSubscriptionByCompanyCode(companyCode);
+	}
+	
+	public User saveUser(User user) {
+		return userRepository.save(user);
+	}
+	
+	public Optional<User> findOneByCompanyCodeAndEmployeeCodeAndActive(String companyCode, String key) {
+		return userRepository.findOneByCompanyCodeAndEmployeeCodeAndActive(companyCode, key);
 	}
 }

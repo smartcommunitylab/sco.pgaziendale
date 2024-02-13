@@ -16,8 +16,10 @@
 
 package it.smartcommunitylab.pgazienda.domain;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import it.smartcommunitylab.pgazienda.Constants;
 
@@ -29,9 +31,17 @@ public class UserRole {
 
 	private String role;
 	private String companyId;
-	private List<String> locations;
-	private List<Subscription> subscriptions;
-	
+	private String territoryId;
+	private String campaignId;
+	private List<Subscription> subscriptions = new LinkedList<>();
+
+	public UserRole() {
+	}
+
+	public UserRole(String role) {
+		this.role = role;
+	}
+
 	/**
 	 * @return the role
 	 */
@@ -56,18 +66,6 @@ public class UserRole {
 	public void setCompanyId(String companyId) {
 		this.companyId = companyId;
 	}
-	/**
-	 * @return the locations
-	 */
-	public List<String> getLocations() {
-		return locations;
-	}
-	/**
-	 * @param locations the locations to set
-	 */
-	public void setLocations(List<String> locations) {
-		this.locations = locations;
-	}
 	
 	/**
 	 * @return the subscriptions
@@ -75,6 +73,11 @@ public class UserRole {
 	public List<Subscription> getSubscriptions() {
 		return subscriptions;
 	}
+
+	public List<Subscription> activeSubscriptions() {
+		return subscriptions != null ? subscriptions.stream().filter(s -> !s.isAbandoned()).collect(Collectors.toList()) : Collections.emptyList();
+	}
+
 	/**
 	 * @param subscriptions the subscriptions to set
 	 */
@@ -86,17 +89,10 @@ public class UserRole {
 		role.setRole(Constants.ROLE_ADMIN);
 		return role;
 	}
-	public static UserRole createCompanyAdminRole(String companyId) {
-		UserRole role = new UserRole();
-		role.setRole(Constants.ROLE_COMPANY_ADMIN);
-		role.setCompanyId(companyId);
-		return role;
-	}
-	public static UserRole createMobilityManager(String companyId, List<String> locations) {
+	public static UserRole createMobilityManager(String companyId) {
 		UserRole role = new UserRole();
 		role.setRole(Constants.ROLE_MOBILITY_MANAGER);
 		role.setCompanyId(companyId);
-		role.setLocations(locations);
 		return role;
 	}
 	
@@ -109,8 +105,58 @@ public class UserRole {
 		}
 		return role;
 	}
+	
+	public static UserRole createCampaignManager(String campaignId) {
+		UserRole role = new UserRole();
+		role.setRole(Constants.ROLE_CAMPAIGN_MANAGER);
+		role.setCampaignId(campaignId);
+		return role;
+	}
 
+	public static UserRole createTerritoryManager(String territoryId) {
+		UserRole role = new UserRole();
+		role.setRole(Constants.ROLE_TERRITORY_MANAGER);
+		role.setTerritoryId(territoryId);
+		return role;
+	}
+	
 	public String key() {
-		return role + (companyId != null ? ("@" + companyId) : "");
+		return role + (territoryId != null ? ("@" + territoryId) : "") 
+				+ (campaignId != null ? ("@" + campaignId) : "")
+				+ (companyId != null ? ("@" + companyId) : "");
+	}
+	public String getTerritoryId() {
+		return territoryId;
+	}
+	public void setTerritoryId(String territoryId) {
+		this.territoryId = territoryId;
+	}
+	public String getCampaignId() {
+		return campaignId;
+	}
+	public void setCampaignId(String campaignId) {
+		this.campaignId = campaignId;
+	}
+	
+	public Subscription containsSubscription(Subscription s) {
+		for(Subscription sub : subscriptions) {
+			if(sub.getCampaign().equals(s.getCampaign()) 
+					&& sub.getCompanyCode().equalsIgnoreCase(s.getCompanyCode()) 
+					&& sub.getKey().equalsIgnoreCase(s.getKey())) {
+				return sub;
+			}
+		}
+		return null;
+	}
+	
+	public Subscription containsSubscription(String companyCode, String campaign, String key) {
+		for(Subscription sub : subscriptions) {
+			if(sub.getCampaign().equals(campaign) 
+					&& sub.getCompanyCode().equalsIgnoreCase(companyCode) 
+					&& sub.getKey().equalsIgnoreCase(key)) {
+				return sub;
+			}
+		}
+		return null;
 	}
 }

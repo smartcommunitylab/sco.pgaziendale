@@ -39,7 +39,7 @@ e la snackbar.
     <navigation-drawer/>
 
     <v-main class="">
-      <v-container class="p-0 m-0 " :class="{'blockScroll': $route.path != '/Login'}">
+      <!-- <v-container class="p-0 m-0 " :class="{'blockScroll': $route.path != '/Login'}"> -->
         <!-- NON VIENE MAI UTILIZZATO - Componente inutile (?)-->
         <!-- <Loader v-if="loading" /> -->
         <transition name="fade">
@@ -52,7 +52,7 @@ e la snackbar.
         <!-- FINE ESEMPIO: Nuovo componente modale-->
 
         <router-view class="min-h-screen px-5 py-5 pb-10"/>
-      </v-container>
+      <!-- </v-container> -->
     </v-main>
 
     <app-footer class="positionFooter"/>
@@ -113,12 +113,12 @@ export default {
     status(newCount, oldCount) {
       console.log(JSON.stringify(newCount) + JSON.stringify(oldCount));
     },
-    message(newAlert,oldAlert){
-      console.log(JSON.stringify(newAlert) + JSON.stringify(oldAlert));
+    message(){
+      // console.log('Message:' + this.message + ',' + this.active);
       // setTimeout(()=>this.clearAlert(),2500)
     },
     // eslint-disable-next-line no-unused-vars
-    $route(to, from) {
+    $route() {
       // clear alert on location change
       setTimeout(()=>this.clearAlert(),2500);
       window.scrollTo(0,0);

@@ -52,10 +52,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.PGAziendaApp;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Campaign.Limit;
+import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Employee;
-import it.smartcommunitylab.pgazienda.domain.PGApp;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
@@ -67,7 +68,6 @@ import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
-import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 
 /**
@@ -81,8 +81,6 @@ public class AdminResourceITest {
 
 	static final String ADMIN = "admin";
 
-    @Autowired
-    private PGAppRepository appRepo;
 	@Autowired
 	private CampaignRepository campaignRepo;
 	@Autowired
@@ -104,7 +102,6 @@ public class AdminResourceITest {
     @BeforeEach
     public void setup() {
         mockServer = MockRestServiceServer.createServer(restTemplate);
-        appRepo.deleteAll();
     	campaignRepo.deleteAll();
     	companyRepo.deleteAll();
     	employeeRepo.deleteAll();
@@ -145,30 +142,6 @@ public class AdminResourceITest {
 
     }
     
-    @SuppressWarnings("unchecked")
-	@Test
-    public void testCampaignSync() throws Exception {
-    	PGApp app = testApp();
-    	appRepo.save(app);
-
-    	Map<String, Object> campaign = TestUtil.readObject(getClass().getResourceAsStream("/campaign.json"), Map.class);
-    	campaign.put("dateFrom", LocalDate.now().minusDays(30).toString());
-    	campaign.put("dateTo", LocalDate.now().plusDays(30).toString());
-    	
-    	mockServer.expect(requestTo(new URI("http://endpoint")))
-        .andExpect(method(HttpMethod.GET))
-        .andRespond(withStatus(HttpStatus.OK)
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(new ObjectMapper().writeValueAsString(Collections.singletonList(campaign))));
-
-    	
-        restMockMvc.perform(
-                post("/api/admin/campaignsync"))
-                .andExpect(status().isOk());
-        Optional<Campaign> campaignOpt = campaignRepo.findById((String) campaign.get("campaignId"));
-        Assert.notNull(campaignOpt.get(), "Campaign is not saved");
-    }
-    
     @Test
     public void testSubscribe() throws Exception {
     	Campaign obj = testCampaign();
@@ -189,8 +162,8 @@ public class AdminResourceITest {
         assertThat(user).isNotNull();
         UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 		assertThat(role).isNotNull();
-		assertThat(role.getSubscriptions().size()).isEqualTo(1);
-		Subscription s = role.getSubscriptions().get(0);
+		assertThat(role.activeSubscriptions().size()).isEqualTo(1);
+		Subscription s = role.activeSubscriptions().get(0);
 		assertThat(s.getCampaign()).isEqualTo(obj.getId());
 		assertThat(s.getKey()).isEqualTo(e.getCode());
 		assertThat(s.getCompanyCode()).isEqualTo(company.getCode());
@@ -206,7 +179,7 @@ public class AdminResourceITest {
         assertThat(user).isNotNull();
         role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
 		assertThat(role).isNotNull();
-		assertThat(role.getSubscriptions().size()).isEqualTo(0);
+		assertThat(role.activeSubscriptions().size()).isEqualTo(0);
 		e = employeeRepo.findById(e.getId()).orElse(null);
 		assertThat(e).isNotNull();
 		assertThat(e.getCampaigns()).doesNotContain(obj.getId());
@@ -236,6 +209,7 @@ public class AdminResourceITest {
     	TrackLegDTO leg = new TrackLegDTO();
     	leg.setDistance(1000d);
     	leg.setMean("bike");
+		leg.setValid(true);
     	leg.setId("123456");
     	leg.setPoints(new LinkedList<>());
     	for (int i = 0; i < 10; i++) {
@@ -256,7 +230,7 @@ public class AdminResourceITest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.valid").value("true"))
                 .andExpect(jsonPath("$.legs[0].distance").value("1000.0"))
-                .andExpect(jsonPath("$.legs[0].validDistance").value("1000.0"));
+                .andExpect(jsonPath("$.legs[0].virtualScore").value("1.0"));
     	
     }
 
@@ -284,6 +258,7 @@ public class AdminResourceITest {
     	leg.setDistance(1000d);
     	leg.setMean("bike");
     	leg.setId("123456");
+		leg.setValid(true);
     	leg.setPoints(new LinkedList<>());
     	for (int i = 0; i < 10; i++) {
     		TrackPointDTO point = new TrackPointDTO();
@@ -337,6 +312,7 @@ public class AdminResourceITest {
     	leg.setDistance(1000d);
     	leg.setMean("bike");
     	leg.setId("123456");
+		leg.setValid(true);
     	leg.setPoints(new LinkedList<>());
     	for (int i = 0; i < 10; i++) {
     		TrackPointDTO point = new TrackPointDTO();
@@ -357,26 +333,14 @@ public class AdminResourceITest {
                 .andExpect(jsonPath("$.valid").value("true"));
         
         restMockMvc.perform(
-                put("/api/admin/update/{campaignId}/{playerId}/{trackId}/{inc}", obj.getId(), "1234", "123456", "100")
+                post("/api/admin/validate/{campaignId}/{playerId}", obj.getId(), "1234")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(TestUtil.convertObjectToJsonBytes(track)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.valid").value("true"))
-                .andExpect(jsonPath("$.legs[0].distance").value("1100.0"));
+                .andExpect(jsonPath("$.valid").value("true"));
     }
 
-    
-    private PGApp testApp() {
-    	PGApp app = new PGApp();
-    	app.setName("test app");
-    	app.setId("externalAppId");
-    	app.setEndpoint("http://endpoint");
-    	app.setPassword("password");
-    	app.setSupportCampaignMgmt(true);
-    	app.setSupportPushValidation(true);
-    	return app;
-    }
     
     private Company testCompany() {
     	Company c = new Company();
@@ -404,11 +368,22 @@ public class AdminResourceITest {
     	Campaign c = new Campaign();
     	c.setTitle("campaign");
     	c.setId("externalCampaignId");
-    	c.setApplication("externalAppId");
+    	c.setTerritoryId("TAA");
     	c.setDescription("description");
     	c.setFrom(LocalDate.now().minusDays(10));
     	c.setTo(LocalDate.now().plusDays(10));
     	c.setMeans(Collections.singletonList("bike"));
+
+		LinkedList<Limit> limits = new LinkedList<>();
+		limits.add(new Limit(it.smartcommunitylab.pgazienda.domain.Constants.AGG_DAY, it.smartcommunitylab.pgazienda.domain.Constants.MEAN.bike.toString(), 20d)); 
+		limits.add(new Limit(it.smartcommunitylab.pgazienda.domain.Constants.AGG_MONTH, it.smartcommunitylab.pgazienda.domain.Constants.MEAN.bike.toString(), 250d));
+		c.setScoreLimits(limits);
+		limits = new LinkedList<>();
+		limits.add(new Limit(it.smartcommunitylab.pgazienda.domain.Constants.AGG_DAY, it.smartcommunitylab.pgazienda.domain.Constants.MEAN.bike.toString(), 4d)); 
+		c.setTrackLimits(limits);
+    	
+		c.getVirtualScore().setBike(new VirtualScoreValue(it.smartcommunitylab.pgazienda.domain.Constants.METRIC_DISTANCE, 0.001));
+
     	return c;
     }
     

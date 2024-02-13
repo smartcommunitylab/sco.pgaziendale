@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -73,7 +75,7 @@ public class AdminService {
 	
 	private static Map<String, String> legacyIds = new HashMap<>();
 	
-	@Value("${app.legacyCampaign}")
+	@Value("${app.legacyCampaign:}")
 	private String legacyCampaignId;
 
 	@PostConstruct
@@ -89,9 +91,7 @@ public class AdminService {
 	}
 	
 	public void loadData(DataModelDTO model) throws InconsistentDataException {
-		validateApps(model);
-		model.getApps().forEach(app -> appService.updateApp(app));
-		
+		appService.setTerritories(model.getTerritories());
 		validateCampaigns(model);
 		model.getCampaigns().forEach(c -> campaignService.saveCampaign(c));
 		
@@ -123,7 +123,7 @@ public class AdminService {
 				user.setUsername(u.getUsername());
 				user.setPassword(u.getPassword());
 				String companyId = companyService.findByCode(u.getCompanyCode()).orElse(null).getId();
-				UserRole role = (Constants.ROLE_COMPANY_ADMIN.equals(u.getRole())) ? UserRole.createCompanyAdminRole(companyId) : UserRole.createMobilityManager(companyId, u.getLocations());
+				UserRole role = UserRole.createMobilityManager(companyId);
 				user.setRoles(Collections.singletonList(role));
 				userService.createUser(user);
 			}
@@ -138,7 +138,7 @@ public class AdminService {
 	 * @throws InconsistentDataException 
 	 */
 	private void validateUsers(DataModelDTO model) throws InconsistentDataException {
-		if (model.getCompanyUsers().stream().anyMatch(u -> !Constants.ROLE_COMPANY_ADMIN.equals(u.getRole()) && !Constants.ROLE_MOBILITY_MANAGER.equals(u.getRole()))) throw new InconsistentDataException("Invalid user roles", "INVALID_ROLES");
+		if (model.getCompanyUsers().stream().anyMatch(u -> !Constants.ROLE_MOBILITY_MANAGER.equals(u.getRole()))) throw new InconsistentDataException("Invalid user roles", "INVALID_ROLES");
 		if (model.getCompanyUsers().stream().anyMatch(u -> StringUtils.isAnyEmpty(u.getUsername(), u.getName(), u.getSurname(), u.getPassword()))) throw new InconsistentDataException("Invalid user definition", "INVALID_USER_DATA");
 		if (model.getCompanyUsers().stream().anyMatch(u -> companyService.findByCode(u.getCompanyCode()).isEmpty())) throw new InconsistentDataException("Invalid user definition: non existing company", "NO_COMPANY");
 		
@@ -151,8 +151,6 @@ public class AdminService {
 	 */
 	private void validateCompanies(DataModelDTO model) throws InconsistentDataException {
 		if (model.getCompanies().stream().anyMatch(c -> StringUtils.isAnyEmpty(c.getCode(), c.getName()))) throw new InconsistentDataException("Invalid company definition", "INVALID_COMPANY_DATA"); 
-		if (model.getCompanies().stream().anyMatch(c -> c.getEnabledApps()== null || c.getEnabledApps().isEmpty())) throw new InconsistentDataException("Invalid company definition: missing app", "NO_APP");
-		if (model.getCompanies().stream().anyMatch(c -> c.getEnabledApps().stream().anyMatch(a -> appService.getApp(a).isEmpty()))) throw new InconsistentDataException("Invalid company definition: non existing app", "NO_APP");
 		if (model.getCompanies().stream().anyMatch(c -> c.getCampaigns() != null && c.getCampaigns().stream().anyMatch(campaign -> campaignService.getCampaign(campaign).isEmpty()))) throw new InconsistentDataException("Invalid company definition: non existing campaign", "NO_CAMPAIGN");
 	}
 
@@ -164,16 +162,7 @@ public class AdminService {
 	private void validateCampaigns(DataModelDTO model) throws InconsistentDataException {
 		if (model.getCampaigns().stream().anyMatch(c -> StringUtils.isAnyEmpty(c.getId(), c.getTitle()))) throw new InconsistentDataException("Invalid campaign definition", "INVALID_CAMPAIGN_DATA");
 		if (model.getCampaigns().stream().anyMatch(c -> c.getFrom() == null)) throw new InconsistentDataException("Invalid campaign definition: missing start date", "NO_START_DATE");
-		if (model.getCampaigns().stream().anyMatch(c -> appService.getApp(c.getApplication()).isEmpty())) throw new InconsistentDataException("Invalid campaign definition: non existing app", "NO_APP");
-	}
-
-
-	/**
-	 * @param model
-	 * @throws InconsistentDataException 
-	 */
-	private void validateApps(DataModelDTO model) throws InconsistentDataException {
-		if (model.getApps().stream().anyMatch(a -> StringUtils.isAnyEmpty(a.getId(), a.getName()))) throw new InconsistentDataException("Invalid apps definition", "INVALID_APP_DATA");
+		if (model.getCampaigns().stream().anyMatch(c -> appService.getTerritory(c.getTerritoryId()) == null)) throw new InconsistentDataException("Invalid campaign definition: non existing territoriy", "NO_TERRITORY");
 	}
 
 
@@ -221,7 +210,7 @@ public class AdminService {
 	 * @return
 	 */
 	private String checkLegacyPlayer(String playerId, String campaignId) {
-		if (legacyIds.containsKey(playerId)) {
+		if (legacyIds.containsKey(playerId) && campaignId.equals(legacyCampaignId)) {
 			String legacyId =legacyIds.get(playerId); 
 			userService.markAsUpgraded(legacyId, campaignId);
 			return legacyId;
@@ -231,7 +220,7 @@ public class AdminService {
 
 	
 	public String getLegacyPlayer(String playerId, String campaignId) {
-		if (legacyIds.containsKey(playerId)) {
+		if (legacyIds.containsKey(playerId) && campaignId.equals(legacyCampaignId)) {
 			String legacyId =legacyIds.get(playerId); 
 			return legacyId;
 		}
@@ -253,21 +242,6 @@ public class AdminService {
 	}
 
 
-	/**
-	 * @param playerId
-	 * @param campaignId
-	 * @param trackId
-	 * @param inc
-	 * @return
-	 */
-	public TrackValidityDTO update(String playerId, String campaignId, String trackId, Double inc) {
-		try {
-			return trackService.update(campaignId, playerId, trackId, inc);
-		} catch (InconsistentDataException e) {
-			return new TrackValidityDTO(e.getDetails());
-		}
-	}
-
 	public void loadLegacyData(String campaignId, InputStream is) {
 		LegacyPlayerMapping lpm = new LegacyPlayerMapping();
 		lpm.setCampaignId(campaignId);
@@ -278,6 +252,24 @@ public class AdminService {
 		});
 		legacyRepo.save(lpm);
 		initLegacyData();
+	}
+	
+	public void unregisterPlayer(String playerId) throws InconsistentDataException {
+		User user = userService.getUserByPlayerId(playerId);
+		if(user != null) {
+			UserRole role = user.findRole(Constants.ROLE_APP_USER).orElse(null);
+			if(role != null) {
+				List<String> campaigns = role.getSubscriptions().stream().filter(s -> !s.isAbandoned()).map(s -> s.getCampaign())
+						.collect(Collectors.toList());
+				campaigns.forEach(campaign -> {
+					User u = userService.getUserByPlayerId(playerId);
+					campaignService.unsubscribeUser(u, campaign);
+				});
+			}
+			user = userService.getUserByPlayerId(playerId);
+			user.setDeleted(true);
+			userService.saveUser(user);
+		}
 	}
 
 }

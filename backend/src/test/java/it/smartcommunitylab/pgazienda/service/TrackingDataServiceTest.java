@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,18 +37,25 @@ import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Constants;
 import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackPointDTO;
+import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
 import it.smartcommunitylab.pgazienda.domain.DayStat;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
+import it.smartcommunitylab.pgazienda.domain.TrackingData;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
 import it.smartcommunitylab.pgazienda.domain.Campaign.Limit;
+import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.util.TrackUtils;
 
 /**
  * @author raman
@@ -73,6 +81,7 @@ public class TrackingDataServiceTest {
 	private Company company;
 	
 	private static DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+	private static DateTimeFormatter weekFormatter = DateTimeFormatter.ofPattern("YYYY-ww", Constants.DEFAULT_LOCALE);
 
     @BeforeEach
     public void init() {
@@ -90,8 +99,13 @@ public class TrackingDataServiceTest {
 		LinkedList<Limit> limits = new LinkedList<>();
 		limits.add(new Limit(Constants.AGG_DAY, Constants.MEAN.bike.toString(), 20d)); 
 		limits.add(new Limit(Constants.AGG_MONTH, Constants.MEAN.bike.toString(), 250d));
-		campaign.setLimits(limits);
+		campaign.setScoreLimits(limits);
+		limits = new LinkedList<>();
+		limits.add(new Limit(Constants.AGG_DAY, Constants.MEAN.bike.toString(), 4d)); 
+		campaign.setTrackLimits(limits);
     	
+		campaign.getVirtualScore().setBike(new VirtualScoreValue(Constants.METRIC_DISTANCE, 0.001));
+
     	campaign = campaignRepo.save(campaign);
     	
     	company = new Company();
@@ -103,6 +117,9 @@ public class TrackingDataServiceTest {
     	loc.setStreetNumber("1");
     	loc.setCity("somecity");
     	loc.setProvince("someprovince");
+		loc.setLatitude(10d);
+		loc.setLongitude(10d);
+		loc.setRadius(0.2);
     	loc.setZip("123456");
     	company.setLocations(Collections.singletonList(loc));
     	company = companyRepo.save(company);
@@ -129,103 +146,82 @@ public class TrackingDataServiceTest {
 
 		prepareStatData();
     }
+
+
+	@Test
+	public void testValidation() throws InconsistentDataException {
+		// nominal case: valid as starts at location
+		TrackDTO track = prepareTrack(MEAN.bike);
+		TrackValidityDTO validity = tds.validate("biketowork", "test", track);
+		assertEquals(true, validity.isValid());
+		
+		// multi-location - should fail as not finishes at location
+		campaign.setUseMultiLocation(true);
+		campaign = campaignRepo.save(campaign);
+		validity = tds.validate("biketowork", "test", track);
+		assertEquals(false, validity.isValid());
+		
+		// multi-location - should succeed as the new location added at the end of the trip
+		List<CompanyLocation> locations = new LinkedList<>(company.getLocations());
+		CompanyLocation loc = new CompanyLocation();
+    	loc.setId("testlocation2");
+    	loc.setAddress("someaddress");
+    	loc.setStreetNumber("1");
+    	loc.setCity("somecity");
+    	loc.setProvince("someprovince");
+		loc.setLatitude(19d);
+		loc.setLongitude(19d);
+		loc.setRadius(0.2);
+    	loc.setZip("123456");
+		locations.add(loc);
+    	company.setLocations(locations);
+    	company = companyRepo.save(company);
+		validity = tds.validate("biketowork", "test", track);
+		assertEquals(true, validity.isValid());
+
+
+		// multi-location with user locations - should succeed
+		campaign.setUseEmployeeLocation(true);
+		campaign = campaignRepo.save(campaign);
+		validity = tds.validate("biketowork", "test", track);
+		assertEquals(true, validity.isValid());
+
+	}
     
-    @Test
-    public void testStats() throws InconsistentDataException {
-    	
-		List<DayStat> aggregation = tds.doPlayerAggregation(campaign.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
-		assertEquals(500d, aggregation.get(0).getDistances().getBike());
-    	
-    }
+	private TrackDTO prepareTrack(MEAN ... means) {
+		TrackDTO track = new TrackDTO();
+		List<TrackLegDTO> legs = new ArrayList<>();
+		double lat = 10d, lon = 10d;
+		for (MEAN m : means) {
+			TrackLegDTO leg = new TrackLegDTO();
+			double dist = 0d;
+			leg.setId("1");
+			leg.setMean(m.toString());
+			leg.setValid(true);
+			List<TrackPointDTO> points = new ArrayList<>();
+			for (int i = 0; i < 10; i++) {
+				TrackPointDTO point = new TrackPointDTO();
+				point.setRecorded_at(System.currentTimeMillis() + i);
+				point.setLatitude(lat);
+				point.setLongitude(lon);
+				lat++;
+				lon++;
+				dist += TrackUtils.harvesineDistance(point.getLatitude(), point.getLongitude(), lat, lon);
+				points.add(point);
+			}
 
-    @Test
-    public void testCompanyCSV() throws InconsistentDataException {
-    	StringWriter writer = new StringWriter();
-    	tds.createEmployeeStatsCSV(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
-    	assertEquals("\"Nome\";\"Cognome\";\"CodiceSede\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
-    			+ "\"First\";\"Last\";\"testlocation\";\"45\";\"0.5\"", writer.toString().trim());
-    }
+			leg.setPoints(points);
+			leg.setDistance(dist);
+			leg.setDuration(10);
+			legs.add(leg);
+		}
+		track.setStartTime(legs.get(0).getPoints().get(0).getRecorded_at());		
+		track.setMultimodalId("123");
+		track.setLegs(legs);
+		return track;
 
-    @Test
-    public void testLocationCSV() throws InconsistentDataException {
-    	StringWriter writer = new StringWriter();
-    	tds.createLocationStatsCSV(writer, campaign.getId(), company.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
-    	assertEquals("\"Indentificativo\";\"Indirizzo\";\"Numero\";\"CAP\";\"Comune\";\"Provincia\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
-    			+ "\"testlocation\";\"someaddress\";\"1\";\"123456\";\"somecity\";\"someprovince\";\"45\";\"0.5\"", writer.toString().trim());
-    }
+	}
 
-    @Test
-    public void testGlobalCSV() throws InconsistentDataException {
-    	StringWriter writer = new StringWriter();
-    	tds.createCampaignStatsCSV(writer, campaign.getId(), LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"));
-    	assertEquals("\"Azienda\";\"ViaggiValidi\";\"KmTotValidi_bike\"\n"
-    			+ "\"test company\";\"45\";\"0.5\"", writer.toString().trim());
-    }
-
-    @Test
-    public void testGlobalStats() throws InconsistentDataException {
-    	List<DayStat> stats = tds.createCampaignStats(campaign.getId(), Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(1, stats.size());
-    	assertEquals(500d, stats.get(0).getDistances().getBike());
-    	
-    	stats = tds.createCampaignStats(campaign.getId(), Constants.AGG_MONTH, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(2, stats.size());
-    	assertEquals(250d, stats.get(0).getDistances().getBike());
-
-    	stats = tds.createCampaignStats(campaign.getId(), Constants.AGG_DAY, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(45, stats.size());
-    	assertEquals(0d, stats.get(30).getDistances().getBike());
-    }
-    @Test
-    public void testGlobalCompanyStats() throws InconsistentDataException {
-    	List<DayStat> stats = tds.createCampaignCompanyStats(campaign.getId(), Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(1, stats.size());
-    	assertEquals(500d, stats.get(0).getDistances().getBike());
-    	
-    	stats = tds.createCampaignCompanyStats(campaign.getId(), Constants.AGG_MONTH, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(2, stats.size());
-    	assertEquals(250d, stats.get(0).getDistances().getBike());
-
-    	stats = tds.createCampaignCompanyStats(campaign.getId(), Constants.AGG_DAY, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(45, stats.size());
-    	assertEquals(0d, stats.get(30).getDistances().getBike());
-    }
-    
-    @Test
-    public void testCompanyStats() throws InconsistentDataException {
-    	List<DayStat> stats = tds.createCompanyStats(campaign.getId(), company.getId(), Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(1, stats.size());
-    	assertEquals(500d, stats.get(0).getDistances().getBike());
-    	
-    	stats = tds.createCompanyStats(campaign.getId(), company.getId(), Constants.AGG_MONTH, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(2, stats.size());
-    	assertEquals(250d, stats.get(0).getDistances().getBike());
-
-    	stats = tds.createCompanyStats(campaign.getId(), company.getId(), Constants.AGG_DAY, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(45, stats.size());
-    	assertEquals(0d, stats.get(30).getDistances().getBike());
-    }
-    
-    @Test
-    public void testLocationStats() throws InconsistentDataException {
-    	List<DayStat> stats = tds.createCompanyLocationStats(campaign.getId(), company.getId(), "testlocation", Constants.AGG_TOTAL, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(1, stats.size());
-    	assertEquals(500d, stats.get(0).getDistances().getBike());
-    	
-    	stats = tds.createCompanyLocationStats(campaign.getId(), company.getId(), "testlocation", Constants.AGG_MONTH, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(2, stats.size());
-    	assertEquals(250d, stats.get(0).getDistances().getBike());
-
-    	stats = tds.createCompanyLocationStats(campaign.getId(), company.getId(), "testlocation", Constants.AGG_DAY, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(45, stats.size());
-    	assertEquals(0d, stats.get(30).getDistances().getBike());
-    	
-    	stats = tds.createCompanyLocationStats(campaign.getId(), company.getId(), "testlocation2", Constants.AGG_DAY, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-28"), false);
-    	assertEquals(0, stats.size());
-
-    }
-
-    
 	/**
 	 * 
 	 */
@@ -236,11 +232,20 @@ public class TrackingDataServiceTest {
 			ds.setPlayerId("test");
 			ds.setCampaign(campaign.getId());
 			ds.setCompany(company.getId());
-			ds.getDistances().setBike((double)i);
-			ds.setTrackCount(1);
 			ds.setMonth(date.format(monthFormatter));
+			ds.setWeek(date.format(weekFormatter));
 			ds.setDate(date.toString());
-			tds.limitDistances(campaign, "test", ds);
+
+			TrackingData td = new TrackingData();
+			td.setMode("bike");
+			td.setDistance(1000 * i + 100);
+			td.setDuration(1000);
+			td.setCo2(10);
+			td.setMultimodalId("mm" + i);
+			ds.getTracks().add(td);
+
+			
+			tds.limitScore(campaign, "test", ds);
 			dayStatRepo.save(ds);
 			
 			date = date.plusDays(1);

@@ -41,9 +41,13 @@ async function fillTheViewWithValues(values, view, selection, currentCampaign) {
   switch (view.item) {
     case 'Tabella':
       viewData.headers = getHeadersTable(values, selection, currentCampaign)
-      viewData.headerNumber = getHeadersNumber(selection);
-      viewData.subheaders = getSubHeaders(viewData.headers, selection)
-      viewData.data = await getData(currentCampaign, viewData.headers, viewData.subheaders, selection, values)
+      viewData.subheaders = getSubHeaders(viewData.headers, selection, currentCampaign)
+      viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
+      for (let i = 0; i < viewData.subheaders.length; i++) {
+        let s = viewData.subheaders[i];
+        s.class = (i == 0 || (i % viewData.headerNumber == 0)) ? 'cell-agg': '';
+      }
+      viewData.data = await getData(viewData.headers, selection, values, currentCampaign)
       break;
 
     default:
@@ -52,12 +56,8 @@ async function fillTheViewWithValues(values, view, selection, currentCampaign) {
   return viewData;
 }
 
-function getHeadersNumber(selection) {
-  return selection.dataColumns.length;
-}
 // based on values and selection, return the right headers for the table (day, month or Campaign)
 function getHeadersTable(values, selection, currentCampaign) {
-  console.log(values, selection, currentCampaign)
   let from = selection.timePeriod.value == 'SPECIFIC' ? selection.selectedDateFrom : currentCampaign.from
   let to = selection.timePeriod.value == 'SPECIFIC' ? selection.selectedDateTo : currentCampaign.to
   let headers = [];
@@ -66,35 +66,43 @@ function getHeadersTable(values, selection, currentCampaign) {
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'month'));
       break;
+    case 'year':
+      //get all month from selection.company.from to selection.company.to 
+      headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'year'));
+      break;
     case 'date':
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'day'));
       break;
+    case 'week':
+      //get all month from selection.company.from to selection.company.to 
+      headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'week'));
+      break;
     case 'campaign':
-      headers.push('Campagna');
+      headers.push('');
       break;
     default:
-      headers.push('Campagna');
+      headers.push('');
       break;
   }
   return headers;
 }
 //based on configuration, return the subheader=header.length*selection.dataColumns
-function getSubHeaders(headers, selection) {
-  let subheaders = [{ text: 'Nome', value: 'name' }];
+function getSubHeaders(headers, selection, currentCampaign) {
+  let subheaders = [{ text: 'Nome', value: 'name', class: 'cell-agg'}];
   for (let i = 0; i < headers.length; i++) {
     for (let k = 0; k < selection.dataColumns.length; k++) {
-      subheaders.push({ text: selection.dataColumns[k].label, value: selection.dataColumns[k].value + headers[i] })
+      let dc = selection.dataColumns[k];
+      if (!dc.mean) {
+        subheaders.push({ text: dc.label, value: dc.value + headers[i]})
+      } else {
+        currentCampaign.means.forEach(m => {
+          subheaders.push({ text: dc.label + ' ('+ m +')', value: dc.value + m + headers[i]})
+        });
+      }
     }
   }
   return subheaders;
-}
-// if values has more than 1 level it return the number of elements (every row of the table is an element)
-// otherwise it is a table with just one row
-function getRowByValues(values) {
-  if (values[0] && Object.prototype.hasOwnProperty.call(values[0], 'values'))
-    return values.length
-  return 1;
 }
 function getPeriodBetweenDates(startDate, endDate, type) {
   let timeValues = [];
@@ -103,6 +111,18 @@ function getPeriodBetweenDates(startDate, endDate, type) {
       while (endDate > startDate || startDate.format('M') === endDate.format('M')) {
         timeValues.push(startDate.format('YYYY-MM'));
         startDate.add(1, 'month');
+      }
+      break;
+    case 'year':
+      while (endDate > startDate || startDate.format('YYYY') === endDate.format('YYYY')) {
+        timeValues.push(startDate.format('YYYY'));
+        startDate.add(1, 'year');
+      }
+      break;
+    case 'week':
+      while (endDate > startDate || startDate.format('YYYY-WW') === endDate.format('YYYY-WW')) {
+        timeValues.push(startDate.format('YYYY-WW'));
+        startDate.add(1, 'week');
       }
       break;
     case 'day':
@@ -118,125 +138,37 @@ function getPeriodBetweenDates(startDate, endDate, type) {
   return timeValues;
 }
 // return the data array with all the elements row for the table
-async function getData(currentCampaign, headers, subheaders, selection, values) {
+async function getData(headers, selection, values, currentCampaign) {
   let data = []
-  // console.log(headers, selection, values);
-  let valuesFiltered = values.filter(val => val!=null);
-  if (valuesFiltered)
-    for (let rowIndex = 0; rowIndex < getRowByValues(valuesFiltered); rowIndex++) {
+  if (values) {
+    for (let rowIndex = 0; rowIndex < values.length; rowIndex++) {
       //set detail name (it should be done more generic getting a function that could be company or locations or employees)
-      // let currentCompany = await companyService.getCompanyById(values[rowIndex][selection.dataLevel.value])
-      let name = await getRowName(valuesFiltered[rowIndex], selection.dataLevel.value, currentCampaign)
-      let row = { name: name };
+      let row = { name: values[rowIndex].key };
       for (let columnIndex = 0; columnIndex < headers.length; columnIndex++) {
+        // entity corresponding the row and the time aggregation element
+        let found = findElementInValues(values, rowIndex, columnIndex, selection, headers);
         //set values for that row for every dataColumns
         for (let dataColumnsIndex = 0; dataColumnsIndex < selection.dataColumns.length; dataColumnsIndex++) {
-          let found = findElementInValues(valuesFiltered, rowIndex, selection, headers, columnIndex);
-          row[selection.dataColumns[dataColumnsIndex].value + headers[columnIndex]] = (found ? parseInt(getValueByField(found[selection.dataColumns[dataColumnsIndex].apiField])/(isKm(selection.dataColumns[dataColumnsIndex].apiField)?1000:1)) : 0)
+          let dc = selection.dataColumns[dataColumnsIndex];
+          if (!dc.mean) {
+            row[dc.value + headers[columnIndex]] = (found ? parseInt(found[dc.apiField]) : 0)
+          } else {
+            currentCampaign.means.forEach(m => {
+              row[dc.value + m + headers[columnIndex]] = (found ? parseInt(found[m+ '_'+dc.apiField ]) : 0)
+            });
+          }
         }
       }
       data.push(row)
-      //  data.push(...Array(headers.length).fill(selection.dataColumns))
     }
+  }
   return data;
-
 }
 
-//get the first element of the table (name) based on the selection: if companies get the name of the single company
-//if campaign return the current campaign and so on
-async function getRowName(obj, selectionValue, currentCampaign) {
-  let returnValue = ""
-  if (obj)
-    switch (selectionValue) {
-      case ("companies"):
-        //map with companyID and detail
-        returnValue = await getCompanyName([obj['id']])
-        break;
-      case ("company"):
-        //map with companyID and detail
-        returnValue = await getCompanyName([obj['id']])
-        break;
-      case ("campaign"):
-        returnValue = currentCampaign.title;
-        break;
-      case ("employees"):
-        //TODO add the name of employee
-        //map with companyID and detail
-        returnValue = await getEmployeeName([obj['id']])
-        break;
-      case ("locations"):
-        //map with companyID and detail
-        returnValue = await getLocationName(decodeURI([obj['id']]))
-        break;
-      default:
-        break;
-    }
-  return returnValue;
-}
-function getCompanyName(id) {
-  if (mapCompanies[id])
-    return Promise.resolve(mapCompanies[id].name);
-  return Promise.resolve("");
-}
-function getEmployeeName(id) {
-  if (mapEmployees[id])
-    return Promise.resolve(mapEmployees[id].surname+' '+mapEmployees[id].name);
-  return Promise.resolve("");
-}
-function getLocationName(id) {
-  if (mapLocations[id])
-    return Promise.resolve(mapLocations[id].id);
-  return Promise.resolve("");
-}
 //find the element of the row depending if the data has one, 2 dimension (1 or multiple row) or is an aggregation
-function findElementInValues(values, rowIndex, selection, headers, columnIndex) {
-  if (values[rowIndex] && Object.prototype.hasOwnProperty.call(values[rowIndex], 'values')) {
-    if (selection.timeUnit.value == 'campaign') {
-      let newObj = {};
-      if (values[rowIndex].values[0])
-        for (let key in values[rowIndex].values[0]) {
-          if (Object.prototype.hasOwnProperty.call(values[rowIndex].values[0], key)) {
-            //var val = obj[key];
-            newObj[key] = sumProp(values[rowIndex].values, key)
-          }
-        }
-      return newObj
-    }
-    return (values[rowIndex].values ? values[rowIndex].values.find(el => {
-      return el[selection.timeUnit.value] === headers[columnIndex]
-    }) : null)
+function findElementInValues(values, rowIndex, columnIndex, selection, headers) {
+  if (!headers[columnIndex]) {
+    return values[rowIndex].values.length > 0 ? values[rowIndex].values[0] : null;
   }
-  else {
-    if (selection.timeUnit.value == 'campaign') {
-      let newObj = {};
-      if (values[0])
-        for (let key in values[0]) {
-          if (Object.prototype.hasOwnProperty.call(values[0], key)) {
-            //var val = obj[key];
-            newObj[key] = sumProp(values, key)
-          }
-        }
-      return newObj
-    }
-    return (values.find(el => el? el[selection?.timeUnit?.value] === headers[columnIndex]:false))
-  }
-}
-function isKm(field){
-  return field.startsWith("distances")
-}
-//return the value of the stat or the aggregation in case of distances (array with multuple values)
-function getValueByField(value) {
-  if (value) {
-    if (!isNaN(value)) {
-      return Math.abs(Math.round(value));
-    }
-    else return Object.values(value).reduce((a, b) => Math.abs(Math.round(a + b)));
-  }
-  return value;
-}
-//sum all the properties
-function sumProp(items, prop) {
-  return items.reduce(function (a, b) {
-    return a + getValueByField(b[prop]);
-  }, 0);
+  return values[rowIndex].values.find(el => el[selection.timeUnit.value] === headers[columnIndex])
 }

@@ -21,7 +21,7 @@
           @click="openModal({type:'locationImport', object:null})"
         >
           <v-icon left>mdi-file-import</v-icon>
-          IMPORTA
+          Aggiungi da file
         </v-btn>
       </v-col>
     </v-row>
@@ -42,60 +42,6 @@
       <profilo-location v-if="actualLocation && actualLocation.item"/> 
     </v-row>
 
-    <!-- <modal v-show="modalImportLocationsOpen">
-
-      <template v-slot:header> Importa Sedi </template>
-
-
-      <template v-slot:body> 
-        <v-row
-          justify="center"
-          class="mt-5 mb-8"
-        >
-          <v-btn
-            outlined
-            color="primary"
-          >
-            <a href="/files/exampleLocations.csv" download>Scarica file di esempio</a>
-          </v-btn>
-        </v-row>
-        <v-row>
-          <v-col
-            cols="12"
-          >
-            <v-file-input
-              label="Clicca qui per caricare il file .csv"
-              type="file"
-              ref="file"
-              v-model="fileUploaded"
-              accept=".csv"
-              @change="/*onFileUploaderChange*/"
-              outlined
-              dense
-            ></v-file-input>
-          </v-col>
-        </v-row>
-      </template>
-
-
-      <template v-slot:footer>
-        <v-btn
-            text
-            @click="closeImportModal"
-            class="py-8 ml-8"
-          >
-            Annulla
-          </v-btn>
-          <v-btn
-            color="primary"
-            text
-            @click="importLocations"
-            class="py-8 ml-8"
-          >
-            Importa Sedi
-          </v-btn>
-      </template>
-    </modal> -->
   </div>
 </template>
 
@@ -201,7 +147,7 @@ export default {
   computed: {
     ...mapState("location", ["allLocations", "actualLocation"]),
     ...mapState("company", ["actualCompany"]),
-    ...mapState("account", ["role"]),
+    ...mapState("account", ["user"]),
 
     // fileName() {
     //   return this.fileUploaded.item(0).name;

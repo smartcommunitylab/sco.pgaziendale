@@ -60,6 +60,7 @@
                   v-model.trim="$v.latitude.$model"
                   :error-messages="latitudeErrors"
                   required
+                  :disabled="true"
                   @input="$v.latitude.$touch()"
                   @blur="$v.latitude.$touch()"
                   outlined
@@ -75,6 +76,7 @@
                   v-model.trim="$v.longitude.$model"
                   :error-messages="longitudeErrors"
                   required
+                  :disabled="true"
                   @input="$v.longitude.$touch()"
                   @blur="$v.longitude.$touch()"
                   outlined
@@ -306,6 +308,9 @@ export default {
   validations: {
     id: {
       required,
+      unique() {
+        return this.actualLocation && this.actualLocation.item && this.id === this.actualLocation.item.id || !this.allLocations.items.find(l=> l.id === this.id);
+      }
     },
     address: {
       required,
@@ -516,7 +521,6 @@ export default {
           7: "Domenica",
         },
       ],
-      oldLocation: {},
       disabled: false,
     };
   },
@@ -529,10 +533,11 @@ export default {
     }),
 
     locationChanged(input) {
+      console.log('Changed', input.address);
       this.locationSelected = input.address;
       this.latitude = this.locationSelected.pos.lat;
       this.longitude = this.locationSelected.pos.lng;
-      if (this.locationSelected && this.locationSelected.structuredValue)
+      if (!this.address && this.locationSelected && this.locationSelected.structuredValue)
         this.changeParamForm(this.locationSelected.structuredValue);
     },
     changeParamForm(structuredValue) {
@@ -542,7 +547,7 @@ export default {
       if (structuredValue.country) this.country = structuredValue.country;
       if (structuredValue.postcode) this.zip = structuredValue.postcode;
       if (structuredValue.state) this.region = structuredValue.state;
-      if (structuredValue.county) this.region = structuredValue.county;
+      if (!this.region && structuredValue.county) this.region = structuredValue.county;
     },
     stopTheEvent(event) {
       console.log(event);
@@ -613,10 +618,6 @@ export default {
         radius: Number.parseInt(this.radius),
       };
     },
-    createOldLocation() {
-      console.log("ho creato una OLD Location");
-      this.oldLocation = this.actualLocation.item;
-    },
     setModalData() {
       if (this.typeCall == "add") {
         this.initLocation();
@@ -642,7 +643,7 @@ export default {
           this.updateLocation({
             companyId: this.actualCompany.item.id,
             location: this.locationSelected,
-            oldLocation: this.oldLocation,
+            oldLocation: this.actualLocation.item,
           });
           this.closeModal();
         }
@@ -658,7 +659,7 @@ export default {
   },
 
   computed: {
-    ...mapState("location", ["actualLocation"]),
+    ...mapState("location", ["actualLocation", "allLocations"]),
     ...mapState("modal", ["active"]),
     ...mapState("company", ["actualCompany"]),
 
@@ -687,6 +688,7 @@ export default {
       const errors = [];
       if (!this.$v.id.$dirty) return errors;
       !this.$v.id.required && errors.push("Campo richiesto.");
+      !this.$v.id.unique && errors.push("Valore gia' in uso.");
       return errors;
     },
     addressErrors() {
@@ -758,7 +760,6 @@ export default {
 
     actualLocation: function () {
       this.setModalData();
-      this.createOldLocation();
     },
   },
 

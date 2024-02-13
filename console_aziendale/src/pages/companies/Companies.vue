@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row>
+    <v-row v-if="user.canDo('manage', 'companies')">
       <v-col>
         <v-btn
           x-large
@@ -16,18 +16,68 @@
     </v-row>
     <v-row>
       <v-col :cols="nColsTable_calculator">
-        <div v-if="allCompanies && allCompanies.items && allCompanies.items.length > 0">
-          <generic-table
-            :items="allCompanies.items"
+        <div v-if="companyList && companyList.length > 0">
+          <v-card>
+            <v-card-title>
+              {{tableTitle}}
+              <v-spacer></v-spacer>
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="Cerca"
+                single-line
+                hide-details
+              ></v-text-field>
+              <v-select
+                v-model="selectedTerritory"
+                :items="territoryList"
+                label="Territorio"
+                item-text="name.it"
+                item-value="territoryId"
+                hide-details
+              ></v-select>
+              <v-select
+                v-model="selectedCampaign"
+                :items="campaignList"
+                label="Campagna"
+                item-text="title"
+                item-value="id"
+                hide-details
+              ></v-select>
+            </v-card-title>
+            <v-data-table
+              class="row-pointer elevation"
+              :headers="headerColumns"
+              :items="filteredList"
+              :search="search"
+              @click:row="showCompanyInfo"
+              :header-props="{'sortByText': 'Ordina per'}"
+              :footer-props="{
+                'items-per-page-text':'righe per pagina',
+                pageText: '{0}-{1} di {2}'
+              }"
+              no-results-text="La ricerca non ha dato risultati"
+              no-data-text="Non ci sono dati inseriti"
+            >
+            <template v-slot:item.state="{ item }">
+              {{ item.state ? 'Si' : 'No' }}
+            </template>
+            </v-data-table>
+          </v-card>
+
+          <!-- <generic-table
+            :items="companyList"
             :headers="headerColumns"
             :title="tableTitle"
             :method="showCompanyInfo"
           >
-          </generic-table>
+          </generic-table> -->
         </div>
         <div v-else class="empty-list">Non ci sono Aziende</div>
       </v-col>
-      <profilo-azienda v-if="actualCompany"></profilo-azienda>
+      <v-col cols="5">
+        <profilo-azienda v-if="actualCompany"></profilo-azienda>
+      </v-col>
     </v-row>
   </div>
 </template>
@@ -35,20 +85,25 @@
 <script>
 import ProfiloAzienda from "./Company.vue";
 import { mapState, mapActions } from "vuex";
-import GenericTable from "@/components/data-table/GenericTable.vue";
 
 export default {
-  components: { ProfiloAzienda, GenericTable },
+  components: { ProfiloAzienda },
 
   name: "Aziende",
 
   data: function () {
     return {
       tableTitle: "Aziende",
-      headerColumns: [{text:"Nome", value:"name"}, {text:"Codice Azienda", value:"code"}, {text:"Indirizzo", value:"address"}],
+      headerColumns: [{text:"Nome", value:"name"}, {text:"Codice Azienda", value:"code"}, {text:"Territorio", value: "territoryName"}, {text: "Campagne", value: "campaignNames"}, {text: 'Verificato', value: "state"}, {text:"Indirizzo", value:"address"}],
       editModalVisible: false,
       deleteModalVisible: false,
       currentCompanySelected: undefined,
+      companyList: null,
+      territoryList: [],
+      selectedTerritory: "",
+      campaignList: [],
+      selectedCampaign: "",
+      search: "",
       popup: {
         title: "",
       },
@@ -64,6 +119,7 @@ export default {
       getCompanyById: "getCompanyById",
       deleteCompany: "deleteCompany",
     }),
+    ...mapActions("campaign", {getTerritories:"getTerritories", getAllCampaigns: "getAll"}),
     ...mapActions("navigation", { changePage: "changePage" }),
     showModal(title) {
       this.nColsTable = 8;
@@ -88,7 +144,7 @@ export default {
       this.deleteModalVisible = false;
       this.deleteCompany(this.company);
     },  
-    showCompanyInfo: function (company) {
+    showCompanyInfo(company) {
       if (this.currentCompanySelected == company) {
         this.getCompanyById(null);
 
@@ -98,25 +154,68 @@ export default {
         this.currentCompanySelected = company;
       }
     },
+    updateList() {
+      if (this.territories && this.territories.items && this.companyList && this.allCampaigns && this.allCampaigns.items) {
+        this.companyList.forEach(c => {
+          c.territoryName = (this.territories.items.find(t => t.territoryId === c.territoryId) || {name: {it: c.territoryId}}).name.it;
+          c.campaignNames = this.allCampaigns.items.filter(cm => c.campaigns.indexOf(cm.id) >= 0).map(cm => cm.title).join(', ');
+        });
+      }
+    }
+  },
+  watch: {
+    allCompanies(list) {
+      this.companyList = list.items;
+      this.updateList();
+    },
+    territories() {
+      this.updateList();
+      let list = this.territories.items;
+      if (list) {
+        list = list.slice();
+        list.splice(0, 0, {territoryId: '', name: {'it': 'Tutti'}});
+      }
+      this.territoryList = list;
+    },
+    allCampaigns() {
+      this.updateList();
+      let list = this.allCampaigns.items;
+      if (list) {
+        list = list.slice();
+        list.splice(0, 0, {id: '', title: 'Tutte'});
+      }
+      this.campaignList = list;
+    },
   },
 
   computed: {
     ...mapState("company", ["allCompanies", "actualCompany", "adminCompany"]),
+    ...mapState("campaign", ["territories", "allCampaigns"]),
+    ...mapState("account", ["user"]),
 
     nColsTable_calculator: function() {
       if(this.actualCompany){
-        return 8;
+        return 7;
       }else if(this.actualCompany == null){
         return 12;
       }else{
         return 12;
       }
     },
+    filteredList() {
+      return this.companyList.filter(c => {
+        return (!this.selectedTerritory || c.territoryId == this.selectedTerritory) &&
+               (!this.selectedCampaign || c.campaigns.indexOf(this.selectedCampaign) >= 0) 
+
+      });
+    }
   },
 
   mounted: function () {
     this.changePage({ title: "", route: "/GestioneAziende" });
     this.getAllCompanies();
+    this.getTerritories();
+    this.getAllCampaigns();
   },
 };
 </script>

@@ -19,9 +19,14 @@ package it.smartcommunitylab.pgazienda.domain;
 public class TrackingData {
 	private String trackId;
 	private String playerId;
+	private String multimodalId;
 	private String startedAt;
 	private String mode;
 	private double distance;
+	private long duration;
+	private Double co2;
+	private Double score;
+	private Double limitedScore;
 	
 	public String getTrackId() {
 		return trackId;
@@ -52,5 +57,38 @@ public class TrackingData {
 	}
 	public void setPlayerId(String playerId) {
 		this.playerId = playerId;
+	}
+	public long getDuration() {
+		return duration;
+	}
+	public void setDuration(long duration) {
+		this.duration = duration;
+	}
+	public Double getCo2() {
+		return co2;
+	}
+	public void setCo2(double co2) {
+		this.co2 = co2;
+	}
+	public String getMultimodalId() {
+		return multimodalId;
+	}
+	public void setMultimodalId(String multimodalId) {
+		this.multimodalId = multimodalId;
+	}
+	public void setCo2(Double co2) {
+		this.co2 = co2;
+	}
+	public Double getScore() {
+		return score;
+	}
+	public void setScore(Double score) {
+		this.score = score;
+	}
+	public Double getLimitedScore() {
+		return limitedScore;
+	}
+	public void setLimitedScore(Double limitedScore) {
+		this.limitedScore = limitedScore;
 	}
 }

@@ -21,16 +21,16 @@
           @click="openModal({type:'employeeImport', object:null})"
         >
           <v-icon left>mdi-file-import</v-icon>
-          IMPORTA
+          Aggiungi da file
         </v-btn>
       </v-col>
     </v-row>
     <v-row>
       <v-col :cols="nColsTable_calculator">
         <!-- TODO: Tabella -->
-        <div v-if="allEmployees && allEmployees.items && allEmployees.items.length > 0">
+        <div v-if="employees && employees.length > 0">
           <generic-table
-            :items="allEmployees.items"
+            :items="employees"
             :headers="headerColumns"
             :title="tableTitle"
             :method="showEmployeeInfo"
@@ -40,110 +40,6 @@
         <div v-else class="empty-list">Non ci sono Dipendenti</div>
       </v-col>
       <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
-      
-      <!-- TODO: Modale Dipendente -->
-      <!-- <modal v-show="deleteModalVisible">
-        <template v-slot:header> <div class="text-danger"> Cancella Dipendente </div> </template>
-        <template v-slot:body>
-          <p class="text-subtitle-1">Sei sicuro di voler cancellare il dipendente?</p>
-        </template>
-        <template v-slot:footer>
-          <v-btn
-            text
-            @click="closeDeleteModal"
-            class="py-8 ml-8"
-          >
-            Annulla
-          </v-btn>
-          <v-btn
-            color="error"
-            text
-            @click="deleteConfirm"
-            class="py-8 ml-8"
-          >
-            Conferma
-          </v-btn>
-        </template>
-      </modal>
-      <modal v-show="editModalVisible">
-        <template v-slot:header> {{ popup.title }} </template>
-        <template v-slot:body>
-          <employee-form />
-        </template>
-        <template v-slot:footer>
-          <v-btn
-            text
-            @click="closeModal"
-            class="py-8 ml-8"
-          >
-            Annulla
-          </v-btn>
-          <v-btn
-            color="primary"
-            text
-            @click="saveEmployee"
-            class="py-8 ml-8"
-          >
-            Salva
-          </v-btn>
-        </template>
-      </modal> -->
-      <!-- <modal v-show="modalImportEmployeesOpen">
-
-        <template v-slot:header> Importa dipendenti </template>
-
-
-        <template v-slot:body> 
-          <v-row
-            justify="center"
-            class="mt-5 mb-8"
-          >
-            <v-btn
-              outlined
-              color="primary"
-            >
-              <a href="/files/exampleEmployee.csv" download>Scarica file di esempio</a>
-            </v-btn>
-          </v-row>
-          <v-row>
-            <v-col
-              cols="12"
-            >
-              <v-file-input
-                label="Clicca qui per caricare il file .csv"
-                type="file"
-                ref="file"
-                v-model="fileUploaded"
-                accept=".csv"
-                @change="onFileUploaderChange"
-                outlined
-                dense
-              ></v-file-input>
-            </v-col>
-          </v-row>
-        </template>
-
-
-        <template v-slot:footer>
-          <v-btn
-              text
-              @click="closeImportModal"
-              class="py-8 ml-8"
-            >
-              Annulla
-            </v-btn>
-            <v-btn
-              color="primary"
-              text
-              @click="importEmployees"
-              class="py-8 ml-8"
-            >
-              Importa dipendenti
-            </v-btn>
-        </template>
-      </modal> -->
-
-
 
     </v-row>
   </div>
@@ -163,7 +59,7 @@ export default {
   data: function () {
     return {
       tableTitle: "Dipendenti",
-      headerColumns: [{text:"Nome", value:"name"}, {text:"Cognome", value:"surname"}, {text:"Sede", value:"location"}, {text:"Codice", value:"code"}],
+      headerColumns: [{text:"Nome", value:"name"}, {text:"Cognome", value:"surname"}, {text:"Sede", value:"location"}, {text:"Codice", value:"code"}, {text: 'Bloccato', value: 'blockedStr'}, {text: 'Iscrizioni', value: "employeeCampaigns"}],
       editModalVisible: false,
       deleteModalVisible: false,
       currentEmployeeSelected: undefined,
@@ -235,6 +131,25 @@ export default {
         this.currentEmployeeSelected = employee;
       }
     },
+    updateEmployeeCampaigns() {
+        if (this.allEmployees && this.allEmployees.items && this.allCampaigns && this.allCampaigns.items) {
+            let empList = this.allEmployees.items.slice();
+            empList.forEach(e => {
+              let list = (e.campaigns || []).concat(e.trackingRecord ? Object.keys(e.trackingRecord) : []);
+              const arr = Array.from(new Set(list)).map(cId => {
+                  let tr = e.trackingRecord && e.trackingRecord[cId] ? e.trackingRecord[cId] : {registration: new Date().getTime()}
+                  tr.id = cId;
+                  tr.title = (this.allCampaigns.items.find(c => c.id === cId) || {title: cId}).title;
+                  return tr;
+              }).map(c => c.title)
+              arr.sort();
+              e.employeeCampaigns = arr.join(', ');
+              e.blockedStr = e.blocked ? 'Si' : 'No'
+            });
+            this.employees = empList;
+        }
+
+    },
     // onFileUploaderChange() {
     //   console.log(this.$refs["file"]);
     //   this.fileUploaded = this.$refs["file"].files;
@@ -273,6 +188,14 @@ export default {
       this.getAllEmployees(this.actualCompany.item.id);
     this.getAllCampaigns();
   },
+  watch: {
+    allEmployees() {
+       this.updateEmployeeCampaigns();
+    },
+    allCampaigns() {
+       this.updateEmployeeCampaigns();
+    }
+  }
 };
 </script>
 

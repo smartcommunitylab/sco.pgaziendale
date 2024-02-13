@@ -1,5 +1,4 @@
 <template>
-  <v-col cols="4">
     <v-card elevation="2" class="frosted-glass" v-if="actualCompany && actualCompany.item">
         <v-card-title>{{ actualCompany.item.name }}</v-card-title>
         
@@ -32,7 +31,7 @@
                             <v-list-item-title v-else>Nessun sito web inserito</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item :href="`mailto:${actualCompany.item.contactEmail}`">
+                    <v-list-item :href="`mailto:${actualCompany.item.contactEmail}`" target="_blank">
                         <v-list-item-icon>
                             <v-icon>mdi-email</v-icon>
                         </v-list-item-icon>
@@ -40,7 +39,7 @@
                             <v-list-item-title v-text="actualCompany.item.contactEmail"></v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item :href="`tel:${actualCompany.item.contactPhone}`">
+                    <v-list-item :href="`tel:${actualCompany.item.contactPhone}`" target="_blank">
                         <v-list-item-icon>
                             <v-icon>mdi-phone</v-icon>
                         </v-list-item-icon>
@@ -48,12 +47,31 @@
                             <v-list-item-title v-text="actualCompany.item.contactPhone"></v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
+
+                    <v-list-item>
+                        <v-list-item-content>
+                            <div v-if="adminCompanyUsers && adminCompanyUsers.items && adminCompanyUsers.items.length > 0">
+                                <p class="text-h6">Manager</p>
+                                <v-simple-table>
+                                    <thead>
+                                        <tr><th>Cognome</th><th>Nome</th><th>Username</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr  v-for="tr in adminCompanyUsers.items" :key="tr.id">
+                                            <td>{{tr.surname}}</td><td>{{tr.name}}</td><td><a target="_blank" :href="'mailto:'+tr.username">{{tr.username}}</a></td>
+                                        </tr>
+                                    </tbody>
+                                </v-simple-table>
+                            </div>
+                            <v-list-item-title v-else>Nessun manager definito</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
                 </v-list-item-group>
             </v-list>
         </v-card-text>
         <v-card-actions>
             <v-btn
-                v-if="!adminCompany && actualCompany && role == 'ROLE_ADMIN'"
+                v-if="!adminCompany && actualCompany && user.canDo('manage', 'company', actualCompany.item.id)"
                 text
                 color="primary"
                 @click="chooseCompanyAdmin"
@@ -71,27 +89,28 @@
 
             <v-spacer></v-spacer>
 
-            <!-- BACKUP MODO DI MODIFICA MODAL - edit Azienda
-            <v-btn icon v-if="role == 'ROLE_ADMIN'"
-            @click="editAzienda">
-                <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-            -->
-
-            <!-- PROVA nuovo Modifica con nuovo MODAL -->
-            <v-btn icon v-if="role == 'ROLE_ADMIN'"
+            <v-btn icon v-if="user.canDo('manage', 'company', actualCompany.item.id)"
             @click="openModal({type:'aziendaFormEdit', object:null})">
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
 
-            <v-btn icon v-show="$route.name !== 'ProfiloAzienda'"
+            <v-btn icon v-if="$route.name !== 'ProfiloAzienda' && user.canDo('manage', 'campaigns', actualCompany.item.id)"
+            @click="openModal({type:'associateForm', object:null})">
+                <v-icon>mdi-clipboard-text-multiple-outline</v-icon>
+            </v-btn>
+
+            <v-btn icon v-show="$route.name !== 'ProfiloAzienda' && user.canDo('manage', 'company', actualCompany.item.id)"
+            @click="openModal({type:'updateCompanyState', object:null})">
+                <v-icon>{{actualCompany.item.state ? 'mdi-close' : 'mdi-check'}}</v-icon>
+            </v-btn>
+
+            <v-btn icon v-show="$route.name !== 'ProfiloAzienda' && user.canDo('manage', 'companies')"
             @click="openModal({type:'deleteAzienda', object:null})">
                 <v-icon>mdi-delete</v-icon>
             </v-btn>
 
         </v-card-actions>
     </v-card>
-  </v-col>
 </template>
 
 <script>
@@ -103,6 +122,7 @@ export default {
   methods: {
     ...mapActions("company", {
       getCompanyById: "getCompanyById",
+      getUsers: "getUsers",
       chooseCompanyAdminCall: "chooseCompanyAdmin",
     }),
     ...mapActions("modal", {openModal: "openModal"}),
@@ -113,9 +133,26 @@ export default {
     },
   },
 
+  mounted() {
+    if (this.actualCompany) {
+        this.getUsers(this.actualCompany.item);
+    } else if (this.adminCompany) {
+        this.getUsers(this.adminCompany.item);
+    }
+  },
+
+  watch: {
+    actualCompany() {
+        this.getUsers(this.actualCompany.item);
+    },
+    adminCompany() {
+        this.getUsers(this.adminCompany.item);
+    },
+  },
+
   computed: {
-    ...mapState("company", ["adminCompany", "actualCompany"]),
-    ...mapState("account", ["role"]),
+    ...mapState("company", ["adminCompany", "actualCompany", "adminCompanyUsers"]),
+    ...mapState("account", ["user"]),
 
     isAdmin: function(){
         if(this.adminCompany){

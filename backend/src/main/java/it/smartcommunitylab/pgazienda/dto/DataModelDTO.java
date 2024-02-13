@@ -21,8 +21,7 @@ import java.util.List;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
-import it.smartcommunitylab.pgazienda.domain.PGApp;
-import it.smartcommunitylab.pgazienda.domain.User;
+import it.smartcommunitylab.pgazienda.domain.Territory;
 
 /**
  * @author raman
@@ -30,21 +29,21 @@ import it.smartcommunitylab.pgazienda.domain.User;
  */
 public class DataModelDTO {
 
-	private List<PGApp> apps = new LinkedList<>();
+	private List<Territory> territories = new LinkedList<>();
 	private List<Company> companies = new LinkedList<>();
 	private List<Campaign> campaigns = new LinkedList<>();
 	private List<UserDTO> companyUsers = new LinkedList<>();
 	/**
-	 * @return the apps
+	 * @return the territories
 	 */
-	public List<PGApp> getApps() {
-		return apps;
+	public List<Territory> getTerritories() {
+		return territories;
 	}
 	/**
-	 * @param apps the apps to set
+	 * @param territories the territories to set
 	 */
-	public void setApps(List<PGApp> apps) {
-		this.apps = apps;
+	public void setTerritories(List<Territory> territories) {
+		this.territories = territories;
 	}
 	/**
 	 * @return the companies

@@ -40,9 +40,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.PGAziendaApp;
 import it.smartcommunitylab.pgazienda.domain.Company;
-import it.smartcommunitylab.pgazienda.domain.PGApp;
+import it.smartcommunitylab.pgazienda.domain.Territory;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
-import it.smartcommunitylab.pgazienda.repository.PGAppRepository;
+import it.smartcommunitylab.pgazienda.service.PGAppService;
 
 /**
  * @author raman
@@ -56,23 +56,22 @@ public class CompanyResourceITest {
     /**
 	 * 
 	 */
-	private static final String APP_ID = "externalAppId";
+	private static final String T_ID = "TAA";
 
 	static final String ADMIN = "admin";
 
     @Autowired
     private CompanyRepository companyRepo;
     @Autowired
-    private PGAppRepository appRepo;
+    private PGAppService appService;
     
     @Autowired
     private MockMvc restMockMvc;
 
     @BeforeEach
     public void setup() {
-        appRepo.deleteAll();
-    	PGApp app = testApp();
-    	appRepo.save(app);
+    	Territory t = testTerritory();
+        appService.setTerritories(Collections.singletonList(t));
 
     	companyRepo.deleteAll();
     }
@@ -80,7 +79,7 @@ public class CompanyResourceITest {
     @Test
     public void testCreateCompany() throws Exception {
     	Company c = testCompany();
-    	c.setEnabledApps(Collections.singletonList(APP_ID));
+    	c.setTerritoryId(T_ID);
 
         restMockMvc.perform(
                 post("/api/companies")
@@ -96,7 +95,7 @@ public class CompanyResourceITest {
             assertThat(updatedCompany.getAddress()).isEqualTo(c.getAddress());
             assertThat(updatedCompany.getContactEmail()).isEqualTo(c.getContactEmail());
             assertThat(updatedCompany.getContactPhone()).isEqualTo(c.getContactPhone());
-            assertThat(updatedCompany.getEnabledApps()).isEqualTo(c.getEnabledApps());
+            assertThat(updatedCompany.getTerritoryId()).isEqualTo(c.getTerritoryId());
             assertThat(updatedCompany.getLogo()).isEqualTo(c.getLogo());
             assertThat(updatedCompany.getWeb()).isEqualTo(c.getWeb());
 
@@ -111,7 +110,8 @@ public class CompanyResourceITest {
     	c.setLogo("logo1");
     	c.setName("company1");
     	c.setWeb("web1");
-    	c.setEnabledApps(Collections.singletonList(APP_ID));
+        c.setCode("code");
+    	c.setTerritoryId(T_ID);
     	c = companyRepo.save(c);
     	
 
@@ -127,7 +127,7 @@ public class CompanyResourceITest {
             assertThat(updatedCompany.getAddress()).isEqualTo(c.getAddress());
             assertThat(updatedCompany.getContactEmail()).isEqualTo(c.getContactEmail());
             assertThat(updatedCompany.getContactPhone()).isEqualTo(c.getContactPhone());
-            assertThat(updatedCompany.getEnabledApps()).isEqualTo(c.getEnabledApps());
+            assertThat(updatedCompany.getTerritoryId()).isEqualTo(c.getTerritoryId());
             assertThat(updatedCompany.getLogo()).isEqualTo(c.getLogo());
             assertThat(updatedCompany.getWeb()).isEqualTo(c.getWeb());
 
@@ -136,7 +136,7 @@ public class CompanyResourceITest {
     @Test
     public void testDeleteCompany() throws Exception {
     	Company c = testCompany();
-    	c.setEnabledApps(Collections.singletonList(APP_ID));
+    	c.setTerritoryId(T_ID);
     	c = companyRepo.save(c);
     	
 
@@ -151,7 +151,7 @@ public class CompanyResourceITest {
     @Test
     public void testReadCompany() throws Exception {
     	Company c = testCompany();
-    	c.setEnabledApps(Collections.singletonList(APP_ID));
+    	c.setTerritoryId(T_ID);
     	c = companyRepo.save(c);
     	
         restMockMvc.perform(
@@ -170,7 +170,7 @@ public class CompanyResourceITest {
                 .andExpect(jsonPath("$.numberOfElements").value("0"));
 
         Company c = testCompany();
-    	c.setEnabledApps(Collections.singletonList(APP_ID));
+        c.setTerritoryId(T_ID);
     	c = companyRepo.save(c);
     	
         restMockMvc.perform(
@@ -192,10 +192,12 @@ public class CompanyResourceITest {
     	return c;
     }
 
-    private PGApp testApp() {
-    	PGApp app = new PGApp();
-    	app.setName("test app");
-    	app.setId(APP_ID);
-    	return app;
+    private Territory testTerritory() {
+    	Territory t = new Territory();
+    	t.setName(Collections.singletonMap("en", "Trentino"));
+    	t.setTerritoryId(T_ID);
+    	return t;
     }
+
+    
 }

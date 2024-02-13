@@ -16,8 +16,8 @@
 
 package it.smartcommunitylab.pgazienda.repository;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,4 +43,8 @@ public interface CompanyRepository  extends MongoRepository<Company, String> {
 
 	@Query("{campaigns:?0}")
 	List<Company> findByCampaign(String id);
+
+	@Query("{id:{$in:?0}}")
+	List<Company> findByIdIn(Collection<String> ids);
+
 }

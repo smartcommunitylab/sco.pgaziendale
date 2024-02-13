@@ -2,21 +2,36 @@
   <v-row>
     <v-col cols="9">
       <v-card>
-        <v-tabs
-          v-model="tab"
-          align-with-title
-          v-if="configurations && configurations.items"
-        >
-          <v-tabs-slider color="primary"></v-tabs-slider>
+        <v-row>
+          <v-col cols="6">
+            <v-tabs
+              v-model="tab"
+              align-with-title
+              v-if="configurations && configurations.items"
+            >
+              <v-tabs-slider color="primary"></v-tabs-slider>
 
-          <v-tab
-            v-for="item in configurations.items[0].views"
-            :key="item.type"
-            @click.prevent="setNewActiveView(item.type)"
-          >
-            {{ item.type }}
-          </v-tab>
-        </v-tabs>
+              <v-tab
+                v-for="item in configurations.items[0].views"
+                :key="item.type"
+                @click.prevent="setNewActiveView(item.type)"
+              >
+                {{ item.type }}
+              </v-tab>
+            </v-tabs>
+          </v-col>
+          <v-col cols="6">
+            <div class="text-right m-2" v-if="activeSelection && activeSelection.dataLevel">
+              <v-btn
+                color="primary"
+                @click="exportCsv"
+              >
+                Download CSV
+              </v-btn>
+            </div>
+
+          </v-col>
+        </v-row>
 
         <v-tabs-items v-model="tab" class="mt-5">
           <v-tab-item key="Tabella">
@@ -36,21 +51,18 @@
       <div>
         <v-card v-if="activeViewType && activeSelection">
           <div>
-            <v-card-title> Filtri - {{ activeViewType.item }} </v-card-title>
+            <v-card-title> Impostazioni</v-card-title>
           </div>
           <v-card-text class="px-5 py-4" v-if="activeSelection">
-            <p v-if="activeSelection.dataLevel" class="p-0">
-              <b>Livello</b>: {{ activeSelection.dataLevel.label }}
-            </p>
-            <p v-if="activeSelection.timeUnit" class="p-0">
-              <b>Unità temporale</b>:<br />
-              {{ activeSelection.timeUnit.label }}
-            </p>
             <p v-if="activeSelection.dataColumns" class="p-0">
               <b>Colonne dati</b>:
               <span v-for="(column, index) in activeSelection.dataColumns" :key="index"
                 ><br />{{ column.label }}</span
               >
+            </p>
+            <p v-if="activeSelection.timeUnit" class="p-0">
+              <b>Aggregazione temporale</b>:<br />
+              {{ activeSelection.timeUnit.label }}
             </p>
             <p v-if="activeSelection.timePeriod" class="p-0">
               <b>Periodo di tempo</b>:
@@ -61,126 +73,68 @@
                 ><br /><span>{{ activeSelection.timePeriod.label }}</span></template
               >
             </p>
+            <p v-if="activeSelection.dataLevel" class="p-0">
+              <b>Livello aggregazione</b>: {{ activeSelection.dataLevel.label }}
+            </p>
             <p v-if="activeSelection.puntualAggregationSelected" class="p-0">
-              <b>Aggregazione puntuale</b>:
+              <b>Filtri</b>:
               <template v-if="activeSelection.puntualAggregationSelected.value != 'NONE'"
                 ><br /><span
                   v-for="(agg, index) in activeSelection.puntualAggregationItems"
                   :key="index"
-                  >{{ agg.name }} {{ agg.surname ? agg.surname : null
-                  }} </span></template
-              ><template v-else><br /><span>Nessuna</span></template>
+                  >{{ agg.label }} </span></template
+              ><template v-else><br /><span>Nessuno</span></template>
             </p>
           </v-card-text>
 
           <v-card-actions>
-            <v-btn color="primary" text @click="sheet = !sheet"> Modifica filtri </v-btn>
+            <v-btn color="primary" text @click="sheet = !sheet"> Modifica </v-btn>
           </v-card-actions>
         </v-card>
-        <div class="text-center m-2" v-if="activeSelection && activeSelection.dataLevel">
-          <v-btn
-            color="primary"
-            @click="exportCsv"
-            :disabled="!activeSelection.dataLevel.exportCSV"
-          >
-            Download CSV
-          </v-btn>
-        </div>
-        <!-- Gestore di inserimento dati (MODALE) -->
-        <v-bottom-sheet v-model="sheet">
-          <v-sheet height="100vh" class="p-4">
-            <div class="text-center">
-              <v-btn
-                class="my-6"
-                text
-                color="primary"
-                @click="saveFiltersAndRefreshStat()"
-              >
-                Salva Filtri
-              </v-btn>
-            </div>
 
-            <div v-if="activeViewType">
-              <v-row>
-                <v-col cols="4" class="pl-5 pr-20">
-                  <p class="text-subtitle-1">Vista: {{ activeViewType.item }}</p>
-                </v-col>
-              </v-row>
-              <!-- <div v-if="activeViewType.item === 'Tabella'">Tabella</div>
-              <div v-if="activeViewType.item === 'Grafico a Barre Orizzontali'">
-                Grafico a Barre Orizzontali
-              </div>
-              <div v-if="activeViewType.item === 'Grafico a Linee'">Grafico a Linee</div>
-              <div v-if="activeViewType.item === 'Grafico a Barre'">Grafico a Barre</div> -->
-            </div>
-
+        <v-dialog
+          v-model="sheet"
+          persistent
+          max-width="1200px">
+          <v-card>
+          <v-card-title>
+            <span class="text-h4 text-center">Impostazioni</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+    
             <!-- INPUT - Componenti per il filtraggio -->
 
             <v-row justify="center">
               <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Livello Aggregazione</p>
+                <p class="text-subtitle-1">Livello aggregazione</p>
 
                 <v-autocomplete
-                  label="Livello Aggregazione"
+                  label="Livello aggregazione"
                   name="livelloaggregazione"
                   id="livelloaggregazione"
                   v-model="localSelection.dataLevel"
                   :items="view.dataLevel"
                   item-text="label"
                   return-object
-                  @change="updateDataLevel"
                   outlined
+                  @change="resetPunctualAggregation"
                 ></v-autocomplete>
-              </v-col>
 
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Unità temporale</p>
-                <v-autocomplete
-                  label="Unità Temporale"
-                  placeholder="Unità Temporale"
-                  name="unitaTemporale"
-                  id="unitaTemporale"
-                  v-model="localSelection.timeUnit"
-                  :items="view.timeUnit"
-                  item-text="label"
-                  return-object
-                  @change="updateTimeUnit"
-                  outlined
-                ></v-autocomplete>
-              </v-col>
-
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Colonne Dati</p>
-                <v-select
-                  v-model="localSelection.dataColumns"
-                  :items="view.dataColumns"
-                  item-text="label"
-                  return-object
-                  :menu-props="{ maxHeight: '400' }"
-                  label="Colonne Dati"
-                  multiple
-                  hint="Seleziona le colonne da visualizzare"
-                  persistent-hint
-                  @change="updateDataColumns"
-                ></v-select>
-              </v-col>
-            </v-row>
-            <v-row v-if="view">
-              <v-col
-                cols="4"
-                class="pl-5 pr-20"
+                <div
+                class="pl-5"
                 v-if="localSelection && localSelection.puntualAggregationSelected"
               >
-                <p class="text-subtitle-1">Aggregazione puntuale</p>
+                <p class="text-subtitle-1">Filtri</p>
                 <v-radio-group
-                  v-model="localSelection.puntualAggregationSelected"
+                  v-model="puntualAggregationSelected"
                   @change="updatePuntualAggregationChange"
                 >
                   <v-radio
                     v-for="(agg, index) in localSelection.dataLevel.puntualAggregation"
                     :key="index"
                     :label="agg.label"
-                    :value="agg"
+                    :value="agg.value"
                   ></v-radio>
                 </v-radio-group>
                 <div
@@ -202,16 +156,30 @@
                     multiple
                   ></v-autocomplete>
                 </div>
+              </div>
               </v-col>
-              <v-col cols="4" class="pl-5 pr-20">
+
+              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
+                <p class="text-subtitle-1">Aggregazione temporale</p>
+                <v-autocomplete
+                  label="Aggregazione temporale"
+                  placeholder="Aggregazione temporale"
+                  name="unitaTemporale"
+                  id="unitaTemporale"
+                  v-model="localSelection.timeUnit"
+                  :items="view.timeUnit"
+                  item-text="label"
+                  return-object
+                  outlined
+                ></v-autocomplete>
+
                 <p class="text-subtitle-1">Periodo di tempo</p>
-                <v-radio-group v-model="localSelection.timePeriod">
+                <v-radio-group v-model="timePeriod" @change="updateTimePeriod">
                   <v-radio
                     v-for="(period, index) in view.timePeriod"
                     :key="index"
                     :label="period.label"
-                    :value="period"
-                    @change="updateTimePeriodChange"
+                    :value="period.value"
                   ></v-radio>
                 </v-radio-group>
                 <div
@@ -267,9 +235,45 @@
                   </v-menu>
                 </div>
               </v-col>
+
+              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
+                <p class="text-subtitle-1">Colonne Dati</p>
+                <v-checkbox v-for="dc in view.dataColumns" :key="dc.value"
+                v-model="localSelection.dataColumns" :value="dc"
+                :label="dc.label" hide-details
+              ></v-checkbox>
+              </v-col>
             </v-row>
-          </v-sheet>
-        </v-bottom-sheet>
+          <!-- </v-sheet>
+        </v-bottom-sheet> -->
+            </v-container>
+             </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                color="blue darken-1"
+                text
+                @click="sheet = false"
+              >
+                Annulla
+              </v-btn>
+              <v-btn
+                color="blue darken-1"
+                text
+                @click="initiSelection()"
+              >
+                Reimposta
+              </v-btn>
+              <v-btn
+                color="blue darken-1"
+                text
+                @click="saveFiltersAndRefreshStat()"
+              >
+                Applica
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </div>
     </v-col>
   </v-row>
@@ -316,7 +320,7 @@ export default {
       localSelection: {
         dataLevel: null,
         timeUnit: null,
-        dataColumns: null,
+        dataColumns: [],
         timePeriod: null,
         selectedDateFrom: new Date(),
         selectedDateTo: new Date(),
@@ -325,6 +329,9 @@ export default {
         puntualAggregationItems: [],
         itemsAggreation: [],
       },
+      baseSelection: null,
+      puntualAggregationSelected: null,
+      timePeriod: null,
       name: "",
       email: "",
       select: null,
@@ -345,16 +352,15 @@ export default {
     ...mapState("company", ["actualCompany"]),
     ...mapState("navigation", ["page"]),
     ...mapState("navigation", ["page"]),
-    ...mapState("account", ["role", "temporaryAdmin"]),
+    ...mapState("account", ["user", "temporaryAdmin"]),
     timeSelected() {
       return (
-        this.localSelection &&
-        this.localSelection.timePeriod &&
-        this.localSelection.timePeriod.value != "ALL"
+        this.activeSelection &&
+        this.activeSelection.timePeriod &&
+        this.activeSelection.timePeriod.value != "ALL"
       );
     },
     view() {
-      console.log("La vista è: ");
       let view = null;
       if (
         this.getConfigurationById &&
@@ -364,7 +370,6 @@ export default {
         view = this.getConfigurationById.views.find(
           (element) => element.type === this.activeViewType.item
         );
-        console.log(view);
       }
 
       return view;
@@ -412,18 +417,32 @@ export default {
 
   methods: {
     ...mapActions("stat", {
-      initConfigurationByRole: "initConfigurationByRole",
+      initConfigurationByUser: "initConfigurationByUser",
       setActiveViewType: "setActiveViewType",
       setActiveSelection: "setActiveSelection",
       getStatFromServer: "getStat",
       downloadCsv: "getCsv",
     }),
-    ...mapActions("stat", { getConfigurationByRole: "getConfigurationByRole" }),
+    ...mapActions("stat", { getConfigurationByUser: "getConfigurationByUser" }),
+
+    comparator(a, b) {
+      return a.value === b.value;
+    },
+    copy(obj) {
+      return obj ? JSON.parse(JSON.stringify(obj)) : null;
+    },
 
     saveFiltersAndRefreshStat() {
       this.sheet = !this.sheet;
+      this.setActiveSelection({ selection: this.copy(this.localSelection) });
       this.getLocalStat(this.localSelection);
     },
+
+    resetPunctualAggregation() {
+      this.puntualAggregationSelected = 'NONE';
+      this.updatePuntualAggregationChange();
+    },
+
     fillTheViewWithValues(values, view, activeSelection, currentCampaign, loader) {
       viewStatService
         .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
@@ -447,25 +466,19 @@ export default {
       }
     },
     getItemText(item) {
-      if (item.surname) return `${item.surname} ${item.name}`;
-      return `${item.name}`;
+      return item.label;
     },
     exportCsv() {
       this.downloadCsv(this.localSelection);
     },
-    updateTimeUnit() {
-      this.setActiveSelection({ selection: this.localSelection });
-    },
-    updateDataLevel() {
-      this.setActiveSelection({ selection: this.localSelection });
-    },
-    updateDataColumns() {
-      this.setActiveSelection({ selection: this.localSelection });
-    },
-    updateTimePeriodChange() {
-      this.setActiveSelection({ selection: this.localSelection });
+    updateTimePeriod() {
+      if (!this.localSelection || !this.view) return;
+      this.localSelection.timePeriod = this.view.timePeriod.find((v) => v.value === this.timePeriod);
     },
     updatePuntualAggregationChange() {
+      if (!this.localSelection) return;
+      
+      this.localSelection.puntualAggregationSelected = this.localSelection.dataLevel.puntualAggregation.find((v) => v.value === this.puntualAggregationSelected);
       if (
         this.localSelection &&
         this.localSelection.puntualAggregationSelected &&
@@ -473,15 +486,14 @@ export default {
       )
         this.localSelection.puntualAggregationItems = [];
       else this.getItemsAggregation();
-      this.setActiveSelection({ selection: this.localSelection });
     },
     setNewActiveView(view) {
       this.setActiveViewType({ activeViewType: view });
     },
 
     initConfigurationStat() {
-      this.initConfigurationByRole({
-        role: this.role,
+      this.initConfigurationByUser({
+        user: this.user,
         temporaryAdmin: this.temporaryAdmin,
       });
       //console.log(this.configurations.items);
@@ -498,13 +510,14 @@ export default {
       this.checkbox = false;
     },
     getItemsAggregation() {
-      if (this.localSelection){if (!this.localSelection.puntualAggregationSelected){
-        this.localSelection.puntualAggregationSelected= {
+      if (this.localSelection){
+        if (!this.localSelection.puntualAggregationSelected){
+          this.localSelection.puntualAggregationSelected= {
           function: "",
-          label: "Nessuna",
+          label: "Nessuno",
           value: "NONE",
+          }
         }
-      }
         statService
           .getItemsAggregation(
             this.localSelection.puntualAggregationSelected.value,
@@ -513,8 +526,8 @@ export default {
           )
           .then(
             (values) => {
+              values.sort((a,b) => a.label.localeCompare(b.label));
               this.localSelection.itemsAggreation = values;
-              console.log(values);
             },
             (err) => {
               console.log(err);
@@ -528,52 +541,38 @@ export default {
     },
     initiSelection() {
       this.tab = this.activeViewType;
-      if (this.activeSelection && this.currentCampaign) {
+      if (this.baseSelection && this.currentCampaign) {
         //init with view configuration
 
-        this.localSelection.company = this.activeSelection.company
-          ? this.activeSelection.company
+        this.localSelection.company = this.baseSelection.company
+          ? this.baseSelection.company
           : this.actualCompany
           ? this.actualCompany.item
           : undefined;
         this.localSelection.campaign = this.currentCampaign.item;
-        this.localSelection.dataLevel = this.activeSelection.dataLevel;
-        this.localSelection.timeUnit = this.activeSelection.timeUnit;
-        this.localSelection.dataColumns = this.activeSelection.dataColumns;
-        this.localSelection.timePeriod = this.activeSelection.timePeriod;
-        //this.timePeriodValue = this.activeSelection.timePeriod.value;
-        this.localSelection.selectedDateFrom = this.activeSelection.selectedDateFrom;
-        this.localSelection.selectedDateTo = this.activeSelection.selectedDateTo;
-        this.localSelection.puntualAggregationSelected = this.activeSelection.puntualAggregationSelected;
-        // this.localSelection.puntualAggregation = this.activeSelection.puntualAggregation;
+        this.localSelection.dataLevel = this.baseSelection.dataLevel;
+        this.localSelection.timeUnit = this.baseSelection.timeUnit;
+        this.localSelection.dataColumns = this.baseSelection.dataColumns;
+        console.log('timePeriod', this.baseSelection.timePeriod);
+        this.localSelection.selectedDateFrom = this.baseSelection.selectedDateFrom;
+        this.localSelection.selectedDateTo = this.baseSelection.selectedDateTo;
+        this.puntualAggregationSelected = this.baseSelection.puntualAggregationSelected.value;
+        this.updatePuntualAggregationChange();
+        this.timePeriod = this.baseSelection.timePeriod.value;
+        this.localSelection.timePeriod = this.baseSelection.timePeriod;
         //load specific values
         this.getItemsAggregation();
         this.getDataRange();
-        //load default values
-        this.getLocalStat(this.localSelection);
       }
     },
 
     setDefaultCampaign() {},
   },
   created() {
+    this.baseSelection = this.copy(this.activeSelection);
     this.initConfigurationStat();
-    //this.initiSelection();
   },
   mounted() {
-    // if (
-    //   this.statValues &&
-    //   this.statValues.items &&
-    //   this.activeViewType &&
-    //   this.activeSelection &&
-    //   this.currentCampaign.item
-    // )
-    //   this.fillTheViewWithValues(
-    //     this.statValues.items,
-    //     this.activeViewType,
-    //     this.activeSelection,
-    //     this.currentCampaign.item
-    //   );
   },
 
   watch: {
@@ -593,42 +592,25 @@ export default {
     },
     activeConfiguration() {
       this.tab = this.activeViewType;
+      this.baseSelection = this.copy(this.activeSelection);
+
       this.initiSelection();
+      if (this.activeSelection && this.currentCampaign) {
+        this.getLocalStat(this.localSelection);
+      }
     },
 
     currentCampaign: {
-      handler: function (newValue, oldValue) {
-        if (!oldValue && newValue) {
-          // if (!this.activeSelection.campaign)
-          //   this.setDefaultCampaign();
-          // else
+      handler(newValue, oldValue) {
+        if (!oldValue && newValue || oldValue.item.id !== newValue.item.id) {
           this.initiSelection();
+          if (this.activeSelection && this.currentCampaign) {
+            this.getLocalStat(this.localSelection);
+          }
         }
       },
       deep: true,
     },
-    // actualCompany: {
-    //   handler: function (newValue, oldValue) {
-    //     if (!oldValue && newValue) {
-    //       // if (!this.activeSelection.campaign)
-    //       //   this.setDefaultCampaign();
-    //       // else
-    //       this.initiSelection();
-    //     }
-    //   },
-    //   deep: true,
-    // },
-    // activeSelection: {
-    //   handler: function (newValue,oldValue) {
-    //     if (!oldValue && newValue && this.localSelection && this.activeSelection ) {
-    //       if (!this.activeSelection.campaign)
-    //         this.setDefaultCampaign();
-    //       else
-    //         this.initiSelection();
-    //     }
-    //   },
-    //   deep: true,
-    // },
 
     $route() {
       console.log("E' cambiata la root, ora sei in: ");

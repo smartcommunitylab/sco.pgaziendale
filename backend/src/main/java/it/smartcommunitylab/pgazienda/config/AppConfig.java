@@ -26,12 +26,12 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -54,7 +54,10 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**").allowedMethods("*");
+		registry.addMapping("/**")
+		.allowedMethods("*")
+		.allowedOrigins("*")
+		.allowedHeaders("*");
 	}
 
 	@Bean(name = "messageSource")
@@ -65,12 +68,12 @@ public class AppConfig implements WebMvcConfigurer {
 		return source;
 	}
 	
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
-		registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
-		registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-	}
+	// @Override
+	// public void addResourceHandlers(ResourceHandlerRegistry registry) {
+	// 	registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
+	// 	registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
+	// 	registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+	// }
 	
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -79,6 +82,7 @@ public class AppConfig implements WebMvcConfigurer {
         builder.serializers(new LocalDateSerializer(DateTimeFormatter.ofPattern(dateFormat)));
         builder.serializers(new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(dateTimeFormat)));
 	    builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		converters.add(new ByteArrayHttpMessageConverter());
 	    converters.add(new MappingJackson2HttpMessageConverter(builder.build()));
 	}
 	

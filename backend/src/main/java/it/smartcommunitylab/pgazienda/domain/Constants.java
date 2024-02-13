@@ -28,11 +28,19 @@ public class Constants {
 	public static final Locale DEFAULT_LOCALE = Locale.ITALY;
 
 	public static final String AGG_DAY = "day";
+	public static final String AGG_WEEK = "week";
 	public static final String AGG_MONTH = "month";
 	public static final String AGG_TOTAL = "total";	
 	
-	public static final String[] AGG_ARRAY = new String[] {AGG_DAY, AGG_MONTH, AGG_TOTAL};
+	public static final String[] AGG_ARRAY = new String[] {AGG_DAY, AGG_MONTH, AGG_WEEK, AGG_TOTAL};
+	public static final String METRIC_DISTANCE = "distance";
+	public static final String METRIC_DURATION = "time";
+	public static final String METRIC_CO2 = "co2";
+	public static final String METRIC_TRACK = "tracks";
 	
 	public enum MEAN {bike, car, walk, bus, train, boat};
 
+	public enum GROUP_BY_TIME {day, week, month, year, total};
+	public enum GROUP_BY_DATA {company, location, employee, campaign};
+	public enum STAT_FIELD  {score, limitedScore, trackCount, limitedTrackCount, co2saved, meanScore, limitedMeanScore, meanDistance, meanDuration, meanCo2, meanTracks }
 }

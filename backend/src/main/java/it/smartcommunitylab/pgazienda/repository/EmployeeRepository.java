@@ -16,11 +16,13 @@
 
 package it.smartcommunitylab.pgazienda.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import it.smartcommunitylab.pgazienda.domain.Employee;
 
@@ -40,5 +42,8 @@ public interface EmployeeRepository  extends MongoRepository<Employee, String> {
 	public List<Employee> findByCompanyIdAndLocation(String id, String location);
 
 	public List<Employee> findByCompanyId(String companyId);
+
+	@Query("{id:{$in:?0}}")
+	public List<Employee> findByIdIn(Collection<String> ids);
 
 }

@@ -57,19 +57,22 @@ public class ProfileResource {
 		if (!StringUtils.isEmpty(userDomain)) {
 			login += userDomain;
 		}
-		logger.info("Real profile for user " + login);
 		
 		Optional<User> userWithAuthorities = userService.getUserWithAuthoritiesByUsername(login);
 		
 		ProfileDTO profile = new ProfileDTO();
 		if (userWithAuthorities.isPresent()) {
 			User user = userWithAuthorities.get();
-			UserRole role = user.getRoles().stream().filter(r -> r.getRole().equals(Constants.ROLE_APP_USER) && !r.getSubscriptions().isEmpty() && r.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaign))).findAny().orElse(null);
+			logger.info("Real profile for user " + userWithAuthorities.get().getPlayerId());
+			UserRole role = user.getRoles().stream().filter(r -> r.getRole().equals(Constants.ROLE_APP_USER) && !r.getSubscriptions().isEmpty() 
+					&& r.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaign) && !s.isAbandoned())).findAny().orElse(null);
 			if (role != null) {
+				logger.info("User role " + role.getSubscriptions());
 				Subscription sub = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaign)).findAny().orElse(null);
 				Company company = companyService.findByCode(sub.getCompanyCode()).orElse(null);
 		        final List<User> managers = userService.getAllManagedUsers(company.getId());
 		        Employee employee = companyService.getEmployeeByCode(company.getId(), sub.getKey());
+				logger.info("User employee " + employee);
 		        if (employee != null) {
 		        	profile.setCompany(company);
 		        	profile.setCompanyEmail(employee.getCompanyEmail());

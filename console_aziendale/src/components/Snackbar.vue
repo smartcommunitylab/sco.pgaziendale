@@ -5,7 +5,7 @@ quando chiamato e avviato, gestire i messaggi lanciati dall'applicativo e farli 
 all'utente come una snackbar.
 -->
 <template>
-  <v-snackbar v-model="snackbar" class="up" :color="type=='success'?'':type" :timeout="5000">
+  <v-snackbar v-model="snackbar" class="up" :color="type=='success'?'':type">
     {{ message }}
     <v-btn :color="type=='success'? 'primary': 'alert'" text @click="clearAlert"> Chiudi </v-btn>
   </v-snackbar>
@@ -28,8 +28,12 @@ export default {
   },
   watch: {
     message(newMsg) {
-      if (newMsg)
-      this.snackbar = true;
+      if (newMsg) {
+        this.snackbar = true;
+        setTimeout(() => {
+          this.clearAlert();
+        }, 5000);
+      }
       else this.snackbar = false;
     },
   },

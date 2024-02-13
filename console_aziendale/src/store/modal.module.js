@@ -12,6 +12,7 @@ const actions = {
     },
     closeModal({ commit }) {
         commit('setActive', false);
+        commit('setType', null);
     },
     initModal({ commit }){
         commit('init');

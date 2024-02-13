@@ -45,10 +45,12 @@ public class Company {
 	private String web;
 	private String contactEmail;
 	private String contactPhone;
-	
+
+	private String territoryId;
+	private Boolean state;
+
 	private List<CompanyLocation> locations = new LinkedList<>();
 	
-	private List<String> enabledApps = new LinkedList<>();
 	private List<String> campaigns = new LinkedList<>();
 	
 	/**
@@ -148,18 +150,6 @@ public class Company {
 		this.locations = locations;
 	}
 	/**
-	 * @return the enabledApps
-	 */
-	public List<String> getEnabledApps() {
-		return enabledApps;
-	}
-	/**
-	 * @param enabledApps the enabledApps to set
-	 */
-	public void setEnabledApps(List<String> enabledApps) {
-		this.enabledApps = enabledApps;
-	}
-	/**
 	 * @return the campaigns
 	 */
 	public List<String> getCampaigns() {
@@ -254,6 +244,18 @@ public class Company {
 	 */
 	public void setCountry(String country) {
 		this.country = country;
+	}
+	public String getTerritoryId() {
+		return territoryId;
+	}
+	public void setTerritoryId(String territoryId) {
+		this.territoryId = territoryId;
+	}
+	public Boolean getState() {
+		return state;
+	}
+	public void setState(Boolean state) {
+		this.state = state;
 	}
 	
 }

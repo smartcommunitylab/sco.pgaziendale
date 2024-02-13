@@ -66,6 +66,19 @@ commit("removeAllEmployees");
             }
         );
     },
+    blockEmployee({ commit, dispatch },{companyId, employeeId, blocked}) {
+        commit('blockEmployee');
+        employeeService.blockEmployee(companyId, employeeId, blocked).then(
+            employee => {
+            commit('blockEmployeeSuccess', employee);
+            dispatch('alert/success', "Dipendente modificato con successo", { root: true });
+        },
+            error => {
+                commit('blockEmployeeFailure', error);
+                dispatch('alert/error', error, { root: true });
+            }
+        );
+    },
     deleteEmployee({ commit, dispatch }, {companyId,employeeId}) {
         commit('deleteEmployee');
         employeeService.deleteEmployee(companyId,employeeId).then(
@@ -136,6 +149,20 @@ const mutations = {
         })
     },
     updateEmployeeFailure(state, error) {
+        state.actualEmployee = { error };
+    },
+    blockEmployee(state) {
+        state.actualEmployee = { loading: true };
+    },
+    blockEmployeeSuccess(state, employee) {
+        state.actualEmployee = { item: employee };
+        //update allEmployees
+        if (state.allEmployees.items)
+        state.allEmployees.items= state.allEmployees.items.map(function(element){
+              return employee.id==element.id?  employee : element
+        })
+    },
+    blockEmployeeFailure(state, error) {
         state.actualEmployee = { error };
     },
     deleteEmployee(state) {

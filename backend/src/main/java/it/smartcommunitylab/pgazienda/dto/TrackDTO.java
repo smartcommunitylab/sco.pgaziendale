@@ -25,7 +25,7 @@ import java.util.List;
 public class TrackDTO {
 
 	private Long startTime;
-
+	private String multimodalId;
 	private List<TrackLegDTO> legs;
 	
 	public Long getStartTime() {
@@ -46,10 +46,22 @@ public class TrackDTO {
 	}
 
 
+	public String getMultimodalId() {
+		return multimodalId;
+	}
+
+	public void setMultimodalId(String multimodalId) {
+		this.multimodalId = multimodalId;
+	}
+
+
 	public static class TrackLegDTO {
 		private String id;
 		private String mean;
 		private Double distance;
+		private long duration;
+		private double co2;
+		private Boolean valid;
 		
 		private List<TrackPointDTO> points;
 		
@@ -77,6 +89,26 @@ public class TrackDTO {
 		public void setPoints(List<TrackPointDTO> points) {
 			this.points = points;
 		}
+		public long getDuration() {
+			return duration;
+		}
+		public void setDuration(long duration) {
+			this.duration = duration;
+		}
+		public double getCo2() {
+			return co2;
+		}
+		public void setCo2(double co2) {
+			this.co2 = co2;
+		}
+				
+		public Boolean getValid() {
+			return valid;
+		}
+		public void setValid(Boolean valid) {
+			this.valid = valid;
+		}
+
 	}
 	
 	

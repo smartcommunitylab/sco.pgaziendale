@@ -34,6 +34,9 @@ public interface UserRepository  extends MongoRepository<User, String> {
 
 	@Query("{'roles.companyId': ?0}")
 	List<User> findByCompanyId(String id);
+	
+	@Query(value = "{'roles.subscriptions.companyCode': ?0}", count = true)
+	long countSubscriptionByCompanyCode(String companyCode);
 
 	Optional<User> findByUsername(String username);
 
@@ -50,8 +53,11 @@ public interface UserRepository  extends MongoRepository<User, String> {
 	@Query("{'roles.subscriptions.campaign': {$in: ?0}}")
 	List<User> findByCampaignIn(List<String> campaigns);
 
-	@Query("{'roles.subscriptions': {$elemMatch: {companyCode:?0, key:?1}}}")
-	Optional<User> findOneByEmployeeCode(String companyCode, String key);
+	@Query("{'playerId': {$in: ?0}}")
+	List<User> findByPlayerIdIn(Set<String> ids);
+
+//	@Query("{'roles.subscriptions': {$elemMatch: {companyCode:?0, key:?1}}}")
+//	Optional<User> findOneByEmployeeCode(String companyCode, String key);
 	
 	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1, key:{$in:?2}}}}")
 	List<User> findByCampaignAndCompanyAndEmployeeCode(String campaign, String companyCode, Set<String> keys);
@@ -59,10 +65,15 @@ public interface UserRepository  extends MongoRepository<User, String> {
 	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1, key:{$regex:?2, $options: 'i'}}}}")
 	List<User> findByCampaignAndCompanyAndEmployeeCode(String campaign, String companyCode, String key);
 
-	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1, key:{$in:?2}, upgraded: {$ne: true}}}}")
-	List<User> findByCampaignAndCompanyAndEmployeeCodeNotUpgraded(String campaign, String companyCode, Set<String> keys);
+//	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1, key:{$in:?2}, upgraded: {$ne: true}}}}")
+//	List<User> findByCampaignAndCompanyAndEmployeeCodeNotUpgraded(String campaign, String companyCode, Set<String> keys);
 
-	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1}}}")
-	List<User> findByCampaignAndCompany(String campaign, String companyCode);
+//	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1}}}")
+//	List<User> findByCampaignAndCompany(String campaign, String companyCode);
 	
+	@Query("{'roles.subscriptions': {$elemMatch: {campaign: ?0, companyCode:?1, key:{$regex:?2, $options: 'i'}}}}")
+	Optional<User> findOneByCampaignAndCompanyAndKey(String campaign, String companyCode, String key);
+	
+	@Query("{'roles.subscriptions': {$elemMatch: {companyCode:?0, key:{$regex:?1, $options: 'i'}, abandoned: {$ne: true}}}}")
+	Optional<User> findOneByCompanyCodeAndEmployeeCodeAndActive(String companyCode, String key);
 }

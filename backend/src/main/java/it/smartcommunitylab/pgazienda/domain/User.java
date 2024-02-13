@@ -31,6 +31,8 @@ import org.springframework.data.annotation.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import it.smartcommunitylab.pgazienda.Constants;
+
 /**
  * @author raman
  *
@@ -59,6 +61,8 @@ public class User extends AbstractAuditingEntity {
     @JsonIgnore
     private String resetKey;
     private Instant resetDate = null;
+    
+    private boolean deleted;
 
 	
 	/**
@@ -214,9 +218,33 @@ public class User extends AbstractAuditingEntity {
 		if (roles == null) return false;
 		return roles.stream().anyMatch(r -> companyId.equalsIgnoreCase(r.getCompanyId()));
 	}
+	public boolean hasTerritoryRole(String territoryId) {
+		if (roles == null) return false;
+		return roles.stream().anyMatch(r -> Constants.ROLE_TERRITORY_MANAGER.equals(r.getRole()) && r.getTerritoryId().equals(territoryId));
+	}
+	public boolean hasCampaignRole(String campaignId) {
+		if (roles == null) return false;
+		return roles.stream().anyMatch(r -> Constants.ROLE_CAMPAIGN_MANAGER.equals(r.getRole()) && r.getCampaignId().equals(campaignId));
+	}
 	public List<UserRole> companyRoles() {
 		if (roles == null) return Collections.emptyList();
 		return roles.stream().filter(r -> !StringUtils.isEmpty(r.getCompanyId())).collect(Collectors.toList());
+	}
+	public boolean isAdmin() {
+		return roles.stream().anyMatch(r -> Constants.ROLE_ADMIN.equals(r.getRole()));
+	}
+	public Optional<Subscription> findActiveSubscription(String campaign, String companyCode, String key) {
+		for(UserRole r : roles) {
+			if(Constants.ROLE_APP_USER.equals(r.getRole())) {
+				for(Subscription s : r.getSubscriptions()) {
+					if(s.getCampaign().equals(campaign) && s.getCompanyCode().equalsIgnoreCase(companyCode)
+							&& s.getKey().equalsIgnoreCase(key) && !s.isAbandoned()) {
+						return Optional.of(s);
+					}
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	@Override
@@ -241,6 +269,12 @@ public class User extends AbstractAuditingEntity {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+	public boolean isDeleted() {
+		return deleted;
+	}
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	

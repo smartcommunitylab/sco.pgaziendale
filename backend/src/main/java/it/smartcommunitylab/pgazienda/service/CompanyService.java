@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -37,8 +38,11 @@ import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -52,7 +56,9 @@ import com.opencsv.exceptions.CsvException;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Employee;
+import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
+import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.ImportDataException;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
@@ -63,11 +69,19 @@ import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
  */
 @Service
 public class CompanyService {
-
+	private static final Logger logger = LoggerFactory.getLogger(CompanyService.class);
+	
 	@Autowired
 	private CompanyRepository companyRepo;
 	@Autowired
 	private EmployeeRepository employeeRepo;
+	@Autowired
+	private DayStatRepository statRepo;
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private CampaignService campaignService;
+	
 	private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
 	private static final Map<String, Integer> DW = new LinkedHashMap<>();
@@ -114,7 +128,9 @@ public class CompanyService {
 	 * @return
 	 */
 	public Page<Company> getCompanies(Pageable page) {
-		return companyRepo.findAll(page);
+		List<Company> companies = companyRepo.findAll();
+		List<Company> result = companies.stream().filter(c -> userService.isCompanyVisible(c)).collect(Collectors.toList());
+		return new PageImpl<>(result, page, result.size());
 	}
 
 	/**
@@ -123,7 +139,12 @@ public class CompanyService {
 	 * @return
 	 */
 	public Optional<Company> getCompany(String id) {
-		return companyRepo.findById(id);
+		Optional<Company> opt = companyRepo.findById(id);
+		if(opt.isPresent()) {
+			if(!userService.isCompanyVisible(opt.get()))
+				return Optional.empty();
+		}
+		return opt;
 	}
 	
 	/**
@@ -133,7 +154,7 @@ public class CompanyService {
 	 * @return
 	 */
 	public Page<Employee> findEmployees(String id, String locationId, Pageable pageable) {
-		if (StringUtils.isEmpty(locationId)) return employeeRepo.findByCompanyId(id, pageable);
+		if (!StringUtils.hasText(locationId)) return employeeRepo.findByCompanyId(id, pageable);
 		else return employeeRepo.findByCompanyIdAndLocation(id, locationId, pageable);
 	}
 	
@@ -163,13 +184,22 @@ public class CompanyService {
 	 * @param company
 	 * @return
 	 */
-	public Optional<Company> updateCompany(Company company) {
+	public Optional<Company> updateCompany(Company company) throws InconsistentDataException {
 		Company old = companyRepo.findById(company.getId()).orElse(null);
 		if (old != null) {
+			if(!old.getTerritoryId().equals(company.getTerritoryId()) || !old.getCode().equals(company.getCode())) {
+				if(userService.countCompanySubscription(old.getCode()) > 0) 
+					throw new InconsistentDataException("Company subscriptions", "INVALID_COMPANY_DATA_SUBSCRIPTION");
+			}
+			Company byCode = findByCode(company.getCode()).orElse(null);
+			if (byCode != null && !byCode.getId().equals(company.getId())) {
+				throw new InconsistentDataException("Duplicate company creation", "INVALID_COMPANY_DATA_DUPLICATE_CODE");
+			}
 			old.setAddress(company.getAddress());
+			old.setTerritoryId(company.getTerritoryId());
+			old.setCode(company.getCode());
 			old.setContactEmail(company.getContactEmail());
 			old.setContactPhone(company.getContactPhone());
-			old.setEnabledApps(company.getEnabledApps());
 			old.setLogo(company.getLogo());
 			old.setName(company.getName());
 			old.setWeb(company.getWeb());
@@ -185,6 +215,21 @@ public class CompanyService {
 		return Optional.empty();
 	}
 
+
+	/**
+	 * Update state field
+	 * @param companyId
+	 * @param state
+	 * @return
+	 */
+    public Company updateCompanyState(String companyId, Boolean state) {
+		Company old = companyRepo.findById(companyId).orElse(null);
+		if (old != null) {
+			old.setState(state);
+			return companyRepo.save(old);
+		}
+        return null;
+    }
 
 	/**
 	 * List of companies assigned to a campaign
@@ -334,7 +379,7 @@ public class CompanyService {
 				e.setCode(employee.getCode());
 				e.setLocation(employee.getLocation());
 				e.setName(employee.getName());
-				e.setSurname(e.getSurname());
+				e.setSurname(employee.getSurname());
 				employeeRepo.save(e);
 			}
 		});
@@ -345,11 +390,22 @@ public class CompanyService {
 	 * @param companyId
 	 * @param employeeId
 	 */
-	public void deleteEmployee(String companyId, String employeeId) {
-		employeeRepo.findById(employeeId).ifPresent(e -> {
-			employeeRepo.delete(e);
-		});
-		
+	public void deleteEmployee(String companyId, String employeeId) throws InconsistentDataException {
+		Employee employee = employeeRepo.findById(employeeId).orElse(null);
+		if(employee != null) {
+			if(employee.getCampaigns().size() > 0) {
+				throw new InconsistentDataException("Employee has subscriptions", "INVALID_COMPANY_DATA_EMPLOYEE");
+			}
+			Company company = companyRepo.findById(companyId).orElse(null);
+			Optional<User> user = userService.findOneByCompanyCodeAndEmployeeCodeAndActive(company.getCode(), employee.getCode());
+			if(user.isPresent()) {
+				long count = statRepo.countByPlayerIdAndCompany(user.get().getPlayerId(), companyId);
+				if(count > 0) {
+					throw new InconsistentDataException("Employee has tracks", "INVALID_COMPANY_DATA_EMPLOYEE");
+				}
+			}
+			employeeRepo.delete(employee);
+		}
 	}
 
 	/**
@@ -378,27 +434,32 @@ public class CompanyService {
 			lines = readCSV(new ByteArrayInputStream(bytes), ';', 4);
 		}
 		Set<String> codes = new HashSet<>();
+		int i = 0;
 		for (String[] l: lines) {
-			String code = l[2];
+			String code = stringValue(l[2], i + 1, 3, true);
 			if (codes.contains(code)) {
 				throw new InconsistentDataException("Duplicate employees", "INVALID_CSV_DUPLICATE_EMPLOYEES");				
 			}
 			Employee existing = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, code).stream().findAny().orElse(null);
+			String location = stringValue(l[3], i + 1, 4, true);
+			String name = stringValue(l[0], i + 1, 1, true);
+			String surname = stringValue(l[1], i + 1, 2, true);
 			if (existing != null) {
-				existing.setLocation(l[3]);
-				existing.setName(l[0]);
-				existing.setSurname(l[1]);
+				existing.setLocation(location);
+				existing.setName(name);
+				existing.setSurname(surname);
 				employeeRepo.save(existing);
 			} else {
 				Employee e = new Employee();
 				e.setCode(code);
-				e.setName(l[0]);
-				e.setSurname(l[1]);
+				e.setName(name);
+				e.setSurname(surname);
 				e.setCompanyId(companyId);
-				e.setLocation(l[3]);
+				e.setLocation(location);
 				employeeRepo.save(e);
 			}
 			codes.add(code);
+			i++;
 		}
 	}
 
@@ -496,6 +557,12 @@ public class CompanyService {
 		if (locations.size() > 0) {
 			Company c = companyRepo.findById(companyId).orElse(null);
 			if (c != null) {
+				Map<String, CompanyLocation> map = locations.stream().collect(Collectors.toMap(l -> l.getId(), l -> l));
+				if (c.getLocations() != null) {
+					for (CompanyLocation l : c.getLocations()) {
+						if (!map.containsKey(l.getId())) locations.add(l);
+					}
+				}
 				c.setLocations(locations);
 				companyRepo.save(c);
 			}
@@ -510,7 +577,7 @@ public class CompanyService {
 	 * @return
 	 */
 	private Double doubeValue(String v, int row, int col, boolean required) throws ImportDataException {
-		if (StringUtils.isEmpty(v)) {
+		if (!StringUtils.hasText(v)) {
 			if (required) throw new ImportDataException(row, col);
 			else return null;
 		} else {
@@ -523,11 +590,41 @@ public class CompanyService {
 	}
 
 	private String stringValue(String v, int row, int col, boolean required) throws ImportDataException {
-		if (StringUtils.isEmpty(v)) {
+		if (!StringUtils.hasText(v)) {
 			if (required) throw new ImportDataException(row, col);
 			else return "";
 		} else return v.trim();
 	}
+
+
+	public Employee setBlockedEmployee(String companyId, String employeeId, boolean blocked) throws InconsistentDataException {
+		Employee employee = employeeRepo.findById(employeeId).orElse(null);
+		if(employee == null) 
+			throw new InconsistentDataException("Invalid employee", "NO_EMPLOYEE");
+		Company company = companyRepo.findById(companyId).orElse(null);
+		if(company == null)
+			throw new InconsistentDataException("Invalid company", "NO_COMPANY");
+		if(blocked) {
+			List<String> campaigns = new ArrayList<>(employee.getCampaigns());
+			for(String campaignId : campaigns) {
+				Optional<User> opt = userService.getUserByCampaignAndCompanyAndKey(campaignId, company.getCode(), employee.getCode());
+				if(opt.isPresent()) {
+					User user = opt.get();
+					try {
+						campaignService.unsubscribePlayer(campaignId, user.getPlayerId());
+						campaignService.unsubscribeUser(user, campaignId);
+					} catch (Exception e) {
+						logger.info("error unsubscibing employee to campaign: {}, {}, {}: {}", company.getCode(), employee.getCode(), campaignId, e.getMessage());
+					}
+				}
+			}
+		}
+		employee = employeeRepo.findById(employeeId).orElse(null);
+		employee.setBlocked(blocked);
+		employeeRepo.save(employee);
+		return employee;
+	}
+
 
 
 }

@@ -87,30 +87,6 @@
                         outlined
                     ></v-text-field>
                     </v-col>
-                    <v-col cols="12">
-                    <v-form>
-                        <p class="text-subtitle-1">Ruoli</p>
-                        <v-checkbox
-                        :error-messages="roleErrors"                                
-                        required
-                        @input="$v.roles.$touch()"
-                        @blur="$v.roles.$touch()"
-                        v-model="$v.roles.$model"
-                        label="Amministratore Aziendale"
-                        value="ROLE_COMPANY_ADMIN"
-                        hide-details
-                        ></v-checkbox>
-                        <v-checkbox
-                        :error-messages="roleErrors"                                
-                        required
-                        @input="$v.roles.$touch()"
-                        @blur="$v.roles.$touch()"
-                        v-model="$v.roles.$model"
-                        label="Mobility Manager"
-                        value="ROLE_MOBILITY_MANAGER"
-                        ></v-checkbox>
-                    </v-form>
-                    </v-col>        
                 </v-row>
                 </div>
             </form>
@@ -175,9 +151,6 @@ export default {
     phone: {
       required,
     },
-    roles: {
-      required,
-    },
   },
 
   data() {
@@ -191,7 +164,7 @@ export default {
       surname: "",
       username: "",
       phone: "",
-      roles: ['ROLE_COMPANY_ADMIN'],
+      roles: ['ROLE_MOBILITY_MANAGER'],
       unique: true,
       popup: {
         title: "",
@@ -286,14 +259,7 @@ export default {
         surname: this.surname,
         username: this.username,
         phone: this.phone,
-        roles: this.roles.map((elem) => {
-          return {
-            companyId: this.adminCompany.item.id,
-            locations: null,
-            role: elem,
-            subscriptions: null,
-          };
-        }),
+        roles: [{companyId: this.adminCompany.item.id, role: 'ROLE_MOBILITY_MANAGER'}] 
       };
     },
   },

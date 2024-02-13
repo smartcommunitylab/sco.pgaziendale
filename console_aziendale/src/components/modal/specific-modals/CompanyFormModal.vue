@@ -19,11 +19,12 @@
                                 required
                                 @input="$v.name.$touch()"
                                 @blur="$v.name.$touch()"
+                                :disabled="!user.canDo('manage', 'companies')"
                                 outlined
                             ></v-text-field>
                         </v-col>
                         <v-col
-                        cols="6"
+                        cols="3"
                         >
                             <v-text-field
                                 label="Codice Azienda"
@@ -34,6 +35,7 @@
                                 v-model.trim="$v.code.$model"
                                 :error-messages="codeErrors"                                
                                 required
+                                :disabled="!user.canDo('manage', 'companies')"
                                 @input="$v.code.$touch()"
                                 @blur="$v.code.$touch()"
                                 outlined
@@ -52,6 +54,21 @@
                                     </v-tooltip>
                                 </template>
                             </v-text-field>
+                        </v-col>
+                        <v-col cols="3">
+                            <v-select
+                                label="Territorio"
+                                name="territoryId"
+                                id="territoryId"
+                                v-model.trim="$v.territoryId.$model"
+                                :items="territoryIds"
+                                item-text="name.it"
+                                item-value="territoryId"
+                                :error-messages="territoryErrors"                                
+                                :disabled="!user.canDo('manage', 'companies')"
+                                required
+                                outlined
+                            ></v-select>
                         </v-col>
                         <v-col
                         cols="6"
@@ -294,6 +311,9 @@ export default {
         code: {
             required,
         },
+        territoryId: {
+            required,
+        },
         address: {
             required,
         },
@@ -350,6 +370,8 @@ export default {
             id: null,
             name: "",
             code: "",
+            territoryId: "",
+            territoryIds: [],
             address: "",
             streetNumber: "",
             city: "",
@@ -371,11 +393,10 @@ export default {
     methods: {
         ...mapActions("modal", { closeModal:"closeModal" }),
         ...mapActions("company", {addCompany:"addCompany", updateCompany:"updateCompany"}),
+        ...mapActions("campaign", {getTerritories:"getTerritories"}),
 
         copyFormValues(company) {
-            console.log("Sono nel For");
-            console.log("Questa è la company:");
-            console.log(company);
+            if (!company) return;
             for (const [key] of Object.entries(company)) {
                 this[key] = company[key];
             }
@@ -399,6 +420,7 @@ export default {
             this.id = null;
             this.name = "";
             this.code = "";
+            this.territoryId = "";
             this.address = "";
             this.streetNumber = "";
             this.city = "";
@@ -416,6 +438,7 @@ export default {
                 id: this.id,
                 name: this.name,
                 code: this.code,
+                territoryId: this.territoryId,
                 address: this.address,
                 streetNumber: this.streetNumber,
                 city: this.city,
@@ -430,6 +453,7 @@ export default {
             };
         },     
         closeThisModal(){
+            console.log(this.type);
             this.initCompany();
             this.$v.$reset();
             this.closeModal();
@@ -457,7 +481,7 @@ export default {
                 this.popup.title = "Aggiungi Azienda";
                 console.log("Modalità AGGIUNGI");
 
-            }else if (this.typeCall == "edit") {
+            }else if (this.typeCall == "edit" && this.actualCompany && this.actualCompany.item) {
                 this.copyFormValues(this.actualCompany.item);
                 this.popup.title = "Modifica Azienda";
                 console.log("Modalità MODIFICA");
@@ -467,6 +491,9 @@ export default {
 
     computed: {
         ...mapState("company", ["actualCompany"]),
+        ...mapState("campaign", ["territories"]),
+        ...mapState("modal", ["type"]),
+        ...mapState("account", ["user"]),
 
         //Controls for form validation 
         nameErrors () {
@@ -540,22 +567,35 @@ export default {
             const errors = []
             if (!this.$v.web.$dirty) return errors
             !this.$v.web.required && errors.push('Url richiesto.')
-            !this.isURL(this.web) && errors.push('Inserisci un url con "Http://" o "Https://".')
+            !this.isURL(this.web) && errors.push('Inserisci un url con "http://" o "https://".')
+            return errors
+        },
+        territoryErrors () {
+            const errors = []
+            if (!this.$v.territoryId.$dirty) return errors
+            !this.$v.territoryId.required && errors.push('Campo richiesto.')
             return errors
         },
     },
 
     watch: {
+        type: function(){
+            this.setModalData();
+        },
         typeCall: function(){
             this.setModalData();
         },
-        actualCompany: function(){
-            this.setModalData();
-        }
-    },
+        territories(res) {
+            if (res.items)
+                {
+                    this.territoryIds = res.items.filter(t => t.territoryId);
+                }
+            },
+        },
 
-    created() {
+    mounted() {
         this.setModalData();
+        this.getTerritories();
     },
 }
 </script>

@@ -92,7 +92,7 @@ public class UserResourceITest {
         user.setActivated(true);
         user.setName(DEFAULT_FIRSTNAME);
         user.setSurname(DEFAULT_LASTNAME);
-        user.setRoles(Collections.singletonList(UserRole.createCompanyAdminRole(COMPANY_ID)));
+        user.setRoles(Collections.singletonList(UserRole.createMobilityManager(COMPANY_ID)));
         return user;
     }
 
@@ -115,7 +115,7 @@ public class UserResourceITest {
         managedUserVM.setName(DEFAULT_FIRSTNAME);
         managedUserVM.setSurname(DEFAULT_LASTNAME);
         managedUserVM.setActivated(true);
-        managedUserVM.setRoles(Collections.singletonList(UserRole.createCompanyAdminRole(COMPANY_ID)));
+        managedUserVM.setRoles(Collections.singletonList(UserRole.createMobilityManager(COMPANY_ID)));
 
         restUserMockMvc.perform(post("/api/companies/{companyId}/users", COMPANY_ID)
             .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +143,7 @@ public class UserResourceITest {
         managedUserVM.setName(DEFAULT_FIRSTNAME);
         managedUserVM.setSurname(DEFAULT_LASTNAME);
         managedUserVM.setActivated(true);
-        managedUserVM.setRoles(Collections.singletonList(UserRole.createCompanyAdminRole(COMPANY_ID)));
+        managedUserVM.setRoles(Collections.singletonList(UserRole.createMobilityManager(COMPANY_ID)));
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restUserMockMvc.perform(post("/api/companies/{companyId}/users", COMPANY_ID)
@@ -167,7 +167,7 @@ public class UserResourceITest {
         managedUserVM.setName(DEFAULT_FIRSTNAME);
         managedUserVM.setSurname(DEFAULT_LASTNAME);
         managedUserVM.setActivated(true);
-        managedUserVM.setRoles(Collections.singletonList(UserRole.createCompanyAdminRole(COMPANY_ID)));
+        managedUserVM.setRoles(Collections.singletonList(UserRole.createMobilityManager(COMPANY_ID)));
 
         // Create the User
         restUserMockMvc.perform(post("/api/companies/{companyId}/users", COMPANY_ID)
@@ -220,7 +220,7 @@ public class UserResourceITest {
         managedUserVM.setCreatedDate(updatedUser.getCreatedDate());
         managedUserVM.setLastModifiedBy(updatedUser.getLastModifiedBy());
         managedUserVM.setLastModifiedDate(updatedUser.getLastModifiedDate());
-        managedUserVM.setRoles(Collections.singletonList(UserRole.createCompanyAdminRole(COMPANY_ID)));
+        managedUserVM.setRoles(Collections.singletonList(UserRole.createMobilityManager(COMPANY_ID)));
 
         restUserMockMvc.perform(put("/api/companies/{companyId}/users", COMPANY_ID)
             .contentType(MediaType.APPLICATION_JSON)
@@ -256,7 +256,7 @@ public class UserResourceITest {
         managedUserVM.setCreatedDate(updatedUser.getCreatedDate());
         managedUserVM.setLastModifiedBy(updatedUser.getLastModifiedBy());
         managedUserVM.setLastModifiedDate(updatedUser.getLastModifiedDate());
-        managedUserVM.setRoles(Collections.singletonList(UserRole.createCompanyAdminRole(COMPANY_ID)));
+        managedUserVM.setRoles(Collections.singletonList(UserRole.createMobilityManager(COMPANY_ID)));
 
         restUserMockMvc.perform(put("/api/companies/{companyId}/users", COMPANY_ID)
             .contentType(MediaType.APPLICATION_JSON)
@@ -300,7 +300,7 @@ public class UserResourceITest {
         managedUserVM.setCreatedDate(updatedUser.getCreatedDate());
         managedUserVM.setLastModifiedBy(updatedUser.getLastModifiedBy());
         managedUserVM.setLastModifiedDate(updatedUser.getLastModifiedDate());
-        managedUserVM.setRoles(Collections.singletonList(UserRole.createCompanyAdminRole(COMPANY_ID)));
+        managedUserVM.setRoles(Collections.singletonList(UserRole.createMobilityManager(COMPANY_ID)));
 
         restUserMockMvc.perform(put("/api/companies/{companyId}/users", COMPANY_ID)
             .contentType(MediaType.APPLICATION_JSON)

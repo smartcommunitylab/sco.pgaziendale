@@ -1,5 +1,5 @@
 <template>
-  <div v-if="role=='ROLE_COMPANY_ADMIN'||(role=='ROLE_ADMIN'&&adminCompany!=null)">
+  <div v-if="adminCompany && user.canDo('manage', 'users', adminCompany.item.id)">
     <v-row>
       <v-col>
         <v-btn
@@ -66,7 +66,7 @@ export default {
   computed: {
     ...mapState("company", ["adminCompany", "adminCompanyUsers"]),
     ...mapState("campaign", ["allCampaigns"]),
-    ...mapState("account", ["role","user"]),
+    ...mapState("account", ["user"]),
   },
 
   mounted() {

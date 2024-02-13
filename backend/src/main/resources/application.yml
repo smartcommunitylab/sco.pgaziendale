@@ -9,19 +9,34 @@ spring:
       database: ${MONGO_DATABASE:pgazienda}
       
   mail:
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    protocol: ${MAIL_PROTOCOL}
-    from: ${MAIL_FROM}
-    baseurl: ${MAIL_BASEURL}
+    username: ${MAIL_USERNAME:username}
+    password: ${MAIL_PASSWORD:}
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:25}
+    protocol: ${MAIL_PROTOCOL:smtp}
+    from: ${MAIL_FROM:no-reply@playngo.it}
+    baseurl: ${MAIL_BASEURL:http://localhost}
     properties:
       mail:
         smtps:
           localhost: ${MAIL_LOCALHOST:}
   messages:
     basename: i18n/messages
+
+  security:
+    oauth2:
+      client:
+        registration:
+          custom:
+            client-id: ${AAC_CLIENT_ID:}
+            client-secret: ${AAC_CLIENT_SECRET:}
+            authorization-grant-type: client_credentials
+        provider:
+          custom:
+            token-uri: ${AAC_TOKEN_URI:https://aac.platform.smartcommunitylab.it/oauth/token}
+            jwk-set-uri: ${AAC_JWK_URI:https://aac.platform.smartcommunitylab.it/jwk}
+            issuer-uri: ${AAC_ISSUER_URI:https://aac.platform.smartcommunitylab.it}
+            user-info-uri: ${SECURITY_EXT_USERINFO_ENDPOINT:https://aac.platform.smartcommunitylab.it/userinfo}
 
 management:
    server:
@@ -58,15 +73,12 @@ app:
         token-validity-in-seconds: 86400
         token-validity-in-seconds-for-remember-me: 2592000
     ext:
-      endpoint-userinfo: ${SECURITY_EXT_USERINFO_ENDPOINT}
       player-field: ${SECURITY_EXT_USERINFO_PLAYER_FIELD:sub}
-      username-field: ${SECURITY_EXT_USERINFO_USERNAME_FIELD:username}
-      name-field: ${SECURITY_EXT_USERINFO_NAME_FIELD:first_name}
-      surname-field: ${SECURITY_EXT_USERINFO_SURNAME_FIELD:last_name}
+      username-field: ${SECURITY_EXT_USERINFO_USERNAME_FIELD:preferred_username}
+      name-field: ${SECURITY_EXT_USERINFO_NAME_FIELD:given_name}
+      surname-field: ${SECURITY_EXT_USERINFO_SURNAME_FIELD:family_name}
       domain: ${SECURITY_EXT_USERINFO_DOMAIN:}
-      issuer-uri: ${AAC_ISSUER_URI:}
-      client-id: ${AAC_CLIENT_ID:}
-      jwk-uri: ${AAC_JWK_URI:}
+
   legacyCampaign: ferrara_bike2work
-      
+  engineEndpoint: ${ENGINE_ENDPOINT:https://backenddev.playngo.it/playandgo/}
       

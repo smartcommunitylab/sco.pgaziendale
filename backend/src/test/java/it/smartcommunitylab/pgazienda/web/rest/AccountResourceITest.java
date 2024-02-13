@@ -94,7 +94,7 @@ public class AccountResourceITest {
             })
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(content().string(TEST_USER_LOGIN));
+            .andExpect(content().string("\""+TEST_USER_LOGIN + "\""));
     }
 
     @Test
@@ -337,7 +337,8 @@ public class AccountResourceITest {
         userRepository.save(user);
 
         restAccountMockMvc.perform(post("/api/account/reset-password/init")
-            .content("password-reset@example.com")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("\"password-reset@example.com\"")
 )
             .andExpect(status().isOk());
     }
@@ -351,7 +352,8 @@ public class AccountResourceITest {
         userRepository.save(user);
 
         restAccountMockMvc.perform(post("/api/account/reset-password/init")
-            .content("password-reset@EXAMPLE.COM")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("\"password-reset@EXAMPLE.COM\"")
 )
             .andExpect(status().isOk());
     }
@@ -360,7 +362,8 @@ public class AccountResourceITest {
     public void testRequestPasswordResetWrongEmail() throws Exception {
         restAccountMockMvc.perform(
             post("/api/account/reset-password/init")
-                .content("password-reset-wrong-email@example.com"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("\"password-reset-wrong-email@example.com\""))
             .andExpect(status().isOk());
     }
 

@@ -25,6 +25,8 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
 
+import it.smartcommunitylab.pgazienda.domain.Constants.MEAN;
+
 /**
  * @author raman
  *
@@ -38,9 +40,8 @@ public class Campaign {
 	private String title;
 	private String description;
 	private String logo;
-	
-	@NotEmpty
-	private String application;
+	private String territoryId;
+
 
 	@NotNull
 	private LocalDate from;
@@ -51,7 +52,15 @@ public class Campaign {
 	
 	private String rules, privacy;
 	
-	private List<Limit> limits; 
+	// private List<Limit> limits; 
+	private List<Limit> trackLimits = new LinkedList<>(); 
+	private List<Limit> scoreLimits;
+
+	private VirtualScore virtualScore;
+
+	private Boolean useMultiLocation;
+	
+	private Boolean useEmployeeLocation;
 	
 	/**
 	 * @return the id
@@ -126,18 +135,6 @@ public class Campaign {
 		this.means = means;
 	}
 	/**
-	 * @return the application
-	 */
-	public String getApplication() {
-		return application;
-	}
-	/**
-	 * @param application the application to set
-	 */
-	public void setApplication(String application) {
-		this.application = application;
-	}
-	/**
 	 * @return the description
 	 */
 	public String getDescription() {
@@ -185,26 +182,81 @@ public class Campaign {
 	public void setPrivacy(String privacy) {
 		this.privacy = privacy;
 	}
+
+	public String getTerritoryId() {
+		return territoryId;
+	}
+	public void setTerritoryId(String territoryId) {
+		this.territoryId = territoryId;
+	}
 	
-	/**
-	 * @return the limits
-	 */
-	public List<Limit> getLimits() {
-		if (limits == null) {
-			limits = new LinkedList<>();
-			limits.add(new Limit(Constants.AGG_DAY, Constants.MEAN.bike.toString(), 20000d)); 
-			limits.add(new Limit(Constants.AGG_MONTH, Constants.MEAN.bike.toString(), 250000d));
+	// /**
+	//  * @return the limits
+	//  */
+	// public List<Limit> getLimits() {
+	// 	if (limits == null) {
+	// 		limits = new LinkedList<>();
+	// 		limits.add(new Limit(Constants.AGG_DAY, Constants.MEAN.bike.toString(), 20000d)); 
+	// 		limits.add(new Limit(Constants.AGG_MONTH, Constants.MEAN.bike.toString(), 250000d));
+	// 	}
+	// 	return limits;
+	// }
+	// /**
+	//  * @param limits the limits to set
+	//  */
+	// public void setLimits(List<Limit> limits) {
+	// 	this.limits = limits;
+	// }
+	
+
+	public List<Limit> getTrackLimits() {
+		return trackLimits;
+	}
+	public void setTrackLimits(List<Limit> trackLimits) {
+		this.trackLimits = trackLimits;
+	}
+	public List<Limit> getScoreLimits() {
+		if (scoreLimits == null) {
+			scoreLimits = new LinkedList<>();
+			scoreLimits.add(new Limit(Constants.AGG_DAY, null, 20d)); 
+			scoreLimits.add(new Limit(Constants.AGG_MONTH, null, 250d));
 		}
-		return limits;
+
+		return scoreLimits;
 	}
-	/**
-	 * @param limits the limits to set
-	 */
-	public void setLimits(List<Limit> limits) {
-		this.limits = limits;
+	public void setScoreLimits(List<Limit> scoreLimits) {
+		this.scoreLimits = scoreLimits;
 	}
 
 
+	public VirtualScore getVirtualScore() {
+		if (virtualScore == null) {
+			virtualScore = new VirtualScore();
+			virtualScore.setBike(new VirtualScoreValue());
+			virtualScore.getBike().coefficient = 0.001d;
+			virtualScore.getBike().metric = Constants.METRIC_DISTANCE;
+
+		}
+		return virtualScore;
+	}
+	public void setVirtualScore(VirtualScore virtualScore) {
+		this.virtualScore = virtualScore;
+	}
+
+	public Boolean getUseEmployeeLocation() {
+		return useEmployeeLocation;
+	}
+	public void setUseEmployeeLocation(Boolean useEmployeeLocation) {
+		this.useEmployeeLocation = useEmployeeLocation;
+	}
+	public Boolean getUseMultiLocation() {
+		return useMultiLocation;
+	}
+	public void setUseMultiLocation(Boolean useMultiLocation) {
+		this.useMultiLocation = useMultiLocation;
+	}
+
+	
 
 	public static class Limit {
 		private String span;
@@ -267,5 +319,156 @@ public class Campaign {
 		}
 		
 	}
+
+	public static class VirtualScore {
+		private String label;
+		private VirtualScoreValue bike, car, walk, bus, train, boat;
+		private Double scoreDailyLimit, scoreWeeklyLimit, scoreMonthlyLimit;
+		private Integer trackDailyLimit, trackWeeklyLimit, trackMonthlyLimit;
+		
+		public String getLabel() {
+			return label;
+		}
+		public void setLabel(String label) {
+			this.label = label;
+		}
+		public VirtualScoreValue getBike() {
+			return bike;
+		}
+		public void setBike(VirtualScoreValue bike) {
+			this.bike = bike;
+		}
+		public VirtualScoreValue getCar() {
+			return car;
+		}
+		public void setCar(VirtualScoreValue car) {
+			this.car = car;
+		}
+		public VirtualScoreValue getWalk() {
+			return walk;
+		}
+		public void setWalk(VirtualScoreValue walk) {
+			this.walk = walk;
+		}
+		public VirtualScoreValue getBus() {
+			return bus;
+		}
+		public void setBus(VirtualScoreValue bus) {
+			this.bus = bus;
+		}
+		public VirtualScoreValue getTrain() {
+			return train;
+		}
+		public void setTrain(VirtualScoreValue train) {
+			this.train = train;
+		}
+		public VirtualScoreValue getBoat() {
+			return boat;
+		}
+		public void setBoat(VirtualScoreValue boat) {
+			this.boat = boat;
+		}
+
+		public VirtualScoreValue meanValue(MEAN mean) {
+			VirtualScoreValue res = null;
+			switch(mean) {
+			case bike: res = getBike(); break;
+			case boat: res = getBoat(); break;
+			case bus: res = getBus(); break;
+			case car: res = getCar(); break;
+			case train: res = getTrain(); break;
+			case walk: res = getWalk(); break;
+			}
+			if (res == null) res = null;
+			return res;
+		}
+		public Double getScoreDailyLimit() {
+			return scoreDailyLimit;
+		}
+		public void setScoreDailyLimit(Double scoreDailyLimit) {
+			this.scoreDailyLimit = scoreDailyLimit;
+		}
+		public Double getScoreWeeklyLimit() {
+			return scoreWeeklyLimit;
+		}
+		public void setScoreWeeklyLimit(Double scoreWeeklyLimit) {
+			this.scoreWeeklyLimit = scoreWeeklyLimit;
+		}
+		public Double getScoreMonthlyLimit() {
+			return scoreMonthlyLimit;
+		}
+		public void setScoreMonthlyLimit(Double scoreMonthlyLimit) {
+			this.scoreMonthlyLimit = scoreMonthlyLimit;
+		}
+		public Integer getTrackDailyLimit() {
+			return trackDailyLimit;
+		}
+		public void setTrackDailyLimit(Integer trackDailyLimit) {
+			this.trackDailyLimit = trackDailyLimit;
+		}
+		public Integer getTrackWeeklyLimit() {
+			return trackWeeklyLimit;
+		}
+		public void setTrackWeeklyLimit(Integer trackWeeklyLimit) {
+			this.trackWeeklyLimit = trackWeeklyLimit;
+		}
+		public Integer getTrackMonthlyLimit() {
+			return trackMonthlyLimit;
+		}
+		public void setTrackMonthlyLimit(Integer trackMonthlyLimit) {
+			this.trackMonthlyLimit = trackMonthlyLimit;
+		}
+        public List<Limit> trackLimits() {
+			List<Limit> limits = new LinkedList<>();
+			if (getTrackDailyLimit() != null && getTrackDailyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_DAY, null, getTrackDailyLimit().doubleValue())); 
+			}
+			if (getTrackWeeklyLimit() != null && getTrackWeeklyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_WEEK, null, getTrackWeeklyLimit().doubleValue())); 
+			}
+			if (getTrackMonthlyLimit() != null && getTrackMonthlyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_MONTH, null, getTrackMonthlyLimit().doubleValue())); 
+			}
+            return limits;
+        }
+        public List<Limit> scoreLimits() {
+			List<Limit> limits = new LinkedList<>();
+			if (getScoreDailyLimit() != null && getScoreDailyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_DAY, null, getScoreDailyLimit().doubleValue())); 
+			}
+			if (getScoreWeeklyLimit() != null && getScoreWeeklyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_WEEK, null, getScoreWeeklyLimit().doubleValue())); 
+			}
+			if (getScoreMonthlyLimit() != null && getScoreMonthlyLimit() > 0) {
+				limits.add(new Limit(Constants.AGG_MONTH, null, getScoreMonthlyLimit().doubleValue())); 
+			}
+            return limits;
+        }
+	}
 	
+	public static class VirtualScoreValue {
+		private String metric;
+		private Double coefficient;
+		
+		public VirtualScoreValue() {
+		}
+		public VirtualScoreValue(String metric, Double coefficient) {
+			this.metric = metric;
+			this.coefficient = coefficient;
+		}
+		public String getMetric() {
+			return metric;
+		}
+		public void setMetric(String metric) {
+			this.metric = metric;
+		}
+		public Double getCoefficient() {
+			return coefficient;
+		}
+		public void setCoefficient(Double coefficient) {
+			this.coefficient = coefficient;
+		}
+
+		
+	}
 }

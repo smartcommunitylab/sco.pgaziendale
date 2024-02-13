@@ -8,10 +8,12 @@
                 <div v-if="typeCall == 'user'">Cancella Utente</div>
                 <div v-if="typeCall == 'location'">Cancella Sede</div>
                 <div v-if="typeCall == 'employee'">Cancella Dipendente</div>
+                <div v-if="typeCall == 'employee-block'">Blocco Dipendente</div>
             </div>
         </template>
         <template v-slot:body>
-          <p class="text-subtitle-1">Sei sicuro di voler cancellare l'elemento selezionato?</p>
+            <p v-if="typeCall != 'employee-block'" class="text-subtitle-1">Sei sicuro di voler cancellare l'elemento selezionato?</p>
+            <p v-if="typeCall == 'employee-block'" class="text-subtitle-1">Sei sicuro di voler bloccare/sbloccare l'elemento selezionato?</p>
         </template>
         <template v-slot:footer>
           <v-btn
@@ -48,7 +50,7 @@ export default {
         ...mapActions("company", { deleteCompany: "deleteCompany", getCompanyById:"getCompanyById", deleteUser:"deleteUser"}),
         ...mapActions("campaign", { deleteCampaign: "deleteCampaign", getAllCompaniesOfCampaign:"getAllCompaniesOfCampaign"}),
         ...mapActions("location", { deleteLocation: "deleteLocation"}),
-        ...mapActions("employee", { deleteEmployee: "deleteEmployee"}),
+        ...mapActions("employee", { deleteEmployee: "deleteEmployee", blockEmployee: "blockEmployee"}),
 
         remove: function() {
             switch (this.typeCall) {
@@ -60,7 +62,7 @@ export default {
                     break;
                 case 'campaign':
                     this.deleteCampaign({
-                        companyId: this.adminCompan ? this.actualCompany.item.id : null,
+                        companyId: this.adminCompany ? this.actualCompany.item.id : null,
                         campaignId: this.actualCampaign.item.id,
                     });
                     this.getAllCompaniesOfCampaign(null);
@@ -81,6 +83,13 @@ export default {
                     this.deleteEmployee({
                         companyId: this.object.actCompany.item.id,
                         employeeId: this.object.actEmployee.item.id,
+                    });
+                    break;
+                case 'employee-block':
+                    this.blockEmployee({
+                        companyId: this.object.actCompany.item.id,
+                        employeeId: this.object.actEmployee.item.id,
+                        blocked: !this.object.actEmployee.item.blocked,
                     });
                     break;
                 default:

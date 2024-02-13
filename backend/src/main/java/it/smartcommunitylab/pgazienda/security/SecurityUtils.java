@@ -17,6 +17,7 @@
 package it.smartcommunitylab.pgazienda.security;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import it.smartcommunitylab.pgazienda.Constants;
+import it.smartcommunitylab.pgazienda.domain.User;
+import it.smartcommunitylab.pgazienda.domain.UserRole;
 
 /**
  * Utility class for Spring Security.
@@ -43,6 +46,20 @@ public final class SecurityUtils {
     public static Optional<String> getCurrentUserLogin() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         return Optional.ofNullable(extractPrincipal(securityContext.getAuthentication()));
+    }
+    
+    public static UserInfo getCurrentUserInfo() {
+    	SecurityContext securityContext = SecurityContextHolder.getContext();
+    	Authentication authentication = securityContext.getAuthentication();
+    	if(authentication.getDetails() instanceof UserInfo) {
+    		return (UserInfo) authentication.getDetails(); 
+    	} else if (authentication.isAuthenticated()) {
+            UserInfo ui = new UserInfo();
+            ui.setUsername(authentication.getName());
+            ui.setRoles(authentication.getAuthorities().stream().map(a -> new UserRole(a.getAuthority())).collect(Collectors.toList()));
+            return ui;
+        }
+    	return null;
     }
 
     private static String extractPrincipal(Authentication authentication) {

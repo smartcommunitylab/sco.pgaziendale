@@ -2,10 +2,9 @@ import axios from "axios";
 
 export const userService = {
     login,
+    loginOAuth,
     logout,
     getAccount,
-    getHome,
-    getRole,
     update,
     getCompanies,
     changePassword,
@@ -14,7 +13,6 @@ export const userService = {
 };
 
 function login(username, password) {
-    console.log(process.env.VUE_APP_BASE_URL);
     return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_LOGIN_API, {
         "password": password,
         "rememberMe": true,
@@ -23,6 +21,25 @@ function login(username, password) {
         res => {
             if (res && res.data && res.data.id_token) {
                 localStorage.setItem('token', res.data.id_token);
+                return Promise.resolve(res.data.id_token);
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+
+    )
+}
+function loginOAuth(access_token) {
+    return axios.get(process.env.VUE_APP_BASE_URL + 'authenticate/extjwt', {
+        headers: {
+            Authorization: access_token
+        }
+    }).then(
+        res => {
+            if (res && res.data && res.data.id_token) {
+                localStorage.setItem('token', res.data.id_token);
+                localStorage.setItem('oauth_login', true);
                 return Promise.resolve(res.data.id_token);
             }
             else return Promise.reject(null);
@@ -51,6 +68,7 @@ function logout() {
     // remove user from local storage to log user out
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('oauth_login');
     sessionStorage.clear();
     localStorage.clear();
 }
@@ -63,59 +81,15 @@ function update(user) {
         }
     )
 }
-function getRole(user) {
-    var role='';
-    for (var i = 0; i < user.roles.length; i++) {
-        if (user.roles[i].role == 'ROLE_ADMIN') {
-            role='ROLE_ADMIN';
-        }
-        if (user.roles[i].role == 'ROLE_COMPANY_ADMIN' && role!='ROLE_ADMIN') {
-            role='ROLE_COMPANY_ADMIN';
-        }
-        if (user.roles[i].role == 'ROLE_MOBILITY_MANAGER'&& (role!='ROLE_ADMIN'|| role!='ROLE_COMPANY_ADMIN')) {
-            role='ROLE_MOBILITY_MANAGER';
-        }
-    }
-    return role;
-}
 
 function getCompanies(user) {
     var companies = [];
     for (var i = 0; i < user.roles.length; i++) {
-        if (user.roles[i].role != 'ROLE_ADMIN') {
+        if (user.roles[i].companyId) {
             companies.push(user.roles[i].companyId);
         }
     }
     return companies;
-}
-function getHome(role) {
-    switch (role) {
-        case 'ROLE_ADMIN':
-            return {
-                title: 'Gestione aziende',
-                route: '/GestioneAziende'
-            };
-        case 'ROLE_COMPANY_ADMIN':
-            return {
-                title: 'Gestione campagne',
-                route: '/GestioneCampagne'
-            };
-        case 'ROLE_MOBILITY_MANAGER':
-            return {
-                title: 'Gestione dipendenti',
-                route: '/GestioneDipendenti'
-            };
-        case 'ROLE_APP_USER':
-            return {
-                title: 'aziende',
-                route: '/GestioneAziende'
-            };
-        default:
-            return {
-                title: 'aziende',
-                route: '/GestioneAziende'
-            };
-    }
 }
 
 function changePassword(oldPassword, newPassword) {

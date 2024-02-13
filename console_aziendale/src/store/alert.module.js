@@ -38,6 +38,14 @@ const HttpErrors = {
     'REPEATING_SUBSCRIPTION': 'Attenzione, utente giá presente!'
 }
 
+const mapErrorData = (type, errorData) => {
+    if (!errorData) return '';
+    if (type == 'INVALID_IMPORT_DATA') {
+        return ` (riga ${errorData.row}, colonna ${errorData.col})`
+    }
+    return '';
+}
+
 
 const actions = {
     success({ commit }, message) {
@@ -59,7 +67,7 @@ const mutations = {
     error(state, message) {
         state.type = 'error';
         if (!!message && message.response && !!message.response.data.type && HttpErrors[message.response.data.type]) {
-            state.message = HttpErrors[message.response.data.type];
+            state.message = HttpErrors[message.response.data.type] + mapErrorData(message.response.data.type, message.response.data.errorData);
         }
         else { state.message = HttpErrors['GENERIC_ERROR']; }
     },
