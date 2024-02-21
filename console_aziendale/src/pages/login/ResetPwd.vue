@@ -165,7 +165,7 @@ export default {
       //check if equal
       if (this.passwordFirst === this.passwordSecond) {
         this.passwordDifferent = false;
-        this.resetPasswordFinish({ key: this.key, newPassword: this.passwordSecond });
+        this.resetPasswordFinish({ key: this.key, newPassword: this.passwordSecond, cb: () => this.$router.push('/') });
       } else this.passwordDifferent = true;
     },
     resetInit() {

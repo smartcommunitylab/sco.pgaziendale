@@ -149,14 +149,12 @@ pagine dall'utente in base al suo login.
           <v-list-item-title :class="{ active: isActiveStatistiche }">Statistiche</v-list-item-title>
         </v-list-item>
       </router-link>
-      <router-link to="/" v-on:click.native="logout">
-        <v-list-item link>
+        <v-list-item link  @click="doLogout">
           <v-list-item-icon>
             <v-icon>mdi-logout</v-icon>
           </v-list-item-icon>
           <v-list-item-title>Esci</v-list-item-title>
         </v-list-item>
-      </router-link>
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -194,6 +192,11 @@ export default {
     },
     resetCompany() {
       this.resetCompanyAdmin();
+    },
+    doLogout() {
+      console.log('Do logout');
+      this.logout();
+      this.$router.push('/');
     },
     goHome() {
       if (this.adminCompany == null){
