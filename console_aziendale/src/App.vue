@@ -143,6 +143,9 @@ export default {
 </script>
 
 <style scoped>
+.v-main {
+  padding-left: 56px !important;
+}
 .closebtn {
   margin-left: 15px;
   color: white;

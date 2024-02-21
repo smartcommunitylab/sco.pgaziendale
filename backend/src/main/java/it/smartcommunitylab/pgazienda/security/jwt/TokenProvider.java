@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -58,6 +59,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
+import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.security.UserInfo;
 
 @Component
@@ -89,6 +91,10 @@ public class TokenProvider {
 
     private JwkProvider provider;
     
+    @Autowired
+    private UserRepository userRepository;
+
+
     private ObjectMapper mapper = new ObjectMapper();
 
     @PostConstruct
@@ -123,6 +129,12 @@ public class TokenProvider {
     	} else if (authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(a -> a.equals(Constants.ROLE_ADMIN))) {
         	info.setUsername(authentication.getName());
         	info.getRoles().add(UserRole.createAdminRole());
+        } else {
+            userRepository.findOneByUsernameIgnoreCase(authentication.getName()).ifPresent(user -> {
+                info.setPlayerId(user.getPlayerId());
+                info.setUsername(user.getUsername());
+                info.getRoles().addAll(user.getRoles());
+            });
         }
 
         return Jwts.builder()
