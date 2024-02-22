@@ -650,7 +650,7 @@ public class TrackingDataService {
 					}
 					// employee not found, pult playerId (should never happen)
 					if (e != null) {
-						ds.setPlayerId(e.getSurname()+ " " + e.getName());
+						ds.setPlayerId(employeeToPlayerId(e));
 						employeesWithData.add(e.getId());
 					}
 				}
@@ -661,7 +661,7 @@ public class TrackingDataService {
 						DayStat ds = new DayStat();
 						ds.setCampaign(campaignId);
 						ds.setCompany(company.getId());
-						ds.setPlayerId(e.getSurname()+ " " + e.getName());
+						ds.setPlayerId(employeeToPlayerId(e));
 						res.add(ds);
 					}
 				});
@@ -671,7 +671,7 @@ public class TrackingDataService {
 						DayStat ds = new DayStat();
 						ds.setCampaign(campaignId);
 						ds.setCompany(company.getId());
-						ds.setPlayerId(e.getSurname()+ " " + e.getName());
+						ds.setPlayerId(employeeToPlayerId(e));
 						res.add(ds);
 					}
 				});
@@ -772,6 +772,9 @@ public class TrackingDataService {
 		return res;
 	}
 
+	private String employeeToPlayerId(Employee e) {
+		return e.getSurname()+ " " + e.getName() + ";" + e.getCode();	
+	}
 	private String getAggKey(DayStat ds, GROUP_BY_TIME timeGroupBy) {
 		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return ds.getDate();
 		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return ds.getWeek();
@@ -910,9 +913,10 @@ public class TrackingDataService {
 			List<String> headers = createHeaders(timeGroupBy, from, to);
 			List<String> fieldHeaders = createSubheaders(headers, fields, campaign);
 			String nameHeader = getNameHeader(dataGroupBy);
+			String idHeader = getIdHeader(dataGroupBy);
 			// write headers
 			if (!headers.isEmpty()) {
-				String s = ";";
+				String s = ";" + (idHeader != null ? idHeader + ";" : "");
 				for (String h: headers) {
 					s += h;
 					for (String f: fieldHeaders) {
@@ -922,6 +926,7 @@ public class TrackingDataService {
 				csvWriter.writeNext(s.split(";"));
 			}
 			String ss = nameHeader;
+			if (idHeader != null) ss += ";" + idHeader;
 			for (int i = 0; i < Math.max(headers.size(), 1); i++){
 				for (String f: fieldHeaders) {
 					ss += ";" +f;
@@ -951,7 +956,14 @@ public class TrackingDataService {
 
 	private List<String> extractValues(String id, Collection<DayStat> list, GROUP_BY_TIME timeGroupBy, List<STAT_FIELD> fields, List<String> headers, Campaign campaign) {
 		List<String> res = new LinkedList<>();
-		res.add(id);
+		if (id.indexOf(';') >= 0) {
+			String[] ids = id.split(";");
+			res.add(ids[0]);
+			res.add(ids[1]);
+			return res;
+		} else  {
+			res.add(id);
+		}
 		// total aggregation, assume one record exists
 		if (headers.isEmpty()) {
 			res.addAll(extractValuesForHeader("", list.iterator().next(), fields, campaign));
@@ -1099,4 +1111,9 @@ public class TrackingDataService {
 		}
 		return dataGroupBy.name();
 	}
+	private String getIdHeader(GROUP_BY_DATA dataGroupBy) {
+		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) return "codice";
+		return null;
+	}
+
 }
