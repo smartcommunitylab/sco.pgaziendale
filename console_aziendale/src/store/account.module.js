@@ -171,12 +171,12 @@ const actions = {
             dispatch('alert/error', error, { root: true });
         })
     },
-    resetPasswordFinish({ commit, dispatch },{key,newPassword}){
+    resetPasswordFinish({ commit, dispatch },{key,newPassword, cb}){
         commit('resetPasswordFinish');
         userService.resetPasswordFinish(key,newPassword).then(function(){
             commit('resetPasswordFinishSuccess');
             dispatch('alert/success', "Password cambiata con successo", { root: true });
-
+            if (cb) cb();
         } ,function(error){
             commit('cresetPasswordFinishFailure', error);
             dispatch('alert/error', error, { root: true });

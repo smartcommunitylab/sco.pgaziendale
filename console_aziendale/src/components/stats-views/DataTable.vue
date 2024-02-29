@@ -19,7 +19,7 @@
 
     <template v-slot:item="{ item, headers }">
       <tr>
-        <td :class="index == 0 || ((index) % Math.floor(dataTableData.headerNumber) ==0) ? 'cell-agg': ''" v-for="(header,index) in headers" :key="index">{{item[header.value]}}</td>
+        <td :class="index == 0 || ((index) % Math.floor(dataTableData.headerNumber) ==0) ? 'cell-agg': ''" v-for="(header,index) in headers" :key="index" v-html="item[header.value]"></td>
       </tr>
     </template>
 

@@ -143,7 +143,13 @@ async function getData(headers, selection, values, currentCampaign) {
   if (values) {
     for (let rowIndex = 0; rowIndex < values.length; rowIndex++) {
       //set detail name (it should be done more generic getting a function that could be company or locations or employees)
-      let row = { name: values[rowIndex].key };
+      let name = values[rowIndex].key;
+      if (name.indexOf(';') > -1) {
+        let code = name.substring(name.indexOf(';') + 1, name.length);
+        name = name.substring(0, name.indexOf(';'));
+        name += '<br><small>(' + code + ')</small>';
+      }
+      let row = { name: name };
       for (let columnIndex = 0; columnIndex < headers.length; columnIndex++) {
         // entity corresponding the row and the time aggregation element
         let found = findElementInValues(values, rowIndex, columnIndex, selection, headers);
