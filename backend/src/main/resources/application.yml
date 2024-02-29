@@ -80,5 +80,5 @@ app:
       domain: ${SECURITY_EXT_USERINFO_DOMAIN:}
 
   legacyCampaign: ferrara_bike2work
-  engineEndpoint: ${ENGINE_ENDPOINT:https://backenddev.playngo.it/playandgo/}
+  engineEndpoint: ${ENGINE_ENDPOINT:https://backend.playngo.it/playandgo/}
       
