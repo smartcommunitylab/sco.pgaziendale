@@ -49,7 +49,7 @@ function importLocations(companyId,file) {
 //get all the companies
 function getAllLocations(companyId) {
     return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+ '/' + companyId + '/' +process.env.VUE_APP_LOCATIONS_API,{        params: {
-        size: 1200
+        size: 1000
       }
     } ).then(
         res => {
