@@ -5,17 +5,17 @@ server:
 spring:
   data:
     mongodb:
-      uri: ${MONGO_URI:mongodb://localhost:27017}
-      database: ${MONGO_DATABASE:pgazienda}
+      uri: ${MONGO_URI:}
+      database: ${MONGO_DATABASE:}
       
   mail:
-    username: ${MAIL_USERNAME:username}
+    username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
-    host: ${MAIL_HOST:localhost}
-    port: ${MAIL_PORT:25}
-    protocol: ${MAIL_PROTOCOL:smtp}
-    from: ${MAIL_FROM:no-reply@playngo.it}
-    baseurl: ${MAIL_BASEURL:http://localhost}
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:}
+    protocol: ${MAIL_PROTOCOL:}
+    from: ${MAIL_FROM:}
+    baseurl: ${MAIL_BASEURL:}
     properties:
       mail:
         smtps:
@@ -33,14 +33,14 @@ spring:
             authorization-grant-type: client_credentials
         provider:
           custom:
-            token-uri: ${AAC_TOKEN_URI:https://aac.platform.smartcommunitylab.it/oauth/token}
-            jwk-set-uri: ${AAC_JWK_URI:https://aac.platform.smartcommunitylab.it/jwk}
-            issuer-uri: ${AAC_ISSUER_URI:https://aac.platform.smartcommunitylab.it}
-            user-info-uri: ${SECURITY_EXT_USERINFO_ENDPOINT:https://aac.platform.smartcommunitylab.it/userinfo}
+            token-uri: ${AAC_TOKEN_URI:}
+            jwk-set-uri: ${AAC_JWK_URI:}
+            issuer-uri: ${AAC_ISSUER_URI:}
+            user-info-uri: ${SECURITY_EXT_USERINFO_ENDPOINT:}
 
 management:
    server:
-      port: ${MANAGEMENT_PORT:7878}
+      port: ${MANAGEMENT_PORT:}
    endpoints:
       web:
          base-path: /
@@ -60,15 +60,15 @@ swagger:
       email: info@smartcommunitylab.it
 
 admin:
-  username: ${ADMIN_USERNAME:admin}
-  password: ${ADMIN_PASSWORD:admin}
+  username: ${ADMIN_USERNAME:}
+  password: ${ADMIN_PASSWORD:}
 
 app:
   security:
     authentication:
       jwt:
         # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
-        base64-secret: ${SECURITY_SECRET:bgYh3rbvGzbJKK/q7k624Ct360QuA4IHHO8jBtMUKA/spqu+BMLkktWpiQuBMXuoVxBYOUwWnBvLXnizzrhKFyJkX9gf9gU6+L8tJl6D1VjAwh8w/iwqiubqmmMSSRxdmu7rmFWLlSi3HpumEfsIzagI2TiPI2U2pCn27vn2TAthiUXELXusVYe3r9awz2DQP/V10yi3j9AIh0Gslz89yUjY6tmrQ8RcJSApvo4FGBdK1EzZU/6CZaEFvmPQEx3I8TG26Y8pVqfcuR+OELhLQ2iOfP5ZlwQiom4UmkNdbMh4ZLyfSN0C9anZojYnpSBym6N8XOQo+7Ueqgpm0w0dFw==}
+        base64-secret: ${SECURITY_SECRET:}
         # Token is valid 24 hours
         token-validity-in-seconds: 86400
         token-validity-in-seconds-for-remember-me: 2592000
@@ -80,5 +80,5 @@ app:
       domain: ${SECURITY_EXT_USERINFO_DOMAIN:}
 
   legacyCampaign: ferrara_bike2work
-  engineEndpoint: ${ENGINE_ENDPOINT:https://backenddev.playngo.it/playandgo/}
+  engineEndpoint: ${ENGINE_ENDPOINT:}
       
