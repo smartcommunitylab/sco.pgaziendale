@@ -32,7 +32,7 @@ function importEmployees(companyId,file) {
 function getAllEmployees(companyId) {
     return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_EMPLOYEES_API, {
         params: {
-          size: 1200
+          size: 10000
         }
       }).then(
         res => {
