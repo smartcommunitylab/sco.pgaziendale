@@ -7,6 +7,9 @@ spring:
     mongodb:
       uri: ${MONGO_URI:}
       database: ${MONGO_DATABASE:}
+    web:
+      pageable:
+        max-page-size: 10000      
       
   mail:
     username: ${MAIL_USERNAME:}
