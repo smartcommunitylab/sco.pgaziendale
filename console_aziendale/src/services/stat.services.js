@@ -44,7 +44,13 @@ function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
       return employeeService.getAllEmployees(companyId).then((content) => {
         return content.filter(e => e.campaigns.indexOf(campaignId) >= 0)
         .map(e => {
-          e.label = (e.surname) ? `${e.surname} ${e.name}` : `${e.name}`;
+          e.label = (e.surname && e.surname != '-') 
+                  ? `${e.surname} ${e.name}` 
+                  : (e.name && e.name != '-') 
+                  ? `${e.name}`
+                  : (e.code)
+                  ? `- - (${e.code})`
+                  : `${e.id}`;
           return e;
         });
       });
@@ -216,7 +222,7 @@ function getAllEmployeesStats(configuration) {
     configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
     configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
     getFields(configuration),
-    true,
+    false,
     configuration.csv
     );
 }
