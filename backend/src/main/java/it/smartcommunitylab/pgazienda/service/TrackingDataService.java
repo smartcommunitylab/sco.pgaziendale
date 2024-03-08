@@ -960,7 +960,6 @@ public class TrackingDataService {
 			String[] ids = id.split(";");
 			res.add(ids[0]);
 			res.add(ids[1]);
-			return res;
 		} else  {
 			res.add(id);
 		}
