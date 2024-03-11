@@ -607,9 +607,9 @@ public class CompanyService {
 		if(blocked) {
 			List<String> campaigns = new ArrayList<>(employee.getCampaigns());
 			for(String campaignId : campaigns) {
-				Optional<User> opt = userService.getUserByCampaignAndCompanyAndKey(campaignId, company.getCode(), employee.getCode());
-				if(opt.isPresent()) {
-					User user = opt.get();
+				List<User> users = userService.getUserByEmployeeCode(campaignId, company.getCode(), employee.getCode());
+				if(!users.isEmpty()) {
+					User user = users.get(0);
 					try {
 						campaignService.unsubscribePlayer(campaignId, user.getPlayerId());
 						campaignService.unsubscribeUser(user, campaignId);
