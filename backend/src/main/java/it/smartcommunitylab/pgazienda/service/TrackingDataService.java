@@ -510,7 +510,7 @@ public class TrackingDataService {
 			}
 			List<User> users = new LinkedList<>();
 			for (Employee e: employees) {
-				users.addAll(userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, c.getCode(), e.getCode()));
+				users.addAll(userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, c.getCode(), "^" + e.getCode()+"$"));
 			}
 			criteria = criteria.and("playerId").in(users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList()));
 		} else if (location != null && companyId != null) {
