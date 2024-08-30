@@ -30,7 +30,10 @@ public class CompanyLocation {
 	@NotNull
 	private String id;
 	@NotNull
-	private String address, streetNumber, zip, city, province, region, country;
+	private String name;
+	@NotNull
+	private String address, streetNumber, zip, city; 
+	private String province, region, country;
 	@NotNull
 	private Double latitude, longitude, radius;
 	private List<Integer> nonWorking;
@@ -216,6 +219,12 @@ public class CompanyLocation {
 	 */
 	public void setNonWorkingDays(Set<String> nonWorkingDays) {
 		this.nonWorkingDays = nonWorkingDays;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }
