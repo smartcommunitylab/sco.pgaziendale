@@ -373,9 +373,6 @@ public class UserService {
     public List<User> getUserByEmployeeCode(String campaign, String companyCode, String userCode) {
         return userRepository.findByCampaignAndCompanyAndEmployeeCode(campaign, companyCode, "^" + userCode+"$");
     }
-    public Optional<User> getUserByCampaignAndCompanyAndKey(String campaign, String companyCode, String userCode) {
-    	return userRepository.findOneByCampaignAndCompanyAndKey(campaign, companyCode, userCode);
-    }
     public User getUserByPlayerId(String playerId) {
     	return userRepository.findByPlayerId(playerId).orElse(null);
     }

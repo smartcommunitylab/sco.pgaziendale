@@ -505,17 +505,18 @@ public class CompanyService {
 			locationIds.add(id);
 			
 			loc.setId(id);
-			loc.setAddress(stringValue(l[1], i+1, 1, true));
-			loc.setStreetNumber(stringValue(l[2], i+1, 2, false));
-			loc.setZip(stringValue(l[3], i+1, 3, true));
-			loc.setCity(stringValue(l[4], i+1, 4, true));
-			loc.setProvince(stringValue(l[5], i+1, 5, true));
-			loc.setRegion(stringValue(l[6], i+1, 6, true));
-			loc.setCountry(stringValue(l[7], i+1, 7, false));
+			loc.setName(stringValue(l[1], i+1, 1, true));			
+			loc.setAddress(stringValue(l[2], i+1, 2, true));
+			loc.setStreetNumber(stringValue(l[3], i+1, 3, false));
+			loc.setZip(stringValue(l[4], i+1, 4, true));
+			loc.setCity(stringValue(l[5], i+1, 5, true));
+			loc.setProvince(stringValue(l[6], i+1, 6, false));
+			loc.setRegion(stringValue(l[7], i+1, 7, false));
+			loc.setCountry(stringValue(l[8], i+1, 8, false));
 
-			Double radius = doubeValue(l[8], i+1, 8, false);
-			if (radius == null) radius = 200d; 
-			loc.setRadius(radius);
+			//Double radius = doubeValue(l[9], i+1, 8, false);
+			//if (radius == null) radius = 200d; 
+			loc.setRadius(200d);
 			loc.setLatitude(doubeValue(l[9], i+1, 9, true));
 			loc.setLongitude(doubeValue(l[10], i+1, 10, true));
 
@@ -607,9 +608,9 @@ public class CompanyService {
 		if(blocked) {
 			List<String> campaigns = new ArrayList<>(employee.getCampaigns());
 			for(String campaignId : campaigns) {
-				Optional<User> opt = userService.getUserByCampaignAndCompanyAndKey(campaignId, company.getCode(), employee.getCode());
-				if(opt.isPresent()) {
-					User user = opt.get();
+				List<User> users = userService.getUserByEmployeeCode(campaignId, company.getCode(), employee.getCode());
+				if(!users.isEmpty()) {
+					User user = users.get(0);
 					try {
 						campaignService.unsubscribePlayer(campaignId, user.getPlayerId());
 						campaignService.unsubscribeUser(user, campaignId);

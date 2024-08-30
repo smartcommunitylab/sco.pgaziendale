@@ -510,7 +510,7 @@ public class TrackingDataService {
 			}
 			List<User> users = new LinkedList<>();
 			for (Employee e: employees) {
-				users.addAll(userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, c.getCode(), e.getCode()));
+				users.addAll(userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, c.getCode(), "^" + e.getCode()+"$"));
 			}
 			criteria = criteria.and("playerId").in(users.stream().map(u -> u.getPlayerId()).collect(Collectors.toList()));
 		} else if (location != null && companyId != null) {
@@ -960,7 +960,6 @@ public class TrackingDataService {
 			String[] ids = id.split(";");
 			res.add(ids[0]);
 			res.add(ids[1]);
-			return res;
 		} else  {
 			res.add(id);
 		}
