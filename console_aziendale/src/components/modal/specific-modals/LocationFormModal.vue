@@ -4,6 +4,150 @@
     <template v-slot:body>
       <form action="" id="addLocation">
         <div class="mb-20">
+          <div>
+            <v-row>
+              <v-col cols="12">
+                <v-divider></v-divider>
+                <p class="text-subtitle-1 mt-5">Dati Sede</p>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="4">
+                <v-text-field
+                  label="Identificativo"
+                  placeholder="Identificativo *"
+                  type="text"
+                  name="campaignCode"
+                  id="campaignCode"
+                  :disabled="disabled"
+                  v-model.trim="$v.id.$model"
+                  :error-messages="idErrors"
+                  @input="$v.id.$touch()"
+                  @blur="$v.id.$touch()"
+                  outlined
+                >
+                  <template v-slot:append>
+                    <v-tooltip left nudge-bottom="50px" v-if="$v.id.$model == ''">
+                      <template v-slot:activator="{ on }">
+                        <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                      </template>
+                      Codice univoco della sede
+                    </v-tooltip>
+                  </template>
+                </v-text-field>
+              </v-col>
+              <v-col cols="4">
+                <v-text-field
+                  label="Indirizzo"
+                  placeholder="Indirizzo *"
+                  type="text"
+                  name="campaignAddress"
+                  id="campaignAddress"
+                  v-model.trim="$v.address.$model"
+                  :error-messages="addressErrors"
+                  required
+                  @input="$v.address.$touch()"
+                  @blur="$v.address.$touch()"
+                  outlined
+                ></v-text-field>
+              </v-col>
+              <v-col cols="4">
+                <v-text-field
+                  label="Numero"
+                  placeholder="Numero *"
+                  type="text"
+                  name="campaignstreetNumber"
+                  id="campaignstreetNumber"
+                  v-model.trim="$v.streetNumber.$model"
+                  :error-messages="streetNumberErrors"
+                  required
+                  @input="$v.streetNumber.$touch()"
+                  @blur="$v.streetNumber.$touch()"
+                  outlined
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="4">
+                <v-text-field
+                  label="CAP"
+                  placeholder="CAP *"
+                  type="text"
+                  name="campaignZip"
+                  id="campaignZip"
+                  v-model.trim="$v.zip.$model"
+                  :error-messages="zipErrors"
+                  required
+                  @input="$v.zip.$touch()"
+                  @blur="$v.zip.$touch()"
+                  outlined
+                ></v-text-field>
+              </v-col>
+              <v-col cols="4">
+                <v-text-field
+                  label="Cittá"
+                  placeholder="Cittá *"
+                  type="text"
+                  name="campaignCity"
+                  id="campaignCity"
+                  v-model.trim="$v.city.$model"
+                  :error-messages="cityErrors"
+                  required
+                  @input="$v.city.$touch()"
+                  @blur="$v.city.$touch()"
+                  outlined
+                ></v-text-field>
+              </v-col>
+              <v-col cols="4">
+                <v-autocomplete
+                  label="Provincia"
+                  placeholder="Provincia *"
+                  name="campaignProvince"
+                  id="campaignProvince"
+                  v-model.trim="$v.province.$model"
+                  :items="listaProvince"
+                  :error-messages="provinceErrors"
+                  required
+                  @input="$v.province.$touch()"
+                  @blur="$v.province.$touch()"
+                  outlined
+                ></v-autocomplete>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <v-autocomplete
+                  label="Regione"
+                  placeholder="Regione *"
+                  name="campaignRegion"
+                  id="campaignRegion"
+                  v-model.trim="$v.region.$model"
+                  :items="listaRegioni"
+                  :error-messages="regionErrors"
+                  required
+                  @input="$v.region.$touch()"
+                  @blur="$v.region.$touch()"
+                  outlined
+                ></v-autocomplete>
+              </v-col>
+              <v-col>
+                <v-text-field
+                  label="Stato"
+                  placeholder="Stato *"
+                  type="text"
+                  name="campaignCountry"
+                  id="campaignCountry"
+                  v-model.trim="$v.country.$model"
+                  :error-messages="countryErrors"
+                  required
+                  @input="$v.country.$touch()"
+                  @blur="$v.country.$touch()"
+                  outlined
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </div>
           <v-row>
             <v-col cols="12" class="mb-0">
               <p class="text-subtitle-1 mb-0">Localizzazione</p>
@@ -21,9 +165,85 @@
                 />
               </div>
             </v-col>
-            <v-col cols="4" align-self="center" class="mt-6">
-              <v-row class="p-0 mx-1" justify="center">
-                <v-col>
+            <v-col cols="4">
+              <div class="tab-container">
+                <p>
+                  Per poter impostare una posizione è necessario indicare l’indirizzo
+                  della sede.
+                </p>
+                <v-tabs v-model="tab" align-with-title>
+                  <v-tabs-slider color="primary"></v-tabs-slider>
+
+                  <v-tab key="1" @click.prevent="setNewActiveView(item.type)">
+                    In automatico
+                  </v-tab>
+                  <v-tab key="2" @click.prevent="setNewActiveView(item.type)">
+                    A mano
+                  </v-tab>
+                </v-tabs>
+                <v-tabs-items v-model="tab" class="mt-5">
+                  <v-tab-item key="1">
+                    <div>
+                      Imposta automaticamente la posizione in base all’indirizzo inserito
+                    </div>
+                    <div>
+                      <v-btn color="primary" @click="alert('auto')"
+                        >Imposta automaticamente</v-btn
+                      >
+                    </div>
+                  </v-tab-item>
+                  <v-tab-item key="2">
+                    <div>
+                      Imposta manualmente la posizione trascinando il Pin o cliccando
+                      sulla mappa. Prima di confermare la nuova posizione verifica che
+                      corrisponda alla reale posizione della sede
+                    </div>
+                    <div>
+                      <v-btn color="primary" @click="alert('manual')"
+                        >Imposta manualmente</v-btn
+                      >
+                    </div>
+                  </v-tab-item>
+                </v-tabs-items>
+              </div>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="8" class="mt-6">
+              <v-row class="p-0 mx-1">
+                <v-col cols="4">
+                  <v-text-field
+                    label="Latitudine"
+                    placeholder="Latitudine *"
+                    type="text"
+                    name="campaignLatitude"
+                    id="campaignLatitude"
+                    v-model.trim="$v.latitude.$model"
+                    :error-messages="latitudeErrors"
+                    required
+                    :disabled="true"
+                    @input="$v.latitude.$touch()"
+                    @blur="$v.latitude.$touch()"
+                    outlined
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="Longitudine"
+                    placeholder="Longitudine *"
+                    type="text"
+                    name="campaignLongitude"
+                    id="campaignLongitude"
+                    v-model.trim="$v.longitude.$model"
+                    :error-messages="longitudeErrors"
+                    required
+                    :disabled="true"
+                    @input="$v.longitude.$touch()"
+                    @blur="$v.longitude.$touch()"
+                    outlined
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
                   <v-text-field
                     label="Raggio"
                     placeholder="Raggio *"
@@ -38,196 +258,21 @@
                     @blur="$v.radius.$touch()"
                     outlined
                   >
+                    <template v-slot:append>
+                      <v-tooltip bottom nudge-bottom="10" nudge-left="75">
+                        <template v-slot:activator="{ on }">
+                          <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                        </template>
+                        Distanza in metri dalla sede all'interno di cui i viaggi dei
+                        dipendenti risultano essere validi
+                      </v-tooltip>
+                    </template>
                   </v-text-field>
                 </v-col>
-                <v-col>
-                  <v-tooltip bottom nudge-bottom="10" nudge-left="75">
-                    <template v-slot:activator="{ on }">
-                      <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
-                    </template>
-                    Distanza in metri dalla sede all'interno di cui i viaggi dei
-                    dipendenti risultano essere validi
-                  </v-tooltip>
-                </v-col>
-              </v-row>
-              <v-row class="p-0 mx-1" justify="center">
-                <v-text-field
-                  label="Latitudine"
-                  placeholder="Latitudine *"
-                  type="text"
-                  name="campaignLatitude"
-                  id="campaignLatitude"
-                  v-model.trim="$v.latitude.$model"
-                  :error-messages="latitudeErrors"
-                  required
-                  :disabled="true"
-                  @input="$v.latitude.$touch()"
-                  @blur="$v.latitude.$touch()"
-                  outlined
-                ></v-text-field>
-              </v-row>
-              <v-row class="p-0 mx-1 my-7" justify="center">
-                <v-text-field
-                  label="Longitudine"
-                  placeholder="Longitudine *"
-                  type="text"
-                  name="campaignLongitude"
-                  id="campaignLongitude"
-                  v-model.trim="$v.longitude.$model"
-                  :error-messages="longitudeErrors"
-                  required
-                  :disabled="true"
-                  @input="$v.longitude.$touch()"
-                  @blur="$v.longitude.$touch()"
-                  outlined
-                ></v-text-field>
               </v-row>
             </v-col>
           </v-row>
 
-          <v-row>
-            <v-col cols="12">
-              <v-divider></v-divider>
-
-              <p class="text-subtitle-1 mt-5">Dati Sede</p>
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="4">
-              <v-text-field
-                label="Identificativo"
-                placeholder="Identificativo *"
-                type="text"
-                name="campaignCode"
-                id="campaignCode"
-                :disabled="disabled"
-                v-model.trim="$v.id.$model"
-                :error-messages="idErrors"
-                @input="$v.id.$touch()"
-                @blur="$v.id.$touch()"
-                outlined
-              >
-                <template v-slot:append>
-                  <v-tooltip left nudge-bottom="50px" v-if="$v.id.$model == ''">
-                    <template v-slot:activator="{ on }">
-                      <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
-                    </template>
-                    Codice univoco della sede
-                  </v-tooltip>
-                </template>
-              </v-text-field>
-            </v-col>
-            <v-col cols="4">
-              <v-text-field
-                label="Indirizzo"
-                placeholder="Indirizzo *"
-                type="text"
-                name="campaignAddress"
-                id="campaignAddress"
-                v-model.trim="$v.address.$model"
-                :error-messages="addressErrors"
-                required
-                @input="$v.address.$touch()"
-                @blur="$v.address.$touch()"
-                outlined
-              ></v-text-field>
-            </v-col>
-            <v-col cols="4">
-              <v-text-field
-                label="Numero"
-                placeholder="Numero *"
-                type="text"
-                name="campaignstreetNumber"
-                id="campaignstreetNumber"
-                v-model.trim="$v.streetNumber.$model"
-                :error-messages="streetNumberErrors"
-                required
-                @input="$v.streetNumber.$touch()"
-                @blur="$v.streetNumber.$touch()"
-                outlined
-              ></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="4">
-              <v-text-field
-                label="CAP"
-                placeholder="CAP *"
-                type="text"
-                name="campaignZip"
-                id="campaignZip"
-                v-model.trim="$v.zip.$model"
-                :error-messages="zipErrors"
-                required
-                @input="$v.zip.$touch()"
-                @blur="$v.zip.$touch()"
-                outlined
-              ></v-text-field>
-            </v-col>
-            <v-col cols="4">
-              <v-text-field
-                label="Cittá"
-                placeholder="Cittá *"
-                type="text"
-                name="campaignCity"
-                id="campaignCity"
-                v-model.trim="$v.city.$model"
-                :error-messages="cityErrors"
-                required
-                @input="$v.city.$touch()"
-                @blur="$v.city.$touch()"
-                outlined
-              ></v-text-field>
-            </v-col>
-            <v-col cols="4">
-              <v-autocomplete
-                label="Provincia"
-                placeholder="Provincia *"
-                name="campaignProvince"
-                id="campaignProvince"
-                v-model.trim="$v.province.$model"
-                :items="listaProvince"
-                :error-messages="provinceErrors"
-                required
-                @input="$v.province.$touch()"
-                @blur="$v.province.$touch()"
-                outlined
-              ></v-autocomplete>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col>
-              <v-autocomplete
-                label="Regione"
-                placeholder="Regione *"
-                name="campaignRegion"
-                id="campaignRegion"
-                v-model.trim="$v.region.$model"
-                :items="listaRegioni"
-                :error-messages="regionErrors"
-                required
-                @input="$v.region.$touch()"
-                @blur="$v.region.$touch()"
-                outlined
-              ></v-autocomplete>
-            </v-col>
-            <v-col>
-              <v-text-field
-                label="Stato"
-                placeholder="Stato *"
-                type="text"
-                name="campaignCountry"
-                id="campaignCountry"
-                v-model.trim="$v.country.$model"
-                :error-messages="countryErrors"
-                required
-                @input="$v.country.$touch()"
-                @blur="$v.country.$touch()"
-                outlined
-              ></v-text-field>
-            </v-col>
-          </v-row>
           <v-row>
             <v-col cols="4" class="mt-3">
               <v-form>
@@ -258,16 +303,27 @@
                     v-model="nonWorkingDays"
                     multiple
                     chips
-                    clearable
                     label="Giorni di chiusura"
                     placeholder="Scegli i giorni di chiusura:"
                     prepend-icon="mdi-calendar"
-                    readonly
+                    deletable-chips
                     v-bind="attrs"
                     v-on="on"
-                  ></v-combobox>
+                    ref="datepick" 
+
+                  >
+                    <template v-slot:append>
+                      <v-btn  rounded color="primary" @click="openDatePicker()"> Aggiungi </v-btn>
+                    </template>
+                  </v-combobox>
+                  <button class="profile-button" v-bind="attrs" v-on="on"></button>
                 </template>
-                <v-date-picker v-model="nonWorkingDays" multiple scrollable no-title>
+                <v-date-picker
+                  v-model="nonWorkingDays"
+                  multiple
+                  scrollable
+                  no-title
+                >
                   <v-spacer></v-spacer>
                   <v-btn text @click="menu = false"> Annulla </v-btn>
                   <v-btn text color="primary" @click="$refs.menu.save(nonWorkingDays)">
@@ -309,8 +365,13 @@ export default {
     id: {
       required,
       unique() {
-        return this.actualLocation && this.actualLocation.item && this.id === this.actualLocation.item.id || !this.allLocations.items.find(l=> l.id === this.id);
-      }
+        return (
+          (this.actualLocation &&
+            this.actualLocation.item &&
+            this.id === this.actualLocation.item.id) ||
+          !this.allLocations.items.find((l) => l.id === this.id)
+        );
+      },
     },
     address: {
       required,
@@ -353,6 +414,7 @@ export default {
       popup: {
         title: "",
       },
+      tab: null,
       id: "",
       address: "",
       streetNumber: "",
@@ -367,6 +429,7 @@ export default {
       nonWorkingDays: [],
       nonWorking: [],
       arrayDays: [],
+      datepicker: null,
       menu: false,
       zoom: 13,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -533,7 +596,7 @@ export default {
     }),
 
     locationChanged(input) {
-      console.log('Changed', input.address);
+      console.log("Changed", input.address);
       this.locationSelected = input.address;
       this.latitude = this.locationSelected.pos.lat;
       this.longitude = this.locationSelected.pos.lng;
@@ -585,20 +648,20 @@ export default {
       this.radius = 200;
       this.nonWorkingDays = [];
       this.nonWorking = [];
-            this.locationSelected = {
+      this.locationSelected = {
         id: "",
-        address:  "",
+        address: "",
         streetNumber: "",
-        zip:  "",
-        city:  "",
-        province:  "",
-        region:  "",
-        latitude:  "",
-        longitude:  "",
+        zip: "",
+        city: "",
+        province: "",
+        region: "",
+        latitude: "",
+        longitude: "",
         nonWorking: [],
         nonWorkingDays: [],
-        country:  "",
-        radius: 200
+        country: "",
+        radius: 200,
       };
     },
     createLocation() {
@@ -655,6 +718,9 @@ export default {
       this.$v.$reset();
       this.closeModal();
       this.initLocation();
+    },
+    openDatePicker() {
+      this.menu=true;
     },
   },
 
@@ -739,14 +805,14 @@ export default {
     active: {
       deep: true,
       async handler(value) {
-       if (value){
-               this.setModalData();
-      if (this.typeCall == "add") {
-        this.disabled = false;
-      } else if (this.typeCall == "edit") {
-        this.disabled = true;
-      }
-       }
+        if (value) {
+          this.setModalData();
+          if (this.typeCall == "add") {
+            this.disabled = false;
+          } else if (this.typeCall == "edit") {
+            this.disabled = true;
+          }
+        }
       },
     },
     typeCall: function () {
@@ -769,6 +835,7 @@ export default {
 
   mounted() {
     this.arrayDays = locationService.getArrayDays();
+
   },
 };
 </script>
