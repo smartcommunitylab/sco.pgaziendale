@@ -32,7 +32,9 @@
                       <template v-slot:activator="{ on }">
                         <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
                       </template>
-                      Codice univoco della sede
+                      <div class="tooltip"><p>ATTENZIONE!!!</p>
+                      <p>Il codice identifcativo sede <b>DEVE ESSERE UNIVOCO E DEVE CORRISPONDERE</b> esattamente a quello utilizzato per associare i dipendenti ad una sede (sia nell’edit manuale dei dipendenti sia nell’import dipendenti d file)
+                      </p></div>
                     </v-tooltip>
                   </template>
                 </v-text-field>
@@ -172,19 +174,17 @@
                   della sede.
                 </p>
                 <v-tabs v-model="tab" align-with-title>
-                  <v-tabs-slider color="primary"></v-tabs-slider>
-
-                  <v-tab key="1" @click.prevent="setNewActiveView(item.type)">
+                  <v-tab key="1" @click.prevent="setNewActiveView(item.type)" class="text-none">
                     In automatico
                   </v-tab>
-                  <v-tab key="2" @click.prevent="setNewActiveView(item.type)">
+                  <v-tab key="2" @click.prevent="setNewActiveView(item.type)" class="text-none">
                     A mano
                   </v-tab>
                 </v-tabs>
                 <v-tabs-items v-model="tab" class="mt-5">
                   <v-tab-item key="1">
                     <div>
-                      Imposta automaticamente la posizione in base all’indirizzo inserito
+                      <i>Imposta automaticamente la posizione in base all’indirizzo inserito</i>  
                     </div>
                     <div>
                       <v-btn color="primary" @click="alert('auto')"
@@ -850,5 +850,8 @@ export default {
 }
 .map-style {
   height: 300px;
+}
+.tooltip {
+  max-width: 200px;
 }
 </style>
