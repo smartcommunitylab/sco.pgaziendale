@@ -2,9 +2,9 @@
   <modal>
     <template v-slot:header> {{ popup.title }} </template>
     <template v-slot:body>
-      <form action="" id="addLocation" >
+      <form action="" id="addLocation">
         <div class="mb-20">
-          <div >
+          <div>
             <v-row>
               <v-col cols="12">
                 <v-divider></v-divider>
@@ -33,9 +33,16 @@
                       <template v-slot:activator="{ on }">
                         <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
                       </template>
-                      <div class="tooltip"><p>ATTENZIONE!!!</p>
-                      <p>Il codice identifcativo sede <b>DEVE ESSERE UNIVOCO E DEVE CORRISPONDERE</b> esattamente a quello utilizzato per associare i dipendenti ad una sede (sia nell’edit manuale dei dipendenti sia nell’import dipendenti d file)
-                      </p></div>
+                      <div class="tooltip">
+                        <p>ATTENZIONE!!!</p>
+                        <p>
+                          Il codice identifcativo sede
+                          <b>DEVE ESSERE UNIVOCO E DEVE CORRISPONDERE</b> esattamente a
+                          quello utilizzato per associare i dipendenti ad una sede (sia
+                          nell’edit manuale dei dipendenti sia nell’import dipendenti d
+                          file)
+                        </p>
+                      </div>
                     </v-tooltip>
                   </template>
                 </v-text-field>
@@ -53,12 +60,11 @@
                   required
                   @input="$v.name.$touch()"
                   @blur="$v.name.$touch()"
-
                   outlined
                 ></v-text-field>
               </v-col>
-              </v-row>
-              <v-row>
+            </v-row>
+            <v-row>
               <v-col cols="12">
                 <v-divider></v-divider>
                 <p class="text-subtitle-1 mt-5">Indirizzo</p>
@@ -77,7 +83,10 @@
                   v-model.trim="$v.address.$model"
                   :error-messages="addressErrors"
                   required
-                  @input="$v.address.$touch();changeAddress()"
+                  @input="
+                    $v.address.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.address.$touch()"
                   outlined
                 ></v-text-field>
@@ -93,7 +102,10 @@
                   v-model.trim="$v.streetNumber.$model"
                   :error-messages="streetNumberErrors"
                   required
-                  @input="$v.streetNumber.$touch();changeAddress()"
+                  @input="
+                    $v.streetNumber.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.streetNumber.$touch()"
                   outlined
                 ></v-text-field>
@@ -111,7 +123,10 @@
                   v-model.trim="$v.zip.$model"
                   :error-messages="zipErrors"
                   required
-                  @input="$v.zip.$touch();changeAddress()"
+                  @input="
+                    $v.zip.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.zip.$touch()"
                   outlined
                 ></v-text-field>
@@ -127,7 +142,10 @@
                   v-model.trim="$v.city.$model"
                   :error-messages="cityErrors"
                   required
-                  @input="$v.city.$touch();changeAddress()"
+                  @input="
+                    $v.city.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.city.$touch()"
                   outlined
                 ></v-text-field>
@@ -143,7 +161,10 @@
                   :items="listaProvince"
                   :error-messages="provinceErrors"
                   required
-                  @input="$v.province.$touch();changeAddress()"
+                  @input="
+                    $v.province.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.province.$touch()"
                   outlined
                 ></v-autocomplete>
@@ -160,7 +181,10 @@
                   :items="listaRegioni"
                   :error-messages="regionErrors"
                   required
-                  @input="$v.region.$touch();changeAddress()"
+                  @input="
+                    $v.region.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.region.$touch()"
                   outlined
                 ></v-autocomplete>
@@ -176,7 +200,10 @@
                   v-model.trim="$v.country.$model"
                   :error-messages="countryErrors"
                   required
-                  @input="$v.country.$touch();changeAddress()"
+                  @input="
+                    $v.country.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.country.$touch()"
                   outlined
                 ></v-text-field>
@@ -197,8 +224,8 @@
                   :key="key"
                   :radius="radius"
                   v-on:poschanged="locationChanged"
-                  :addressIsValid="addresIsValid"
-                  :inputAddress="{address:inputAddress}"
+                  :initialAddresIsValid="addresIsValid"
+                  :inputAddress="{ address: inputAddress }"
                   :latLng="{ lat: latitude, lng: longitude }"
                   v-on:returnGeosearch="geoSearchResult"
                 />
@@ -206,25 +233,40 @@
             </v-col>
             <v-col cols="4">
               <div class="tab-container">
-                <p>
+                <p v-if="!showErrorLocation">
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
+                <p v-if="showErrorLocation">L'indirizzo inserito non permette il posizionamento automatico. Si prega di utilizzare il posizionamento manuale.
+</p>
                 <v-tabs v-model="tab" align-with-title>
-                  <v-tab key="1" @click.prevent="setNewActiveView(item.type)" class="text-none">
+                  <v-tab
+                    key="1"
+                    class="text-none"
+                  >
                     In automatico
                   </v-tab>
-                  <v-tab key="2" @click.prevent="setNewActiveView(item.type)" class="text-none">
+                  <v-tab
+                    key="2"
+                    class="text-none"
+                  >
                     A mano
                   </v-tab>
                 </v-tabs>
                 <v-tabs-items v-model="tab" class="mt-5">
                   <v-tab-item key="1">
                     <div>
-                      <i>Imposta automaticamente la posizione in base all’indirizzo inserito</i>  
+                      <i
+                        >Imposta automaticamente la posizione in base all’indirizzo
+                        inserito</i
+                      >
                     </div>
-                    <div >
-                      <v-btn color="primary"  :disabled="!addresIsValid" @click="autoPosition()">Imposta automaticamente</v-btn
+                    <div>
+                      <v-btn
+                        color="primary"
+                          :disabled="!addresIsValid"
+                        @click="autoPosition()"
+                        >Imposta automaticamente</v-btn
                       >
                     </div>
                   </v-tab-item>
@@ -235,7 +277,10 @@
                       corrisponda alla reale posizione della sede
                     </div>
                     <div>
-                      <v-btn color="primary" @click="alert('manual')"
+                      <v-btn
+                        color="primary"
+                        @click="manualPosition()"
+                        :disabled="$v.invalid"
                         >Imposta manualmente</v-btn
                       >
                     </div>
@@ -345,21 +390,17 @@
                     deletable-chips
                     v-bind="attrs"
                     v-on="on"
-                    ref="datepick" 
-
+                    ref="datepick"
                   >
                     <template v-slot:append>
-                      <v-btn  rounded color="primary" @click="openDatePicker()"> Aggiungi </v-btn>
+                      <v-btn rounded color="primary" @click="openDatePicker()">
+                        Aggiungi
+                      </v-btn>
                     </template>
                   </v-combobox>
                   <button class="profile-button" v-bind="attrs" v-on="on"></button>
                 </template>
-                <v-date-picker
-                  v-model="nonWorkingDays"
-                  multiple
-                  scrollable
-                  no-title
-                >
+                <v-date-picker v-model="nonWorkingDays" multiple scrollable no-title>
                   <v-spacer></v-spacer>
                   <v-btn text @click="menu = false"> Annulla </v-btn>
                   <v-btn text color="primary" @click="$refs.menu.save(nonWorkingDays)">
@@ -374,7 +415,15 @@
     </template>
     <template v-slot:footer>
       <v-btn text @click="closeThisModal" class="py-8 ml-8"> Annulla </v-btn>
-      <v-btn color="primary" text @click="saveLocation" class="py-8 ml-8"> Salva </v-btn>
+      <v-btn
+        color="primary"
+        text
+        @click="saveLocation"
+        class="py-8 ml-8"
+        :disabled="!addresIsValid || $v.$invalid"
+      >
+        Salva
+      </v-btn>
     </template>
   </modal>
 </template>
@@ -408,7 +457,7 @@ export default {
         );
       },
     },
-        name: {
+    name: {
       required,
     },
     address: {
@@ -453,14 +502,15 @@ export default {
       popup: {
         title: "",
       },
-      timerId:null,
-      geoResults:[],
+      showErrorLocation: false,
+      timerId: null,
+      geoResults: [],
       addresIsValid: false,
-      inputAddress:"",
+      inputAddress: "",
       tab: null,
       id: "",
       address: "",
-      name:"",
+      name: "",
       streetNumber: "",
       zip: "",
       city: "",
@@ -638,22 +688,31 @@ export default {
       addLocation: "addLocation",
       updateLocation: "updateLocation",
     }),
-    geoSearchResult(results){
+    geoSearchResult(results) {
       console.log(results);
-      if (results.length > 0) {
-        this.addresIsValid = true;
-        this.geoResults=results;
-        
+      if (!this.$v.$invalid) {
+        if (results.length > 0) {
+          this.addresIsValid = true;
+          this.geoResults = results;
+          this.showErrorLocation=false;
+
+        } else {
+          this.showErrorLocation=true;
+          this.addresIsValid = false;
+        }
       }
     },
     autoPosition() {
-      if (this.geoResults.length > 0){
-      console.log("AutoPosition",this.geoResults[0]);
-      // this.locationChanged(this.geoResults[0]);
-      this.$refs.geolocationSelector.onSearch({location:this.geoResults[0]});
-
-      
+      if (this.geoResults.length > 0) {
+        console.log("AutoPosition", this.geoResults[0]);
+        // this.locationChanged(this.geoResults[0]);
+        this.$refs.geolocationSelector.onSearch({ location: this.geoResults[0] });
       }
+    },
+    manualPosition() {
+      this.$refs.geolocationSelector.enableMap();
+      this.addresIsValid =true;
+      console.log("ManualPosition",this.addresIsValid);
     },
     locationChanged(input) {
       console.log("Changed", input.address);
@@ -743,17 +802,21 @@ export default {
       };
     },
     changeAddress() {
-      // this.inputAddress=this.address+' '+this.streetNumber+', '+this.zip+', '+this.city+', '+this.province+', '+this.region+', '+this.country;
-      // this.$_.debounce(() => {
-      // this.$refs.geolocationSelector.changeAddress(this.inputAddress);
-      // },500, false)();
-      // clearTimeout(this.timerId)
-
-    // delay new call 500ms
-    // this._timerId = setTimeout(() => {
-      this.inputAddress=this.address+' '+this.streetNumber+', '+this.zip+', '+this.city+', '+this.province+', '+this.region+', '+this.country;
+      this.inputAddress =
+        this.address +
+        " " +
+        this.streetNumber +
+        ", " +
+        this.zip +
+        ", " +
+        this.city +
+        ", " +
+        this.province +
+        ", " +
+        this.region +
+        ", " +
+        this.country;
       this.$refs.geolocationSelector.changeAddress(this.inputAddress);
-    // }, 500)
     },
     setModalData() {
       if (this.typeCall == "add") {
@@ -794,7 +857,7 @@ export default {
       this.initLocation();
     },
     openDatePicker() {
-      this.menu=true;
+      this.menu = true;
     },
   },
 
@@ -915,13 +978,13 @@ export default {
 
   mounted() {
     this.arrayDays = locationService.getArrayDays();
-    var inputNumber = document.getElementById('campaignstreetNumber');
+    var inputNumber = document.getElementById("campaignstreetNumber");
 
     setTimeout(() => {
-    if (inputNumber?.matches(':autofill')) {
-      this.changeAddress();
+      if (inputNumber?.matches(":autofill")) {
+        this.changeAddress();
       }
-}, 500);
+    }, 500);
   },
 };
 </script>

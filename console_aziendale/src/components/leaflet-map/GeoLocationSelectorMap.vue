@@ -27,13 +27,13 @@
       @dragstart="dragging = true"
       @dragend="dragging = false"
     >
-      <l-tooltip :content="tooltipContent" :options="{ permanent: true }" />
+      <!-- <l-tooltip :content="tooltipContent" :options="{ permanent: true }" /> -->
     </l-marker>
   </l-map>
 </template>
 
 <script>
-import { LMap, LMarker, LTileLayer, LTooltip } from "vue2-leaflet";
+import { LMap, LMarker, LTileLayer } from "vue2-leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import GeoSearch from '@/components/leaflet-map/Geosearch.vue'
 import { mapState } from "vuex";
@@ -45,7 +45,6 @@ export default {
     LMap,
     LTileLayer,
     LMarker,
-    LTooltip,
     "v-geosearch": GeoSearch
   },
 
@@ -64,7 +63,7 @@ export default {
       type: Object,
       required: true,
     },
-    addresIsValid: {
+    initialAddresIsValid: {
       type: Boolean,
       default: false,
     },
@@ -131,12 +130,12 @@ if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
     },
     enableMap() {
       
-      this.$refs.map.dragging.enable();
-      this.$refs.map.touchZoom.enable();
-      this.$refs.map.doubleClickZoom.enable();
-      this.$refs.map.scrollWheelZoom.enable();
-      this.$refs.map.boxZoom.enable();
-      this.$refs.map.keyboard.enable();
+      this.$refs.map.mapObject.dragging.enable();
+      this.$refs.map.mapObject.touchZoom.enable();
+      this.$refs.map.mapObject.doubleClickZoom.enable();
+      this.$refs.map.mapObject.scrollWheelZoom.enable();
+      this.$refs.map.mapObject.boxZoom.enable();
+      this.$refs.map.mapObject.keyboard.enable();
       
     if ( this.$refs.map.tap)  this.$refs.map.tap.enable();
     },
@@ -194,6 +193,7 @@ if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
       return address;
     },
     async onMapClick(value) {
+      console.log('this.addresIsValid',this.addresIsValid);
       if (!this.addresIsValid) return;
       this.position = value.latlng;
     },
@@ -219,6 +219,9 @@ if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
   computed: {
     ...mapState("location", ["actualLocation"]),
     ...mapState("modal", ["active"]),
+    addresIsValid() {
+      return this.initialAddresIsValid;
+    },
     tooltipContent() {
       if (this.dragging) return "...";
       if (this.loading) return "Loading...";
@@ -284,7 +287,5 @@ if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
   border: solid 1px;
   border-radius: 8px;
 }
-.leaflet-control-containe .leaflet-control-geosearch {
-  visibility: hidden;
-}
+
 </style>
