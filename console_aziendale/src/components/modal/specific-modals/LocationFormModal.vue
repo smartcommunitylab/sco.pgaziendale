@@ -355,7 +355,13 @@
               </v-row>
             </v-col>
           </v-row>
-
+          <v-row v-if="latitude && longitude">
+            <v-col cols="12">
+              <v-divider></v-divider>
+              <p class="text-subtitle-1 mt-5">ATTENZIONE!!! La posizione sarà utilizzata per la validazione dei viaggi dei dipendenti. Saranno validi solo i viaggi che iniziano o finiscono all'interno della zona delimitata dal cerchio rosso.
+</p>
+            </v-col>
+          </v-row>
           <v-row>
             <v-col cols="4" class="mt-3">
               <v-form>
