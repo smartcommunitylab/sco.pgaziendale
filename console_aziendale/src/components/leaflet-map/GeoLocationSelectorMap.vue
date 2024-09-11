@@ -100,6 +100,7 @@ export default {
       },
       zoom: 10,
       dragging: false,
+      markerClick:false
     };
   },
 
@@ -118,18 +119,19 @@ export default {
       }, 250);
     },
     disableMap() {
-      this.$refs.map.mapObject.invalidateSize();
+      this.markerClick = false;
+        this.$refs.map.mapObject.invalidateSize();
         this.$refs.map.mapObject.dragging.disable();
         this.$refs.map.mapObject.touchZoom.disable();
         this.$refs.map.mapObject.doubleClickZoom.disable();
         this.$refs.map.mapObject.scrollWheelZoom.disable();
         this.$refs.map.mapObject.boxZoom.disable();
         this.$refs.map.mapObject.keyboard.disable();
-if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
+        if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
 
     },
     enableMap() {
-      
+      this.markerClick=true;
       this.$refs.map.mapObject.dragging.enable();
       this.$refs.map.mapObject.touchZoom.enable();
       this.$refs.map.mapObject.doubleClickZoom.enable();
@@ -194,7 +196,7 @@ if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
     },
     async onMapClick(value) {
       console.log('this.addresIsValid',this.addresIsValid);
-      if (!this.addresIsValid) return;
+      if (!this.addresIsValid || !this.markerClick) return;
       this.position = value.latlng;
     },
     onSearch(value) {

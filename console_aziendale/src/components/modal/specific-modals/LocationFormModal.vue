@@ -243,12 +243,14 @@
                   <v-tab
                     key="1"
                     class="text-none"
+                    @click="setTab(1)"
                   >
                     In automatico
                   </v-tab>
                   <v-tab
                     key="2"
                     class="text-none"
+                    @click="setTab(2)"
                   >
                     A mano
                   </v-tab>
@@ -280,7 +282,7 @@
                       <v-btn
                         color="primary"
                         @click="manualPosition()"
-                        :disabled="$v.invalid"
+                        :disabled="$v.$invalid"
                         >Imposta manualmente</v-btn
                       >
                     </div>
@@ -701,6 +703,23 @@ export default {
           this.addresIsValid = false;
         }
       }
+    },
+    setTab(value) {
+      if (value == 1) {
+        this.$refs.geolocationSelector.disableMap();
+        if (!this.$v.$invalid) {
+        if (this.geoResults.length > 0) {
+          this.addresIsValid = true;
+          this.showErrorLocation=false;
+
+        } else {
+          this.showErrorLocation=true;
+          this.addresIsValid = false;
+        }
+      }
+      } else {
+        this.$refs.geolocationSelector.enableMap();
+        }
     },
     autoPosition() {
       if (this.geoResults.length > 0) {
