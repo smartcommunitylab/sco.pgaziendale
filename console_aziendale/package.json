@@ -16,6 +16,7 @@
     "dayjs": "^1.10.3",
     "leaflet": "^1.7.1",
     "leaflet-geosearch": "^3.3.0",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "oidc-client-ts": "^2.3.0",
     "postcss": "^7.0.35",
@@ -34,7 +35,7 @@
     "vue2-leaflet": "^2.6.0",
     "vue2-leaflet-geosearch": "^1.0.6",
     "vuelidate": "^0.7.6",
-    "vuetify": "^2.4.0",
+    "vuetify": "^2.7.1",
     "vuex": "^3.6.0",
     "vuex-persistedstate": "^4.0.0-beta.3"
   },
@@ -70,7 +71,7 @@
     "last 2 versions",
     "not dead"
   ],
-	"engines": {
+  "engines": {
     "node": "16.8.0"
-  }	
+  }
 }
