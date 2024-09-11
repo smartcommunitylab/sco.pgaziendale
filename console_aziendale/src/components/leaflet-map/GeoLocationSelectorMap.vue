@@ -3,6 +3,7 @@
     ref="map"
     class="map-style"
     @click="onMapClick"
+
     @ready="initMap()"
     :zoom="zoom"
     :center="[
@@ -26,16 +27,16 @@
       @dragstart="dragging = true"
       @dragend="dragging = false"
     >
-      <l-tooltip :content="tooltipContent" :options="{ permanent: true }" />
+      <!-- <l-tooltip :content="tooltipContent" :options="{ permanent: true }" /> -->
     </l-marker>
   </l-map>
 </template>
 
 <script>
-import { LMap, LMarker, LTileLayer, LTooltip } from "vue2-leaflet";
+import { LMap, LMarker, LTileLayer } from "vue2-leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import GeoSearch from '@/components/leaflet-map/Geosearch.vue'
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 
 export default {
   name: "LocationInput",
@@ -44,12 +45,10 @@ export default {
     LMap,
     LTileLayer,
     LMarker,
-    LTooltip,
     "v-geosearch": GeoSearch
   },
 
   props: {
-
     latLng: {
       lat: Number,
       lng: Number,
@@ -64,6 +63,10 @@ export default {
       type: Object,
       required: true,
     },
+    initialAddresIsValid: {
+      type: Boolean,
+      default: false,
+    },
 
     defaultLocation: {
       type: Object,
@@ -76,17 +79,19 @@ export default {
 
   data() {
     return {
+      timerId:null,
       loading: false,
       geoSearchOptions: {
         provider: new OpenStreetMapProvider(),
         animateZoom: true,
         showMarker: false,
         autoClose: true,
-        style: 'bar',
-        searchLabel: 'Inserisci l\'indirizzo'
+        style: "bar",
+        searchLabel: "Inserisci l'indirizzo",
       },
       userLocation: {},
       position: {},
+      inputAddress: {},
       address: "",
       tileProvider: {
         attribution:
@@ -99,20 +104,57 @@ export default {
   },
 
   methods: {
+
     initMap() {
       setTimeout(() => {
-       if (this.actualLocation)
-{        this.position ={ lat: this.actualLocation?.item?.latitude, lng: this.actualLocation?.item?.longitude };
-}        this.zoom=14;
-        this.$refs.map.mapObject.invalidateSize();
+        if (this.actualLocation) {
+          this.position = {
+            lat: this.actualLocation?.item?.latitude,
+            lng: this.actualLocation?.item?.longitude,
+          };
+        }
+        this.zoom = 14;
+        this.disableMap();
       }, 250);
+    },
+    disableMap() {
+      this.$refs.map.mapObject.invalidateSize();
+        this.$refs.map.mapObject.dragging.disable();
+        this.$refs.map.mapObject.touchZoom.disable();
+        this.$refs.map.mapObject.doubleClickZoom.disable();
+        this.$refs.map.mapObject.scrollWheelZoom.disable();
+        this.$refs.map.mapObject.boxZoom.disable();
+        this.$refs.map.mapObject.keyboard.disable();
+if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
+
+    },
+    enableMap() {
+      
+      this.$refs.map.mapObject.dragging.enable();
+      this.$refs.map.mapObject.touchZoom.enable();
+      this.$refs.map.mapObject.doubleClickZoom.enable();
+      this.$refs.map.mapObject.scrollWheelZoom.enable();
+      this.$refs.map.mapObject.boxZoom.enable();
+      this.$refs.map.mapObject.keyboard.enable();
+      
+    if ( this.$refs.map.tap)  this.$refs.map.tap.enable();
+    },
+    async changeAddress(value) {
+      console.log("change");
+      clearTimeout(this.timerId)
+      this.timerId = setTimeout(async () => {
+      const results = await this.geoSearchOptions?.provider?.search({ query: value });
+      console.log(results);
+      this.$emit('returnGeosearch', results);
+    }, 500)
     },
     getStringAddress(structuredValue) {
       var returnAddress = "";
       if (structuredValue.amenity) returnAddress += "<br />" + structuredValue.amenity;
       if (structuredValue.office) returnAddress += "<br />" + structuredValue.office;
       if (structuredValue.road) returnAddress += "<br />" + structuredValue.road;
-      if (structuredValue.house_number) returnAddress += ", " + structuredValue.house_number;
+      if (structuredValue.house_number)
+        returnAddress += ", " + structuredValue.house_number;
       if (structuredValue.city) returnAddress += "<br />" + structuredValue.city;
       if (structuredValue.country) returnAddress += "<br />" + structuredValue.country;
       if (structuredValue.postcode) returnAddress += "<br />" + structuredValue.postcode;
@@ -151,10 +193,12 @@ export default {
       return address;
     },
     async onMapClick(value) {
+      console.log('this.addresIsValid',this.addresIsValid);
+      if (!this.addresIsValid) return;
       this.position = value.latlng;
     },
     onSearch(value) {
-      console.log(value);
+      // console.log(value);
       const loc = value.location;
       this.position = { lat: loc.y, lng: loc.x };
     },
@@ -174,7 +218,10 @@ export default {
 
   computed: {
     ...mapState("location", ["actualLocation"]),
-          ...mapState("modal", ["active"]),
+    ...mapState("modal", ["active"]),
+    addresIsValid() {
+      return this.initialAddresIsValid;
+    },
     tooltipContent() {
       if (this.dragging) return "...";
       if (this.loading) return "Loading...";
@@ -189,16 +236,16 @@ export default {
   },
 
   watch: {
-     actualLocation: {
+    actualLocation: {
       deep: true,
       async handler() {
-        this.initMap()
+        this.initMap();
       },
     },
     active: {
       deep: true,
       async handler() {
-        this.initMap()
+        this.initMap();
       },
     },
     position: {
@@ -208,7 +255,15 @@ export default {
         this.$emit("poschanged", { position: value, address: this.address });
       },
     },
+    inputAddress: {
+      deep: true,
+      async handler(value) {
+        console.log(value);
+        const results = await this.geoSearchOptions?.provider?.search({ query: value.string });
+        console.log(results);
 
+      },
+    }
     // latLng(){
     //   //Fai una query per latlong come search
     //   console.log(this.latLng)
@@ -218,7 +273,7 @@ export default {
   activated() {
     this.initMap();
   },
-  
+
   mounted() {
     this.getUserPosition();
     this.$refs.map.mapObject.on("geosearch/showlocation", this.onSearch);
@@ -228,8 +283,9 @@ export default {
 </script>
 
 <style scoped>
-.map-style{
+.map-style {
   border: solid 1px;
   border-radius: 8px;
 }
+
 </style>

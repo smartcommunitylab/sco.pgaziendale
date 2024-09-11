@@ -30,4 +30,7 @@ text-align:center;
   padding:8px;
   margin:auto;
 }
+.leaflet-control-container .leaflet-control-geosearch {
+  visibility: hidden;
+}
 

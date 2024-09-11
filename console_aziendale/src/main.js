@@ -27,7 +27,6 @@ import CrosshairsGps from "vue-material-design-icons/CrosshairsGps";
 import CalendarRemove from "vue-material-design-icons/CalendarRemove";
 import Code from "vue-material-design-icons/FormTextboxPassword";
 import Help from "vue-material-design-icons/HelpCircle";
-
 import axios from 'axios'
 import {router} from "./routes.js"
 import { store } from './store'
@@ -135,6 +134,8 @@ axios.interceptors.response.use(
 )
 Vue.use(Vuelidate)
 Vue.use(Loading);
+import _ from 'lodash';    
+Object.defineProperty(Vue.prototype, '$_', { value: _ });
 new Vue({
   render: h => h(App),
   router,

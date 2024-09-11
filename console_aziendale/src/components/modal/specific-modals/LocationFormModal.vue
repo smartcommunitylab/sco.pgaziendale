@@ -13,13 +13,14 @@
             </v-row>
 
             <v-row>
-              <v-col cols="4">
+              <v-col cols="6">
                 <v-text-field
                   label="Identificativo"
                   placeholder="Identificativo *"
                   type="text"
                   name="campaignCode"
                   id="campaignCode"
+                  autocomplete="null"
                   :disabled="disabled"
                   v-model.trim="$v.id.$model"
                   :error-messages="idErrors"
@@ -32,13 +33,45 @@
                       <template v-slot:activator="{ on }">
                         <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
                       </template>
-                      <div class="tooltip"><p>ATTENZIONE!!!</p>
-                      <p>Il codice identifcativo sede <b>DEVE ESSERE UNIVOCO E DEVE CORRISPONDERE</b> esattamente a quello utilizzato per associare i dipendenti ad una sede (sia nell’edit manuale dei dipendenti sia nell’import dipendenti d file)
-                      </p></div>
+                      <div class="tooltip">
+                        <p>ATTENZIONE!!!</p>
+                        <p>
+                          Il codice identifcativo sede
+                          <b>DEVE ESSERE UNIVOCO E DEVE CORRISPONDERE</b> esattamente a
+                          quello utilizzato per associare i dipendenti ad una sede (sia
+                          nell’edit manuale dei dipendenti sia nell’import dipendenti d
+                          file)
+                        </p>
+                      </div>
                     </v-tooltip>
                   </template>
                 </v-text-field>
               </v-col>
+              <v-col cols="4">
+                <v-text-field
+                  label="Denominazione"
+                  placeholder="Denominazione *"
+                  type="text"
+                  name="denominazione"
+                  id="denominazione"
+                  autocomplete="null"
+                  v-model.trim="$v.name.$model"
+                  :error-messages="nameErrors"
+                  required
+                  @input="$v.name.$touch()"
+                  @blur="$v.name.$touch()"
+                  outlined
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-divider></v-divider>
+                <p class="text-subtitle-1 mt-5">Indirizzo</p>
+              </v-col>
+            </v-row>
+
+            <v-row>
               <v-col cols="4">
                 <v-text-field
                   label="Indirizzo"
@@ -46,10 +79,14 @@
                   type="text"
                   name="campaignAddress"
                   id="campaignAddress"
+                  autocomplete="null"
                   v-model.trim="$v.address.$model"
                   :error-messages="addressErrors"
                   required
-                  @input="$v.address.$touch()"
+                  @input="
+                    $v.address.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.address.$touch()"
                   outlined
                 ></v-text-field>
@@ -61,10 +98,14 @@
                   type="text"
                   name="campaignstreetNumber"
                   id="campaignstreetNumber"
+                  autocomplete="null"
                   v-model.trim="$v.streetNumber.$model"
                   :error-messages="streetNumberErrors"
                   required
-                  @input="$v.streetNumber.$touch()"
+                  @input="
+                    $v.streetNumber.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.streetNumber.$touch()"
                   outlined
                 ></v-text-field>
@@ -78,10 +119,14 @@
                   type="text"
                   name="campaignZip"
                   id="campaignZip"
+                  autocomplete="null"
                   v-model.trim="$v.zip.$model"
                   :error-messages="zipErrors"
                   required
-                  @input="$v.zip.$touch()"
+                  @input="
+                    $v.zip.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.zip.$touch()"
                   outlined
                 ></v-text-field>
@@ -93,10 +138,14 @@
                   type="text"
                   name="campaignCity"
                   id="campaignCity"
+                  autocomplete="null"
                   v-model.trim="$v.city.$model"
                   :error-messages="cityErrors"
                   required
-                  @input="$v.city.$touch()"
+                  @input="
+                    $v.city.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.city.$touch()"
                   outlined
                 ></v-text-field>
@@ -107,11 +156,15 @@
                   placeholder="Provincia *"
                   name="campaignProvince"
                   id="campaignProvince"
+                  autocomplete="null"
                   v-model.trim="$v.province.$model"
                   :items="listaProvince"
                   :error-messages="provinceErrors"
                   required
-                  @input="$v.province.$touch()"
+                  @input="
+                    $v.province.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.province.$touch()"
                   outlined
                 ></v-autocomplete>
@@ -128,7 +181,10 @@
                   :items="listaRegioni"
                   :error-messages="regionErrors"
                   required
-                  @input="$v.region.$touch()"
+                  @input="
+                    $v.region.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.region.$touch()"
                   outlined
                 ></v-autocomplete>
@@ -140,10 +196,14 @@
                   type="text"
                   name="campaignCountry"
                   id="campaignCountry"
+                  autocomplete="null"
                   v-model.trim="$v.country.$model"
                   :error-messages="countryErrors"
                   required
-                  @input="$v.country.$touch()"
+                  @input="
+                    $v.country.$touch();
+                    changeAddress();
+                  "
                   @blur="$v.country.$touch()"
                   outlined
                 ></v-text-field>
@@ -160,34 +220,52 @@
               <div class="map-style" v-if="locationSelected">
                 <geolocation-selector
                   v-model="locationSelected"
+                  ref="geolocationSelector"
                   :key="key"
                   :radius="radius"
                   v-on:poschanged="locationChanged"
+                  :initialAddresIsValid="addresIsValid"
+                  :inputAddress="{ address: inputAddress }"
                   :latLng="{ lat: latitude, lng: longitude }"
+                  v-on:returnGeosearch="geoSearchResult"
                 />
               </div>
             </v-col>
             <v-col cols="4">
               <div class="tab-container">
-                <p>
+                <p v-if="!showErrorLocation">
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
+                <p v-if="showErrorLocation">L'indirizzo inserito non permette il posizionamento automatico. Si prega di utilizzare il posizionamento manuale.
+</p>
                 <v-tabs v-model="tab" align-with-title>
-                  <v-tab key="1" @click.prevent="setNewActiveView(item.type)" class="text-none">
+                  <v-tab
+                    key="1"
+                    class="text-none"
+                  >
                     In automatico
                   </v-tab>
-                  <v-tab key="2" @click.prevent="setNewActiveView(item.type)" class="text-none">
+                  <v-tab
+                    key="2"
+                    class="text-none"
+                  >
                     A mano
                   </v-tab>
                 </v-tabs>
                 <v-tabs-items v-model="tab" class="mt-5">
                   <v-tab-item key="1">
                     <div>
-                      <i>Imposta automaticamente la posizione in base all’indirizzo inserito</i>  
+                      <i
+                        >Imposta automaticamente la posizione in base all’indirizzo
+                        inserito</i
+                      >
                     </div>
                     <div>
-                      <v-btn color="primary" @click="alert('auto')"
+                      <v-btn
+                        color="primary"
+                          :disabled="!addresIsValid"
+                        @click="autoPosition()"
                         >Imposta automaticamente</v-btn
                       >
                     </div>
@@ -199,7 +277,10 @@
                       corrisponda alla reale posizione della sede
                     </div>
                     <div>
-                      <v-btn color="primary" @click="alert('manual')"
+                      <v-btn
+                        color="primary"
+                        @click="manualPosition()"
+                        :disabled="$v.invalid"
                         >Imposta manualmente</v-btn
                       >
                     </div>
@@ -309,21 +390,17 @@
                     deletable-chips
                     v-bind="attrs"
                     v-on="on"
-                    ref="datepick" 
-
+                    ref="datepick"
                   >
                     <template v-slot:append>
-                      <v-btn  rounded color="primary" @click="openDatePicker()"> Aggiungi </v-btn>
+                      <v-btn rounded color="primary" @click="openDatePicker()">
+                        Aggiungi
+                      </v-btn>
                     </template>
                   </v-combobox>
                   <button class="profile-button" v-bind="attrs" v-on="on"></button>
                 </template>
-                <v-date-picker
-                  v-model="nonWorkingDays"
-                  multiple
-                  scrollable
-                  no-title
-                >
+                <v-date-picker v-model="nonWorkingDays" multiple scrollable no-title>
                   <v-spacer></v-spacer>
                   <v-btn text @click="menu = false"> Annulla </v-btn>
                   <v-btn text color="primary" @click="$refs.menu.save(nonWorkingDays)">
@@ -338,7 +415,15 @@
     </template>
     <template v-slot:footer>
       <v-btn text @click="closeThisModal" class="py-8 ml-8"> Annulla </v-btn>
-      <v-btn color="primary" text @click="saveLocation" class="py-8 ml-8"> Salva </v-btn>
+      <v-btn
+        color="primary"
+        text
+        @click="saveLocation"
+        class="py-8 ml-8"
+        :disabled="!addresIsValid || $v.$invalid"
+      >
+        Salva
+      </v-btn>
     </template>
   </modal>
 </template>
@@ -350,7 +435,6 @@ import { locationService } from "@/services";
 import GeoLocationSelectorMapVue from "@/components/leaflet-map/GeoLocationSelectorMap.vue";
 import Modal from "@/components/modal/ModalStructure.vue";
 import { mapActions, mapState } from "vuex";
-
 export default {
   components: {
     "geolocation-selector": GeoLocationSelectorMapVue,
@@ -373,9 +457,13 @@ export default {
         );
       },
     },
+    name: {
+      required,
+    },
     address: {
       required,
     },
+
     streetNumber: {
       required,
     },
@@ -414,9 +502,15 @@ export default {
       popup: {
         title: "",
       },
+      showErrorLocation: false,
+      timerId: null,
+      geoResults: [],
+      addresIsValid: false,
+      inputAddress: "",
       tab: null,
       id: "",
       address: "",
+      name: "",
       streetNumber: "",
       zip: "",
       city: "",
@@ -594,14 +688,39 @@ export default {
       addLocation: "addLocation",
       updateLocation: "updateLocation",
     }),
+    geoSearchResult(results) {
+      console.log(results);
+      if (!this.$v.$invalid) {
+        if (results.length > 0) {
+          this.addresIsValid = true;
+          this.geoResults = results;
+          this.showErrorLocation=false;
 
+        } else {
+          this.showErrorLocation=true;
+          this.addresIsValid = false;
+        }
+      }
+    },
+    autoPosition() {
+      if (this.geoResults.length > 0) {
+        console.log("AutoPosition", this.geoResults[0]);
+        // this.locationChanged(this.geoResults[0]);
+        this.$refs.geolocationSelector.onSearch({ location: this.geoResults[0] });
+      }
+    },
+    manualPosition() {
+      this.$refs.geolocationSelector.enableMap();
+      this.addresIsValid =true;
+      console.log("ManualPosition",this.addresIsValid);
+    },
     locationChanged(input) {
       console.log("Changed", input.address);
-      this.locationSelected = input.address;
-      this.latitude = this.locationSelected.pos.lat;
-      this.longitude = this.locationSelected.pos.lng;
+      this.locationSelected = input?.address;
+      this.latitude = this.locationSelected?.pos?.lat;
+      this.longitude = this.locationSelected?.pos?.lng;
       if (!this.address && this.locationSelected && this.locationSelected.structuredValue)
-        this.changeParamForm(this.locationSelected.structuredValue);
+        this.changeParamForm(this.locationSelected?.structuredValue);
     },
     changeParamForm(structuredValue) {
       if (structuredValue.road) this.address = structuredValue.road;
@@ -668,6 +787,7 @@ export default {
       this.locationSelected = {
         id: this.id,
         address: this.address,
+        name: this.name,
         streetNumber: this.streetNumber,
         zip: this.zip,
         city: this.city,
@@ -680,6 +800,23 @@ export default {
         country: this.country,
         radius: Number.parseInt(this.radius),
       };
+    },
+    changeAddress() {
+      this.inputAddress =
+        this.address +
+        " " +
+        this.streetNumber +
+        ", " +
+        this.zip +
+        ", " +
+        this.city +
+        ", " +
+        this.province +
+        ", " +
+        this.region +
+        ", " +
+        this.country;
+      this.$refs.geolocationSelector.changeAddress(this.inputAddress);
     },
     setModalData() {
       if (this.typeCall == "add") {
@@ -720,7 +857,7 @@ export default {
       this.initLocation();
     },
     openDatePicker() {
-      this.menu=true;
+      this.menu = true;
     },
   },
 
@@ -761,6 +898,12 @@ export default {
       const errors = [];
       if (!this.$v.address.$dirty) return errors;
       !this.$v.address.required && errors.push("Campo richiesto.");
+      return errors;
+    },
+    nameErrors() {
+      const errors = [];
+      if (!this.$v.name.$dirty) return errors;
+      !this.$v.name.required && errors.push("Campo richiesto.");
       return errors;
     },
     streetNumberErrors() {
@@ -835,7 +978,13 @@ export default {
 
   mounted() {
     this.arrayDays = locationService.getArrayDays();
+    var inputNumber = document.getElementById("campaignstreetNumber");
 
+    setTimeout(() => {
+      if (inputNumber?.matches(":autofill")) {
+        this.changeAddress();
+      }
+    }, 500);
   },
 };
 </script>
