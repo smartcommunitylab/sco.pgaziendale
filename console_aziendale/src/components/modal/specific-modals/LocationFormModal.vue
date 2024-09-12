@@ -237,23 +237,15 @@
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
-                <p v-if="showErrorLocation">L'indirizzo inserito non permette il posizionamento automatico. Si prega di utilizzare il posizionamento manuale.
-</p>
+                <p v-if="showErrorLocation">
+                  L'indirizzo inserito non permette il posizionamento automatico. Si prega
+                  di utilizzare il posizionamento manuale.
+                </p>
                 <v-tabs v-model="tab" align-with-title>
-                  <v-tab
-                    key="1"
-                    class="text-none"
-                    @click="setTab(1)"
-                  >
+                  <v-tab key="1" class="text-none" @click="setTab(1)">
                     In automatico
                   </v-tab>
-                  <v-tab
-                    key="2"
-                    class="text-none"
-                    @click="setTab(2)"
-                  >
-                    A mano
-                  </v-tab>
+                  <v-tab key="2" class="text-none" @click="setTab(2)"> A mano </v-tab>
                 </v-tabs>
                 <v-tabs-items v-model="tab" class="mt-5">
                   <v-tab-item key="1">
@@ -266,7 +258,7 @@
                     <div>
                       <v-btn
                         color="primary"
-                          :disabled="!addresIsValid"
+                        :disabled="!addresIsValid"
                         @click="autoPosition()"
                         >Imposta automaticamente</v-btn
                       >
@@ -358,8 +350,11 @@
           <v-row v-if="latitude && longitude">
             <v-col cols="12">
               <v-divider></v-divider>
-              <p class="text-subtitle-1 mt-5">ATTENZIONE!!! La posizione sarà utilizzata per la validazione dei viaggi dei dipendenti. Saranno validi solo i viaggi che iniziano o finiscono all'interno della zona delimitata dal cerchio rosso.
-</p>
+              <p class="text-subtitle-1 mt-5">
+                ATTENZIONE!!! La posizione sarà utilizzata per la validazione dei viaggi
+                dei dipendenti. Saranno validi solo i viaggi che iniziano o finiscono
+                all'interno della zona delimitata dal cerchio rosso.
+              </p>
             </v-col>
           </v-row>
           <v-row>
@@ -416,6 +411,26 @@
                   </v-btn>
                 </v-date-picker>
               </v-menu>
+              <v-row>
+                <v-col cols="6">
+                  <v-divider></v-divider>
+                  <v-select
+                    label="Sede"
+                    name="location"
+                    v-model="location"
+                    id="locationId"
+                    :items="allLocations?.items"
+                    item-text="name"
+                    item-value="id"
+                    outlined
+                  ></v-select>
+                </v-col>
+                <v-col cols="6">
+                  <v-btn rounded @click="copyDates()"  color="primary">
+                    Usa date di questa sede
+                  </v-btn>
+                </v-col>
+              </v-row>
             </v-col>
           </v-row>
         </div>
@@ -542,6 +557,7 @@ export default {
       mapOptions: {
         zoomSnap: 0.5,
       },
+      location: {},
       selectedPosition: false,
       key: 1,
       locationSelected: {},
@@ -695,39 +711,46 @@ export default {
     ...mapActions("location", {
       addLocation: "addLocation",
       updateLocation: "updateLocation",
+      getAllLocations: "getAllLocations",
     }),
+    loadLocations() {
+      if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
+    },
+    copyDates() {
+      this.nonWorkingDays = this.allLocations.items.find(
+        (location) => location.id == this.location
+      )?.nonWorkingDays;
+    },
     geoSearchResult(results) {
       console.log(results);
       if (!this.$v.$invalid) {
         if (results.length > 0) {
           this.addresIsValid = true;
           this.geoResults = results;
-          this.showErrorLocation=false;
-
+          this.showErrorLocation = false;
         } else {
-          this.showErrorLocation=true;
+          this.showErrorLocation = true;
           this.addresIsValid = false;
         }
       } else {
-          this.addresIsValid = false;
+        this.addresIsValid = false;
       }
     },
     setTab(value) {
       if (value == 1) {
         this.$refs.geolocationSelector.disableMap();
         if (!this.$v.$invalid) {
-        if (this.geoResults.length > 0) {
-          this.addresIsValid = true;
-          this.showErrorLocation=false;
-
-        } else {
-          this.showErrorLocation=true;
-          this.addresIsValid = false;
+          if (this.geoResults.length > 0) {
+            this.addresIsValid = true;
+            this.showErrorLocation = false;
+          } else {
+            this.showErrorLocation = true;
+            this.addresIsValid = false;
+          }
         }
-      }
       } else {
         this.$refs.geolocationSelector.enableMap();
-        }
+      }
     },
     autoPosition() {
       if (this.geoResults.length > 0) {
@@ -738,8 +761,8 @@ export default {
     },
     manualPosition() {
       this.$refs.geolocationSelector.enableMap();
-      this.addresIsValid =true;
-      console.log("ManualPosition",this.addresIsValid);
+      this.addresIsValid = true;
+      console.log("ManualPosition", this.addresIsValid);
     },
     locationChanged(input) {
       console.log("Changed", input.address);
@@ -854,7 +877,7 @@ export default {
         if (this.actualLocation.item) this.copyFormValues(this.actualLocation.item);
         this.popup.title = "Modifica Sede";
         console.log("Modalità MODIFICA");
-this.addresIsValid=true;
+        this.addresIsValid = true;
       }
     },
     saveLocation() {
@@ -987,7 +1010,6 @@ this.addresIsValid=true;
       },
     },
     typeCall: function () {
-
       this.setModalData();
       if (this.typeCall == "add") {
         this.disabled = false;
@@ -1003,6 +1025,7 @@ this.addresIsValid=true;
 
   created() {
     this.setModalData();
+    this.loadLocations();
   },
 
   mounted() {
