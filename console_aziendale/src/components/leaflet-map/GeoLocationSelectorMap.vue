@@ -7,20 +7,20 @@
     @ready="initMap()"
     :zoom="zoom"
     :center="[
-      position.lat || userLocation.lat || defaultLocation.lat,
-      position.lng || userLocation.lng || defaultLocation.lng,
+      position?.lat || userLocation?.lat || defaultLocation?.lat,
+      position?.lng || userLocation?.lng || defaultLocation?.lng,
     ]"
   >
     <l-tile-layer :url="tileProvider.url" :attribution="tileProvider.attribution" />
     <v-geosearch :options="geoSearchOptions"></v-geosearch>
     <l-circle
-      v-if="position.lat && position.lng && dragging == false"
+      v-if="position?.lat && position?.lng && dragging == false"
       :lat-lng.sync="position"
       :radius="radius"
       :color="'red'"
     />
     <l-marker
-      v-if="position.lat && position.lng"
+      v-if="position?.lat && position?.lng"
       visible
       draggable
       :lat-lng.sync="position"
@@ -175,6 +175,7 @@ export default {
         },
       };
       try {
+        if (!this.position) return address;
         const { lat, lng } = this.position;
         const result = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
@@ -232,8 +233,8 @@ export default {
           ? this.getStringAddress(this.address.structuredValue)
           : ""
       }</strong> <hr/><strong>lat:</strong> ${
-        this.position.lat
-      }<br/> <strong>lng:</strong> ${this.position.lng}`;
+        this.position?.lat
+      }<br/> <strong>lng:</strong> ${this.position?.lng}`;
     },
   },
 
@@ -276,9 +277,12 @@ export default {
     this.initMap();
   },
 
-  mounted() {
-    this.getUserPosition();
-    this.$refs.map.mapObject.on("geosearch/showlocation", this.onSearch);
+  async mounted() {
+    if (!this.actualLocation?.item) {
+      this.position = await this.getUserPosition();
+
+    }
+    // this.$refs.map.mapObject.on("geosearch/showlocation", this.onSearch);
     this.$refs.map.mapObject.invalidateSize();
   },
 };
