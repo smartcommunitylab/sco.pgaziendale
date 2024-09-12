@@ -21,7 +21,7 @@
                   name="campaignCode"
                   id="campaignCode"
                   autocomplete="null"
-                  :disabled="disabled"
+                  :disabled="typeCall == 'edit' ? true : false"
                   v-model.trim="$v.id.$model"
                   :error-messages="idErrors"
                   @input="$v.id.$touch()"
@@ -708,6 +708,8 @@ export default {
           this.showErrorLocation=true;
           this.addresIsValid = false;
         }
+      } else {
+          this.addresIsValid = false;
       }
     },
     setTab(value) {
@@ -852,6 +854,7 @@ export default {
         if (this.actualLocation.item) this.copyFormValues(this.actualLocation.item);
         this.popup.title = "Modifica Sede";
         console.log("Modalità MODIFICA");
+this.addresIsValid=true;
       }
     },
     saveLocation() {
@@ -984,6 +987,7 @@ export default {
       },
     },
     typeCall: function () {
+
       this.setModalData();
       if (this.typeCall == "add") {
         this.disabled = false;
