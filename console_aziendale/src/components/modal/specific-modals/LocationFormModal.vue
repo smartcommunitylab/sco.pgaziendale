@@ -2,8 +2,7 @@
   <modal>
     <template v-slot:header> {{ popup.title }} </template>
     <template v-slot:body>
-      <form action="" id="addLocation" @submit="saveLocation"
->
+      <form action="" id="addLocation" @submit="saveLocation">
         <div class="mb-20">
           <div>
             <v-row>
@@ -275,7 +274,7 @@
                       <v-btn
                         color="primary"
                         @click="manualPosition()"
-                        :disabled="$v.$invalid"
+                        :disabled="!addressFormIsValid()"
                         >Imposta manualmente</v-btn
                       >
                     </div>
@@ -397,7 +396,7 @@
                     ref="datepick"
                   >
                     <template v-slot:append>
-                      <v-btn rounded color="primary" @click="openDatePicker()" >
+                      <v-btn rounded color="primary" @click="openDatePicker()">
                         Aggiungi
                       </v-btn>
                     </template>
@@ -459,6 +458,7 @@ import { locationService } from "@/services";
 import GeoLocationSelectorMapVue from "@/components/leaflet-map/GeoLocationSelectorMap.vue";
 import Modal from "@/components/modal/ModalStructure.vue";
 import { mapActions, mapState } from "vuex";
+
 export default {
   components: {
     "geolocation-selector": GeoLocationSelectorMapVue,
@@ -472,6 +472,9 @@ export default {
   validations: {
     id: {
       required,
+      valid: function(value) {
+       return /^\S*$/.test(value);
+      },
       unique() {
         return (
           (this.actualLocation &&
@@ -586,7 +589,7 @@ export default {
     },
     addressFormIsValid() {
       return (
-        this.$v.address.$invalid == false  &&
+        this.$v.address.$invalid == false &&
         this.$v.streetNumber.$invalid == false &&
         this.$v.zip.$invalid == false &&
         this.$v.city.$invalid == false &&
@@ -809,6 +812,7 @@ export default {
       if (!this.$v.id.$dirty) return errors;
       !this.$v.id.required && errors.push("Campo richiesto.");
       !this.$v.id.unique && errors.push("Valore gia' in uso.");
+      !this.$v.id.valid && errors.push("Il valore non deve contenere spazi.");
       return errors;
     },
     addressErrors() {
@@ -1015,37 +1019,37 @@ const listaProvince = [
   "VT",
 ];
 const listaRegioni = [
-        "Abruzzo",
-        "Basilicata",
-        "Calabria",
-        "Campania",
-        "Emilia-Romagna",
-        "Friuli-Venezia Giulia",
-        "Lazio",
-        "Liguria",
-        "Lombardia",
-        "Marche",
-        "Molise",
-        "Piemonte",
-        "Puglia",
-        "Sardegna",
-        "Sicilia",
-        "Toscana",
-        "Trentino-Alto Adige",
-        "Umbria",
-        "Valle d'Aosta Veneto",
-      ]
-      const giorniSettimana = [
-        {
-          1: "Lunedì",
-          2: "Martedì",
-          3: "Mercoledì",
-          4: "Giovedì",
-          5: "Venerdì",
-          6: "Sabato",
-          7: "Domenica",
-        },
-      ]
+  "Abruzzo",
+  "Basilicata",
+  "Calabria",
+  "Campania",
+  "Emilia-Romagna",
+  "Friuli-Venezia Giulia",
+  "Lazio",
+  "Liguria",
+  "Lombardia",
+  "Marche",
+  "Molise",
+  "Piemonte",
+  "Puglia",
+  "Sardegna",
+  "Sicilia",
+  "Toscana",
+  "Trentino-Alto Adige",
+  "Umbria",
+  "Valle d'Aosta Veneto",
+];
+const giorniSettimana = [
+  {
+    1: "Lunedì",
+    2: "Martedì",
+    3: "Mercoledì",
+    4: "Giovedì",
+    5: "Venerdì",
+    6: "Sabato",
+    7: "Domenica",
+  },
+];
 </script>
 
 <style scoped>
