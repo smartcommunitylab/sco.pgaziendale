@@ -29,7 +29,6 @@ public class CompanyLocation {
 
 	@NotNull
 	private String id;
-	@NotNull
 	private String name;
 	@NotNull
 	private String address, streetNumber, zip, city; 
