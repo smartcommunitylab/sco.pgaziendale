@@ -423,6 +423,11 @@ public class CompanyService {
 	 * @throws IOException 
 	 */
 	public void importEmployees(String companyId, InputStream inputStream) throws Exception {
+		Company c = companyRepo.findById(companyId).orElse(null);
+		if(c == null) {
+			throw new InconsistentDataException("Company not found", "COMPANY_NOT_FOUND");
+		}
+		
 		List<String[]> lines = null;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -444,6 +449,10 @@ public class CompanyService {
 			String location = stringValue(l[3], i + 1, 4, true);
 			String name = stringValue(l[0], i + 1, 1, true);
 			String surname = stringValue(l[1], i + 1, 2, true);
+			CompanyLocation loc = getCompanyLocation(c, location);
+			if(loc == null) {
+				throw new ImportDataException(i + 1, 3);
+			}
 			if (existing != null) {
 				existing.setLocation(location);
 				existing.setName(name);
@@ -483,6 +492,11 @@ public class CompanyService {
 	}
 	
 	public void importLocations(String companyId, InputStream inputStream) throws Exception {
+		Company c = companyRepo.findById(companyId).orElse(null);
+		if(c == null) {
+			throw new InconsistentDataException("Company not found", "COMPANY_NOT_FOUND");
+		}
+		
 		List<String[]> lines = null;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -495,17 +509,15 @@ public class CompanyService {
 		}
 		int i = 0;
 		List<CompanyLocation> locations = new LinkedList<>();
-		Set<String> locationIds = new HashSet<>();
 		for (String[] l : lines) {
-			CompanyLocation loc = new CompanyLocation();
 			String id = stringValue(l[0], i+1, 0, true);
-			if (locationIds.contains(id)) {
-				throw new InconsistentDataException("Duplicate locations", "INVALID_CSV_DUPLICATE_LOCATIONS");				
+			CompanyLocation loc = getCompanyLocation(c, id);
+			if (loc == null) {
+				loc = new CompanyLocation();
 			}
-			locationIds.add(id);
 			
 			loc.setId(id);
-			loc.setName(stringValue(l[1], i+1, 1, true));			
+			loc.setName(stringValue(l[1], i+1, 1, false));			
 			loc.setAddress(stringValue(l[2], i+1, 2, true));
 			loc.setStreetNumber(stringValue(l[3], i+1, 3, false));
 			loc.setZip(stringValue(l[4], i+1, 4, true));
@@ -556,18 +568,24 @@ public class CompanyService {
 			i++;
 		}
 		if (locations.size() > 0) {
-			Company c = companyRepo.findById(companyId).orElse(null);
-			if (c != null) {
-				Map<String, CompanyLocation> map = locations.stream().collect(Collectors.toMap(l -> l.getId(), l -> l));
-				if (c.getLocations() != null) {
-					for (CompanyLocation l : c.getLocations()) {
-						if (!map.containsKey(l.getId())) locations.add(l);
-					}
+			Map<String, CompanyLocation> map = locations.stream().collect(Collectors.toMap(l -> l.getId(), l -> l));
+			if (c.getLocations() != null) {
+				for (CompanyLocation l : c.getLocations()) {
+					if (!map.containsKey(l.getId())) locations.add(l);
 				}
-				c.setLocations(locations);
-				companyRepo.save(c);
+			}
+			c.setLocations(locations);
+			companyRepo.save(c);
+		}			
+	}
+	
+	private CompanyLocation getCompanyLocation(Company c, String locationId) {
+		for(CompanyLocation l : c.getLocations()) {
+			if(l.getId().equalsIgnoreCase(locationId)) {
+				return l;
 			}
 		}
+		return null;
 	}
 	
 	/**
