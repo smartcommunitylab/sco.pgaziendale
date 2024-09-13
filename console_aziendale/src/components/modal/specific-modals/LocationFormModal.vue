@@ -442,6 +442,7 @@
         color="primary"
         text
         type="submit"
+        @click="saveLocation"
         class="py-8 ml-8"
         :disabled="!addresIsValid || $v.$invalid"
       >
@@ -583,8 +584,20 @@ export default {
         (location) => location.id == this.location
       )?.nonWorkingDays;
     },
+    addressFormIsValid() {
+      return (
+        this.$v.address.$invalid == false  &&
+        this.$v.streetNumber.$invalid == false &&
+        this.$v.zip.$invalid == false &&
+        this.$v.city.$invalid == false &&
+        this.$v.province.$invalid == false &&
+        this.$v.region.$invalid == false &&
+        this.$v.country.$invalid == false
+      );
+    },
     geoSearchResult(results) {
-      if (!this.$v.$invalid) {
+      console.log(results);
+      if (this.addressFormIsValid()) {
         if (results.length > 0) {
           this.addresIsValid = true;
           this.geoResults = results;
