@@ -329,13 +329,18 @@ public class CompanyService {
 	 * @param companyId
 	 * @param locationId
 	 */
-	public void deleteLocation(String companyId, String locationId) {
-		companyRepo.findById(companyId).ifPresent(company -> {
+	public void deleteLocation(String companyId, String locationId) throws InconsistentDataException {
+		Company company = companyRepo.findById(companyId).orElse(null);
+		if(company != null) {
+			List<Employee> list = employeeRepo.findByCompanyIdAndLocationIgnoreCase(companyId, locationId);
+			if(list.size() > 0) {
+				throw new InconsistentDataException("Location has employees", "INVALID_LOCATION_DATA_EMPLOYEE");
+			}
 			if (company.getLocations() != null) {
 				company.getLocations().removeIf(l -> l.getId() == null && locationId == null || l.getId().equalsIgnoreCase(locationId));
 				companyRepo.save(company);
 			}
-		});		
+		}		
 	}
 	/**
 	 * @param companyId
