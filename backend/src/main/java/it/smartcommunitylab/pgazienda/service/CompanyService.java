@@ -332,7 +332,7 @@ public class CompanyService {
 	public void deleteLocation(String companyId, String locationId) {
 		companyRepo.findById(companyId).ifPresent(company -> {
 			if (company.getLocations() != null) {
-				company.getLocations().removeIf(l -> l.getId() == null && locationId == null || l.getId().equals(locationId));
+				company.getLocations().removeIf(l -> l.getId() == null && locationId == null || l.getId().equalsIgnoreCase(locationId));
 				companyRepo.save(company);
 			}
 		});		
@@ -372,17 +372,26 @@ public class CompanyService {
 	 * @param employee
 	 * @return
 	 */
-	public Employee updateEmployee(String companyId, Employee employee) {
-		employeeRepo.findById(employee.getId()).ifPresent(e -> {
-			if (e.getCompanyId().equals(companyId)) {
+	public Employee updateEmployee(String companyId, Employee employee) throws InconsistentDataException {
+		Employee e = employeeRepo.findById(employee.getId()).orElse(null);
+		if(e != null) {
+			if(e.getCompanyId().equals(companyId)) {
+				Company c = companyRepo.findById(companyId).orElse(null);
+				if(c == null) {
+					throw new InconsistentDataException("Company not found", "COMPANY_NOT_FOUND");
+				}
+				CompanyLocation loc = getCompanyLocation(c, employee.getLocation());
+				if(loc == null) {
+					throw new InconsistentDataException("Location not found", "LOCATION_NOT_FOUND");
+				}
 				e.setCompanyEmail(employee.getCompanyEmail());
 				e.setCode(employee.getCode());
 				e.setLocation(employee.getLocation());
 				e.setName(employee.getName());
 				e.setSurname(employee.getSurname());
 				employeeRepo.save(e);
-			}
-		});
+			}			
+		}
 		return employeeRepo.findById(employee.getId()).orElse(null);
 	}
 
