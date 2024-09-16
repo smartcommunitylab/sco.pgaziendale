@@ -29,7 +29,6 @@ public class CompanyLocation {
 
 	@NotNull
 	private String id;
-	@NotNull
 	private String name;
 	@NotNull
 	private String address, streetNumber, zip, city; 
@@ -204,7 +203,7 @@ public class CompanyLocation {
 		if (id == null) {
 			if (other.id != null)
 				return false;
-		} else if (!id.equals(other.id))
+		} else if (!id.equalsIgnoreCase(other.id))
 			return false;
 		return true;
 	}

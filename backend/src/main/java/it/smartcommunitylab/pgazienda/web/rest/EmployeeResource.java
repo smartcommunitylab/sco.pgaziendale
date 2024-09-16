@@ -83,7 +83,8 @@ public class EmployeeResource {
      */
     @PutMapping("/companies/{companyId}/employees/{employeeId:.*}")
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN + "\", \""+Constants.ROLE_MOBILITY_MANAGER+"\")")
-	public ResponseEntity<Employee> updateEmployee(@PathVariable String companyId, @PathVariable String employeeId, @Valid @RequestBody Employee employee) {
+	public ResponseEntity<Employee> updateEmployee(@PathVariable String companyId, @PathVariable String employeeId, 
+			@Valid @RequestBody Employee employee) throws InconsistentDataException {
     	log.debug("Updating a employee {} / {}", companyId, employeeId);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	return ResponseEntity.ok(companyService.updateEmployee(companyId, employee));

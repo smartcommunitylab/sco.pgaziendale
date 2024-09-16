@@ -2,7 +2,7 @@
   <modal>
     <template v-slot:header> {{ popup.title }} </template>
     <template v-slot:body>
-      <form action="" id="addLocation">
+      <form action="" id="addLocation" @submit="saveLocation">
         <div class="mb-20">
           <div>
             <v-row>
@@ -28,40 +28,35 @@
                   @blur="$v.id.$touch()"
                   outlined
                 >
-                  <template v-slot:append>
-                    <v-tooltip left nudge-bottom="50px" v-if="$v.id.$model == ''">
-                      <template v-slot:activator="{ on }">
-                        <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
-                      </template>
-                      <div class="tooltip">
-                        <p>ATTENZIONE!!!</p>
-                        <p>
-                          Il codice identifcativo sede
-                          <b>DEVE ESSERE UNIVOCO E DEVE CORRISPONDERE</b> esattamente a
-                          quello utilizzato per associare i dipendenti ad una sede (sia
-                          nell’edit manuale dei dipendenti sia nell’import dipendenti d
-                          file)
-                        </p>
-                      </div>
-                    </v-tooltip>
-                  </template>
+                  
                 </v-text-field>
               </v-col>
-              <v-col cols="4">
+              <v-col cols="6">
                 <v-text-field
                   label="Denominazione"
-                  placeholder="Denominazione *"
+                  placeholder="Denominazione"
                   type="text"
                   name="denominazione"
                   id="denominazione"
                   autocomplete="null"
                   v-model.trim="$v.name.$model"
-                  :error-messages="nameErrors"
-                  required
+                  
                   @input="$v.name.$touch()"
                   @blur="$v.name.$touch()"
                   outlined
                 ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row class="mt-0 pt-0">
+              <v-col cols="6" class="mt-0 pt-0">
+                <p>
+                  Il codice sede deve essere <b>UNIVOCO</b>. Verrà utilizzato per associare i dipendenti ad una sede - nell'import dei dipendenti deve essere <b>IDENTICO</b>
+                  </p>
+              </v-col>
+              <v-col cols="6" class="mt-0 pt-0">
+                <p>
+                  Il nome verrà visualizzato nell'app (se non specificato, verrà usato il codice sede).
+                  </p>
               </v-col>
             </v-row>
             <v-row>
@@ -233,7 +228,11 @@
             </v-col>
             <v-col cols="4">
               <div class="tab-container">
-                <p v-if="!showErrorLocation">
+                <div v-if="addresIsValid">
+                    <p>E’ possibile impostare la posizione della sede manualmente oppure automaticamente in base all’indirizzo inserito.</p>
+                  </div>
+
+                <p v-if="!showErrorLocation ">
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
@@ -274,7 +273,7 @@
                       <v-btn
                         color="primary"
                         @click="manualPosition()"
-                        :disabled="$v.$invalid"
+                        :disabled="!addressFormIsValid()"
                         >Imposta manualmente</v-btn
                       >
                     </div>
@@ -401,7 +400,6 @@
                       </v-btn>
                     </template>
                   </v-combobox>
-                  <button class="profile-button" v-bind="attrs" v-on="on"></button>
                 </template>
                 <v-date-picker v-model="nonWorkingDays" multiple scrollable no-title>
                   <v-spacer></v-spacer>
@@ -426,7 +424,7 @@
                   ></v-select>
                 </v-col>
                 <v-col cols="6">
-                  <v-btn rounded @click="copyDates()"  color="primary">
+                  <v-btn rounded @click="copyDates()" color="primary">
                     Usa date di questa sede
                   </v-btn>
                 </v-col>
@@ -441,9 +439,10 @@
       <v-btn
         color="primary"
         text
+        type="submit"
         @click="saveLocation"
         class="py-8 ml-8"
-        :disabled="!addresIsValid || $v.$invalid"
+        :disabled="!addresIsValid || $v.$invalid || !latitude || !longitude"
       >
         Salva
       </v-btn>
@@ -458,6 +457,7 @@ import { locationService } from "@/services";
 import GeoLocationSelectorMapVue from "@/components/leaflet-map/GeoLocationSelectorMap.vue";
 import Modal from "@/components/modal/ModalStructure.vue";
 import { mapActions, mapState } from "vuex";
+
 export default {
   components: {
     "geolocation-selector": GeoLocationSelectorMapVue,
@@ -471,6 +471,9 @@ export default {
   validations: {
     id: {
       required,
+      // valid: function(value) {
+      //  return /^\S*$/.test(value);
+      // },
       unique() {
         return (
           (this.actualLocation &&
@@ -481,7 +484,7 @@ export default {
       },
     },
     name: {
-      required,
+      
     },
     address: {
       required,
@@ -560,148 +563,10 @@ export default {
       location: {},
       selectedPosition: false,
       key: 1,
-      locationSelected: {},
-      listaProvince: [
-        "AG",
-        "AL",
-        "AN",
-        "AO",
-        "AR",
-        "AP",
-        "AT",
-        "AV",
-        "BA",
-        "BT",
-        "BL",
-        "BN",
-        "BG",
-        "BI",
-        "BO",
-        "BZ",
-        "BS",
-        "BR",
-        "CA",
-        "CL",
-        "CB",
-        "CE",
-        "CT",
-        "CZ",
-        "CH",
-        "CO",
-        "CS",
-        "CR",
-        "KR",
-        "CN",
-        "EN",
-        "FM",
-        "FE",
-        "FI",
-        "FG",
-        "FC",
-        "FR",
-        "GE",
-        "GO",
-        "GR",
-        "IM",
-        "IS",
-        "AQ",
-        "SP",
-        "LT",
-        "LE",
-        "LC",
-        "LI",
-        "LO",
-        "LU",
-        "MC",
-        "MN",
-        "MS",
-        "MT",
-        "ME",
-        "MI",
-        "MO",
-        "MB",
-        "NA",
-        "NO",
-        "NU",
-        "OR",
-        "PD",
-        "PA",
-        "PR",
-        "PV",
-        "PG",
-        "PU",
-        "PE",
-        "PC",
-        "PI",
-        "PT",
-        "PN",
-        "PZ",
-        "PO",
-        "RG",
-        "RA",
-        "RC",
-        "RE",
-        "RI",
-        "RN",
-        "RM",
-        "RO",
-        "SA",
-        "SS",
-        "SV",
-        "SI",
-        "SR",
-        "SO",
-        "SU",
-        "TA",
-        "TE",
-        "TR",
-        "TO",
-        "TP",
-        "TN",
-        "TV",
-        "TS",
-        "UD",
-        "VA",
-        "VE",
-        "VB",
-        "VC",
-        "VR",
-        "VV",
-        "VI",
-        "VT",
-      ],
-      listaRegioni: [
-        "Abruzzo",
-        "Basilicata",
-        "Calabria",
-        "Campania",
-        "Emilia-Romagna",
-        "Friuli-Venezia Giulia",
-        "Lazio",
-        "Liguria",
-        "Lombardia",
-        "Marche",
-        "Molise",
-        "Piemonte",
-        "Puglia",
-        "Sardegna",
-        "Sicilia",
-        "Toscana",
-        "Trentino-Alto Adige",
-        "Umbria",
-        "Valle d'Aosta Veneto",
-      ],
-      giorniSettimana: [
-        {
-          1: "Lunedì",
-          2: "Martedì",
-          3: "Mercoledì",
-          4: "Giovedì",
-          5: "Venerdì",
-          6: "Sabato",
-          7: "Domenica",
-        },
-      ],
+      locationSelected: null,
+      listaProvince: listaProvince,
+      listaRegioni: listaRegioni,
+      giorniSettimana: giorniSettimana,
       disabled: false,
     };
   },
@@ -721,9 +586,20 @@ export default {
         (location) => location.id == this.location
       )?.nonWorkingDays;
     },
+    addressFormIsValid() {
+      return (
+        this.$v.address.$invalid == false &&
+        this.$v.streetNumber.$invalid == false &&
+        this.$v.zip.$invalid == false &&
+        this.$v.city.$invalid == false &&
+        this.$v.province.$invalid == false &&
+        this.$v.region.$invalid == false &&
+        this.$v.country.$invalid == false
+      );
+    },
     geoSearchResult(results) {
       console.log(results);
-      if (!this.$v.$invalid) {
+      if (this.addressFormIsValid()) {
         if (results.length > 0) {
           this.addresIsValid = true;
           this.geoResults = results;
@@ -754,18 +630,14 @@ export default {
     },
     autoPosition() {
       if (this.geoResults.length > 0) {
-        console.log("AutoPosition", this.geoResults[0]);
-        // this.locationChanged(this.geoResults[0]);
         this.$refs.geolocationSelector.onSearch({ location: this.geoResults[0] });
       }
     },
     manualPosition() {
       this.$refs.geolocationSelector.enableMap();
       this.addresIsValid = true;
-      console.log("ManualPosition", this.addresIsValid);
     },
     locationChanged(input) {
-      console.log("Changed", input.address);
       this.locationSelected = input?.address;
       this.latitude = this.locationSelected?.pos?.lat;
       this.longitude = this.locationSelected?.pos?.lng;
@@ -782,7 +654,6 @@ export default {
       if (!this.region && structuredValue.county) this.region = structuredValue.county;
     },
     stopTheEvent(event) {
-      console.log(event);
       event.stopPropagation();
     },
     addDays(day) {
@@ -872,11 +743,9 @@ export default {
       if (this.typeCall == "add") {
         this.initLocation();
         this.popup.title = "Aggiungi Sede";
-        console.log("Modalità AGGIUNGI");
       } else if (this.typeCall == "edit") {
         if (this.actualLocation.item) this.copyFormValues(this.actualLocation.item);
         this.popup.title = "Modifica Sede";
-        console.log("Modalità MODIFICA");
         this.addresIsValid = true;
       }
     },
@@ -890,7 +759,6 @@ export default {
           });
           this.closeModal();
         } else if (this.typeCall == "edit") {
-          console.log(this.locationSelected);
           this.updateLocation({
             companyId: this.actualCompany.item.id,
             location: this.locationSelected,
@@ -943,6 +811,7 @@ export default {
       if (!this.$v.id.$dirty) return errors;
       !this.$v.id.required && errors.push("Campo richiesto.");
       !this.$v.id.unique && errors.push("Valore gia' in uso.");
+      // !this.$v.id.valid && errors.push("Il valore non deve contenere spazi.");
       return errors;
     },
     addressErrors() {
@@ -951,12 +820,12 @@ export default {
       !this.$v.address.required && errors.push("Campo richiesto.");
       return errors;
     },
-    nameErrors() {
-      const errors = [];
-      if (!this.$v.name.$dirty) return errors;
-      !this.$v.name.required && errors.push("Campo richiesto.");
-      return errors;
-    },
+    // nameErrors() {
+    //   const errors = [];
+    //   if (!this.$v.name.$dirty) return errors;
+    //   !this.$v.name.required && errors.push("Campo richiesto.");
+    //   return errors;
+    // },
     streetNumberErrors() {
       const errors = [];
       if (!this.$v.streetNumber.$dirty) return errors;
@@ -1039,6 +908,147 @@ export default {
     }, 500);
   },
 };
+const listaProvince = [
+  "AG",
+  "AL",
+  "AN",
+  "AO",
+  "AR",
+  "AP",
+  "AT",
+  "AV",
+  "BA",
+  "BT",
+  "BL",
+  "BN",
+  "BG",
+  "BI",
+  "BO",
+  "BZ",
+  "BS",
+  "BR",
+  "CA",
+  "CL",
+  "CB",
+  "CE",
+  "CT",
+  "CZ",
+  "CH",
+  "CO",
+  "CS",
+  "CR",
+  "KR",
+  "CN",
+  "EN",
+  "FM",
+  "FE",
+  "FI",
+  "FG",
+  "FC",
+  "FR",
+  "GE",
+  "GO",
+  "GR",
+  "IM",
+  "IS",
+  "AQ",
+  "SP",
+  "LT",
+  "LE",
+  "LC",
+  "LI",
+  "LO",
+  "LU",
+  "MC",
+  "MN",
+  "MS",
+  "MT",
+  "ME",
+  "MI",
+  "MO",
+  "MB",
+  "NA",
+  "NO",
+  "NU",
+  "OR",
+  "PD",
+  "PA",
+  "PR",
+  "PV",
+  "PG",
+  "PU",
+  "PE",
+  "PC",
+  "PI",
+  "PT",
+  "PN",
+  "PZ",
+  "PO",
+  "RG",
+  "RA",
+  "RC",
+  "RE",
+  "RI",
+  "RN",
+  "RM",
+  "RO",
+  "SA",
+  "SS",
+  "SV",
+  "SI",
+  "SR",
+  "SO",
+  "SU",
+  "TA",
+  "TE",
+  "TR",
+  "TO",
+  "TP",
+  "TN",
+  "TV",
+  "TS",
+  "UD",
+  "VA",
+  "VE",
+  "VB",
+  "VC",
+  "VR",
+  "VV",
+  "VI",
+  "VT",
+];
+const listaRegioni = [
+  "Abruzzo",
+  "Basilicata",
+  "Calabria",
+  "Campania",
+  "Emilia-Romagna",
+  "Friuli-Venezia Giulia",
+  "Lazio",
+  "Liguria",
+  "Lombardia",
+  "Marche",
+  "Molise",
+  "Piemonte",
+  "Puglia",
+  "Sardegna",
+  "Sicilia",
+  "Toscana",
+  "Trentino-Alto Adige",
+  "Umbria",
+  "Valle d'Aosta Veneto",
+];
+const giorniSettimana = [
+  {
+    1: "Lunedì",
+    2: "Martedì",
+    3: "Mercoledì",
+    4: "Giovedì",
+    5: "Venerdì",
+    6: "Sabato",
+    7: "Domenica",
+  },
+];
 </script>
 
 <style scoped>
