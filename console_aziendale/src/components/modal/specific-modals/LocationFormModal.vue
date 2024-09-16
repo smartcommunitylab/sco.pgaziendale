@@ -232,7 +232,7 @@
                     <p>E’ possibile impostare la posizione della sede manualmente oppure automaticamente in base all’indirizzo inserito.</p>
                   </div>
 
-                <p v-if="!showErrorLocation ">
+                <p v-if="!showErrorLocation && !addresIsValid ">
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
