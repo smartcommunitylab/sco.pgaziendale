@@ -150,20 +150,20 @@ export default {
       this.$emit('returnGeosearch', results);
     }, 500)
     },
-    getStringAddress(structuredValue) {
-      var returnAddress = "";
-      if (structuredValue.amenity) returnAddress += "<br />" + structuredValue.amenity;
-      if (structuredValue.office) returnAddress += "<br />" + structuredValue.office;
-      if (structuredValue.road) returnAddress += "<br />" + structuredValue.road;
-      if (structuredValue.house_number)
-        returnAddress += ", " + structuredValue.house_number;
-      if (structuredValue.city) returnAddress += "<br />" + structuredValue.city;
-      if (structuredValue.country) returnAddress += "<br />" + structuredValue.country;
-      if (structuredValue.postcode) returnAddress += "<br />" + structuredValue.postcode;
-      if (structuredValue.state) returnAddress += "<br />" + structuredValue.state;
-      if (structuredValue.county) returnAddress += "<br />" + structuredValue.county;
-      return returnAddress;
-    },
+    // getStringAddress(structuredValue) {
+    //   var returnAddress = "";
+    //   if (structuredValue.amenity) returnAddress += "<br />" + structuredValue.amenity;
+    //   if (structuredValue.office) returnAddress += "<br />" + structuredValue.office;
+    //   if (structuredValue.road) returnAddress += "<br />" + structuredValue.road;
+    //   if (structuredValue.house_number)
+    //     returnAddress += ", " + structuredValue.house_number;
+    //   if (structuredValue.city) returnAddress += "<br />" + structuredValue.city;
+    //   if (structuredValue.country) returnAddress += "<br />" + structuredValue.country;
+    //   if (structuredValue.postcode) returnAddress += "<br />" + structuredValue.postcode;
+    //   if (structuredValue.state) returnAddress += "<br />" + structuredValue.state;
+    //   if (structuredValue.county) returnAddress += "<br />" + structuredValue.county;
+    //   return returnAddress;
+    // },
     async getAddress() {
       this.loading = true;
       let address = {
@@ -225,17 +225,17 @@ export default {
     addresIsValid() {
       return this.initialAddresIsValid;
     },
-    tooltipContent() {
-      if (this.dragging) return "...";
-      if (this.loading) return "Loading...";
-      return `<strong>${
-        this.address && this.address.structuredValue
-          ? this.getStringAddress(this.address.structuredValue)
-          : ""
-      }</strong> <hr/><strong>lat:</strong> ${
-        this.position?.lat
-      }<br/> <strong>lng:</strong> ${this.position?.lng}`;
-    },
+    // tooltipContent() {
+    //   if (this.dragging) return "...";
+    //   if (this.loading) return "Loading...";
+    //   return `<strong>${
+    //     this.address && this.address.structuredValue
+    //       ? this.getStringAddress(this.address.structuredValue)
+    //       : ""
+    //   }</strong> <hr/><strong>lat:</strong> ${
+    //     this.position?.lat
+    //   }<br/> <strong>lng:</strong> ${this.position?.lng}`;
+    // },
   },
 
   watch: {
