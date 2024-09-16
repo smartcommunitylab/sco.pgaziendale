@@ -441,17 +441,17 @@ public class CompanyService {
 		Set<String> codes = new HashSet<>();
 		int i = 0;
 		for (String[] l: lines) {
-			String code = stringValue(l[2], i + 1, 3, true);
+			String code = stringValue(l[2], i + 2, 3, true);
 			if (codes.contains(code)) {
 				throw new InconsistentDataException("Duplicate employees", "INVALID_CSV_DUPLICATE_EMPLOYEES");				
 			}
 			Employee existing = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, code).stream().findAny().orElse(null);
-			String location = stringValue(l[3], i + 1, 4, true);
-			String name = stringValue(l[0], i + 1, 1, true);
-			String surname = stringValue(l[1], i + 1, 2, true);
+			String location = stringValue(l[3], i + 2, 4, true);
+			String name = stringValue(l[0], i + 2, 1, true);
+			String surname = stringValue(l[1], i + 2, 2, true);
 			CompanyLocation loc = getCompanyLocation(c, location);
 			if(loc == null) {
-				throw new ImportDataException(i + 1, 3);
+				throw new ImportDataException(i + 2, 4);
 			}
 			if (existing != null) {
 				existing.setLocation(location);
@@ -510,30 +510,30 @@ public class CompanyService {
 		int i = 0;
 		List<CompanyLocation> locations = new LinkedList<>();
 		for (String[] l : lines) {
-			String id = stringValue(l[0], i+1, 0, true);
+			String id = stringValue(l[0], i+2, 0, true);
 			CompanyLocation loc = getCompanyLocation(c, id);
 			if (loc == null) {
 				loc = new CompanyLocation();
 			}
 			
 			loc.setId(id);
-			loc.setName(stringValue(l[1], i+1, 1, false));			
-			loc.setAddress(stringValue(l[2], i+1, 2, true));
-			loc.setStreetNumber(stringValue(l[3], i+1, 3, false));
-			loc.setZip(stringValue(l[4], i+1, 4, true));
-			loc.setCity(stringValue(l[5], i+1, 5, true));
-			loc.setProvince(stringValue(l[6], i+1, 6, false));
-			loc.setRegion(stringValue(l[7], i+1, 7, false));
-			loc.setCountry(stringValue(l[8], i+1, 8, false));
+			loc.setName(stringValue(l[1], i+2, 1, false));			
+			loc.setAddress(stringValue(l[2], i+2, 2, true));
+			loc.setStreetNumber(stringValue(l[3], i+2, 3, false));
+			loc.setZip(stringValue(l[4], i+2, 4, true));
+			loc.setCity(stringValue(l[5], i+2, 5, true));
+			loc.setProvince(stringValue(l[6], i+2, 6, false));
+			loc.setRegion(stringValue(l[7], i+2, 7, false));
+			loc.setCountry(stringValue(l[8], i+2, 8, false));
 
 			//Double radius = doubeValue(l[9], i+1, 8, false);
 			//if (radius == null) radius = 200d; 
 			loc.setRadius(200d);
-			loc.setLatitude(doubeValue(l[9], i+1, 9, true));
-			loc.setLongitude(doubeValue(l[10], i+1, 10, true));
+			loc.setLatitude(doubeValue(l[9], i+2, 9, true));
+			loc.setLongitude(doubeValue(l[10], i+2, 10, true));
 
 			// check non-working days
-			String nwDoW = stringValue(l[11], i + 1, 11, false);
+			String nwDoW = stringValue(l[11], i + 2, 11, false);
 			if (nwDoW.length() > 0) {
 				loc.setNonWorking(new LinkedList<>());
 				String[] days = nwDoW.toLowerCase().split(",");
@@ -541,12 +541,12 @@ public class CompanyService {
 					if (DW.containsKey(d.trim())) {
 						loc.getNonWorking().add(DW.get(d.trim()));
 					} else {
-						throw new ImportDataException(i + 1, 11);
+						throw new ImportDataException(i + 2, 11);
 					}
 				}
 			}
 			// check exception days
-			String nwDays = stringValue(l[12], i + 1, 12, false);
+			String nwDays = stringValue(l[12], i + 2, 12, false);
 			if (nwDays.length() > 0) {
 				loc.setNonWorkingDays(new HashSet<>());
 				String[] days = nwDays.toLowerCase().split(",");
@@ -558,7 +558,7 @@ public class CompanyService {
 						try {
 							date = LocalDate.parse(d.trim(), dateFormatter );
 						} catch (Exception e1) {
-							throw new ImportDataException(i + 1, 11);
+							throw new ImportDataException(i + 2, 11);
 						}
 					}
 					loc.getNonWorkingDays().add(date.toString());
