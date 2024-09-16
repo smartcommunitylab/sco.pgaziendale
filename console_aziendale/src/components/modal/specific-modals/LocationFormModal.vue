@@ -28,40 +28,35 @@
                   @blur="$v.id.$touch()"
                   outlined
                 >
-                  <template v-slot:append>
-                    <v-tooltip left nudge-bottom="50px" v-if="$v.id.$model == ''">
-                      <template v-slot:activator="{ on }">
-                        <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
-                      </template>
-                      <div class="tooltip">
-                        <p>ATTENZIONE!!!</p>
-                        <p>
-                          Il codice identifcativo sede
-                          <b>DEVE ESSERE UNIVOCO E DEVE CORRISPONDERE</b> esattamente a
-                          quello utilizzato per associare i dipendenti ad una sede (sia
-                          nell’edit manuale dei dipendenti sia nell’import dipendenti d
-                          file)
-                        </p>
-                      </div>
-                    </v-tooltip>
-                  </template>
+                  
                 </v-text-field>
               </v-col>
-              <v-col cols="4">
+              <v-col cols="6">
                 <v-text-field
                   label="Denominazione"
-                  placeholder="Denominazione *"
+                  placeholder="Denominazione"
                   type="text"
                   name="denominazione"
                   id="denominazione"
                   autocomplete="null"
                   v-model.trim="$v.name.$model"
-                  :error-messages="nameErrors"
-                  required
+                  
                   @input="$v.name.$touch()"
                   @blur="$v.name.$touch()"
                   outlined
                 ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row class="mt-0 pt-0">
+              <v-col cols="6" class="mt-0 pt-0">
+                <p>
+                  Il codice sede deve essere <b>UNIVOCO</b>. Verrà utilizzato per associare i dipendenti ad una sede - nell'import dei dipendenti deve essere <b>IDENTICO</b>
+                  </p>
+              </v-col>
+              <v-col cols="6" class="mt-0 pt-0">
+                <p>
+                  Il nome verrà visualizzato nell'app (se non specificato, verrà usato il codice sede).
+                  </p>
               </v-col>
             </v-row>
             <v-row>
@@ -233,7 +228,11 @@
             </v-col>
             <v-col cols="4">
               <div class="tab-container">
-                <p v-if="!showErrorLocation">
+                <div v-if="addresIsValid">
+                    <p>E’ possibile impostare la posizione della sede manualmente oppure automaticamente in base all’indirizzo inserito.</p>
+                  </div>
+
+                <p v-if="!showErrorLocation ">
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
@@ -443,7 +442,7 @@
         type="submit"
         @click="saveLocation"
         class="py-8 ml-8"
-        :disabled="!addresIsValid || $v.$invalid"
+        :disabled="!addresIsValid || $v.$invalid || !latitude || !longitude"
       >
         Salva
       </v-btn>
@@ -472,9 +471,9 @@ export default {
   validations: {
     id: {
       required,
-      valid: function(value) {
-       return /^\S*$/.test(value);
-      },
+      // valid: function(value) {
+      //  return /^\S*$/.test(value);
+      // },
       unique() {
         return (
           (this.actualLocation &&
@@ -485,7 +484,7 @@ export default {
       },
     },
     name: {
-      required,
+      
     },
     address: {
       required,
@@ -564,7 +563,7 @@ export default {
       location: {},
       selectedPosition: false,
       key: 1,
-      locationSelected: {},
+      locationSelected: null,
       listaProvince: listaProvince,
       listaRegioni: listaRegioni,
       giorniSettimana: giorniSettimana,
@@ -812,7 +811,7 @@ export default {
       if (!this.$v.id.$dirty) return errors;
       !this.$v.id.required && errors.push("Campo richiesto.");
       !this.$v.id.unique && errors.push("Valore gia' in uso.");
-      !this.$v.id.valid && errors.push("Il valore non deve contenere spazi.");
+      // !this.$v.id.valid && errors.push("Il valore non deve contenere spazi.");
       return errors;
     },
     addressErrors() {
@@ -821,12 +820,12 @@ export default {
       !this.$v.address.required && errors.push("Campo richiesto.");
       return errors;
     },
-    nameErrors() {
-      const errors = [];
-      if (!this.$v.name.$dirty) return errors;
-      !this.$v.name.required && errors.push("Campo richiesto.");
-      return errors;
-    },
+    // nameErrors() {
+    //   const errors = [];
+    //   if (!this.$v.name.$dirty) return errors;
+    //   !this.$v.name.required && errors.push("Campo richiesto.");
+    //   return errors;
+    // },
     streetNumberErrors() {
       const errors = [];
       if (!this.$v.streetNumber.$dirty) return errors;
