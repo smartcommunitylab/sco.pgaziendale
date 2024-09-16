@@ -11,15 +11,15 @@
         <v-row >
           <v-col cols="12">
             <div v-if="typeCall == 'location'">
-              <p>Il file deve seguire il formato dell'esempio e tutti i campi devono essere valorizzati.</p>
-              <p>I valori nella colonna <b>Identificativo sede</b> devono essere univoci.</p>
+              <p>Il file deve seguire il formato dell'esempio. Tutti i campi, a parte 'Nome' devono essere valorizzati.</p>
+              <p>I valori nella colonna <b>Codice sede</b> devono essere univoci.</p>
               <p>Il processo di import aggiungerà al database tutte le sedi indicate nel file oppure, se nel database dovessero già esistere delle sedi con l'identificativo valorizzato nel file, ne aggiornerà tutti i dati con i valori del file.</p>
             </div>
             <div v-if="typeCall == 'employee'">
               <p>Il file deve seguire il formato dell'esempio e tutte le colonne devono essere valorizzate.</p>
               <p>Il valore indicato nella colonna <b>Codice dipendente</b> è utilizzato per identificare il dipendente, dunque deve essere univoco e non possono esistere duplicati.</p>
               <p>La procedura di import aggiungerà al database tutti i dipendenti inseriti nel file a meno che il loro codice non corrisponda a quello di un dipendente già inserito nel database; in questo caso tutti i dati del dipendente già inserito verranno aggiornati con i valori indicati nel file importato.</p>
-              <p>Il valore indicato nella colonna <b>Codice sede</b> è utilizzato per associare il dipendente ad una specifica sede, dunque deve corrispondere esattamente ad all'identificativo di una delle sedi inserite nel database (si veda 'Gestione Sedi').</p>
+              <p>Il valore indicato nella colonna <b>Codice sede</b> è utilizzato per associare il dipendente ad una specifica sede, dunque deve corrispondere esattamente all'identificativo di una delle sedi inserite nel database (si veda 'Gestione Sedi').</p>
             </div>
           </v-col>
         </v-row>
