@@ -516,7 +516,7 @@ public class TrackingDataService {
 		} else if (location != null && companyId != null) {
 			Company company = companyRepo.findById(companyId).orElse(null);
 			if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
-			Set<String> employeeKeys = employeeRepo.findByCompanyIdAndLocation(companyId, location).stream().map(e -> e.getCode()).collect(Collectors.toSet());
+			Set<String> employeeKeys = employeeRepo.findByCompanyIdAndLocationIgnoreCase(companyId, location).stream().map(e -> e.getCode()).collect(Collectors.toSet());
 			List<String> users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, company.getCode(), employeeKeys).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
 			criteria = criteria.and("playerId").in(users);
 		}

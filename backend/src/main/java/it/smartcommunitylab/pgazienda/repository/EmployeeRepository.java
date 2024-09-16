@@ -39,7 +39,7 @@ public interface EmployeeRepository  extends MongoRepository<Employee, String> {
 
 	public List<Employee> findByCampaigns(String campaignId);
 
-	public List<Employee> findByCompanyIdAndLocation(String id, String location);
+	public List<Employee> findByCompanyIdAndLocationIgnoreCase(String id, String location);
 
 	public List<Employee> findByCompanyId(String companyId);
 
