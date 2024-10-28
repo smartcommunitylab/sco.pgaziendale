@@ -55,7 +55,7 @@
               </v-col>
               <v-col cols="6" class="mt-0 pt-0">
                 <p>
-                  Il nome verrà visualizzato nell'app (se non specificato, verrà usato il codice sede).
+                  La denomiazione verrà visualizzato nell'app (se non specificato, verrà usato il codice sede).
                   </p>
               </v-col>
             </v-row>
