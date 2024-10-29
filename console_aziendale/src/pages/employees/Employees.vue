@@ -59,7 +59,7 @@ export default {
   data: function () {
     return {
       tableTitle: "Dipendenti",
-      headerColumns: [{text:"Nome", value:"name"}, {text:"Cognome", value:"surname"}, {text:"Sede", value:"location"}, {text:"Codice", value:"code"}, {text: 'Bloccato', value: 'blockedStr'}, {text: 'Iscrizioni', value: "employeeCampaigns"}],
+      headerColumns: [{text:"Nome", value:"name"}, {text:"Cognome", value:"surname"}, {text:"Sede", value:"location"}, {text:"Codice dipendente", value:"code"}, {text: 'Bloccato', value: 'blockedStr'}, {text: 'Iscrizioni', value: "employeeCampaigns"}],
       editModalVisible: false,
       deleteModalVisible: false,
       currentEmployeeSelected: undefined,

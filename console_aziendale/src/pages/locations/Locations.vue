@@ -61,7 +61,7 @@ export default {
   data: function () {
     return {
       headerColumns: [
-        { text: "Identificativo", value: "id" },
+        { text: "Codice sede", value: "id" },
         { text: "Denomiazione", value: "name" },
         { text: "Cittá", value: "city" },
         { text: "Indirizzo", value: "address" },

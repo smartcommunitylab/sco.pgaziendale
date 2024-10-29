@@ -15,8 +15,8 @@
             <v-row>
               <v-col cols="6">
                 <v-text-field
-                  label="Identificativo"
-                  placeholder="Identificativo *"
+                  label="Codice sede"
+                  placeholder="Codice sede *"
                   type="text"
                   name="campaignCode"
                   id="campaignCode"
@@ -55,7 +55,7 @@
               </v-col>
               <v-col cols="6" class="mt-0 pt-0">
                 <p>
-                  La denomiazione verrà visualizzato nell'app (se non specificato, verrà usato il codice sede).
+                  La denomiazione verrà visualizzata nell'app (se non specificata, verrà usato il codice sede).
                   </p>
               </v-col>
             </v-row>
