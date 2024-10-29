@@ -96,6 +96,11 @@ public class UserResourceITest {
         return user;
     }
 
+    /**
+     * Initialize the database with one user.
+     * <p>
+     * The user is created by calling {@link #createEntity()}.
+     */
     @BeforeEach
     public void initTest() {
         userRepository.findAll().forEach(u -> {
@@ -104,11 +109,13 @@ public class UserResourceITest {
         user = createEntity();
     }
 
+    /**
+     * Creates a User and validates that the created user is in the database.
+     */
     @Test
     public void createUser() throws Exception {
         int databaseSizeBeforeCreate = userRepository.findAll().size();
 
-        // Create the User
         User managedUserVM = new User();
         managedUserVM.setUsername(DEFAULT_LOGIN);
         managedUserVM.setPassword(DEFAULT_PASSWORD);
@@ -122,7 +129,6 @@ public class UserResourceITest {
             .content(TestUtil.convertObjectToJsonBytes(managedUserVM)))
             .andExpect(status().is2xxSuccessful());
 
-        // Validate the User in the database
         assertPersistedUsers(users -> {
             assertThat(users).hasSize(databaseSizeBeforeCreate + 1);
             User testUser = users.get(users.size() - 1);
@@ -132,6 +138,16 @@ public class UserResourceITest {
         });
     }
 
+    /**
+     * Creates a User with an existing ID.
+     *
+     * This is an alternative to creating a User, so that the test can also succeed
+     * when the JHipster server uses the {@link org.springframework.boot.autoconfigure.ConfigurationProperties}
+     * Loader configuration, which the {@link UserResourceIntTest} does. To differentiate
+     * this test from the {@link UserResourceIntTest}, a User is created with an existing ID.
+     *
+     * A User with an existing ID cannot be created, so this API call must fail.
+     */
     @Test
     public void createUserWithExistingId() throws Exception {
         int databaseSizeBeforeCreate = userRepository.findAll().size();
@@ -145,19 +161,22 @@ public class UserResourceITest {
         managedUserVM.setActivated(true);
         managedUserVM.setRoles(Collections.singletonList(UserRole.createMobilityManager(COMPANY_ID)));
 
-        // An entity with an existing ID cannot be created, so this API call must fail
         restUserMockMvc.perform(post("/api/companies/{companyId}/users", COMPANY_ID)
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(managedUserVM)))
             .andExpect(status().isBadRequest());
 
-        // Validate the User in the database
         assertPersistedUsers(users -> assertThat(users).hasSize(databaseSizeBeforeCreate));
     }
 
+    /**
+     * Creates a User with an existing login.
+     *
+     * A User with an existing login cannot be created, so this API call must fail.
+     */
     @Test
     public void createUserWithExistingLogin() throws Exception {
-        // Initialize the database
+
         userRepository.save(user);
         int databaseSizeBeforeCreate = userRepository.findAll().size();
 
@@ -169,22 +188,29 @@ public class UserResourceITest {
         managedUserVM.setActivated(true);
         managedUserVM.setRoles(Collections.singletonList(UserRole.createMobilityManager(COMPANY_ID)));
 
-        // Create the User
         restUserMockMvc.perform(post("/api/companies/{companyId}/users", COMPANY_ID)
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(managedUserVM)))
             .andExpect(status().isBadRequest());
 
-        // Validate the User in the database
         assertPersistedUsers(users -> assertThat(users).hasSize(databaseSizeBeforeCreate));
     }
 
+    /**
+     * Test case for verifying the retrieval of all users.
+     *
+     * This test saves a user in the repository and performs a GET request
+     * to retrieve all users associated with a company. It expects the operation
+     * to return an HTTP 200 OK status, and verifies that the response contains
+     * the username, name, and surname of the saved user in JSON format.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void getAllUsers() throws Exception {
-        // Initialize the database
+
         userRepository.save(user);
 
-        // Get all the users
         restUserMockMvc.perform(get("/api/companies/{companyId}/users", COMPANY_ID)
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -194,19 +220,35 @@ public class UserResourceITest {
             .andExpect(jsonPath("$.[*].surname").value(hasItem(DEFAULT_LASTNAME)));
     }
 
+    /**
+     * Test case for verifying the behavior of the get user endpoint
+     * when attempting to retrieve a non-existing user.
+     *
+     * The test expects the endpoint to return an HTTP 404 Not Found status.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void getNonExistingUser() throws Exception {
         restUserMockMvc.perform(get("/api/users/unknown"))
             .andExpect(status().isNotFound());
     }
 
+    /**
+     * Test case for verifying the behavior of the update user endpoint
+     * when attempting to update an existing user.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status and
+     * to update the user associated with the given id.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void updateUser() throws Exception {
-        // Initialize the database
+
         userRepository.save(user);
         int databaseSizeBeforeUpdate = userRepository.findAll().size();
 
-        // Update the user
         User updatedUser = userRepository.findById(user.getId()).get();
 
         User managedUserVM = new User();
@@ -227,7 +269,6 @@ public class UserResourceITest {
             .content(TestUtil.convertObjectToJsonBytes(managedUserVM)))
             .andExpect(status().isOk());
 
-        // Validate the User in the database
         assertPersistedUsers(users -> {
             assertThat(users).hasSize(databaseSizeBeforeUpdate);
             User testUser = users.get(users.size() - 1);
@@ -236,13 +277,21 @@ public class UserResourceITest {
         });
     }
 
+    /**
+     * Test case for verifying the behavior of the update user endpoint
+     * when attempting to update an existing user with a new login.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status and
+     * to update the user associated with the given id.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void updateUserLogin() throws Exception {
-        // Initialize the database
+
         userRepository.save(user);
         int databaseSizeBeforeUpdate = userRepository.findAll().size();
 
-        // Update the user
         User updatedUser = userRepository.findById(user.getId()).get();
 
         User managedUserVM = new User();
@@ -263,7 +312,6 @@ public class UserResourceITest {
             .content(TestUtil.convertObjectToJsonBytes(managedUserVM)))
             .andExpect(status().isOk());
 
-        // Validate the User in the database
         assertPersistedUsers(users -> {
             assertThat(users).hasSize(databaseSizeBeforeUpdate);
             User testUser = users.get(users.size() - 1);
@@ -273,9 +321,16 @@ public class UserResourceITest {
         });
     }
 
+    /**
+     * Updates a user with an existing login.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void updateUserExistingLogin() throws Exception {
-        // Initialize the database
+
         userRepository.save(user);
 
         User anotherUser = new User();
@@ -286,7 +341,6 @@ public class UserResourceITest {
         anotherUser.setSurname("hipster");
         userRepository.save(anotherUser);
 
-        // Update the user
         User updatedUser = userRepository.findById(user.getId()).get();
 
         User managedUserVM = new User();
@@ -308,21 +362,32 @@ public class UserResourceITest {
             .andExpect(status().isBadRequest());
     }
 
+    /**
+     * Deletes a user.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status and
+     * to delete the user associated with the given id.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void deleteUser() throws Exception {
-        // Initialize the database
+
         userRepository.save(user);
         int databaseSizeBeforeDelete = userRepository.findAll().size();
 
-        // Delete the user
         restUserMockMvc.perform(delete("/api/companies/{companyId}/users/{login}", COMPANY_ID, user.getUsername())
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().is2xxSuccessful());
 
-        // Validate the database is empty
         assertPersistedUsers(users -> assertThat(users).hasSize(databaseSizeBeforeDelete - 1));
     }
 
+    /**
+     * Asserts the persisted users against the given assertion.
+     *
+     * @param userAssertion the assertion to perform on the persisted users
+     */
     private void assertPersistedUsers(Consumer<List<User>> userAssertion) {
         userAssertion.accept(userRepository.findAll());
     }

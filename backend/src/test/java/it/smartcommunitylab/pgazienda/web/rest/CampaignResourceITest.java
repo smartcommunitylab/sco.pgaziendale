@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -28,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -86,6 +84,12 @@ public class CampaignResourceITest {
     @Autowired
     private MockMvc restMockMvc;
 
+/**
+ * Sets up the test environment by clearing all existing campaigns, companies,
+ * employees, and users with the username "login@example.com" from the database.
+ * It also initializes the application with a default test territory.
+ * This ensures that each test starts with a clean state.
+ */
     @BeforeEach
     public void setup() {
     	Territory t = testTerritory();
@@ -99,6 +103,14 @@ public class CampaignResourceITest {
     }
 
     
+    /**
+     * Tests the read operation by retrieving the list of campaigns and
+     * asserting that the result is an empty list (i.e., there are no campaigns
+     * in the database). It then creates a campaign and asserts that the read
+     * operation returns a list with one element.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testRead() throws Exception {
         restMockMvc.perform(
@@ -116,7 +128,37 @@ public class CampaignResourceITest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.numberOfElements").value("1"));
     }
+
+    /**
+     * Test case for verifying the behavior of the resetCampaign endpoint.
+     *
+     * The test creates a campaign, saves it in the database, and then calls
+     * the resetCampaign endpoint with the campaign's id. It then asserts that
+     * the response status is 200 (OK).
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
+	@Test
+	public void testResetCampaign() throws Exception {
+		Campaign obj = testCampaign();
+		obj = campaignRepo.save(obj);
+
+		restMockMvc.perform(
+				put("/api/campaigns/{campaignId}/reset", obj.getId()))
+				.andExpect(status().isOk());
+	}
     
+    /**
+     * Test case for verifying the behavior of the campaigns associated with a company.
+     *
+     * The test first creates and saves a campaign and a company in the database.
+     * It checks that the company initially has no associated campaigns.
+     * Then, it associates the campaign with the company and verifies that the
+     * campaign is successfully linked. After that, it removes the campaign from
+     * the company and ensures that the company no longer has any associated campaigns.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testCompanyCampaign() throws Exception {
     	Campaign obj = testCampaign();
@@ -151,6 +193,20 @@ public class CampaignResourceITest {
     	
 	}
     
+    /**
+     * Test case for verifying the behavior of the subscribe and unsubscribe endpoints
+     * when a user is associated with a company and a campaign.
+     *
+     * The test first creates a campaign and a company and associates the campaign
+     * with the company. After that, it creates an employee and associates the employee
+     * with the company. It also creates a user and associates the user with the company.
+     *
+     * Then, it subscribes the user to the campaign and verifies that the user is
+     * successfully subscribed. After that, it unsubscribes the user from the campaign
+     * and ensures that the user is no longer subscribed to the campaign.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithMockUser(username = "login@example.com")
     public void testSubscription() throws Exception {
@@ -166,7 +222,7 @@ public class CampaignResourceITest {
     	
     	User user = testUser();
     	userRepository.save(user);
-    	
+
         restMockMvc.perform(
                 put("/api/campaigns/{campaignId}/subscribe/{companyCode}/{key}", obj.getId(), company.getCode(), e.getCode()))
                 .andExpect(status().isOk());
@@ -210,6 +266,18 @@ public class CampaignResourceITest {
 		return e;
 	}
     
+    /**
+     * Test case for verifying the behavior of the read endpoint
+     * when accessed by an unauthenticated user.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status
+     * with an empty list of campaigns.
+     *
+     * Additionally, the test checks that if a campaign is activated,
+     * it is included in the response.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithUnauthenticatedMockUser
     public void testReadPublic() throws Exception {
@@ -232,6 +300,18 @@ public class CampaignResourceITest {
                 .andExpect(jsonPath("$.numberOfElements").value("1"));
     }
 
+    /**
+     * Test case for verifying the behavior of the read endpoint when accessed by an authenticated user.
+     *
+     * The test first creates a campaign, associates it with a company, and saves an employee.
+     * It then subscribes the user to the campaign and verifies that the endpoint returns the
+     * correct list of subscribed campaigns for the user.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status with a response body containing
+     * the list of campaigns the user is subscribed to.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithMockUser(username = "login@example.com")
     public void testReadUser() throws Exception {
@@ -260,6 +340,13 @@ public class CampaignResourceITest {
                 .andExpect(jsonPath("$", hasSize(1)));
     }
     
+    /**
+     * Returns a test Territory object.
+     *
+     * The test Territory has English name "Trentino" and territoryId {@link #T_ID}.
+     *
+     * @return a test Territory object
+     */
     private Territory testTerritory() {
     	Territory t = new Territory();
     	t.setName(Collections.singletonMap("en", "Trentino"));
@@ -267,8 +354,15 @@ public class CampaignResourceITest {
     	return t;
     }
 
-    
-
+    /**
+     * Returns a test Company object.
+     *
+     * The test Company has code "code", English name "company", address "address",
+     * contact email "email", contact phone "123", logo "logo", and web page "web".
+     * Its territoryId is {@link #T_ID}.
+     *
+     * @return a test Company object
+     */
     private Company testCompany() {
     	Company c = new Company();
     	c.setCode("code");
@@ -281,8 +375,17 @@ public class CampaignResourceITest {
     	c.setWeb("web");
     	return c;
     }
-    
 
+
+/**
+ * Utility method for creating a test campaign object.
+ *
+ * This method initializes a Campaign instance with preset data for testing purposes.
+ * It sets the campaign's title, id, territory id, description, start and end dates,
+ * and means of transportation.
+ *
+ * @return a Campaign object for use in unit tests
+ */
     private Campaign testCampaign() {
     	Campaign c = new Campaign();
     	c.setTitle("campaign");
@@ -295,6 +398,14 @@ public class CampaignResourceITest {
     	return c;
     }
     
+    /**
+     * Utility method for creating a test user object.
+     *
+     * This method initializes a User instance with preset data for testing purposes.
+     * It sets the user's username, password, activated flag, name, and surname.
+     *
+     * @return a User object for use in unit tests
+     */
     public User testUser() {
         User user = new User();
         user.setUsername("login@example.com");

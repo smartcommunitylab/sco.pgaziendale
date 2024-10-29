@@ -1,8 +1,10 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://localhost:27017
-      database: pgaziendatest
+      uri: mongodb+srv://mzanotti:iWxq6WPIWhOePVrA@cluster0.ddvh8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      database: Cluster0
+      #      uri: mongodb://localhost:27017
+      #      database: pgaziendatest
   mail:
     host: localhost
     from: pgazienda@test.com
@@ -40,8 +42,9 @@ app:
       player-field: userId
       name-field: name
       surname-field: surname
-      domain: '@local.com'
-  engineEndpoint: http://localhost:8080/api/
+      domain: '@test.com'
+  engineEndpoint: mongodb+srv://mzanotti:iWxq6WPIWhOePVrA@cluster0.ddvh8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+  #http://localhost:8080/api/
 
 admin:
   username: ${ADMIN_USERNAME:admin}
