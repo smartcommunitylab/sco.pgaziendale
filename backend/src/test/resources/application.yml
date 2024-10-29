@@ -43,8 +43,8 @@ app:
       name-field: name
       surname-field: surname
       domain: '@test.com'
-  engineEndpoint: mongodb+srv://mzanotti:iWxq6WPIWhOePVrA@cluster0.ddvh8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-  #http://localhost:8080/api/
+  # engineEndpoint: mongodb+srv://mzanotti:<db_password>@cluster0.ddvh8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+  engineEndpoint: http://localhost:8080/api/
 
 admin:
   username: ${ADMIN_USERNAME:admin}
