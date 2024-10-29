@@ -1,10 +1,10 @@
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://mzanotti:iWxq6WPIWhOePVrA@cluster0.ddvh8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-      database: Cluster0
-      #      uri: mongodb://localhost:27017
-      #      database: pgaziendatest
+      # uri: mongodb+srv://mzanotti:<db_password>@cluster0.ddvh8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      # database: Cluster0
+      uri: mongodb://localhost:27017
+      database: pgaziendatest
   mail:
     host: localhost
     from: pgazienda@test.com
