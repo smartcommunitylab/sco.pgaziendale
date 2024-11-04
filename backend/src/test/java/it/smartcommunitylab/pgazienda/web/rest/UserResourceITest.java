@@ -17,6 +17,8 @@ package it.smartcommunitylab.pgazienda.web.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import it.smartcommunitylab.pgazienda.service.errors.UsernameAlreadyUsedException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -234,6 +237,7 @@ public class UserResourceITest {
             .andExpect(status().isNotFound());
     }
 
+
     /**
      * Test case for verifying the behavior of the update user endpoint
      * when attempting to update an existing user.
@@ -275,6 +279,16 @@ public class UserResourceITest {
             assertThat(testUser.getName()).isEqualTo(UPDATED_FIRSTNAME);
             assertThat(testUser.getSurname()).isEqualTo(UPDATED_LASTNAME);
         });
+
+        //Test if UsernameAlreadyUsedException is returned
+        managedUserVM.setId("userException");
+        restUserMockMvc.perform(put("/api/companies/{companyId}/users", COMPANY_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtil.convertObjectToJsonBytes(managedUserVM)))
+                .andExpect(status().isBadRequest()) // Check if BadRequest is returned
+                .andExpect(result -> assertInstanceOf(UsernameAlreadyUsedException.class, result.getResolvedException()))
+                .andExpect(result -> assertEquals("Login name already used!", result.getResolvedException().getMessage()));
+
     }
 
     /**
