@@ -242,9 +242,13 @@
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
-                <p v-if="showErrorLocation">
-                  L'indirizzo inserito non permette il posizionamento automatico. Si prega
-                  di utilizzare il posizionamento manuale.
+                <p v-if="showErrorLocation" class="wrong-address">
+                  <v-icon class="wrong-address-icon">mdi-alert</v-icon>
+                  <span
+                    >L'indirizzo inserito
+                    <b>non permette il posizionamento automatico</b>. Si prega di
+                    utilizzare il posizionamento manuale.</span
+                  >
                 </p>
                 <v-tabs v-model="tab" align-with-title>
                   <v-tab key="1" class="text-none" @click="setTab(1)">
@@ -272,10 +276,10 @@
                   <v-tab-item key="2">
                     <div>
                       <i>
-                      Imposta manualmente la posizione trascinando il Pin o cliccando
-                      sulla mappa. Prima di confermare la nuova posizione verifica che
-                      corrisponda alla reale posizione della sede
-                    </i>
+                        Imposta manualmente la posizione trascinando il Pin o cliccando
+                        sulla mappa. Prima di confermare la nuova posizione verifica che
+                        corrisponda alla reale posizione della sede
+                      </i>
                     </div>
                     <div>
                       <v-btn
@@ -357,7 +361,7 @@
           <v-row v-if="latitude && longitude">
             <v-col cols="12">
               <v-divider></v-divider>
-              <p class="text-subtitle-1 mt-5">
+              <p class="text-subtitle-1 mt-5 bg-warning p-2 position-warning">
                 ATTENZIONE!!! La posizione sarà utilizzata per la validazione dei viaggi
                 dei dipendenti. Saranno validi solo i viaggi che iniziano o finiscono
                 all'interno della zona delimitata dal cerchio rosso.
@@ -563,7 +567,7 @@ export default {
       arrayDays: [],
       datepicker: null,
       menu: false,
-      manualPositionSet:false,
+      manualPositionSet: false,
       zoom: 13,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
@@ -652,15 +656,19 @@ export default {
     manualPosition() {
       this.$refs.geolocationSelector.enableMap();
       this.addresIsValid = true;
-      this.manualPositionSet=true;
+      this.manualPositionSet = true;
     },
     locationChanged(input) {
-      if (this.manualPosition){
-      this.locationSelected = input?.address;
-      this.latitude = this.locationSelected?.pos?.lat;
-      this.longitude = this.locationSelected?.pos?.lng;
-      if (!this.address && this.locationSelected && this.locationSelected.structuredValue)
-        this.changeParamForm(this.locationSelected?.structuredValue);
+      if (this.manualPosition) {
+        this.locationSelected = input?.address;
+        this.latitude = this.locationSelected?.pos?.lat;
+        this.longitude = this.locationSelected?.pos?.lng;
+        if (
+          !this.address &&
+          this.locationSelected &&
+          this.locationSelected.structuredValue
+        )
+          this.changeParamForm(this.locationSelected?.structuredValue);
       }
     },
     changeParamForm(structuredValue) {
@@ -763,9 +771,8 @@ export default {
           ", " +
           this.country;
       } else {
-
-        this.province ='';
-          this.region ='';
+        this.province = "";
+        this.region = "";
         this.inputAddress =
           this.address +
           " " +
@@ -1349,5 +1356,14 @@ const giorniSettimana = [
 }
 .tooltip {
   max-width: 200px;
+}
+.wrong-address {
+  display: flex;
+}
+.wrong-address-icon {
+  align-self: baseline;
+}
+.position-warning {
+  border: 1px solid black;
 }
 </style>
