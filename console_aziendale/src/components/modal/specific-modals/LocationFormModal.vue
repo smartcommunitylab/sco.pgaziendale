@@ -563,6 +563,7 @@ export default {
       arrayDays: [],
       datepicker: null,
       menu: false,
+      manualPositionSet:false,
       zoom: 13,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
@@ -651,13 +652,16 @@ export default {
     manualPosition() {
       this.$refs.geolocationSelector.enableMap();
       this.addresIsValid = true;
+      this.manualPositionSet=true;
     },
     locationChanged(input) {
+      if (this.manualPosition){
       this.locationSelected = input?.address;
       this.latitude = this.locationSelected?.pos?.lat;
       this.longitude = this.locationSelected?.pos?.lng;
       if (!this.address && this.locationSelected && this.locationSelected.structuredValue)
         this.changeParamForm(this.locationSelected?.structuredValue);
+      }
     },
     changeParamForm(structuredValue) {
       if (structuredValue.road) this.address = structuredValue.road;
