@@ -59,8 +59,8 @@ public class TerritoryResourceITest {
 	 *
 	 */
 
-    @Value("${spring.data.mongodb.uri}")
-    private String mongoDbUri;
+    @Value("${app.engineEndpoint}")
+    private String playgoUri;
 
 	private static final String T_ID = "TAA";
 
@@ -86,7 +86,7 @@ public class TerritoryResourceITest {
     public void setup() {
         mockServer = MockRestServiceServer.createServer(restTemplate);
 
-        mockServer.expect(manyTimes(), requestTo(mongoDbUri + "/publicapi/territory"))
+        mockServer.expect(manyTimes(), requestTo(playgoUri + "publicapi/territory"))
                 .andRespond(withStatus(HttpStatus.OK)
                         .contentType(MediaType.APPLICATION_JSON));
     }
