@@ -28,7 +28,6 @@
                   @blur="$v.id.$touch()"
                   outlined
                 >
-                  
                 </v-text-field>
               </v-col>
               <v-col cols="6">
@@ -40,7 +39,6 @@
                   id="denominazione"
                   autocomplete="null"
                   v-model.trim="$v.name.$model"
-                  
                   @input="$v.name.$touch()"
                   @blur="$v.name.$touch()"
                   outlined
@@ -50,13 +48,16 @@
             <v-row class="mt-0 pt-0">
               <v-col cols="6" class="mt-0 pt-0">
                 <p>
-                  Il codice sede deve essere <b>UNIVOCO</b>. Verrà utilizzato per associare i dipendenti ad una sede - nell'import dei dipendenti deve essere <b>IDENTICO</b>
-                  </p>
+                  Il codice sede deve essere <b>UNIVOCO</b>. Verrà utilizzato per
+                  associare i dipendenti ad una sede - nell'import dei dipendenti deve
+                  essere <b>IDENTICO</b>
+                </p>
               </v-col>
               <v-col cols="6" class="mt-0 pt-0">
                 <p>
-                  La denomiazione verrà visualizzata nell'app (se non specificata, verrà usato il codice sede).
-                  </p>
+                  La denomiazione verrà visualizzata nell'app (se non specificata, verrà
+                  usato il codice sede).
+                </p>
               </v-col>
             </v-row>
             <v-row>
@@ -229,10 +230,13 @@
             <v-col cols="4">
               <div class="tab-container">
                 <div v-if="addresIsValid">
-                    <p>E’ possibile impostare la posizione della sede manualmente oppure automaticamente in base all’indirizzo inserito.</p>
-                  </div>
+                  <p>
+                    E’ possibile impostare la posizione della sede manualmente oppure
+                    automaticamente in base all’indirizzo inserito.
+                  </p>
+                </div>
 
-                <p v-if="!showErrorLocation && !addresIsValid ">
+                <p v-if="!showErrorLocation && !addresIsValid">
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
@@ -483,9 +487,7 @@ export default {
         );
       },
     },
-    name: {
-      
-    },
+    name: {},
     address: {
       required,
     },
@@ -582,9 +584,11 @@ export default {
       if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
     },
     copyDates() {
-      this.nonWorkingDays = this.allLocations.items.find(
+      const loc = this.allLocations.items.find(
         (location) => location.id == this.location
-      )?.nonWorkingDays;
+      );
+      if (loc && loc.nonWorkingDays) this.nonWorkingDays = loc.nonWorkingDays;
+      else this.nonWorkingDays = [];
     },
     addressFormIsValid() {
       return (
@@ -671,7 +675,14 @@ export default {
       for (const [key] of Object.entries(location)) {
         this[key] = location[key];
       }
+      this.checkArrayInit();
       this.createLocation();
+    },
+    checkArrayInit() {
+      if (!this.nonWorkingDays)
+         this.nonWorkingDays=[];
+        if (!this.nonWorking)
+          this.nonWorking=[];
     },
     initLocation() {
       this.locationSelected = {};
@@ -716,7 +727,7 @@ export default {
         region: this.region,
         latitude: Number.parseFloat(this.latitude),
         longitude: Number.parseFloat(this.longitude),
-        nonWorking: this.nonWorking,
+        nonWorking: this.nonWorking?this.nonWorking:[],
         nonWorkingDays: this.nonWorkingDays,
         country: this.country,
         radius: Number.parseInt(this.radius),
