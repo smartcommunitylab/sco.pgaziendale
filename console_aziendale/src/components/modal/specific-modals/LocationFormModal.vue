@@ -271,9 +271,11 @@
                   </v-tab-item>
                   <v-tab-item key="2">
                     <div>
+                      <i>
                       Imposta manualmente la posizione trascinando il Pin o cliccando
                       sulla mappa. Prima di confermare la nuova posizione verifica che
                       corrisponda alla reale posizione della sede
+                    </i>
                     </div>
                     <div>
                       <v-btn
