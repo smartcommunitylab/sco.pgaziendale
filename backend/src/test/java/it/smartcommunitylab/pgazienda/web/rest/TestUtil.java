@@ -32,6 +32,18 @@ public final class TestUtil {
 
     private static final ObjectMapper mapper = createObjectMapper();
 
+    /**
+     * Creates an object mapper for JSON serialization and deserialization.
+     *
+     * This object mapper is configured to:
+     * <ul>
+     *     <li>Not write durations as timestamps.</li>
+     *     <li>Including only non-empty fields in JSON output.</li>
+     *     <li>Using the JavaTimeModule for date and time serialization and deserialization.</li>
+     * </ul>
+     *
+     * @return the object mapper.
+     */
     private static ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false);
@@ -51,6 +63,16 @@ public final class TestUtil {
         return mapper.writeValueAsBytes(object);
     }
     
+    /**
+     * Convert an object from JSON byte array.
+     *
+     * @param is the input stream of JSON data.
+     * @param cls the type of the object to convert.
+     * @return the converted object.
+     * @throws JsonParseException if the JSON data is not valid JSON.
+     * @throws JsonMappingException if the JSON data cannot be mapped to an object of the given type.
+     * @throws IOException if there is an IO error while reading the JSON data.
+     */
     public static <T> T readObject(InputStream is, Class<T> cls) throws JsonParseException, JsonMappingException, IOException {
     	return mapper.readValue(is, cls);
     } 

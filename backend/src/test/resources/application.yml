@@ -40,7 +40,7 @@ app:
       player-field: userId
       name-field: name
       surname-field: surname
-      domain: '@local.com'
+      domain: '@test.com'
   engineEndpoint: http://localhost:8080/api/
 
 admin:
