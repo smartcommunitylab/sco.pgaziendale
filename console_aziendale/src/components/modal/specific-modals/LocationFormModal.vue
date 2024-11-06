@@ -300,7 +300,7 @@
                     </div>
                     <div v-if="manualEnabling">
                       <v-btn  color="error"  outlined @click="cancelManualPosition()" class="m-2">Annulla</v-btn>
-                      <v-btn color="error" flat @click="setManualPosition()">Conferma</v-btn>
+                      <v-btn color="error"  @click="setManualPosition()">Conferma</v-btn>
                     </div>
                   </v-tab-item>
                 </v-tabs-items>

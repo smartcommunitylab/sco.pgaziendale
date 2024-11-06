@@ -127,7 +127,7 @@ export default {
     initMap() {},
     getNonWorking(days) {
       var returnDays = "";
-      if (days)
+      if (days?.length>0)
         days.forEach((element) => {
           returnDays += locationService.getDayByInt(element) + "<br>";
         });
@@ -135,8 +135,9 @@ export default {
       return returnDays;
     },
     getNonWorkingDays(days) {
+      console.log('nn working days')
       var returnDays = "";
-      if (days)
+      if (days?.length>0)
         days.forEach((element) => {
           returnDays += moment(element).format('DD-MM-YYYY') + "<br>";
         });
