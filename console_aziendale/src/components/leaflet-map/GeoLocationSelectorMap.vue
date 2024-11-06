@@ -127,6 +127,10 @@ export default {
         this.$refs.map.mapObject.scrollWheelZoom.disable();
         this.$refs.map.mapObject.boxZoom.disable();
         this.$refs.map.mapObject.keyboard.disable();
+        this.$refs.map.mapObject.eachLayer(function (layer) { 
+          if (layer?.options?.draggable)
+          layer.options.draggable=false;
+        });
         if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
 
     },
@@ -138,7 +142,10 @@ export default {
       this.$refs.map.mapObject.scrollWheelZoom.enable();
       this.$refs.map.mapObject.boxZoom.enable();
       this.$refs.map.mapObject.keyboard.enable();
-      
+      this.$refs.map.mapObject.eachLayer(function (layer) { 
+        if (layer?.options?.draggable)
+          layer.options.draggable=true;
+        });
     if ( this.$refs.map.tap)  this.$refs.map.tap.enable();
     },
     async changeAddress(value) {
@@ -191,6 +198,10 @@ export default {
         }
       } catch (e) {
         console.error("Reverse Geocode Error->", e);
+        address.pos = {
+            lat: this.position.lat,
+            lng: this.position.lng,
+          };
       }
       this.loading = false;
       return address;
