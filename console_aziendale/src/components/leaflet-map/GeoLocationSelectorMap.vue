@@ -118,6 +118,9 @@ export default {
         this.disableMap();
       }, 250);
     },
+    resetPosition(lat,lng) {
+      this.position = { lat, lng };
+    },
     disableMap() {
       this.markerClick = false;
         this.$refs.map.mapObject.invalidateSize();
@@ -157,20 +160,7 @@ export default {
       this.$emit('returnGeosearch', results);
     }, 500)
     },
-    // getStringAddress(structuredValue) {
-    //   var returnAddress = "";
-    //   if (structuredValue.amenity) returnAddress += "<br />" + structuredValue.amenity;
-    //   if (structuredValue.office) returnAddress += "<br />" + structuredValue.office;
-    //   if (structuredValue.road) returnAddress += "<br />" + structuredValue.road;
-    //   if (structuredValue.house_number)
-    //     returnAddress += ", " + structuredValue.house_number;
-    //   if (structuredValue.city) returnAddress += "<br />" + structuredValue.city;
-    //   if (structuredValue.country) returnAddress += "<br />" + structuredValue.country;
-    //   if (structuredValue.postcode) returnAddress += "<br />" + structuredValue.postcode;
-    //   if (structuredValue.state) returnAddress += "<br />" + structuredValue.state;
-    //   if (structuredValue.county) returnAddress += "<br />" + structuredValue.county;
-    //   return returnAddress;
-    // },
+
     async getAddress() {
       this.loading = true;
       let address = {

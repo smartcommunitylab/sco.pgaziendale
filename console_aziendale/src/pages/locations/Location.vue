@@ -131,6 +131,7 @@ export default {
         days.forEach((element) => {
           returnDays += locationService.getDayByInt(element) + "<br>";
         });
+        else returnDays="Nessuno";
       return returnDays;
     },
     getNonWorkingDays(days) {
@@ -139,6 +140,7 @@ export default {
         days.forEach((element) => {
           returnDays += moment(element).format('DD-MM-YYYY') + "<br>";
         });
+        else returnDays="Nessuno";
       return returnDays;
     },
   },

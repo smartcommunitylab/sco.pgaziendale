@@ -299,8 +299,8 @@
                       >
                     </div>
                     <div v-if="manualEnabling">
-                      <v-btn @click="cancelManualPosition()">Annulla</v-btn>
-                      <v-btn @click="setManualPosition()">Conferma</v-btn>
+                      <v-btn  color="error"  outlined @click="cancelManualPosition()" class="m-2">Annulla</v-btn>
+                      <v-btn color="error" flat @click="setManualPosition()">Conferma</v-btn>
                     </div>
                   </v-tab-item>
                 </v-tabs-items>
@@ -680,7 +680,8 @@ export default {
 
     },
     cancelManualPosition() {
-      // this.manualPositionSet=false;
+      //return to previous position
+      this.$refs.geolocationSelector.resetPosition(this.latitude,this.longitude  )
       this.$refs.geolocationSelector.disableMap();
       this.manualEnabling = false;
     },
