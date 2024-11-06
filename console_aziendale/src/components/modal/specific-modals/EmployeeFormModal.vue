@@ -43,8 +43,8 @@
                     cols="6"
                     >
                     <v-text-field
-                        label="Codice"
-                        placeholder="Codice *"
+                        label="Codice dipendente"
+                        placeholder="Codice dipendente *"
                         type="text"
                         name="employeeCode"
                         id="employeeCode"

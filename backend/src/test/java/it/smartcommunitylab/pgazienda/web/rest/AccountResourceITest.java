@@ -15,7 +15,8 @@
  ******************************************************************************/
 package it.smartcommunitylab.pgazienda.web.rest;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -23,10 +24,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
+import it.smartcommunitylab.pgazienda.web.rest.errors.AccountResourceException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +47,7 @@ import it.smartcommunitylab.pgazienda.service.UserService;
 import it.smartcommunitylab.pgazienda.web.rest.vm.KeyAndPasswordVM;
 import it.smartcommunitylab.pgazienda.web.rest.vm.PasswordChangeVM;
 
+
 /**
  * Integration tests for the {@link AccountResource} REST controller.
  */
@@ -59,7 +60,6 @@ public class AccountResourceITest {
     @Autowired
     private UserRepository userRepository;
 
-
     @Autowired
     private UserService userService;
 
@@ -68,7 +68,14 @@ public class AccountResourceITest {
 
     @Autowired
     private MockMvc restAccountMockMvc;
+    @Autowired
+    private AccountResource accountResource;
 
+    /**
+     * Initializes the test by removing all users except the default admin user.
+     * This is done to ensure that the tests are isolated and start with a clean
+     * slate.
+     */
     @BeforeEach
     public void setup() {
         userRepository.findAll().forEach(u -> {
@@ -76,6 +83,15 @@ public class AccountResourceITest {
         });;
     }
 
+    /**
+     * Test case for verifying the behavior of the authenticate endpoint
+     * when accessed by a non-authenticated (unauthenticated) user.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status with
+     * an empty response body when no user is authenticated.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithUnauthenticatedMockUser
     public void testNonAuthenticatedUser() throws Exception {
@@ -85,6 +101,15 @@ public class AccountResourceITest {
             .andExpect(content().string(""));
     }
 
+    /**
+     * Test case for verifying the behavior of the authenticate endpoint
+     * when accessed by an authenticated user.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status with
+     * a response body containing the username of the authenticated user.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testAuthenticatedUser() throws Exception {
         restAccountMockMvc.perform(get("/api/authenticate")
@@ -97,6 +122,15 @@ public class AccountResourceITest {
             .andExpect(content().string("\""+TEST_USER_LOGIN + "\""));
     }
 
+    /**
+     * Test case for verifying the behavior of the getAccount endpoint
+     * when accessed by an authenticated user who has an account in the system.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status with
+     * a response body containing the account details of the authenticated user.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testGetExistingAccount() throws Exception {
         Set<String> authorities = new HashSet<>();
@@ -118,6 +152,15 @@ public class AccountResourceITest {
             .andExpect(jsonPath("$.surname").value("doe"));
     }
 
+    /**
+     * Test case for verifying the behavior of the getAccount endpoint
+     * when accessed by an authenticated user who does not have an account in the system.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status with
+     * a response body containing a Problem in JSON format.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testGetUnknownAccount() throws Exception {
         restAccountMockMvc.perform(get("/api/account")
@@ -125,6 +168,15 @@ public class AccountResourceITest {
             .andExpect(status().isBadRequest());
     }
 
+    /**
+     * Test case for verifying the behavior of the activate endpoint
+     * when a valid activation key is provided.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status and
+     * to activate the user account associated with the activation key.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testActivateAccount() throws Exception {
         final String activationKey = "some activation key";
@@ -143,12 +195,30 @@ public class AccountResourceITest {
         assertThat(user.isActivated()).isTrue();
     }
 
+    /**
+     * Test case for verifying the behavior of the activate endpoint
+     * when an invalid activation key is provided.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testActivateAccountWithWrongKey() throws Exception {
         restAccountMockMvc.perform(get("/api/activate?key=wrongActivationKey"))
             .andExpect(status().isBadRequest());
     }
 
+
+    /**
+     * Test case for verifying the behavior of the save endpoint
+     * when a valid user data is provided.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status and
+     * to update the user account associated with the username.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithMockUser("save-account@example.com")
     public void testSaveAccount() throws Exception {
@@ -179,8 +249,45 @@ public class AccountResourceITest {
         assertThat(updatedUser.getPassword()).isEqualTo(user.getPassword());
         assertThat(updatedUser.isActivated()).isEqualTo(true);
         assertThat(updatedUser.getRoles()).isEmpty();
+
     }
 
+    /**
+     * Test case for verifying the behavior of the save endpoint
+     * when a user is not found in the system.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status
+     * with an exception indicating that the user could not be found.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
+    @Test
+    @WithMockUser("save-account@example.com")
+    public void testSaveAccountUserNotFound() throws Exception {
+
+        userRepository.deleteAll();
+
+        User userDTO = new User();
+        userDTO.setUsername("save-account@example.com");
+
+        restAccountMockMvc.perform(
+                        post("/api/account")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(TestUtil.convertObjectToJsonBytes(userDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof AccountResourceException))
+                .andExpect(result -> assertEquals("User could not be found", result.getResolvedException().getMessage()));
+    }
+
+    /**
+     * Test case for verifying the behavior of the save endpoint
+     * when a user is passed with an invalid email.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status
+     * with an exception indicating that the user could not be found.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithMockUser("save-invalid-email@example.com")
     public void testSaveInvalidEmail() throws Exception {
@@ -201,6 +308,15 @@ public class AccountResourceITest {
         assertThat(userRepository.findOneByUsernameIgnoreCase("invalid email")).isNotPresent();
     }
 
+    /**
+     * Test case for verifying the behavior of the save endpoint
+     * when a user is passed with an existing email and login.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status
+     * with the updated user in the response body.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithMockUser("save-existing-email-and-login@example.com")
     public void testSaveExistingEmailAndLogin() throws Exception {
@@ -228,6 +344,15 @@ public class AccountResourceITest {
         assertThat(updatedUser.getUsername()).isEqualTo("save-existing-email-and-login@example.com");
     }
 
+    /**
+     * Test case for verifying the behavior of the change password endpoint
+     * when the user is passing an invalid current password.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status
+     * and the user's password to remain unchanged.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithMockUser("change-password-wrong-existing-password@example.com")
     public void testChangePasswordWrongExistingPassword() throws Exception {
@@ -248,6 +373,15 @@ public class AccountResourceITest {
         assertThat(passwordEncoder.matches(currentPassword, updatedUser.getPassword())).isTrue();
     }
 
+    /**
+     * Test case for verifying the behavior of the change password endpoint
+     * when the user is passing the correct current password.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status
+     * and the user's password to be changed.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithMockUser("change-password@example.com")
     public void testChangePassword() throws Exception {
@@ -267,6 +401,15 @@ public class AccountResourceITest {
         assertThat(passwordEncoder.matches("new password", updatedUser.getPassword())).isTrue();
     }
 
+    /**
+     * Test case for verifying the behavior of the change password endpoint
+     * when the user is passing a new password that is too small.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status
+     * and the user's password to remain unchanged.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithMockUser("change-password-too-small@example.com")
     public void testChangePasswordTooSmall() throws Exception {
@@ -288,6 +431,15 @@ public class AccountResourceITest {
         assertThat(updatedUser.getPassword()).isEqualTo(user.getPassword());
     }
 
+    /**
+     * Test case for verifying the behavior of the change password endpoint
+     * when the user is passing a new password that is too long.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status
+     * and the user's password to remain unchanged.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithMockUser("change-password-too-long@example.com")
     public void testChangePasswordTooLong() throws Exception {
@@ -309,6 +461,15 @@ public class AccountResourceITest {
         assertThat(updatedUser.getPassword()).isEqualTo(user.getPassword());
     }
 
+    /**
+     * Test case for verifying the behavior of the change password endpoint
+     * when the user is passing an empty new password.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status
+     * and the user's password to remain unchanged.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     @WithMockUser("change-password-empty@example.com")
     public void testChangePasswordEmpty() throws Exception {
@@ -328,6 +489,15 @@ public class AccountResourceITest {
         assertThat(updatedUser.getPassword()).isEqualTo(user.getPassword());
     }
 
+    /**
+     * Test case for verifying the behavior of the request password reset endpoint
+     * when a valid user email is passed.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status
+     * and the user's password reset key to be updated.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testRequestPasswordReset() throws Exception {
         User user = new User();
@@ -343,6 +513,16 @@ public class AccountResourceITest {
             .andExpect(status().isOk());
     }
 
+    /**
+     * Test case for verifying the behavior of the request password reset endpoint
+     * when a valid user email is provided in uppercase.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status,
+     * indicating that the request is processed successfully, regardless
+     * of the case of the email.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testRequestPasswordResetUpperCaseEmail() throws Exception {
         User user = new User();
@@ -358,6 +538,16 @@ public class AccountResourceITest {
             .andExpect(status().isOk());
     }
 
+    /**
+     * Test case for verifying the behavior of the request password reset endpoint
+     * when an invalid user email is passed.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status,
+     * simulating a successful request even if the email does not exist,
+     * to prevent checking which emails actually exist in the system.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testRequestPasswordResetWrongEmail() throws Exception {
         restAccountMockMvc.perform(
@@ -367,6 +557,15 @@ public class AccountResourceITest {
             .andExpect(status().isOk());
     }
 
+    /**
+     * Test case for verifying the behavior of the finish password reset endpoint
+     * when a valid reset key and new password are provided.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status
+     * and the user's password to be successfully updated.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testFinishPasswordReset() throws Exception {
         User user = new User();
@@ -390,6 +589,15 @@ public class AccountResourceITest {
         assertThat(passwordEncoder.matches(keyAndPassword.getNewPassword(), updatedUser.getPassword())).isTrue();
     }
 
+    /**
+     * Test case for verifying the behavior of the finish password reset endpoint
+     * when a valid reset key and a new password which is too small are provided.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status
+     * and the user's password to remain unchanged.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testFinishPasswordResetTooSmall() throws Exception {
         User user = new User();
@@ -413,6 +621,15 @@ public class AccountResourceITest {
         assertThat(passwordEncoder.matches(keyAndPassword.getNewPassword(), updatedUser.getPassword())).isFalse();
     }
 
+    /**
+     * Test case for verifying the behavior of the finish password reset endpoint
+     * when a wrong reset key is provided.
+     *
+     * The test expects the endpoint to return an HTTP 400 Bad Request status
+     * and the user's password to remain unchanged.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testFinishPasswordResetWrongKey() throws Exception {
         KeyAndPasswordVM keyAndPassword = new KeyAndPasswordVM();
@@ -424,5 +641,36 @@ public class AccountResourceITest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(TestUtil.convertObjectToJsonBytes(keyAndPassword)))
             .andExpect(status().isBadRequest());
+    }
+
+
+    /**
+     * Test case for verifying the behavior of the getAccounts endpoint
+     * when accessed by an administrator.
+     *
+     * The test expects the endpoint to return an HTTP 200 OK status
+     * with a response body containing the list of users in the system.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void testGetAccounts() throws Exception {
+
+        userRepository.deleteAll();
+
+        Set<String> authorities = new HashSet<>();
+        authorities.add(Constants.ROLE_ADMIN);
+
+        User user = new User();
+        user.setUsername("admin1@example.com");
+        userService.createUser(user, null);
+
+        restAccountMockMvc.perform(get("/api/accounts")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.content[0].username").value("admin1@example.com"));
+
     }
 }
