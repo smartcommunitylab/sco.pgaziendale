@@ -15,8 +15,8 @@
             <v-row>
               <v-col cols="6">
                 <v-text-field
-                  label="Identificativo"
-                  placeholder="Identificativo *"
+                  label="Codice sede"
+                  placeholder="Codice sede *"
                   type="text"
                   name="campaignCode"
                   id="campaignCode"
@@ -28,7 +28,6 @@
                   @blur="$v.id.$touch()"
                   outlined
                 >
-                  
                 </v-text-field>
               </v-col>
               <v-col cols="6">
@@ -40,7 +39,6 @@
                   id="denominazione"
                   autocomplete="null"
                   v-model.trim="$v.name.$model"
-                  
                   @input="$v.name.$touch()"
                   @blur="$v.name.$touch()"
                   outlined
@@ -50,13 +48,16 @@
             <v-row class="mt-0 pt-0">
               <v-col cols="6" class="mt-0 pt-0">
                 <p>
-                  Il codice sede deve essere <b>UNIVOCO</b>. Verrà utilizzato per associare i dipendenti ad una sede - nell'import dei dipendenti deve essere <b>IDENTICO</b>
-                  </p>
+                  Il codice sede deve essere <b>UNIVOCO</b>. Verrà utilizzato per
+                  associare i dipendenti ad una sede - nell'import dei dipendenti deve
+                  essere <b>IDENTICO</b>
+                </p>
               </v-col>
               <v-col cols="6" class="mt-0 pt-0">
                 <p>
-                  La denomiazione verrà visualizzato nell'app (se non specificato, verrà usato il codice sede).
-                  </p>
+                  La denomiazione verrà visualizzata nell'app (se non specificata, verrà
+                  usato il codice sede).
+                </p>
               </v-col>
             </v-row>
             <v-row>
@@ -147,25 +148,27 @@
               </v-col>
               <v-col cols="4">
                 <v-autocomplete
-                  label="Provincia"
-                  placeholder="Provincia *"
-                  name="campaignProvince"
-                  id="campaignProvince"
+                  label="Stato"
+                  placeholder="Stato *"
+                  name="campaignCountry"
+                  id="campaignCountry"
                   autocomplete="null"
-                  v-model.trim="$v.province.$model"
-                  :items="listaProvince"
-                  :error-messages="provinceErrors"
+                  v-model.trim="$v.country.$model"
+                  item-text="name"
+                  item-value="name"
+                  :items="listaStati"
+                  :error-messages="countryErrors"
                   required
                   @input="
-                    $v.province.$touch();
+                    $v.country.$touch();
                     changeAddress();
                   "
-                  @blur="$v.province.$touch()"
+                  @blur="$v.country.$touch()"
                   outlined
                 ></v-autocomplete>
               </v-col>
             </v-row>
-            <v-row>
+            <v-row v-if="$v.country.$model === 'Italy'">
               <v-col>
                 <v-autocomplete
                   label="Regione"
@@ -185,23 +188,23 @@
                 ></v-autocomplete>
               </v-col>
               <v-col>
-                <v-text-field
-                  label="Stato"
-                  placeholder="Stato *"
-                  type="text"
-                  name="campaignCountry"
-                  id="campaignCountry"
+                <v-autocomplete
+                  label="Provincia"
+                  placeholder="Provincia *"
+                  name="campaignProvince"
+                  id="campaignProvince"
                   autocomplete="null"
-                  v-model.trim="$v.country.$model"
-                  :error-messages="countryErrors"
+                  v-model.trim="$v.province.$model"
+                  :items="listaProvince"
+                  :error-messages="provinceErrors"
                   required
                   @input="
-                    $v.country.$touch();
+                    $v.province.$touch();
                     changeAddress();
                   "
-                  @blur="$v.country.$touch()"
+                  @blur="$v.province.$touch()"
                   outlined
-                ></v-text-field>
+                ></v-autocomplete>
               </v-col>
             </v-row>
           </div>
@@ -225,20 +228,36 @@
                   v-on:returnGeosearch="geoSearchResult"
                 />
               </div>
+              <v-row v-if="latitude && longitude">
+            <v-col cols="12">
+              <p class="text-subtitle-1 mt-5 bg-warning p-2 position-warning">
+                ATTENZIONE!!! La posizione sarà utilizzata per la validazione dei viaggi
+                dei dipendenti. Saranno validi solo i viaggi che iniziano o finiscono
+                all'interno della zona delimitata dal cerchio rosso.
+              </p>
+            </v-col>
+          </v-row>
             </v-col>
             <v-col cols="4">
               <div class="tab-container">
                 <div v-if="addresIsValid">
-                    <p>E’ possibile impostare la posizione della sede manualmente oppure automaticamente in base all’indirizzo inserito.</p>
-                  </div>
+                  <p>
+                    E’ possibile impostare la posizione della sede manualmente oppure
+                    automaticamente in base all’indirizzo inserito.
+                  </p>
+                </div>
 
-                <p v-if="!showErrorLocation && !addresIsValid ">
+                <p v-if="!showErrorLocation && !addresIsValid">
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
-                <p v-if="showErrorLocation">
-                  L'indirizzo inserito non permette il posizionamento automatico. Si prega
-                  di utilizzare il posizionamento manuale.
+                <p v-if="showErrorLocation" class="wrong-address">
+                  <v-icon class="wrong-address-icon">mdi-alert</v-icon>
+                  <span
+                    >L'indirizzo inserito
+                    <b>non permette il posizionamento automatico</b>. Si prega di
+                    utilizzare il posizionamento manuale.</span
+                  >
                 </p>
                 <v-tabs v-model="tab" align-with-title>
                   <v-tab key="1" class="text-none" @click="setTab(1)">
@@ -265,9 +284,11 @@
                   </v-tab-item>
                   <v-tab-item key="2">
                     <div>
-                      Imposta manualmente la posizione trascinando il Pin o cliccando
-                      sulla mappa. Prima di confermare la nuova posizione verifica che
-                      corrisponda alla reale posizione della sede
+                      <i>
+                        Imposta manualmente la posizione trascinando il Pin o cliccando
+                        sulla mappa. Prima di confermare la nuova posizione verifica che
+                        corrisponda alla reale posizione della sede
+                      </i>
                     </div>
                     <div>
                       <v-btn
@@ -346,16 +367,8 @@
               </v-row>
             </v-col>
           </v-row>
-          <v-row v-if="latitude && longitude">
-            <v-col cols="12">
-              <v-divider></v-divider>
-              <p class="text-subtitle-1 mt-5">
-                ATTENZIONE!!! La posizione sarà utilizzata per la validazione dei viaggi
-                dei dipendenti. Saranno validi solo i viaggi che iniziano o finiscono
-                all'interno della zona delimitata dal cerchio rosso.
-              </p>
-            </v-col>
-          </v-row>
+          <v-divider></v-divider>
+
           <v-row>
             <v-col cols="4" class="mt-3">
               <v-form>
@@ -442,7 +455,9 @@
         type="submit"
         @click="saveLocation"
         class="py-8 ml-8"
-        :disabled="!addresIsValid || $v.$invalid || !latitude || !longitude"
+        :disabled="
+          $v.$dirty && (!addresIsValid || $v.$invalid || !latitude || !longitude)
+        "
       >
         Salva
       </v-btn>
@@ -452,7 +467,7 @@
 
 <script>
 import { validationMixin } from "vuelidate";
-import { required, numeric } from "vuelidate/lib/validators";
+import { required, requiredIf, numeric } from "vuelidate/lib/validators";
 import { locationService } from "@/services";
 import GeoLocationSelectorMapVue from "@/components/leaflet-map/GeoLocationSelectorMap.vue";
 import Modal from "@/components/modal/ModalStructure.vue";
@@ -483,9 +498,7 @@ export default {
         );
       },
     },
-    name: {
-      
-    },
+    name: {},
     address: {
       required,
     },
@@ -500,10 +513,14 @@ export default {
       required,
     },
     province: {
-      required,
+      required: requiredIf(function (model) {
+        return model.country === "Italy";
+      }),
     },
     region: {
-      required,
+      required: requiredIf(function (model) {
+        return model.country === "Italy";
+      }),
     },
     country: {
       required,
@@ -551,6 +568,7 @@ export default {
       arrayDays: [],
       datepicker: null,
       menu: false,
+      manualPositionSet: false,
       zoom: 13,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
@@ -566,6 +584,7 @@ export default {
       locationSelected: null,
       listaProvince: listaProvince,
       listaRegioni: listaRegioni,
+      listaStati: listaStati,
       giorniSettimana: giorniSettimana,
       disabled: false,
     };
@@ -582,9 +601,11 @@ export default {
       if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
     },
     copyDates() {
-      this.nonWorkingDays = this.allLocations.items.find(
+      const loc = this.allLocations.items.find(
         (location) => location.id == this.location
-      )?.nonWorkingDays;
+      );
+      if (loc && loc.nonWorkingDays) this.nonWorkingDays = loc.nonWorkingDays;
+      else this.nonWorkingDays = [];
     },
     addressFormIsValid() {
       return (
@@ -636,13 +657,20 @@ export default {
     manualPosition() {
       this.$refs.geolocationSelector.enableMap();
       this.addresIsValid = true;
+      this.manualPositionSet = true;
     },
     locationChanged(input) {
-      this.locationSelected = input?.address;
-      this.latitude = this.locationSelected?.pos?.lat;
-      this.longitude = this.locationSelected?.pos?.lng;
-      if (!this.address && this.locationSelected && this.locationSelected.structuredValue)
-        this.changeParamForm(this.locationSelected?.structuredValue);
+      if (this.manualPosition) {
+        this.locationSelected = input?.address;
+        this.latitude = this.locationSelected?.pos?.lat;
+        this.longitude = this.locationSelected?.pos?.lng;
+        if (
+          !this.address &&
+          this.locationSelected &&
+          this.locationSelected.structuredValue
+        )
+          this.changeParamForm(this.locationSelected?.structuredValue);
+      }
     },
     changeParamForm(structuredValue) {
       if (structuredValue.road) this.address = structuredValue.road;
@@ -671,7 +699,12 @@ export default {
       for (const [key] of Object.entries(location)) {
         this[key] = location[key];
       }
+      this.checkArrayInit();
       this.createLocation();
+    },
+    checkArrayInit() {
+      if (!this.nonWorkingDays) this.nonWorkingDays = [];
+      if (!this.nonWorking) this.nonWorking = [];
     },
     initLocation() {
       this.locationSelected = {};
@@ -684,7 +717,7 @@ export default {
       this.region = "";
       this.latitude = "";
       this.longitude = "";
-      this.country = "";
+      this.country = "Italy";
       this.radius = 200;
       this.nonWorkingDays = [];
       this.nonWorking = [];
@@ -716,27 +749,42 @@ export default {
         region: this.region,
         latitude: Number.parseFloat(this.latitude),
         longitude: Number.parseFloat(this.longitude),
-        nonWorking: this.nonWorking,
+        nonWorking: this.nonWorking ? this.nonWorking : [],
         nonWorkingDays: this.nonWorkingDays,
-        country: this.country,
+        country: this.country ? this.country : "Italy",
         radius: Number.parseInt(this.radius),
       };
     },
     changeAddress() {
-      this.inputAddress =
-        this.address +
-        " " +
-        this.streetNumber +
-        ", " +
-        this.zip +
-        ", " +
-        this.city +
-        ", " +
-        this.province +
-        ", " +
-        this.region +
-        ", " +
-        this.country;
+      if (this.country == "Italy") {
+        this.inputAddress =
+          this.address +
+          " " +
+          this.streetNumber +
+          ", " +
+          this.zip +
+          ", " +
+          this.city +
+          ", " +
+          this.province +
+          ", " +
+          this.region +
+          ", " +
+          this.country;
+      } else {
+        this.province = "";
+        this.region = "";
+        this.inputAddress =
+          this.address +
+          " " +
+          this.streetNumber +
+          ", " +
+          this.zip +
+          ", " +
+          this.city +
+          ", " +
+          this.country;
+      }
       this.$refs.geolocationSelector.changeAddress(this.inputAddress);
     },
     setModalData() {
@@ -1038,6 +1086,251 @@ const listaRegioni = [
   "Umbria",
   "Valle d'Aosta Veneto",
 ];
+const listaStati = [
+  { name: "Afghanistan", code: "AF" },
+  { name: "Åland Islands", code: "AX" },
+  { name: "Albania", code: "AL" },
+  { name: "Algeria", code: "DZ" },
+  { name: "American Samoa", code: "AS" },
+  { name: "Andorra", code: "AD" },
+  { name: "Angola", code: "AO" },
+  { name: "Anguilla", code: "AI" },
+  { name: "Antarctica", code: "AQ" },
+  { name: "Antigua and Barbuda", code: "AG" },
+  { name: "Argentina", code: "AR" },
+  { name: "Armenia", code: "AM" },
+  { name: "Aruba", code: "AW" },
+  { name: "Australia", code: "AU" },
+  { name: "Austria", code: "AT" },
+  { name: "Azerbaijan", code: "AZ" },
+  { name: "Bahamas", code: "BS" },
+  { name: "Bahrain", code: "BH" },
+  { name: "Bangladesh", code: "BD" },
+  { name: "Barbados", code: "BB" },
+  { name: "Belarus", code: "BY" },
+  { name: "Belgium", code: "BE" },
+  { name: "Belize", code: "BZ" },
+  { name: "Benin", code: "BJ" },
+  { name: "Bermuda", code: "BM" },
+  { name: "Bhutan", code: "BT" },
+  { name: "Bolivia", code: "BO" },
+  { name: "Bosnia and Herzegovina", code: "BA" },
+  { name: "Botswana", code: "BW" },
+  { name: "Bouvet Island", code: "BV" },
+  { name: "Brazil", code: "BR" },
+  { name: "British Indian Ocean Territory", code: "IO" },
+  { name: "Brunei Darussalam", code: "BN" },
+  { name: "Bulgaria", code: "BG" },
+  { name: "Burkina Faso", code: "BF" },
+  { name: "Burundi", code: "BI" },
+  { name: "Cambodia", code: "KH" },
+  { name: "Cameroon", code: "CM" },
+  { name: "Canada", code: "CA" },
+  { name: "Cape Verde", code: "CV" },
+  { name: "Cayman Islands", code: "KY" },
+  { name: "Central African Republic", code: "CF" },
+  { name: "Chad", code: "TD" },
+  { name: "Chile", code: "CL" },
+  { name: "China", code: "CN" },
+  { name: "Christmas Island", code: "CX" },
+  { name: "Cocos (Keeling) Islands", code: "CC" },
+  { name: "Colombia", code: "CO" },
+  { name: "Comoros", code: "KM" },
+  { name: "Congo", code: "CG" },
+  { name: "Congo, The Democratic Republic of the", code: "CD" },
+  { name: "Cook Islands", code: "CK" },
+  { name: "Costa Rica", code: "CR" },
+  { name: "Cote D'Ivoire", code: "CI" },
+  { name: "Croatia", code: "HR" },
+  { name: "Cuba", code: "CU" },
+  { name: "Cyprus", code: "CY" },
+  { name: "Czech Republic", code: "CZ" },
+  { name: "Denmark", code: "DK" },
+  { name: "Djibouti", code: "DJ" },
+  { name: "Dominica", code: "DM" },
+  { name: "Dominican Republic", code: "DO" },
+  { name: "Ecuador", code: "EC" },
+  { name: "Egypt", code: "EG" },
+  { name: "El Salvador", code: "SV" },
+  { name: "Equatorial Guinea", code: "GQ" },
+  { name: "Eritrea", code: "ER" },
+  { name: "Estonia", code: "EE" },
+  { name: "Ethiopia", code: "ET" },
+  { name: "Falkland Islands (Malvinas)", code: "FK" },
+  { name: "Faroe Islands", code: "FO" },
+  { name: "Fiji", code: "FJ" },
+  { name: "Finland", code: "FI" },
+  { name: "France", code: "FR" },
+  { name: "French Guiana", code: "GF" },
+  { name: "French Polynesia", code: "PF" },
+  { name: "French Southern Territories", code: "TF" },
+  { name: "Gabon", code: "GA" },
+  { name: "Gambia", code: "GM" },
+  { name: "Georgia", code: "GE" },
+  { name: "Germany", code: "DE" },
+  { name: "Ghana", code: "GH" },
+  { name: "Gibraltar", code: "GI" },
+  { name: "Greece", code: "GR" },
+  { name: "Greenland", code: "GL" },
+  { name: "Grenada", code: "GD" },
+  { name: "Guadeloupe", code: "GP" },
+  { name: "Guam", code: "GU" },
+  { name: "Guatemala", code: "GT" },
+  { name: "Guernsey", code: "GG" },
+  { name: "Guinea", code: "GN" },
+  { name: "Guinea-Bissau", code: "GW" },
+  { name: "Guyana", code: "GY" },
+  { name: "Haiti", code: "HT" },
+  { name: "Heard Island and Mcdonald Islands", code: "HM" },
+  { name: "Holy See (Vatican City State)", code: "VA" },
+  { name: "Honduras", code: "HN" },
+  { name: "Hong Kong", code: "HK" },
+  { name: "Hungary", code: "HU" },
+  { name: "Iceland", code: "IS" },
+  { name: "India", code: "IN" },
+  { name: "Indonesia", code: "ID" },
+  { name: "Iran, Islamic Republic Of", code: "IR" },
+  { name: "Iraq", code: "IQ" },
+  { name: "Ireland", code: "IE" },
+  { name: "Isle of Man", code: "IM" },
+  { name: "Israel", code: "IL" },
+  { name: "Italy", code: "IT" },
+  { name: "Jamaica", code: "JM" },
+  { name: "Japan", code: "JP" },
+  { name: "Jersey", code: "JE" },
+  { name: "Jordan", code: "JO" },
+  { name: "Kazakhstan", code: "KZ" },
+  { name: "Kenya", code: "KE" },
+  { name: "Kiribati", code: "KI" },
+  { name: "Korea, Democratic People'S Republic of", code: "KP" },
+  { name: "Korea, Republic of", code: "KR" },
+  { name: "Kuwait", code: "KW" },
+  { name: "Kyrgyzstan", code: "KG" },
+  { name: "Lao People'S Democratic Republic", code: "LA" },
+  { name: "Latvia", code: "LV" },
+  { name: "Lebanon", code: "LB" },
+  { name: "Lesotho", code: "LS" },
+  { name: "Liberia", code: "LR" },
+  { name: "Libyan Arab Jamahiriya", code: "LY" },
+  { name: "Liechtenstein", code: "LI" },
+  { name: "Lithuania", code: "LT" },
+  { name: "Luxembourg", code: "LU" },
+  { name: "Macao", code: "MO" },
+  { name: "Macedonia, The Former Yugoslav Republic of", code: "MK" },
+  { name: "Madagascar", code: "MG" },
+  { name: "Malawi", code: "MW" },
+  { name: "Malaysia", code: "MY" },
+  { name: "Maldives", code: "MV" },
+  { name: "Mali", code: "ML" },
+  { name: "Malta", code: "MT" },
+  { name: "Marshall Islands", code: "MH" },
+  { name: "Martinique", code: "MQ" },
+  { name: "Mauritania", code: "MR" },
+  { name: "Mauritius", code: "MU" },
+  { name: "Mayotte", code: "YT" },
+  { name: "Mexico", code: "MX" },
+  { name: "Micronesia, Federated States of", code: "FM" },
+  { name: "Moldova, Republic of", code: "MD" },
+  { name: "Monaco", code: "MC" },
+  { name: "Mongolia", code: "MN" },
+  { name: "Montserrat", code: "MS" },
+  { name: "Morocco", code: "MA" },
+  { name: "Mozambique", code: "MZ" },
+  { name: "Myanmar", code: "MM" },
+  { name: "Namibia", code: "NA" },
+  { name: "Nauru", code: "NR" },
+  { name: "Nepal", code: "NP" },
+  { name: "Netherlands", code: "NL" },
+  { name: "Netherlands Antilles", code: "AN" },
+  { name: "New Caledonia", code: "NC" },
+  { name: "New Zealand", code: "NZ" },
+  { name: "Nicaragua", code: "NI" },
+  { name: "Niger", code: "NE" },
+  { name: "Nigeria", code: "NG" },
+  { name: "Niue", code: "NU" },
+  { name: "Norfolk Island", code: "NF" },
+  { name: "Northern Mariana Islands", code: "MP" },
+  { name: "Norway", code: "NO" },
+  { name: "Oman", code: "OM" },
+  { name: "Pakistan", code: "PK" },
+  { name: "Palau", code: "PW" },
+  { name: "Palestinian Territory, Occupied", code: "PS" },
+  { name: "Panama", code: "PA" },
+  { name: "Papua New Guinea", code: "PG" },
+  { name: "Paraguay", code: "PY" },
+  { name: "Peru", code: "PE" },
+  { name: "Philippines", code: "PH" },
+  { name: "Pitcairn", code: "PN" },
+  { name: "Poland", code: "PL" },
+  { name: "Portugal", code: "PT" },
+  { name: "Puerto Rico", code: "PR" },
+  { name: "Qatar", code: "QA" },
+  { name: "Reunion", code: "RE" },
+  { name: "Romania", code: "RO" },
+  { name: "Russian Federation", code: "RU" },
+  { name: "RWANDA", code: "RW" },
+  { name: "Saint Helena", code: "SH" },
+  { name: "Saint Kitts and Nevis", code: "KN" },
+  { name: "Saint Lucia", code: "LC" },
+  { name: "Saint Pierre and Miquelon", code: "PM" },
+  { name: "Saint Vincent and the Grenadines", code: "VC" },
+  { name: "Samoa", code: "WS" },
+  { name: "San Marino", code: "SM" },
+  { name: "Sao Tome and Principe", code: "ST" },
+  { name: "Saudi Arabia", code: "SA" },
+  { name: "Senegal", code: "SN" },
+  { name: "Serbia and Montenegro", code: "CS" },
+  { name: "Seychelles", code: "SC" },
+  { name: "Sierra Leone", code: "SL" },
+  { name: "Singapore", code: "SG" },
+  { name: "Slovakia", code: "SK" },
+  { name: "Slovenia", code: "SI" },
+  { name: "Solomon Islands", code: "SB" },
+  { name: "Somalia", code: "SO" },
+  { name: "South Africa", code: "ZA" },
+  { name: "South Georgia and the South Sandwich Islands", code: "GS" },
+  { name: "Spain", code: "ES" },
+  { name: "Sri Lanka", code: "LK" },
+  { name: "Sudan", code: "SD" },
+  { name: "Suriname", code: "SR" },
+  { name: "Svalbard and Jan Mayen", code: "SJ" },
+  { name: "Swaziland", code: "SZ" },
+  { name: "Sweden", code: "SE" },
+  { name: "Switzerland", code: "CH" },
+  { name: "Syrian Arab Republic", code: "SY" },
+  { name: "Taiwan, Province of China", code: "TW" },
+  { name: "Tajikistan", code: "TJ" },
+  { name: "Tanzania, United Republic of", code: "TZ" },
+  { name: "Thailand", code: "TH" },
+  { name: "Timor-Leste", code: "TL" },
+  { name: "Togo", code: "TG" },
+  { name: "Tokelau", code: "TK" },
+  { name: "Tonga", code: "TO" },
+  { name: "Trinidad and Tobago", code: "TT" },
+  { name: "Tunisia", code: "TN" },
+  { name: "Turkey", code: "TR" },
+  { name: "Turkmenistan", code: "TM" },
+  { name: "Turks and Caicos Islands", code: "TC" },
+  { name: "Tuvalu", code: "TV" },
+  { name: "Uganda", code: "UG" },
+  { name: "Ukraine", code: "UA" },
+  { name: "United Arab Emirates", code: "AE" },
+  { name: "United Kingdom", code: "GB" },
+  { name: "United States", code: "US" },
+  { name: "United States Minor Outlying Islands", code: "UM" },
+  { name: "Uruguay", code: "UY" },
+  { name: "Uzbekistan", code: "UZ" },
+  { name: "Vanuatu", code: "VU" },
+  { name: "Venezuela", code: "VE" },
+  { name: "Viet Nam", code: "VN" },
+  { name: "Virgin Islands, British", code: "VG" },
+  { name: "Virgin Islands, U.S.", code: "VI" },
+  { name: "Wallis and Futuna", code: "WF" },
+  { name: "Western Sahara", code: "EH" },
+  { name: "Yemen", code: "YE" },
+  { name: "Zambia", code: "ZM" },
+  { name: "Zimbabwe", code: "ZW" },
+];
 const giorniSettimana = [
   {
     1: "Lunedì",
@@ -1064,5 +1357,14 @@ const giorniSettimana = [
 }
 .tooltip {
   max-width: 200px;
+}
+.wrong-address {
+  display: flex;
+}
+.wrong-address-icon {
+  align-self: baseline;
+}
+.position-warning {
+  border: 1px solid black;
 }
 </style>
