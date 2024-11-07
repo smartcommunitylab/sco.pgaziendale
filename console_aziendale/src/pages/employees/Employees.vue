@@ -7,7 +7,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="openModal({type:'employeeFormAdd', object:null})"
+          @click="openModal({ type: 'employeeFormAdd', object: null })"
           class="mr-4"
         >
           <v-icon left>mdi-plus</v-icon>
@@ -18,7 +18,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="openModal({type:'employeeImport', object:null})"
+          @click="openModal({ type: 'employeeImport', object: null })"
         >
           <v-icon left>mdi-file-import</v-icon>
           Aggiungi da file
@@ -40,7 +40,6 @@
         <div v-else class="empty-list">Non ci sono Dipendenti</div>
       </v-col>
       <profilo-employee v-if="actualEmployee && actualEmployee.item"></profilo-employee>
-
     </v-row>
   </div>
 </template>
@@ -52,14 +51,21 @@ import ProfiloEmployee from "./Employee.vue";
 import GenericTable from "@/components/data-table/GenericTable.vue";
 
 export default {
-  components: { ProfiloEmployee,  GenericTable },
+  components: { ProfiloEmployee, GenericTable },
 
   name: "Dipendenti",
 
   data: function () {
     return {
       tableTitle: "Dipendenti",
-      headerColumns: [{text:"Nome", value:"name"}, {text:"Cognome", value:"surname"}, {text:"Sede", value:"location"}, {text:"Codice dipendente", value:"code"}, {text: 'Bloccato', value: 'blockedStr'}, {text: 'Iscrizioni', value: "employeeCampaigns"}],
+      headerColumns: [
+        { text: "Nome", value: "name" },
+        { text: "Cognome", value: "surname" },
+        { text: "Codice Sede", value: "location" },
+        { text: "Codice dipendente", value: "code" },
+        { text: "Bloccato", value: "blockedStr" },
+        { text: "Iscrizioni", value: "employeeCampaigns" },
+      ],
       editModalVisible: false,
       deleteModalVisible: false,
       currentEmployeeSelected: undefined,
@@ -76,9 +82,9 @@ export default {
       inDragArea: false,
     };
   },
-  
+
   methods: {
-    ...mapActions("modal", {openModal: 'openModal'}),
+    ...mapActions("modal", { openModal: "openModal" }),
     ...mapActions("employee", {
       getAllEmployees: "getAll",
       addEmployeeCall: "addEmployee",
@@ -89,7 +95,8 @@ export default {
     }),
     ...mapActions("navigation", { changePage: "changePage" }),
     ...mapActions("campaign", {
-      getAllCampaigns: "getAll"}),
+      getAllCampaigns: "getAll",
+    }),
     showModal(title) {
       this.editModalVisible = true;
       this.newEmployee = true;
@@ -105,7 +112,7 @@ export default {
       this.deleteModalVisible = false;
     },
     closeImportModal() {
-      this.modalImportEmployeesOpen = false
+      this.modalImportEmployeesOpen = false;
       this.$v.$reset();
     },
     copyFormValues() {
@@ -120,7 +127,7 @@ export default {
         employeeId: this.actualEmployee.item.id,
       });
     },
-   
+
     showEmployeeInfo(employee) {
       if (this.currentEmployeeSelected == employee) {
         this.getEmployee(null);
@@ -132,23 +139,36 @@ export default {
       }
     },
     updateEmployeeCampaigns() {
-        if (this.allEmployees && this.allEmployees.items && this.allCampaigns && this.allCampaigns.items) {
-            let empList = this.allEmployees.items.slice();
-            empList.forEach(e => {
-              let list = (e.campaigns || []).concat(e.trackingRecord ? Object.keys(e.trackingRecord) : []);
-              const arr = Array.from(new Set(list)).map(cId => {
-                  let tr = e.trackingRecord && e.trackingRecord[cId] ? e.trackingRecord[cId] : {registration: new Date().getTime()}
-                  tr.id = cId;
-                  tr.title = (this.allCampaigns.items.find(c => c.id === cId) || {title: cId}).title;
-                  return tr;
-              }).map(c => c.title)
-              arr.sort();
-              e.employeeCampaigns = arr.join(', ');
-              e.blockedStr = e.blocked ? 'Si' : 'No'
-            });
-            this.employees = empList;
-        }
-
+      if (
+        this.allEmployees &&
+        this.allEmployees.items &&
+        this.allCampaigns &&
+        this.allCampaigns.items
+      ) {
+        let empList = this.allEmployees.items.slice();
+        empList.forEach((e) => {
+          let list = (e.campaigns || []).concat(
+            e.trackingRecord ? Object.keys(e.trackingRecord) : []
+          );
+          const arr = Array.from(new Set(list))
+            .map((cId) => {
+              let tr =
+                e.trackingRecord && e.trackingRecord[cId]
+                  ? e.trackingRecord[cId]
+                  : { registration: new Date().getTime() };
+              tr.id = cId;
+              tr.title = (
+                this.allCampaigns.items.find((c) => c.id === cId) || { title: cId }
+              ).title;
+              return tr;
+            })
+            .map((c) => c.title);
+          arr.sort();
+          e.employeeCampaigns = arr.join(", ");
+          e.blockedStr = e.blocked ? "Si" : "No";
+        });
+        this.employees = empList;
+      }
     },
     // onFileUploaderChange() {
     //   console.log(this.$refs["file"]);
@@ -162,21 +182,21 @@ export default {
     //   this.importData({ companyId: this.actualCompany.item.id, file: formData });
     // },
   },
-  
+
   computed: {
     ...mapState("employee", ["allEmployees", "actualEmployee"]),
     ...mapState("company", ["actualCompany"]),
-     ...mapState("campaign", ["allCampaigns"]),
+    ...mapState("campaign", ["allCampaigns"]),
 
     // fileName() {
     //   return this.fileUploaded.item(0).name;
     // },
-    nColsTable_calculator: function() {
-      if(this.actualEmployee){
+    nColsTable_calculator: function () {
+      if (this.actualEmployee) {
         return 8;
-      }else if(this.actualEmployee == null){
+      } else if (this.actualEmployee == null) {
         return 12;
-      }else{
+      } else {
         return 12;
       }
     },
@@ -190,12 +210,12 @@ export default {
   },
   watch: {
     allEmployees() {
-       this.updateEmployeeCampaigns();
+      this.updateEmployeeCampaigns();
     },
     allCampaigns() {
-       this.updateEmployeeCampaigns();
-    }
-  }
+      this.updateEmployeeCampaigns();
+    },
+  },
 };
 </script>
 

@@ -117,7 +117,7 @@ const actions = {
         campaignService.updateCampaign(companyId, campaign).then(
             () => {
                 commit('createCompanyCampaignSuccess', campaign);
-                dispatch('alert/success', "Campagna cancellata con successo", { root: true });
+                dispatch('alert/success', "Campagna associata con successo", { root: true });
 
             },
             error => {

@@ -118,6 +118,9 @@ export default {
         this.disableMap();
       }, 250);
     },
+    resetPosition(lat,lng) {
+      this.position = { lat, lng };
+    },
     disableMap() {
       this.markerClick = false;
         this.$refs.map.mapObject.invalidateSize();
@@ -127,6 +130,10 @@ export default {
         this.$refs.map.mapObject.scrollWheelZoom.disable();
         this.$refs.map.mapObject.boxZoom.disable();
         this.$refs.map.mapObject.keyboard.disable();
+        this.$refs.map.mapObject.eachLayer(function (layer) { 
+          if (layer?.options?.draggable)
+          layer.options.draggable=false;
+        });
         if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
 
     },
@@ -138,7 +145,10 @@ export default {
       this.$refs.map.mapObject.scrollWheelZoom.enable();
       this.$refs.map.mapObject.boxZoom.enable();
       this.$refs.map.mapObject.keyboard.enable();
-      
+      this.$refs.map.mapObject.eachLayer(function (layer) { 
+        if (layer?.options?.draggable)
+          layer.options.draggable=true;
+        });
     if ( this.$refs.map.tap)  this.$refs.map.tap.enable();
     },
     async changeAddress(value) {
@@ -150,20 +160,7 @@ export default {
       this.$emit('returnGeosearch', results);
     }, 500)
     },
-    // getStringAddress(structuredValue) {
-    //   var returnAddress = "";
-    //   if (structuredValue.amenity) returnAddress += "<br />" + structuredValue.amenity;
-    //   if (structuredValue.office) returnAddress += "<br />" + structuredValue.office;
-    //   if (structuredValue.road) returnAddress += "<br />" + structuredValue.road;
-    //   if (structuredValue.house_number)
-    //     returnAddress += ", " + structuredValue.house_number;
-    //   if (structuredValue.city) returnAddress += "<br />" + structuredValue.city;
-    //   if (structuredValue.country) returnAddress += "<br />" + structuredValue.country;
-    //   if (structuredValue.postcode) returnAddress += "<br />" + structuredValue.postcode;
-    //   if (structuredValue.state) returnAddress += "<br />" + structuredValue.state;
-    //   if (structuredValue.county) returnAddress += "<br />" + structuredValue.county;
-    //   return returnAddress;
-    // },
+
     async getAddress() {
       this.loading = true;
       let address = {
@@ -191,6 +188,10 @@ export default {
         }
       } catch (e) {
         console.error("Reverse Geocode Error->", e);
+        address.pos = {
+            lat: this.position.lat,
+            lng: this.position.lng,
+          };
       }
       this.loading = false;
       return address;
