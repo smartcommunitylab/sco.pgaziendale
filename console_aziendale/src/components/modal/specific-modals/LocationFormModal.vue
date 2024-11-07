@@ -273,7 +273,7 @@
                         inserito</i
                       >
                     </div>
-                    <div>
+                    <div  class="text-center"	>
                       <v-btn
                         color="primary"
                         :disabled="!addresIsValid"
@@ -290,7 +290,7 @@
                         corrisponda alla reale posizione della sede
                       </i>
                     </div>
-                    <div v-if="!manualEnabling">
+                    <div v-if="!manualEnabling" class="text-center"	>
                       <v-btn
                         color="primary"
                         @click="manualPosition()"
@@ -298,7 +298,7 @@
                         >Imposta manualmente</v-btn
                       >
                     </div>
-                    <div v-if="manualEnabling">
+                    <div v-if="manualEnabling"  class="text-center">
                       <v-btn  color="error"  outlined @click="cancelManualPosition()" class="m-2">Annulla</v-btn>
                       <v-btn color="error"  @click="setManualPosition()">Conferma</v-btn>
                     </div>
