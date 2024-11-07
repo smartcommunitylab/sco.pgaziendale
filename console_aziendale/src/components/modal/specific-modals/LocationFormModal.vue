@@ -229,18 +229,18 @@
                 />
               </div>
               <v-row v-if="latitude && longitude">
-            <v-col cols="12">
-              <p class="text-subtitle-1 mt-5 bg-warning p-2 position-warning">
-                ATTENZIONE!!! La posizione sarà utilizzata per la validazione dei viaggi
-                dei dipendenti. Saranno validi solo i viaggi che iniziano o finiscono
-                all'interno della zona delimitata dal cerchio rosso.
-              </p>
-            </v-col>
-          </v-row>
+                <v-col cols="12">
+                  <p class="text-subtitle-1 mt-5 bg-warning p-2 position-warning">
+                    <b>ATTENZIONE!</b> La posizione sarà utilizzata per la validazione dei
+                    viaggi dei dipendenti. Saranno validi solo i viaggi che iniziano o
+                    finiscono all'interno della zona delimitata dal cerchio rosso.
+                  </p>
+                </v-col>
+              </v-row>
             </v-col>
             <v-col cols="4">
               <div class="tab-container">
-                <div v-if="addresIsValid">
+                <div v-if="addresIsValid && !showErrorLocation && !manualEnabling">
                   <p>
                     E’ possibile impostare la posizione della sede manualmente oppure
                     automaticamente in base all’indirizzo inserito.
@@ -273,7 +273,7 @@
                         inserito</i
                       >
                     </div>
-                    <div>
+                    <div  class="text-center"	>
                       <v-btn
                         color="primary"
                         :disabled="!addresIsValid"
@@ -290,13 +290,17 @@
                         corrisponda alla reale posizione della sede
                       </i>
                     </div>
-                    <div>
+                    <div v-if="!manualEnabling" class="text-center"	>
                       <v-btn
                         color="primary"
                         @click="manualPosition()"
                         :disabled="!addressFormIsValid()"
                         >Imposta manualmente</v-btn
                       >
+                    </div>
+                    <div v-if="manualEnabling"  class="text-center">
+                      <v-btn  color="error"  outlined @click="cancelManualPosition()" class="m-2">Annulla</v-btn>
+                      <v-btn color="error"  @click="setManualPosition()">Conferma</v-btn>
                     </div>
                   </v-tab-item>
                 </v-tabs-items>
@@ -560,7 +564,9 @@ export default {
       province: "",
       region: "",
       latitude: "",
+      tmpLatitude: "",
       longitude: "",
+      tmpLongitude: "",
       country: "",
       radius: 200,
       nonWorkingDays: [],
@@ -568,7 +574,7 @@ export default {
       arrayDays: [],
       datepicker: null,
       menu: false,
-      manualPositionSet: false,
+      // manualPositionSet: false,
       zoom: 13,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
@@ -581,12 +587,14 @@ export default {
       location: {},
       selectedPosition: false,
       key: 1,
+      tmpLocationSelected: null,
       locationSelected: null,
       listaProvince: listaProvince,
       listaRegioni: listaRegioni,
       listaStati: listaStati,
       giorniSettimana: giorniSettimana,
       disabled: false,
+      manualEnabling: false,
     };
   },
 
@@ -645,9 +653,10 @@ export default {
             this.addresIsValid = false;
           }
         }
-      } else {
-        this.$refs.geolocationSelector.enableMap();
       }
+      // else {
+      //   this.$refs.geolocationSelector.enableMap();
+      // }
     },
     autoPosition() {
       if (this.geoResults.length > 0) {
@@ -655,21 +664,39 @@ export default {
       }
     },
     manualPosition() {
+      console.log('manual');
       this.$refs.geolocationSelector.enableMap();
       this.addresIsValid = true;
-      this.manualPositionSet = true;
+      // this.manualPositionSet = true;
+      this.manualEnabling = true;
+    },
+    setManualPosition() {
+      //confirm location
+      this.locationSelected = this.tmpLocationSelected;
+      this.latitude = this.tmpLocationSelected?.pos?.lat?this.tmpLocationSelected?.pos?.lat:this.tmpLatitude;
+      this.longitude =  this.tmpLocationSelected?.pos?.lng?this.tmpLocationSelected?.pos?.lng:this.tmpLongitude;
+      this.manualEnabling = false;
+      this.$refs.geolocationSelector.disableMap();
+
+    },
+    cancelManualPosition() {
+      //return to previous position
+      this.$refs.geolocationSelector.resetPosition(this.latitude,this.longitude  )
+      this.$refs.geolocationSelector.disableMap();
+      this.manualEnabling = false;
     },
     locationChanged(input) {
-      if (this.manualPosition) {
-        this.locationSelected = input?.address;
-        this.latitude = this.locationSelected?.pos?.lat;
-        this.longitude = this.locationSelected?.pos?.lng;
-        if (
-          !this.address &&
-          this.locationSelected &&
-          this.locationSelected.structuredValue
-        )
-          this.changeParamForm(this.locationSelected?.structuredValue);
+      if (this.manualEnabling) {
+        //using tmp
+        this.tmpLocationSelected = input?.address;
+        this.tmpLatitude = this.locationSelected?.pos?.lat;
+        this.tmpLongitude = this.locationSelected?.pos?.lng;
+        // if (
+        //   !this.address &&
+        //   this.locationSelected &&
+        //   this.locationSelected.structuredValue
+        // )
+        //   this.changeParamForm(this.locationSelected?.structuredValue);
       }
     },
     changeParamForm(structuredValue) {
