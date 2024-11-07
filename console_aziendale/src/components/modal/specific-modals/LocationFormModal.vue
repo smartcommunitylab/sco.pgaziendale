@@ -39,6 +39,7 @@
                   id="denominazione"
                   autocomplete="null"
                   v-model.trim="$v.name.$model"
+                  :error-messages="denominazioneErrors"
                   @input="$v.name.$touch()"
                   @blur="$v.name.$touch()"
                   outlined
@@ -502,7 +503,16 @@ export default {
         );
       },
     },
-    name: {},
+    name: {
+      unique() {
+        return (
+          (this.actualLocation &&
+            this.actualLocation.item &&
+            this.name === this.actualLocation.item.name) ||
+          !this.allLocations.items.find((l) => l.name === this.name)
+        );
+      },
+    },
     address: {
       required,
     },
@@ -886,7 +896,12 @@ export default {
       if (!this.$v.id.$dirty) return errors;
       !this.$v.id.required && errors.push("Campo richiesto.");
       !this.$v.id.unique && errors.push("Valore gia' in uso.");
-      // !this.$v.id.valid && errors.push("Il valore non deve contenere spazi.");
+      return errors;
+    },
+    denominazioneErrors() {
+      const errors = [];
+      if (!this.$v.id.$dirty) return errors;
+      !this.$v.name.unique && errors.push("Valore gia' in uso.");
       return errors;
     },
     addressErrors() {
