@@ -260,6 +260,13 @@
                     utilizzare il posizionamento manuale.</span
                   >
                 </p>
+                <p v-if="pointIsFar && manualEnabling" class="wrong-address">
+                  <v-icon class="wrong-address-icon">mdi-alert</v-icon>
+                  <span>
+                    La posizione <b>non sembra corrispondere </b>all’indirizzo. Si prega di
+                    verificarla e se necessario correggerla.
+                  </span>
+                </p>
                 <v-tabs v-model="tab" align-with-title>
                   <v-tab key="1" class="text-none" @click="setTab(1)">
                     In automatico
@@ -274,7 +281,7 @@
                         inserito</i
                       >
                     </div>
-                    <div  class="text-center"	>
+                    <div class="text-center">
                       <v-btn
                         color="primary"
                         :disabled="!addresIsValid"
@@ -291,7 +298,7 @@
                         corrisponda alla reale posizione della sede
                       </i>
                     </div>
-                    <div v-if="!manualEnabling" class="text-center"	>
+                    <div v-if="!manualEnabling" class="text-center">
                       <v-btn
                         color="primary"
                         @click="manualPosition()"
@@ -299,9 +306,15 @@
                         >Imposta manualmente</v-btn
                       >
                     </div>
-                    <div v-if="manualEnabling"  class="text-center">
-                      <v-btn  color="error"  outlined @click="cancelManualPosition()" class="m-2">Annulla</v-btn>
-                      <v-btn color="error"  @click="setManualPosition()">Conferma</v-btn>
+                    <div v-if="manualEnabling" class="text-center">
+                      <v-btn
+                        color="error"
+                        outlined
+                        @click="cancelManualPosition()"
+                        class="m-2"
+                        >Annulla</v-btn
+                      >
+                      <v-btn color="error" @click="setManualPosition()">Conferma</v-btn>
                     </div>
                   </v-tab-item>
                 </v-tabs-items>
@@ -584,7 +597,7 @@ export default {
       arrayDays: [],
       datepicker: null,
       menu: false,
-      // manualPositionSet: false,
+      pointIsFar: false,
       zoom: 13,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
@@ -674,7 +687,7 @@ export default {
       }
     },
     manualPosition() {
-      console.log('manual');
+      console.log("manual");
       this.$refs.geolocationSelector.enableMap();
       this.addresIsValid = true;
       // this.manualPositionSet = true;
@@ -683,15 +696,18 @@ export default {
     setManualPosition() {
       //confirm location
       this.locationSelected = this.tmpLocationSelected;
-      this.latitude = this.tmpLocationSelected?.pos?.lat?this.tmpLocationSelected?.pos?.lat:this.tmpLatitude;
-      this.longitude =  this.tmpLocationSelected?.pos?.lng?this.tmpLocationSelected?.pos?.lng:this.tmpLongitude;
+      this.latitude = this.tmpLocationSelected?.pos?.lat
+        ? this.tmpLocationSelected?.pos?.lat
+        : this.tmpLatitude;
+      this.longitude = this.tmpLocationSelected?.pos?.lng
+        ? this.tmpLocationSelected?.pos?.lng
+        : this.tmpLongitude;
       this.manualEnabling = false;
       this.$refs.geolocationSelector.disableMap();
-
     },
     cancelManualPosition() {
       //return to previous position
-      this.$refs.geolocationSelector.resetPosition(this.latitude,this.longitude  )
+      this.$refs.geolocationSelector.resetPosition(this.latitude, this.longitude);
       this.$refs.geolocationSelector.disableMap();
       this.manualEnabling = false;
     },
@@ -701,6 +717,12 @@ export default {
         this.tmpLocationSelected = input?.address;
         this.tmpLatitude = this.locationSelected?.pos?.lat;
         this.tmpLongitude = this.locationSelected?.pos?.lng;
+        if (this.isFarFromInput(input)) {
+          //show warning far
+          this.pointIsFar = true;
+        } else {
+          this.pointIsFar = false;
+        }
         // if (
         //   !this.address &&
         //   this.locationSelected &&
@@ -708,6 +730,12 @@ export default {
         // )
         //   this.changeParamForm(this.locationSelected?.structuredValue);
       }
+    },
+    isFarFromInput(input) {
+      if (this.zip != input?.address?.structuredValue?.postcode) return true;
+      // if (this.city?.toUpperCase() != input?.address?.structuredValue?.town?.toUpperCase()) return true;
+      // if (this.country?.toUpperCase() != input?.address?.structuredValue?.country?.toUpperCase()) return true;
+      return false;
     },
     changeParamForm(structuredValue) {
       if (structuredValue.road) this.address = structuredValue.road;
