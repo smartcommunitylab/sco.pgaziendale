@@ -211,7 +211,9 @@
           </div>
           <v-row>
             <v-col cols="12" class="mb-0">
-              <p class="text-subtitle-1 mb-0">Localizzazione</p>
+              <v-divider></v-divider>
+
+              <p class="text-subtitle-1 mt-5">Localizzazione</p>
             </v-col>
           </v-row>
           <v-row>
