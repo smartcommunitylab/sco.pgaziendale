@@ -265,8 +265,8 @@
                 <p v-if="pointIsFar && manualEnabling" class="wrong-address">
                   <v-icon class="wrong-address-icon">mdi-alert</v-icon>
                   <span>
-                    La posizione <b>non sembra corrispondere </b>all’indirizzo. Si prega di
-                    verificarla e se necessario correggerla.
+                    La posizione <b>non sembra corrispondere </b>all’indirizzo. Si prega
+                    di verificarla e se necessario correggerla.
                   </span>
                 </p>
                 <v-tabs v-model="tab" align-with-title>
@@ -404,7 +404,44 @@
               </v-form>
             </v-col>
             <v-spacer></v-spacer>
-            <v-col cols="8">
+            <v-col cols="8" class="mt-3">
+              <p class="text-subtitle-1">Giorni di chiusura</p>
+              <v-row v-if="!copyDate" class="text-center m-3">
+                <v-col cols="12">
+                  <v-btn rounded @click="enableCopy()" color="primary">
+                    Copia date da altra sede
+                  </v-btn>
+                </v-col>
+              </v-row>
+              <v-row v-if="copyDate">
+                <v-col cols="6">
+                  <v-divider></v-divider>
+                  <v-select
+                    label="Sede"
+                    name="location"
+                    v-model="location"
+                    id="locationId"
+                    :items="allLocations?.items"
+                    item-text="name"
+                    item-value="id"
+                    outlined
+                  ></v-select>
+                </v-col>
+                <v-col cols="6">
+                  <div class="text-center">
+                    <v-btn color="error" outlined @click="cancelDates()" class="m-2"
+                      >Annulla</v-btn
+                    >
+                    <v-btn color="error" @click="copyDates()">Copia date</v-btn>
+                  </div>
+                  <!-- <v-btn rounded @click="cancelDates()" color="primary">
+                      Annulla
+                    </v-btn>
+                    <v-btn rounded @click="copyDates()" color="primary">
+                      Copia date
+                    </v-btn> -->
+                </v-col>
+              </v-row>
               <v-menu
                 ref="menu"
                 v-model="menu"
@@ -442,26 +479,6 @@
                   </v-btn>
                 </v-date-picker>
               </v-menu>
-              <v-row>
-                <v-col cols="6">
-                  <v-divider></v-divider>
-                  <v-select
-                    label="Sede"
-                    name="location"
-                    v-model="location"
-                    id="locationId"
-                    :items="allLocations?.items"
-                    item-text="name"
-                    item-value="id"
-                    outlined
-                  ></v-select>
-                </v-col>
-                <v-col cols="6">
-                  <v-btn rounded @click="copyDates()" color="primary">
-                    Usa date di questa sede
-                  </v-btn>
-                </v-col>
-              </v-row>
             </v-col>
           </v-row>
         </div>
@@ -481,6 +498,8 @@
       >
         Salva
       </v-btn>
+      <app-confirm ref="confirm"></app-confirm>
+
     </template>
   </modal>
 </template>
@@ -492,10 +511,11 @@ import { locationService } from "@/services";
 import GeoLocationSelectorMapVue from "@/components/leaflet-map/GeoLocationSelectorMap.vue";
 import Modal from "@/components/modal/ModalStructure.vue";
 import { mapActions, mapState } from "vuex";
-
+import Confirm from "@/components/Confirm.vue"
 export default {
   components: {
     "geolocation-selector": GeoLocationSelectorMapVue,
+    "app-confirm":Confirm,
     modal: Modal,
   },
 
@@ -571,6 +591,7 @@ export default {
 
   data() {
     return {
+      copyDate:false,
       popup: {
         title: "",
       },
@@ -633,12 +654,22 @@ export default {
     loadLocations() {
       if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
     },
-    copyDates() {
-      const loc = this.allLocations.items.find(
+    enableCopy() {
+      this.copyDate=true;
+    },
+    cancelDates(){
+      this.copyDate=false;
+    },
+    async copyDates() {
+      if (await this.$refs.confirm.open("Copia date", 'In caso di conferma verranno sovrascritte le date. Sei sicuro?', { color: 'primary' })) {
+        const loc = this.allLocations.items.find(
         (location) => location.id == this.location
       );
       if (loc && loc.nonWorkingDays) this.nonWorkingDays = loc.nonWorkingDays;
       else this.nonWorkingDays = [];
+  }
+
+      this.copyDate=false;
     },
     addressFormIsValid() {
       return (
