@@ -406,7 +406,7 @@
             <v-spacer></v-spacer>
             <v-col cols="8" class="mt-3">
               <p class="text-subtitle-1">Giorni di chiusura</p>
-              <v-row v-if="!copyDate" class="text-center m-3">
+              <v-row v-if="!copyDate" class="mt-5 mb-5">
                 <v-col cols="12">
                   <v-btn rounded @click="enableCopy()" color="primary">
                     Copia date da altra sede
@@ -422,7 +422,7 @@
                     v-model="location"
                     id="locationId"
                     :items="allLocations?.items"
-                    item-text="name"
+                    :item-text="item=>`Id: ${item.id}${item.name?(' - Nome: '+item.name):''}`"
                     item-value="id"
                     outlined
                   ></v-select>
@@ -442,7 +442,8 @@
                     </v-btn> -->
                 </v-col>
               </v-row>
-              <v-menu
+              <div class="pt-5">
+              <v-menu 
                 ref="menu"
                 v-model="menu"
                 :close-on-content-click="false"
@@ -479,6 +480,7 @@
                   </v-btn>
                 </v-date-picker>
               </v-menu>
+            </div>
             </v-col>
           </v-row>
         </div>
