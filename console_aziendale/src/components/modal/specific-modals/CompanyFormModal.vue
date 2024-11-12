@@ -4,7 +4,7 @@
     <template v-slot:body>
       <form action="" id="addAzienda">
         <div class="mb-20 flex flex-wrap justify-between">
-          <v-row>
+          <v-row class="pt-7 rounded-lg bg-background">
             <v-col cols="6">
               <v-text-field
                 label="Nome"
@@ -59,6 +59,8 @@
                 outlined
               ></v-select>
             </v-col>
+            </v-row>
+            <v-row>
             <v-col cols="6">
               <v-text-field
                 label="Indirizzo"
