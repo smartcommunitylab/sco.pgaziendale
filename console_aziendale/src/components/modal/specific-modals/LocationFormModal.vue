@@ -963,7 +963,7 @@ export default {
     },
     denominazioneErrors() {
       const errors = [];
-      if (!this.$v.id.$dirty) return errors;
+      if (!this.$v.name.$dirty) return errors;
       !this.$v.name.unique && errors.push("Valore gia' in uso.");
       return errors;
     },
