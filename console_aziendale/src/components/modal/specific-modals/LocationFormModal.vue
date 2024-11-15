@@ -759,19 +759,14 @@ export default {
         } else {
           this.pointIsFar = false;
         }
-        // if (
-        //   !this.address &&
-        //   this.locationSelected &&
-        //   this.locationSelected.structuredValue
-        // )
-        //   this.changeParamForm(this.locationSelected?.structuredValue);
+      } else {
+        this.latitude = input?.position?.lat;
+      this.longitude = input?.position?.lng;
       }
     },
     isFarFromInput(input) {
       if (this.zip != input?.address?.structuredValue?.postcode) return true;
-      // if (this.city?.toUpperCase() != input?.address?.structuredValue?.town?.toUpperCase()) return true;
-      // if (this.country?.toUpperCase() != input?.address?.structuredValue?.country?.toUpperCase()) return true;
-      return false;
+         return false;
     },
     changeParamForm(structuredValue) {
       if (structuredValue.road) this.address = structuredValue.road;
