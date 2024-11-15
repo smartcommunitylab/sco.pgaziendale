@@ -316,7 +316,7 @@
                         class="m-2"
                         >Annulla</v-btn
                       >
-                      <v-btn color="error" @click="setManualPosition()">Conferma</v-btn>
+                      <v-btn color="error" @click="setManualPosition()" :disabled="!tmpLocationSelected?.pos?.lat && !tmpLocationSelected?.pos?.lng">Conferma</v-btn>
                     </div>
                   </v-tab-item>
                 </v-tabs-items>
@@ -742,6 +742,7 @@ export default {
     },
     cancelManualPosition() {
       //return to previous position
+      this.tmpLocationSelected=null;
       this.$refs.geolocationSelector.resetPosition(this.latitude, this.longitude);
       this.$refs.geolocationSelector.disableMap();
       this.manualEnabling = false;
@@ -758,19 +759,14 @@ export default {
         } else {
           this.pointIsFar = false;
         }
-        // if (
-        //   !this.address &&
-        //   this.locationSelected &&
-        //   this.locationSelected.structuredValue
-        // )
-        //   this.changeParamForm(this.locationSelected?.structuredValue);
+      } else {
+        this.latitude = input?.position?.lat;
+      this.longitude = input?.position?.lng;
       }
     },
     isFarFromInput(input) {
       if (this.zip != input?.address?.structuredValue?.postcode) return true;
-      // if (this.city?.toUpperCase() != input?.address?.structuredValue?.town?.toUpperCase()) return true;
-      // if (this.country?.toUpperCase() != input?.address?.structuredValue?.country?.toUpperCase()) return true;
-      return false;
+         return false;
     },
     changeParamForm(structuredValue) {
       if (structuredValue.road) this.address = structuredValue.road;
