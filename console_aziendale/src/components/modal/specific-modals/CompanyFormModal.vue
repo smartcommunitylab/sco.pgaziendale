@@ -47,6 +47,7 @@
             </v-col>
             <v-col cols="3">
               <v-select
+
                 label="Territorio"
                 name="territoryId"
                 id="territoryId"
@@ -56,6 +57,8 @@
                 item-value="territoryId"
                 :error-messages="territoryErrors"
                 :disabled="!user.canDo('manage', 'companies') || !user.permissions.admin"
+                @input="$v.territoryId.$touch()"
+                @blur="$v.territoryId.$touch()"
                 outlined
               ></v-select>
             </v-col>
@@ -1007,6 +1010,7 @@ export default {
       return errors;
     },
     territoryErrors() {
+      console.log('error territory')
       const errors = [];
       if (!this.$v.territoryId.$dirty) return errors;
       !this.$v.territoryId.required && errors.push("Campo richiesto.");
