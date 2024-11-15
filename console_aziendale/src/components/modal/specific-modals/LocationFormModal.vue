@@ -316,7 +316,7 @@
                         class="m-2"
                         >Annulla</v-btn
                       >
-                      <v-btn color="error" @click="setManualPosition()">Conferma</v-btn>
+                      <v-btn color="error" @click="setManualPosition()" :disabled="!tmpLocationSelected?.pos?.lat && !tmpLocationSelected?.pos?.lng">Conferma</v-btn>
                     </div>
                   </v-tab-item>
                 </v-tabs-items>
@@ -742,6 +742,7 @@ export default {
     },
     cancelManualPosition() {
       //return to previous position
+      this.tmpLocationSelected=null;
       this.$refs.geolocationSelector.resetPosition(this.latitude, this.longitude);
       this.$refs.geolocationSelector.disableMap();
       this.manualEnabling = false;
