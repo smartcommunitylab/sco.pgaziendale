@@ -783,12 +783,14 @@ export default {
     },
     isURL(str) {
       let url;
+      if (str) {
       try {
         url = new URL(str);
       } catch (_) {
         return false;
       }
       return url.protocol === "http:" || url.protocol === "https:";
+    } else return true;
     },
     validateEmail(email) {
       var re = /\S+@\S+\.\S+/;
@@ -999,8 +1001,8 @@ export default {
       if (!this.$v.web.$dirty) return errors;
       !this.user.permissions.admin &&
         !this.$v.web.required &&
-        errors.push("Url richiesto.");
-      !this.isURL(this.web) &&
+        errors.push("Campo richiesto.");
+        !this.isURL(this.web) &&
         errors.push('Inserisci un url con "http://" o "https://".');
       return errors;
     },
