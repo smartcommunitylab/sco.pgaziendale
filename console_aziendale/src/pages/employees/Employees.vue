@@ -209,9 +209,12 @@ export default {
     this.getAllCampaigns();
   },
   watch: {
-    allEmployees() {
+    allEmployees:{
+    handler: function () {
       this.updateEmployeeCampaigns();
     },
+    deep: true
+  },
     allCampaigns() {
       this.updateEmployeeCampaigns();
     },
