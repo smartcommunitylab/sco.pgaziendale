@@ -231,7 +231,7 @@
                   v-on:returnGeosearch="geoSearchResult"
                 />
               </div>
-              <v-row v-if="latitude && longitude">
+              <v-row v-if="tmpLocationSelected">
                 <v-col cols="12">
                   <p class="text-subtitle-1 mt-5 bg-warning p-2 position-warning">
                     <b>ATTENZIONE!</b> La posizione sarà utilizzata per la validazione dei
