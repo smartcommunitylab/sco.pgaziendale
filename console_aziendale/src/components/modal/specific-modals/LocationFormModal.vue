@@ -243,8 +243,8 @@
             </v-col>
             <v-col cols="4">
               <div class="tab-container">
-                <div v-if="addresIsValid && !showErrorLocation && !manualEnabling">
-                  <p>
+                <div v-if="showInfoEdit()">
+                  <p> 
                     E’ possibile impostare la posizione della sede manualmente oppure
                     automaticamente in base all’indirizzo inserito.
                   </p>
@@ -653,6 +653,9 @@ export default {
       updateLocation: "updateLocation",
       getAllLocations: "getAllLocations",
     }),
+    showInfoEdit(){
+      return this.addresIsValid && !this.showErrorLocation &&!this.tmpLocationSelected && !(this.typeCall == 'edit')
+    },
     loadLocations() {
       if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
     },
@@ -746,6 +749,7 @@ export default {
       this.$refs.geolocationSelector.resetPosition(this.latitude, this.longitude);
       this.$refs.geolocationSelector.disableMap();
       this.manualEnabling = false;
+      this.pointIsFar=false;
     },
     locationChanged(input) {
       if (this.manualEnabling) {
