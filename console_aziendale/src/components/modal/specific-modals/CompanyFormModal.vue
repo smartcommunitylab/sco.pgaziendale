@@ -47,7 +47,6 @@
             </v-col>
             <v-col cols="3">
               <v-select
-
                 label="Territorio"
                 name="territoryId"
                 id="territoryId"
@@ -229,18 +228,18 @@
         </v-row>
         <v-row>
           <v-col cols="6">
-            <img  v-if="imgUrl"
+            <img
+              v-if="imgUrl"
               :width="300"
               aspect-ratio="16/9"
               cover
               :src="imgUrl"
               alt="Immagine non disponibile"
               @error="errorUrl"
-            >
+            />
             <div v-else>
-             <p class="text-h5 text-center"> Immagine non disponibile</p>
+              <p class="text-h5 text-center">Immagine non disponibile</p>
             </div>
-           
           </v-col>
           <v-col cols="6">
             <v-text-field
@@ -250,7 +249,7 @@
               name="companyLogo"
               id="companyLogo"
               v-model.trim="$v.logo.$model"
-              @input="event => onChangeUrl($v.logo.$model)"
+              @input="(event) => onChangeUrl($v.logo.$model)"
               outlined
             >
               <template v-slot:append>
@@ -295,6 +294,14 @@ export default {
         },
         code: {
           required,
+          unique() {
+            return (
+              (this.actualCompany &&
+                this.actualCompany.item &&
+                this.code === this.actualCompany.item.code) ||
+              !this.allCompanies.items.find((l) => l.code === this.code)
+            );
+          },
         },
         territoryId: {
           required,
@@ -343,6 +350,14 @@ export default {
         },
         code: {
           required,
+          unique() {
+            return (
+              (this.actualCompany &&
+                this.actualCompany.item &&
+                this.code === this.actualCompany.item.code) ||
+              !this.allCompanies.items.find((l) => l.code === this.code)
+            );
+          },
         },
         territoryId: {
           required,
@@ -757,7 +772,7 @@ export default {
       contactPhone: "",
       web: "",
       logo: "",
-      imgUrl:"",
+      imgUrl: "",
       popup: {
         title: "",
       },
@@ -769,9 +784,9 @@ export default {
     ...mapActions("company", {
       addCompany: "addCompany",
       updateCompany: "updateCompany",
+      getAllCompanies: "getAllCompanies",
     }),
     ...mapActions("campaign", { getTerritories: "getTerritories" }),
-
     copyFormValues(company) {
       if (!company) return;
       for (const [key] of Object.entries(company)) {
@@ -782,18 +797,18 @@ export default {
       this.imgUrl = url;
     },
     errorUrl() {
-      this.imgUrl=null;
+      this.imgUrl = null;
     },
     isURL(str) {
       let url;
       if (str) {
-      try {
-        url = new URL(str);
-      } catch (_) {
-        return false;
-      }
-      return url.protocol === "http:" || url.protocol === "https:";
-    } else return true;
+        try {
+          url = new URL(str);
+        } catch (_) {
+          return false;
+        }
+        return url.protocol === "http:" || url.protocol === "https:";
+      } else return true;
     },
     validateEmail(email) {
       var re = /\S+@\S+\.\S+/;
@@ -879,7 +894,7 @@ export default {
         if (this.typeCall == "add") {
           this.addCompany(this.company);
           this.$v.$reset();
-         this.closeModal();
+          this.closeModal();
         } else if (this.typeCall == "edit") {
           console.log(this.company);
           this.updateCompany(this.company);
@@ -908,7 +923,7 @@ export default {
   },
 
   computed: {
-    ...mapState("company", ["actualCompany"]),
+    ...mapState("company", ["actualCompany", "allCompanies"]),
     ...mapState("campaign", ["territories"]),
     ...mapState("modal", ["type"]),
     ...mapState("account", ["user"]),
@@ -924,6 +939,7 @@ export default {
       const errors = [];
       if (!this.$v.code.$dirty) return errors;
       !this.$v.code.required && errors.push("Campo richiesto.");
+      !this.$v.code.unique && errors.push("Valore gia' in uso.");
       return errors;
     },
     addressErrors() {
@@ -1005,12 +1021,12 @@ export default {
       !this.user.permissions.admin &&
         !this.$v.web.required &&
         errors.push("Campo richiesto.");
-        !this.isURL(this.web) &&
+      !this.isURL(this.web) &&
         errors.push('Inserisci un url con "http://" o "https://".');
       return errors;
     },
     territoryErrors() {
-      console.log('error territory')
+      console.log("error territory");
       const errors = [];
       if (!this.$v.territoryId.$dirty) return errors;
       !this.$v.territoryId.required && errors.push("Campo richiesto.");
@@ -1035,7 +1051,7 @@ export default {
   mounted() {
     this.setModalData();
     this.getTerritories();
-    this.imgUrl=this.$v.logo.$model;
+    this.imgUrl = this.$v.logo.$model;
   },
 };
 </script>
