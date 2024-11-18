@@ -654,7 +654,7 @@ export default {
       getAllLocations: "getAllLocations",
     }),
     showInfoEdit(){
-      this.addresIsValid && !this.showErrorLocation && !this.manualEnabling && !(this.typeCall == 'edit')
+      return this.addresIsValid && !this.showErrorLocation &&!this.tmpLocationSelected && !(this.typeCall == 'edit')
     },
     loadLocations() {
       if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
