@@ -82,7 +82,7 @@
                         v-model.trim="$v.location.$model"
                         :items="listaSedi"
                         :error-messages="locationErrors"    
-                        :item-text="item=>`${item.id}${item.name?(' - '+item.name):''}`"
+                        :item-text="item=>`${item.name?(item.name + ' - '):''} codice ${item.id}`"
                         item-value="id"                            
                         required
                         @input="$v.location.$touch()"
