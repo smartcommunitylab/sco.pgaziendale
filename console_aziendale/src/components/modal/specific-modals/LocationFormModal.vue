@@ -169,7 +169,7 @@
                 ></v-autocomplete>
               </v-col>
             </v-row>
-            <v-row v-if="$v.country.$model === 'Italy'">
+            <v-row v-if="$v.country.$model === 'Italia'">
               <v-col>
                 <v-autocomplete
                   label="Regione"
@@ -574,12 +574,12 @@ export default {
     },
     province: {
       required: requiredIf(function (model) {
-        return model.country === "Italy";
+        return model.country === "Italia";
       }),
     },
     region: {
       required: requiredIf(function (model) {
-        return model.country === "Italy";
+        return model.country === "Italia";
       }),
     },
     country: {
@@ -840,6 +840,8 @@ export default {
       for (const [key] of Object.entries(location)) {
         this[key] = location[key];
       }
+            if (this.country==="Italy" ) this.country = "Italia";
+
       this.checkArrayInit();
       this.createLocation();
     },
@@ -858,7 +860,7 @@ export default {
       this.region = "";
       this.latitude = "";
       this.longitude = "";
-      this.country = "Italy";
+      this.country = "Italia";
       this.radius = 200;
       this.nonWorkingDays = [];
       this.nonWorking = [];
@@ -892,12 +894,12 @@ export default {
         longitude: Number.parseFloat(this.longitude),
         nonWorking: this.nonWorking ? this.nonWorking : [],
         nonWorkingDays: this.nonWorkingDays,
-        country: this.country ? this.country : "Italy",
+        country: this.country ? this.country : "Italia",
         radius: Number.parseInt(this.radius),
       };
     },
     changeAddress() {
-      if (this.country == "Italy") {
+      if (this.country == "Italia") {
         this.inputAddress =
           this.address +
           " " +
@@ -928,7 +930,11 @@ export default {
       }
       this.$refs.geolocationSelector.changeAddress(this.inputAddress);
     },
+    fixCountry() {
+      if (this.$v.country.$model==="Italy" || this.$v.country.$model==="") this.$v.country.$model = "Italia";
+    },
     setModalData() {
+      this.fixCountry();
       if (this.typeCall == "add") {
         this.initLocation();
         this.popup.title = "Aggiungi Sede";
@@ -1087,6 +1093,7 @@ export default {
   },
 
   created() {
+    
     this.setModalData();
     this.loadLocations();
   },
@@ -1340,7 +1347,7 @@ const listaStati = [
   { name: "Ireland", code: "IE" },
   { name: "Isle of Man", code: "IM" },
   { name: "Israel", code: "IL" },
-  { name: "Italy", code: "IT" },
+  { name: "Italia", code: "IT" },
   { name: "Jamaica", code: "JM" },
   { name: "Japan", code: "JP" },
   { name: "Jersey", code: "JE" },
