@@ -142,7 +142,7 @@
               ></v-autocomplete>
             </v-col>
           </v-row>
-          <v-row v-if="$v.country.$model === 'Italy'">
+          <v-row v-if="$v.country.$model === 'Italia'">
             <v-col>
               <v-autocomplete
                 label="Regione"
@@ -317,12 +317,12 @@ export default {
         },
         province: {
           required: requiredIf(function (model) {
-            return model.country === "Italy";
+            return model.country === "Italia";
           }),
         },
         region: {
           required: requiredIf(function (model) {
-            return model.country === "Italy";
+            return model.country === "Italia";
           }),
         },
         country: {
@@ -618,7 +618,7 @@ export default {
         { name: "Ireland", code: "IE" },
         { name: "Isle of Man", code: "IM" },
         { name: "Israel", code: "IL" },
-        { name: "Italy", code: "IT" },
+        { name: "Italia", code: "IT" },
         { name: "Jamaica", code: "JM" },
         { name: "Japan", code: "JP" },
         { name: "Jersey", code: "JE" },
@@ -792,6 +792,8 @@ export default {
       for (const [key] of Object.entries(company)) {
         this[key] = company[key];
       }
+      if (this.country==="Italy" ) this.country = "Italia";
+
     },
     onChangeUrl(url) {
       this.imgUrl = url;
@@ -852,7 +854,7 @@ export default {
       };
     },
     changeAddress() {
-      if (this.country == "Italy") {
+      if (this.country == "Italia") {
         this.inputAddress =
           this.address +
           " " +
@@ -905,7 +907,11 @@ export default {
         this.$v.$touch();
       }
     },
+    fixCountry() {
+      if (this.$v.country.$model==="Italy" || this.$v.country.$model==="") this.$v.country.$model = "Italia";
+    },
     setModalData() {
+      this.fixCountry();
       if (this.typeCall == "add") {
         this.initCompany();
         this.popup.title = "Aggiungi Azienda";

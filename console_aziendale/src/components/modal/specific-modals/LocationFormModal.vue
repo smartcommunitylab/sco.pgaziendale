@@ -169,7 +169,7 @@
                 ></v-autocomplete>
               </v-col>
             </v-row>
-            <v-row v-if="$v.country.$model === 'Italy'">
+            <v-row v-if="$v.country.$model === 'Italia'">
               <v-col>
                 <v-autocomplete
                   label="Regione"
@@ -244,7 +244,7 @@
             <v-col cols="4">
               <div class="tab-container">
                 <div v-if="showInfoEdit()">
-                  <p> 
+                  <p>
                     E’ possibile impostare la posizione della sede manualmente oppure
                     automaticamente in base all’indirizzo inserito.
                   </p>
@@ -286,7 +286,7 @@
                     <div class="text-center">
                       <v-btn
                         color="primary"
-                        :disabled="!addresIsValid"
+                        :disabled="autoPositionButtonDisabled()"
                         @click="autoPosition()"
                         >Imposta automaticamente</v-btn
                       >
@@ -316,7 +316,14 @@
                         class="m-2"
                         >Annulla</v-btn
                       >
-                      <v-btn color="error" @click="setManualPosition()" :disabled="!tmpLocationSelected?.pos?.lat && !tmpLocationSelected?.pos?.lng">Conferma</v-btn>
+                      <v-btn
+                        color="error"
+                        @click="setManualPosition()"
+                        :disabled="
+                          !tmpLocationSelected?.pos?.lat && !tmpLocationSelected?.pos?.lng
+                        "
+                        >Conferma</v-btn
+                      >
                     </div>
                   </v-tab-item>
                 </v-tabs-items>
@@ -422,7 +429,10 @@
                     v-model="location"
                     id="locationId"
                     :items="allLocations?.items"
-                    :item-text="item=>`Id: ${item.id}${item.name?(' - Nome: '+item.name):''}`"
+                    :item-text="
+                      (item) =>
+                        `Id: ${item.id}${item.name ? ' - Nome: ' + item.name : ''}`
+                    "
                     item-value="id"
                     outlined
                   ></v-select>
@@ -443,44 +453,44 @@
                 </v-col>
               </v-row>
               <div class="pt-5">
-              <v-menu 
-                ref="menu"
-                v-model="menu"
-                :close-on-content-click="false"
-                :return-value.sync="nonWorkingDays"
-                transition="scale-transition"
-                offset-y
-                min-width="auto"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-combobox
-                    v-model="nonWorkingDays"
-                    multiple
-                    chips
-                    label="Giorni di chiusura"
-                    placeholder="Scegli i giorni di chiusura:"
-                    prepend-icon="mdi-calendar"
-                    deletable-chips
-                    v-bind="attrs"
-                    v-on="on"
-                    ref="datepick"
-                  >
-                    <template v-slot:append>
-                      <v-btn rounded color="primary" @click="openDatePicker()">
-                        Aggiungi
-                      </v-btn>
-                    </template>
-                  </v-combobox>
-                </template>
-                <v-date-picker v-model="nonWorkingDays" multiple scrollable no-title>
-                  <v-spacer></v-spacer>
-                  <v-btn text @click="menu = false"> Annulla </v-btn>
-                  <v-btn text color="primary" @click="$refs.menu.save(nonWorkingDays)">
-                    Salva
-                  </v-btn>
-                </v-date-picker>
-              </v-menu>
-            </div>
+                <v-menu
+                  ref="menu"
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  :return-value.sync="nonWorkingDays"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="auto"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-combobox
+                      v-model="nonWorkingDays"
+                      multiple
+                      chips
+                      label="Giorni di chiusura"
+                      placeholder="Scegli i giorni di chiusura:"
+                      prepend-icon="mdi-calendar"
+                      deletable-chips
+                      v-bind="attrs"
+                      v-on="on"
+                      ref="datepick"
+                    >
+                      <template v-slot:append>
+                        <v-btn rounded color="primary" @click="openDatePicker()">
+                          Aggiungi
+                        </v-btn>
+                      </template>
+                    </v-combobox>
+                  </template>
+                  <v-date-picker v-model="nonWorkingDays" multiple scrollable no-title>
+                    <v-spacer></v-spacer>
+                    <v-btn text @click="menu = false"> Annulla </v-btn>
+                    <v-btn text color="primary" @click="$refs.menu.save(nonWorkingDays)">
+                      Salva
+                    </v-btn>
+                  </v-date-picker>
+                </v-menu>
+              </div>
             </v-col>
           </v-row>
         </div>
@@ -501,7 +511,6 @@
         Salva
       </v-btn>
       <app-confirm ref="confirm"></app-confirm>
-
     </template>
   </modal>
 </template>
@@ -513,11 +522,11 @@ import { locationService } from "@/services";
 import GeoLocationSelectorMapVue from "@/components/leaflet-map/GeoLocationSelectorMap.vue";
 import Modal from "@/components/modal/ModalStructure.vue";
 import { mapActions, mapState } from "vuex";
-import Confirm from "@/components/Confirm.vue"
+import Confirm from "@/components/Confirm.vue";
 export default {
   components: {
     "geolocation-selector": GeoLocationSelectorMapVue,
-    "app-confirm":Confirm,
+    "app-confirm": Confirm,
     modal: Modal,
   },
 
@@ -565,12 +574,12 @@ export default {
     },
     province: {
       required: requiredIf(function (model) {
-        return model.country === "Italy";
+        return model.country === "Italia";
       }),
     },
     region: {
       required: requiredIf(function (model) {
-        return model.country === "Italy";
+        return model.country === "Italia";
       }),
     },
     country: {
@@ -593,7 +602,7 @@ export default {
 
   data() {
     return {
-      copyDate:false,
+      copyDate: false,
       popup: {
         title: "",
       },
@@ -623,6 +632,7 @@ export default {
       datepicker: null,
       menu: false,
       pointIsFar: false,
+      autoPositionLocation: null,
       zoom: 13,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
@@ -653,28 +663,53 @@ export default {
       updateLocation: "updateLocation",
       getAllLocations: "getAllLocations",
     }),
-    showInfoEdit(){
-      return this.addresIsValid && !this.showErrorLocation &&!this.tmpLocationSelected && !(this.typeCall == 'edit')
+    showInfoEdit() {
+      return (
+        this.addresIsValid &&
+        !this.showErrorLocation &&
+        !this.tmpLocationSelected &&
+        !(this.typeCall == "edit")
+      );
+    },
+    autoPositionButtonDisabled() {
+      console.log("autoPositionButtonDisabled", this.autoPositionLocation);
+      console.log("latitude", this.latitude);
+      console.log("longitude", this.longitude);
+      if (
+        this.autoPositionLocation?.position &&
+        this.autoPositionLocation?.position?.lat &&
+        this.autoPositionLocation?.position?.lng &&
+        this.autoPositionLocation?.position?.lat === this.latitude &&
+        this.autoPositionLocation?.position?.lng === this.longitude
+      )
+        return true;
+      return !this.addresIsValid;
     },
     loadLocations() {
       if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
     },
     enableCopy() {
-      this.copyDate=true;
+      this.copyDate = true;
     },
-    cancelDates(){
-      this.copyDate=false;
+    cancelDates() {
+      this.copyDate = false;
     },
     async copyDates() {
-      if (await this.$refs.confirm.open("Copia date", 'In caso di conferma verranno sovrascritte le date. Sei sicuro?', { color: 'primary' })) {
+      if (
+        await this.$refs.confirm.open(
+          "Copia date",
+          "In caso di conferma verranno sovrascritte le date. Sei sicuro?",
+          { color: "primary" }
+        )
+      ) {
         const loc = this.allLocations.items.find(
-        (location) => location.id == this.location
-      );
-      if (loc && loc.nonWorkingDays) this.nonWorkingDays = loc.nonWorkingDays;
-      else this.nonWorkingDays = [];
-  }
+          (location) => location.id == this.location
+        );
+        if (loc && loc.nonWorkingDays) this.nonWorkingDays = loc.nonWorkingDays;
+        else this.nonWorkingDays = [];
+      }
 
-      this.copyDate=false;
+      this.copyDate = false;
     },
     addressFormIsValid() {
       return (
@@ -721,6 +756,7 @@ export default {
     },
     autoPosition() {
       if (this.geoResults.length > 0) {
+        this.autoPositionLocation =  null;
         this.$refs.geolocationSelector.onSearch({ location: this.geoResults[0] });
       }
     },
@@ -745,13 +781,16 @@ export default {
     },
     cancelManualPosition() {
       //return to previous position
-      this.tmpLocationSelected=null;
+      this.tmpLocationSelected = null;
       this.$refs.geolocationSelector.resetPosition(this.latitude, this.longitude);
       this.$refs.geolocationSelector.disableMap();
       this.manualEnabling = false;
-      this.pointIsFar=false;
+      this.pointIsFar = false;
     },
     locationChanged(input) {
+      console.log("input", input);
+      console.log("addresIsValid", this.addresIsValid);
+      console.log("autoPositionLocation", this.autoPositionLocation);
       if (this.manualEnabling) {
         //using tmp
         this.tmpLocationSelected = input?.address;
@@ -764,13 +803,15 @@ export default {
           this.pointIsFar = false;
         }
       } else {
+        if (!this.autoPositionLocation)
+          this.autoPositionLocation = input;
         this.latitude = input?.position?.lat;
-      this.longitude = input?.position?.lng;
+        this.longitude = input?.position?.lng;
       }
     },
     isFarFromInput(input) {
       if (this.zip != input?.address?.structuredValue?.postcode) return true;
-         return false;
+      return false;
     },
     changeParamForm(structuredValue) {
       if (structuredValue.road) this.address = structuredValue.road;
@@ -799,6 +840,8 @@ export default {
       for (const [key] of Object.entries(location)) {
         this[key] = location[key];
       }
+            if (this.country==="Italy" ) this.country = "Italia";
+
       this.checkArrayInit();
       this.createLocation();
     },
@@ -817,7 +860,7 @@ export default {
       this.region = "";
       this.latitude = "";
       this.longitude = "";
-      this.country = "Italy";
+      this.country = "Italia";
       this.radius = 200;
       this.nonWorkingDays = [];
       this.nonWorking = [];
@@ -851,12 +894,12 @@ export default {
         longitude: Number.parseFloat(this.longitude),
         nonWorking: this.nonWorking ? this.nonWorking : [],
         nonWorkingDays: this.nonWorkingDays,
-        country: this.country ? this.country : "Italy",
+        country: this.country ? this.country : "Italia",
         radius: Number.parseInt(this.radius),
       };
     },
     changeAddress() {
-      if (this.country == "Italy") {
+      if (this.country == "Italia") {
         this.inputAddress =
           this.address +
           " " +
@@ -887,7 +930,11 @@ export default {
       }
       this.$refs.geolocationSelector.changeAddress(this.inputAddress);
     },
+    fixCountry() {
+      if (this.$v.country.$model==="Italy" || this.$v.country.$model==="") this.$v.country.$model = "Italia";
+    },
     setModalData() {
+      this.fixCountry();
       if (this.typeCall == "add") {
         this.initLocation();
         this.popup.title = "Aggiungi Sede";
@@ -1046,6 +1093,7 @@ export default {
   },
 
   created() {
+    
     this.setModalData();
     this.loadLocations();
   },
@@ -1299,7 +1347,7 @@ const listaStati = [
   { name: "Ireland", code: "IE" },
   { name: "Isle of Man", code: "IM" },
   { name: "Israel", code: "IL" },
-  { name: "Italy", code: "IT" },
+  { name: "Italia", code: "IT" },
   { name: "Jamaica", code: "JM" },
   { name: "Japan", code: "JP" },
   { name: "Jersey", code: "JE" },
