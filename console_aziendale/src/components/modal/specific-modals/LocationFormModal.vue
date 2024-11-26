@@ -231,7 +231,7 @@
                   v-on:returnGeosearch="geoSearchResult"
                 />
               </div>
-              <v-row v-if="tmpLocationSelected">
+              <v-row v-if="tmpLocationSelected || autoPositionLocation?.position">
                 <v-col cols="12">
                   <p class="text-subtitle-1 mt-5 bg-warning p-2 position-warning">
                     <b>ATTENZIONE!</b> La posizione sarà utilizzata per la validazione dei
@@ -254,6 +254,11 @@
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
+                <p v-if="addresIsValid && autoPositionSelected() && !pointIsFar" class="wrong-address">
+                  <span>
+                    La posizione corrisponde all’indirizzo inserito. Se necessario può essere modificata e impostata manualmente.
+                  </span>
+                </p>
                 <p v-if="showErrorLocation" class="wrong-address">
                   <v-icon class="wrong-address-icon">mdi-alert</v-icon>
                   <span
@@ -262,7 +267,7 @@
                     utilizzare il posizionamento manuale.</span
                   >
                 </p>
-                <p v-if="pointIsFar && manualEnabling" class="wrong-address">
+                <p v-if="pointIsFar" class="wrong-address">
                   <v-icon class="wrong-address-icon">mdi-alert</v-icon>
                   <span>
                     La posizione <b>non sembra corrispondere </b>all’indirizzo. Si prega
@@ -668,7 +673,8 @@ export default {
         this.addresIsValid &&
         !this.showErrorLocation &&
         !this.tmpLocationSelected &&
-        !(this.typeCall == "edit")
+        !(this.typeCall == "edit") &&
+         !this.autoPositionLocation?.position 
       );
     },
     autoPositionButtonDisabled() {
@@ -676,14 +682,22 @@ export default {
       console.log("latitude", this.latitude);
       console.log("longitude", this.longitude);
       if (
-        this.autoPositionLocation?.position &&
-        this.autoPositionLocation?.position?.lat &&
-        this.autoPositionLocation?.position?.lng &&
-        this.autoPositionLocation?.position?.lat === this.latitude &&
-        this.autoPositionLocation?.position?.lng === this.longitude
+        this.autoPositionSelected()
       )
         return true;
       return !this.addresIsValid;
+    },
+    autoPositionSelected() {
+      console.log("autoPositionSelected", this.autoPositionLocation?.position &&
+        this.autoPositionLocation?.position?.lat &&
+        this.autoPositionLocation?.position?.lng &&
+        (this.autoPositionLocation?.position?.lat === this.tmpLatitude || this.autoPositionLocation?.position?.lat === this.latitude) &&
+        (this.autoPositionLocation?.position?.lng === this.tmpLongitude||this.autoPositionLocation?.position?.lng === this.longitude))
+      return this.autoPositionLocation?.position &&
+        this.autoPositionLocation?.position?.lat &&
+        this.autoPositionLocation?.position?.lng &&
+        (this.autoPositionLocation?.position?.lat === this.tmpLatitude || this.autoPositionLocation?.position?.lat === this.latitude) &&
+        (this.autoPositionLocation?.position?.lng === this.tmpLongitude||this.autoPositionLocation?.position?.lng === this.longitude)
     },
     loadLocations() {
       if (this.actualCompany) this.getAllLocations(this.actualCompany.item.id);
@@ -757,6 +771,7 @@ export default {
     autoPosition() {
       if (this.geoResults.length > 0) {
         this.autoPositionLocation =  null;
+        this.pointIsFar = false;
         this.$refs.geolocationSelector.onSearch({ location: this.geoResults[0] });
       }
     },
@@ -788,16 +803,16 @@ export default {
       this.pointIsFar = false;
     },
     locationChanged(input) {
-      console.log("input", input);
-      console.log("addresIsValid", this.addresIsValid);
-      console.log("autoPositionLocation", this.autoPositionLocation);
+      // console.log("input", input);
+      // console.log("addresIsValid", this.addresIsValid);
+      // console.log("autoPositionLocation", this.autoPositionLocation);
+
       if (this.manualEnabling) {
         //using tmp
         this.tmpLocationSelected = input?.address;
         this.tmpLatitude = this.locationSelected?.pos?.lat;
         this.tmpLongitude = this.locationSelected?.pos?.lng;
-        if (this.isFarFromInput(input)) {
-          //show warning far
+        if (this.autoPositionLocation && getDistanceFromLatLonInKm(this.autoPositionLocation.position?.lat,this.autoPositionLocation.position?.lng,input.position?.lat,  input.position?.lng) > 0.5) {
           this.pointIsFar = true;
         } else {
           this.pointIsFar = false;
@@ -1495,6 +1510,36 @@ const giorniSettimana = [
     7: "Domenica",
   },
 ];
+
+/**
+ * Returns the distance between two points on the Earth's surface,
+ * given their coordinates in decimal degrees.
+ *
+ * @param {Number} lat1 Latitude of the first point.
+ * @param {Number} lon1 Longitude of the first point.
+ * @param {Number} lat2 Latitude of the second point.
+ * @param {Number} lon2 Longitude of the second point.
+ * @return {Number} The distance in kilometers.
+ */
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+  var R = 6371; // Radius of the earth in km
+  var dLat = deg2rad(lat2-lat1);  // deg2rad below
+  var dLon = deg2rad(lon2-lon1); 
+  var a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ; 
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; // Distance in km
+  console.log("distance",d);
+  return d;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180)
+}
+
 </script>
 
 <style scoped>
