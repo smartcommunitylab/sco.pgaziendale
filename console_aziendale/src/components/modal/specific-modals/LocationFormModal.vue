@@ -752,7 +752,11 @@ export default {
       }
     },
     setTab(value) {
+
       if (value == 1) {
+        if (this.manualEnabling) {
+        this.cancelManualPosition();
+      }
         this.$refs.geolocationSelector.disableMap();
         if (!this.$v.$invalid) {
           if (this.geoResults.length > 0) {
@@ -1035,12 +1039,6 @@ export default {
       !this.$v.address.required && errors.push("Campo richiesto.");
       return errors;
     },
-    // nameErrors() {
-    //   const errors = [];
-    //   if (!this.$v.name.$dirty) return errors;
-    //   !this.$v.name.required && errors.push("Campo richiesto.");
-    //   return errors;
-    // },
     streetNumberErrors() {
       const errors = [];
       if (!this.$v.streetNumber.$dirty) return errors;
@@ -1115,12 +1113,9 @@ export default {
 
   mounted() {
     this.arrayDays = locationService.getArrayDays();
-    var inputNumber = document.getElementById("campaignstreetNumber");
 
     setTimeout(() => {
-      if (inputNumber?.matches(":autofill")) {
         this.changeAddress();
-      }
     }, 500);
   },
 };
