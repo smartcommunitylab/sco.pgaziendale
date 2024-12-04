@@ -725,6 +725,12 @@ export default {
 
       this.copyDate = false;
     },
+/*************  ✨ Codeium Command ⭐  *************/
+    /**
+     * Checks if the address form is valid.
+     * @returns {boolean} true if the form is valid, false otherwise
+     */
+/******  46cb2d65-d5f6-41a1-b82b-c00dbaa7fea7  *******/
     addressFormIsValid() {
       return (
         this.$v.address.$invalid == false &&
@@ -737,12 +743,17 @@ export default {
       );
     },
     geoSearchResult(results) {
-      console.log(results);
+      // console.log(results);
       if (this.addressFormIsValid()) {
         if (results.length > 0) {
           this.addresIsValid = true;
           this.geoResults = results;
           this.showErrorLocation = false;
+          this.autoPositionLocation = {
+            position: { lat: this.geoResults[0].y, lng: this.geoResults[0].x }
+          }
+        // this.$refs.geolocationSelector.onSearch({ location: this.geoResults[0] });
+
         } else {
           this.showErrorLocation = true;
           this.addresIsValid = false;
