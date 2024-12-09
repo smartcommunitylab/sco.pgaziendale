@@ -231,7 +231,7 @@
                   v-on:returnGeosearch="geoSearchResult"
                 />
               </div>
-              <v-row v-if="tmpLocationSelected || autoPositionLocation?.position">
+              <v-row v-if="showWarning()">
                 <v-col cols="12">
                   <p class="text-subtitle-1 mt-5 bg-warning p-2 position-warning">
                     <b>ATTENZIONE!</b> La posizione sarà utilizzata per la validazione dei
@@ -254,7 +254,7 @@
                   Per poter impostare una posizione è necessario indicare l’indirizzo
                   della sede.
                 </p>
-                <p v-if="addresIsValid && autoPositionSelected() && !pointIsFar" class="wrong-address">
+                <p v-if="positionIsClose()" class="wrong-address">
                   <span>
                     La posizione corrisponde all’indirizzo inserito. Se necessario può essere modificata e impostata manualmente.
                   </span>
@@ -668,6 +668,16 @@ export default {
       updateLocation: "updateLocation",
       getAllLocations: "getAllLocations",
     }),
+    showWarning() {
+      console.log("this.tmpLocationSelected",this.tmpLocationSelected);
+      console.log("this.autoPositionLocation",this.autoPositionLocation);
+      return (this.tmpLocationSelected || (this.latitude && this.longitude));
+      // return (this.tmpLocationSelected || this.autoPositionLocation?.position);
+    },
+    positionIsClose() {
+      // return this.addresIsValid && this.autoPositionSelected() && !this.pointIsFar;
+      return this.addresIsValid &&(this.tmpLocationSelected || this.autoPositionSelected()) && !this.pointIsFar;
+    },
     showInfoEdit() {
       return (
         this.addresIsValid &&
@@ -688,6 +698,11 @@ export default {
       return !this.addresIsValid;
     },
     autoPositionSelected() {
+      console.log("autoPositionSelected", this.autoPositionLocation);
+      console.log("tmpLatitude", this.tmpLatitude);
+      console.log("tmpLongitude", this.tmpLongitude);
+      console.log("latitude", this.latitude);
+      console.log("longitude", this.longitude);
       console.log("autoPositionSelected", this.autoPositionLocation?.position &&
         this.autoPositionLocation?.position?.lat &&
         this.autoPositionLocation?.position?.lng &&
