@@ -526,7 +526,7 @@ export default {
           )
           .then(
             (values) => {
-              values.sort((a,b) => a.label.localeCompare(b.label));
+              values?.sort((a,b) => a?.label?.localeCompare(b.label));
               this.localSelection.itemsAggreation = values;
             },
             (err) => {

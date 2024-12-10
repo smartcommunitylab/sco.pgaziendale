@@ -3,7 +3,7 @@
     <v-col cols="2" class="pl-5 pr-20" v-if="localCompany">
       <p class="text-subtitle-1"> {{ localCompany.name }}</p>
     </v-col>
-    <v-col cols="4" class="pl-5 pr-20" v-if="allCampaigns && allCampaigns.items">
+    <v-col cols="4" class="pl-5 pr-20" v-if="statsCampaigns">
 
       <v-autocomplete
         label="Campagna"
@@ -12,7 +12,7 @@
         v-model="localCampaign"
         item-text="title"
         item-value="id"
-        :items="allCampaigns.items"
+        :items="statsCampaigns"
         @change="updateCampaign"
         :return-object="true"
         outlined
@@ -43,7 +43,8 @@ export default {
     return {
       localCompany: null,
       localCampaign: null,
-      selectedConfiguration: null
+      selectedConfiguration: null,
+      statsCampaigns: null
     };
   },
   computed: {
@@ -59,6 +60,7 @@ export default {
   mounted: function () {
     if (!this.adminCompany) {
       if (this.allCampaigns && this.allCampaigns.items) {
+        this.statsCampaigns = this.allCampaigns.items.sort((a, b) => new Date(a?.from).getTime() - new Date(b?.from).getTime()).reverse();
         this.localCampaign = this.allCampaigns.items[0];
         console.log('mounted',this.localCampaign);
         this.updateCampaign();
@@ -75,6 +77,7 @@ export default {
     allCampaigns: {
       handler: function (newValue, oldValue) {
         if (oldValue && oldValue.loading && newValue.items) {
+          this.statsCampaigns = newValue.items.sort((a, b) => new Date(a?.from).getTime() - new Date(b?.from).getTime()).reverse();
           this.localCampaign = newValue.items[0];
           console.log('watched',this.localCampaign);
           this.updateCampaign();
