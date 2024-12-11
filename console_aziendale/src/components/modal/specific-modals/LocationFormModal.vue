@@ -274,13 +274,13 @@
                     di verificarla e se necessario correggerla.
                   </span>
                 </p>
-                <v-tabs v-model="tab" align-with-title>
-                  <v-tab key="1" class="text-none" @click="setTab(1)">
+                <v-tabs v-model="tab" align-with-title @change="onTabChange">
+                  <v-tab key="1" class="text-none" >
                     In automatico
                   </v-tab>
-                  <v-tab key="2" class="text-none" @click="setTab(2)"> A mano </v-tab>
+                  <v-tab key="2" class="text-none" > A mano </v-tab>
                 </v-tabs>
-                <v-tabs-items v-model="tab" class="mt-5">
+                <v-tabs-items v-model="currentTab" class="mt-5">
                   <v-tab-item key="1">
                     <div>
                       <i
@@ -617,6 +617,7 @@ export default {
       addresIsValid: false,
       inputAddress: "",
       tab: null,
+      currentTab: 0,
       id: "",
       address: "",
       name: "",
@@ -663,6 +664,7 @@ export default {
 
   methods: {
     ...mapActions("modal", { closeModal: "closeModal" }),
+    ...mapActions("alert", { error: "error" }),
     ...mapActions("location", {
       addLocation: "addLocation",
       updateLocation: "updateLocation",
@@ -777,11 +779,16 @@ export default {
         this.addresIsValid = false;
       }
     },
-    setTab(value) {
-
-      if (value == 1) {
+    onTabChange(value) {
+      if (value == 0) {
         if (this.manualEnabling) {
-        this.cancelManualPosition();
+        this.$nextTick(() => {
+          this.tab = this.currentTab;
+          this.error({response:{data:{type:'NO_SWTICH_ALLOWED'}}}, 'NO_SWTICH_ALLOWED', { root: true });
+        })
+        return;
+      } else {
+        this.currentTab = this.tab
       }
         this.$refs.geolocationSelector.disableMap();
         if (!this.$v.$invalid) {
@@ -793,10 +800,10 @@ export default {
             this.addresIsValid = false;
           }
         }
+      } else {
+        this.currentTab = this.tab
       }
-      // else {
-      //   this.$refs.geolocationSelector.enableMap();
-      // }
+
     },
     autoPosition() {
       if (this.geoResults.length > 0) {
