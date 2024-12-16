@@ -510,7 +510,7 @@
         @click="saveLocation"
         class="py-8 ml-8"
         :disabled="
-          $v.$dirty && (!addresIsValid || $v.$invalid || !latitude || !longitude)
+          ($v.$dirty && (!addresIsValid || $v.$invalid || !latitude || !longitude))|| manualEnabling
         "
       >
         Salva
