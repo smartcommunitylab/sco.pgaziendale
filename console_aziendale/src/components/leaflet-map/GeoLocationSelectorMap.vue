@@ -22,7 +22,7 @@
     <l-marker
       v-if="position?.lat && position?.lng"
       visible
-      draggable
+      :draggable="dragMarker"
       :lat-lng.sync="position"
       @dragstart="dragging = true"
       @dragend="dragging = false"
@@ -100,6 +100,7 @@ export default {
       },
       zoom: 10,
       dragging: false,
+      dragMarker:false,
       markerClick:false
     };
   },
@@ -135,6 +136,7 @@ export default {
           layer.options.draggable=false;
         });
         if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
+        this.dragMarker=false;
 
     },
     enableMap() {
@@ -150,6 +152,7 @@ export default {
           layer.options.draggable=true;
         });
     if ( this.$refs.map.tap)  this.$refs.map.tap.enable();
+    this.dragMarke=true;
     },
     async changeAddress(value) {
       console.log("change");
