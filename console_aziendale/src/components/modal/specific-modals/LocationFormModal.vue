@@ -639,7 +639,7 @@ export default {
       menu: false,
       pointIsFar: false,
       autoPositionLocation: null,
-      zoom: 13,
+      zoom: 14,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
