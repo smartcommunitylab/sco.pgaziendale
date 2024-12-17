@@ -502,7 +502,7 @@
       </form>
     </template>
     <template v-slot:footer>
-      <v-btn text @click="closeThisModal" class="py-8 ml-8"> Annulla </v-btn>
+      <v-btn text @click="closeThisModal" :disabled="manualEnabling" class="py-8 ml-8"> Annulla </v-btn>
       <v-btn
         color="primary"
         text
