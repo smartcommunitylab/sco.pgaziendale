@@ -502,7 +502,7 @@
       </form>
     </template>
     <template v-slot:footer>
-      <v-btn text @click="closeThisModal" class="py-8 ml-8"> Annulla </v-btn>
+      <v-btn text @click="closeThisModal" :disabled="manualEnabling" class="py-8 ml-8"> Annulla </v-btn>
       <v-btn
         color="primary"
         text
@@ -639,7 +639,7 @@ export default {
       menu: false,
       pointIsFar: false,
       autoPositionLocation: null,
-      zoom: 13,
+      zoom: 14,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',

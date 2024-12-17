@@ -106,7 +106,7 @@ export default {
 
   data() {
     return {
-      zoom: 13,
+      zoom: 16,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
