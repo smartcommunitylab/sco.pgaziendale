@@ -115,7 +115,7 @@ export default {
             lng: this.actualLocation?.item?.longitude,
           };
         }
-        this.zoom = 14;
+        this.zoom = 16;
         this.disableMap();
       }, 250);
     },
