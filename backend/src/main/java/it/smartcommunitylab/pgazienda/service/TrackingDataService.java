@@ -1022,10 +1022,11 @@ public class TrackingDataService {
 						res.add(normalizedValue(ds.getMeanDistance().meanValue(m), 0.001)); 					
 					});
 					break;
-				case meanDuration: //, , 
+				case meanDuration:  
+					double multiplier = 1.0/3600.0;
 					campaign.getMeans().forEach(ms -> {
 						MEAN m = MEAN.valueOf(ms);
-						res.add(normalizedValue(ds.getMeanDuration().meanValue(m), 1/3600)); 					
+						res.add(normalizedValue(ds.getMeanDuration().meanValue(m), multiplier)); 					
 					});
 					break;
 				case meanCo2: 
@@ -1037,7 +1038,7 @@ public class TrackingDataService {
 				case meanTracks: 
 					campaign.getMeans().forEach(ms -> {
 						MEAN m = MEAN.valueOf(ms);
-						res.add(normalizedValue(ds.getMeanCo2().meanValue(m), 1)); 					
+						res.add(normalizedValue(ds.getMeanTracks().meanValue(m), 1)); 					
 					});
 					break;
 			}
