@@ -329,13 +329,18 @@ public class CompanyService {
 	 * @param companyId
 	 * @param locationId
 	 */
-	public void deleteLocation(String companyId, String locationId) {
-		companyRepo.findById(companyId).ifPresent(company -> {
+	public void deleteLocation(String companyId, String locationId) throws InconsistentDataException {
+		Company company = companyRepo.findById(companyId).orElse(null);
+		if(company != null) {
+			List<Employee> list = employeeRepo.findByCompanyIdAndLocationIgnoreCase(companyId, locationId);
+			if(list.size() > 0) {
+				throw new InconsistentDataException("Location has employees", "INVALID_LOCATION_DATA_EMPLOYEE");
+			}
 			if (company.getLocations() != null) {
-				company.getLocations().removeIf(l -> l.getId() == null && locationId == null || l.getId().equals(locationId));
+				company.getLocations().removeIf(l -> l.getId() == null && locationId == null || l.getId().equalsIgnoreCase(locationId));
 				companyRepo.save(company);
 			}
-		});		
+		}		
 	}
 	/**
 	 * @param companyId
@@ -372,17 +377,26 @@ public class CompanyService {
 	 * @param employee
 	 * @return
 	 */
-	public Employee updateEmployee(String companyId, Employee employee) {
-		employeeRepo.findById(employee.getId()).ifPresent(e -> {
-			if (e.getCompanyId().equals(companyId)) {
+	public Employee updateEmployee(String companyId, Employee employee) throws InconsistentDataException {
+		Employee e = employeeRepo.findById(employee.getId()).orElse(null);
+		if(e != null) {
+			if(e.getCompanyId().equals(companyId)) {
+				Company c = companyRepo.findById(companyId).orElse(null);
+				if(c == null) {
+					throw new InconsistentDataException("Company not found", "COMPANY_NOT_FOUND");
+				}
+				CompanyLocation loc = getCompanyLocation(c, employee.getLocation());
+				if(loc == null) {
+					throw new InconsistentDataException("Location not found", "LOCATION_NOT_FOUND");
+				}
 				e.setCompanyEmail(employee.getCompanyEmail());
 				e.setCode(employee.getCode());
 				e.setLocation(employee.getLocation());
 				e.setName(employee.getName());
 				e.setSurname(employee.getSurname());
 				employeeRepo.save(e);
-			}
-		});
+			}			
+		}
 		return employeeRepo.findById(employee.getId()).orElse(null);
 	}
 
@@ -423,6 +437,11 @@ public class CompanyService {
 	 * @throws IOException 
 	 */
 	public void importEmployees(String companyId, InputStream inputStream) throws Exception {
+		Company c = companyRepo.findById(companyId).orElse(null);
+		if(c == null) {
+			throw new InconsistentDataException("Company not found", "COMPANY_NOT_FOUND");
+		}
+		
 		List<String[]> lines = null;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -436,14 +455,18 @@ public class CompanyService {
 		Set<String> codes = new HashSet<>();
 		int i = 0;
 		for (String[] l: lines) {
-			String code = stringValue(l[2], i + 1, 3, true);
+			String code = stringValue(l[2], i + 2, 3, true);
 			if (codes.contains(code)) {
 				throw new InconsistentDataException("Duplicate employees", "INVALID_CSV_DUPLICATE_EMPLOYEES");				
 			}
 			Employee existing = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, code).stream().findAny().orElse(null);
-			String location = stringValue(l[3], i + 1, 4, true);
-			String name = stringValue(l[0], i + 1, 1, true);
-			String surname = stringValue(l[1], i + 1, 2, true);
+			String location = stringValue(l[3], i + 2, 4, true);
+			String name = stringValue(l[0], i + 2, 1, true);
+			String surname = stringValue(l[1], i + 2, 2, true);
+			CompanyLocation loc = getCompanyLocation(c, location);
+			if(loc == null) {
+				throw new ImportDataException(i + 2, 4);
+			}
 			if (existing != null) {
 				existing.setLocation(location);
 				existing.setName(name);
@@ -483,6 +506,11 @@ public class CompanyService {
 	}
 	
 	public void importLocations(String companyId, InputStream inputStream) throws Exception {
+		Company c = companyRepo.findById(companyId).orElse(null);
+		if(c == null) {
+			throw new InconsistentDataException("Company not found", "COMPANY_NOT_FOUND");
+		}
+		
 		List<String[]> lines = null;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -495,32 +523,31 @@ public class CompanyService {
 		}
 		int i = 0;
 		List<CompanyLocation> locations = new LinkedList<>();
-		Set<String> locationIds = new HashSet<>();
 		for (String[] l : lines) {
-			CompanyLocation loc = new CompanyLocation();
-			String id = stringValue(l[0], i+1, 0, true);
-			if (locationIds.contains(id)) {
-				throw new InconsistentDataException("Duplicate locations", "INVALID_CSV_DUPLICATE_LOCATIONS");				
+			String id = stringValue(l[0], i+2, 1, true);
+			CompanyLocation loc = getCompanyLocation(c, id);
+			if (loc == null) {
+				loc = new CompanyLocation();
 			}
-			locationIds.add(id);
 			
 			loc.setId(id);
-			loc.setAddress(stringValue(l[1], i+1, 1, true));
-			loc.setStreetNumber(stringValue(l[2], i+1, 2, false));
-			loc.setZip(stringValue(l[3], i+1, 3, true));
-			loc.setCity(stringValue(l[4], i+1, 4, true));
-			loc.setProvince(stringValue(l[5], i+1, 5, true));
-			loc.setRegion(stringValue(l[6], i+1, 6, true));
-			loc.setCountry(stringValue(l[7], i+1, 7, false));
+			loc.setName(stringValue(l[1], i+2, 2, false));			
+			loc.setAddress(stringValue(l[2], i+2, 3, true));
+			loc.setStreetNumber(stringValue(l[3], i+2, 4, false));
+			loc.setZip(stringValue(l[4], i+2, 5, true));
+			loc.setCity(stringValue(l[5], i+2, 6, true));
+			loc.setProvince(stringValue(l[6], i+2, 7, false));
+			loc.setRegion(stringValue(l[7], i+2, 8, false));
+			loc.setCountry(stringValue(l[8], i+2, 9, false));
 
-			Double radius = doubeValue(l[8], i+1, 8, false);
-			if (radius == null) radius = 200d; 
-			loc.setRadius(radius);
-			loc.setLatitude(doubeValue(l[9], i+1, 9, true));
-			loc.setLongitude(doubeValue(l[10], i+1, 10, true));
+			//Double radius = doubeValue(l[9], i+1, 8, false);
+			//if (radius == null) radius = 200d; 
+			loc.setRadius(200d);
+			loc.setLatitude(doubeValue(l[9], i+2, 10, true));
+			loc.setLongitude(doubeValue(l[10], i+2, 110, true));
 
 			// check non-working days
-			String nwDoW = stringValue(l[11], i + 1, 11, false);
+			String nwDoW = stringValue(l[11], i + 2, 12, false);
 			if (nwDoW.length() > 0) {
 				loc.setNonWorking(new LinkedList<>());
 				String[] days = nwDoW.toLowerCase().split(",");
@@ -528,12 +555,12 @@ public class CompanyService {
 					if (DW.containsKey(d.trim())) {
 						loc.getNonWorking().add(DW.get(d.trim()));
 					} else {
-						throw new ImportDataException(i + 1, 11);
+						throw new ImportDataException(i + 2, 12);
 					}
 				}
 			}
 			// check exception days
-			String nwDays = stringValue(l[12], i + 1, 12, false);
+			String nwDays = stringValue(l[12], i + 2, 13, false);
 			if (nwDays.length() > 0) {
 				loc.setNonWorkingDays(new HashSet<>());
 				String[] days = nwDays.toLowerCase().split(",");
@@ -545,7 +572,7 @@ public class CompanyService {
 						try {
 							date = LocalDate.parse(d.trim(), dateFormatter );
 						} catch (Exception e1) {
-							throw new ImportDataException(i + 1, 11);
+							throw new ImportDataException(i + 2, 13);
 						}
 					}
 					loc.getNonWorkingDays().add(date.toString());
@@ -555,18 +582,24 @@ public class CompanyService {
 			i++;
 		}
 		if (locations.size() > 0) {
-			Company c = companyRepo.findById(companyId).orElse(null);
-			if (c != null) {
-				Map<String, CompanyLocation> map = locations.stream().collect(Collectors.toMap(l -> l.getId(), l -> l));
-				if (c.getLocations() != null) {
-					for (CompanyLocation l : c.getLocations()) {
-						if (!map.containsKey(l.getId())) locations.add(l);
-					}
+			Map<String, CompanyLocation> map = locations.stream().collect(Collectors.toMap(l -> l.getId(), l -> l));
+			if (c.getLocations() != null) {
+				for (CompanyLocation l : c.getLocations()) {
+					if (!map.containsKey(l.getId())) locations.add(l);
 				}
-				c.setLocations(locations);
-				companyRepo.save(c);
+			}
+			c.setLocations(locations);
+			companyRepo.save(c);
+		}			
+	}
+	
+	private CompanyLocation getCompanyLocation(Company c, String locationId) {
+		for(CompanyLocation l : c.getLocations()) {
+			if(l.getId().equalsIgnoreCase(locationId)) {
+				return l;
 			}
 		}
+		return null;
 	}
 	
 	/**
@@ -607,9 +640,9 @@ public class CompanyService {
 		if(blocked) {
 			List<String> campaigns = new ArrayList<>(employee.getCampaigns());
 			for(String campaignId : campaigns) {
-				Optional<User> opt = userService.getUserByCampaignAndCompanyAndKey(campaignId, company.getCode(), employee.getCode());
-				if(opt.isPresent()) {
-					User user = opt.get();
+				List<User> users = userService.getUserByEmployeeCode(campaignId, company.getCode(), employee.getCode());
+				if(!users.isEmpty()) {
+					User user = users.get(0);
 					try {
 						campaignService.unsubscribePlayer(campaignId, user.getPlayerId());
 						campaignService.unsubscribeUser(user, campaignId);

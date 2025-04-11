@@ -3,39 +3,40 @@
     ref="map"
     class="map-style"
     @click="onMapClick"
+
     @ready="initMap()"
     :zoom="zoom"
     :center="[
-      position.lat || userLocation.lat || defaultLocation.lat,
-      position.lng || userLocation.lng || defaultLocation.lng,
+      position?.lat || userLocation?.lat || defaultLocation?.lat,
+      position?.lng || userLocation?.lng || defaultLocation?.lng,
     ]"
   >
     <l-tile-layer :url="tileProvider.url" :attribution="tileProvider.attribution" />
     <v-geosearch :options="geoSearchOptions"></v-geosearch>
     <l-circle
-      v-if="position.lat && position.lng && dragging == false"
+      v-if="position?.lat && position?.lng && dragging == false"
       :lat-lng.sync="position"
       :radius="radius"
       :color="'red'"
     />
     <l-marker
-      v-if="position.lat && position.lng"
+      v-if="position?.lat && position?.lng"
       visible
-      draggable
+      :draggable="dragMarker"
       :lat-lng.sync="position"
       @dragstart="dragging = true"
       @dragend="dragging = false"
     >
-      <l-tooltip :content="tooltipContent" :options="{ permanent: true }" />
+      <!-- <l-tooltip :content="tooltipContent" :options="{ permanent: true }" /> -->
     </l-marker>
   </l-map>
 </template>
 
 <script>
-import { LMap, LMarker, LTileLayer, LTooltip } from "vue2-leaflet";
+import { LMap, LMarker, LTileLayer } from "vue2-leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import GeoSearch from '@/components/leaflet-map/Geosearch.vue'
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 
 export default {
   name: "LocationInput",
@@ -44,12 +45,10 @@ export default {
     LMap,
     LTileLayer,
     LMarker,
-    LTooltip,
     "v-geosearch": GeoSearch
   },
 
   props: {
-
     latLng: {
       lat: Number,
       lng: Number,
@@ -64,6 +63,10 @@ export default {
       type: Object,
       required: true,
     },
+    initialAddresIsValid: {
+      type: Boolean,
+      default: false,
+    },
 
     defaultLocation: {
       type: Object,
@@ -76,17 +79,19 @@ export default {
 
   data() {
     return {
+      timerId:null,
       loading: false,
       geoSearchOptions: {
         provider: new OpenStreetMapProvider(),
         animateZoom: true,
         showMarker: false,
         autoClose: true,
-        style: 'bar',
-        searchLabel: 'Inserisci l\'indirizzo'
+        style: "bar",
+        searchLabel: "Inserisci l'indirizzo",
       },
       userLocation: {},
       position: {},
+      inputAddress: {},
       address: "",
       tileProvider: {
         attribution:
@@ -95,31 +100,70 @@ export default {
       },
       zoom: 10,
       dragging: false,
+      dragMarker:false,
+      markerClick:false
     };
   },
 
   methods: {
+
     initMap() {
       setTimeout(() => {
-       if (this.actualLocation)
-{        this.position ={ lat: this.actualLocation?.item?.latitude, lng: this.actualLocation?.item?.longitude };
-}        this.zoom=14;
-        this.$refs.map.mapObject.invalidateSize();
+        if (this.actualLocation) {
+          this.position = {
+            lat: this.actualLocation?.item?.latitude,
+            lng: this.actualLocation?.item?.longitude,
+          };
+        }
+        this.zoom = 16;
+        this.disableMap();
       }, 250);
     },
-    getStringAddress(structuredValue) {
-      var returnAddress = "";
-      if (structuredValue.amenity) returnAddress += "<br />" + structuredValue.amenity;
-      if (structuredValue.office) returnAddress += "<br />" + structuredValue.office;
-      if (structuredValue.road) returnAddress += "<br />" + structuredValue.road;
-      if (structuredValue.house_number) returnAddress += ", " + structuredValue.house_number;
-      if (structuredValue.city) returnAddress += "<br />" + structuredValue.city;
-      if (structuredValue.country) returnAddress += "<br />" + structuredValue.country;
-      if (structuredValue.postcode) returnAddress += "<br />" + structuredValue.postcode;
-      if (structuredValue.state) returnAddress += "<br />" + structuredValue.state;
-      if (structuredValue.county) returnAddress += "<br />" + structuredValue.county;
-      return returnAddress;
+    resetPosition(lat,lng) {
+      this.position = { lat, lng };
     },
+    disableMap() {
+      this.markerClick = false;
+        this.$refs.map.mapObject.invalidateSize();
+        this.$refs.map.mapObject.dragging.disable();
+        this.$refs.map.mapObject.touchZoom.disable();
+        this.$refs.map.mapObject.doubleClickZoom.disable();
+        this.$refs.map.mapObject.scrollWheelZoom.disable();
+        this.$refs.map.mapObject.boxZoom.disable();
+        this.$refs.map.mapObject.keyboard.disable();
+        this.$refs.map.mapObject.eachLayer(function (layer) { 
+          if (layer?.options?.draggable)
+          layer.options.draggable=false;
+        });
+        if (this.$refs.map.mapObject.tap) this.$refs.map.mapObject.tap.disable();
+        this.dragMarker=false;
+
+    },
+    enableMap() {
+      this.markerClick=true;
+      this.$refs.map.mapObject.dragging.enable();
+      this.$refs.map.mapObject.touchZoom.enable();
+      this.$refs.map.mapObject.doubleClickZoom.enable();
+      this.$refs.map.mapObject.scrollWheelZoom.enable();
+      this.$refs.map.mapObject.boxZoom.enable();
+      this.$refs.map.mapObject.keyboard.enable();
+      this.$refs.map.mapObject.eachLayer(function (layer) { 
+        if (layer?.options?.draggable)
+          layer.options.draggable=true;
+        });
+    if ( this.$refs.map.tap)  this.$refs.map.tap.enable();
+    this.dragMarke=true;
+    },
+    async changeAddress(value) {
+      console.log("change");
+      clearTimeout(this.timerId)
+      this.timerId = setTimeout(async () => {
+      const results = await this.geoSearchOptions?.provider?.search({ query: value });
+      console.log(results);
+      this.$emit('returnGeosearch', results);
+    }, 500)
+    },
+
     async getAddress() {
       this.loading = true;
       let address = {
@@ -131,6 +175,7 @@ export default {
         },
       };
       try {
+        if (!this.position) return address;
         const { lat, lng } = this.position;
         const result = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
@@ -146,15 +191,21 @@ export default {
         }
       } catch (e) {
         console.error("Reverse Geocode Error->", e);
+        address.pos = {
+            lat: this.position.lat,
+            lng: this.position.lng,
+          };
       }
       this.loading = false;
       return address;
     },
     async onMapClick(value) {
+      console.log('this.addresIsValid',this.addresIsValid);
+      if (!this.addresIsValid || !this.markerClick) return;
       this.position = value.latlng;
     },
     onSearch(value) {
-      console.log(value);
+      // console.log(value);
       const loc = value.location;
       this.position = { lat: loc.y, lng: loc.x };
     },
@@ -174,31 +225,34 @@ export default {
 
   computed: {
     ...mapState("location", ["actualLocation"]),
-          ...mapState("modal", ["active"]),
-    tooltipContent() {
-      if (this.dragging) return "...";
-      if (this.loading) return "Loading...";
-      return `<strong>${
-        this.address && this.address.structuredValue
-          ? this.getStringAddress(this.address.structuredValue)
-          : ""
-      }</strong> <hr/><strong>lat:</strong> ${
-        this.position.lat
-      }<br/> <strong>lng:</strong> ${this.position.lng}`;
+    ...mapState("modal", ["active"]),
+    addresIsValid() {
+      return this.initialAddresIsValid;
     },
+    // tooltipContent() {
+    //   if (this.dragging) return "...";
+    //   if (this.loading) return "Loading...";
+    //   return `<strong>${
+    //     this.address && this.address.structuredValue
+    //       ? this.getStringAddress(this.address.structuredValue)
+    //       : ""
+    //   }</strong> <hr/><strong>lat:</strong> ${
+    //     this.position?.lat
+    //   }<br/> <strong>lng:</strong> ${this.position?.lng}`;
+    // },
   },
 
   watch: {
-     actualLocation: {
+    actualLocation: {
       deep: true,
       async handler() {
-        this.initMap()
+        this.initMap();
       },
     },
     active: {
       deep: true,
       async handler() {
-        this.initMap()
+        this.initMap();
       },
     },
     position: {
@@ -208,7 +262,15 @@ export default {
         this.$emit("poschanged", { position: value, address: this.address });
       },
     },
+    inputAddress: {
+      deep: true,
+      async handler(value) {
+        console.log(value);
+        const results = await this.geoSearchOptions?.provider?.search({ query: value.string });
+        console.log(results);
 
+      },
+    }
     // latLng(){
     //   //Fai una query per latlong come search
     //   console.log(this.latLng)
@@ -218,18 +280,22 @@ export default {
   activated() {
     this.initMap();
   },
-  
-  mounted() {
-    this.getUserPosition();
-    this.$refs.map.mapObject.on("geosearch/showlocation", this.onSearch);
+
+  async mounted() {
+    if (!this.actualLocation?.item) {
+      this.position = await this.getUserPosition();
+
+    }
+    // this.$refs.map.mapObject.on("geosearch/showlocation", this.onSearch);
     this.$refs.map.mapObject.invalidateSize();
   },
 };
 </script>
 
 <style scoped>
-.map-style{
+.map-style {
   border: solid 1px;
   border-radius: 8px;
 }
+
 </style>

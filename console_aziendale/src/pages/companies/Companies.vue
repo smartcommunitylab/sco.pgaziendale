@@ -7,7 +7,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="openModal({type:'aziendaFormAdd', object:null})"
+          @click="openModal({ type: 'aziendaFormAdd', object: null })"
         >
           <v-icon left>mdi-plus</v-icon>
           AGGIUNGI
@@ -19,7 +19,7 @@
         <div v-if="companyList && companyList.length > 0">
           <v-card>
             <v-card-title>
-              {{tableTitle}}
+              {{ tableTitle }}
               <v-spacer></v-spacer>
               <v-text-field
                 v-model="search"
@@ -51,17 +51,17 @@
               :items="filteredList"
               :search="search"
               @click:row="showCompanyInfo"
-              :header-props="{'sortByText': 'Ordina per'}"
+              :header-props="{ sortByText: 'Ordina per' }"
               :footer-props="{
-                'items-per-page-text':'righe per pagina',
-                pageText: '{0}-{1} di {2}'
+                'items-per-page-text': 'righe per pagina',
+                pageText: '{0}-{1} di {2}',
               }"
               no-results-text="La ricerca non ha dato risultati"
               no-data-text="Non ci sono dati inseriti"
             >
-            <template v-slot:item.state="{ item }">
-              {{ item.state ? 'Si' : 'No' }}
-            </template>
+              <template v-slot:item.state="{ item }">
+                {{ item.state ? "Si" : "No" }}
+              </template>
             </v-data-table>
           </v-card>
 
@@ -94,7 +94,14 @@ export default {
   data: function () {
     return {
       tableTitle: "Aziende",
-      headerColumns: [{text:"Nome", value:"name"}, {text:"Codice Azienda", value:"code"}, {text:"Territorio", value: "territoryName"}, {text: "Campagne", value: "campaignNames"}, {text: 'Verificato', value: "state"}, {text:"Indirizzo", value:"address"}],
+      headerColumns: [
+        { text: "Nome", value: "name" },
+        { text: "Codice Azienda", value: "code" },
+        { text: "Territorio", value: "territoryName" },
+        { text: "Campagne", value: "campaignNames" },
+        { text: "Verificato", value: "state" },
+        { text: "Indirizzo", value: "address" },
+      ],
       editModalVisible: false,
       deleteModalVisible: false,
       currentCompanySelected: undefined,
@@ -110,7 +117,7 @@ export default {
       submitStatus: null,
     };
   },
-  
+
   methods: {
     ...mapActions("company", {
       getAllCompanies: "getAll",
@@ -119,7 +126,10 @@ export default {
       getCompanyById: "getCompanyById",
       deleteCompany: "deleteCompany",
     }),
-    ...mapActions("campaign", {getTerritories:"getTerritories", getAllCampaigns: "getAll"}),
+    ...mapActions("campaign", {
+      getTerritories: "getTerritories",
+      getAllCampaigns: "getAll",
+    }),
     ...mapActions("navigation", { changePage: "changePage" }),
     showModal(title) {
       this.nColsTable = 8;
@@ -129,7 +139,7 @@ export default {
         title: title,
       };
     },
-    ...mapActions("modal", { openModal:"openModal"}),
+    ...mapActions("modal", { openModal: "openModal" }),
 
     closeModal() {
       this.editModalVisible = false;
@@ -138,12 +148,11 @@ export default {
     closeDeleteModal() {
       this.deleteModalVisible = false;
     },
-    saveCompany() {
-    },
+    saveCompany() {},
     deleteConfirm() {
       this.deleteModalVisible = false;
       this.deleteCompany(this.company);
-    },  
+    },
     showCompanyInfo(company) {
       if (this.currentCompanySelected == company) {
         this.getCompanyById(null);
@@ -155,25 +164,40 @@ export default {
       }
     },
     updateList() {
-      if (this.territories && this.territories.items && this.companyList && this.allCampaigns && this.allCampaigns.items) {
-        this.companyList.forEach(c => {
-          c.territoryName = (this.territories.items.find(t => t.territoryId === c.territoryId) || {name: {it: c.territoryId}}).name.it;
-          c.campaignNames = this.allCampaigns.items.filter(cm => c.campaigns.indexOf(cm.id) >= 0).map(cm => cm.title).join(', ');
+      if (
+        this.territories &&
+        this.territories.items &&
+        this.companyList &&
+        this.allCampaigns &&
+        this.allCampaigns.items
+      ) {
+        this.companyList.forEach((c) => {
+          c.territoryName = (
+            this.territories.items.find((t) => t.territoryId === c.territoryId) || {
+              name: { it: c.territoryId },
+            }
+          ).name.it;
+          c.campaignNames = this.allCampaigns.items
+            .filter((cm) => c.campaigns.indexOf(cm.id) >= 0)
+            .map((cm) => cm.title)
+            .join(", ");
         });
       }
-    }
+    },
   },
   watch: {
-    allCompanies(list) {
-      this.companyList = list.items;
-      this.updateList();
+    allCompanies: {
+      handler: function (val) {
+        this.companyList = val.items;
+      },
+      deep: true,
     },
     territories() {
       this.updateList();
       let list = this.territories.items;
       if (list) {
         list = list.slice();
-        list.splice(0, 0, {territoryId: '', name: {'it': 'Tutti'}});
+        list.splice(0, 0, { territoryId: "", name: { it: "Tutti" } });
       }
       this.territoryList = list;
     },
@@ -182,7 +206,7 @@ export default {
       let list = this.allCampaigns.items;
       if (list) {
         list = list.slice();
-        list.splice(0, 0, {id: '', title: 'Tutte'});
+        list.splice(0, 0, { id: "", title: "Tutte" });
       }
       this.campaignList = list;
     },
@@ -193,22 +217,23 @@ export default {
     ...mapState("campaign", ["territories", "allCampaigns"]),
     ...mapState("account", ["user"]),
 
-    nColsTable_calculator: function() {
-      if(this.actualCompany){
+    nColsTable_calculator: function () {
+      if (this.actualCompany) {
         return 7;
-      }else if(this.actualCompany == null){
+      } else if (this.actualCompany == null) {
         return 12;
-      }else{
+      } else {
         return 12;
       }
     },
     filteredList() {
-      return this.companyList.filter(c => {
-        return (!this.selectedTerritory || c.territoryId == this.selectedTerritory) &&
-               (!this.selectedCampaign || c.campaigns.indexOf(this.selectedCampaign) >= 0) 
-
+      return this.companyList.filter((c) => {
+        return (
+          (!this.selectedTerritory || c.territoryId == this.selectedTerritory) &&
+          (!this.selectedCampaign || c.campaigns.indexOf(this.selectedCampaign) >= 0)
+        );
       });
-    }
+    },
   },
 
   mounted: function () {

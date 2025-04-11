@@ -68,7 +68,7 @@ public class ProfileResource {
 					&& r.getSubscriptions().stream().anyMatch(s -> s.getCampaign().equals(campaign) && !s.isAbandoned())).findAny().orElse(null);
 			if (role != null) {
 				logger.info("User role " + role.getSubscriptions());
-				Subscription sub = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaign)).findAny().orElse(null);
+				Subscription sub = role.getSubscriptions().stream().filter(s -> s.getCampaign().equals(campaign) && !s.isAbandoned()).findAny().orElse(null);
 				Company company = companyService.findByCode(sub.getCompanyCode()).orElse(null);
 		        final List<User> managers = userService.getAllManagedUsers(company.getId());
 		        Employee employee = companyService.getEmployeeByCode(company.getId(), sub.getKey());

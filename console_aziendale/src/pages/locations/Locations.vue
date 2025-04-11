@@ -7,7 +7,12 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="[selectActualLocation(null), openModal({type:'locationFormAdd', object:null})]"
+          @click="
+            [
+              selectActualLocation(null),
+              openModal({ type: 'locationFormAdd', object: null }),
+            ]
+          "
           class="mr-4"
         >
           <v-icon left>mdi-plus</v-icon>
@@ -18,7 +23,7 @@
           color="secondary"
           rounded
           elevation="6"
-          @click="openModal({type:'locationImport', object:null})"
+          @click="openModal({ type: 'locationImport', object: null })"
         >
           <v-icon left>mdi-file-import</v-icon>
           Aggiungi da file
@@ -39,9 +44,8 @@
         <div v-else class="empty-list">Non ci sono Sedi</div>
       </v-col>
       <!-- PROFILO LOCATION -->
-      <profilo-location v-if="actualLocation && actualLocation.item"/> 
+      <profilo-location v-if="actualLocation && actualLocation.item" />
     </v-row>
-
   </div>
 </template>
 
@@ -56,7 +60,13 @@ export default {
   components: { ProfiloLocation, GenericTable },
   data: function () {
     return {
-      headerColumns: [{text:"Identificativo", value:"id"}, {text:"Cittá", value:"city"}, {text:"Indirizzo", value:"address"}, {text:"Numero", value:"streetNumber"}],
+      headerColumns: [
+        { text: "Codice sede", value: "id" },
+        { text: "Denomiazione", value: "name" },
+        { text: "Cittá", value: "city" },
+        { text: "Indirizzo", value: "address" },
+        { text: "Numero", value: "streetNumber" },
+      ],
       tableTitle: "Sedi",
       newLocation: false,
       location: null,
@@ -69,12 +79,12 @@ export default {
       submitStatus: null,
       // fileUploaded: null,
       inDragArea: false,
-      oldLocation:null
+      oldLocation: null,
     };
   },
 
   methods: {
-    ...mapActions("modal", {openModal:'openModal'}),
+    ...mapActions("modal", { openModal: "openModal" }),
     ...mapActions("location", {
       getAllLocations: "getAllLocations",
       selectActualLocation: "selectActualLocation",
@@ -103,7 +113,7 @@ export default {
           this.selectActualLocation(location);
           //this.actualLocation = location;
         }
-      }else{
+      } else {
         this.selectActualLocation(location);
         //this.actualLocation = location;
       }
@@ -125,9 +135,9 @@ export default {
       this.deleteModalVisible = false;
     },
     closeImportModal() {
-      this.modalImportLocationsOpen = false
+      this.modalImportLocationsOpen = false;
     },
-    
+
     deleteConfirm() {
       this.deleteModalVisible = false;
       this.deleteLocation({
@@ -152,10 +162,14 @@ export default {
     // fileName() {
     //   return this.fileUploaded.item(0).name;
     // },
-    nColsTable_calculator: function() {
-      if(this.actualLocation != null && this.actualLocation != undefined && this.actualLocation.item != null){
+    nColsTable_calculator: function () {
+      if (
+        this.actualLocation != null &&
+        this.actualLocation != undefined &&
+        this.actualLocation.item != null
+      ) {
         return 8;
-      } else{
+      } else {
         return 12;
       }
     },
@@ -164,12 +178,11 @@ export default {
   created() {
     this.loadLocations();
   },
-  
+
   mounted() {
     this.changePage({ title: "Lista sedi", route: "/GestioneSedi" });
   },
 };
 </script>
 
-<style>
-</style>
+<style></style>
