@@ -35,7 +35,10 @@ const HttpErrors = {
     'INSUFFICIENT_RIGHTS': 'Attenzione, permessi non validi per eseguire l\'operazione!',
     'GENERIC_ERROR': 'Attenzione, errori di sistema, riprovare piú tardi!',
     'USER_ANOTHER_COMPANY': 'Attenzione, l\'utente specificato é giá iscritto per un\'altra azienda!',
-    'REPEATING_SUBSCRIPTION': 'Attenzione, utente giá presente!'
+    'REPEATING_SUBSCRIPTION': 'Attenzione, utente giá presente!',
+    'INVALID_LOCATION_DATA_EMPLOYEE':'Attenzione, ci sono dipendenti associati alla sede che vuoi cancellare!',
+    'INVALID_COMPANY_DATA_EMPLOYEE':'Attenzione, non è possibile eliminare il dipendente per presenza di dati associati.',
+    'NO_SWTICH_ALLOWED':'Attenzione, confermare o annullare l\'operazione corrente.'
 }
 
 const mapErrorData = (type, errorData) => {

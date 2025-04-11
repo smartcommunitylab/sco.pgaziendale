@@ -59,7 +59,8 @@
                             <v-icon>mdi-calendar</v-icon>
                         </v-list-item-icon>
                         <v-list-item-content>
-                            <v-list-item-title>Giorni della settimana non lavorativi:
+                          Giorni della settimana non lavorativi:
+                            <v-list-item-title>
                               <div v-html="getNonWorking(actualLocation.item.nonWorking)"></div>
                             </v-list-item-title>
                         </v-list-item-content>
@@ -69,8 +70,9 @@
                             <v-icon>mdi-calendar</v-icon>
                         </v-list-item-icon>
                         <v-list-item-content>
+                          Giorni non lavorativi:
+
                             <v-list-item-title>
-                               Giorni non lavorativi:
                               <div v-html="getNonWorkingDays(actualLocation.item.nonWorkingDays)"></div>
                             </v-list-item-title>
                         </v-list-item-content>
@@ -104,7 +106,7 @@ export default {
 
   data() {
     return {
-      zoom: 13,
+      zoom: 16,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -127,18 +129,21 @@ export default {
     initMap() {},
     getNonWorking(days) {
       var returnDays = "";
-      if (days)
+      if (days?.length>0)
         days.forEach((element) => {
           returnDays += locationService.getDayByInt(element) + "<br>";
         });
+        else returnDays="Nessuno";
       return returnDays;
     },
     getNonWorkingDays(days) {
+      console.log('nn working days')
       var returnDays = "";
-      if (days)
+      if (days?.length>0)
         days.forEach((element) => {
           returnDays += moment(element).format('DD-MM-YYYY') + "<br>";
         });
+        else returnDays="Nessuno";
       return returnDays;
     },
   },
@@ -163,5 +168,8 @@ export default {
   width: 100%;
   position: relative;
   z-index: 1;
+}
+v-list-item-title{
+font-weight: 400;
 }
 </style>

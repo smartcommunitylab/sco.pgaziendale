@@ -516,7 +516,7 @@ public class TrackingDataService {
 		} else if (location != null && companyId != null) {
 			Company company = companyRepo.findById(companyId).orElse(null);
 			if (company == null) throw new InconsistentDataException("Invalid company: " + companyId, "NO_COMPANY");
-			Set<String> employeeKeys = employeeRepo.findByCompanyIdAndLocation(companyId, location).stream().map(e -> e.getCode()).collect(Collectors.toSet());
+			Set<String> employeeKeys = employeeRepo.findByCompanyIdAndLocationIgnoreCase(companyId, location).stream().map(e -> e.getCode()).collect(Collectors.toSet());
 			List<String> users = userRepo.findByCampaignAndCompanyAndEmployeeCode(campaignId, company.getCode(), employeeKeys).stream().map(u -> u.getPlayerId()).collect(Collectors.toList());
 			criteria = criteria.and("playerId").in(users);
 		}
@@ -1022,10 +1022,11 @@ public class TrackingDataService {
 						res.add(normalizedValue(ds.getMeanDistance().meanValue(m), 0.001)); 					
 					});
 					break;
-				case meanDuration: //, , 
+				case meanDuration:  
+					double multiplier = 1.0/3600.0;
 					campaign.getMeans().forEach(ms -> {
 						MEAN m = MEAN.valueOf(ms);
-						res.add(normalizedValue(ds.getMeanDuration().meanValue(m), 1/3600)); 					
+						res.add(normalizedValue(ds.getMeanDuration().meanValue(m), multiplier)); 					
 					});
 					break;
 				case meanCo2: 
@@ -1037,7 +1038,7 @@ public class TrackingDataService {
 				case meanTracks: 
 					campaign.getMeans().forEach(ms -> {
 						MEAN m = MEAN.valueOf(ms);
-						res.add(normalizedValue(ds.getMeanCo2().meanValue(m), 1)); 					
+						res.add(normalizedValue(ds.getMeanTracks().meanValue(m), 1)); 					
 					});
 					break;
 			}

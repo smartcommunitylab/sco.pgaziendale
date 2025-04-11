@@ -64,12 +64,23 @@ public class LocationResourceITest {
 
     private Company company;
     
+    /**
+     * Initializes the test environment. Deletes all existing companies and
+     * creates a new test company.
+     */
     @BeforeEach
     public void setup() {
         repo.deleteAll();
         company = repo.save(testCompany());
     }
     
+    /**
+     * Test create location
+     *
+     * Creates a new location, verifies correct status and location presence in the company.
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreate() throws Exception {
     	CompanyLocation loc = testLocation();
@@ -85,6 +96,14 @@ public class LocationResourceITest {
             assertThat(company.getLocations().contains(loc)).isEqualTo(true);
     }
     
+    /**
+     * Test update location
+     *
+     * Updates an existing location's address and verifies that the update
+     * is correctly reflected in the company's saved locations.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testUpdate() throws Exception {
     	CompanyLocation loc = testLocation();
@@ -107,6 +126,14 @@ public class LocationResourceITest {
 
     }
     
+    /**
+     * Test delete location
+     *
+     * Deletes an existing location and verifies that the location is correctly
+     * removed from the company's saved locations.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testDelete() throws Exception {
     	CompanyLocation loc = testLocation();
@@ -123,6 +150,16 @@ public class LocationResourceITest {
         assertThat(company.getLocations().contains(loc)).isEqualTo(false);
     }
     
+    /**
+     * Test read locations
+     *
+     * Verifies that the read endpoint returns a list of locations associated
+     * with the specified company. The test first verifies that the list is
+     * empty, then adds a location and verifies that the list contains the new
+     * location.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testRead() throws Exception {
         restMockMvc.perform(
@@ -142,6 +179,14 @@ public class LocationResourceITest {
                 .andExpect(jsonPath("$", hasSize(1)));
     }
     
+    /**
+     * Test import locations
+     *
+     * Verifies that the import endpoint correctly adds the locations from the
+     * provided CSV file to the specified company.
+     *
+     * @throws Exception if an error occurs during the mock request
+     */
     @Test
     public void testImportLocations() throws Exception {
     	
@@ -152,10 +197,15 @@ public class LocationResourceITest {
                 .file(file))
             .andExpect(status().is(200));
     }
-    
 
-
-
+    /**
+     * Utility method for creating a test company object.
+     *
+     * The method creates an instance of the Company class and sets its code,
+     * address, contact email, contact phone, logo, name, and web page fields.
+     *
+     * @return a Company object for use in unit tests
+     */
     private Company testCompany() {
     	Company c = new Company();
     	c.setCode("code");
@@ -168,6 +218,15 @@ public class LocationResourceITest {
     	return c;
     }
     
+    /**
+     * Utility method for creating a test CompanyLocation object.
+     *
+     * The method creates an instance of the CompanyLocation class and sets its
+     * id, address, city, country, latitude, longitude, province, radius,
+     * region, street number, and zip fields.
+     *
+     * @return a CompanyLocation object for use in unit tests
+     */
     private CompanyLocation testLocation() {
     	CompanyLocation loc = new CompanyLocation();
     	loc.setId("locationId");

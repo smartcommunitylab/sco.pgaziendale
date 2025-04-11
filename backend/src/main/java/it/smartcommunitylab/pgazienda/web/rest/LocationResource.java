@@ -89,10 +89,11 @@ public class LocationResource {
      * @param companyId
      * @param locationId
      * @return
+     * @throws InconsistentDataException 
      */
     @DeleteMapping("/companies/{companyId}/locations/{locationId:.*}")
     //@PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN + "\", \""+Constants.ROLE_COMPANY_ADMIN  +"\")")
-	public ResponseEntity<Void> deleteLocation(@PathVariable String companyId, @PathVariable String locationId) {
+	public ResponseEntity<Void> deleteLocation(@PathVariable String companyId, @PathVariable String locationId) throws InconsistentDataException {
     	log.debug("Deleting a location {} / {}", companyId, locationId);
     	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	companyService.deleteLocation(companyId, locationId);

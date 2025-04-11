@@ -1,2 +1,2 @@
-Identificativo;Indirizzo;Numero;CAP;Citta;Provincia;Regione;Stato;Raggio;Latitudine;Longitudine;GiorniNonLavorativi;GiorniDiChiusura
-Sede 8;Via Marconi;35;44122;Ferrara;Ferrara;Emilia-Romagna;Italy;200;44.85203;11.59929;sab,dom;25/04/2021,02/06/2021
+CodiceSede;Denominazione;Indirizzo;Numero;CAP;Citta;Provincia;Regione;Stato;Latitudine;Longitudine;GiorniNonLavorativi;GiorniDiChiusura
+Sede8;Sede 8;Via Marconi;35;44122;Ferrara;Ferrara;Emilia-Romagna;Italy;44.85203;11.59929;sab,dom;25/04/2021,02/06/2021

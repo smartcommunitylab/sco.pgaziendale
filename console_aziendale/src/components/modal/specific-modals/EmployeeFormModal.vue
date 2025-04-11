@@ -43,8 +43,8 @@
                     cols="6"
                     >
                     <v-text-field
-                        label="Codice"
-                        placeholder="Codice *"
+                        label="Codice dipendente"
+                        placeholder="Codice dipendente *"
                         type="text"
                         name="employeeCode"
                         id="employeeCode"
@@ -81,7 +81,9 @@
                         id="companyLocation"
                         v-model.trim="$v.location.$model"
                         :items="listaSedi"
-                        :error-messages="locationErrors"                                
+                        :error-messages="locationErrors"    
+                        :item-text="item=>`${item.name?(item.name + ' - '):''} codice ${item.id}`"
+                        item-value="id"                            
                         required
                         @input="$v.location.$touch()"
                         @blur="$v.location.$touch()"
@@ -258,7 +260,7 @@ export default {
         {
           for (let i=0;i<locations.items.length; i++)
             {
-              this.listaSedi.push(locations.items[i].id);}
+              this.listaSedi.push(locations.items[i]);}
           console.log(this.listaSedi);
         }
     },
