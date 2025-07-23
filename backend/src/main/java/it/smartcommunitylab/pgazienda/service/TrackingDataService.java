@@ -246,7 +246,6 @@ public class TrackingDataService {
 				stat.setWeek(date.format(WEEK_PATTERN));
 				stat.setYear(date.format(YEAR_PATTERN));
 				stat.setDayOfWeek(date.getDayOfWeek().toString());
-				stat.setHour(date.format(HOUR_PATTERN));
 				stat.setScore(new Score());
 			}
 
@@ -260,6 +259,7 @@ public class TrackingDataService {
 					td.setTrackId(l.getId());
 					td.setPlayerId(playerId);
 					td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
+					td.setHour(date.format(HOUR_PATTERN));
 					stat.getTracks().add(td);
 				}
 				td.setMode(mean.name());

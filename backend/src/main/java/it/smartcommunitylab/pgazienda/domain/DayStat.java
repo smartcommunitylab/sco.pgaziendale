@@ -33,7 +33,7 @@ public class DayStat {
 	@Id
 	private String id;
 	
-	private String campaign, playerId, date, year, month, week, company, employeeCode, dayOfWeek, hour;
+	private String campaign, playerId, date, year, month, week, company, employeeCode, dayOfWeek;
 	
 	private Double co2saved;
 	private Integer trackCount;
@@ -534,12 +534,5 @@ public class DayStat {
 	public void setDayOfWeek(String dayOfWeek) {
 		this.dayOfWeek = dayOfWeek;
 	}
-	public String getHour() {
-		return hour;
-	}
-	public void setHour(String hour) {
-		this.hour = hour;
-	}
-
 
 }

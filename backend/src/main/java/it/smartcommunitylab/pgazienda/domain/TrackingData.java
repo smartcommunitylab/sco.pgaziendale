@@ -29,6 +29,7 @@ public class TrackingData {
 	private Double limitedScore = Double.valueOf(0.0);
 	private boolean wayBack = false;
 	private String locationId;
+	private String hour;
 	
 	public String getTrackId() {
 		return trackId;
@@ -104,5 +105,11 @@ public class TrackingData {
 	}
 	public void setLocationId(String locationId) {
 		this.locationId = locationId;
+	}
+	public String getHour() {
+		return hour;
+	}
+	public void setHour(String hour) {
+		this.hour = hour;
 	}
 }
