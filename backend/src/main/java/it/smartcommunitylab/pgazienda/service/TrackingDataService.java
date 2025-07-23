@@ -19,6 +19,7 @@ package it.smartcommunitylab.pgazienda.service;
 import java.io.PrintWriter;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
@@ -200,7 +201,7 @@ public class TrackingDataService {
 				if(track.getLegs().size() == 1) {
 					CompanyLocation l = locationMatched.get();
 					Circle c = new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius());
-					wayBack = TrackUtils.checkWayBack(trackLegDTO, c);
+					wayBack = TrackUtils.isWayBack(trackLegDTO, c);
 				} else wayBack = matchingLegIndex == 0 ? false : true;				
 			}
 			
@@ -259,7 +260,7 @@ public class TrackingDataService {
 					td.setTrackId(l.getId());
 					td.setPlayerId(playerId);
 					td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
-					td.setHour(date.format(HOUR_PATTERN));
+					td.setHour(toLocalDateTime(track.getStartTime()).format(HOUR_PATTERN));
 					stat.getTracks().add(td);
 				}
 				td.setMode(mean.name());
@@ -365,6 +366,10 @@ public class TrackingDataService {
 	 */
 	private LocalDate toLocalDate(Long startTime) {
 		return Instant.ofEpochMilli(startTime).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
+	}
+	
+	private LocalDateTime toLocalDateTime(Long startTime) {
+		return Instant.ofEpochMilli(startTime).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDateTime();
 	}
 	
 	/**
