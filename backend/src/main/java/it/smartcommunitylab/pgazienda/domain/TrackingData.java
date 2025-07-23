@@ -24,9 +24,11 @@ public class TrackingData {
 	private String mode;
 	private double distance;
 	private long duration;
-	private Double co2;
-	private Double score;
-	private Double limitedScore;
+	private Double co2 = Double.valueOf(0.0);
+	private Double score = Double.valueOf(0.0);
+	private Double limitedScore = Double.valueOf(0.0);
+	private boolean wayBack = false;
+	private String locationId;
 	
 	public String getTrackId() {
 		return trackId;
@@ -90,5 +92,17 @@ public class TrackingData {
 	}
 	public void setLimitedScore(Double limitedScore) {
 		this.limitedScore = limitedScore;
+	}
+	public boolean isWayBack() {
+		return wayBack;
+	}
+	public void setWayBack(boolean wayBack) {
+		this.wayBack = wayBack;
+	}
+	public String getLocationId() {
+		return locationId;
+	}
+	public void setLocationId(String locationId) {
+		this.locationId = locationId;
 	}
 }

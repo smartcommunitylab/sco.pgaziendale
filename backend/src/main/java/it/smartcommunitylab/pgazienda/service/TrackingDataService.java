@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -165,9 +166,10 @@ public class TrackingDataService {
 		if (employee == null ) throw new InconsistentDataException("Invalid user key: " + playerId, "NO_USER");
 		if (employee.isBlocked()) throw new InconsistentDataException("User is blocked: " + playerId, "USER_BLOCKED");
 		// locations
-		List<Shape> locations = 
-				company.getLocations().stream()
+		List<CompanyLocation> companylocations = company.getLocations().stream()
 				.filter(l -> checkWorking(l, toLocalDate(track.getStartTime())))
+				.collect(Collectors.toList());
+		List<Shape> locations = companylocations.stream()
 				.map(l -> new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius()))
 				.collect(Collectors.toList());
 		Shape employeeLocation = Boolean.TRUE.equals(campaign.getUseEmployeeLocation()) && employee.getLocation() != null 
@@ -182,6 +184,25 @@ public class TrackingDataService {
 		} else if ((matchingLegIndex = TrackUtils.matchLocations(track, locations, campaign.getUseMultiLocation(), employeeLocation)) < 0) {
 			return TrackValidityDTO.errMatches();
 		} else {
+			// check matching location id
+			TrackLegDTO trackLegDTO = track.getLegs().get(matchingLegIndex);
+			Optional<CompanyLocation> locationMatched = companylocations.stream()
+				.filter(l -> {
+					Circle c = new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius());
+					return TrackUtils.matchLocations(trackLegDTO, Collections.singletonList(c));
+				})
+				.findFirst();
+			String matchingLocationId = locationMatched.isPresent() ? locationMatched.get().getId() : null;
+			//check way back trip
+			boolean wayBack = false;
+			if(!campaign.getUseMultiLocation() && locationMatched.isPresent()) {
+				if(track.getLegs().size() == 1) {
+					CompanyLocation l = locationMatched.get();
+					Circle c = new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius());
+					wayBack = TrackUtils.checkWayBack(trackLegDTO, c);
+				} else wayBack = matchingLegIndex == 0 ? false : true;				
+			}
+			
 			List<TrackLegDTO> validTrack = new LinkedList<>();
 			// limit to valid legs towards the location
 			if (matchingLegIndex == 0) {
@@ -223,6 +244,7 @@ public class TrackingDataService {
 				stat.setMonth(date.format(MONTH_PATTERN));
 				stat.setWeek(date.format(WEEK_PATTERN));
 				stat.setYear(date.format(YEAR_PATTERN));
+				stat.setDayOfWeek(date.getDayOfWeek().toString());
 				stat.setScore(new Score());
 			}
 
@@ -243,6 +265,8 @@ public class TrackingDataService {
 				td.setDuration(l.getDuration());
 				td.setCo2(l.getCo2());
 				td.setMultimodalId(track.getMultimodalId());
+				td.setWayBack(wayBack);
+				td.setLocationId(matchingLocationId);
 				trackMap.put(l.getId(), td);
 			}
 			// recalculate the score from updated track list

@@ -33,7 +33,7 @@ public class DayStat {
 	@Id
 	private String id;
 	
-	private String campaign, playerId, date, year, month, week, company, employeeCode;
+	private String campaign, playerId, date, year, month, week, company, employeeCode, dayOfWeek;
 	
 	private Double co2saved;
 	private Integer trackCount;
@@ -525,6 +525,14 @@ public class DayStat {
 			
 			res.setScore(res.getScore()   + (src.getScore()  == null ? 0d : src.getScore()));
 		}
+	}
+
+
+	public String getDayOfWeek() {
+		return dayOfWeek;
+	}
+	public void setDayOfWeek(String dayOfWeek) {
+		this.dayOfWeek = dayOfWeek;
 	}
 
 

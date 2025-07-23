@@ -129,4 +129,15 @@ public class TrackUtils {
 
 		return EARTH_RADIUS * c;
 	}
+	
+	public static boolean checkWayBack(TrackLegDTO leg, Shape area) {
+		if(leg.getPoints().size() < 10) return false;
+		List<Shape> areas = Collections.singletonList(area);
+		leg.getPoints().sort((a,b) -> {
+			return a.getRecorded_at().compareTo(b.getRecorded_at()); 
+		});
+		List<TrackPointDTO> endPoints = new LinkedList<>();
+		endPoints.addAll(leg.getPoints().subList(leg.getPoints().size() - 5, leg.getPoints().size()));
+		return matchPoints(areas, endPoints.toArray());
+	}
 }
