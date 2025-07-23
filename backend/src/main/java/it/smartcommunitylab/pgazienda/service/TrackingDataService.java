@@ -96,6 +96,7 @@ public class TrackingDataService {
 	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
 	private static final DateTimeFormatter YEAR_PATTERN = DateTimeFormatter.ofPattern("yyyy");
 	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww", Constants.DEFAULT_LOCALE);
+	private static final DateTimeFormatter HOUR_PATTERN = DateTimeFormatter.ofPattern("HH", Constants.DEFAULT_LOCALE);
 	
 	@Autowired
 	private CampaignRepository campaignRepo;
@@ -245,6 +246,7 @@ public class TrackingDataService {
 				stat.setWeek(date.format(WEEK_PATTERN));
 				stat.setYear(date.format(YEAR_PATTERN));
 				stat.setDayOfWeek(date.getDayOfWeek().toString());
+				stat.setHour(date.format(HOUR_PATTERN));
 				stat.setScore(new Score());
 			}
 
