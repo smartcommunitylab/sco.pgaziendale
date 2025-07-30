@@ -65,6 +65,7 @@ import it.smartcommunitylab.pgazienda.domain.DayStat.Score;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.Employee.TrackingRecord;
 import it.smartcommunitylab.pgazienda.domain.Shape;
+import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.TrackingData;
 import it.smartcommunitylab.pgazienda.domain.User;
@@ -78,6 +79,7 @@ import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
+import it.smartcommunitylab.pgazienda.repository.StatTrackRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.util.LimitsUtils;
@@ -109,6 +111,8 @@ public class TrackingDataService {
 	private UserRepository userRepo;
 	@Autowired
 	private DayStatRepository dayStatRepo;
+	@Autowired
+	private StatTrackRepository statTrackRepository;
 
 	@Autowired
 	private MongoTemplate template;
@@ -276,6 +280,7 @@ public class TrackingDataService {
 			limitScore(campaign, playerId, stat);
 			stat.recalculate();
 			dayStatRepo.save(stat);
+			updateTrackStats(stat);
 			
 			// create result
 			TrackValidityDTO validity = new TrackValidityDTO();
@@ -307,6 +312,37 @@ public class TrackingDataService {
 			return validity;
 		}
 	}  
+	
+	private void updateTrackStats(DayStat stat) {
+		statTrackRepository.deleteByPlayerIdAndCampaignAndCompanyAndDate(stat.getPlayerId(), stat.getCampaign(), stat.getCompany(), stat.getDate());
+		for(TrackingData td : stat.getTracks()) {
+				StatTrack statTrack = new StatTrack();
+				statTrack.setCampaign(stat.getCampaign());
+				statTrack.setPlayerId(stat.getPlayerId());
+				statTrack.setDate(stat.getDate());
+				statTrack.setCompany(stat.getCompany());
+				statTrack.setTrackId(td.getTrackId());
+				statTrack.setYear(stat.getYear());
+				statTrack.setMonth(stat.getMonth());
+				statTrack.setWeek(stat.getWeek());
+				statTrack.setDayOfWeek(stat.getDayOfWeek());
+				statTrack.setHour(td.getHour());
+				statTrack.setCompany(stat.getCompany());
+				statTrack.setLocationId(td.getLocationId());
+				statTrack.setEmployeeCode(stat.getEmployeeCode());
+				statTrack.setTrackId(td.getTrackId());
+				statTrack.setMultimodalId(td.getMultimodalId());
+				statTrack.setStartedAt(td.getStartedAt());
+				statTrack.setMode(td.getMode());
+				statTrack.setDistance(td.getDistance());
+				statTrack.setCo2(td.getCo2());
+				statTrack.setScore(td.getScore());
+				statTrack.setLimitedScore(td.getLimitedScore());
+				statTrack.setDuration(td.getDuration());
+				statTrack.setWayBack(td.isWayBack());
+				statTrackRepository.save(statTrack);
+		}
+	}
 	
 	/**
 	 * @param campaignId
