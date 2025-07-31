@@ -391,6 +391,7 @@ public class TrackingDataService {
 			}
 			limitScore(campaign, playerId, stat);
 			dayStatRepo.save(stat);
+			updateTrackStats(stat);
 		}
 
 		return TrackValidityDTO.errInvalidated();
