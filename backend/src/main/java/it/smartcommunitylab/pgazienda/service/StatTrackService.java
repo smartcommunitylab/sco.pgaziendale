@@ -3,9 +3,12 @@ package it.smartcommunitylab.pgazienda.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -20,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
-import it.smartcommunitylab.pgazienda.domain.Constants.STAT_FIELD;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
@@ -78,7 +80,7 @@ public class StatTrackService {
 
 		if (GROUP_BY_DATA.company.equals(dataGroupBy)) group.add("company");
 		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) group.add("employeeCode");
-		if (GROUP_BY_DATA.location.equals(dataGroupBy)) group.add("locationId");
+		if (GROUP_BY_DATA.location.equals(dataGroupBy)) group.add("location");
 		
 		GroupOperation groupByOperation = Aggregation.group(group.toArray(new String[group.size()]));
 		if (fields == null || fields.isEmpty()) {
@@ -87,11 +89,11 @@ public class StatTrackService {
 		if (fields.contains(STAT_TRACK_FIELD.score)) {
 			groupByOperation = groupByOperation.sum("score").as("score");
 		}
-		if (fields.contains(STAT_TRACK_FIELD.trackCount)) {
-			groupByOperation = groupByOperation.count().as("trackCount");
+		if (fields.contains(STAT_TRACK_FIELD.track)) {
+			groupByOperation = groupByOperation.count().as("track");
 		}
-		if (fields.contains(STAT_TRACK_FIELD.co2saved)) {
-			groupByOperation = groupByOperation.sum("co2").as("co2saved");
+		if (fields.contains(STAT_TRACK_FIELD.co2)) {
+			groupByOperation = groupByOperation.sum("co2").as("co2");
 		}
 		if (fields.contains(STAT_TRACK_FIELD.distance)) {
 			groupByOperation = groupByOperation.sum("distance").as("distance");
@@ -102,37 +104,41 @@ public class StatTrackService {
 		
 		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
 		AggregationResults<Document> aggregationResults = template.aggregate(aggregation, StatTrack.class, Document.class);
-		List<StatTrackDTO> result = new ArrayList<>();
-		for(Document doc : aggregationResults.getMappedResults()) {
-			result.add(populateKeyFields(doc, group));
+		if(!groupByMean) { 
+			return populateStats(aggregationResults.getMappedResults(), group);
+		} else {
+			return populateStatsByMean(aggregationResults.getMappedResults(), group);
 		}
-		return result;
 	}
 	
-	private StatTrackDTO populateKeyFields(Document doc, List<String> group) {
-		StatTrackDTO dto = new StatTrackDTO();
+	private List<StatTrackDTO>populateStatsByMean(List<Document> documents, List<String> group) {
+		Map<String, StatTrackDTO.Builder>groupMap = new HashMap<>();
+		for(Document doc : documents) {
+			String groupKey = getGroupKey(doc, group);
+			if (!groupMap.containsKey(groupKey)) {
+				groupMap.put(groupKey, new StatTrackDTO.Builder().populateKeyFields(doc, group));
+			}
+			groupMap.get(groupKey).populateStatMean(doc);			
+		}
+		return groupMap.values().stream().map(builder -> builder.updateMainStats().build()).collect(Collectors.toList());
+	}
+	
+	private String getGroupKey(Document doc, List<String> group) {
+		String key = "";
 		Document idMap = (Document) doc.get("_id");
-		if(idMap.containsKey("campaign")) dto.setCampaign(idMap.getString("campaign"));
-		if(idMap.containsKey("mode")) dto.setMode(idMap.getString("mode"));
-		
-		if(idMap.containsKey("hour")) dto.setHour(idMap.getString("hour"));
-		if(idMap.containsKey("dayOfWeek")) dto.setDayOfWeek(idMap.getString("dayOfWeek"));
-		if(idMap.containsKey("date")) dto.setDate(idMap.getString("date"));
-		if(idMap.containsKey("week")) dto.setWeek(idMap.getString("week"));
-		if(idMap.containsKey("month")) dto.setMonth(idMap.getString("month"));
-		if(idMap.containsKey("year")) dto.setYear(idMap.getString("year"));
-		
-		if(idMap.containsKey("company")) dto.setCompany(idMap.getString("company"));
-		if(idMap.containsKey("playerId")) dto.setPlayerId(idMap.getString("playerId"));
-		if(idMap.containsKey("employeeCode")) dto.setEmployeeCode(idMap.getString("employeeCode"));
-		if(idMap.containsKey("locationId")) dto.setLocationId (idMap.getString("locationId"));
-		
-		if(doc.containsKey("score")) dto.setScore(doc.getDouble("score"));
-		if(doc.containsKey("co2saved")) dto.setScore(doc.getDouble("co2saved"));
-		if(doc.containsKey("distance")) dto.setDistance(doc.getDouble("distance"));
-		if(doc.containsKey("duration")) dto.setDuration(doc.getLong("duration"));
-		if(doc.containsKey("trackCount")) dto.setTrackCount(doc.getInteger("trackCount"));
-		
-		return dto;
-	}	
+		for(String k : group) {
+			if(!k.equalsIgnoreCase("mode"))
+				key += idMap.getString(k) + "_";			
+		}
+		return key.substring(0, key.lastIndexOf('_'));
+	}
+	
+	private List<StatTrackDTO> populateStats(List<Document> documents, List<String> group) {
+		List<StatTrackDTO> result = new ArrayList<>();
+		for(Document doc : documents) {
+			result.add(new StatTrackDTO.Builder().populateKeyFields(doc, group).populateStatFields(doc).build());
+		}
+		return result;		
+	}
+	
 }

@@ -18,7 +18,7 @@ public class StatTrack {
 	private String dayOfWeek; 
 	private String hour; 
 	private String company; 
-	private String locationId; 
+	private String location; 
 	private String employeeCode;
 	private String trackId;
 	private String multimodalId; 
@@ -88,11 +88,11 @@ public class StatTrack {
 	public void setCompany(String company) {
 		this.company = company;
 	}
-	public String getLocationId() {
-		return locationId;
+	public String getLocation() {
+		return location;
 	}
-	public void setLocationId(String locationId) {
-		this.locationId = locationId;
+	public void setLocation(String location) {
+		this.location = location;
 	}
 	public String getEmployeeCode() {
 		return employeeCode;

@@ -1,21 +1,17 @@
 package it.smartcommunitylab.pgazienda.dto;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.bson.Document;
+
 public class StatTrackDTO {
-	private String campaign; 
-	private String playerId;
-	private String date;
-	private String year;
-	private String month;
-	private String week; 
-	private String dayOfWeek; 
-	private String hour; 
-	private String company; 
-	private String locationId; 
-	private String employeeCode;
-	private String mode;
-	private double distance, co2, score;
-	private long duration;
-	private int trackCount;
+	private String campaign;
+	private String timeGroup; 
+	private String dataGroup;
+	private StatValue stats;
+	private Map<String, StatValue>meanStatMap = new HashMap<>();
 	
 	public String getCampaign() {
 		return campaign;
@@ -23,101 +19,167 @@ public class StatTrackDTO {
 	public void setCampaign(String campaign) {
 		this.campaign = campaign;
 	}
-	public String getPlayerId() {
-		return playerId;
+	public String getTimeGroup() {
+		return timeGroup;
 	}
-	public void setPlayerId(String playerId) {
-		this.playerId = playerId;
+	public void setTimeGroup(String timeGroup) {
+		this.timeGroup = timeGroup;
 	}
-	public String getDate() {
-		return date;
+	public String getDataGroup() {
+		return dataGroup;
 	}
-	public void setDate(String date) {
-		this.date = date;
+	public void setDataGroup(String dataGroup) {
+		this.dataGroup = dataGroup;
 	}
-	public String getYear() {
-		return year;
+	public StatValue getStats() {
+		return stats;
 	}
-	public void setYear(String year) {
-		this.year = year;
+	public void setStats(StatValue stats) {
+		this.stats = stats;
 	}
-	public String getMonth() {
-		return month;
+	public Map<String, StatValue> getMeanStatMap() {
+		return meanStatMap;
 	}
-	public void setMonth(String month) {
-		this.month = month;
+	public void setMeanStatMap(Map<String, StatValue> meanStatMap) {
+		this.meanStatMap = meanStatMap;
 	}
-	public String getWeek() {
-		return week;
+
+	public static class StatValue {
+		private Double score, co2, distance;
+		private Long duration;
+		private Integer track;
+		
+		public Double getScore() {
+			return score;
+		}
+		public void setScore(Double score) {
+			this.score = score;
+		}
+		public Double getCo2() {
+			return co2;
+		}
+		public void setCo2(Double co2) {
+			this.co2 = co2;
+		}
+		public Double getDistance() {
+			return distance;
+		}
+		public void setDistance(Double distance) {
+			this.distance = distance;
+		}
+		public Long getDuration() {
+			return duration;
+		}
+		public void setDuration(Long duration) {
+			this.duration = duration;
+		}
+		public Integer getTrack() {
+			return track;
+		}
+		public void setTrack(Integer track) {
+			this.track = track;
+		}
+		
 	}
-	public void setWeek(String week) {
-		this.week = week;
-	}
-	public String getDayOfWeek() {
-		return dayOfWeek;
-	}
-	public void setDayOfWeek(String dayOfWeek) {
-		this.dayOfWeek = dayOfWeek;
-	}
-	public String getHour() {
-		return hour;
-	}
-	public void setHour(String hour) {
-		this.hour = hour;
-	}
-	public String getCompany() {
-		return company;
-	}
-	public void setCompany(String company) {
-		this.company = company;
-	}
-	public String getLocationId() {
-		return locationId;
-	}
-	public void setLocationId(String locationId) {
-		this.locationId = locationId;
-	}
-	public String getEmployeeCode() {
-		return employeeCode;
-	}
-	public void setEmployeeCode(String employeeCode) {
-		this.employeeCode = employeeCode;
-	}
-	public String getMode() {
-		return mode;
-	}
-	public void setMode(String mode) {
-		this.mode = mode;
-	}
-	public double getDistance() {
-		return distance;
-	}
-	public void setDistance(double distance) {
-		this.distance = distance;
-	}
-	public double getCo2() {
-		return co2;
-	}
-	public void setCo2(double co2) {
-		this.co2 = co2;
-	}
-	public double getScore() {
-		return score;
-	}
-	public void setScore(double score) {
-		this.score = score;
-	}
-	public long getDuration() {
-		return duration;
-	}
-	public void setDuration(long duration) {
-		this.duration = duration;
-	}
-	public long getTrackCount() {
-		return trackCount;
-	}
-	public void setTrackCount(int trackCount) {
-		this.trackCount = trackCount;
+	
+	public static class Builder {
+		private StatTrackDTO dto;
+		
+		public Builder populateKeyFields(Document doc, List<String> groupKey) {
+			if(dto == null)
+				dto = new StatTrackDTO();
+			
+			Document idMap = (Document) doc.get("_id");
+			if(idMap.containsKey("campaign")) dto.setCampaign(idMap.getString("campaign"));
+			if(idMap.containsKey("location")) dto.setDataGroup(idMap.getString("location"));
+			if(idMap.containsKey("employeeCode")) dto.setDataGroup(idMap.getString("employeeCode"));
+			if(idMap.containsKey("company")) dto.setDataGroup(idMap.getString("company"));
+			
+			if(idMap.containsKey("hour")) dto.setTimeGroup(idMap.getString("hour"));
+			if(idMap.containsKey("dayOfWeek")) dto.setTimeGroup(idMap.getString("dayOfWeek"));
+			if(idMap.containsKey("date")) dto.setTimeGroup(idMap.getString("date"));
+			if(idMap.containsKey("week")) dto.setTimeGroup(idMap.getString("week"));
+			if(idMap.containsKey("month")) dto.setTimeGroup(idMap.getString("month"));
+			if(idMap.containsKey("year")) dto.setTimeGroup(idMap.getString("year"));
+			return this;
+		}
+		
+		public Builder populateStatFields(Document doc) {
+			if(dto == null)
+				dto = new StatTrackDTO();
+			
+			StatValue stats = new StatValue(); 
+			if(doc.containsKey("score")) stats.setScore(doc.getDouble("score"));
+			if(doc.containsKey("co2")) stats.setScore(doc.getDouble("co2"));
+			if(doc.containsKey("distance")) stats.setDistance(doc.getDouble("distance"));
+			if(doc.containsKey("duration")) stats.setDuration(doc.getLong("duration"));
+			if(doc.containsKey("track")) stats.setTrack(doc.getInteger("track"));
+			dto.setStats(stats);	
+			return this;
+		}
+		
+		public Builder populateStatMean(Document doc) {
+			if(dto == null)
+				dto = new StatTrackDTO();
+			
+			Document idMap = (Document) doc.get("_id");
+			if(idMap.containsKey("mode")) {
+				String mode = idMap.getString("mode");
+				StatValue stats = new StatValue(); 
+				if(doc.containsKey("score")) stats.setScore(doc.getDouble("score"));
+				if(doc.containsKey("co2")) stats.setScore(doc.getDouble("co2"));
+				if(doc.containsKey("distance")) stats.setDistance(doc.getDouble("distance"));
+				if(doc.containsKey("duration")) stats.setDuration(doc.getLong("duration"));
+				if(doc.containsKey("track")) stats.setTrack(doc.getInteger("track"));
+				dto.getMeanStatMap().put(mode, stats);
+			}
+			return this;
+		}
+		
+		public Builder updateMainStats() {
+			if(dto == null)
+				dto = new StatTrackDTO();
+			
+			StatValue stats = new StatValue(); 
+			dto.getMeanStatMap().values().forEach(sv -> {
+				if(sv.getScore() != null) {
+					if (stats.getScore() == null) 
+						stats.setScore(sv.getScore());
+					else
+						stats.setScore(stats.getScore() + sv.getScore());
+				}
+				if(sv.getCo2() != null) {
+					if (stats.getCo2() == null) 
+						stats.setCo2(sv.getCo2());
+					else
+						stats.setCo2(stats.getCo2() + sv.getCo2());
+				}
+				if(sv.getDistance() != null) {
+					if (stats.getDistance() == null) 
+						stats.setDistance(sv.getDistance());
+					else
+						stats.setDistance(stats.getDistance() + sv.getDistance());
+				}
+				if(sv.getTrack() != null) {
+					if (stats.getTrack() == null) 
+						stats.setTrack(sv.getTrack());
+					else
+						stats.setTrack(stats.getTrack() + sv.getTrack());
+				}
+				if(sv.getDuration() != null) {
+					if (stats.getDuration() == null) 
+						stats.setDuration(sv.getDuration());
+					else
+						stats.setDuration(stats.getDuration() + sv.getDuration());
+				}
+			});
+			dto.setStats(stats);
+			return this;
+		}
+		
+		public StatTrackDTO build() {
+			return dto;
+		}
 	}
 
 }

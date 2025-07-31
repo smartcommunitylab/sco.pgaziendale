@@ -328,7 +328,7 @@ public class TrackingDataService {
 				statTrack.setDayOfWeek(stat.getDayOfWeek());
 				statTrack.setHour(td.getHour());
 				statTrack.setCompany(stat.getCompany());
-				statTrack.setLocationId(td.getLocationId());
+				statTrack.setLocation(td.getLocationId());
 				statTrack.setEmployeeCode(stat.getEmployeeCode());
 				statTrack.setTrackId(td.getTrackId());
 				statTrack.setMultimodalId(td.getMultimodalId());
