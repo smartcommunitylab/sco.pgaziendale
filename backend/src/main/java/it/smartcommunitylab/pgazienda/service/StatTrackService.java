@@ -24,13 +24,18 @@ import org.springframework.stereotype.Service;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
+import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
+import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 @Service
 public class StatTrackService {
 	@Autowired
 	private MongoTemplate template;
+	@Autowired
+	private CampaignRepository campaignRepo;
 
 	public List<StatTrackDTO> getTrackStats(
 			String campaignId,
@@ -44,7 +49,14 @@ public class StatTrackService {
 			List<STAT_TRACK_FIELD> fields,
 			boolean groupByMean,
 			LocalDate from, 
-			LocalDate to) {
+			LocalDate to) throws InconsistentDataException {
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		if (from == null) {
+			from = campaign.getFrom();
+			to = campaign.getTo();
+		}
+		
 		Criteria criteria = Criteria
 				.where("campaign").is(campaignId)
 				.and("date").lte(to.toString()).gte(from.toString());
