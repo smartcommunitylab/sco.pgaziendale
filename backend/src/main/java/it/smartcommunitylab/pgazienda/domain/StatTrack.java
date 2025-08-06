@@ -20,6 +20,7 @@ public class StatTrack {
 	private String company; 
 	private String location; 
 	private String employeeCode;
+	private String employeeKey;
 	private String trackId;
 	private String multimodalId; 
 	private String startedAt; 
@@ -159,6 +160,12 @@ public class StatTrack {
 	}
 	public void setWayBack(boolean wayBack) {
 		this.wayBack = wayBack;
+	}
+	public String getEmployeeKey() {
+		return employeeKey;
+	}
+	public void setEmployeeKey(String employeeKey) {
+		this.employeeKey = employeeKey;
 	}
 	
 }
