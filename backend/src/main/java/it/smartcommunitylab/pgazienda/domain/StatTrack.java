@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
 public class StatTrack {
+	public static final String EMPLOYEE_KEY_DIV = "__";
+	
 	@Id
 	private String id;
 	@Indexed
