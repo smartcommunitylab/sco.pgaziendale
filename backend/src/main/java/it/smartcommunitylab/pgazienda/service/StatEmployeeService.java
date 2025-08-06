@@ -4,10 +4,14 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,12 +23,18 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.Constants;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
+import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.domain.Employee;
+import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatEmployeeDTO;
+import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
+import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
+import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 @Service
@@ -38,6 +48,12 @@ public class StatEmployeeService {
 	private MongoTemplate template;
 	@Autowired
 	private CampaignRepository campaignRepo;
+	@Autowired
+	private EmployeeRepository employeeRepository;
+	@Autowired
+	private CompanyRepository companyRepository;
+	@Autowired
+	private StatTrackService statTrackService;
 
 	public List<StatEmployeeDTO> getEmployeeStats(
 			String campaignId,
@@ -61,24 +77,47 @@ public class StatEmployeeService {
 		if(StringUtils.isNotBlank(locationId)) {
 			criteria = criteria.and("location").is(locationId);
 		}
-		List<Employee> list = template.find(new Query(criteria), Employee.class);
+		
 		Map<String, StatEmployeeDTO>mapStats = new HashMap<>();
+		
+		//set activeUsers
+		List<StatTrackDTO> trackStats = statTrackService.getTrackStats(campaignId, companyId, locationId, null, null, "all", 
+				timeGroupBy, GROUP_BY_DATA.employee, Collections.singletonList(STAT_TRACK_FIELD.track), false, from, to);
+		for(StatTrackDTO dto : trackStats) {
+			String timeGroup = dto.getTimeGroup();
+			String employeeKey = dto.getDataGroup();
+			String[] split = employeeKey.split(StatTrack.EMPLOYEE_KEY_DIV);
+			String company = split[0];
+			String employeeCode = split[1];
+			Employee emp = employeeRepository.findByCompanyIdAndCodeIgnoreCase(company, employeeCode).stream().findAny().orElse(null);
+			if(emp != null) {
+				String dataGroup = getGroupByData(emp, dataGroupBy);
+				String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+				StatEmployeeDTO stats = mapStats.get(groupKey);
+				if(stats == null) {
+					stats = new  StatEmployeeDTO();
+					stats.setCampaign(campaignId);
+					stats.setTimeGroup(timeGroup);
+					if(StringUtils.isNotBlank(dataGroup)) stats.setDataGroup(dataGroup);
+					mapStats.put(groupKey, stats);
+				}
+				stats.addActiveUsers();
+			}
+		}
+		
+		List<Employee> list = template.find(new Query(criteria), Employee.class);
 		for(Employee employee : list) {
 			LocalDate registrationDate = toLocalDate(employee.getTrackingRecord().get(campaignId).getRegistration());
 			LocalDate dropoutDate = null;
-			LocalDate trackingDate = null;
 			if(employee.getTrackingRecord().get(campaignId).getLeave() != null) {
 				dropoutDate = toLocalDate(employee.getTrackingRecord().get(campaignId).getLeave());
-			}
-			if(employee.getTrackingRecord().get(campaignId).getTracking() != null) {
-				trackingDate = toLocalDate(employee.getTrackingRecord().get(campaignId).getTracking());
 			}
 			if(registrationDate.isAfter(to)) continue;
 			if((dropoutDate != null) && (dropoutDate.isBefore(from))) continue;
 			
 			//set registration
 			String timeGroup = getGroupByTime(timeGroupBy, registrationDate);
-			String dataGroup = getGroupByDate(employee, dataGroupBy);
+			String dataGroup = getGroupByData(employee, dataGroupBy);
 			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup); 
 			StatEmployeeDTO stats = mapStats.get(groupKey);
 			if(stats == null) {
@@ -89,21 +128,6 @@ public class StatEmployeeService {
 				mapStats.put(groupKey, stats);
 			}
 			if(isRegistered(registrationDate, from, to)) stats.addRegistration();
-			
-			//set activeUsers
-			if(trackingDate != null) {
-				timeGroup = getGroupByTime(timeGroupBy, trackingDate);
-				groupKey = getGroupKey(campaignId, timeGroup, dataGroup); 
-				stats = mapStats.get(groupKey);
-				if(stats == null) {
-					stats = new  StatEmployeeDTO();
-					stats.setCampaign(campaignId);
-					stats.setTimeGroup(timeGroup);
-					if(StringUtils.isNotBlank(dataGroup)) stats.setDataGroup(dataGroup);
-					mapStats.put(groupKey, stats);
-				}
-				if(isActive(trackingDate, from, to)) stats.addActiveUsers();
-			}
 			
 			//set dropout
 			if(dropoutDate != null) {
@@ -121,11 +145,6 @@ public class StatEmployeeService {
 			}
 		}
 		return new ArrayList<StatEmployeeDTO>(mapStats.values());
-	}
-	
-	private boolean isActive(LocalDate trackingDate, LocalDate from, LocalDate to) {
-		if((trackingDate != null) && from.isBefore(trackingDate) && to.isAfter(trackingDate)) return true;
-		return false;		
 	}
 	
 	private boolean isDropout(LocalDate dropoutDate, LocalDate from, LocalDate to) {
@@ -156,9 +175,25 @@ public class StatEmployeeService {
 		return null;
 	}
 	
-	private String getGroupByDate(Employee employee, GROUP_BY_DATA dataGroupBy) {
+	private String getGroupByData(Employee employee, GROUP_BY_DATA dataGroupBy) {
 		if (GROUP_BY_DATA.company.equals(dataGroupBy)) return employee.getCompanyId();
 		if (GROUP_BY_DATA.location.equals(dataGroupBy)) return employee.getLocation();
 		return null;
 	}
+	
+	public List<Entry<String, Long>> getEmployeeCount(String campaignId, String companyId) {
+		if(StringUtils.isNotBlank(companyId)) {
+			Company company = companyRepository.findById(companyId).orElse(null);
+			if(company != null) {
+				Entry<String, Long> entry = new AbstractMap.SimpleEntry<>(companyId, employeeRepository.countByCompanyId(companyId));
+				return Collections.singletonList(entry);
+			}
+		} else {
+			List<Company> list = companyRepository.findByCampaign(campaignId);
+			return list.stream().map(c -> {return (Entry<String, Long>) new AbstractMap.SimpleEntry<String, Long>(c.getId(), employeeRepository.countByCompanyId(c.getId()));})
+					.collect(Collectors.toList());
+		}
+		return Collections.emptyList();
+	}
+ 
 }
