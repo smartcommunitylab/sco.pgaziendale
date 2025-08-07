@@ -20,10 +20,10 @@ public class StatTrack {
 	private String week; 
 	private String dayOfWeek; 
 	private String hour; 
+	@Indexed
 	private String company; 
 	private String location; 
 	private String employeeCode;
-	@Indexed
 	private String employeeKey;
 	private String trackId;
 	private String multimodalId; 
