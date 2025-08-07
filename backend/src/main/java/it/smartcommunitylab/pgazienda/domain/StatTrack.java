@@ -2,7 +2,9 @@ package it.smartcommunitylab.pgazienda.domain;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document
 public class StatTrack {
 	public static final String EMPLOYEE_KEY_DIV = "__";
 	
@@ -10,7 +12,6 @@ public class StatTrack {
 	private String id;
 	@Indexed
 	private String campaign; 
-	@Indexed
 	private String playerId;
 	@Indexed
 	private String date;
@@ -22,6 +23,7 @@ public class StatTrack {
 	private String company; 
 	private String location; 
 	private String employeeCode;
+	@Indexed
 	private String employeeKey;
 	private String trackId;
 	private String multimodalId; 

@@ -7,6 +7,7 @@ spring:
     mongodb:
       uri: ${MONGO_URI:}
       database: ${MONGO_DATABASE:}
+      auto-index-creation: true
     web:
       pageable:
         max-page-size: 10000      
