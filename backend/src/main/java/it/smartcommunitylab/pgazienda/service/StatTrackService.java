@@ -62,10 +62,10 @@ public class StatTrackService {
 				.and("date").lte(to.toString()).gte(from.toString());
 		if (StringUtils.isNotEmpty(companyId)) {
 			criteria = criteria.and("company").is(companyId);
+			if (StringUtils.isNotEmpty(locationId)) {
+				criteria = criteria.and("location").is(locationId);
+			}			
 		}		
-		if (StringUtils.isNotEmpty(locationId)) {
-			criteria = criteria.and("locationId").is(locationId);
-		}
 		if ((means != null) && !means.isEmpty()) {
 			criteria = criteria.and("mode").in(means);
 		}
