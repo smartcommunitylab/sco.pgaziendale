@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,13 +37,11 @@ import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.util.DateUtils;
 
 @Service
 public class StatEmployeeService {
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
-	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
-	private static final DateTimeFormatter YEAR_PATTERN = DateTimeFormatter.ofPattern("yyyy");
-	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww", Constants.DEFAULT_LOCALE);
 
 	@Autowired
 	private MongoTemplate template;
@@ -80,6 +79,9 @@ public class StatEmployeeService {
 		
 		Map<String, StatEmployeeDTO>mapStats = new HashMap<>();
 		
+		List<String> timeGroupList = getTimeGroupList(from, to, timeGroupBy);
+		List<String> dataGroupList = new ArrayList<>();
+		
 		//set activeUsers
 		List<StatTrackDTO> trackStats = statTrackService.getTrackStats(campaignId, companyId, locationId, null, null, "all", 
 				timeGroupBy, GROUP_BY_DATA.employee, Collections.singletonList(STAT_TRACK_FIELD.track), false, from, to);
@@ -92,6 +94,7 @@ public class StatEmployeeService {
 			Employee emp = employeeRepository.findByCompanyIdAndCodeIgnoreCase(company, employeeCode).stream().findAny().orElse(null);
 			if(emp != null) {
 				String dataGroup = getGroupByData(emp, dataGroupBy);
+				addDataGroup(dataGroupList, dataGroup); 
 				String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
 				StatEmployeeDTO stats = mapStats.get(groupKey);
 				if(stats == null) {
@@ -118,6 +121,7 @@ public class StatEmployeeService {
 			//set registration
 			String timeGroup = getGroupByTime(timeGroupBy, registrationDate);
 			String dataGroup = getGroupByData(employee, dataGroupBy);
+			addDataGroup(dataGroupList, dataGroup);
 			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup); 
 			StatEmployeeDTO stats = mapStats.get(groupKey);
 			if(stats == null) {
@@ -144,7 +148,50 @@ public class StatEmployeeService {
 				if(isDropout(dropoutDate, from, to)) stats.addDropout();
 			}
 		}
-		return new ArrayList<StatEmployeeDTO>(mapStats.values());
+		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList);
+		Comparator<StatEmployeeDTO> comparator = new Comparator<StatEmployeeDTO>() {
+			@Override
+			public int compare(StatEmployeeDTO o1, StatEmployeeDTO o2) {
+				return o1.getTimeGroup().compareTo(o2.getTimeGroup());
+			}
+		};
+		List<StatEmployeeDTO>  result = new ArrayList<StatEmployeeDTO>(mapStats.values());
+		Collections.sort(result, comparator);
+		return result;
+	}
+	
+	private void fillEmptyDate(String campaignId, Map<String, StatEmployeeDTO>mapStats, 
+			List<String> timeGroupList, List<String> dataGroupList) {
+		if(dataGroupList.size() == 0) {
+			for(String timeGroup : timeGroupList) {
+				String groupKey = getGroupKey(campaignId, timeGroup, null);
+				if(!mapStats.containsKey(groupKey)) {
+					StatEmployeeDTO stats = new  StatEmployeeDTO();
+					stats.setCampaign(campaignId);
+					stats.setTimeGroup(timeGroup);
+					mapStats.put(groupKey, stats);
+				}
+			}
+		} else {
+			for(String dataGroup : dataGroupList) {
+				for(String timeGroup : timeGroupList) {
+					String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+					if(!mapStats.containsKey(groupKey)) {
+						StatEmployeeDTO stats = new  StatEmployeeDTO();
+						stats.setCampaign(campaignId);
+						stats.setTimeGroup(timeGroup);
+						stats.setDataGroup(dataGroup);
+						mapStats.put(groupKey, stats);
+					}					
+				}
+			}
+		}
+	}
+	
+	private void addDataGroup(List<String> dataGroupList, String dataGroup) {
+		if(StringUtils.isNotBlank(dataGroup) && !dataGroupList.contains(dataGroup)) {
+			dataGroupList.add(dataGroup);
+		}
 	}
 	
 	private boolean isDropout(LocalDate dropoutDate, LocalDate from, LocalDate to) {
@@ -169,10 +216,18 @@ public class StatEmployeeService {
 	
 	private String getGroupByTime(GROUP_BY_TIME timeGroupBy, LocalDate localDate) {		
 		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return localDate.toString();
-		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return localDate.format(WEEK_PATTERN);
-		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return localDate.format(MONTH_PATTERN);
-		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return localDate.format(YEAR_PATTERN);
+		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return localDate.format(DateUtils.WEEK_PATTERN);
+		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return localDate.format(DateUtils.MONTH_PATTERN);
+		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return localDate.format(DateUtils.YEAR_PATTERN);
 		return null;
+	}
+	
+	private List<String> getTimeGroupList(LocalDate start, LocalDate end, GROUP_BY_TIME timeGroupBy) {
+		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return DateUtils.getDateRangeStrings(start, end);
+		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return DateUtils.getDateRangeByWeek(start, end);
+		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return DateUtils.getDateRangeByMonth(start, end);
+		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return DateUtils.getDateRangeByYear(start, end);;
+		return Collections.emptyList();		
 	}
 	
 	private String getGroupByData(Employee employee, GROUP_BY_DATA dataGroupBy) {

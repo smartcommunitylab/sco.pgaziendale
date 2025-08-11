@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,10 +35,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.opencsv.CSVWriter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +45,13 @@ import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
+
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.opencsv.CSVWriter;
+
 import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
 import it.smartcommunitylab.pgazienda.domain.Circle;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
@@ -70,7 +71,6 @@ import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.TrackingData;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
-import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
@@ -82,6 +82,7 @@ import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.repository.StatTrackRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.util.DateUtils;
 import it.smartcommunitylab.pgazienda.util.LimitsUtils;
 import it.smartcommunitylab.pgazienda.util.TrackUtils;
 
@@ -96,10 +97,6 @@ public class TrackingDataService {
 	 * 
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
-	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
-	private static final DateTimeFormatter YEAR_PATTERN = DateTimeFormatter.ofPattern("yyyy");
-	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww", Constants.DEFAULT_LOCALE);
-	private static final DateTimeFormatter HOUR_PATTERN = DateTimeFormatter.ofPattern("HH", Constants.DEFAULT_LOCALE);
 	
 	@Autowired
 	private CampaignRepository campaignRepo;
@@ -247,9 +244,9 @@ public class TrackingDataService {
 				stat.setEmployeeCode(employee.getCode());
 				stat.setDate(date.toString());
 				stat.setTrackCount(0);
-				stat.setMonth(date.format(MONTH_PATTERN));
-				stat.setWeek(date.format(WEEK_PATTERN));
-				stat.setYear(date.format(YEAR_PATTERN));
+				stat.setMonth(date.format(DateUtils.MONTH_PATTERN));
+				stat.setWeek(date.format(DateUtils.WEEK_PATTERN));
+				stat.setYear(date.format(DateUtils.YEAR_PATTERN));
 				stat.setDayOfWeek(date.getDayOfWeek().toString());
 				stat.setScore(new Score());
 			}
@@ -264,7 +261,7 @@ public class TrackingDataService {
 					td.setTrackId(l.getId());
 					td.setPlayerId(playerId);
 					td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
-					td.setHour(toLocalDateTime(track.getStartTime()).format(HOUR_PATTERN));
+					td.setHour(toLocalDateTime(track.getStartTime()).format(DateUtils.HOUR_PATTERN));
 					stat.getTracks().add(td);
 				}
 				td.setMode(mean.name());
@@ -866,8 +863,8 @@ public class TrackingDataService {
 			if (idMap.containsKey("date")) {
 				stat.setDate((String)idMap.get("date"));
 				LocalDate ld = LocalDate.parse(stat.getDate());
-				stat.setMonth(ld.format(MONTH_PATTERN));
-				stat.setWeek(ld.format(WEEK_PATTERN));
+				stat.setMonth(ld.format(DateUtils.MONTH_PATTERN));
+				stat.setWeek(ld.format(DateUtils.WEEK_PATTERN));
 			}
 			if (idMap.containsKey("week")) {
 				stat.setWeek((String)idMap.get("week"));
@@ -1132,21 +1129,21 @@ public class TrackingDataService {
 		else if (GROUP_BY_TIME.week.equals(timeGroupBy)) {
 			LocalDate curr = from;
 			while (!curr.isAfter(to)) {
-				list.add(curr.format(WEEK_PATTERN));
+				list.add(curr.format(DateUtils.WEEK_PATTERN));
 				curr = curr.plusWeeks(1);
 			}
 		}
 		else if (GROUP_BY_TIME.month.equals(timeGroupBy)) {
 			LocalDate curr = from;
 			while (!curr.isAfter(to)) {
-				list.add(curr.format(MONTH_PATTERN));
+				list.add(curr.format(DateUtils.MONTH_PATTERN));
 				curr = curr.plusMonths(1);
 			}
 		}
 		else if (GROUP_BY_TIME.year.equals(timeGroupBy)) {
 			LocalDate curr = from;
 			while (!curr.isAfter(to)) {
-				list.add(curr.format(YEAR_PATTERN));
+				list.add(curr.format(DateUtils.YEAR_PATTERN));
 				curr = curr.plusYears(1);
 			}
 		}

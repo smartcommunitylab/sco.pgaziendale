@@ -53,11 +53,4 @@ public class StatEmployeeDTO {
 		this.activeUsers += 1;
 	}
 	
-	public static class Builder {
-		private StatEmployeeDTO dto;
-		
-		public StatEmployeeDTO build() {
-			return dto;
-		}
-	}
 }
