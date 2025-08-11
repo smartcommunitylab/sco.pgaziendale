@@ -73,9 +73,9 @@ public class StatEmployeeService {
 		Criteria criteria = new Criteria("trackingRecord." + campaignId).exists(true);
 		if(StringUtils.isNotBlank(companyId)) {
 			criteria = criteria.and("companyId").is(companyId);
-		}
-		if(StringUtils.isNotBlank(locationId)) {
-			criteria = criteria.and("location").is(locationId);
+			if(StringUtils.isNotBlank(locationId)) {
+				criteria = criteria.and("location").is(locationId);
+			}
 		}
 		
 		Map<String, StatEmployeeDTO>mapStats = new HashMap<>();
@@ -86,7 +86,7 @@ public class StatEmployeeService {
 		for(StatTrackDTO dto : trackStats) {
 			String timeGroup = dto.getTimeGroup();
 			String employeeKey = dto.getDataGroup();
-			String[] split = employeeKey.split(StatTrack.EMPLOYEE_KEY_DIV);
+			String[] split = employeeKey.split(StatTrack.KEY_DIV);
 			String company = split[0];
 			String employeeCode = split[1];
 			Employee emp = employeeRepository.findByCompanyIdAndCodeIgnoreCase(company, employeeCode).stream().findAny().orElse(null);
@@ -177,7 +177,7 @@ public class StatEmployeeService {
 	
 	private String getGroupByData(Employee employee, GROUP_BY_DATA dataGroupBy) {
 		if (GROUP_BY_DATA.company.equals(dataGroupBy)) return employee.getCompanyId();
-		if (GROUP_BY_DATA.location.equals(dataGroupBy)) return employee.getLocation();
+		if (GROUP_BY_DATA.location.equals(dataGroupBy)) return employee.getCompanyId() + StatTrack.KEY_DIV + employee.getLocation();
 		return null;
 	}
 	

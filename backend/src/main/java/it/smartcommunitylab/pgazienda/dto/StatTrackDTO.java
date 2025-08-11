@@ -91,7 +91,7 @@ public class StatTrackDTO {
 			
 			Document idMap = (Document) doc.get("_id");
 			if(idMap.containsKey("campaign")) dto.setCampaign(idMap.getString("campaign"));
-			if(idMap.containsKey("location")) dto.setDataGroup(idMap.getString("location"));
+			if(idMap.containsKey("locationKey")) dto.setDataGroup(idMap.getString("locationKey"));
 			if(idMap.containsKey("employeeKey")) dto.setDataGroup(idMap.getString("employeeKey"));
 			if(idMap.containsKey("company")) dto.setDataGroup(idMap.getString("company"));
 			

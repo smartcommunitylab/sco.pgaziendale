@@ -92,7 +92,7 @@ public class StatTrackService {
 
 		if (GROUP_BY_DATA.company.equals(dataGroupBy)) group.add("company");
 		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) group.add("employeeKey");
-		if (GROUP_BY_DATA.location.equals(dataGroupBy)) group.add("location");
+		if (GROUP_BY_DATA.location.equals(dataGroupBy)) group.add("locationKey");
 		
 		GroupOperation groupByOperation = Aggregation.group(group.toArray(new String[group.size()]));
 		if (fields == null || fields.isEmpty()) {

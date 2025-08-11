@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class StatTrack {
-	public static final String EMPLOYEE_KEY_DIV = "__";
+	public static final String KEY_DIV = "__";
 	
 	@Id
 	private String id;
@@ -23,6 +23,7 @@ public class StatTrack {
 	@Indexed
 	private String company; 
 	private String location; 
+	private String locationKey;
 	private String employeeCode;
 	private String employeeKey;
 	private String trackId;
@@ -170,6 +171,12 @@ public class StatTrack {
 	}
 	public void setEmployeeKey(String employeeKey) {
 		this.employeeKey = employeeKey;
+	}
+	public String getLocationKey() {
+		return locationKey;
+	}
+	public void setLocationKey(String locationKey) {
+		this.locationKey = locationKey;
 	}
 	
 }
