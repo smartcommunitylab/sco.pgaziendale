@@ -110,7 +110,7 @@ public class StatTrackDTO {
 			
 			StatValue stats = new StatValue(); 
 			if(doc.containsKey("score")) stats.setScore(doc.getDouble("score"));
-			if(doc.containsKey("co2")) stats.setScore(doc.getDouble("co2"));
+			if(doc.containsKey("co2")) stats.setCo2(doc.getDouble("co2"));
 			if(doc.containsKey("distance")) stats.setDistance(doc.getDouble("distance"));
 			if(doc.containsKey("duration")) stats.setDuration(doc.getLong("duration"));
 			if(doc.containsKey("track")) stats.setTrack(doc.getInteger("track"));
@@ -127,7 +127,7 @@ public class StatTrackDTO {
 				String mode = idMap.getString("mode");
 				StatValue stats = new StatValue(); 
 				if(doc.containsKey("score")) stats.setScore(doc.getDouble("score"));
-				if(doc.containsKey("co2")) stats.setScore(doc.getDouble("co2"));
+				if(doc.containsKey("co2")) stats.setCo2(doc.getDouble("co2"));
 				if(doc.containsKey("distance")) stats.setDistance(doc.getDouble("distance"));
 				if(doc.containsKey("duration")) stats.setDuration(doc.getLong("duration"));
 				if(doc.containsKey("track")) stats.setTrack(doc.getInteger("track"));
