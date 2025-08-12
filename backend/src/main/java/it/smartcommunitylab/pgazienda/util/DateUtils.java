@@ -3,6 +3,7 @@ package it.smartcommunitylab.pgazienda.util;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import it.smartcommunitylab.pgazienda.domain.Constants;
@@ -51,6 +52,10 @@ public class DateUtils {
             current = current.plusWeeks(1);
         }
         return dates;
+    }
+    
+    public static List<String> getDateRangeByHour(LocalDate start, LocalDate end) {
+    	return Arrays.asList("00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "15", "17", "18", "19", "20", "21", "22", "23");
     }
      
 }

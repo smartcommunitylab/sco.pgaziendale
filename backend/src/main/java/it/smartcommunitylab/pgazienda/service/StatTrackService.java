@@ -3,12 +3,12 @@ package it.smartcommunitylab.pgazienda.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -21,14 +21,15 @@ import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
+import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
-import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.util.DateUtils;
 
 @Service
 public class StatTrackService {
@@ -114,27 +115,101 @@ public class StatTrackService {
 			groupByOperation = groupByOperation.sum("duration").as("duration");
 		}
 		
+		Map<String, StatTrackDTO>mapStats = new HashMap<>();
+		List<String> timeGroupList = getTimeGroupList(from, to, timeGroupBy);
+		List<String> dataGroupList = new ArrayList<>();
+
 		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
 		AggregationResults<Document> aggregationResults = template.aggregate(aggregation, StatTrack.class, Document.class);
 		if(!groupByMean) { 
-			return populateStats(aggregationResults.getMappedResults(), group);
+			 populateStats(aggregationResults.getMappedResults(), group, mapStats, dataGroupList, dataGroupBy, timeGroupBy, campaignId);
 		} else {
-			return populateStatsByMean(aggregationResults.getMappedResults(), group);
+			populateStatsByMean(aggregationResults.getMappedResults(), group, mapStats, dataGroupList,  dataGroupBy, timeGroupBy, campaignId);
 		}
+		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList);
+		Comparator<StatTrackDTO>comparator = new Comparator<StatTrackDTO>() {
+			@Override
+			public int compare(StatTrackDTO o1, StatTrackDTO o2) {
+				return o1.getTimeGroup().compareTo(o2.getTimeGroup());
+			}
+		};
+		List<StatTrackDTO> result = new ArrayList<>(mapStats.values());
+		Collections.sort(result, comparator);
+		return result;		
 	}
 	
-	private List<StatTrackDTO>populateStatsByMean(List<Document> documents, List<String> group) {
+	private void fillEmptyDate(String campaignId, Map<String, StatTrackDTO> mapStats, List<String> timeGroupList,
+			List<String> dataGroupList) {
+		if(dataGroupList.size() == 0) {
+			for(String timeGroup : timeGroupList) {
+				String groupKey = getGroupKey(campaignId, timeGroup, null);
+				if(!mapStats.containsKey(groupKey)) {
+					StatTrackDTO stats = new  StatTrackDTO();
+					stats.setCampaign(campaignId);
+					stats.setTimeGroup(timeGroup);
+					mapStats.put(groupKey, stats);
+				}
+			}
+		} else {
+			for(String dataGroup : dataGroupList) {
+				for(String timeGroup : timeGroupList) {
+					String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+					if(!mapStats.containsKey(groupKey)) {
+						StatTrackDTO stats = new  StatTrackDTO();
+						stats.setCampaign(campaignId);
+						stats.setTimeGroup(timeGroup);
+						stats.setDataGroup(dataGroup);
+						mapStats.put(groupKey, stats);
+					}					
+				}
+			}
+		}
+	}
+
+	private String getGroupByData(Document doc, GROUP_BY_DATA dataGroupBy) {
+		Document idMap = (Document) doc.get("_id");
+		if (GROUP_BY_DATA.company.equals(dataGroupBy)) return idMap.getString("company");
+		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) return idMap.getString("employeeKey");
+		if (GROUP_BY_DATA.location.equals(dataGroupBy)) return idMap.getString("locationKey");		
+		return null;
+	}
+	
+	private String getGroupByTime(Document doc, GROUP_BY_TIME timeGroupBy) {		
+		Document idMap = (Document) doc.get("_id");
+		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return idMap.getString("date");
+		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return idMap.getString("week");
+		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return idMap.getString("month");
+		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return idMap.getString("year");
+		if (GROUP_BY_TIME.hour.equals(timeGroupBy)) return idMap.getString("hour");
+		if (GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) return idMap.getString("dayOfWeek");
+		return null;
+	}
+
+	private String getGroupKey(String campaignId, String timeGroup, String dataGroup) {
+		String key = campaignId + "_" + timeGroup;
+		if(StringUtils.isNotBlank(dataGroup)) key += "_" + dataGroup;
+		return key;
+	}
+
+	private void populateStatsByMean(List<Document> documents, List<String> group, Map<String, StatTrackDTO> mapStats, List<String> dataGroupList,
+			GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, String campaignId) {
 		Map<String, StatTrackDTO.Builder>groupMap = new HashMap<>();
 		for(Document doc : documents) {
-			String groupKey = getGroupKey(doc, group);
+			String timeGroup = getGroupByTime(doc, timeGroupBy);
+			String dataGroup = getGroupByData(doc, dataGroupBy);
+			addDataGroup(dataGroupList, dataGroup);
+			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
 			if (!groupMap.containsKey(groupKey)) {
 				groupMap.put(groupKey, new StatTrackDTO.Builder().populateKeyFields(doc, group));
 			}
 			groupMap.get(groupKey).populateStatMean(doc);			
 		}
-		return groupMap.values().stream().map(builder -> builder.updateMainStats().build()).collect(Collectors.toList());
+		for(String key :  groupMap.keySet()) {
+			mapStats.put(key, groupMap.get(key).updateMainStats().build());
+		}
 	}
 	
+	@SuppressWarnings("unused")
 	private String getGroupKey(Document doc, List<String> group) {
 		String key = "";
 		Document idMap = (Document) doc.get("_id");
@@ -145,12 +220,31 @@ public class StatTrackService {
 		return key.substring(0, key.lastIndexOf('_'));
 	}
 	
-	private List<StatTrackDTO> populateStats(List<Document> documents, List<String> group) {
-		List<StatTrackDTO> result = new ArrayList<>();
+	private void populateStats(List<Document> documents, List<String> group, Map<String, StatTrackDTO> mapStats, List<String> dataGroupList,
+			GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, String campaignId) {
 		for(Document doc : documents) {
-			result.add(new StatTrackDTO.Builder().populateKeyFields(doc, group).populateStatFields(doc).build());
+			String timeGroup = getGroupByTime(doc, timeGroupBy);
+			String dataGroup = getGroupByData(doc, dataGroupBy);
+			addDataGroup(dataGroupList, dataGroup);
+			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+			mapStats.put(groupKey, new StatTrackDTO.Builder().populateKeyFields(doc, group).populateStatFields(doc).build());
 		}
-		return result;		
 	}
+	
+	private void addDataGroup(List<String> dataGroupList, String dataGroup) {
+		if(StringUtils.isNotBlank(dataGroup) && !dataGroupList.contains(dataGroup)) {
+			dataGroupList.add(dataGroup);
+		}
+	}
+
+	private List<String> getTimeGroupList(LocalDate start, LocalDate end, GROUP_BY_TIME timeGroupBy) {
+		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return DateUtils.getDateRangeStrings(start, end);
+		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return DateUtils.getDateRangeByWeek(start, end);
+		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return DateUtils.getDateRangeByMonth(start, end);
+		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return DateUtils.getDateRangeByYear(start, end);
+		if (GROUP_BY_TIME.hour.equals(timeGroupBy)) return DateUtils.getDateRangeByHour(start, end);
+		return Collections.emptyList();		
+	}
+	
 	
 }
