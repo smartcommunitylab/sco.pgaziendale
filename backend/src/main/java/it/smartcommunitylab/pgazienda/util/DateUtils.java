@@ -57,5 +57,9 @@ public class DateUtils {
     public static List<String> getDateRangeByHour(LocalDate start, LocalDate end) {
     	return Arrays.asList("00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "15", "17", "18", "19", "20", "21", "22", "23");
     }
-     
+
+    public static List<String> getDateRangeByDayOfWeek(LocalDate start, LocalDate end) {
+    	return Arrays.asList("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY");
+    }
+
 }
