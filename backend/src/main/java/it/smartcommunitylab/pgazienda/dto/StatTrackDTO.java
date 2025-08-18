@@ -89,18 +89,29 @@ public class StatTrackDTO {
 			if(dto == null)
 				dto = new StatTrackDTO();
 			
-			Document idMap = (Document) doc.get("_id");
-			if(idMap.containsKey("campaign")) dto.setCampaign(idMap.getString("campaign"));
-			if(idMap.containsKey("locationKey")) dto.setDataGroup(idMap.getString("locationKey"));
-			if(idMap.containsKey("employeeKey")) dto.setDataGroup(idMap.getString("employeeKey"));
-			if(idMap.containsKey("company")) dto.setDataGroup(idMap.getString("company"));
-			
-			if(idMap.containsKey("hour")) dto.setTimeGroup(idMap.getString("hour"));
-			if(idMap.containsKey("dayOfWeek")) dto.setTimeGroup(idMap.getString("dayOfWeek"));
-			if(idMap.containsKey("date")) dto.setTimeGroup(idMap.getString("date"));
-			if(idMap.containsKey("week")) dto.setTimeGroup(idMap.getString("week"));
-			if(idMap.containsKey("month")) dto.setTimeGroup(idMap.getString("month"));
-			if(idMap.containsKey("year")) dto.setTimeGroup(idMap.getString("year"));
+			if(doc.get("_id") instanceof Document) {
+				Document idMap = (Document) doc.get("_id");
+				if(idMap.containsKey("campaign")) dto.setCampaign(idMap.getString("campaign"));
+				if(idMap.containsKey("locationKey")) dto.setDataGroup(idMap.getString("locationKey"));
+				if(idMap.containsKey("employeeKey")) dto.setDataGroup(idMap.getString("employeeKey"));
+				if(idMap.containsKey("company")) dto.setDataGroup(idMap.getString("company"));
+				
+				if(idMap.containsKey("hour")) 
+					dto.setTimeGroup(idMap.getString("hour"));
+				else if(idMap.containsKey("dayOfWeek")) 
+					dto.setTimeGroup(idMap.getString("dayOfWeek"));
+				else if(idMap.containsKey("date")) 
+					dto.setTimeGroup(idMap.getString("date"));
+				else if(idMap.containsKey("week")) 
+					dto.setTimeGroup(idMap.getString("week"));
+				else if(idMap.containsKey("month")) 
+					dto.setTimeGroup(idMap.getString("month"));
+				else if(idMap.containsKey("year")) 
+					dto.setTimeGroup(idMap.getString("year"));
+				else dto.setTimeGroup("total");
+			} else {
+				dto.setTimeGroup("total");
+			}
 			return this;
 		}
 		

@@ -167,21 +167,26 @@ public class StatTrackService {
 	}
 
 	private String getGroupByData(Document doc, GROUP_BY_DATA dataGroupBy) {
-		Document idMap = (Document) doc.get("_id");
-		if (GROUP_BY_DATA.company.equals(dataGroupBy)) return idMap.getString("company");
-		if (GROUP_BY_DATA.employee.equals(dataGroupBy)) return idMap.getString("employeeKey");
-		if (GROUP_BY_DATA.location.equals(dataGroupBy)) return idMap.getString("locationKey");		
+		if(doc.get("_id") instanceof Document) {
+			Document idMap = (Document) doc.get("_id");
+			if (GROUP_BY_DATA.company.equals(dataGroupBy)) return idMap.getString("company");
+			if (GROUP_BY_DATA.employee.equals(dataGroupBy)) return idMap.getString("employeeKey");
+			if (GROUP_BY_DATA.location.equals(dataGroupBy)) return idMap.getString("locationKey");					
+		}
 		return null;
 	}
 	
 	private String getGroupByTime(Document doc, GROUP_BY_TIME timeGroupBy) {		
-		Document idMap = (Document) doc.get("_id");
-		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return idMap.getString("date");
-		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return idMap.getString("week");
-		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return idMap.getString("month");
-		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return idMap.getString("year");
-		if (GROUP_BY_TIME.hour.equals(timeGroupBy)) return idMap.getString("hour");
-		if (GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) return idMap.getString("dayOfWeek");
+		if(doc.get("_id") instanceof Document) {
+			Document idMap = (Document) doc.get("_id");
+			if (GROUP_BY_TIME.day.equals(timeGroupBy)) return idMap.getString("date");
+			if (GROUP_BY_TIME.week.equals(timeGroupBy)) return idMap.getString("week");
+			if (GROUP_BY_TIME.month.equals(timeGroupBy)) return idMap.getString("month");
+			if (GROUP_BY_TIME.year.equals(timeGroupBy)) return idMap.getString("year");
+			if (GROUP_BY_TIME.hour.equals(timeGroupBy)) return idMap.getString("hour");
+			if (GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) return idMap.getString("dayOfWeek");			
+		}
+		if (GROUP_BY_TIME.total.equals(timeGroupBy)) return "total";
 		return null;
 	}
 
@@ -244,6 +249,7 @@ public class StatTrackService {
 		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return DateUtils.getDateRangeByYear(start, end);
 		if (GROUP_BY_TIME.hour.equals(timeGroupBy)) return DateUtils.getDateRangeByHour(start, end);
 		if (GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) return DateUtils.getDateRangeByDayOfWeek(start, end); 
+		if (GROUP_BY_TIME.total.equals(timeGroupBy)) return DateUtils.getDateRangeByTotal(start, end);
 		return Collections.emptyList();		
 	}
 	

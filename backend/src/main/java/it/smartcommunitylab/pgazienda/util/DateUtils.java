@@ -62,4 +62,8 @@ public class DateUtils {
     	return Arrays.asList("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY");
     }
 
+    public static List<String> getDateRangeByTotal(LocalDate start, LocalDate end) {
+    	return Arrays.asList("total");
+    }
+
 }

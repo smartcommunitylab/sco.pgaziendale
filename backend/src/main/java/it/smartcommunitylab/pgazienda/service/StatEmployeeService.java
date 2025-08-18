@@ -3,7 +3,6 @@ package it.smartcommunitylab.pgazienda.service;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -219,6 +218,7 @@ public class StatEmployeeService {
 		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return localDate.format(DateUtils.WEEK_PATTERN);
 		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return localDate.format(DateUtils.MONTH_PATTERN);
 		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return localDate.format(DateUtils.YEAR_PATTERN);
+		if (GROUP_BY_TIME.total.equals(timeGroupBy)) return "total";
 		return null;
 	}
 	
@@ -227,6 +227,7 @@ public class StatEmployeeService {
 		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return DateUtils.getDateRangeByWeek(start, end);
 		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return DateUtils.getDateRangeByMonth(start, end);
 		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return DateUtils.getDateRangeByYear(start, end);
+		if (GROUP_BY_TIME.total.equals(timeGroupBy)) return DateUtils.getDateRangeByTotal(start, end);
 		return Collections.emptyList();		
 	}
 	
