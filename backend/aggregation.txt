@@ -76,13 +76,6 @@
       {
         db: "pgaziendale-dev",
         coll: "statTrack"
-        /*
-    timeseries: {
-    timeField: 'field',
-    bucketMaxSpanSeconds: 'number',
-    granularity: 'granularity'
-    }
-    */
       }
   }
 ]
