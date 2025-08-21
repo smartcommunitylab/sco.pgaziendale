@@ -19,7 +19,6 @@ package it.smartcommunitylab.pgazienda.web.rest;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
-import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
-import it.smartcommunitylab.pgazienda.service.StatTrackService;
+import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO;
+import it.smartcommunitylab.pgazienda.service.StatMultimodalService;
 import it.smartcommunitylab.pgazienda.service.UserService;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
@@ -45,12 +44,12 @@ import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
  */
 @RestController
 @RequestMapping("/api")
-public class StatTrackResource {
+public class StatMultimodalResource {
 
-	private static final Logger log = LoggerFactory.getLogger(StatTrackResource.class);
+	private static final Logger log = LoggerFactory.getLogger(StatMultimodalResource.class);
 	
 	@Autowired
-	private StatTrackService dataService;
+	private StatMultimodalService dataService;
 	@Autowired
 	private UserService userService;
 
@@ -59,7 +58,6 @@ public class StatTrackResource {
 	 * @param campaignId
 	 * @param companyId
 	 * @param location
-	 * @param employeeId
 	 * @param timeGroupBy
 	 * @param dataGroupBy
 	 * @param fields
@@ -69,18 +67,14 @@ public class StatTrackResource {
 	 * @throws IOException
 	 * @throws InconsistentDataException
 	 */
-    @GetMapping("/campaigns/{campaignId}/stats/track")
-	public ResponseEntity<List<StatTrackDTO>> statistics(
+    @GetMapping("/campaigns/{campaignId}/stats/multimodal")
+	public ResponseEntity<List<StatMultimodalDTO>> statistics(
 		@PathVariable String campaignId, 
 		@RequestParam(required=false) String companyId,
 		@RequestParam(required=false) String location,
-		@RequestParam(required=false) Set<String> means,
-		@RequestParam(required=false) Set<String> employeeId,			
-		@RequestParam(required=false, defaultValue = "all") String way,
 		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
 		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
-		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
 		@RequestParam(required=false) String from, 
 		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
 	{
@@ -95,7 +89,7 @@ public class StatTrackResource {
         log.debug("REST request to get statistics");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
-    	return ResponseEntity.ok(dataService.getTrackStats(campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, fromDate, toDate));
+    	return ResponseEntity.ok(dataService.getMultimodalStats(campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, fromDate, toDate));
 	}
-    
+
 }

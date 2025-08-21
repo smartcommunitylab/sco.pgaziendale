@@ -91,10 +91,11 @@ public class StatMultimodalDTO {
 	public static class Builder {
 		private StatMultimodalDTO dto;
 		
-		public Builder populateKeyFields(Document doc) {
+		public Builder populateKeyFields(Document doc, String modeGroup) {
 			if(dto == null)
 				dto = new StatMultimodalDTO();
 			
+			dto.setModeGroup(modeGroup);
 			Document idMap = (Document) doc.get("_id");
 			if(idMap.containsKey("campaign")) dto.setCampaign(idMap.getString("campaign"));
 			if(idMap.containsKey("locationKey")) dto.setDataGroup(idMap.getString("locationKey"));

@@ -139,7 +139,7 @@ public class StatMultimodalService {
 				StatMultimodalDTO.Builder builder = mapBuilders.get(groupKey);
 				if(builder == null) {
 					builder = new StatMultimodalDTO.Builder();
-					builder.populateKeyFields(doc);
+					builder.populateKeyFields(doc, modeGroup);
 					mapBuilders.put(groupKey, builder);
 				}
 				builder.mergeStatMean(doc);
@@ -178,18 +178,33 @@ public class StatMultimodalService {
 	}
 
 	private String getGroupKey(String campaignId, String modeGroup, String timeGroup, String dataGroup) {
-		// TODO Auto-generated method stub
-		return null;
+		String key = campaignId + "_" + modeGroup + "_" + timeGroup;
+		if(StringUtils.isNotBlank(dataGroup)) key += "_" + dataGroup;
+		return key;
 	}
 
 	private String getGroupByData(Document doc, GROUP_BY_DATA dataGroupBy) {
-		// TODO Auto-generated method stub
+		Document idMap = (Document) doc.get("_id");
+		if (GROUP_BY_DATA.company.equals(dataGroupBy)) return idMap.getString("company");
+		if (GROUP_BY_DATA.location.equals(dataGroupBy)) return idMap.getString("locationKey");
 		return null;
 	}
 
 	private String getGroupByTime(Document doc, GROUP_BY_TIME timeGroupBy) {
-		// TODO Auto-generated method stub
-		return null;
+		Document idMap = (Document) doc.get("_id");
+		if(idMap.containsKey("hour")) 
+			return idMap.getString("hour");
+		else if(idMap.containsKey("dayOfWeek")) 
+			return idMap.getString("dayOfWeek");
+		else if(idMap.containsKey("date")) 
+			return idMap.getString("date");
+		else if(idMap.containsKey("week")) 
+			return idMap.getString("week");
+		else if(idMap.containsKey("month")) 
+			return idMap.getString("month");
+		else if(idMap.containsKey("year")) 
+			return idMap.getString("year");
+		else return "total";
 	}
 
 	private String getModeList(List<Document> docs) {
