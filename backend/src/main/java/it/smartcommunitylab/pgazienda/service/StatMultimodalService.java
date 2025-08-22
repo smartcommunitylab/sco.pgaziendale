@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -149,6 +150,7 @@ public class StatMultimodalService {
 		for(String groupKey :  mapBuilders.keySet()) {
 			mapStats.put(groupKey, mapBuilders.get(groupKey).updateMainStats().build());
 		}
+		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList, mapModes.keySet());
 		Comparator<StatMultimodalDTO>comparator = new Comparator<StatMultimodalDTO>() {
 			@Override
 			public int compare(StatMultimodalDTO o1, StatMultimodalDTO o2) {
@@ -160,6 +162,38 @@ public class StatMultimodalService {
 		return result;		
 	}
 	
+	private void fillEmptyDate(String campaignId, Map<String, StatMultimodalDTO> mapStats, List<String> timeGroupList,
+			List<String> dataGroupList, Set<String> modeGroupSet) {
+		for(String modeGroup : modeGroupSet) {
+			if(dataGroupList.size() == 0) {
+				for(String timeGroup : timeGroupList) {
+					String groupKey = getGroupKey(campaignId, modeGroup, timeGroup, null);
+					if(!mapStats.containsKey(groupKey)) {
+						StatMultimodalDTO stats = new  StatMultimodalDTO();
+						stats.setCampaign(campaignId);
+						stats.setTimeGroup(timeGroup);
+						stats.setModeGroup(modeGroup);
+						mapStats.put(groupKey, stats);
+					}
+				}
+			} else {
+				for(String dataGroup : dataGroupList) {
+					for(String timeGroup : timeGroupList) {
+						String groupKey = getGroupKey(campaignId, modeGroup, timeGroup, dataGroup);
+						if(!mapStats.containsKey(groupKey)) {
+							StatMultimodalDTO stats = new  StatMultimodalDTO();
+							stats.setCampaign(campaignId);
+							stats.setTimeGroup(timeGroup);
+							stats.setDataGroup(dataGroup);
+							stats.setModeGroup(modeGroup);
+							mapStats.put(groupKey, stats);
+						}					
+					}
+				}
+			}			
+		}
+	}
+
 	private void addDataGroup(List<String> dataGroupList, String dataGroup) {
 		if(StringUtils.isNotBlank(dataGroup) && !dataGroupList.contains(dataGroup)) {
 			dataGroupList.add(dataGroup);
