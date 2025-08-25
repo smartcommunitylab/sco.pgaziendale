@@ -277,7 +277,7 @@ public class StatMultimodalService {
 			row.add(dto.getModeGroup());
 			row.add(dto.getTimeGroup());
 			if(dto.getDataGroup() != null) row.add(dto.getDataGroup());
-			row.add(dto.getModeGroup());
+			row.add("all");
 			row.addAll(getStatValue(dto.getStats(), fields));
 			result.add(row.toArray(new String[0]));			
 		} else {
