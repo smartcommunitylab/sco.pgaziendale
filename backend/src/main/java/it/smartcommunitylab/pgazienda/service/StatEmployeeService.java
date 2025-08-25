@@ -1,5 +1,7 @@
 package it.smartcommunitylab.pgazienda.service;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -21,6 +23,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+
+import com.opencsv.CSVWriter;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
@@ -251,5 +255,40 @@ public class StatEmployeeService {
 		}
 		return Collections.emptyList();
 	}
+
+	public void getEmployeeStatsCsv(PrintWriter writer, String campaignId, String companyId, String location,
+			GROUP_BY_TIME timeGroupBy, GROUP_BY_DATA dataGroupBy, LocalDate fromDate, LocalDate toDate) throws InconsistentDataException, IOException {
+		List<StatEmployeeDTO> employeeStats = getEmployeeStats(campaignId, companyId, location, timeGroupBy, dataGroupBy, fromDate, toDate);
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		String[] headers = getHeaders(timeGroupBy, dataGroupBy);
+		csvWriter.writeNext(headers);
+		for(StatEmployeeDTO dto : employeeStats) {
+			String[] row = getCSV(dto);
+			csvWriter.writeNext(row);
+		}
+		csvWriter.close();
+	}
  
+	private String[] getCSV(StatEmployeeDTO dto) {
+		List<String> row = new ArrayList<>();
+		row.add(dto.getCampaign());
+		row.add(dto.getTimeGroup());
+		if(dto.getDataGroup() != null) row.add(dto.getDataGroup());	
+		row.add(String.valueOf(dto.getActiveUsers()));
+		row.add(String.valueOf(dto.getRegistration()));
+		row.add(String.valueOf(dto.getDropout()));		
+		return row.toArray(new String[0]);
+	}
+
+	private String[] getHeaders(GROUP_BY_TIME timeGroupBy, GROUP_BY_DATA dataGroupBy) {
+		List<String>headers = new ArrayList<>();
+		headers.add("campaign"); 
+		headers.add("timeGroup"); 
+		if(dataGroupBy != null) headers.add("dataGroup");
+		headers.add("activeUsers");
+		headers.add("registration");
+		headers.add("dropout");
+		return headers.toArray(new String[0]);
+	}
+
 }

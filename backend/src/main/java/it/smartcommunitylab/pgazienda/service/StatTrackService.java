@@ -1,5 +1,7 @@
 package it.smartcommunitylab.pgazienda.service;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,12 +23,15 @@ import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
+import com.opencsv.CSVWriter;
+
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
+import it.smartcommunitylab.pgazienda.dto.StatTrackDTO.StatValue;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.util.DateUtils;
@@ -251,6 +256,90 @@ public class StatTrackService {
 		if (GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) return DateUtils.getDateRangeByDayOfWeek(start, end); 
 		if (GROUP_BY_TIME.total.equals(timeGroupBy)) return DateUtils.getDateRangeByTotal(start, end);
 		return Collections.emptyList();		
+	}
+
+	public void getTrackStatsCSV(PrintWriter writer, 
+			String campaignId, 
+			String companyId, 
+			String location,
+			Set<String> means, 
+			Set<String> employeeId, 
+			String way, 
+			GROUP_BY_TIME timeGroupBy, 
+			GROUP_BY_DATA dataGroupBy,
+			List<STAT_TRACK_FIELD> fields, 
+			boolean groupByMean, 
+			LocalDate fromDate, 
+			LocalDate toDate) throws InconsistentDataException, IOException {
+		List<StatTrackDTO> trackStats = getTrackStats(campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, fromDate, toDate);
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		String[] headers = getHeaders(timeGroupBy, dataGroupBy, groupByMean, fields);
+		csvWriter.writeNext(headers);
+		for(StatTrackDTO dto : trackStats) {
+			List<String[]> rows = getCSV(dto, groupByMean, fields);
+			csvWriter.writeAll(rows);
+		}
+		csvWriter.close();
+	}
+
+	private List<String[]> getCSV(StatTrackDTO dto, boolean groupByMean, List<STAT_TRACK_FIELD> fields) {
+		List<String[]> result = new ArrayList<>();
+		if(!groupByMean) {
+			List<String> row = new ArrayList<>();
+			row.add(dto.getCampaign());
+			row.add(dto.getTimeGroup());
+			if(dto.getDataGroup() != null) row.add(dto.getDataGroup());			
+			row.addAll(getStatValue(dto.getStats(), fields));
+			result.add(row.toArray(new String[0]));
+		} else {
+			for(String mean : dto.getMeanStatMap().keySet()) {
+				List<String> row = new ArrayList<>();
+				row.add(dto.getCampaign());
+				row.add(dto.getTimeGroup());
+				if(dto.getDataGroup() != null) row.add(dto.getDataGroup());			
+				row.add(mean);
+				row.addAll(getStatValue(dto.getMeanStatMap().get(mean), fields));
+				result.add(row.toArray(new String[0]));
+			}
+		}
+		return result;
+	}
+	
+	private List<String> getStatValue(StatValue stat, List<STAT_TRACK_FIELD> fields) {
+		List<String> row = new ArrayList<>();
+		fields.forEach(f -> {
+			switch (f) {
+			case score:
+				row.add(String.valueOf(stat.getScore()));
+				break;
+			case track:
+				row.add(String.valueOf(stat.getTrack()));
+				break;
+			case co2:
+				row.add(String.valueOf(stat.getCo2()));
+				break;
+			case distance:
+				row.add(String.valueOf(stat.getDistance()));
+				break;
+			case duration:
+				row.add(String.valueOf(stat.getDuration()));
+				break;				
+			default:
+				break;
+			}
+		});
+		return row;
+	}
+
+	private String[] getHeaders(GROUP_BY_TIME timeGroupBy, GROUP_BY_DATA dataGroupBy, boolean groupByMean,
+			List<STAT_TRACK_FIELD> fields) {
+		List<String>headers = new ArrayList<>();
+		headers.add("campaign"); 
+		headers.add("timeGroup"); 
+		if(dataGroupBy != null) headers.add("dataGroup");
+		if(groupByMean) headers.add("mean");
+		fields.forEach(f -> headers.add(f.toString()));
+		return headers.toArray(new String[0]);
 	}
 	
 	

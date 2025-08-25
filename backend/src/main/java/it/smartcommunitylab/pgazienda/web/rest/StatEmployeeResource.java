@@ -1,8 +1,11 @@
 package it.smartcommunitylab.pgazienda.web.rest;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -59,4 +62,28 @@ public class StatEmployeeResource {
 		}*/
 		return ResponseEntity.ok(statEmployeeService.getEmployeeCount(campaignId, companyId));
 	}
+	
+	@GetMapping("/campaigns/{campaignId}/stats/employee/csv")
+	public void statisticsCsv(
+			@PathVariable String campaignId, 
+			@RequestParam(required=false) String companyId,
+			@RequestParam(required=false) String location,
+			@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy,
+			@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
+			@RequestParam(required=false) String from,
+			@RequestParam(required=false) String to,
+			HttpServletResponse response) throws InconsistentDataException, IOException {
+	    	/*if(!userService.isInCampaignRole(campaignId)) {
+			if(StringUtils.isNotBlank(companyId)) {
+		    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
+		    		throw new SecurityException("Insufficient rights");        		
+	    	} else {
+	    		throw new SecurityException("Insufficient rights");	
+	    	}
+		}*/
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);		
+		statEmployeeService.getEmployeeStatsCsv(response.getWriter(), campaignId, companyId, location, timeGroupBy, dataGroupBy, fromDate, toDate);
+	}
+			
 }

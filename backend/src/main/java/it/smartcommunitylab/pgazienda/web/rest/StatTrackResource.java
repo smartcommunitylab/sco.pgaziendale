@@ -21,6 +21,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,5 +99,35 @@ public class StatTrackResource {
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
     	return ResponseEntity.ok(dataService.getTrackStats(campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, fromDate, toDate));
 	}
-    
+
+    @GetMapping("/campaigns/{campaignId}/stats/track/csv")
+	public void statisticsCsv(
+		@PathVariable String campaignId, 
+		@RequestParam(required=false) String companyId,
+		@RequestParam(required=false) String location,
+		@RequestParam(required=false) Set<String> means,
+		@RequestParam(required=false) Set<String> employeeId,			
+		@RequestParam(required=false, defaultValue = "all") String way,
+		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
+		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
+		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
+		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
+		@RequestParam(required=false) String from, 
+		@RequestParam(required=false) String to,
+		HttpServletResponse response) throws IOException, InconsistentDataException 
+	{
+    	/*if(!userService.isInCampaignRole(campaignId)) {
+    		if(StringUtils.isNotBlank(companyId)) {
+    	    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
+    	    		throw new SecurityException("Insufficient rights");        		
+        	} else {
+        		throw new SecurityException("Insufficient rights");	
+        	}
+    	}*/
+        log.debug("REST request to get statistics CSV");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	dataService.getTrackStatsCSV(response.getWriter(), campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, fromDate, toDate);
+	}
+
 }
