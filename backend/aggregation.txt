@@ -1,0 +1,117 @@
+[
+  {
+    $unwind:
+      /**
+       * path: Path to the array field.
+       * includeArrayIndex: Optional name for index.
+       * preserveNullAndEmptyArrays: Optional
+       *   toggle to unwind null and empty values.
+       */
+      {
+        path: "$tracks",
+        preserveNullAndEmptyArrays: false
+      }
+  },
+  {
+    $project:
+      /**
+       * specifications: The fields to
+       *   include or exclude.
+       */
+      {
+        _id: 0,
+        score: 0,
+        limitedScore: 0,
+        meanScore: 0,
+        limitedMeanScore: 0,
+        meanDistance: 0,
+        meanDuration: 0,
+        meanCo2: 0,
+        meanTracks: 0,
+        trackCount: 0,
+        limitedTrackCount: 0
+      }
+  },
+  {
+    $project:
+      /**
+       * specifications: The fields to
+       *   include or exclude.
+       */
+      {
+        campaign: 1,
+        playerId: 1,
+        company: 1,
+        employeeCode: 1,
+        date: 1,
+        year: 1,
+        month: 1,
+        week: 1,
+        dayOfWeek: 1,
+        hour: "$tracks.hour",
+        trackId: "$tracks.trackId",
+        multimodalId: "$tracks.multimodalId",
+        startedAt: "$tracks.startedAt",
+        mode: "$tracks.mode",
+        distance: "$tracks.distance",
+        duration: "$tracks.duration",
+        co2: "$tracks.co2",
+        score: "$tracks.score",
+        limitedScore: "$tracks.limitedScore",
+        location: "$tracks.locationId",
+        wayBack: "$tracks.wayBack",
+				employeeKey: {
+					$concat: ["$company", "__", "$employeeCode"]
+				},
+				locationKey: {
+					$concat: ["$company", "__", "$tracks.locationId"]
+				}
+      }
+  },
+  {
+    $out:
+      /**
+       * Provide the name of the output database and collection.
+       */
+      {
+        db: "pgaziendale-dev",
+        coll: "statTrack"
+      }
+  }
+]
+
+
+
+
+
+
+[
+  {
+    $group:
+      /**
+       * _id: The id of the group.
+       * fieldN: The first field name.
+       */
+      {
+        _id: {
+          date: "$date",
+          mode: "$mode"
+        },
+        score: {
+          $sum: "$score"
+        },
+        duration: {
+          $sum: "$duration"
+        },
+        co2: {
+          $sum: "$co2"
+        },
+        distance: {
+          $sum: "$distance"
+        },
+        count: {
+          $count: {}
+        }
+      }
+  }
+]

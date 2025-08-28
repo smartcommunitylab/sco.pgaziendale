@@ -19,8 +19,8 @@ package it.smartcommunitylab.pgazienda.service;
 import java.io.PrintWriter;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,14 +29,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.opencsv.CSVWriter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +45,13 @@ import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
+
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.opencsv.CSVWriter;
+
 import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
 import it.smartcommunitylab.pgazienda.domain.Circle;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
@@ -63,11 +66,11 @@ import it.smartcommunitylab.pgazienda.domain.DayStat.Score;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.Employee.TrackingRecord;
 import it.smartcommunitylab.pgazienda.domain.Shape;
+import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.domain.Subscription;
 import it.smartcommunitylab.pgazienda.domain.TrackingData;
 import it.smartcommunitylab.pgazienda.domain.User;
 import it.smartcommunitylab.pgazienda.domain.UserRole;
-import it.smartcommunitylab.pgazienda.domain.Campaign.VirtualScoreValue;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackDTO.TrackLegDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
@@ -76,8 +79,10 @@ import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.DayStatRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
+import it.smartcommunitylab.pgazienda.repository.StatTrackRepository;
 import it.smartcommunitylab.pgazienda.repository.UserRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.util.DateUtils;
 import it.smartcommunitylab.pgazienda.util.LimitsUtils;
 import it.smartcommunitylab.pgazienda.util.TrackUtils;
 
@@ -92,9 +97,6 @@ public class TrackingDataService {
 	 * 
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
-	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
-	private static final DateTimeFormatter YEAR_PATTERN = DateTimeFormatter.ofPattern("yyyy");
-	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww", Constants.DEFAULT_LOCALE);
 	
 	@Autowired
 	private CampaignRepository campaignRepo;
@@ -106,6 +108,8 @@ public class TrackingDataService {
 	private UserRepository userRepo;
 	@Autowired
 	private DayStatRepository dayStatRepo;
+	@Autowired
+	private StatTrackRepository statTrackRepository;
 
 	@Autowired
 	private MongoTemplate template;
@@ -165,9 +169,10 @@ public class TrackingDataService {
 		if (employee == null ) throw new InconsistentDataException("Invalid user key: " + playerId, "NO_USER");
 		if (employee.isBlocked()) throw new InconsistentDataException("User is blocked: " + playerId, "USER_BLOCKED");
 		// locations
-		List<Shape> locations = 
-				company.getLocations().stream()
+		List<CompanyLocation> companylocations = company.getLocations().stream()
 				.filter(l -> checkWorking(l, toLocalDate(track.getStartTime())))
+				.collect(Collectors.toList());
+		List<Shape> locations = companylocations.stream()
 				.map(l -> new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius()))
 				.collect(Collectors.toList());
 		Shape employeeLocation = Boolean.TRUE.equals(campaign.getUseEmployeeLocation()) && employee.getLocation() != null 
@@ -182,6 +187,25 @@ public class TrackingDataService {
 		} else if ((matchingLegIndex = TrackUtils.matchLocations(track, locations, campaign.getUseMultiLocation(), employeeLocation)) < 0) {
 			return TrackValidityDTO.errMatches();
 		} else {
+			// check matching location id
+			TrackLegDTO trackLegDTO = track.getLegs().get(matchingLegIndex);
+			Optional<CompanyLocation> locationMatched = companylocations.stream()
+				.filter(l -> {
+					Circle c = new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius());
+					return TrackUtils.matchLocations(trackLegDTO, Collections.singletonList(c));
+				})
+				.findFirst();
+			String matchingLocationId = locationMatched.isPresent() ? locationMatched.get().getId() : null;
+			//check way back trip
+			boolean wayBack = false;
+			if(!campaign.getUseMultiLocation() && locationMatched.isPresent()) {
+				if(track.getLegs().size() == 1) {
+					CompanyLocation l = locationMatched.get();
+					Circle c = new Circle(new double[] {l.getLatitude(), l.getLongitude()}, l.getRadius());
+					wayBack = TrackUtils.isWayBack(trackLegDTO, c);
+				} else wayBack = matchingLegIndex == 0 ? false : true;				
+			}
+			
 			List<TrackLegDTO> validTrack = new LinkedList<>();
 			// limit to valid legs towards the location
 			if (matchingLegIndex == 0) {
@@ -220,9 +244,10 @@ public class TrackingDataService {
 				stat.setEmployeeCode(employee.getCode());
 				stat.setDate(date.toString());
 				stat.setTrackCount(0);
-				stat.setMonth(date.format(MONTH_PATTERN));
-				stat.setWeek(date.format(WEEK_PATTERN));
-				stat.setYear(date.format(YEAR_PATTERN));
+				stat.setMonth(date.format(DateUtils.MONTH_PATTERN));
+				stat.setWeek(date.format(DateUtils.WEEK_PATTERN));
+				stat.setYear(date.format(DateUtils.YEAR_PATTERN));
+				stat.setDayOfWeek(date.getDayOfWeek().toString());
 				stat.setScore(new Score());
 			}
 
@@ -236,6 +261,7 @@ public class TrackingDataService {
 					td.setTrackId(l.getId());
 					td.setPlayerId(playerId);
 					td.setStartedAt(Instant.ofEpochMilli(track.getStartTime()).toString());
+					td.setHour(toLocalDateTime(track.getStartTime()).format(DateUtils.HOUR_PATTERN));
 					stat.getTracks().add(td);
 				}
 				td.setMode(mean.name());
@@ -243,12 +269,15 @@ public class TrackingDataService {
 				td.setDuration(l.getDuration());
 				td.setCo2(l.getCo2());
 				td.setMultimodalId(track.getMultimodalId());
+				td.setWayBack(wayBack);
+				td.setLocationId(matchingLocationId);
 				trackMap.put(l.getId(), td);
 			}
 			// recalculate the score from updated track list
 			limitScore(campaign, playerId, stat);
 			stat.recalculate();
 			dayStatRepo.save(stat);
+			updateTrackStats(stat);
 			
 			// create result
 			TrackValidityDTO validity = new TrackValidityDTO();
@@ -280,6 +309,39 @@ public class TrackingDataService {
 			return validity;
 		}
 	}  
+	
+	private void updateTrackStats(DayStat stat) {
+		statTrackRepository.deleteByPlayerIdAndCampaignAndCompanyAndDate(stat.getPlayerId(), stat.getCampaign(), stat.getCompany(), stat.getDate());
+		for(TrackingData td : stat.getTracks()) {
+				StatTrack statTrack = new StatTrack();
+				statTrack.setCampaign(stat.getCampaign());
+				statTrack.setPlayerId(stat.getPlayerId());
+				statTrack.setDate(stat.getDate());
+				statTrack.setCompany(stat.getCompany());
+				statTrack.setTrackId(td.getTrackId());
+				statTrack.setYear(stat.getYear());
+				statTrack.setMonth(stat.getMonth());
+				statTrack.setWeek(stat.getWeek());
+				statTrack.setDayOfWeek(stat.getDayOfWeek());
+				statTrack.setHour(td.getHour());
+				statTrack.setCompany(stat.getCompany());
+				statTrack.setLocation(td.getLocationId());
+				statTrack.setLocationKey(stat.getCompany() + StatTrack.KEY_DIV + td.getLocationId());
+				statTrack.setEmployeeCode(stat.getEmployeeCode());
+				statTrack.setEmployeeKey(stat.getCompany() + StatTrack.KEY_DIV + stat.getEmployeeCode());
+				statTrack.setTrackId(td.getTrackId());
+				statTrack.setMultimodalId(td.getMultimodalId());
+				statTrack.setStartedAt(td.getStartedAt());
+				statTrack.setMode(td.getMode());
+				statTrack.setDistance(td.getDistance());
+				statTrack.setCo2(td.getCo2());
+				statTrack.setScore(td.getScore());
+				statTrack.setLimitedScore(td.getLimitedScore());
+				statTrack.setDuration(td.getDuration());
+				statTrack.setWayBack(td.isWayBack());
+				statTrackRepository.save(statTrack);
+		}
+	}
 	
 	/**
 	 * @param campaignId
@@ -328,6 +390,7 @@ public class TrackingDataService {
 			}
 			limitScore(campaign, playerId, stat);
 			dayStatRepo.save(stat);
+			updateTrackStats(stat);
 		}
 
 		return TrackValidityDTO.errInvalidated();
@@ -339,6 +402,10 @@ public class TrackingDataService {
 	 */
 	private LocalDate toLocalDate(Long startTime) {
 		return Instant.ofEpochMilli(startTime).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
+	}
+	
+	private LocalDateTime toLocalDateTime(Long startTime) {
+		return Instant.ofEpochMilli(startTime).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDateTime();
 	}
 	
 	/**
@@ -796,8 +863,8 @@ public class TrackingDataService {
 			if (idMap.containsKey("date")) {
 				stat.setDate((String)idMap.get("date"));
 				LocalDate ld = LocalDate.parse(stat.getDate());
-				stat.setMonth(ld.format(MONTH_PATTERN));
-				stat.setWeek(ld.format(WEEK_PATTERN));
+				stat.setMonth(ld.format(DateUtils.MONTH_PATTERN));
+				stat.setWeek(ld.format(DateUtils.WEEK_PATTERN));
 			}
 			if (idMap.containsKey("week")) {
 				stat.setWeek((String)idMap.get("week"));
@@ -1022,10 +1089,11 @@ public class TrackingDataService {
 						res.add(normalizedValue(ds.getMeanDistance().meanValue(m), 0.001)); 					
 					});
 					break;
-				case meanDuration: //, , 
+				case meanDuration:  
+					double multiplier = 1.0/3600.0;
 					campaign.getMeans().forEach(ms -> {
 						MEAN m = MEAN.valueOf(ms);
-						res.add(normalizedValue(ds.getMeanDuration().meanValue(m), 1/3600)); 					
+						res.add(normalizedValue(ds.getMeanDuration().meanValue(m), multiplier)); 					
 					});
 					break;
 				case meanCo2: 
@@ -1037,7 +1105,7 @@ public class TrackingDataService {
 				case meanTracks: 
 					campaign.getMeans().forEach(ms -> {
 						MEAN m = MEAN.valueOf(ms);
-						res.add(normalizedValue(ds.getMeanCo2().meanValue(m), 1)); 					
+						res.add(normalizedValue(ds.getMeanTracks().meanValue(m), 1)); 					
 					});
 					break;
 			}
@@ -1061,21 +1129,21 @@ public class TrackingDataService {
 		else if (GROUP_BY_TIME.week.equals(timeGroupBy)) {
 			LocalDate curr = from;
 			while (!curr.isAfter(to)) {
-				list.add(curr.format(WEEK_PATTERN));
+				list.add(curr.format(DateUtils.WEEK_PATTERN));
 				curr = curr.plusWeeks(1);
 			}
 		}
 		else if (GROUP_BY_TIME.month.equals(timeGroupBy)) {
 			LocalDate curr = from;
 			while (!curr.isAfter(to)) {
-				list.add(curr.format(MONTH_PATTERN));
+				list.add(curr.format(DateUtils.MONTH_PATTERN));
 				curr = curr.plusMonths(1);
 			}
 		}
 		else if (GROUP_BY_TIME.year.equals(timeGroupBy)) {
 			LocalDate curr = from;
 			while (!curr.isAfter(to)) {
-				list.add(curr.format(YEAR_PATTERN));
+				list.add(curr.format(DateUtils.YEAR_PATTERN));
 				curr = curr.plusYears(1);
 			}
 		}

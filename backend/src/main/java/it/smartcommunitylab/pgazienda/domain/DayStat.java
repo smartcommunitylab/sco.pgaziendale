@@ -33,7 +33,7 @@ public class DayStat {
 	@Id
 	private String id;
 	
-	private String campaign, playerId, date, year, month, week, company, employeeCode;
+	private String campaign, playerId, date, year, month, week, company, employeeCode, dayOfWeek;
 	
 	private Double co2saved;
 	private Integer trackCount;
@@ -527,5 +527,12 @@ public class DayStat {
 		}
 	}
 
+
+	public String getDayOfWeek() {
+		return dayOfWeek;
+	}
+	public void setDayOfWeek(String dayOfWeek) {
+		this.dayOfWeek = dayOfWeek;
+	}
 
 }

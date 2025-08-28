@@ -45,5 +45,7 @@ public interface EmployeeRepository  extends MongoRepository<Employee, String> {
 
 	@Query("{id:{$in:?0}}")
 	public List<Employee> findByIdIn(Collection<String> ids);
-
+	
+	public long countByCompanyId(String companyId);
+	
 }
