@@ -58,13 +58,15 @@
         co2: "$tracks.co2",
         score: "$tracks.score",
         limitedScore: "$tracks.limitedScore",
-        location: "$tracks.locationId",
-        wayBack: "$tracks.wayBack",
-				employeeKey: {
-					$concat: ["$company", "__", "$employeeCode"]
-				},
+        /**
+				location: "$tracks.locationId",
+        wayBack: "$tracks.wayBack",				
 				locationKey: {
 					$concat: ["$company", "__", "$tracks.locationId"]
+				},
+				*/
+				employeeKey: {
+					$concat: ["$company", "__", "$employeeCode"]
 				}
       }
   },
