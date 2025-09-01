@@ -10,6 +10,7 @@ public class StatTrackDTO {
 	private String campaign;
 	private String timeGroup; 
 	private String dataGroup;
+	private String dataGroupName;
 	private StatValue stats;
 	private Map<String, StatValue>meanStatMap = new HashMap<>();
 	
@@ -42,6 +43,14 @@ public class StatTrackDTO {
 	}
 	public void setMeanStatMap(Map<String, StatValue> meanStatMap) {
 		this.meanStatMap = meanStatMap;
+	}
+
+	public String getDataGroupName() {
+		return dataGroupName;
+	}
+
+	public void setDataGroupName(String dataGroupName) {
+		this.dataGroupName = dataGroupName;
 	}
 
 	public static class StatValue {

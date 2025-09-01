@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Service;
 import com.opencsv.CSVWriter;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Company;
+import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
@@ -33,15 +36,23 @@ import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO.StatValue;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
+import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
+import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.util.DateUtils;
 
 @Service
 public class StatTrackService {
+
+	@Autowired
+    private CompanyRepository companyRepository;
+	@Autowired
+	private EmployeeRepository employeeRepository;
 	@Autowired
 	private MongoTemplate template;
 	@Autowired
 	private CampaignRepository campaignRepo;
+
 
 	public List<StatTrackDTO> getTrackStats(
 			String campaignId,
@@ -139,10 +150,47 @@ public class StatTrackService {
 			}
 		};
 		List<StatTrackDTO> result = new ArrayList<>(mapStats.values());
+		updateDateGroupNames(result, dataGroupBy, campaignId);
 		Collections.sort(result, comparator);
 		return result;		
 	}
 	
+	/**
+	 * Fill the dataGroupName field of the StatTrackDTO objects in the result list 
+	 * by replacing the companyId or employeeKey or locationKey 
+	 * with the corresponding name
+	 * @param result the list of StatTrackDTO objects
+	 * @param dataGroupBy the type of group
+	 * @param campaignId the campaign id
+	 */
+	private void updateDateGroupNames(List<StatTrackDTO> result, GROUP_BY_DATA dataGroupBy, String campaignId) {
+		Map<String, String> map = new HashMap<>();
+		switch (dataGroupBy) {
+			case company:
+				map = companyRepository.findByCampaign(campaignId).stream().collect(Collectors.toMap(Company::getId, Company::getName));
+				break;
+			case employee:
+				List<String> companies = result.stream().map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
+				map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));					
+			case location:
+				List<String> companyIds = result.stream().map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
+				for (String companyId : companyIds) {
+					Company company = companyRepository.findById(companyId).orElse(null);
+					if (company != null) {
+						List<CompanyLocation> locations = company.getLocations();
+						for (CompanyLocation location : locations) {
+							map.put(companyId + StatTrack.KEY_DIV + location.getId(), location.getName());
+						}
+					}
+				}
+			default:
+				break;
+		}
+		for (StatTrackDTO s : result) {
+			s.setDataGroupName(map.getOrDefault(s.getDataGroup(), s.getDataGroup()));			
+		}
+	}
+
 	private void fillEmptyDate(String campaignId, Map<String, StatTrackDTO> mapStats, List<String> timeGroupList,
 			List<String> dataGroupList) {
 		if(dataGroupList.size() == 0) {
@@ -288,7 +336,7 @@ public class StatTrackService {
 			List<String> row = new ArrayList<>();
 			row.add(dto.getCampaign());
 			row.add(dto.getTimeGroup());
-			if(dto.getDataGroup() != null) row.add(dto.getDataGroup());			
+			if(dto.getDataGroupName() != null) row.add(dto.getDataGroupName());			
 			row.addAll(getStatValue(dto.getStats(), fields));
 			result.add(row.toArray(new String[0]));
 		} else {
@@ -296,7 +344,7 @@ public class StatTrackService {
 				List<String> row = new ArrayList<>();
 				row.add(dto.getCampaign());
 				row.add(dto.getTimeGroup());
-				if(dto.getDataGroup() != null) row.add(dto.getDataGroup());			
+				if(dto.getDataGroupName() != null) row.add(dto.getDataGroupName());			
 				row.add(mean);
 				row.addAll(getStatValue(dto.getMeanStatMap().get(mean), fields));
 				result.add(row.toArray(new String[0]));
