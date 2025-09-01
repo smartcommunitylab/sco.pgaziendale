@@ -1,9 +1,9 @@
 <template>
   <v-row align="center" >
-    <v-col cols="2" class="pl-5 pr-20" v-if="localCompany">
+    <v-col cols="3" class="pl-5 pr-20" v-if="localCompany">
       <p class="text-subtitle-1"> {{ localCompany.name }}</p>
     </v-col>
-    <v-col cols="4" class="pl-5 pr-20" v-if="statsCampaigns">
+    <v-col cols="3" class="pl-5 pr-20" v-if="statsCampaigns">
 
       <v-autocomplete
         label="Campagna"
@@ -18,7 +18,7 @@
         outlined
       ></v-autocomplete>
     </v-col>
-    <v-col cols="4" class="pl-5 pr-20" v-if="configurations && configurations.items">
+    <v-col cols="3" class="pl-5 pr-20" v-if="configurations && configurations.items">
       <v-select
         label="Profilo statistiche"
         name="profili"

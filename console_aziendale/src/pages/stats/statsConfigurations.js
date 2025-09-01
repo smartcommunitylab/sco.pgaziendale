@@ -39,19 +39,33 @@ export const statsConfigurations = [
         ],
         dataColumns: [ 
           VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_COUNTING_POINTS,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DISTANCE,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DURATION,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_COUNTING_POINTS,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DISTANCE,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DURATION,
+          //added
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.DISTANCE,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.DURATION,
+          
 
         ],
         timeUnit: [
           // VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
           // VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.HOUR,
+            value: "hour",
+            apiField: "hour"
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.DOW,
+            value: "dayOfWeek",
+            apiField: "dayOfWeek"
+          },
           {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
             value: "week",
@@ -88,8 +102,9 @@ export const statsConfigurations = [
         
         default: {
           dataColumns: [
-            VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
-            VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
+            // VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
+            // VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
             VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL
           ],
           puntualAggregationSelected:{
@@ -179,20 +194,33 @@ export const statsConfigurations = [
         ],
         dataColumns: [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_COUNTING_POINTS,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DISTANCE,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DURATION,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_COUNTING_POINTS,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DISTANCE,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DURATION,
+          //added
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.DISTANCE,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.DURATION,
         ],
         timeUnit: [
           {
             label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
             value: "campaign",
             apiField: "total"
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.HOUR,
+            value: "hour",
+            apiField: "hour"
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.DOW,
+            value: "dayOfWeek",
+            apiField: "dayOfWeek"
           },
           {
             label:VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
@@ -230,7 +258,8 @@ export const statsConfigurations = [
         
         default: {
           dataColumns: [
-            VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
+            // VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
             ],
           puntualAggregationSelected:{
             label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
@@ -306,11 +335,21 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_CO2_SAVED,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
+          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_CO2_SAVED,
         ],
         timeUnit: [
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.HOUR,
+            value: "hour",
+            apiField: "hour"
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.DOW,
+            value: "dayOfWeek",
+            apiField: "dayOfWeek"
+          },
           {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
             value: "month",

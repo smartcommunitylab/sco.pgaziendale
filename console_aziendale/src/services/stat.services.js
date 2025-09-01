@@ -35,7 +35,6 @@ function getConfigurationByUser(user, temporaryAdmin) {
       array.push(config);
     }
   });
-  console.log(array);
   return Promise.resolve(array);
 }
 function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
@@ -81,24 +80,46 @@ function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
  * @param {*} campaignId 
  * @param {*} companyId 
  * @param {*} location 
+ * @param {*} means
  * @param {*} employeeId 
+ * @param {*} way
  * @param {*} timeGroupBy 
  * @param {*} dataGroupBy 
  * @param {*} from 
  * @param {*} to 
  * @param {*} fields 
+ * @param {*} groupByMean 
+ * @param {*} all 
+ * @param {*} csv
  * @returns 
  */
-function callStatsAPI(campaignId, companyId, location, employeeId, timeGroupBy, dataGroupBy, from, to, fields, all, csv) {
+function callStatsAPI(
+  campaignId, 
+  companyId, 
+  location, 
+  means,
+  employeeId, 
+  way,
+  timeGroupBy, 
+  dataGroupBy, 
+  from, 
+  to, 
+  fields,
+  groupByMean, 
+  all, 
+  csv) {
   let params = {
     ...(companyId ? { companyId } : {}),
     ...(location ? { location } : {}),
     ...(employeeId ? { employeeId } : {}),
+    ...(means ? { means: means.join(',') } : {}),
+    ...(way ? { way } : {}),
+    ...(groupByMean ? { groupByMean } : {}),
     ...(from ? { from } : {}),
     ...(to ? { to } : {}),
     ...(timeGroupBy ? { timeGroupBy } : {}),
     ...(dataGroupBy ? { dataGroupBy } : {}),
-    ...(fields ? { fields } : {fields: 'score,limitedScore'}),
+    ...(fields ? { fields } : {fields: 'score'}),
     ...(all ? { all } : {}),
   }
 
@@ -109,7 +130,7 @@ function callStatsAPI(campaignId, companyId, location, employeeId, timeGroupBy, 
       process.env.VUE_APP_CAMPAIGNS_API +
       "/" +
       campaignId +
-      "/stats/all/csv",
+      "/stats/track/csv",
       { params }
     )
     .then(res => {
@@ -127,13 +148,13 @@ function callStatsAPI(campaignId, companyId, location, employeeId, timeGroupBy, 
     process.env.VUE_APP_CAMPAIGNS_API +
     "/" +
     campaignId +
-    "/stats/all",
+    "/stats/track",
     { params }
   )
   .then(res => {
     let map = {};
     res.data.forEach(d => {
-      d = flattenStat(d);
+      d = flattenStat(d, timeGroupBy, fields, means, groupByMean);
       let key = d.name || '';
       if (!map[key]) {
         map[key] = [];
@@ -156,29 +177,38 @@ function callStatsAPI(campaignId, companyId, location, employeeId, timeGroupBy, 
  * @param {*} ds 
  * @returns 
  */
-function flattenStat(ds) {
-  let res = ds;
-  res.name = ds.playerId;
-  res.score = res.score.score || 0;
-  res.limitedScore = res.limitedScore.score || 0;
-  let means = ['car', 'bike', 'walk', 'train', 'bus', 'boat'];
-  means.forEach(m => {
-    res[m + '_meanScore'] = res.meanScore[m] || 0;
-    res[m + '_limitedMeanScore'] = res.limitedMeanScore[m] || 0;
-    res[m + '_meanDistance'] = (res.meanDistance[m] || 0) / 1000;
-    res[m + '_meanDuration'] = (res.meanDuration[m] || 0) / 3600;
-    res[m + '_meanCo2'] = res.meanCo2[m] || 0;
-    res[m + '_meanTracks'] = res.meanTracks[m] || 0;
-  });
-  delete res.meanScore;
-  delete res.limitedMeanScore;
-  delete res.meanDistance;
-  delete res.meanDuration;
-  delete res.meanCo2;
-  delete res.meanTracks;
+function flattenStat(ds, timeGroupBy, fields, means, groupByMean) {
+  ds.stats = ds.stats || {};
+  let res = {campaign: ds.campaign, id: ds.dataGroup, name: ds.dataGroupName || ds.dataGroup};
+  res[timeGroupBy] = mapTimeLabel(timeGroupBy, ds.timeGroup);
+  for (let field of fields.split(',')) {
+    res[field] = adjustValue(ds.stats[field] || 0, field);
+    if (groupByMean && means && means.length > 0 && ds.meanStatMap) {
+      means.forEach(m => {
+        res[m + '_mean_' + field] = adjustValue((ds.meanStatMap[m] || {})[field] || 0, field);
+      });
+    }
+  }
   return res;
 }
 
+function mapTimeLabel(timeGroupBy, timeGroup) {
+  if (timeGroupBy === 'dayOfWeek') {
+    const days = {"MONDAY": "Lunedì", "TUESDAY": "Martedì", "WEDNESDAY": "Mercoledì", "THURSDAY": "Giovedì", "FRIDAY": "Venerdì", "SATURDAY": "Sabato", "SUNDAY": "Domenica"};
+    return days[timeGroup];
+  }
+  return timeGroup;
+}
+
+function adjustValue(value, field) {
+  if (field === 'distance') {
+    return (value / 1000); //convert to km
+  }
+  if (field === 'duration') {
+    return (value / 3600); //convert to hours
+  }
+  return value;
+}
 /**
  * Prepare fields parameter given the configuration
  * @param {*} configuration 
@@ -196,51 +226,60 @@ function getFields(configuration) {
 function getAllLocationsStats(configuration) {
   console.log('getAllLocationsStats', configuration);
   return callStatsAPI(
-    configuration.campaign.id, 
-    configuration.company.id, 
-    null, 
-    null, 
-    configuration.timeUnit.apiField, 
-    'location', 
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-    getFields(configuration),
-    true,
-    configuration.csv
+    configuration.campaign.id, // campaignId
+    configuration.company.id,  // companyId
+    null,                      // location
+    configuration.means,       // means
+    null,                      // employeeId
+    configuration.direction,   // way
+    configuration.timeUnit.apiField, // timeGroupBy
+    'location',                      // dataGroupBy
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null, // from
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,     // to 
+    getFields(configuration),      // fields
+    configuration.groupByMean,     // groupByMean
+    true,                          // all
+    configuration.csv              // csv    
     );
 }
 
 function getAllEmployeesStats(configuration) {
   console.log('getAllEmployeesStat', configuration);
   return callStatsAPI(
-    configuration.campaign.id, 
-    configuration.company.id, 
-    null, 
-    null, 
-    configuration.timeUnit.apiField, 
-    'employee', 
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-    getFields(configuration),
-    false,
-    configuration.csv
+    configuration.campaign.id, // campaignId
+    configuration.company.id,  // companyId
+    null,                      // location
+    configuration.means,       // means
+    null,                      // employeeId
+    configuration.direction,   // way
+    configuration.timeUnit.apiField, // timeGroupBy
+    'employee',                      // dataGroupBy
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null, // from
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,     // to
+    getFields(configuration),   // fields
+    configuration.groupByMean,     // groupByMean
+    true,                          // all
+    configuration.csv              // csv    
     );
 }
 
 function getCompanyStats(configuration) {
   console.log('getCompanyStats', configuration);
   return callStatsAPI(
-    configuration.campaign.id, 
-    configuration.company.id, 
-    null, 
-    null, 
-    configuration.timeUnit.apiField, 
-    'company', 
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-    getFields(configuration),
-    false,
-    configuration.csv
+    configuration.campaign.id, // campaignId
+    configuration.company.id,  // companyId
+    null,                      // location
+    configuration.means,       // means
+    null,                      // employeeId
+    configuration.direction,   // way
+    configuration.timeUnit.apiField, // timeGroupBy
+    'company',                      // dataGroupBy
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null, // from
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,     // to
+    getFields(configuration),   // fields
+    configuration.groupByMean,     // groupByMean
+    false,                          // all
+    configuration.csv              // csv 
     );
 
 }
@@ -248,33 +287,39 @@ function getCompanyStats(configuration) {
 function aggregateByEmployeeStat(configuration) {
   console.log('aggregateByEmployeeStat', configuration);
   return callStatsAPI(
-    configuration.campaign.id, 
-    configuration.company.id, 
-    null, 
+    configuration.campaign.id, // campaignId
+    configuration.company.id,  // companyId
+    null,                      // location
+    configuration.means,       // means
     configuration.puntualAggregationItems.map(i => i.id).join(','), 
-    configuration.timeUnit.apiField, 
-    'employee', 
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-    getFields(configuration),
-    false,
-    configuration.csv
+    configuration.direction,   // way
+    configuration.timeUnit.apiField,  // timeGroupBy
+    'employee', // dataGroupBy
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null, // from
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,  
+    getFields(configuration), // fields
+    configuration.groupByMean,     // groupByMean
+    false,                    // all
+    configuration.csv         // csv
   );  
 }
 function aggregateByLocationStat(configuration) {
   console.log('aggregateByLocationStat', configuration);
   return callStatsAPI(
-    configuration.campaign.id, 
-    configuration.company.id, 
-    null, 
-    null, 
-    configuration.timeUnit.apiField, 
-    'location', 
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-    getFields(configuration),
-    true,
-    configuration.csv
+    configuration.campaign.id, // campaignId
+    configuration.company.id,  // companyId
+    null,                      // location
+    configuration.means,       // means
+    null,                      // employeeId
+    configuration.direction,   // way
+    configuration.timeUnit.apiField, // timeGroupBy
+    'location',                      // dataGroupBy
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null, // from
+    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,     // to 
+    getFields(configuration),      // fields
+    configuration.groupByMean,     // groupByMean
+    true,                          // all
+    configuration.csv              // csv    
   );  
 }
 
@@ -286,14 +331,17 @@ function getCampaignCompanyStats(configuration) {
 
   return callStatsAPI(
     configuration.campaign.id, 
+    null,
+    null,  
+    configuration.means,       // means
     null, 
-    null, 
-    null, 
+    configuration.direction, 
     configuration.timeUnit.apiField, 
     'company', 
     configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
     configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
     getFields(configuration),
+    configuration.groupByMean,
     true,
     configuration.csv
     );
@@ -308,12 +356,15 @@ function getCampaignStats(configuration) {
     configuration.campaign.id, 
     null, 
     null, 
-    null, 
+    configuration.means,       // means
+    null,
+    configuration.direction, 
     configuration.timeUnit.apiField, 
     'campaign', 
     configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
     configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
     getFields(configuration),
+    configuration.groupByMean,
     false,
     configuration.csv
     );
@@ -326,13 +377,16 @@ function aggregateCompanyStat(configuration) {
       configuration.campaign.id, 
       configuration.puntualAggregationItems[companyId].id, 
       null, 
-      null, 
+      configuration.means,       // means
+      null,
+      configuration.direction, 
       configuration.timeUnit.apiField, 
       'company', 
       configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
       configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
       getFields(configuration),
-      false,
+      configuration.groupByMean,
+      true,
       configuration.csv
     ));
   }
@@ -373,7 +427,6 @@ function getStat(configuration) {
       return aggregateByEmployeeStat(configuration);
     case "aggregateByLocation":
       return aggregateByLocationStat(configuration).then(res => {
-        console.log('RES', res);
         const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(l => l.id) : [];
         if (arr.length == 0) return res;
         return res.filter(l => arr.indexOf(l.key) >= 0);
@@ -389,111 +442,4 @@ function getStat(configuration) {
 function getCsv(configuration) {
   configuration.csv = true;
   return getStat(configuration).finally(() => configuration.csv = false);
-  // //check configuration and ask the right csv
-  // switch (configuration.dataLevel.api) {
-  //   case "getCampaignCompanyStats":
-  //     return getCampaignCsv({
-  //       campaignId: campaign.id,
-  //       from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
-  //       to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
-  //     });
-
-  //   case "getEmployeesStats":
-  //     return getCompanyCsv({
-  //       campaignId: campaign.id,
-  //       companyId: configuration.company.id,
-  //       from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
-  //       to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
-  //     });
-  //   case "getLocationsStats":
-  //     return getLocationCsv({
-  //       campaignId: campaign.id,
-  //       companyId: configuration.company.id,
-  //       from: configuration.selectedDateFrom ? configuration.selectedDateFrom : null,
-  //       to: configuration.selectedDateTo ? configuration.selectedDateTo : null,
-  //     });
-
-  //   default:
-  //     break;
-  // }
 }
-
-// function getCampaignCsv({campaignId, from, to}) {
-//   return axios
-//     .get(
-//       process.env.VUE_APP_BASE_URL +
-//       process.env.VUE_APP_CAMPAIGNS_API +
-//       "/" +
-//       campaignId +
-//       "/stats/csv",
-//       {
-//         params: {
-//           ...(from ? { from: from } : {}),
-//           ...(to ? { to: to } : {}),
-//         },
-//       }
-//     )
-//     .then(
-//       (res) => {
-//         if (res && res.data) {
-//           return Promise.resolve(res.data);
-//         } else return Promise.reject(null);
-//       },
-//       (err) => {
-//         return Promise.reject(err);
-//       }
-//     );
-// }
-
-// function getCompanyCsv({ campaignId, companyId, from, to }) {
-//   var fromParam = from ? "?from=" + from : "";
-//   var toParam = "";
-//   if (fromParam) toParam = to ? "&to=" + to : "";
-//   return axios
-//     .get(
-//       process.env.VUE_APP_BASE_URL +
-//       process.env.VUE_APP_CAMPAIGNS_API +
-//       "/" +
-//       campaignId +
-//       "/stats/csv/employee/" +
-//       companyId +
-//       fromParam +
-//       toParam
-//     )
-//     .then(
-//       (res) => {
-//         if (res && res.data) {
-//           return Promise.resolve(res.data);
-//         } else return Promise.reject(null);
-//       },
-//       (err) => {
-//         return Promise.reject(err);
-//       }
-//     );
-// }
-// function getLocationCsv({ campaignId, companyId, from, to }) {
-//   var fromParam = from ? "?from=" + from : "";
-//   var toParam = "";
-//   if (fromParam) toParam = to ? "&to=" + to : "";
-//   return axios
-//     .get(
-//       process.env.VUE_APP_BASE_URL +
-//       process.env.VUE_APP_CAMPAIGNS_API +
-//       "/" +
-//       campaignId +
-//       "/stats/csv/location/" +
-//       companyId +
-//       fromParam +
-//       toParam
-//     )
-//     .then(
-//       (res) => {
-//         if (res && res.data) {
-//           return Promise.resolve(res.data);
-//         } else return Promise.reject(null);
-//       },
-//       (err) => {
-//         return Promise.reject(err);
-//       }
-//     );
-// }
