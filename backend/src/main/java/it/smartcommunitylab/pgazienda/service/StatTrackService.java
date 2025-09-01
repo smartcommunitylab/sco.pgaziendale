@@ -172,7 +172,7 @@ public class StatTrackService {
 		Map<String, String> map = new HashMap<>();
 		switch (dataGroupBy) {
 			case company:
-				Set<String> allCompanies = result.stream().map(s -> s.getDataGroup()).collect(Collectors.toSet());
+				Set<String> allCompanies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup()).collect(Collectors.toSet());
 				for (String companyId : allCompanies) {
 					Company company = companyRepository.findById(companyId).orElse(null);
 					if (company != null) {
