@@ -172,7 +172,13 @@ public class StatTrackService {
 		Map<String, String> map = new HashMap<>();
 		switch (dataGroupBy) {
 			case company:
-				map = companyRepository.findByCampaign(campaignId).stream().collect(Collectors.toMap(Company::getId, Company::getName));
+				Set<String> allCompanies = result.stream().map(s -> s.getDataGroup()).collect(Collectors.toSet());
+				for (String companyId : allCompanies) {
+					Company company = companyRepository.findById(companyId).orElse(null);
+					if (company != null) {
+						map.put(companyId, company.getName());
+					}
+				}
 				break;
 			case employee:
 				List<String> companies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
@@ -180,7 +186,7 @@ public class StatTrackService {
 					map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));					
 				}
 			case location:
-				List<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
+				Set<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
 				for (String companyId : companyIds) {
 					Company company = companyRepository.findById(companyId).orElse(null);
 					if (company != null) {
