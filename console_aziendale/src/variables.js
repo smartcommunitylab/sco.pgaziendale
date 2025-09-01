@@ -30,64 +30,43 @@ export const VARIABLES = {
         PERCENTAGE_EMPLOYEES: { label: "% dipendenti", value: "% dipendenti" },
         CO2_SAVED: {
           label: "kg CO2 risparmiata",
-          value: "co2saved",
-          apiField: "co2saved"
+          meanLabel: "CO2 per mezzo (_mezzo_)",
+          value: "co2",
+          apiField: "co2"
         }, 
         POINTS: {
-          label: "Punti totali",
+          label: "Punti",
+          meanLabel: "Punti per mezzo (_mezzo_)",
           value: "score",
           apiField: "score"
         },
-        COUNTING_POINTS: {
-          label:  "Punti utili", 
-          value:  "limitedScore",
-          apiField: "limitedScore"
-        },
-        N_COUNTING_TRAVEL: {
-          label:  "Viaggi utili", 
-          value: "limitedTrackCount",
-          apiField: "limitedTrackCount"
-        },
+        // COUNTING_POINTS: {
+        //   label:  "Punti utili", 
+        //   value:  "limitedScore",
+        //   apiField: "limitedScore"
+        // },
+        // N_COUNTING_TRAVEL: {
+        //   label:  "Viaggi utili", 
+        //   value: "limitedTrackCount",
+        //   apiField: "limitedTrackCount"
+        // },
         N_TRAVEL: {
           label: "Viaggi totali",
-          value: "trackCount",
-          apiField: "trackCount"
+          meanLabel: "Tratte per mezzo (_mezzo_)",
+          value: "track",
+          apiField: "track"
         },
-        MEAN_POINTS: {
-          label: "Punti totali per mezzo",
-          value: "meanScore",
-          apiField: "meanScore",
-          mean: true
+        DISTANCE: {
+          label: "Distanca totale (km)",
+          meanLabel: "KM per mezzo (_mezzo_)",
+          value: "distance",
+          apiField: "distance"
         },
-        MEAN_COUNTING_POINTS: {
-          label: "Punti utili per mezzo",
-          value: "limitedMeanScore",
-          apiField: "limitedMeanScore",
-          mean: true
-        },
-        MEAN_DISTANCE: {
-          label: "Km per mezzo",
-          value: "meanDistance",
-          apiField: "meanDistance",
-          mean: true
-        },
-        MEAN_DURATION: {
-          label: "Ore per mezzo",
-          value: "meanDuration",
-          apiField: "meanDuration",
-          mean: true
-        },
-        MEAN_CO2_SAVED: {
-          label: "CO2 salvata per mezzo",
-          value: "meanCo2",
-          apiField: "meanCo2",
-          mean: true
-        },
-        MEAN_N_TRAVEL: {
-          label: "Tratte per mezzo",
-          value: "meanTracks",
-          apiField: "meanTracks",
-          mean: true
+        DURATION: {
+          label: "Durata totale (ore)",
+          meanLabel: "Ore per mezzo (_mezzo_)",
+          value: "duration",
+          apiField: "duration"
         },
       },
       DATALEVEL: {
@@ -98,6 +77,8 @@ export const VARIABLES = {
         COMPANIES: "Aziende",
       },
       TIMEUNIT: {
+        HOUR: "Fascia oraria",
+        DOW: "Giorno della settimana",
         DAY: "Giorno", 
         WEEK: "Settimana",
         MONTH: "Mese", 
@@ -112,7 +93,7 @@ export const VARIABLES = {
         NONE:  "Nessuno", 
         EMPLOYEES:  "Selezione dipendente/i", 
         LOCATIONS: "Sedi", 
-        COMPANIES: "Aziende"
+        COMPANIES: "Aziende",
       },
     },
   },

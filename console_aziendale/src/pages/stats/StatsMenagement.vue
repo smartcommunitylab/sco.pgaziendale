@@ -1,114 +1,38 @@
 <template>
-  <v-row>
-    <v-col cols="9">
-      <v-card>
-        <v-row>
-          <v-col cols="6">
-            <v-tabs
-              v-model="tab"
-              align-with-title
-              v-if="configurations && configurations.items"
-            >
-              <v-tabs-slider color="primary"></v-tabs-slider>
+  <div style="margin-right: 56px">
+  <v-navigation-drawer
+      absolute
+      permanent
+      right
+      v-model="drawer"
+      :mini-variant.sync="mini"
+      width="384"
+      >
+      <v-list-item class="ml-2 px-2">
+        <v-list-item-icon>
+            <v-icon>mdi-filter-cog</v-icon>
+          </v-list-item-icon>
 
-              <v-tab
-                v-for="item in configurations.items[0].views"
-                :key="item.type"
-                @click.prevent="setNewActiveView(item.type)"
-              >
-                {{ item.type }}
-              </v-tab>
-            </v-tabs>
-          </v-col>
-          <v-col cols="6">
-            <div class="text-right m-2" v-if="activeSelection && activeSelection.dataLevel">
-              <v-btn
-                color="primary"
-                @click="exportCsv"
-              >
-                Download CSV
-              </v-btn>
-            </div>
+        <v-list-item-title>Impostazioni</v-list-item-title>
 
-          </v-col>
-        </v-row>
+        <v-btn
+          icon
+          @click.stop="mini = !mini"
+        >
+          <v-icon>mdi-chevron-right</v-icon>
+        </v-btn>
+      </v-list-item>
 
-        <v-tabs-items v-model="tab" class="mt-5">
-          <v-tab-item key="Tabella">
-            <data-table :dataTableData="viewData"></data-table>
-          </v-tab-item>
-          <v-tab-item key="Grafico a Linee">
-            <line-chart></line-chart>
-          </v-tab-item>
-          <v-tab-item key="Grafico a Barre">
-            <bar-chart></bar-chart>
-          </v-tab-item>
-          <v-tab-item key="Mappa???"> </v-tab-item>
-        </v-tabs-items>
-      </v-card>
-    </v-col>
-    <v-col cols="3">
-      <div>
-        <v-card v-if="activeViewType && activeSelection">
-          <div>
-            <v-card-title> Impostazioni</v-card-title>
-          </div>
-          <v-card-text class="px-5 py-4" v-if="activeSelection">
-            <p v-if="activeSelection.dataColumns" class="p-0">
-              <b>Colonne dati</b>:
-              <span v-for="(column, index) in activeSelection.dataColumns" :key="index"
-                ><br />{{ column.label }}</span
-              >
-            </p>
-            <p v-if="activeSelection.timeUnit" class="p-0">
-              <b>Aggregazione temporale</b>:<br />
-              {{ activeSelection.timeUnit.label }}
-            </p>
-            <p v-if="activeSelection.timePeriod" class="p-0">
-              <b>Periodo di tempo</b>:
-              <template v-if="timeSelected"
-                ><br /><span>{{ activeSelection.selectedDateFrom }}<br /></span>
-                <span>{{ activeSelection.selectedDateTo }}<br /></span> </template
-              ><template v-else
-                ><br /><span>{{ activeSelection.timePeriod.label }}</span></template
-              >
-            </p>
-            <p v-if="activeSelection.dataLevel" class="p-0">
-              <b>Livello aggregazione</b>: {{ activeSelection.dataLevel.label }}
-            </p>
-            <p v-if="activeSelection.puntualAggregationSelected" class="p-0">
-              <b>Filtri</b>:
-              <template v-if="activeSelection.puntualAggregationSelected.value != 'NONE'"
-                ><br /><span
-                  v-for="(agg, index) in activeSelection.puntualAggregationItems"
-                  :key="index"
-                  >{{ agg.label }} </span></template
-              ><template v-else><br /><span>Nessuno</span></template>
-            </p>
-          </v-card-text>
+      <v-divider></v-divider>
+      <div class="pa-2">
+      <v-expansion-panels v-show="!mini" v-if="localSelection && view" 
 
-          <v-card-actions>
-            <v-btn color="primary" text @click="sheet = !sheet"> Modifica </v-btn>
-          </v-card-actions>
-        </v-card>
-
-        <v-dialog
-          v-model="sheet"
-          persistent
-          max-width="1200px">
-          <v-card>
-          <v-card-title>
-            <span class="text-h4 text-center">Impostazioni</span>
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-    
-            <!-- INPUT - Componenti per il filtraggio -->
-
-            <v-row justify="center">
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Livello aggregazione</p>
-
+        v-model="panel"
+        multiple
+      >
+        <v-expansion-panel>
+          <v-expansion-panel-header>Livello aggregazione</v-expansion-panel-header>
+          <v-expansion-panel-content>
                 <v-autocomplete
                   label="Livello aggregazione"
                   name="livelloaggregazione"
@@ -157,10 +81,11 @@
                   ></v-autocomplete>
                 </div>
               </div>
-              </v-col>
-
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Aggregazione temporale</p>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+        <v-expansion-panel>
+          <v-expansion-panel-header>Aggregazione temporale</v-expansion-panel-header>
+          <v-expansion-panel-content>
                 <v-autocomplete
                   label="Aggregazione temporale"
                   placeholder="Aggregazione temporale"
@@ -234,49 +159,115 @@
                     ></v-date-picker>
                   </v-menu>
                 </div>
-              </v-col>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+        <v-expansion-panel>
+          <v-expansion-panel-header>Mezzi</v-expansion-panel-header>
+          <v-expansion-panel-content>
+              <v-autocomplete
+                    label="Selezione"
+                    name="means"
+                    id="means"
+                    v-model="localSelection.means"
+                    :items="meansList"
+                    :item-text="getMeanText"
+                    outlined
+                    multiple
+                  ></v-autocomplete>
 
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Colonne Dati</p>
+                  <p class="text-subtitle-1">Direzione</p>
+                <v-radio-group
+                  v-model="localSelection.direction"
+                >
+                  <v-radio label="Tutti" value="all"></v-radio>
+                  <v-radio label="Verso sede" value="wayThere"></v-radio>
+                  <v-radio label="Da sede" value="wayBack"></v-radio>
+                </v-radio-group>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+        <v-expansion-panel>
+          <v-expansion-panel-header>Colonne dati</v-expansion-panel-header>
+          <v-expansion-panel-content>
                 <v-checkbox v-for="dc in view.dataColumns" :key="dc.value"
                 v-model="localSelection.dataColumns" :value="dc"
                 :label="dc.label" hide-details
               ></v-checkbox>
-              </v-col>
-            </v-row>
-          <!-- </v-sheet>
-        </v-bottom-sheet> -->
-            </v-container>
-             </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
+              <br>
+              <v-switch
+                v-model="localSelection.groupByMean"
+                label="Dividere per mezzo"
+                hide-details
+                inset
+              ></v-switch>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+
+      <v-divider v-show="!mini"></v-divider>
+      <v-row v-show="!mini" class="pa-2 mb-4" >
+        <v-col cols="6" class="text-center">
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="resetFilterAndRefreshStat()"
+          >
+            Reimposta
+          </v-btn>
+        </v-col>
+        <v-col cols="6" class="text-center">
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="saveFiltersAndRefreshStat()"
+          >
+            Applica
+          </v-btn>
+        </v-col>
+      </v-row> 
+      </div>   
+  </v-navigation-drawer>
+  <v-row>
+    <v-col cols="12">
+      <v-card>
+        <v-row>
+          <v-col cols="6">
+            <v-tabs
+              v-model="tab"
+              align-with-title
+              v-if="configurations && configurations.items"
+            >
+              <v-tabs-slider color="primary"></v-tabs-slider>
+                <v-tab @click.prevent="setNewActiveView('Tabella')">Tabella</v-tab>
+                <v-tab @click.prevent="setNewActiveView('Grafico')">Grafico</v-tab>
+                <v-tab @click.prevent="setNewActiveView('Mappa')">Mappa</v-tab>
+            </v-tabs>
+          </v-col>
+          <v-col cols="6">
+            <div class="text-right m-2" v-if="activeSelection && activeSelection.dataLevel">
               <v-btn
-                color="blue darken-1"
-                text
-                @click="sheet = false"
+                color="primary"
+                @click="exportCsv"
               >
-                Annulla
+                Download CSV
               </v-btn>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="initiSelection()"
-              >
-                Reimposta
-              </v-btn>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="saveFiltersAndRefreshStat()"
-              >
-                Applica
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </div>
+            </div>
+
+          </v-col>
+        </v-row>
+
+        <v-tabs-items v-model="tab" class="mt-5">
+          <v-tab-item key="Tabella">
+            <data-table :dataTableData="viewData"></data-table>
+          </v-tab-item>
+          <v-tab-item key="Grafico">
+            <data-chart :dataChartData="viewData" :configuration="localSelection"></data-chart>
+          </v-tab-item>
+          <v-tab-item key="Mappa">Mappa</v-tab-item>
+        </v-tabs-items>
+      </v-card>
     </v-col>
   </v-row>
+  </div>
 </template>
 
 <script>
@@ -284,8 +275,7 @@ import { mapState, mapActions } from "vuex";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
 import DataTable from "@/components/stats-views/DataTable.vue";
-import LineChart from "@/components/stats-views/LineChart.vue";
-import BarChart from "@/components/stats-views/BarChart.vue";
+import DataChart from "@/components/stats-views/DataChart.vue";
 import { statService } from "../../services";
 import { viewStatService } from "../../services";
 export default {
@@ -304,12 +294,14 @@ export default {
 
   components: {
     "data-table": DataTable,
-    "line-chart": LineChart,
-    "bar-chart": BarChart,
+    "data-chart": DataChart,
   },
 
   data() {
     return {
+      drawer: true,
+      mini: true,
+      panel: [0],
       tab: null,
       sheet: false,
       showPickerFrom: false,
@@ -321,6 +313,7 @@ export default {
         dataLevel: null,
         timeUnit: null,
         dataColumns: [],
+        means: [],
         timePeriod: null,
         selectedDateFrom: new Date(),
         selectedDateTo: new Date(),
@@ -328,6 +321,8 @@ export default {
         puntualAggregationSelected: null,
         puntualAggregationItems: [],
         itemsAggreation: [],
+        direction: 'all',
+        groupByMean: false,
       },
       baseSelection: null,
       puntualAggregationSelected: null,
@@ -338,6 +333,15 @@ export default {
       // items: ["Item 1", "Item 2", "Item 3", "Item 4"],
       checkbox: false,
       viewData: null,
+      meansList: [],
+      allMeans: [
+        { value: "bike", text: "Bici", order: 2 },
+        { value: "car", text: "Auto", order: 5 },
+        { value: "train", text: "Treno", order: 4 },
+        { value: "walk", text: "Piedi", order: 1 },
+        { value: "bus", text: "Autobus", order: 3 },
+        { value: "boat", text: "Barca", order: 6 },
+      ],
     };
   },
   computed: {
@@ -433,9 +437,17 @@ export default {
     },
 
     saveFiltersAndRefreshStat() {
-      this.sheet = !this.sheet;
+      // this.sheet = !this.sheet;
       this.setActiveSelection({ selection: this.copy(this.localSelection) });
       this.getLocalStat(this.localSelection);
+      this.mini = true;
+    },
+
+    resetFilterAndRefreshStat() {
+      this.initiSelection();
+      this.setActiveSelection({ selection: this.copy(this.localSelection) });
+      this.getLocalStat(this.localSelection);
+      this.mini = true;
     },
 
     resetPunctualAggregation() {
@@ -468,6 +480,9 @@ export default {
     getItemText(item) {
       return item.label;
     },
+    getMeanText(item) {
+      return item.text;
+    },
     exportCsv() {
       this.downloadCsv(this.localSelection);
     },
@@ -488,7 +503,8 @@ export default {
       else this.getItemsAggregation();
     },
     setNewActiveView(view) {
-      this.setActiveViewType({ activeViewType: view });
+      console.log(view);
+      // this.setActiveViewType({ activeViewType: view });
     },
 
     initConfigurationStat() {
@@ -563,6 +579,9 @@ export default {
         //load specific values
         this.getItemsAggregation();
         this.getDataRange();
+        console.log("Configurations loaded: "+ this.localSelection.campaign);
+        this.meansList = this.allMeans.filter(m => this.localSelection.campaign.means.includes(m.value));
+        this.localSelection.means = this.localSelection.campaign.means.slice();
       }
     },
 
