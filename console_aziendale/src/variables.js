@@ -15,13 +15,9 @@ export const VARIABLES = {
     },
     VIEWS: {
       DATACOLUMNS: {
-        REGISTERED_EMPLOYEES: { label: "dipendenti registrati", value: "dipendenti registrati", source: 'employee' },
-        SUBSCRIBED_EMPLOYEES: { label: "dipendenti iscritti", value: "dipendenti iscritti", source: 'employee' },
-        ACTIVE_EMPLOYEES: { label: "dipendenti attivi", value: "dipendenti attivi", source: 'employee' },
-        ACTIVE_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti iscritti attivi", value: "% dipendenti iscritti attivi", source: 'employee' },
-        INACTIVE_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti iscritti inattivi", value: "% dipendenti iscritti inattivi", source: 'employee' },
-        NOT_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti non iscritti", value: "% dipendenti non iscritti", source: 'employee' },
-        PERCENTAGE_EMPLOYEES: { label: "% dipendenti", value: "% dipendenti", source: 'employee' },
+        REGISTERED_EMPLOYEES: { label: "Dipendenti registrati", value: "registration", source: 'employee' },
+        ACTIVE_EMPLOYEES: { label: "Dipendenti attivi", value: "activeUsers", source: 'employee' },
+        UNSUBSCRIBED_EMPLOYEES: { label: "Dipendenti rimossi", value: "dropout", source: 'employee' },
         CO2_SAVED: {
           label: "kg CO2 risparmiata",
           meanLabel: "CO2 per mezzo (_mezzo_)",

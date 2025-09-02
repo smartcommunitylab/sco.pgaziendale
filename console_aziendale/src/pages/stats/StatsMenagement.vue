@@ -239,7 +239,7 @@
               <v-tabs-slider color="primary"></v-tabs-slider>
                 <v-tab @click.prevent="setNewActiveView('Tabella')">Tabella</v-tab>
                 <v-tab @click.prevent="setNewActiveView('Grafico')">Grafico</v-tab>
-                <v-tab @click.prevent="setNewActiveView('Mappa')">Mappa</v-tab>
+                <!-- <v-tab @click.prevent="setNewActiveView('Mappa')">Mappa</v-tab> -->
             </v-tabs>
           </v-col>
           <v-col cols="6">
