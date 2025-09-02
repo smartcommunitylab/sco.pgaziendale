@@ -11,12 +11,11 @@ export const statsConfigurations = [
     profile: 'global',
     views: [
       {
-        type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
         dataLevel: [
           {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.CAMPAIGN,
             value: "campaign",
-            api: "getCampaignStats",
+            // api: "getCampaignStats",
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value:  'NONE'
@@ -24,38 +23,28 @@ export const statsConfigurations = [
           },
           {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES,
-            value: "companies",
-            api: "getCampaignCompanyStats",
+            value: "company",
+            // api: "getCampaignCompanyStats",
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
-              function:''
+              // function:''
             },{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.COMPANIES,
               value: 'COMPANIES',
-              function:'aggregateBycompany'
+              // function:'aggregateBycompany'
             }]
           },
         ],
         dataColumns: [ 
           VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_COUNTING_POINTS,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DISTANCE,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DURATION,
-          //added
           VARIABLES.STATS.VIEWS.DATACOLUMNS.DISTANCE,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.DURATION,
           
 
         ],
         timeUnit: [
-          // VARIABLES.STATS.VIEWS.TIMEUNIT.DAY,
-          // VARIABLES.STATS.VIEWS.TIMEUNIT.WEEK,
           {
             label: VARIABLES.STATS.VIEWS.TIMEUNIT.HOUR,
             value: "hour",
@@ -99,31 +88,30 @@ export const statsConfigurations = [
             apiField: "month"
           },
         ],
-        
+        source: "tracks",
         default: {
+          source: "tracks",
           dataColumns: [
-            // VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
-            // VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
             VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
             VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL
           ],
           puntualAggregationSelected:{
             label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
             value: 'NONE',
-            function:''
+            // function:''
           },
           dataLevel: {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES,
-            value: "companies",
-            api: "getCampaignCompanyStats",
+            value: "company",
+            // api: "getCampaignCompanyStats",
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
-              function:''
+              // function:''
             },{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.COMPANIES,
               value: 'COMPANIES',
-              function:'aggregateBycompany'
+              // function:'aggregateBycompany'
             }]
           },
           timeUnit:  {
@@ -150,12 +138,12 @@ export const statsConfigurations = [
     profile: 'company',
     views: [
       {
-        type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
+        source: "tracks",
         dataLevel: [
           {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
             value: "company",
-            api: "getCompanyStats",
+            // api: "getCompanyStats",
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value:  'NONE'
@@ -163,46 +151,38 @@ export const statsConfigurations = [
           },
           {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
-            value: "locations",
-            api: "getLocationsStats",
+            value: "location",
+            // api: "getLocationsStats",
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
-              function:''
+              // function:''
             }
             ,{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.LOCATIONS,
               value: 'LOCATIONS',
-              function:'aggregateByLocation'
+              // function:'aggregateByLocation'
             }
             ]
           },
           {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES,
-            value: "employees",
-            api: "getEmployeesStats",
+            value: "employee",
+            // api: "getEmployeesStats",
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
-              function:''
+              // function:''
             },{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES,
               value: 'EMPLOYEES',
-              function:'aggregateByemployee'
+              // function:'aggregateByemployee'
             }]
           }
         ],
         dataColumns: [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.N_COUNTING_TRAVEL,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_COUNTING_POINTS,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DISTANCE,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_DURATION,
-          //added
           VARIABLES.STATS.VIEWS.DATACOLUMNS.DISTANCE,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.DURATION,
         ],
@@ -257,27 +237,27 @@ export const statsConfigurations = [
         ],
         
         default: {
+          source: "tracks",
           dataColumns: [
-            // VARIABLES.STATS.VIEWS.DATACOLUMNS.COUNTING_POINTS,
             VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
             ],
           puntualAggregationSelected:{
             label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
             value: 'NONE',
-            function:''
+            // function:''
           },
           dataLevel: {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.EMPLOYEES,
-            value: "employees",
-            api: "getEmployeesStats",
+            value: "employee",
+            // api: "getEmployeesStats",
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
-              function:''
+              // function:''
             },{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.EMPLOYEES,
               value: 'EMPLOYEES',
-              function:'aggregateByemployee'
+              // function:'aggregateByemployee'
             }]
           },
           timeUnit:  {
@@ -305,12 +285,12 @@ export const statsConfigurations = [
     profile: 'company',
     views: [
       {
-        type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
+        source: "tracks",
         dataLevel: [
           {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
             value: "company",
-            api: "getCompanyStats",
+            // api: "getCompanyStats",
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value:  'NONE'
@@ -318,16 +298,16 @@ export const statsConfigurations = [
           },
           {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
-            value: "locations",
-            api: "getLocationsStats",
+            value: "location",
+            // api: "getLocationsStats",
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value: 'NONE',
-              function:''
+              // function:''
             },{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.LOCATIONS,
               value: 'LOCATIONS',
-              function:'aggregateByLocation'
+              // function:'aggregateByLocation'
             }]
           }
         ],
@@ -335,9 +315,6 @@ export const statsConfigurations = [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
-          // VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_CO2_SAVED,
         ],
         timeUnit: [
           {
@@ -380,6 +357,7 @@ export const statsConfigurations = [
         ],
         
         default: {
+          source: "tracks",
           dataColumns: [
             VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
             VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
@@ -389,12 +367,12 @@ export const statsConfigurations = [
           puntualAggregationSelected:{
             label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
             value: 'NONE',
-            function:''
+            // function:''
           },
           dataLevel: {
             label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
             value: "company",
-            api: "getCompanyStats",
+            // api: "getCompanyStats",
             puntualAggregation: [{
               label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
               value:  'NONE'
@@ -413,6 +391,116 @@ export const statsConfigurations = [
       }
     },
 
+    ],
+  },
+    /*
+  / Configurazione - Utenti e registrazione
+  / Specifica per il COMPANY ADMIN -> Amministratore Aziendale
+  */
+  {
+    id: 2,
+    name: VARIABLES.STATS.NAME.EMPLOYEES_PARTECIPATION,
+    profile: 'global',
+    views: [
+      {
+        source: "employee",
+        dataLevel: [
+          {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+            value: "company",
+            // api: "getCompanyStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value:  'NONE'
+            }],
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
+            value: "location",
+            // api: "getLocationsStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value: 'NONE',
+              // function:''
+            },{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.LOCATIONS,
+              value: 'LOCATIONS',
+              // function:'aggregateByLocation'
+            }]
+          }
+        ],
+        dataColumns: [
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.REGISTERED_EMPLOYEES,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.SUBSCRIBED_EMPLOYEES,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_EMPLOYEES,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_SUBSCRIBED_EMPLOYEES,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.INACTIVE_SUBSCRIBED_EMPLOYEES,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.NOT_SUBSCRIBED_EMPLOYEES,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.EMPLOYEES_PARTECIPATION
+        ],
+        timeUnit: [
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+            value: "month",
+            apiField: "month"
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.YEAR,
+            value: "year",
+            apiField: "year"
+          },          {
+            label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
+            value: "campaign",
+            apiField: "total"
+          }
+
+        ],
+        timePeriod: [
+          {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+            value: "ALL",
+            apiField: ""
+          },
+          {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC,
+            value: "SPECIFIC",
+            apiField: "month"
+          },
+        ],
+        
+        default: {
+          source: "employee",
+          dataColumns: [
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.REGISTERED_EMPLOYEES,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.SUBSCRIBED_EMPLOYEES,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_EMPLOYEES,  
+          ],
+          puntualAggregationSelected:{
+            label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+            value: 'NONE',
+            // function:''
+          },
+          dataLevel: {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+            value: "company",
+            // api: "getCompanyStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value:  'NONE'
+            }],
+          },
+          timeUnit:  {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+            value: "month",
+            apiField: "month"
+          },
+          timePeriod: {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+            value: "ALL",
+            apiField: ""
+          },
+      }
+    },
     ],
   }
 ];

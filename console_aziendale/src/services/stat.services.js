@@ -93,7 +93,7 @@ function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
  * @param {*} csv
  * @returns 
  */
-function callStatsAPI(
+function callTrackStatsAPI(
   campaignId, 
   companyId, 
   location, 
@@ -173,6 +173,91 @@ function callStatsAPI(
 }
 
 /**
+ * Call API with filters, aggregations, and fields. Convert data to flat representation with mode fields exploded
+ * @param {*} campaignId 
+ * @param {*} companyId 
+ * @param {*} location 
+ * @param {*} means
+ * @param {*} employeeId 
+ * @param {*} way
+ * @param {*} timeGroupBy 
+ * @param {*} dataGroupBy 
+ * @param {*} from 
+ * @param {*} to 
+ * @param {*} fields 
+ * @param {*} groupByMean 
+ * @param {*} all 
+ * @param {*} csv
+ * @returns 
+ */
+function callEmployeeStatsAPI(
+  campaignId, 
+  companyId, 
+  location, 
+  timeGroupBy, 
+  dataGroupBy, 
+  from, 
+  to, 
+  csv) {
+  let params = {
+    ...(companyId ? { companyId } : {}),
+    ...(location ? { location } : {}),
+    ...(from ? { from } : {}),
+    ...(to ? { to } : {}),
+    ...(timeGroupBy ? { timeGroupBy } : {}),
+    ...(dataGroupBy ? { dataGroupBy } : {}),
+  }
+
+  if (csv) {
+    return axios
+    .get(
+      process.env.VUE_APP_BASE_URL +
+      process.env.VUE_APP_CAMPAIGNS_API +
+      "/" +
+      campaignId +
+      "/stats/employee/csv",
+      { params }
+    )
+    .then(res => {
+      if (res && res.data) return Promise.resolve(res.data);
+      else return Promise.reject(null);
+    })  
+    .catch(()=>{
+      Promise.resolve(null);
+    })
+  }
+
+  return axios
+  .get(
+    process.env.VUE_APP_BASE_URL +
+    process.env.VUE_APP_CAMPAIGNS_API +
+    "/" +
+    campaignId +
+    "/stats/employee",
+    { params }
+  )
+  .then(res => {
+    let map = {};
+    res.data.forEach(d => {
+      d.name = d.dataGroupName || d.dataGroup;
+      let key = d.name || '';
+      if (!map[key]) {
+        map[key] = [];
+      }
+      map[key].push(d);
+    });
+    let array = Object.keys(map).map(id => {
+      return {key: id, values: map[id]};
+    });
+    array.sort((a,b) => a.key.localeCompare(b.key));
+    return array;
+  })
+  .catch(()=>{
+    Promise.resolve(null);
+  })
+}
+
+/**
  * Convert the data structure received from service to a flat object with mode fields exploded
  * @param {*} ds 
  * @returns 
@@ -191,6 +276,7 @@ function flattenStat(ds, timeGroupBy, fields, means, groupByMean) {
   }
   return res;
 }
+
 
 function mapTimeLabel(timeGroupBy, timeGroup) {
   if (timeGroupBy === 'dayOfWeek') {
@@ -222,222 +308,56 @@ function getFields(configuration) {
   .join(',');
 }
 
-
-function getAllLocationsStats(configuration) {
-  console.log('getAllLocationsStats', configuration);
-  return callStatsAPI(
-    configuration.campaign.id, // campaignId
-    configuration.company.id,  // companyId
-    null,                      // location
-    configuration.means,       // means
-    null,                      // employeeId
-    configuration.direction,   // way
-    configuration.timeUnit.apiField, // timeGroupBy
-    'location',                      // dataGroupBy
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null, // from
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,     // to 
-    getFields(configuration),      // fields
-    configuration.groupByMean,     // groupByMean
-    true,                          // all
-    configuration.csv              // csv    
-    );
-}
-
-function getAllEmployeesStats(configuration) {
-  console.log('getAllEmployeesStat', configuration);
-  return callStatsAPI(
-    configuration.campaign.id, // campaignId
-    configuration.company.id,  // companyId
-    null,                      // location
-    configuration.means,       // means
-    null,                      // employeeId
-    configuration.direction,   // way
-    configuration.timeUnit.apiField, // timeGroupBy
-    'employee',                      // dataGroupBy
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null, // from
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,     // to
-    getFields(configuration),   // fields
-    configuration.groupByMean,     // groupByMean
-    true,                          // all
-    configuration.csv              // csv    
-    );
-}
-
-function getCompanyStats(configuration) {
-  console.log('getCompanyStats', configuration);
-  return callStatsAPI(
-    configuration.campaign.id, // campaignId
-    configuration.company.id,  // companyId
-    null,                      // location
-    configuration.means,       // means
-    null,                      // employeeId
-    configuration.direction,   // way
-    configuration.timeUnit.apiField, // timeGroupBy
-    'company',                      // dataGroupBy
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null, // from
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,     // to
-    getFields(configuration),   // fields
-    configuration.groupByMean,     // groupByMean
-    false,                          // all
-    configuration.csv              // csv 
-    );
-
-}
-
-function aggregateByEmployeeStat(configuration) {
-  console.log('aggregateByEmployeeStat', configuration);
-  return callStatsAPI(
-    configuration.campaign.id, // campaignId
-    configuration.company.id,  // companyId
-    null,                      // location
-    configuration.means,       // means
-    configuration.puntualAggregationItems.map(i => i.id).join(','), 
-    configuration.direction,   // way
-    configuration.timeUnit.apiField,  // timeGroupBy
-    'employee', // dataGroupBy
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null, // from
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,  
-    getFields(configuration), // fields
-    configuration.groupByMean,     // groupByMean
-    false,                    // all
-    configuration.csv         // csv
-  );  
-}
-function aggregateByLocationStat(configuration) {
-  console.log('aggregateByLocationStat', configuration);
-  return callStatsAPI(
-    configuration.campaign.id, // campaignId
-    configuration.company.id,  // companyId
-    null,                      // location
-    configuration.means,       // means
-    null,                      // employeeId
-    configuration.direction,   // way
-    configuration.timeUnit.apiField, // timeGroupBy
-    'location',                      // dataGroupBy
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null, // from
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,     // to 
-    getFields(configuration),      // fields
-    configuration.groupByMean,     // groupByMean
-    true,                          // all
-    configuration.csv              // csv    
-  );  
-}
-
-function getCampaignCompanyStats(configuration) {
-  console.log('getCampaignCompanyStats', configuration);
-  if (!configuration.campaign.id) {
-    return Promise.resolve([]);
-  }
-
-  return callStatsAPI(
-    configuration.campaign.id, 
-    null,
-    null,  
-    configuration.means,       // means
-    null, 
-    configuration.direction, 
-    configuration.timeUnit.apiField, 
-    'company', 
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-    getFields(configuration),
-    configuration.groupByMean,
-    true,
-    configuration.csv
-    );
-}
-
-function getCampaignStats(configuration) {
-  console.log('getCampaignStats', configuration);
-  if (!configuration.campaign.id) {
-    return Promise.resolve([]);
-  }
-  return callStatsAPI(
-    configuration.campaign.id, 
-    null, 
-    null, 
-    configuration.means,       // means
-    null,
-    configuration.direction, 
-    configuration.timeUnit.apiField, 
-    'campaign', 
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-    configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-    getFields(configuration),
-    configuration.groupByMean,
-    false,
-    configuration.csv
-    );
-}
-
-function aggregateCompanyStat(configuration) {
-  let arrayRequest = [];
-  for (let companyId = 0; companyId < configuration.puntualAggregationItems.length; companyId++) {
-    arrayRequest.push(callStatsAPI(
-      configuration.campaign.id, 
-      configuration.puntualAggregationItems[companyId].id, 
-      null, 
-      configuration.means,       // means
-      null,
-      configuration.direction, 
-      configuration.timeUnit.apiField, 
-      'company', 
-      configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-      configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-      getFields(configuration),
-      configuration.groupByMean,
-      true,
-      configuration.csv
-    ));
-  }
-  return axios.all(arrayRequest).then(responses => {
-    let res = [];
-    for (let companyId = 0; companyId < configuration.puntualAggregationItems.length; companyId++) {
-      if (responses[companyId].length === 0) {
-        res.push({key: configuration.puntualAggregationItems[companyId].name, values:[]});
-      } else {
-        res = res.concat(responses[companyId]);
-      }
-    }
-    return res;
-  }).catch(errors => {
-    console.log(errors)
-    return Promise.reject(errors);
-
-  })
-}
-
 function getStat(configuration) {
-  //check configuration and ask the right stat
-  let apiToCall = configuration.dataLevel.api
-  if (configuration.puntualAggregationSelected && configuration.puntualAggregationSelected.function)
-    apiToCall = configuration.puntualAggregationSelected.function
-  console.log('apiToCall', apiToCall)
-  switch (apiToCall) {
-    //admin that check all companies of a campaign
-    case "getCampaignCompanyStats":
-      return getCampaignCompanyStats(configuration);
-    case "getCampaignStats":
-      return getCampaignStats(configuration);
-    case "aggregateBycompany":
-      return aggregateCompanyStat(configuration);
-    case "getEmployeesStats":
-      return getAllEmployeesStats(configuration);
-    case "aggregateByemployee":
-      return aggregateByEmployeeStat(configuration);
-    case "aggregateByLocation":
-      return aggregateByLocationStat(configuration).then(res => {
-        const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(l => l.id) : [];
-        if (arr.length == 0) return res;
-        return res.filter(l => arr.indexOf(l.key) >= 0);
-      });
-    case "getLocationsStats":
-      return getAllLocationsStats(configuration);
-    case "getCompanyStats":
-      return getCompanyStats(configuration);
-    default:
-      break;
+  if (!configuration.campaign.id) {
+    return Promise.resolve([]);
   }
+  const agg = configuration.dataLevel.value;
+
+  if (configuration.source === 'tracks') {
+    return callTrackStatsAPI(
+        configuration.campaign.id, 
+        null, // companyId is null, filter later
+        null, // locationId is null, filter later
+        configuration.means,       // means
+        agg === 'employee' ? configuration.puntualAggregationItems.map(i => i.id).join(',') : null, // employees
+        configuration.direction, 
+        configuration.timeUnit.apiField, 
+        agg, 
+        configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+        configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+        getFields(configuration),
+        configuration.groupByMean,
+        true, // TODO - handle backend side
+        configuration.csv
+      ).then(res => {
+        if (agg === 'location' || agg === 'company') {
+          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
+          if (arr.length == 0) return res;
+          return res.filter(e => arr.indexOf(e.key) >= 0);
+        }
+        return res;
+      });
+  } else if (configuration.source === 'employee') {
+      return callEmployeeStatsAPI(
+        configuration.campaign.id, 
+        null, // companyId is null, filter later
+        null, // locationId is null, filter later
+        configuration.timeUnit.apiField, 
+        agg, 
+        configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+        configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+        configuration.csv
+      ).then(res => {
+        if (agg === 'company') {
+          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
+          if (arr.length == 0) return res;
+          return res.filter(e => arr.indexOf(e.key) >= 0);
+        }
+        return res;
+      });
+  }
+  
 }
 function getCsv(configuration) {
   configuration.csv = true;

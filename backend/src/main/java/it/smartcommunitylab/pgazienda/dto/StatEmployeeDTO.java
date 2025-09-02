@@ -1,7 +1,7 @@
 package it.smartcommunitylab.pgazienda.dto;
 
 public class StatEmployeeDTO {
-	private String campaign, timeGroup, dataGroup;
+	private String campaign, timeGroup, dataGroup, dataGroupName;
 	private int registration, activeUsers, dropout;
 	
 	public String getCampaign() {
@@ -52,5 +52,12 @@ public class StatEmployeeDTO {
 	public void addActiveUsers() {
 		this.activeUsers += 1;
 	}
+	public String getDataGroupName() {
+		return dataGroupName;
+	}
+	public void setDataGroupName(String dataGroupName) {
+		this.dataGroupName = dataGroupName;
+	}
+
 	
 }

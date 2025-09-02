@@ -161,7 +161,7 @@
                 </div>
           </v-expansion-panel-content>
         </v-expansion-panel>
-        <v-expansion-panel>
+        <v-expansion-panel v-if="view.source == 'tracks'">
           <v-expansion-panel-header>Mezzi</v-expansion-panel-header>
           <v-expansion-panel-content>
               <v-autocomplete
@@ -188,12 +188,12 @@
         <v-expansion-panel>
           <v-expansion-panel-header>Colonne dati</v-expansion-panel-header>
           <v-expansion-panel-content>
-                <v-checkbox v-for="dc in view.dataColumns" :key="dc.value"
+                <v-checkbox v-for="dc in view.dataColumns.filter(dc => dc.source == view.source)" :key="dc.value"
                 v-model="localSelection.dataColumns" :value="dc"
-                :label="dc.label" hide-details
+                :label="dc.label" hide-details 
               ></v-checkbox>
               <br>
-              <v-switch
+              <v-switch v-if="view.source == 'tracks'"
                 v-model="localSelection.groupByMean"
                 label="Dividere per mezzo"
                 hide-details
@@ -310,6 +310,7 @@ export default {
       // puntualAggregationValue: "NONE",
       //timePeriodValue: null,
       localSelection: {
+        source: null,
         dataLevel: null,
         timeUnit: null,
         dataColumns: [],
@@ -368,12 +369,9 @@ export default {
       let view = null;
       if (
         this.getConfigurationById &&
-        this.getConfigurationById.views &&
-        this.activeViewType!=null
+        this.getConfigurationById.views
       ) {
-        view = this.getConfigurationById.views.find(
-          (element) => element.type === this.activeViewType.item
-        );
+        view = this.getConfigurationById.views[0];
       }
 
       return view;
@@ -560,11 +558,14 @@ export default {
       if (this.baseSelection && this.currentCampaign) {
         //init with view configuration
 
+        console.log('baseSelection', this.baseSelection);
+
         this.localSelection.company = this.baseSelection.company
           ? this.baseSelection.company
           : this.actualCompany
           ? this.actualCompany.item
           : undefined;
+        this.localSelection.source = this.baseSelection.source;
         this.localSelection.campaign = this.currentCampaign.item;
         this.localSelection.dataLevel = this.baseSelection.dataLevel;
         this.localSelection.timeUnit = this.baseSelection.timeUnit;
