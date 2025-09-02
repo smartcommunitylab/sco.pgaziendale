@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,7 @@ import com.opencsv.CSVWriter;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
+import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Constants;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
@@ -159,10 +161,56 @@ public class StatEmployeeService {
 			}
 		};
 		List<StatEmployeeDTO>  result = new ArrayList<StatEmployeeDTO>(mapStats.values());
+		updateDateGroupNames(result, dataGroupBy, campaignId);
 		Collections.sort(result, comparator);
 		return result;
 	}
 	
+/**
+	 * Fill the dataGroupName field of the StatTrackDTO objects in the result list 
+	 * by replacing the companyId or employeeKey or locationKey 
+	 * with the corresponding name
+	 * @param result the list of StatTrackDTO objects
+	 * @param dataGroupBy the type of group
+	 * @param campaignId the campaign id
+	 */
+	private void updateDateGroupNames(List<StatEmployeeDTO> result, GROUP_BY_DATA dataGroupBy, String campaignId) {
+		Map<String, String> map = new HashMap<>();
+		switch (dataGroupBy) {
+			case company:
+				Set<String> allCompanies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup()).collect(Collectors.toSet());
+				for (String companyId : allCompanies) {
+					Company company = companyRepository.findById(companyId).orElse(null);
+					if (company != null) {
+						map.put(companyId, company.getName());
+					}
+				}
+				break;
+			case employee:
+				List<String> companies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
+				if (companies.size() > 0) {
+					map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));					
+				}
+			case location:
+				Set<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
+				for (String companyId : companyIds) {
+					Company company = companyRepository.findById(companyId).orElse(null);
+					if (company != null) {
+						List<CompanyLocation> locations = company.getLocations();
+						for (CompanyLocation location : locations) {
+							map.put(companyId + StatTrack.KEY_DIV + location.getId(), location.getName());
+						}
+					}
+				}
+			default:
+				break;
+		}
+		logger.info("Map: {}", map);
+		for (StatEmployeeDTO s : result) {
+			s.setDataGroupName(map.getOrDefault(s.getDataGroup(), s.getDataGroup()));			
+		}
+	}
+
 	private void fillEmptyDate(String campaignId, Map<String, StatEmployeeDTO>mapStats, 
 			List<String> timeGroupList, List<String> dataGroupList) {
 		if(dataGroupList.size() == 0) {

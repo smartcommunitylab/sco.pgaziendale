@@ -57,21 +57,15 @@ function setMapLocations(array) {
 }
 async function fillTheViewWithValues(values, view, selection, currentCampaign) {
   let viewData = {};
-  switch (view.item) {
-    case 'Tabella':
-      viewData.headers = getHeadersTable(values, selection, currentCampaign)
-      viewData.subheaders = getSubHeaders(viewData.headers, selection)
-      viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
-      for (let i = 0; i < viewData.subheaders.length; i++) {
-        let s = viewData.subheaders[i];
-        s.class = (i == 0 || (i % viewData.headerNumber == 0)) ? 'cell-agg': '';
-      }
-      viewData.data = await getData(viewData.headers, selection, values)
-      break;
-
-    default:
-      break;
+  viewData.headers = getHeadersTable(values, selection, currentCampaign)
+  viewData.subheaders = getSubHeaders(viewData.headers, selection)
+  viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
+  for (let i = 0; i < viewData.subheaders.length; i++) {
+    let s = viewData.subheaders[i];
+    s.class = (i == 0 || (i % viewData.headerNumber == 0)) ? 'cell-agg': '';
   }
+  viewData.data = await getData(viewData.headers, selection, values)
+
   return viewData;
 }
 
@@ -186,7 +180,7 @@ async function getData(headers, selection, values) {
         //set values for that row for every dataColumns
         for (let dataColumnsIndex = 0; dataColumnsIndex < selection.dataColumns.length; dataColumnsIndex++) {
           let dc = selection.dataColumns[dataColumnsIndex];
-          row[dc.value + headers[columnIndex]] = (found ? parseInt(found[dc.apiField]) : 0)
+          row[dc.value + headers[columnIndex]] = (found ? parseInt(found[dc.value]) : 0)
           if (selection.groupByMean) {
             selection.means.forEach(m => {
               row[m + '_mean_' + dc.value + headers[columnIndex]] = (found ? parseInt(found[m+ '_mean_'+dc.value ]) : 0)

@@ -82,7 +82,7 @@ Visualization:
         return elems;
       },
       createChart(dc, mean) {
-        const chart = {id: dc.apiField + (mean ? '_' + mean : '')};
+        const chart = {id: dc.value + (mean ? '_' + mean : '')};
         switch (this.configuration.timeUnit.apiField) {
           case "day":
           case "week":
@@ -102,7 +102,7 @@ Visualization:
         if (mean) {
           chart.title = meanLabel(dc.meanLabel, mean);
         }    
-        const prefix = mean ? ( mean  + '_mean_' + dc.apiField) : dc.apiField;
+        const prefix = mean ? ( mean  + '_mean_' + dc.value) : dc.value;
         if (chart.type === 'pie') {
           chart.data = [{
             labels: this.dataChartData.data.map(row => row.name),
