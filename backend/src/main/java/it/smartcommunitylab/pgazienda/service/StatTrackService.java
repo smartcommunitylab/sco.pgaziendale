@@ -15,12 +15,15 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Log;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +46,8 @@ import it.smartcommunitylab.pgazienda.util.DateUtils;
 
 @Service
 public class StatTrackService {
+
+	private static final Logger logger = LoggerFactory.getLogger(StatTrackService.class);
 
 	@Autowired
     private CompanyRepository companyRepository;
@@ -167,13 +172,25 @@ public class StatTrackService {
 		Map<String, String> map = new HashMap<>();
 		switch (dataGroupBy) {
 			case company:
-				map = companyRepository.findByCampaign(campaignId).stream().collect(Collectors.toMap(Company::getId, Company::getName));
+				Set<String> allCompanies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup()).collect(Collectors.toSet());
+				for (String companyId : allCompanies) {
+					Company company = companyRepository.findById(companyId).orElse(null);
+					if (company != null) {
+						map.put(companyId, company.getName());
+					}
+				}
 				break;
 			case employee:
-				List<String> companies = result.stream().map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
-				map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));					
+				List<String> companies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
+				if (companies.size() > 0) {
+					try {
+						map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+					}					
+				}
 			case location:
-				List<String> companyIds = result.stream().map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
+				Set<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
 				for (String companyId : companyIds) {
 					Company company = companyRepository.findById(companyId).orElse(null);
 					if (company != null) {
@@ -186,6 +203,7 @@ public class StatTrackService {
 			default:
 				break;
 		}
+		logger.info("Map: {}", map);
 		for (StatTrackDTO s : result) {
 			s.setDataGroupName(map.getOrDefault(s.getDataGroup(), s.getDataGroup()));			
 		}

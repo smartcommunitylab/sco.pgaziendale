@@ -14,31 +14,21 @@ export const VARIABLES = {
       KM_COUNTED: "Punteggio Campagna",
     },
     VIEWS: {
-      TYPE: {
-        TABLE: "Tabella",
-        HORIZONTAL_STACKED_BARS: "Grafico a Barre Orizzontali",
-        LINE_CHART: "Grafico a Linee",
-        BAR_CHART: "Grafico a Barre",
-      },
       DATACOLUMNS: {
-        REGISTERED_EMPLOYEES: { label: "dipendenti registrati", value: "dipendenti registrati" },
-        SUBSCRIBED_EMPLOYEES: { label: "dipendenti iscritti", value: "dipendenti iscritti" },
-        ACTIVE_EMPLOYEES: { label: "dipendenti attivi", value: "dipendenti attivi" },
-        ACTIVE_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti iscritti attivi", value: "% dipendenti iscritti attivi" },
-        INACTIVE_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti iscritti inattivi", value: "% dipendenti iscritti inattivi" },
-        NOT_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti non iscritti", value: "% dipendenti non iscritti" },
-        PERCENTAGE_EMPLOYEES: { label: "% dipendenti", value: "% dipendenti" },
+        REGISTERED_EMPLOYEES: { label: "Dipendenti registrati", value: "registration", source: 'employee' },
+        ACTIVE_EMPLOYEES: { label: "Dipendenti attivi", value: "activeUsers", source: 'employee' },
+        UNSUBSCRIBED_EMPLOYEES: { label: "Dipendenti rimossi", value: "dropout", source: 'employee' },
         CO2_SAVED: {
           label: "kg CO2 risparmiata",
           meanLabel: "CO2 per mezzo (_mezzo_)",
           value: "co2",
-          apiField: "co2"
+          source: "tracks"
         }, 
         POINTS: {
           label: "Punti",
           meanLabel: "Punti per mezzo (_mezzo_)",
           value: "score",
-          apiField: "score"
+          source: "tracks"
         },
         // COUNTING_POINTS: {
         //   label:  "Punti utili", 
@@ -54,19 +44,19 @@ export const VARIABLES = {
           label: "Viaggi totali",
           meanLabel: "Tratte per mezzo (_mezzo_)",
           value: "track",
-          apiField: "track"
+          source: "tracks"
         },
         DISTANCE: {
           label: "Distanca totale (km)",
           meanLabel: "KM per mezzo (_mezzo_)",
           value: "distance",
-          apiField: "distance"
+          source: "tracks"
         },
         DURATION: {
           label: "Durata totale (ore)",
           meanLabel: "Ore per mezzo (_mezzo_)",
           value: "duration",
-          apiField: "duration"
+          source: "tracks"
         },
       },
       DATALEVEL: {
