@@ -23,7 +23,6 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Log;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
@@ -122,6 +121,9 @@ public class StatTrackService {
 		}
 		if (fields.contains(STAT_TRACK_FIELD.score)) {
 			groupByOperation = groupByOperation.sum("score").as("score");
+		}
+		if (fields.contains(STAT_TRACK_FIELD.limitedScore)) {
+			groupByOperation = groupByOperation.sum("score").as("limitedScore");
 		}
 		if (fields.contains(STAT_TRACK_FIELD.track)) {
 			groupByOperation = groupByOperation.count().as("track");
@@ -377,6 +379,9 @@ public class StatTrackService {
 			switch (f) {
 			case score:
 				row.add(String.valueOf(stat.getScore()));
+				break;
+			case limitedScore:
+				row.add(String.valueOf(stat.getLimitedScore()));
 				break;
 			case track:
 				row.add(String.valueOf(stat.getTrack()));

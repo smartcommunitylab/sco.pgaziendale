@@ -54,7 +54,7 @@ public class StatTrackDTO {
 	}
 
 	public static class StatValue {
-		private Double score, co2, distance;
+		private Double score, limitedScore, co2, distance;
 		private Long duration;
 		private Integer track;
 		
@@ -63,6 +63,12 @@ public class StatTrackDTO {
 		}
 		public void setScore(Double score) {
 			this.score = score;
+		}
+		public Double getLimitedScore() {
+			return limitedScore;
+		}
+		public void setLimitedScore(Double limitedScore) {
+			this.limitedScore = limitedScore;
 		}
 		public Double getCo2() {
 			return co2;
@@ -130,6 +136,7 @@ public class StatTrackDTO {
 			
 			StatValue stats = new StatValue(); 
 			if(doc.containsKey("score")) stats.setScore(doc.getDouble("score"));
+			if(doc.containsKey("limitedScore")) stats.setLimitedScore(doc.getDouble("limitedScore"));
 			if(doc.containsKey("co2")) stats.setCo2(doc.getDouble("co2"));
 			if(doc.containsKey("distance")) stats.setDistance(doc.getDouble("distance"));
 			if(doc.containsKey("duration")) stats.setDuration(doc.getLong("duration"));
@@ -147,6 +154,7 @@ public class StatTrackDTO {
 				String mode = idMap.getString("mode");
 				StatValue stats = new StatValue(); 
 				if(doc.containsKey("score")) stats.setScore(doc.getDouble("score"));
+				if(doc.containsKey("limitedScore")) stats.setLimitedScore(doc.getDouble("limitedScore"));
 				if(doc.containsKey("co2")) stats.setCo2(doc.getDouble("co2"));
 				if(doc.containsKey("distance")) stats.setDistance(doc.getDouble("distance"));
 				if(doc.containsKey("duration")) stats.setDuration(doc.getLong("duration"));
@@ -167,6 +175,12 @@ public class StatTrackDTO {
 						stats.setScore(sv.getScore());
 					else
 						stats.setScore(stats.getScore() + sv.getScore());
+				}
+				if(sv.getLimitedScore() != null) {
+					if (stats.getLimitedScore() == null) 
+						stats.setLimitedScore(sv.getLimitedScore());
+					else
+						stats.setLimitedScore(stats.getLimitedScore() + sv.getLimitedScore());
 				}
 				if(sv.getCo2() != null) {
 					if (stats.getCo2() == null) 

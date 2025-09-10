@@ -93,6 +93,9 @@ public class StatMultimodalService {
 		if (fields.contains(STAT_TRACK_FIELD.score)) {
 			groupByOperation = groupByOperation.sum("score").as("score");
 		}
+		if (fields.contains(STAT_TRACK_FIELD.limitedScore)) {
+			groupByOperation = groupByOperation.sum("score").as("limitedScore");
+		}
 		if (fields.contains(STAT_TRACK_FIELD.track)) {
 			groupByOperation = groupByOperation.count().as("track");
 		}
@@ -312,6 +315,9 @@ public class StatMultimodalService {
 			switch (f) {
 			case score:
 				row.add(String.valueOf(stat.getScore()));
+				break;
+			case limitedScore:
+				row.add(String.valueOf(stat.getLimitedScore()));
 				break;
 			case track:
 				row.add(String.valueOf(stat.getTrack()));
