@@ -94,7 +94,7 @@ public class StatMultimodalService {
 			groupByOperation = groupByOperation.sum("score").as("score");
 		}
 		if (fields.contains(STAT_TRACK_FIELD.limitedScore)) {
-			groupByOperation = groupByOperation.sum("score").as("limitedScore");
+			groupByOperation = groupByOperation.sum("limitedScore").as("limitedScore");
 		}
 		if (fields.contains(STAT_TRACK_FIELD.track)) {
 			groupByOperation = groupByOperation.count().as("track");
