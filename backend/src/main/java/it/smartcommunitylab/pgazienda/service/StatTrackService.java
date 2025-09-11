@@ -31,6 +31,7 @@ import com.opencsv.CSVWriter;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
+import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
@@ -69,6 +70,7 @@ public class StatTrackService {
 			GROUP_BY_DATA dataGroupBy,
 			List<STAT_TRACK_FIELD> fields,
 			boolean groupByMean,
+			boolean allDataGroupBy,
 			LocalDate from, 
 			LocalDate to) throws InconsistentDataException {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
@@ -149,6 +151,12 @@ public class StatTrackService {
 		} else {
 			populateStatsByMean(aggregationResults.getMappedResults(), group, mapStats, dataGroupList,  dataGroupBy, timeGroupBy, campaignId);
 		}
+		//add all poassibly dataGroupBy value if requested
+		if((allDataGroupBy && GROUP_BY_DATA.company.equals(dataGroupBy)) || 
+			(allDataGroupBy && GROUP_BY_DATA.location.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId)) || 
+			(allDataGroupBy && GROUP_BY_DATA.employee.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId))) {
+			fillAllDataGroup(campaignId, companyId, dataGroupBy, dataGroupList);
+		}
 		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList);
 		Comparator<StatTrackDTO>comparator = new Comparator<StatTrackDTO>() {
 			@Override
@@ -160,6 +168,36 @@ public class StatTrackService {
 		updateDateGroupNames(result, dataGroupBy, campaignId);
 		Collections.sort(result, comparator);
 		return result;		
+	}
+
+	private void fillAllDataGroup(String campaignId, String companyId, GROUP_BY_DATA dataGroupBy, List<String> dataGroupList) {
+		if (GROUP_BY_DATA.company.equals(dataGroupBy)) {
+			//add all companies subscribed to the campaign
+			companyRepository.findByCampaign(campaignId).forEach(c -> {
+				if(!dataGroupList.contains(c.getId())) {
+					dataGroupList.add(c.getId());
+				}
+			});
+		} else if (GROUP_BY_DATA.location.equals(dataGroupBy)) {
+			Company company = companyRepository.findById(companyId).orElse(null);
+			if (company != null) {
+				List<CompanyLocation> locations = company.getLocations();
+				for (CompanyLocation location : locations) {
+					String locationKey = companyId + StatTrack.KEY_DIV + location.getId();
+					if(!dataGroupList.contains(locationKey)) {
+						dataGroupList.add(locationKey);
+					}
+				}
+			}
+		} else if (GROUP_BY_DATA.employee.equals(dataGroupBy)) {
+			List<Employee> employees = employeeRepository.findByCompanyId(companyId);
+			for (Employee employee : employees) {
+				String employeeKey = employee.getCompanyId() + StatTrack.KEY_DIV + employee.getCode();
+				if(!dataGroupList.contains(employeeKey)) {
+					dataGroupList.add(employeeKey);
+				}
+			}
+		}		
 	}
 	
 	/**
@@ -337,9 +375,10 @@ public class StatTrackService {
 			GROUP_BY_DATA dataGroupBy,
 			List<STAT_TRACK_FIELD> fields, 
 			boolean groupByMean, 
+			boolean allDataGroupBy,
 			LocalDate fromDate, 
 			LocalDate toDate) throws InconsistentDataException, IOException {
-		List<StatTrackDTO> trackStats = getTrackStats(campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, fromDate, toDate);
+		List<StatTrackDTO> trackStats = getTrackStats(campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		String[] headers = getHeaders(timeGroupBy, dataGroupBy, groupByMean, fields);
 		csvWriter.writeNext(headers);
