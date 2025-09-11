@@ -77,6 +77,7 @@ public class StatMultimodalResource {
 		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
 		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
+		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
 		@RequestParam(required=false) String from, 
 		@RequestParam(required=false) String to) throws IOException, InconsistentDataException	{
     	/*if(!userService.isInCampaignRole(campaignId)) {
@@ -90,7 +91,7 @@ public class StatMultimodalResource {
         log.debug("REST request to get statistics");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
-    	return ResponseEntity.ok(dataService.getMultimodalStats(campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, fromDate, toDate));
+    	return ResponseEntity.ok(dataService.getMultimodalStats(campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, allDataGroupBy, fromDate, toDate));
 	}
     
     @GetMapping("/campaigns/{campaignId}/stats/multimodal/csv")
@@ -101,6 +102,7 @@ public class StatMultimodalResource {
     		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
     		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
     		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
+			@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
     		@RequestParam(required=false) String from, 
     		@RequestParam(required=false) String to,
     		HttpServletResponse response) throws IOException, InconsistentDataException { 
@@ -114,7 +116,7 @@ public class StatMultimodalResource {
 		}*/
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);    	
-    	dataService.getMultimodalStatsCsv(response.getWriter(), campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, fromDate, toDate);
+    	dataService.getMultimodalStatsCsv(response.getWriter(), campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, allDataGroupBy, fromDate, toDate);
     }
 
 }
