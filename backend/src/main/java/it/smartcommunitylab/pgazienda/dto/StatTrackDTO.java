@@ -56,7 +56,7 @@ public class StatTrackDTO {
 	public static class StatValue {
 		private Double score, limitedScore, co2, distance;
 		private Long duration;
-		private Integer track;
+		private Integer track, tripCount, limitedTripCount;
 		
 		public Double getScore() {
 			return score;
@@ -87,6 +87,18 @@ public class StatTrackDTO {
 		}
 		public void setDuration(Long duration) {
 			this.duration = duration;
+		}
+		public Integer getTripCount() {
+			return tripCount;
+		}
+		public void setTripCount(Integer track) {
+			this.tripCount = track;
+		}
+		public Integer getLimitedTripCount() {
+			return limitedTripCount;
+		}
+		public void setLimitedTripCount(Integer limitedTrack) {
+			this.limitedTripCount = limitedTrack;
 		}
 		public Integer getTrack() {
 			return track;
@@ -125,6 +137,7 @@ public class StatTrackDTO {
 					dto.setTimeGroup(idMap.getString("year"));
 				else dto.setTimeGroup("total");
 			} else {
+				dto.setCampaign(doc.getString("_id"));
 				dto.setTimeGroup("total");
 			}
 			return this;
@@ -141,6 +154,8 @@ public class StatTrackDTO {
 			if(doc.containsKey("distance")) stats.setDistance(doc.getDouble("distance"));
 			if(doc.containsKey("duration")) stats.setDuration(doc.getLong("duration"));
 			if(doc.containsKey("track")) stats.setTrack(doc.getInteger("track"));
+			if(doc.containsKey("tripCount")) stats.setTripCount(doc.getInteger("tripCount"));
+			if(doc.containsKey("limitedTripCount")) stats.setLimitedTripCount(doc.getInteger("limitedTripCount"));
 			dto.setStats(stats);	
 			return this;
 		}
@@ -164,11 +179,15 @@ public class StatTrackDTO {
 			return this;
 		}
 		
-		public Builder updateMainStats() {
+		public Builder updateMainStats(Integer tripCount, Integer limitedTripCount) {
 			if(dto == null)
 				dto = new StatTrackDTO();
 			
-			StatValue stats = new StatValue(); 
+			StatValue stats = new StatValue();
+			if(tripCount != null)
+				stats.setTripCount(tripCount);
+			if(limitedTripCount != null)
+				stats.setLimitedTripCount(limitedTripCount); 
 			dto.getMeanStatMap().values().forEach(sv -> {
 				if(sv.getScore() != null) {
 					if (stats.getScore() == null) 
@@ -199,6 +218,18 @@ public class StatTrackDTO {
 						stats.setTrack(sv.getTrack());
 					else
 						stats.setTrack(stats.getTrack() + sv.getTrack());
+				}
+				if(sv.getTripCount() != null) {
+					if (stats.getTripCount() == null) 
+						stats.setTripCount(sv.getTripCount());
+					else
+						stats.setTripCount(stats.getTripCount() + sv.getTripCount());
+				}
+				if(sv.getLimitedTripCount() != null) {
+					if (stats.getLimitedTripCount() == null) 
+						stats.setLimitedTripCount(sv.getLimitedTripCount());
+					else
+						stats.setLimitedTripCount(stats.getLimitedTripCount() + sv.getLimitedTripCount());
 				}
 				if(sv.getDuration() != null) {
 					if (stats.getDuration() == null) 
