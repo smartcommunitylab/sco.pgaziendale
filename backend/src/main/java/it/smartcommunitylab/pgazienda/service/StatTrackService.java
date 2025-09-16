@@ -462,7 +462,10 @@ public class StatTrackService {
 			List<String> row = new ArrayList<>();
 			row.add(dto.getCampaign());
 			row.add(dto.getTimeGroup());
-			if(dto.getDataGroupName() != null) row.add(dto.getDataGroupName());			
+			if(dto.getDataGroup() != null) {
+				row.add(dto.getDataGroup());			
+				row.add(dto.getDataGroupName());			
+			}
 			row.addAll(getStatValue(dto.getStats(), fields));
 			result.add(row.toArray(new String[0]));
 		} else {
@@ -470,7 +473,10 @@ public class StatTrackService {
 				List<String> row = new ArrayList<>();
 				row.add(dto.getCampaign());
 				row.add(dto.getTimeGroup());
-				if(dto.getDataGroupName() != null) row.add(dto.getDataGroupName());			
+				if(dto.getDataGroup() != null) {
+					row.add(dto.getDataGroup());			
+					row.add(dto.getDataGroupName());			
+				}
 				row.add(mean);
 				row.addAll(getStatValue(dto.getMeanStatMap().get(mean), fields));
 				result.add(row.toArray(new String[0]));
@@ -490,7 +496,7 @@ public class StatTrackService {
 				row.add(String.valueOf(stat.getLimitedScore()));
 				break;
 			case track:
-				row.add(String.valueOf(stat.getTripCount()));
+				row.add(String.valueOf(stat.getTrack()));
 				break;
 			case co2:
 				row.add(String.valueOf(stat.getCo2()));
@@ -500,6 +506,12 @@ public class StatTrackService {
 				break;
 			case duration:
 				row.add(String.valueOf(stat.getDuration()));
+				break;
+			case tripCount:
+				row.add(String.valueOf(stat.getTripCount()));
+				break;
+			case limitedTripCount:
+				row.add(String.valueOf(stat.getLimitedTripCount()));
 				break;				
 			default:
 				break;
@@ -513,7 +525,10 @@ public class StatTrackService {
 		List<String>headers = new ArrayList<>();
 		headers.add("campaign"); 
 		headers.add("timeGroup"); 
-		if(dataGroupBy != null) headers.add("dataGroup");
+		if(dataGroupBy != null) {
+			headers.add("dataGroup");
+			headers.add("dataGroupName");
+		}
 		if(groupByMean) headers.add("mean");
 		fields.forEach(f -> headers.add(f.toString()));
 		return headers.toArray(new String[0]);
