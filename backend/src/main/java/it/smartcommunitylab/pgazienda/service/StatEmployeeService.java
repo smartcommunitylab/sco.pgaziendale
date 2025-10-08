@@ -89,7 +89,7 @@ public class StatEmployeeService {
 		
 		//set activeUsers
 		List<StatTrackDTO> trackStats = statTrackService.getTrackStats(campaignId, companyId, locationId, null, null, "all", 
-				timeGroupBy, GROUP_BY_DATA.employee, Collections.singletonList(STAT_TRACK_FIELD.track), false, from, to);
+				timeGroupBy, GROUP_BY_DATA.employee, Collections.singletonList(STAT_TRACK_FIELD.track), false, false, from, to);
 		for(StatTrackDTO dto : trackStats) {
 			String timeGroup = dto.getTimeGroup();
 			String employeeKey = dto.getDataGroup();

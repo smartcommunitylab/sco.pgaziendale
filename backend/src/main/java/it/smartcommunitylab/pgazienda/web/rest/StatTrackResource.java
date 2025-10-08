@@ -83,6 +83,7 @@ public class StatTrackResource {
 		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
 		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
+		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
 		@RequestParam(required=false) String from, 
 		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
 	{
@@ -97,7 +98,7 @@ public class StatTrackResource {
         log.debug("REST request to get statistics");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
-    	return ResponseEntity.ok(dataService.getTrackStats(campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, fromDate, toDate));
+    	return ResponseEntity.ok(dataService.getTrackStats(campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
 	}
 
     @GetMapping("/campaigns/{campaignId}/stats/track/csv")
@@ -112,6 +113,7 @@ public class StatTrackResource {
 		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
 		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
+		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
 		@RequestParam(required=false) String from, 
 		@RequestParam(required=false) String to,
 		HttpServletResponse response) throws IOException, InconsistentDataException 
@@ -127,7 +129,7 @@ public class StatTrackResource {
         log.debug("REST request to get statistics CSV");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
-    	dataService.getTrackStatsCSV(response.getWriter(), campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, fromDate, toDate);
+    	dataService.getTrackStatsCSV(response.getWriter(), campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 	}
 
 }

@@ -23,7 +23,6 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Log;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +31,7 @@ import com.opencsv.CSVWriter;
 import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Company;
 import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
+import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
@@ -70,6 +70,7 @@ public class StatTrackService {
 			GROUP_BY_DATA dataGroupBy,
 			List<STAT_TRACK_FIELD> fields,
 			boolean groupByMean,
+			boolean allDataGroupBy,
 			LocalDate from, 
 			LocalDate to) throws InconsistentDataException {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
@@ -123,6 +124,9 @@ public class StatTrackService {
 		if (fields.contains(STAT_TRACK_FIELD.score)) {
 			groupByOperation = groupByOperation.sum("score").as("score");
 		}
+		if (fields.contains(STAT_TRACK_FIELD.limitedScore)) {
+			groupByOperation = groupByOperation.sum("limitedScore").as("limitedScore");
+		}
 		if (fields.contains(STAT_TRACK_FIELD.track)) {
 			groupByOperation = groupByOperation.count().as("track");
 		}
@@ -135,7 +139,15 @@ public class StatTrackService {
 		if (fields.contains(STAT_TRACK_FIELD.duration)) {
 			groupByOperation = groupByOperation.sum("duration").as("duration");
 		}
-		
+		Map<String, Integer> mapTrips = new HashMap<>();
+		if (fields.contains(STAT_TRACK_FIELD.tripCount)) {
+			getTripCount(criteria, group, dataGroupBy, timeGroupBy, campaignId, mapTrips);
+		}
+		Map<String, Integer> mapLimitedTrips = new HashMap<>();
+		if (fields.contains(STAT_TRACK_FIELD.limitedTripCount)) {
+			getLimitedTripCount(criteria, group, dataGroupBy, timeGroupBy, campaignId, mapLimitedTrips);
+		}
+
 		Map<String, StatTrackDTO>mapStats = new HashMap<>();
 		List<String> timeGroupList = getTimeGroupList(from, to, timeGroupBy);
 		List<String> dataGroupList = new ArrayList<>();
@@ -143,9 +155,17 @@ public class StatTrackService {
 		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
 		AggregationResults<Document> aggregationResults = template.aggregate(aggregation, StatTrack.class, Document.class);
 		if(!groupByMean) { 
-			 populateStats(aggregationResults.getMappedResults(), group, mapStats, dataGroupList, dataGroupBy, timeGroupBy, campaignId);
+			 populateStats(aggregationResults.getMappedResults(), group, mapStats, mapTrips, mapLimitedTrips, dataGroupList, dataGroupBy, 
+			 	timeGroupBy, fields, campaignId);
 		} else {
-			populateStatsByMean(aggregationResults.getMappedResults(), group, mapStats, dataGroupList,  dataGroupBy, timeGroupBy, campaignId);
+			populateStatsByMean(aggregationResults.getMappedResults(), group, mapStats, mapTrips, mapLimitedTrips, dataGroupList,  dataGroupBy, 
+				timeGroupBy, fields, campaignId);
+		}
+		//add all poassibly dataGroupBy value if requested
+		if((allDataGroupBy && GROUP_BY_DATA.company.equals(dataGroupBy)) || 
+			(allDataGroupBy && GROUP_BY_DATA.location.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId)) || 
+			(allDataGroupBy && GROUP_BY_DATA.employee.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId))) {
+			fillAllDataGroup(campaignId, companyId, dataGroupBy, dataGroupList);
 		}
 		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList);
 		Comparator<StatTrackDTO>comparator = new Comparator<StatTrackDTO>() {
@@ -159,6 +179,36 @@ public class StatTrackService {
 		Collections.sort(result, comparator);
 		return result;		
 	}
+
+	private void fillAllDataGroup(String campaignId, String companyId, GROUP_BY_DATA dataGroupBy, List<String> dataGroupList) {
+		if (GROUP_BY_DATA.company.equals(dataGroupBy)) {
+			//add all companies subscribed to the campaign
+			companyRepository.findByCampaign(campaignId).forEach(c -> {
+				if(!dataGroupList.contains(c.getId())) {
+					dataGroupList.add(c.getId());
+				}
+			});
+		} else if (GROUP_BY_DATA.location.equals(dataGroupBy)) {
+			Company company = companyRepository.findById(companyId).orElse(null);
+			if (company != null) {
+				List<CompanyLocation> locations = company.getLocations();
+				for (CompanyLocation location : locations) {
+					String locationKey = companyId + StatTrack.KEY_DIV + location.getId();
+					if(!dataGroupList.contains(locationKey)) {
+						dataGroupList.add(locationKey);
+					}
+				}
+			}
+		} else if (GROUP_BY_DATA.employee.equals(dataGroupBy)) {
+			List<Employee> employees = employeeRepository.findByCompanyId(companyId);
+			for (Employee employee : employees) {
+				String employeeKey = employee.getCompanyId() + StatTrack.KEY_DIV + employee.getCode();
+				if(!dataGroupList.contains(employeeKey)) {
+					dataGroupList.add(employeeKey);
+				}
+			}
+		}		
+	}
 	
 	/**
 	 * Fill the dataGroupName field of the StatTrackDTO objects in the result list 
@@ -170,38 +220,40 @@ public class StatTrackService {
 	 */
 	private void updateDateGroupNames(List<StatTrackDTO> result, GROUP_BY_DATA dataGroupBy, String campaignId) {
 		Map<String, String> map = new HashMap<>();
-		switch (dataGroupBy) {
-			case company:
-				Set<String> allCompanies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup()).collect(Collectors.toSet());
-				for (String companyId : allCompanies) {
-					Company company = companyRepository.findById(companyId).orElse(null);
-					if (company != null) {
-						map.put(companyId, company.getName());
-					}
-				}
-				break;
-			case employee:
-				List<String> companies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
-				if (companies.size() > 0) {
-					try {
-						map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					}					
-				}
-			case location:
-				Set<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
-				for (String companyId : companyIds) {
-					Company company = companyRepository.findById(companyId).orElse(null);
-					if (company != null) {
-						List<CompanyLocation> locations = company.getLocations();
-						for (CompanyLocation location : locations) {
-							map.put(companyId + StatTrack.KEY_DIV + location.getId(), location.getName());
+		if(dataGroupBy != null) {
+			switch (dataGroupBy) {
+				case company:
+					Set<String> allCompanies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup()).collect(Collectors.toSet());
+					for (String companyId : allCompanies) {
+						Company company = companyRepository.findById(companyId).orElse(null);
+						if (company != null) {
+							map.put(companyId, company.getName());
 						}
 					}
-				}
-			default:
-				break;
+					break;
+				case employee:
+					List<String> companies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
+					if (companies.size() > 0) {
+						try {
+							map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+						}					
+					}
+				case location:
+					Set<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
+					for (String companyId : companyIds) {
+						Company company = companyRepository.findById(companyId).orElse(null);
+						if (company != null) {
+							List<CompanyLocation> locations = company.getLocations();
+							for (CompanyLocation location : locations) {
+								map.put(companyId + StatTrack.KEY_DIV + location.getId(), location.getName());
+							}
+						}
+					}
+				default:
+					break;
+			}
 		}
 		logger.info("Map: {}", map);
 		for (StatTrackDTO s : result) {
@@ -267,8 +319,9 @@ public class StatTrackService {
 		return key;
 	}
 
-	private void populateStatsByMean(List<Document> documents, List<String> group, Map<String, StatTrackDTO> mapStats, List<String> dataGroupList,
-			GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, String campaignId) {
+	private void populateStatsByMean(List<Document> documents, List<String> group, Map<String, StatTrackDTO> mapStats, 
+			Map<String, Integer> mapTrips, Map<String, Integer> mapLimitedTrips, List<String> dataGroupList,
+			GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, List<STAT_TRACK_FIELD> fields, String campaignId) {
 		Map<String, StatTrackDTO.Builder>groupMap = new HashMap<>();
 		for(Document doc : documents) {
 			String timeGroup = getGroupByTime(doc, timeGroupBy);
@@ -281,7 +334,9 @@ public class StatTrackService {
 			groupMap.get(groupKey).populateStatMean(doc);			
 		}
 		for(String key :  groupMap.keySet()) {
-			mapStats.put(key, groupMap.get(key).updateMainStats().build());
+			Integer tripCount = mapTrips.get(key);
+			Integer limitedTripCount = mapLimitedTrips.get(key);
+			mapStats.put(key, groupMap.get(key).updateMainStats(tripCount, limitedTripCount).build());
 		}
 	}
 	
@@ -296,13 +351,26 @@ public class StatTrackService {
 		return key.substring(0, key.lastIndexOf('_'));
 	}
 	
-	private void populateStats(List<Document> documents, List<String> group, Map<String, StatTrackDTO> mapStats, List<String> dataGroupList,
-			GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, String campaignId) {
+	private void populateStats(List<Document> documents, List<String> group, Map<String, StatTrackDTO> mapStats, 
+			Map<String, Integer> mapTrips, Map<String, Integer> mapLimitedTrips, List<String> dataGroupList,
+			GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, List<STAT_TRACK_FIELD> fields, String campaignId) {
 		for(Document doc : documents) {
 			String timeGroup = getGroupByTime(doc, timeGroupBy);
 			String dataGroup = getGroupByData(doc, dataGroupBy);
 			addDataGroup(dataGroupList, dataGroup);
 			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+			if(fields.contains(STAT_TRACK_FIELD.tripCount)) {
+				Integer tripCount = mapTrips.get(groupKey);
+				if(tripCount != null) {
+					doc.put("tripCount", tripCount);
+				}
+			}
+			if(fields.contains(STAT_TRACK_FIELD.limitedTripCount)) {
+				Integer limitedTripCount = mapLimitedTrips.get(groupKey);
+				if(limitedTripCount != null) {
+					doc.put("limitedTripCount", limitedTripCount);
+				}
+			}
 			mapStats.put(groupKey, new StatTrackDTO.Builder().populateKeyFields(doc, group).populateStatFields(doc).build());
 		}
 	}
@@ -324,6 +392,45 @@ public class StatTrackService {
 		return Collections.emptyList();		
 	}
 
+	private void getLimitedTripCount(Criteria criteria, List<String> group, GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, 
+			String campaignId, Map<String, Integer> mapLimitedTrips) {
+		criteria = criteria.and("limitedScore").gt(Double.valueOf(0));
+		MatchOperation filterOperation = Aggregation.match(criteria);
+		List<String> copyGroup = new ArrayList<>(group);
+		copyGroup.remove("mode");
+		copyGroup.add("multimodalId");
+		GroupOperation groupByOperation = Aggregation.group(copyGroup.toArray(new String[copyGroup.size()]));
+		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
+		AggregationResults<Document> aggregationResults = template.aggregate(aggregation, StatTrack.class, Document.class);
+		for(Document doc : aggregationResults.getMappedResults()) {
+			String timeGroup = getGroupByTime(doc, timeGroupBy);
+			String dataGroup = getGroupByData(doc, dataGroupBy);
+			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+			Integer count = mapLimitedTrips.get(groupKey);
+			if(count == null) count = 0;
+			mapLimitedTrips.put(groupKey, count + 1);
+		}
+	}
+
+	private void getTripCount(Criteria criteria, List<String> group, GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, 
+			String campaignId, Map<String, Integer> mapTrips) {
+		MatchOperation filterOperation = Aggregation.match(criteria);
+		List<String> copyGroup = new ArrayList<>(group);
+		copyGroup.remove("mode");
+		copyGroup.add("multimodalId");
+		GroupOperation groupByOperation = Aggregation.group(copyGroup.toArray(new String[copyGroup.size()]));
+		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
+		AggregationResults<Document> aggregationResults = template.aggregate(aggregation, StatTrack.class, Document.class);
+		for(Document doc : aggregationResults.getMappedResults()) {
+			String timeGroup = getGroupByTime(doc, timeGroupBy);
+			String dataGroup = getGroupByData(doc, dataGroupBy);
+			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+			Integer count = mapTrips.get(groupKey);
+			if(count == null) count = 0;
+			mapTrips.put(groupKey, count + 1);
+		}
+	}
+
 	public void getTrackStatsCSV(PrintWriter writer, 
 			String campaignId, 
 			String companyId, 
@@ -335,9 +442,10 @@ public class StatTrackService {
 			GROUP_BY_DATA dataGroupBy,
 			List<STAT_TRACK_FIELD> fields, 
 			boolean groupByMean, 
+			boolean allDataGroupBy,
 			LocalDate fromDate, 
 			LocalDate toDate) throws InconsistentDataException, IOException {
-		List<StatTrackDTO> trackStats = getTrackStats(campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, fromDate, toDate);
+		List<StatTrackDTO> trackStats = getTrackStats(campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		String[] headers = getHeaders(timeGroupBy, dataGroupBy, groupByMean, fields);
 		csvWriter.writeNext(headers);
@@ -354,7 +462,10 @@ public class StatTrackService {
 			List<String> row = new ArrayList<>();
 			row.add(dto.getCampaign());
 			row.add(dto.getTimeGroup());
-			if(dto.getDataGroupName() != null) row.add(dto.getDataGroupName());			
+			if(dto.getDataGroup() != null) {
+				row.add(dto.getDataGroup());			
+				row.add(dto.getDataGroupName());			
+			}
 			row.addAll(getStatValue(dto.getStats(), fields));
 			result.add(row.toArray(new String[0]));
 		} else {
@@ -362,7 +473,10 @@ public class StatTrackService {
 				List<String> row = new ArrayList<>();
 				row.add(dto.getCampaign());
 				row.add(dto.getTimeGroup());
-				if(dto.getDataGroupName() != null) row.add(dto.getDataGroupName());			
+				if(dto.getDataGroup() != null) {
+					row.add(dto.getDataGroup());			
+					row.add(dto.getDataGroupName());			
+				}
 				row.add(mean);
 				row.addAll(getStatValue(dto.getMeanStatMap().get(mean), fields));
 				result.add(row.toArray(new String[0]));
@@ -378,6 +492,9 @@ public class StatTrackService {
 			case score:
 				row.add(String.valueOf(stat.getScore()));
 				break;
+			case limitedScore:
+				row.add(String.valueOf(stat.getLimitedScore()));
+				break;
 			case track:
 				row.add(String.valueOf(stat.getTrack()));
 				break;
@@ -389,6 +506,12 @@ public class StatTrackService {
 				break;
 			case duration:
 				row.add(String.valueOf(stat.getDuration()));
+				break;
+			case tripCount:
+				row.add(String.valueOf(stat.getTripCount()));
+				break;
+			case limitedTripCount:
+				row.add(String.valueOf(stat.getLimitedTripCount()));
 				break;				
 			default:
 				break;
@@ -402,7 +525,10 @@ public class StatTrackService {
 		List<String>headers = new ArrayList<>();
 		headers.add("campaign"); 
 		headers.add("timeGroup"); 
-		if(dataGroupBy != null) headers.add("dataGroup");
+		if(dataGroupBy != null) {
+			headers.add("dataGroup");
+			headers.add("dataGroupName");
+		}
 		if(groupByMean) headers.add("mean");
 		fields.forEach(f -> headers.add(f.toString()));
 		return headers.toArray(new String[0]);

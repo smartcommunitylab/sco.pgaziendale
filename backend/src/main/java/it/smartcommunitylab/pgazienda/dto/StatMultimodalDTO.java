@@ -51,7 +51,7 @@ public class StatMultimodalDTO {
 	}
 
 	public static class StatValue {
-		private Double score, co2, distance;
+		private Double score, limitedScore, co2, distance;
 		private Long duration;
 		private Integer track;
 		
@@ -60,6 +60,12 @@ public class StatMultimodalDTO {
 		}
 		public void setScore(Double score) {
 			this.score = score;
+		}
+		public Double getLimitedScore() {
+			return limitedScore != null ? limitedScore : Double.valueOf(0d);
+		}
+		public void setLimitedScore(Double limitedScore) {
+			this.limitedScore = limitedScore;
 		}
 		public Double getCo2() {
 			return co2 != null ? co2 : Double.valueOf(0d);
@@ -124,6 +130,7 @@ public class StatMultimodalDTO {
 			
 			StatValue stats = new StatValue(); 
 			if(doc.containsKey("score")) stats.setScore(doc.getDouble("score"));
+			if(doc.containsKey("limitedScore")) stats.setLimitedScore(doc.getDouble("limitedScore"));
 			if(doc.containsKey("co2")) stats.setCo2(doc.getDouble("co2"));
 			if(doc.containsKey("distance")) stats.setDistance(doc.getDouble("distance"));
 			if(doc.containsKey("duration")) stats.setDuration(doc.getLong("duration"));
@@ -146,6 +153,7 @@ public class StatMultimodalDTO {
 				}
 				
 				if(doc.containsKey("score")) stats.setScore(stats.getScore() +  doc.getDouble("score"));
+				if(doc.containsKey("limitedScore")) stats.setLimitedScore(stats.getScore() +  doc.getDouble("limitedScore"));
 				if(doc.containsKey("co2")) stats.setCo2(stats.getCo2() + doc.getDouble("co2"));
 				if(doc.containsKey("distance")) stats.setDistance(stats.getDistance() + doc.getDouble("distance"));
 				if(doc.containsKey("duration")) stats.setDuration(stats.getDuration() + doc.getLong("duration"));
@@ -165,6 +173,12 @@ public class StatMultimodalDTO {
 						stats.setScore(sv.getScore());
 					else
 						stats.setScore(stats.getScore() + sv.getScore());
+				}
+				if(sv.getLimitedScore() != null) {
+					if (stats.getLimitedScore() == null) 
+						stats.setLimitedScore(sv.getLimitedScore());
+					else
+						stats.setLimitedScore(stats.getLimitedScore() + sv.getLimitedScore());
 				}
 				if(sv.getCo2() != null) {
 					if (stats.getCo2() == null) 

@@ -27,13 +27,18 @@ import org.springframework.stereotype.Service;
 import com.opencsv.CSVWriter;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Company;
+import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
+import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO.StatValue;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
+import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
+import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.util.DateUtils;
 
@@ -43,6 +48,10 @@ public class StatMultimodalService {
 	private MongoTemplate template;
 	@Autowired
 	private CampaignRepository campaignRepo;
+	@Autowired
+    private CompanyRepository companyRepository;
+	@Autowired
+	private EmployeeRepository employeeRepository;
 	
 	public List<StatMultimodalDTO> getMultimodalStats(
 			String campaignId,
@@ -51,6 +60,7 @@ public class StatMultimodalService {
 			GROUP_BY_TIME timeGroupBy,
 			GROUP_BY_DATA dataGroupBy,
 			List<STAT_TRACK_FIELD> fields,
+			boolean allDataGroupBy,
 			LocalDate from, 
 			LocalDate to) throws InconsistentDataException {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
@@ -92,6 +102,9 @@ public class StatMultimodalService {
 		}
 		if (fields.contains(STAT_TRACK_FIELD.score)) {
 			groupByOperation = groupByOperation.sum("score").as("score");
+		}
+		if (fields.contains(STAT_TRACK_FIELD.limitedScore)) {
+			groupByOperation = groupByOperation.sum("limitedScore").as("limitedScore");
 		}
 		if (fields.contains(STAT_TRACK_FIELD.track)) {
 			groupByOperation = groupByOperation.count().as("track");
@@ -155,6 +168,12 @@ public class StatMultimodalService {
 		for(String groupKey :  mapBuilders.keySet()) {
 			mapStats.put(groupKey, mapBuilders.get(groupKey).updateMainStats().build());
 		}
+		//add all poassibly dataGroupBy value if requested
+		if((allDataGroupBy && GROUP_BY_DATA.company.equals(dataGroupBy)) || 
+			(allDataGroupBy && GROUP_BY_DATA.location.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId)) || 
+			(allDataGroupBy && GROUP_BY_DATA.employee.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId))) {
+			fillAllDataGroup(campaignId, companyId, dataGroupBy, dataGroupList);
+		}
 		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList, mapModes.keySet());
 		Comparator<StatMultimodalDTO>comparator = new Comparator<StatMultimodalDTO>() {
 			@Override
@@ -165,6 +184,36 @@ public class StatMultimodalService {
 		List<StatMultimodalDTO> result = new ArrayList<>(mapStats.values());
 		Collections.sort(result, comparator);
 		return result;		
+	}
+
+	private void fillAllDataGroup(String campaignId, String companyId, GROUP_BY_DATA dataGroupBy, List<String> dataGroupList) {
+		if (GROUP_BY_DATA.company.equals(dataGroupBy)) {
+			//add all companies subscribed to the campaign
+			companyRepository.findByCampaign(campaignId).forEach(c -> {
+				if(!dataGroupList.contains(c.getId())) {
+					dataGroupList.add(c.getId());
+				}
+			});
+		} else if (GROUP_BY_DATA.location.equals(dataGroupBy)) {
+			Company company = companyRepository.findById(companyId).orElse(null);
+			if (company != null) {
+				List<CompanyLocation> locations = company.getLocations();
+				for (CompanyLocation location : locations) {
+					String locationKey = companyId + StatTrack.KEY_DIV + location.getId();
+					if(!dataGroupList.contains(locationKey)) {
+						dataGroupList.add(locationKey);
+					}
+				}
+			}
+		} else if (GROUP_BY_DATA.employee.equals(dataGroupBy)) {
+			List<Employee> employees = employeeRepository.findByCompanyId(companyId);
+			for (Employee employee : employees) {
+				String employeeKey = employee.getCompanyId() + StatTrack.KEY_DIV + employee.getCode();
+				if(!dataGroupList.contains(employeeKey)) {
+					dataGroupList.add(employeeKey);
+				}
+			}
+		}		
 	}
 	
 	private void fillEmptyDate(String campaignId, Map<String, StatMultimodalDTO> mapStats, List<String> timeGroupList,
@@ -255,10 +304,18 @@ public class StatMultimodalService {
 		return String.join("_", modes);
 	}
 
-	public void getMultimodalStatsCsv(PrintWriter writer, String campaignId, String companyId, String location,
-			GROUP_BY_TIME timeGroupBy, GROUP_BY_DATA dataGroupBy, List<STAT_TRACK_FIELD> fields, LocalDate fromDate,
+	public void getMultimodalStatsCsv(
+			PrintWriter writer, 
+			String campaignId, 
+			String companyId, 
+			String location,
+			GROUP_BY_TIME timeGroupBy, 
+			GROUP_BY_DATA dataGroupBy, 
+			List<STAT_TRACK_FIELD> fields, 
+			boolean allDataGroupBy,
+			LocalDate fromDate,
 			LocalDate toDate) throws InconsistentDataException, IOException {
-		List<StatMultimodalDTO> multimodalStats = getMultimodalStats(campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, fromDate, toDate);
+		List<StatMultimodalDTO> multimodalStats = getMultimodalStats(campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, allDataGroupBy, fromDate, toDate);
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		String[] headers = getHeaders(timeGroupBy, dataGroupBy, fields);
 		csvWriter.writeNext(headers);
@@ -312,6 +369,9 @@ public class StatMultimodalService {
 			switch (f) {
 			case score:
 				row.add(String.valueOf(stat.getScore()));
+				break;
+			case limitedScore:
+				row.add(String.valueOf(stat.getLimitedScore()));
 				break;
 			case track:
 				row.add(String.valueOf(stat.getTrack()));

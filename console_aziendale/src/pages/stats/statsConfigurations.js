@@ -398,7 +398,7 @@ export const statsConfigurations = [
   / Specifica per il COMPANY ADMIN -> Amministratore Aziendale
   */
   {
-    id: 2,
+    id: 3,
     name: VARIABLES.STATS.NAME.EMPLOYEES_PARTECIPATION,
     profile: 'global',
     views: [
@@ -431,12 +431,8 @@ export const statsConfigurations = [
         ],
         dataColumns: [
           VARIABLES.STATS.VIEWS.DATACOLUMNS.REGISTERED_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.SUBSCRIBED_EMPLOYEES,
           VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_SUBSCRIBED_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.INACTIVE_SUBSCRIBED_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.NOT_SUBSCRIBED_EMPLOYEES,
-          VARIABLES.STATS.VIEWS.DATACOLUMNS.EMPLOYEES_PARTECIPATION
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.UNSUBSCRIBED_EMPLOYEES,
         ],
         timeUnit: [
           {
@@ -472,8 +468,8 @@ export const statsConfigurations = [
           source: "employee",
           dataColumns: [
             VARIABLES.STATS.VIEWS.DATACOLUMNS.REGISTERED_EMPLOYEES,
-            VARIABLES.STATS.VIEWS.DATACOLUMNS.SUBSCRIBED_EMPLOYEES,
-            VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_EMPLOYEES,  
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_EMPLOYEES,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.UNSUBSCRIBED_EMPLOYEES,
           ],
           puntualAggregationSelected:{
             label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
@@ -502,5 +498,112 @@ export const statsConfigurations = [
       }
     },
     ],
-  }
+  },
+  /*
+  / Configurazione - utenti
+  / Specifica per il COMPANY ADMIN -> Amministratore Aziendale
+  */
+  {
+    id: 4,
+    name: VARIABLES.STATS.NAME.EMPLOYEES_PARTECIPATION,
+    profile: 'company',
+    views: [
+      {
+        source: "employee",
+        dataLevel: [
+          {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+            value: "company",
+            // api: "getCompanyStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value:  'NONE'
+            }],
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
+            value: "location",
+            // api: "getLocationsStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value: 'NONE',
+              // function:''
+            },{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.LOCATIONS,
+              value: 'LOCATIONS',
+              // function:'aggregateByLocation'
+            }]
+          }
+        ],
+        dataColumns: [
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.REGISTERED_EMPLOYEES,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_EMPLOYEES,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.UNSUBSCRIBED_EMPLOYEES,
+        ],
+        timeUnit: [
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+            value: "month",
+            apiField: "month"
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.YEAR,
+            value: "year",
+            apiField: "year"
+          },          {
+            label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
+            value: "campaign",
+            apiField: "total"
+          }
+
+        ],
+        timePeriod: [
+          {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+            value: "ALL",
+            apiField: ""
+          },
+          {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC,
+            value: "SPECIFIC",
+            apiField: "month"
+          },
+        ],
+        
+        default: {
+          source: "employee",
+          dataColumns: [
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.REGISTERED_EMPLOYEES,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.ACTIVE_EMPLOYEES,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.UNSUBSCRIBED_EMPLOYEES,
+  
+          ],
+          puntualAggregationSelected:{
+            label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+            value: 'NONE',
+            // function:''
+          },
+          dataLevel: {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+            value: "company",
+            // api: "getCompanyStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value:  'NONE'
+            }],
+          },
+          timeUnit:  {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+            value: "month",
+            apiField: "month"
+          },
+          timePeriod: {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+            value: "ALL",
+            apiField: ""
+          },
+      }
+    },
+    ],
+  }  
 ];
