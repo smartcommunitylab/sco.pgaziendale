@@ -36,6 +36,7 @@ import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
+import it.smartcommunitylab.pgazienda.dto.FieldEmployeeDTO;
 import it.smartcommunitylab.pgazienda.dto.StatEmployeeDTO;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
@@ -82,7 +83,7 @@ public class StatEmployeeService {
 			}
 		}
 		
-		Map<String, StatEmployeeDTO>mapStats = new HashMap<>();
+		Map<String, StatEmployeeDTO> mapStats = new HashMap<>();
 		
 		List<String> timeGroupList = getTimeGroupList(from, to, timeGroupBy);
 		List<String> dataGroupList = new ArrayList<>();
@@ -103,13 +104,10 @@ public class StatEmployeeService {
 				String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
 				StatEmployeeDTO stats = mapStats.get(groupKey);
 				if(stats == null) {
-					stats = new  StatEmployeeDTO();
-					stats.setCampaign(campaignId);
-					stats.setTimeGroup(timeGroup);
-					if(StringUtils.isNotBlank(dataGroup)) stats.setDataGroup(dataGroup);
+					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, company);
 					mapStats.put(groupKey, stats);
 				}
-				stats.addActiveUsers();
+				stats.getActiveUsers().addValue();
 			}
 		}
 		
@@ -130,13 +128,10 @@ public class StatEmployeeService {
 			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup); 
 			StatEmployeeDTO stats = mapStats.get(groupKey);
 			if(stats == null) {
-				stats = new  StatEmployeeDTO();
-				stats.setCampaign(campaignId);
-				stats.setTimeGroup(timeGroup);
-				if(StringUtils.isNotBlank(dataGroup)) stats.setDataGroup(dataGroup);
+				stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId());
 				mapStats.put(groupKey, stats);
 			}
-			if(isRegistered(registrationDate, from, to)) stats.addRegistration();
+			if(isRegistered(registrationDate, from, to)) stats.getRegistration().addValue();
 			
 			//set dropout
 			if(dropoutDate != null) {
@@ -144,13 +139,23 @@ public class StatEmployeeService {
 				groupKey = getGroupKey(campaignId, timeGroup, dataGroup); 
 				stats = mapStats.get(groupKey);
 				if(stats == null) {
-					stats = new  StatEmployeeDTO();
-					stats.setCampaign(campaignId);
-					stats.setTimeGroup(timeGroup);
-					if(StringUtils.isNotBlank(dataGroup)) stats.setDataGroup(dataGroup);
+					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId());
 					mapStats.put(groupKey, stats);
 				}
-				if(isDropout(dropoutDate, from, to)) stats.addDropout();
+				if(isDropout(dropoutDate, from, to)) stats.getDropout().addValue();
+			}
+		}
+		// set percentages
+		for(StatEmployeeDTO stats : mapStats.values()) {
+			stats.getRegistration().setPrcTot((stats.getRegistration().getValue() / stats.getEmployee()) * 100.0);
+			stats.getDropout().setPrcTot((stats.getDropout().getValue() / stats.getEmployee()) * 100.0);
+			stats.setRegistered(FieldEmployeeDTO.fromValue(stats.getRegistration().getValue() - stats.getDropout().getValue()));
+			stats.getRegistered().setPrcTot((stats.getRegistered().getValue() / stats.getEmployee()) * 100.0);
+			stats.getActiveUsers().setPrcTot((stats.getActiveUsers().getValue() / stats.getEmployee()) * 100.0);
+			if(stats.getRegistration().getValue() > 0) {
+				stats.getDropout().setPrcRegistered((stats.getDropout().getValue() / stats.getRegistration().getValue()) * 100.0);
+				stats.getRegistered().setPrcRegistered((stats.getRegistered().getValue() / stats.getRegistration().getValue()) * 100.0);
+				stats.getActiveUsers().setPrcRegistered((stats.getActiveUsers().getValue() / stats.getRegistration().getValue()) * 100.0);
 			}
 		}
 		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList);
@@ -164,6 +169,19 @@ public class StatEmployeeService {
 		updateDateGroupNames(result, dataGroupBy, campaignId);
 		Collections.sort(result, comparator);
 		return result;
+	}
+
+	private StatEmployeeDTO addNewEmployeeStats(String campaignId, String timeGroup, String dataGroup, String companyId) {
+		StatEmployeeDTO stats = new  StatEmployeeDTO();
+		stats.setCampaign(campaignId);
+		stats.setTimeGroup(timeGroup);
+		if(StringUtils.isNotBlank(dataGroup)) stats.setDataGroup(dataGroup);
+		if(StringUtils.isNotBlank(companyId)) stats.setEmployee(employeeRepository.countByCompanyId(companyId));
+		stats.setDropout(FieldEmployeeDTO.fromValue(0));
+		stats.setActiveUsers(FieldEmployeeDTO.fromValue(0));
+		stats.setRegistration(FieldEmployeeDTO.fromValue(0));
+		stats.setRegistered(FieldEmployeeDTO.fromValue(0));
+		return stats;
 	}
 	
 /**
