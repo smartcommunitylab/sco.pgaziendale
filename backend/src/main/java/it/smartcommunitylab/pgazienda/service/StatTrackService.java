@@ -498,22 +498,31 @@ public class StatTrackService {
 		fields.forEach(f -> {
 			switch (f) {
 			case score:
-				row.add(String.valueOf(stat.getScore()));
+				row.add(String.valueOf(stat.getScore().getValue()));
 				break;
 			case limitedScore:
-				row.add(String.valueOf(stat.getLimitedScore()));
+				row.add(String.valueOf(stat.getLimitedScore().getValue()));
 				break;
 			case track:
 				row.add(String.valueOf(stat.getTrack()));
 				break;
 			case co2:
-				row.add(String.valueOf(stat.getCo2()));
+				row.add(String.valueOf(stat.getCo2().getValue()));
+				row.add(String.valueOf(stat.getCo2().getAvgTrack()));
+				row.add(String.valueOf(stat.getCo2().getAvgTrip()));
+				row.add(String.valueOf(stat.getCo2().getPrcValue()));
 				break;
 			case distance:
-				row.add(String.valueOf(stat.getDistance()));
+				row.add(String.valueOf(stat.getDistance().getValue()));
+				row.add(String.valueOf(stat.getDistance().getAvgTrack()));
+				row.add(String.valueOf(stat.getDistance().getAvgTrip()));
+				row.add(String.valueOf(stat.getDistance().getPrcValue()));
 				break;
 			case duration:
-				row.add(String.valueOf(stat.getDuration()));
+				row.add(String.valueOf(stat.getDuration().getValue()));
+				row.add(String.valueOf(stat.getDuration().getAvgTrack()));
+				row.add(String.valueOf(stat.getDuration().getAvgTrip()));
+				row.add(String.valueOf(stat.getDuration().getPrcValue()));
 				break;
 			case tripCount:
 				row.add(String.valueOf(stat.getTripCount()));
@@ -538,7 +547,14 @@ public class StatTrackService {
 			headers.add("dataGroupName");
 		}
 		if(groupByMean) headers.add("mean");
-		fields.forEach(f -> headers.add(f.toString()));
+		fields.forEach(f -> {
+			headers.add(f.toString());
+			if((f == STAT_TRACK_FIELD.distance) || (f == STAT_TRACK_FIELD.duration) || (f == STAT_TRACK_FIELD.co2)) {
+				headers.add(f.toString() + "_avgTrack");
+				headers.add(f.toString() + "_avgTrip");
+				headers.add(f.toString() + "_prcValue");
+			}
+		});
 		return headers.toArray(new String[0]);
 	}
 	

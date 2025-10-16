@@ -108,9 +108,9 @@ public class StatTrackDTO {
 				stats.getDistance().setAvgTrip(doc.getDouble("distance") / (double) doc.getInteger("tripCount"));
 			}
 			if(doc.containsKey("duration")) {
-				stats.setDuration(FieldDTO.fromValue(doc.getDouble("duration")));
-				stats.getDuration().setAvgTrack(doc.getDouble("duration") / (double) doc.getInteger("track"));
-				stats.getDuration().setAvgTrip(doc.getDouble("duration") / (double) doc.getInteger("tripCount"));
+				stats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")));
+				stats.getDuration().setAvgTrack((double) doc.getLong("duration") / (double) doc.getInteger("track"));
+				stats.getDuration().setAvgTrip((double) doc.getLong("duration") / (double) doc.getInteger("tripCount"));
 			}
 			dto.setStats(stats);	
 			return this;

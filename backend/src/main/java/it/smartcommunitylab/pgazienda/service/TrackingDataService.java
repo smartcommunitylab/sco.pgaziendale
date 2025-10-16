@@ -1010,6 +1010,10 @@ public class TrackingDataService {
 			table.forEach(l -> {
 				csvWriter.writeNext(l);
 			});
+			csvWriter.flush();
+			csvWriter.close();
+		} catch (Exception e) {
+			throw new InconsistentDataException("Error generating CSV: " + e.getMessage(), "CSV_ERROR");
 		} finally  {
 			if (writer != null) {
 				try {
