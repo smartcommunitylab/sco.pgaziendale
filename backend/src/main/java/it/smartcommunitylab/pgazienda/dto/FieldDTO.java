@@ -1,7 +1,7 @@
 package it.smartcommunitylab.pgazienda.dto;
 
 public class FieldDTO {
-    private Double value, avgTrack, avgTrip, prcValue, prcTrack, prcTrip;
+    private Double value, avgTrip, prcValue, prcTrip;
 
     public Double getValue() {
         return value;
@@ -9,14 +9,6 @@ public class FieldDTO {
 
     public void setValue(Double value) {
         this.value = value;
-    }
-
-    public Double getAvgTrack() {
-        return avgTrack;
-    }
-
-    public void setAvgTrack(Double avgTrack) {
-        this.avgTrack = avgTrack;
     }
 
     public Double getAvgTrip() {
@@ -33,14 +25,6 @@ public class FieldDTO {
 
     public void setPrcValue(Double prcValue) {
         this.prcValue = prcValue;
-    }
-
-    public Double getPrcTrack() {
-        return prcTrack;
-    }
-
-    public void setPrcTrack(Double prcTrack) {
-        this.prcTrack = prcTrack;
     }
 
     public Double getPrcTrip() {

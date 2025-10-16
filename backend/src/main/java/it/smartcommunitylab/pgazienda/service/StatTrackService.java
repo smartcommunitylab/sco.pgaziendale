@@ -508,19 +508,16 @@ public class StatTrackService {
 				break;
 			case co2:
 				row.add(String.valueOf(stat.getCo2().getValue()));
-				row.add(String.valueOf(stat.getCo2().getAvgTrack()));
 				row.add(String.valueOf(stat.getCo2().getAvgTrip()));
 				row.add(String.valueOf(stat.getCo2().getPrcValue()));
 				break;
 			case distance:
 				row.add(String.valueOf(stat.getDistance().getValue()));
-				row.add(String.valueOf(stat.getDistance().getAvgTrack()));
 				row.add(String.valueOf(stat.getDistance().getAvgTrip()));
 				row.add(String.valueOf(stat.getDistance().getPrcValue()));
 				break;
 			case duration:
 				row.add(String.valueOf(stat.getDuration().getValue()));
-				row.add(String.valueOf(stat.getDuration().getAvgTrack()));
 				row.add(String.valueOf(stat.getDuration().getAvgTrip()));
 				row.add(String.valueOf(stat.getDuration().getPrcValue()));
 				break;
