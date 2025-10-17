@@ -467,65 +467,140 @@ public class StatTrackService {
 	private List<String[]> getCSV(StatTrackDTO dto, boolean groupByMean, List<STAT_TRACK_FIELD> fields) {
 		List<String[]> result = new ArrayList<>();
 		if(!groupByMean) {
-			List<String> row = new ArrayList<>();
-			row.add(dto.getCampaign());
-			row.add(dto.getTimeGroup());
-			if(dto.getDataGroup() != null) {
-				row.add(dto.getDataGroup());			
-				row.add(dto.getDataGroupName());			
-			}
-			row.addAll(getStatValue(dto.getStats(), fields));
-			result.add(row.toArray(new String[0]));
+			result.add(getStatCsv(dto, null, fields, groupByMean, true));
 		} else {
+			result.add(getStatCsv(dto, "all", fields, groupByMean, true));
 			for(String mean : dto.getMeanStatMap().keySet()) {
-				List<String> row = new ArrayList<>();
-				row.add(dto.getCampaign());
-				row.add(dto.getTimeGroup());
-				if(dto.getDataGroup() != null) {
-					row.add(dto.getDataGroup());			
-					row.add(dto.getDataGroupName());			
-				}
-				row.add(mean);
-				row.addAll(getStatValue(dto.getMeanStatMap().get(mean), fields));
-				result.add(row.toArray(new String[0]));
+				result.add(getStatCsv(dto, mean, fields, groupByMean, false));
 			}
 		}
 		return result;
 	}
+
+	private String[] getStatCsv(StatTrackDTO dto, String mean, List<STAT_TRACK_FIELD> fields, boolean groupByMean, boolean mainStats) {
+		List<String> row = new ArrayList<>();
+		row.add(dto.getCampaign());
+		row.add(dto.getTimeGroup());
+		if(dto.getDataGroup() != null) {
+			row.add(dto.getDataGroup());			
+			row.add(dto.getDataGroupName());			
+		}
+		if(mean != null) row.add(mean);
+		if(mainStats)
+			row.addAll(getStatValue(dto.getStats(), fields, groupByMean, mainStats));
+		else
+			row.addAll(getStatValue(dto.getMeanStatMap().get(mean), fields, groupByMean, mainStats));
+		return row.toArray(new String[0]);
+	}
 	
-	private List<String> getStatValue(StatValueDTO stat, List<STAT_TRACK_FIELD> fields) {
+	private List<String> getStatValue(StatValueDTO stat, List<STAT_TRACK_FIELD> fields, boolean groupByMean, boolean mainStats) {
 		List<String> row = new ArrayList<>();
 		fields.forEach(f -> {
 			switch (f) {
 			case score:
-				row.add(String.valueOf(stat.getScore().getValue()));
+				if(stat.getScore() != null)
+					row.add(String.valueOf(stat.getScore().getValue()));
+				else 
+					row.add("");
 				break;
 			case limitedScore:
-				row.add(String.valueOf(stat.getLimitedScore().getValue()));
+				if(stat.getLimitedScore() != null)
+					row.add(String.valueOf(stat.getLimitedScore().getValue()));
+				else	
+					row.add("");
 				break;
 			case track:
-				row.add(String.valueOf(stat.getTrack()));
+				if(stat.getTrack() != null)
+					row.add(String.valueOf(stat.getTrack()));
+				else 
+					row.add("");
 				break;
 			case co2:
-				row.add(String.valueOf(stat.getCo2().getValue()));
-				row.add(String.valueOf(stat.getCo2().getAvgTrip()));
-				row.add(String.valueOf(stat.getCo2().getPrcValue()));
+				if(stat.getCo2() != null) {
+					row.add(String.valueOf(stat.getCo2().getValue()));
+					row.add(String.valueOf(stat.getCo2().getAvgTrip()));
+					if(!mainStats) {
+						row.add(String.valueOf(stat.getCo2().getPrcValue()));
+						row.add(String.valueOf(stat.getCo2().getPrcAvgTrip()));
+					}
+					if(mainStats && groupByMean) {
+						row.add("");
+						row.add("");
+					}
+				} else {
+					row.add("");
+					row.add("");
+					if(!mainStats) {
+						row.add("");
+						row.add("");
+					}
+					if(mainStats && groupByMean) {
+						row.add("");
+						row.add("");
+					}
+				}
 				break;
 			case distance:
-				row.add(String.valueOf(stat.getDistance().getValue()));
-				row.add(String.valueOf(stat.getDistance().getAvgTrip()));
-				row.add(String.valueOf(stat.getDistance().getPrcValue()));
+				if(stat.getDistance() != null) {
+					row.add(String.valueOf(stat.getDistance().getValue()));
+					row.add(String.valueOf(stat.getDistance().getAvgTrip()));
+					if(!mainStats) {
+						row.add(String.valueOf(stat.getDistance().getPrcValue()));
+						row.add(String.valueOf(stat.getDistance().getPrcAvgTrip()));
+					}
+					if(mainStats && groupByMean) {
+						row.add("");
+						row.add("");
+					}
+				} else {
+					row.add("");
+					row.add("");
+					if(!mainStats) {
+						row.add("");
+						row.add("");
+					}
+					if(mainStats && groupByMean) {
+						row.add("");
+						row.add("");
+					}
+				}
 				break;
 			case duration:
-				row.add(String.valueOf(stat.getDuration().getValue()));
-				row.add(String.valueOf(stat.getDuration().getAvgTrip()));
-				row.add(String.valueOf(stat.getDuration().getPrcValue()));
+				if(stat.getDuration() != null) {
+					row.add(String.valueOf(stat.getDuration().getValue()));
+					row.add(String.valueOf(stat.getDuration().getAvgTrip()));
+					if(!mainStats) {
+						row.add(String.valueOf(stat.getDuration().getPrcValue()));
+						row.add(String.valueOf(stat.getDuration().getPrcAvgTrip()));
+					} 
+					if(mainStats && groupByMean) {
+						row.add("");
+						row.add("");
+					}
+				} else {
+					row.add("");
+					row.add("");
+					if(!mainStats) {
+						row.add("");
+						row.add("");
+					}
+					if(mainStats && groupByMean) {
+						row.add("");
+						row.add("");
+					}
+				}
 				break;
 			case tripCount:
-				row.add(String.valueOf(stat.getTripCount()));
+				if(stat.getTripCount() != null)
+					row.add(String.valueOf(stat.getTripCount()));
+				else 
+					row.add("");
 				break;
 			case limitedTripCount:
-				row.add(String.valueOf(stat.getLimitedTripCount()));
+				if(stat.getLimitedTripCount() != null)
+					row.add(String.valueOf(stat.getLimitedTripCount()));
+				else
+					row.add("");
 				break;				
 			default:
 				break;
@@ -547,9 +622,11 @@ public class StatTrackService {
 		fields.forEach(f -> {
 			headers.add(f.toString());
 			if((f == STAT_TRACK_FIELD.distance) || (f == STAT_TRACK_FIELD.duration) || (f == STAT_TRACK_FIELD.co2)) {
-				headers.add(f.toString() + "_avgTrack");
 				headers.add(f.toString() + "_avgTrip");
-				headers.add(f.toString() + "_prcValue");
+				if(groupByMean) {
+					headers.add(f.toString() + "_prcValue");
+					headers.add(f.toString() + "_prcAvgTrip");
+				}
 			}
 		});
 		return headers.toArray(new String[0]);

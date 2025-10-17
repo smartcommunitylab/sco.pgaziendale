@@ -159,12 +159,12 @@ public class StatMultimodalDTO {
 				if(sv.getDistance() != null) {
 					sv.getDistance().setAvgTrip(sv.getDistance().getValue() / stats.getCount().getValue());
 					sv.getDistance().setPrcValue((sv.getDistance().getValue() / stats.getDistance().getValue()) * 100.0);
-					sv.getDistance().setPrcTrip((sv.getDistance().getAvgTrip() / stats.getDistance().getAvgTrip()) * 100.0);
+					sv.getDistance().setPrcAvgTrip((sv.getDistance().getAvgTrip() / stats.getDistance().getAvgTrip()) * 100.0);
 				}
 				if(sv.getDuration() != null) {
 					sv.getDuration().setAvgTrip(sv.getDuration().getValue() / stats.getCount().getValue());
 					sv.getDuration().setPrcValue((sv.getDuration().getValue() / stats.getDuration().getValue()) * 100.0);
-					sv.getDuration().setPrcTrip((sv.getDuration().getAvgTrip() / stats.getDuration().getAvgTrip()) * 100.0);
+					sv.getDuration().setPrcAvgTrip((sv.getDuration().getAvgTrip() / stats.getDuration().getAvgTrip()) * 100.0);
 				}
 			});
 			dto.setStats(stats);
