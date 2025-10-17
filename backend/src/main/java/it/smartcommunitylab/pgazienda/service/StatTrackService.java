@@ -37,7 +37,7 @@ import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
-import it.smartcommunitylab.pgazienda.dto.StatTrackDTO.StatValue;
+import it.smartcommunitylab.pgazienda.dto.StatValueDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
@@ -64,7 +64,6 @@ public class StatTrackService {
 			String companyId,
 			String locationId,
 			Set<String> means,
-			Set<String> employeeId,
 			String way,
 			GROUP_BY_TIME timeGroupBy,
 			GROUP_BY_DATA dataGroupBy,
@@ -120,6 +119,16 @@ public class StatTrackService {
 		GroupOperation groupByOperation = Aggregation.group(group.toArray(new String[group.size()]));
 		if (fields == null || fields.isEmpty()) {
 			fields = Collections.singletonList(STAT_TRACK_FIELD.score);
+		}
+		// check fields for avg
+		if(fields.contains(STAT_TRACK_FIELD.distance) || fields.contains(STAT_TRACK_FIELD.duration) || 
+			fields.contains(STAT_TRACK_FIELD.co2)) {
+			if(!fields.contains(STAT_TRACK_FIELD.track)) {
+				fields.add(STAT_TRACK_FIELD.track);
+			}
+			if(!fields.contains(STAT_TRACK_FIELD.tripCount)) {
+				fields.add(STAT_TRACK_FIELD.tripCount);
+			}
 		}
 		if (fields.contains(STAT_TRACK_FIELD.score)) {
 			groupByOperation = groupByOperation.sum("score").as("score");
@@ -436,7 +445,6 @@ public class StatTrackService {
 			String companyId, 
 			String location,
 			Set<String> means, 
-			Set<String> employeeId, 
 			String way, 
 			GROUP_BY_TIME timeGroupBy, 
 			GROUP_BY_DATA dataGroupBy,
@@ -445,7 +453,7 @@ public class StatTrackService {
 			boolean allDataGroupBy,
 			LocalDate fromDate, 
 			LocalDate toDate) throws InconsistentDataException, IOException {
-		List<StatTrackDTO> trackStats = getTrackStats(campaignId, companyId, location, means, employeeId, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
+		List<StatTrackDTO> trackStats = getTrackStats(campaignId, companyId, location, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		String[] headers = getHeaders(timeGroupBy, dataGroupBy, groupByMean, fields);
 		csvWriter.writeNext(headers);
@@ -485,27 +493,33 @@ public class StatTrackService {
 		return result;
 	}
 	
-	private List<String> getStatValue(StatValue stat, List<STAT_TRACK_FIELD> fields) {
+	private List<String> getStatValue(StatValueDTO stat, List<STAT_TRACK_FIELD> fields) {
 		List<String> row = new ArrayList<>();
 		fields.forEach(f -> {
 			switch (f) {
 			case score:
-				row.add(String.valueOf(stat.getScore()));
+				row.add(String.valueOf(stat.getScore().getValue()));
 				break;
 			case limitedScore:
-				row.add(String.valueOf(stat.getLimitedScore()));
+				row.add(String.valueOf(stat.getLimitedScore().getValue()));
 				break;
 			case track:
 				row.add(String.valueOf(stat.getTrack()));
 				break;
 			case co2:
-				row.add(String.valueOf(stat.getCo2()));
+				row.add(String.valueOf(stat.getCo2().getValue()));
+				row.add(String.valueOf(stat.getCo2().getAvgTrip()));
+				row.add(String.valueOf(stat.getCo2().getPrcValue()));
 				break;
 			case distance:
-				row.add(String.valueOf(stat.getDistance()));
+				row.add(String.valueOf(stat.getDistance().getValue()));
+				row.add(String.valueOf(stat.getDistance().getAvgTrip()));
+				row.add(String.valueOf(stat.getDistance().getPrcValue()));
 				break;
 			case duration:
-				row.add(String.valueOf(stat.getDuration()));
+				row.add(String.valueOf(stat.getDuration().getValue()));
+				row.add(String.valueOf(stat.getDuration().getAvgTrip()));
+				row.add(String.valueOf(stat.getDuration().getPrcValue()));
 				break;
 			case tripCount:
 				row.add(String.valueOf(stat.getTripCount()));
@@ -530,7 +544,14 @@ public class StatTrackService {
 			headers.add("dataGroupName");
 		}
 		if(groupByMean) headers.add("mean");
-		fields.forEach(f -> headers.add(f.toString()));
+		fields.forEach(f -> {
+			headers.add(f.toString());
+			if((f == STAT_TRACK_FIELD.distance) || (f == STAT_TRACK_FIELD.duration) || (f == STAT_TRACK_FIELD.co2)) {
+				headers.add(f.toString() + "_avgTrack");
+				headers.add(f.toString() + "_avgTrip");
+				headers.add(f.toString() + "_prcValue");
+			}
+		});
 		return headers.toArray(new String[0]);
 	}
 	

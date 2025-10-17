@@ -35,7 +35,7 @@ import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO;
-import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO.StatValue;
+import it.smartcommunitylab.pgazienda.dto.StatMultimodalValueDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
@@ -363,21 +363,12 @@ public class StatMultimodalService {
 		return headers.toArray(new String[0]);
 	}
 
-	private List<String> getStatValue(StatValue stat, List<STAT_TRACK_FIELD> fields) {
+	private List<String> getStatValue(StatMultimodalValueDTO stat, List<STAT_TRACK_FIELD> fields) {
 		List<String> row = new ArrayList<>();
 		fields.forEach(f -> {
 			switch (f) {
-			case score:
-				row.add(String.valueOf(stat.getScore()));
-				break;
-			case limitedScore:
-				row.add(String.valueOf(stat.getLimitedScore()));
-				break;
 			case track:
-				row.add(String.valueOf(stat.getTrack()));
-				break;
-			case co2:
-				row.add(String.valueOf(stat.getCo2()));
+				row.add(String.valueOf(stat.getCount()));
 				break;
 			case distance:
 				row.add(String.valueOf(stat.getDistance()));
