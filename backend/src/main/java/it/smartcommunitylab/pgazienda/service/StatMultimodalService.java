@@ -35,7 +35,9 @@ import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO;
+import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO.Builder;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalValueDTO;
+import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
@@ -97,21 +99,7 @@ public class StatMultimodalService {
 		if (GROUP_BY_DATA.location.equals(dataGroupBy)) group.add("locationKey");
 		
 		GroupOperation groupByOperation = Aggregation.group(group.toArray(new String[group.size()]));
-		if (fields == null || fields.isEmpty()) {
-			fields = Collections.singletonList(STAT_TRACK_FIELD.track);
-		}
-		if (fields.contains(STAT_TRACK_FIELD.score)) {
-			groupByOperation = groupByOperation.sum("score").as("score");
-		}
-		if (fields.contains(STAT_TRACK_FIELD.limitedScore)) {
-			groupByOperation = groupByOperation.sum("limitedScore").as("limitedScore");
-		}
-		if (fields.contains(STAT_TRACK_FIELD.track)) {
-			groupByOperation = groupByOperation.count().as("track");
-		}
-		if (fields.contains(STAT_TRACK_FIELD.co2)) {
-			groupByOperation = groupByOperation.sum("co2").as("co2");
-		}
+		groupByOperation = groupByOperation.count().as("count");
 		if (fields.contains(STAT_TRACK_FIELD.distance)) {
 			groupByOperation = groupByOperation.sum("distance").as("distance");
 		}
@@ -136,36 +124,54 @@ public class StatMultimodalService {
 			}
 			list.add(doc);
 		}
-		
-		Map<String, List<Document>> mapModes = new HashMap<>();
-		for(List<Document> docs : mapMultimodal.values()) {
-			String modes = getModeList(docs);
-			List<Document> list = mapModes.get(modes);
-			if(list == null) {
-				list = new ArrayList<>();
-				mapModes.put(modes, list);
-			}
-			list.addAll(docs);
+
+		// map multimodalId to mode list
+		Map<String, String> mapModes = new HashMap<>();
+		for(String multimodalId : mapMultimodal.keySet()) {
+			String modes = getModeList(mapMultimodal.get(multimodalId));
+			mapModes.put(multimodalId, modes);
 		}
+
+		/*Map<String, Integer> mapModeMultimodalCount = new HashMap<>();
+		for(String modes : mapModes.keySet()) {
+			mapModeMultimodalCount.put(modes, countMultimodal(mapModes.get(modes)));
+		}*/
 		
 		Map<String, StatMultimodalDTO.Builder> mapBuilders = new HashMap<>();
-		for(String modeGroup : mapModes.keySet()) {
-			for(Document doc : mapModes.get(modeGroup)) {
+		Map<String, List<Document>> mapModeKeyDocs = new HashMap<>();
+		for(String multimodalId : mapMultimodal.keySet()) {
+			String mode = mapModes.get(multimodalId);
+			for(Document doc : mapMultimodal.get(multimodalId)) {
 				String timeGroup = getGroupByTime(doc, timeGroupBy);
 				String dataGroup = getGroupByData(doc, dataGroupBy);
 				addDataGroup(dataGroupList, dataGroup);
-				String groupKey = getGroupKey(campaignId, modeGroup, timeGroup, dataGroup);
+				String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+				String modeKey = getModeKey(campaignId, timeGroup, dataGroup, mode);
 				StatMultimodalDTO.Builder builder = mapBuilders.get(groupKey);
 				if(builder == null) {
 					builder = new StatMultimodalDTO.Builder();
-					builder.populateKeyFields(doc, modeGroup);
+					builder.populateKeyFields(doc);
 					mapBuilders.put(groupKey, builder);
 				}
-				builder.mergeStatMean(doc);
+				builder.mergeStatModeDoc(doc, mode);
+				List<Document> docList = mapModeKeyDocs.get(groupKey);
+				if(docList == null) {
+					docList = new ArrayList<>();
+					mapModeKeyDocs.put(modeKey, docList);
+				}
+				docList.add(doc);
 			}
 		}
-		
-		for(String groupKey :  mapBuilders.keySet()) {
+		// set mode trip counter
+		for(String modeKey : mapModeKeyDocs.keySet()) {
+			List<Document> docs = mapModeKeyDocs.get(modeKey);
+			int count = countMultimodal(docs);
+			StatMultimodalDTO.Builder builder = mapBuilders.get(modeKey.substring(0, modeKey.lastIndexOf("___")));
+			if(builder != null) {
+				builder.setModeCount(modeKey.substring(modeKey.lastIndexOf("___") + 3), count);
+			}
+		}
+		for(String groupKey : mapBuilders.keySet()) {
 			mapStats.put(groupKey, mapBuilders.get(groupKey).updateMainStats().build());
 		}
 		//add all poassibly dataGroupBy value if requested
@@ -174,7 +180,7 @@ public class StatMultimodalService {
 			(allDataGroupBy && GROUP_BY_DATA.employee.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId))) {
 			fillAllDataGroup(campaignId, companyId, dataGroupBy, dataGroupList);
 		}
-		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList, mapModes.keySet());
+		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList);
 		Comparator<StatMultimodalDTO>comparator = new Comparator<StatMultimodalDTO>() {
 			@Override
 			public int compare(StatMultimodalDTO o1, StatMultimodalDTO o2) {
@@ -184,6 +190,18 @@ public class StatMultimodalService {
 		List<StatMultimodalDTO> result = new ArrayList<>(mapStats.values());
 		Collections.sort(result, comparator);
 		return result;		
+	}
+
+	private Integer countMultimodal(List<Document> list) {
+		List<String> multimodalIds = new ArrayList<>();
+		for(Document doc : list) {
+			Document idMap = (Document) doc.get("_id");
+			String multimodalId = idMap.getString("multimodalId");
+			if(!multimodalIds.contains(multimodalId)) {
+				multimodalIds.add(multimodalId);
+			}
+		}
+		return multimodalIds.size();
 	}
 
 	private void fillAllDataGroup(String campaignId, String companyId, GROUP_BY_DATA dataGroupBy, List<String> dataGroupList) {
@@ -216,36 +234,32 @@ public class StatMultimodalService {
 		}		
 	}
 	
-	private void fillEmptyDate(String campaignId, Map<String, StatMultimodalDTO> mapStats, List<String> timeGroupList,
-			List<String> dataGroupList, Set<String> modeGroupSet) {
-		for(String modeGroup : modeGroupSet) {
-			if(dataGroupList.size() == 0) {
+	private void fillEmptyDate(String campaignId, Map<String, StatMultimodalDTO> mapStats, 
+			List<String> timeGroupList, List<String> dataGroupList) {
+		if(dataGroupList.size() == 0) {
+			for(String timeGroup : timeGroupList) {
+				String groupKey = getGroupKey(campaignId, timeGroup, null);
+				if(!mapStats.containsKey(groupKey)) {
+					StatMultimodalDTO stats = new  StatMultimodalDTO();
+					stats.setCampaign(campaignId);
+					stats.setTimeGroup(timeGroup);
+					mapStats.put(groupKey, stats);
+				}
+			}
+		} else {
+			for(String dataGroup : dataGroupList) {
 				for(String timeGroup : timeGroupList) {
-					String groupKey = getGroupKey(campaignId, modeGroup, timeGroup, null);
+					String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
 					if(!mapStats.containsKey(groupKey)) {
 						StatMultimodalDTO stats = new  StatMultimodalDTO();
 						stats.setCampaign(campaignId);
 						stats.setTimeGroup(timeGroup);
-						stats.setModeGroup(modeGroup);
+						stats.setDataGroup(dataGroup);
 						mapStats.put(groupKey, stats);
-					}
+					}					
 				}
-			} else {
-				for(String dataGroup : dataGroupList) {
-					for(String timeGroup : timeGroupList) {
-						String groupKey = getGroupKey(campaignId, modeGroup, timeGroup, dataGroup);
-						if(!mapStats.containsKey(groupKey)) {
-							StatMultimodalDTO stats = new  StatMultimodalDTO();
-							stats.setCampaign(campaignId);
-							stats.setTimeGroup(timeGroup);
-							stats.setDataGroup(dataGroup);
-							stats.setModeGroup(modeGroup);
-							mapStats.put(groupKey, stats);
-						}					
-					}
-				}
-			}			
-		}
+			}
+		}			
 	}
 
 	private void addDataGroup(List<String> dataGroupList, String dataGroup) {
@@ -265,9 +279,16 @@ public class StatMultimodalService {
 		return Collections.emptyList();		
 	}
 
-	private String getGroupKey(String campaignId, String modeGroup, String timeGroup, String dataGroup) {
-		String key = campaignId + "_" + modeGroup + "_" + timeGroup;
+	private String getGroupKey(String campaignId, String timeGroup, String dataGroup) {
+		String key = campaignId + "_" + timeGroup;
 		if(StringUtils.isNotBlank(dataGroup)) key += "_" + dataGroup;
+		return key;
+	}
+
+	private String getModeKey(String campaignId, String timeGroup, String dataGroup, String mode) {
+		String key = campaignId + "_" + timeGroup;
+		if(StringUtils.isNotBlank(dataGroup)) key += "_" + dataGroup;
+		key += "___" + mode;
 		return key;
 	}
 
@@ -328,24 +349,24 @@ public class StatMultimodalService {
 
 	private List<String[]> getCSV(StatMultimodalDTO dto, List<STAT_TRACK_FIELD> fields) {
 		List<String[]> result = new ArrayList<>();
-		if(dto.getMeanStatMap().isEmpty()) {
+		if(dto.getModeStatMap().isEmpty()) {
 			List<String> row = new ArrayList<>();
 			row.add(dto.getCampaign());
-			row.add(dto.getModeGroup());
+			//row.add(dto.getModeGroup());
 			row.add(dto.getTimeGroup());
 			if(dto.getDataGroup() != null) row.add(dto.getDataGroup());
 			row.add("none");
 			row.addAll(getStatValue(dto.getStats(), fields));
 			result.add(row.toArray(new String[0]));			
 		} else {
-			for(String mean : dto.getMeanStatMap().keySet()) {
+			for(String mean : dto.getModeStatMap().keySet()) {
 				List<String> row = new ArrayList<>();
 				row.add(dto.getCampaign());
-				row.add(dto.getModeGroup());
+				//row.add(dto.getModeGroup());
 				row.add(dto.getTimeGroup());
 				if(dto.getDataGroup() != null) row.add(dto.getDataGroup());			
 				row.add(mean);
-				row.addAll(getStatValue(dto.getMeanStatMap().get(mean), fields));
+				row.addAll(getStatValue(dto.getModeStatMap().get(mean), fields));
 				result.add(row.toArray(new String[0]));
 			}					
 		}
@@ -361,6 +382,21 @@ public class StatMultimodalService {
 		headers.add("mean");
 		fields.forEach(f -> headers.add(f.toString()));
 		return headers.toArray(new String[0]);
+	}
+
+	private String[] getStatCsv(StatMultimodalDTO dto, String mean, List<STAT_TRACK_FIELD> fields, boolean groupByMean, boolean mainStats) {
+		List<String> row = new ArrayList<>();
+		row.add(dto.getCampaign());
+		row.add(dto.getTimeGroup());
+		if(dto.getDataGroup() != null) {
+			row.add(dto.getDataGroup());			
+		}
+		if(mean != null) row.add(mean);
+		if(mainStats)
+			row.addAll(getStatValue(dto.getStats(), fields));
+		else
+			row.addAll(getStatValue(dto.getModeStatMap().get(mean), fields));
+		return row.toArray(new String[0]);
 	}
 
 	private List<String> getStatValue(StatMultimodalValueDTO stat, List<STAT_TRACK_FIELD> fields) {
