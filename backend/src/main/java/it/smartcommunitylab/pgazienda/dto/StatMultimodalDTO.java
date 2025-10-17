@@ -8,10 +8,9 @@ import org.bson.Document;
 public class StatMultimodalDTO {
 	private String campaign;
 	private String timeGroup;
-	private String modeGroup; 
 	private String dataGroup;
 	private StatMultimodalValueDTO stats = new StatMultimodalValueDTO();
-	private Map<String, StatMultimodalValueDTO>meanStatMap = new HashMap<>();
+	private Map<String, StatMultimodalValueDTO> modeStatMap = new HashMap<>();
 	
 	public String getTimeGroup() {
 		return timeGroup;
@@ -19,23 +18,17 @@ public class StatMultimodalDTO {
 	public void setTimeGroup(String timeGroup) {
 		this.timeGroup = timeGroup;
 	}
-	public Map<String, StatMultimodalValueDTO> getMeanStatMap() {
-		return meanStatMap;
+	public Map<String, StatMultimodalValueDTO> getModeStatMap() {
+		return modeStatMap;
 	}
-	public void setMeanStatMap(Map<String, StatMultimodalValueDTO> meanStatMap) {
-		this.meanStatMap = meanStatMap;
+	public void setModeStatMap(Map<String, StatMultimodalValueDTO> meanStatMap) {
+		this.modeStatMap = meanStatMap;
 	}
 	public String getCampaign() {
 		return campaign;
 	}
 	public void setCampaign(String campaign) {
 		this.campaign = campaign;
-	}
-	public String getModeGroup() {
-		return modeGroup;
-	}
-	public void setModeGroup(String modeGroup) {
-		this.modeGroup = modeGroup;
 	}
 	public String getDataGroup() {
 		return dataGroup;
@@ -53,11 +46,10 @@ public class StatMultimodalDTO {
 	public static class Builder {
 		private StatMultimodalDTO dto;
 		
-		public Builder populateKeyFields(Document doc, String modeGroup) {
+		public Builder populateKeyFields(Document doc) {
 			if(dto == null)
 				dto = new StatMultimodalDTO();
 			
-			dto.setModeGroup(modeGroup);
 			Document idMap = (Document) doc.get("_id");
 			if(idMap.containsKey("campaign")) dto.setCampaign(idMap.getString("campaign"));
 			if(idMap.containsKey("locationKey")) dto.setDataGroup(idMap.getString("locationKey"));
@@ -80,40 +72,57 @@ public class StatMultimodalDTO {
 			return this;
 		}
 		
-		public Builder populateStatFields(Document doc) {
+		public Builder mergeStatModeDoc(Document doc, String mode) {
 			if(dto == null)
 				dto = new StatMultimodalDTO();
 			
-			StatMultimodalValueDTO stats = new StatMultimodalValueDTO(); 
-			if(doc.containsKey("track")) stats.setCount(FieldDTO.fromValue((double) doc.getInteger("track")));
+			StatMultimodalValueDTO stats = dto.getStats();
 			if(doc.containsKey("distance")) {
-				stats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
-				stats.getDistance().setAvgTrip(doc.getDouble("distance") / (double) doc.getInteger("track"));
+				if (stats.getDistance() == null) 
+					stats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
+				else
+					stats.getDistance().sumValue(doc.getDouble("distance"));
+				if(dto.getModeStatMap().containsKey(mode)) {
+					StatMultimodalValueDTO modeStats = dto.getModeStatMap().get(mode);
+					if(modeStats.getDistance() == null) {
+						modeStats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
+					} else {
+						modeStats.getDistance().sumValue(doc.getDouble("distance"));
+					}
+				} else {
+					StatMultimodalValueDTO modeStats = new StatMultimodalValueDTO();
+					modeStats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
+					dto.getModeStatMap().put(mode, modeStats);
+				}
 			}
 			if(doc.containsKey("duration")) {
-				stats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")));
-				stats.getDuration().setAvgTrip((double) doc.getLong("duration") / (double) doc.getInteger("track"));
+				if (stats.getDuration() == null) 
+					stats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")));
+				else
+					stats.getDuration().sumValue((double) doc.getLong("duration"));
+				if(dto.getModeStatMap().containsKey(mode)) {
+					StatMultimodalValueDTO modeStats = dto.getModeStatMap().get(mode);
+					if(modeStats.getDuration() == null) {
+						modeStats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")));
+					} else {
+						modeStats.getDuration().sumValue((double) doc.getLong("duration"));
+					}
+				} else {
+					StatMultimodalValueDTO modeStats = new StatMultimodalValueDTO();
+					modeStats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")));
+					dto.getModeStatMap().put(mode, modeStats);
+				}
 			}
-
-			dto.setStats(stats);	
 			return this;
 		}
-		
-		public Builder mergeStatMean(Document doc) {
+
+		public Builder setModeCount(String mode, Integer count) {
 			if(dto == null)
 				dto = new StatMultimodalDTO();
 			
-			Document idMap = (Document) doc.get("_id");
-			if(idMap.containsKey("mode")) {
-				String mode = idMap.getString("mode");			
-				StatMultimodalValueDTO stats = dto.getMeanStatMap().get(mode);
-				if(stats == null) {
-					stats = new StatMultimodalValueDTO();
-					 dto.getMeanStatMap().put(mode, stats);
-				}
-				if(doc.containsKey("distance")) stats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
-				if(doc.containsKey("duration")) stats.setDuration(FieldDTO.fromValue((double)doc.getLong("duration")));
-				if(doc.containsKey("track")) stats.setCount(FieldDTO.fromValue((double) doc.getInteger("track")));
+			if(dto.getModeStatMap().containsKey(mode)) {
+				StatMultimodalValueDTO stats = dto.getModeStatMap().get(mode);
+				stats.setCount(FieldDTO.fromValue((double) count));
 			}
 			return this;
 		}
@@ -123,7 +132,7 @@ public class StatMultimodalDTO {
 				dto = new StatMultimodalDTO();
 			
 			StatMultimodalValueDTO stats = new StatMultimodalValueDTO(); 
-			dto.getMeanStatMap().values().forEach(sv -> {
+			dto.getModeStatMap().values().forEach(sv -> {
 				if(sv.getDuration() != null) {
 					if (stats.getDuration() == null) 
 						stats.setDuration(FieldDTO.fromValue(sv.getDuration().getValue()));
@@ -142,8 +151,15 @@ public class StatMultimodalDTO {
 					else
 						stats.getCount().sumValue(sv.getCount());
 				}
-
 			});
+			// update main count
+			int totalCount = 0;
+			for(StatMultimodalValueDTO sv : dto.getModeStatMap().values()) {
+				if(sv.getCount() != null) {
+					totalCount += sv.getCount().getValue().intValue();
+				}
+			}
+			stats.setCount(FieldDTO.fromValue((double) totalCount));
 			// update main avg
 			if(stats.getDistance() != null) {
 				stats.getDistance().setAvgTrip(stats.getDistance().getValue() / stats.getCount().getValue());
@@ -152,7 +168,7 @@ public class StatMultimodalDTO {
 				stats.getDuration().setAvgTrip(stats.getDuration().getValue() / stats.getCount().getValue());
 			}
 			// update avg and prc for every mean
-			dto.getMeanStatMap().values().forEach(sv -> {
+			dto.getModeStatMap().values().forEach(sv -> {
 				if(sv.getCount() != null) {
 					sv.getCount().setPrcValue((sv.getCount().getValue() / stats.getCount().getValue()) * 100.0);
 				}

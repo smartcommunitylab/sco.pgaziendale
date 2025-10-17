@@ -50,4 +50,14 @@ public class FieldDTO {
             }
         }
     }
+
+    public void sumValue(Double addValue) {
+        if (addValue != null) {
+            if (this.value == null) {
+                this.value = addValue;
+            } else {
+                this.value += addValue;
+            }
+        }
+    }
 }
