@@ -17,10 +17,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -74,6 +78,9 @@ public class StatEmployeeService {
 			from = campaign.getFrom();
 			to = campaign.getTo();
 		}
+
+		// get employee counts
+		Map<String, Integer> employeeCountMap = getEmployeeCountByCompany(campaignId);
 		
 		Criteria criteria = new Criteria("trackingRecord." + campaignId).exists(true);
 		if(StringUtils.isNotBlank(companyId)) {
@@ -88,7 +95,7 @@ public class StatEmployeeService {
 		List<String> timeGroupList = getTimeGroupList(from, to, timeGroupBy);
 		List<String> dataGroupList = new ArrayList<>();
 		
-		//set activeUsers
+		// set activeUsers
 		List<StatTrackDTO> trackStats = statTrackService.getTrackStats(campaignId, companyId, locationId, null, "all", 
 				timeGroupBy, GROUP_BY_DATA.employee, Collections.singletonList(STAT_TRACK_FIELD.track), false, false, from, to);
 		for(StatTrackDTO dto : trackStats) {
@@ -104,7 +111,7 @@ public class StatEmployeeService {
 				String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
 				StatEmployeeDTO stats = mapStats.get(groupKey);
 				if(stats == null) {
-					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, company);
+					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, company, employeeCountMap);
 					mapStats.put(groupKey, stats);
 				}
 				stats.getActiveUsers().addValue();
@@ -128,7 +135,7 @@ public class StatEmployeeService {
 			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup); 
 			StatEmployeeDTO stats = mapStats.get(groupKey);
 			if(stats == null) {
-				stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId());
+				stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId(), employeeCountMap);
 				mapStats.put(groupKey, stats);
 			}
 			if(isRegistered(registrationDate, from, to)) stats.getRegistration().addValue();
@@ -139,7 +146,7 @@ public class StatEmployeeService {
 				groupKey = getGroupKey(campaignId, timeGroup, dataGroup); 
 				stats = mapStats.get(groupKey);
 				if(stats == null) {
-					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId());
+					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId(), employeeCountMap);
 					mapStats.put(groupKey, stats);
 				}
 				if(isDropout(dropoutDate, from, to)) stats.getDropout().addValue();
@@ -171,17 +178,34 @@ public class StatEmployeeService {
 		return result;
 	}
 
-	private StatEmployeeDTO addNewEmployeeStats(String campaignId, String timeGroup, String dataGroup, String companyId) {
+	private StatEmployeeDTO addNewEmployeeStats(String campaignId, String timeGroup, String dataGroup, 
+			String companyId, Map<String, Integer> employeeCountMap) {
 		StatEmployeeDTO stats = new  StatEmployeeDTO();
 		stats.setCampaign(campaignId);
 		stats.setTimeGroup(timeGroup);
 		if(StringUtils.isNotBlank(dataGroup)) stats.setDataGroup(dataGroup);
-		if(StringUtils.isNotBlank(companyId)) stats.setEmployee(employeeRepository.countByCompanyId(companyId));
+		if(StringUtils.isNotBlank(companyId)) stats.setEmployee(employeeCountMap.getOrDefault(companyId, 0));
 		stats.setDropout(FieldEmployeeDTO.fromValue(0));
 		stats.setActiveUsers(FieldEmployeeDTO.fromValue(0));
 		stats.setRegistration(FieldEmployeeDTO.fromValue(0));
 		stats.setRegistered(FieldEmployeeDTO.fromValue(0));
 		return stats;
+	}
+
+	private Map<String, Integer> getEmployeeCountByCompany(String campaignId) {
+		Criteria criteria = new Criteria("trackingRecord." + campaignId).exists(true);
+		MatchOperation filterOperation = Aggregation.match(criteria);
+		GroupOperation groupByOperation = Aggregation.group("companyId")
+				.count().as("employeeCount");
+		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
+		List<Document> results = template.aggregate(aggregation, Employee.class, Document.class).getMappedResults();
+		Map<String, Integer> map = new HashMap<>();
+		for(Document doc : results) {
+			String companyId = doc.getString("_id");
+			Integer count = doc.getInteger("employeeCount", 0);
+			map.put(companyId, count);
+		}
+		return map;
 	}
 	
 /**
