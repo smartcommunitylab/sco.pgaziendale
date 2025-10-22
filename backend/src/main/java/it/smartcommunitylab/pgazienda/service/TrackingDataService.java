@@ -623,7 +623,7 @@ public class TrackingDataService {
 			// get all the company employees
 			Map<String, Employee> employeeMap = new HashMap<>();
 			List<Employee> employees = employeeRepo.findByCompanyId(companyId);
-			employees.forEach(e -> employeeMap.put(e.getCode(), e));
+			employees.forEach(e -> employeeMap.put(e.getCode().toLowerCase(), e));
 
 			// mapping players to employees
 			Map<String, Employee> playerEmployeeMap = new HashMap<>();
@@ -631,8 +631,8 @@ public class TrackingDataService {
 				u.getRoles().forEach(r -> {
 					if (r.getSubscriptions() != null) {
 						r.getSubscriptions().forEach(s -> {
-							if (s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(company.getCode()) && employeeMap.containsKey(s.getKey())) {
-								playerEmployeeMap.put(u.getPlayerId(), employeeMap.get(s.getKey()));
+							if (s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(company.getCode()) && employeeMap.containsKey(s.getKey().toLowerCase())) {
+								playerEmployeeMap.put(u.getPlayerId(), employeeMap.get(s.getKey().toLowerCase()));
 							}
 						});
 					}
@@ -646,7 +646,7 @@ public class TrackingDataService {
 					Employee e = playerEmployeeMap.get(ds.getPlayerId());
 					// any employee with that code for the company (should never happen)
 					if (e == null) {
-						e = employeeMap.get(ds.getEmployeeCode());
+						e = employeeMap.get(ds.getEmployeeCode().toLowerCase());
 					}
 					// employee not found, pult playerId (should never happen)
 					if (e != null) {
@@ -692,13 +692,13 @@ public class TrackingDataService {
 			// map the players to location using the codes of the employees in subscriptions
 			Map<String, String> employeeLocationMap = new HashMap<>();
 			Map<String, String> playerLocationMap = new HashMap<>();
-			employees.forEach(e -> employeeLocationMap.put(e.getCode(), e.getLocation()));
+			employees.forEach(e -> employeeLocationMap.put(e.getCode().toLowerCase(), e.getLocation()));
 			users.forEach(u -> {
 				u.getRoles().forEach(r -> {
 					if (r.getSubscriptions() != null) {
 						r.getSubscriptions().forEach(s -> {
-							if (s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(company.getCode()) && employeeLocationMap.containsKey(s.getKey())) {
-								playerLocationMap.put(u.getPlayerId(), employeeLocationMap.get(s.getKey()));
+							if (s.getCampaign().equals(campaignId) && s.getCompanyCode().equals(company.getCode()) && employeeLocationMap.containsKey(s.getKey().toLowerCase())) {
+								playerLocationMap.put(u.getPlayerId(), employeeLocationMap.get(s.getKey().toLowerCase()));
 							}
 						});
 					}
