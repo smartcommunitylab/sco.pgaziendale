@@ -99,6 +99,8 @@ public class StatEmployeeService {
 		List<StatTrackDTO> trackStats = statTrackService.getTrackStats(campaignId, companyId, locationId, null, "all", 
 				timeGroupBy, GROUP_BY_DATA.employee, Collections.singletonList(STAT_TRACK_FIELD.track), false, false, from, to);
 		for(StatTrackDTO dto : trackStats) {
+			if(dto.getStats() == null) continue;
+			if(dto.getStats().getTrack() == 0) continue;
 			String timeGroup = dto.getTimeGroup();
 			String employeeKey = dto.getDataGroup();
 			String[] split = employeeKey.split(StatTrack.KEY_DIV);
@@ -161,7 +163,6 @@ public class StatEmployeeService {
 			stats.getActiveUsers().setPrcTot((stats.getActiveUsers().getValue() / (double) stats.getEmployee()) * 100.0);
 			if(stats.getRegistration().getValue() > 0) {
 				stats.getDropout().setPrcRegistered(((double) stats.getDropout().getValue() / (double) stats.getRegistration().getValue()) * 100.0);
-				stats.getRegistered().setPrcRegistered(((double) stats.getRegistered().getValue() / (double) stats.getRegistration().getValue()) * 100.0);
 				stats.getActiveUsers().setPrcRegistered(((double) stats.getActiveUsers().getValue() / (double) stats.getRegistration().getValue()) * 100.0);
 			}
 		}
@@ -363,21 +364,64 @@ public class StatEmployeeService {
 		List<String> row = new ArrayList<>();
 		row.add(dto.getCampaign());
 		row.add(dto.getTimeGroup());
-		if(dto.getDataGroup() != null) row.add(dto.getDataGroup());	
-		row.add(String.valueOf(dto.getActiveUsers()));
-		row.add(String.valueOf(dto.getRegistration()));
-		row.add(String.valueOf(dto.getDropout()));		
+		if(dto.getDataGroup() != null) {
+			row.add(dto.getDataGroup());
+			row.add(dto.getDataGroupName());
+		}
+		row.add(String.valueOf(dto.getEmployee()));
+		row.add(getValue(dto.getRegistration()));
+		row.add(getPrcTot(dto.getRegistration()));
+		row.add(getValue(dto.getRegistered()));
+		row.add(getPrcTot(dto.getRegistered()));
+		row.add(getValue(dto.getActiveUsers()));
+		row.add(getPrcTot(dto.getActiveUsers()));
+		row.add(getPrcRegistered(dto.getActiveUsers()));
+		row.add(getValue(dto.getDropout()));
+		row.add(getPrcTot(dto.getDropout()));
+		row.add(getPrcRegistered(dto.getDropout()));
 		return row.toArray(new String[0]);
+	}
+
+	private String getValue(FieldEmployeeDTO field) {
+		if(field != null && field.getValue() != null) {
+			return String.valueOf(field.getValue());
+		}
+		return "";
+	}
+
+	private String getPrcTot(FieldEmployeeDTO field) {
+		if(field != null && field.getPrcTot() != null) {
+			return String.valueOf(field.getPrcTot());
+		}
+		return "";
+	}
+
+	private String getPrcRegistered(FieldEmployeeDTO field) {
+		if(field != null && field.getPrcRegistered() != null) {
+			return String.valueOf(field.getPrcRegistered());
+		}
+		return "";
 	}
 
 	private String[] getHeaders(GROUP_BY_TIME timeGroupBy, GROUP_BY_DATA dataGroupBy) {
 		List<String>headers = new ArrayList<>();
 		headers.add("campaign"); 
 		headers.add("timeGroup"); 
-		if(dataGroupBy != null) headers.add("dataGroup");
-		headers.add("activeUsers");
+		if(dataGroupBy != null) {
+			headers.add("dataGroup");
+			headers.add("dataGroupName");
+		}
+		headers.add("employee");
 		headers.add("registration");
+		headers.add("registration_prcTot");
+		headers.add("registered");
+		headers.add("registered_prcTot");
+		headers.add("activeUsers");
+		headers.add("activeUsers_prcTot");
+		headers.add("activeUsers_prcRegistered");
 		headers.add("dropout");
+		headers.add("dropout_prcTot");
+		headers.add("dropout_prcRegistered");
 		return headers.toArray(new String[0]);
 	}
 
