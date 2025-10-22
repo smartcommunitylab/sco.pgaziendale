@@ -38,6 +38,7 @@ import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO.Builder;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalValueDTO;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
+import it.smartcommunitylab.pgazienda.dto.StatValueDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
@@ -100,6 +101,9 @@ public class StatMultimodalService {
 		
 		GroupOperation groupByOperation = Aggregation.group(group.toArray(new String[group.size()]));
 		groupByOperation = groupByOperation.count().as("count");
+		if(!fields.contains(STAT_TRACK_FIELD.track)) {
+			fields.add(STAT_TRACK_FIELD.track);
+		}
 		if (fields.contains(STAT_TRACK_FIELD.distance)) {
 			groupByOperation = groupByOperation.sum("distance").as("distance");
 		}
@@ -349,42 +353,14 @@ public class StatMultimodalService {
 
 	private List<String[]> getCSV(StatMultimodalDTO dto, List<STAT_TRACK_FIELD> fields) {
 		List<String[]> result = new ArrayList<>();
-		if(dto.getModeStatMap().isEmpty()) {
-			List<String> row = new ArrayList<>();
-			row.add(dto.getCampaign());
-			//row.add(dto.getModeGroup());
-			row.add(dto.getTimeGroup());
-			if(dto.getDataGroup() != null) row.add(dto.getDataGroup());
-			row.add("none");
-			row.addAll(getStatValue(dto.getStats(), fields));
-			result.add(row.toArray(new String[0]));			
-		} else {
-			for(String mean : dto.getModeStatMap().keySet()) {
-				List<String> row = new ArrayList<>();
-				row.add(dto.getCampaign());
-				//row.add(dto.getModeGroup());
-				row.add(dto.getTimeGroup());
-				if(dto.getDataGroup() != null) row.add(dto.getDataGroup());			
-				row.add(mean);
-				row.addAll(getStatValue(dto.getModeStatMap().get(mean), fields));
-				result.add(row.toArray(new String[0]));
-			}					
+		result.add(getStatCsv(dto, "all", fields, true));
+		for(String mean : dto.getModeStatMap().keySet()) {
+			result.add(getStatCsv(dto, mean, fields, false));
 		}
 		return result;
 	}
 
-	private String[] getHeaders(GROUP_BY_TIME timeGroupBy, GROUP_BY_DATA dataGroupBy, List<STAT_TRACK_FIELD> fields) {
-		List<String>headers = new ArrayList<>();
-		headers.add("campaign");
-		headers.add("modeGroup");
-		headers.add("timeGroup"); 
-		if(dataGroupBy != null) headers.add("dataGroup");
-		headers.add("mean");
-		fields.forEach(f -> headers.add(f.toString()));
-		return headers.toArray(new String[0]);
-	}
-
-	private String[] getStatCsv(StatMultimodalDTO dto, String mean, List<STAT_TRACK_FIELD> fields, boolean groupByMean, boolean mainStats) {
+	private String[] getStatCsv(StatMultimodalDTO dto, String mean, List<STAT_TRACK_FIELD> fields, boolean mainStats) {
 		List<String> row = new ArrayList<>();
 		row.add(dto.getCampaign());
 		row.add(dto.getTimeGroup());
@@ -392,25 +368,66 @@ public class StatMultimodalService {
 			row.add(dto.getDataGroup());			
 		}
 		if(mean != null) row.add(mean);
-		if(mainStats)
-			row.addAll(getStatValue(dto.getStats(), fields));
-		else
-			row.addAll(getStatValue(dto.getModeStatMap().get(mean), fields));
+		if(mainStats) {
+			row.addAll(getStatValue(dto.getStats(), fields, mainStats));
+		} else {
+			row.addAll(getStatValue(dto.getModeStatMap().get(mean), fields, mainStats));
+		}
 		return row.toArray(new String[0]);
 	}
 
-	private List<String> getStatValue(StatMultimodalValueDTO stat, List<STAT_TRACK_FIELD> fields) {
+	private List<String> getStatValue(StatMultimodalValueDTO stat, List<STAT_TRACK_FIELD> fields, boolean mainStats) {
 		List<String> row = new ArrayList<>();
 		fields.forEach(f -> {
 			switch (f) {
 			case track:
-				row.add(String.valueOf(stat.getCount()));
+				if(stat.getCount() != null) {
+					row.add(String.valueOf(stat.getCount().getValue()));
+					if(!mainStats) {
+						row.add(String.valueOf(stat.getCount().getPrcValue()));
+					} else {
+						row.add("");
+					}
+				} else {
+					row.add("");
+					row.add("");
+				}
 				break;
 			case distance:
-				row.add(String.valueOf(stat.getDistance()));
+				if(stat.getDistance() != null) {
+					row.add(String.valueOf(stat.getDistance().getValue()));
+					row.add(String.valueOf(stat.getDistance().getAvgTrip()));
+					if(!mainStats) {
+						row.add(String.valueOf(stat.getDistance().getPrcValue()));
+						row.add(String.valueOf(stat.getDistance().getPrcAvgTrip()));
+					} else {
+						row.add("");
+						row.add("");
+					}
+				} else {
+					row.add("");
+					row.add("");
+					row.add("");
+					row.add("");
+				}
 				break;
 			case duration:
-				row.add(String.valueOf(stat.getDuration()));
+				if(stat.getDuration() != null) {
+					row.add(String.valueOf(stat.getDuration().getValue()));
+					row.add(String.valueOf(stat.getDuration().getAvgTrip()));
+					if(!mainStats) {
+						row.add(String.valueOf(stat.getDuration().getPrcValue()));
+						row.add(String.valueOf(stat.getDuration().getPrcAvgTrip()));
+					} else {
+						row.add("");
+						row.add("");
+					}
+				} else {
+					row.add("");
+					row.add("");
+					row.add("");
+					row.add("");
+				}
 				break;				
 			default:
 				break;
@@ -418,5 +435,29 @@ public class StatMultimodalService {
 		});
 		return row;
 	}
+
+	private String[] getHeaders(GROUP_BY_TIME timeGroupBy, GROUP_BY_DATA dataGroupBy, List<STAT_TRACK_FIELD> fields) {
+		List<String>headers = new ArrayList<>();
+		headers.add("campaign");
+		headers.add("timeGroup"); 
+		if(dataGroupBy != null) headers.add("dataGroup");
+		headers.add("mean");
+		fields.forEach(f -> {
+			if(STAT_TRACK_FIELD.track == f) {
+				headers.add("count"); 
+				headers.add("count_prcValue");
+			}
+			else {
+				headers.add(f.toString());
+				headers.add(f.toString() + "_avgTrip");
+				headers.add(f.toString() + "_prcValue");
+				headers.add(f.toString() + "_prcAvgTrip");
+			}
+		});
+		return headers.toArray(new String[0]);
+	}
+
+
+
 	
 }
