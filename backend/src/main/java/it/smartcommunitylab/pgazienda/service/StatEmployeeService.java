@@ -154,15 +154,15 @@ public class StatEmployeeService {
 		}
 		// set percentages
 		for(StatEmployeeDTO stats : mapStats.values()) {
-			stats.getRegistration().setPrcTot((stats.getRegistration().getValue() / stats.getEmployee()) * 100.0);
-			stats.getDropout().setPrcTot((stats.getDropout().getValue() / stats.getEmployee()) * 100.0);
+			stats.getRegistration().setPrcTot((stats.getRegistration().getValue() / (double) stats.getEmployee()) * 100.0);
+			stats.getDropout().setPrcTot((stats.getDropout().getValue() / (double) stats.getEmployee()) * 100.0);
 			stats.setRegistered(FieldEmployeeDTO.fromValue(stats.getRegistration().getValue() - stats.getDropout().getValue()));
-			stats.getRegistered().setPrcTot((stats.getRegistered().getValue() / stats.getEmployee()) * 100.0);
-			stats.getActiveUsers().setPrcTot((stats.getActiveUsers().getValue() / stats.getEmployee()) * 100.0);
+			stats.getRegistered().setPrcTot((stats.getRegistered().getValue() / (double) stats.getEmployee()) * 100.0);
+			stats.getActiveUsers().setPrcTot((stats.getActiveUsers().getValue() / (double) stats.getEmployee()) * 100.0);
 			if(stats.getRegistration().getValue() > 0) {
-				stats.getDropout().setPrcRegistered((stats.getDropout().getValue() / stats.getRegistration().getValue()) * 100.0);
-				stats.getRegistered().setPrcRegistered((stats.getRegistered().getValue() / stats.getRegistration().getValue()) * 100.0);
-				stats.getActiveUsers().setPrcRegistered((stats.getActiveUsers().getValue() / stats.getRegistration().getValue()) * 100.0);
+				stats.getDropout().setPrcRegistered(((double) stats.getDropout().getValue() / (double) stats.getRegistration().getValue()) * 100.0);
+				stats.getRegistered().setPrcRegistered(((double) stats.getRegistered().getValue() / (double) stats.getRegistration().getValue()) * 100.0);
+				stats.getActiveUsers().setPrcRegistered(((double) stats.getActiveUsers().getValue() / (double) stats.getRegistration().getValue()) * 100.0);
 			}
 		}
 		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList);
