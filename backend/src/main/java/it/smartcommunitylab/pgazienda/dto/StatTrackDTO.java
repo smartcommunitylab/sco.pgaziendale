@@ -99,15 +99,24 @@ public class StatTrackDTO {
 			if(doc.containsKey("limitedScore")) stats.setLimitedScore(FieldDTO.fromValue(doc.getDouble("limitedScore")));
 			if(doc.containsKey("co2")) {
 				stats.setCo2(FieldDTO.fromValue(doc.getDouble("co2")));
-				stats.getCo2().setAvgTrip(doc.getDouble("co2") / (double) doc.getInteger("tripCount"));
+				if (stats.getTripCount() != null && stats.getTripCount() > 0) 
+					stats.getCo2().setAvgTrip(doc.getDouble("co2") / (double) stats.getTripCount());
+				if (stats.getTrack() != null && stats.getTrack() > 0) 
+					stats.getCo2().setAvgTrack(doc.getDouble("co2") / (double) stats.getTrack());	
 			}
 			if(doc.containsKey("distance")) {
 				stats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
-				stats.getDistance().setAvgTrip(doc.getDouble("distance") / (double) doc.getInteger("tripCount"));
+				if (stats.getTripCount() != null && stats.getTripCount() > 0) 
+					stats.getDistance().setAvgTrip(doc.getDouble("distance") / (double) stats.getTripCount());
+				if (stats.getTrack() != null && stats.getTrack() > 0) 
+					stats.getDistance().setAvgTrack(doc.getDouble("distance") / (double) stats.getTrack());
 			}
 			if(doc.containsKey("duration")) {
 				stats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")));
-				stats.getDuration().setAvgTrip((double) doc.getLong("duration") / (double) doc.getInteger("tripCount"));
+				if (stats.getTripCount() != null && stats.getTripCount() > 0) 
+					stats.getDuration().setAvgTrip((double) doc.getLong("duration") / (double) stats.getTripCount());
+				if (stats.getTrack() != null && stats.getTrack() > 0) 
+					stats.getDuration().setAvgTrack((double) doc.getLong("duration") / (double) stats.getTrack());
 			}
 			dto.setStats(stats);	
 			return this;
@@ -193,30 +202,60 @@ public class StatTrackDTO {
 			});
 			// update main avg
 			if(stats.getCo2() != null) {
-				stats.getCo2().setAvgTrip(stats.getCo2().getValue() / (double) stats.getTripCount());
+				if (stats.getTripCount() != null && stats.getTripCount() > 0)
+					stats.getCo2().setAvgTrip(stats.getCo2().getValue() / (double) stats.getTripCount());
+				if (stats.getTrack() != null && stats.getTrack() > 0)
+					stats.getCo2().setAvgTrack(stats.getCo2().getValue() / (double) stats.getTrack());
 			}
 			if(stats.getDistance() != null) {
-				stats.getDistance().setAvgTrip(stats.getDistance().getValue() / (double) stats.getTripCount());
+				if (stats.getTripCount() != null && stats.getTripCount() > 0)
+					stats.getDistance().setAvgTrip(stats.getDistance().getValue() / (double) stats.getTripCount());
+				if (stats.getTrack() != null && stats.getTrack() > 0)
+					stats.getDistance().setAvgTrack(stats.getDistance().getValue() / (double) stats.getTrack());
 			}
 			if(stats.getDuration() != null) {
-				stats.getDuration().setAvgTrip(stats.getDuration().getValue() / (double) stats.getTripCount());
+				if (stats.getTripCount() != null && stats.getTripCount() > 0)
+					stats.getDuration().setAvgTrip(stats.getDuration().getValue() / (double) stats.getTripCount());
+				if (stats.getTrack() != null && stats.getTrack() > 0)
+					stats.getDuration().setAvgTrack(stats.getDuration().getValue() / (double) stats.getTrack());
 			}
 			// update avg and prc for every mean
 			dto.getMeanStatMap().values().forEach(sv -> {
 				if(sv.getCo2() != null) {
-					sv.getCo2().setAvgTrip(sv.getCo2().getValue() / (double) stats.getTripCount());
-					sv.getCo2().setPrcValue((sv.getCo2().getValue() / stats.getCo2().getValue()) * 100.0);
-					sv.getCo2().setPrcAvgTrip((sv.getCo2().getAvgTrip() / stats.getCo2().getAvgTrip()) * 100.0);
+					if (stats.getTripCount() != null && stats.getTripCount() > 0)
+						sv.getCo2().setAvgTrip(sv.getCo2().getValue() / (double) stats.getTripCount());
+					if (stats.getTrack() != null && stats.getTrack() > 0)
+						sv.getCo2().setAvgTrack(sv.getCo2().getValue() / (double) stats.getTrack());
+					if (stats.getCo2().getValue() != null && stats.getCo2().getValue() > 0)
+						sv.getCo2().setPrcValue((sv.getCo2().getValue() / stats.getCo2().getValue()) * 100.0);
+					if (stats.getCo2().getAvgTrip() != null && stats.getCo2().getAvgTrip() > 0)
+						sv.getCo2().setPrcAvgTrip((sv.getCo2().getAvgTrip() / stats.getCo2().getAvgTrip()) * 100.0);
+					if (stats.getCo2().getAvgTrack() != null && stats.getCo2().getAvgTrack() > 0)
+						sv.getCo2().setPrcAvgTrack((sv.getCo2().getAvgTrack() / stats.getCo2().getAvgTrack()) * 100.0);
 				}
 				if(sv.getDistance() != null) {
-					sv.getDistance().setAvgTrip(sv.getDistance().getValue() / (double) stats.getTripCount());
-					sv.getDistance().setPrcValue((sv.getDistance().getValue() / stats.getDistance().getValue()) * 100.0);
-					sv.getDistance().setPrcAvgTrip((sv.getDistance().getAvgTrip() / stats.getDistance().getAvgTrip()) * 100.0);
+					if (stats.getTripCount() != null && stats.getTripCount() > 0)
+						sv.getDistance().setAvgTrip(sv.getDistance().getValue() / (double) stats.getTripCount());
+					if (stats.getTrack() != null && stats.getTrack() > 0)
+						sv.getDistance().setAvgTrack(sv.getDistance().getValue() / (double) stats.getTrack());
+					if (stats.getDistance().getValue() != null && stats.getDistance().getValue() > 0)
+						sv.getDistance().setPrcValue((sv.getDistance().getValue() / stats.getDistance().getValue()) * 100.0);
+					if (stats.getDistance().getAvgTrip() != null && stats.getDistance().getAvgTrip() > 0)
+						sv.getDistance().setPrcAvgTrip((sv.getDistance().getAvgTrip() / stats.getDistance().getAvgTrip()) * 100.0);
+					if (stats.getDistance().getAvgTrack() != null && stats.getDistance().getAvgTrack() > 0)
+						sv.getDistance().setPrcAvgTrack((sv.getDistance().getAvgTrack() / stats.getDistance().getAvgTrack()) * 100.0);
 				}
 				if(sv.getDuration() != null) {
-					sv.getDuration().setAvgTrip(sv.getDuration().getValue() / (double) stats.getTripCount());
-					sv.getDuration().setPrcValue((sv.getDuration().getValue() / stats.getDuration().getValue()) * 100.0);
-					sv.getDuration().setPrcAvgTrip((sv.getDuration().getAvgTrip() / stats.getDuration().getAvgTrip()) * 100.0);
+					if (stats.getTrack() != null && stats.getTrack() > 0) 
+						sv.getDuration().setAvgTrack(sv.getDuration().getValue() / (double) stats.getTrack());
+					if (stats.getTripCount() != null && stats.getTripCount() > 0)
+						sv.getDuration().setAvgTrip(sv.getDuration().getValue() / (double) stats.getTripCount());
+					if (stats.getDuration().getValue() != null && stats.getDuration().getValue() > 0)
+						sv.getDuration().setPrcValue((sv.getDuration().getValue() / stats.getDuration().getValue()) * 100.0);
+					if (stats.getDuration().getAvgTrip() != null && stats.getDuration().getAvgTrip() > 0)
+						sv.getDuration().setPrcAvgTrip((sv.getDuration().getAvgTrip() / stats.getDuration().getAvgTrip()) * 100.0);
+					if (stats.getDuration().getAvgTrack() != null && stats.getDuration().getAvgTrack() > 0)
+						sv.getDuration().setPrcAvgTrack((sv.getDuration().getAvgTrack() / stats.getDuration().getAvgTrack()) * 100.0);
 				}
 			});
 			dto.setStats(stats);
