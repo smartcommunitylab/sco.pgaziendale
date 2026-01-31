@@ -105,18 +105,20 @@ public class StatTrackDTO {
 					stats.getCo2().setAvgTrack(doc.getDouble("co2") / (double) stats.getTrack());	
 			}
 			if(doc.containsKey("distance")) {
-				stats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
+				Double dist = doc.get("distance") != null ? doc.getDouble("distance")/1000.0 : 0.0; // to km
+				stats.setDistance(FieldDTO.fromValue(dist));
 				if (stats.getTripCount() != null && stats.getTripCount() > 0) 
-					stats.getDistance().setAvgTrip(doc.getDouble("distance") / (double) stats.getTripCount());
+					stats.getDistance().setAvgTrip(dist / (double) stats.getTripCount());
 				if (stats.getTrack() != null && stats.getTrack() > 0) 
-					stats.getDistance().setAvgTrack(doc.getDouble("distance") / (double) stats.getTrack());
+					stats.getDistance().setAvgTrack(dist / (double) stats.getTrack());
 			}
 			if(doc.containsKey("duration")) {
-				stats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")));
+				Double duration = doc.get("duration") != null ? (double) doc.getLong("duration")/3600.0 : 0.0; // to hours
+				stats.setDuration(FieldDTO.fromValue(duration));
 				if (stats.getTripCount() != null && stats.getTripCount() > 0) 
-					stats.getDuration().setAvgTrip((double) doc.getLong("duration") / (double) stats.getTripCount());
+					stats.getDuration().setAvgTrip(duration / (double) stats.getTripCount());
 				if (stats.getTrack() != null && stats.getTrack() > 0) 
-					stats.getDuration().setAvgTrack((double) doc.getLong("duration") / (double) stats.getTrack());
+					stats.getDuration().setAvgTrack(duration / (double) stats.getTrack());
 			}
 			dto.setStats(stats);	
 			return this;
@@ -130,11 +132,15 @@ public class StatTrackDTO {
 			if(idMap.containsKey("mode")) {
 				String mode = idMap.getString("mode");
 				StatValueDTO stats = new StatValueDTO(); 
+
+				Double dist = doc.get("distance") != null ? doc.getDouble("distance")/1000.0 : 0.0; // to km
+				Double duration = doc.get("duration") != null ? (double) doc.getLong("duration")/3600.0 : 0.0; // to hours
+
 				if(doc.containsKey("score")) stats.setScore(FieldDTO.fromValue(doc.getDouble("score")));
 				if(doc.containsKey("limitedScore")) stats.setLimitedScore(FieldDTO.fromValue(doc.getDouble("limitedScore")));
 				if(doc.containsKey("co2")) stats.setCo2(FieldDTO.fromValue(doc.getDouble("co2")));
-				if(doc.containsKey("distance")) stats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
-				if(doc.containsKey("duration")) stats.setDuration(FieldDTO.fromValue((double)doc.getLong("duration")));
+				if(doc.containsKey("distance")) stats.setDistance(FieldDTO.fromValue(dist));
+				if(doc.containsKey("duration")) stats.setDuration(FieldDTO.fromValue(duration));
 				if(doc.containsKey("track")) stats.setTrack(doc.getInteger("track"));
 				dto.getMeanStatMap().put(mode, stats);
 			}
