@@ -249,6 +249,7 @@ public class StatTrackService {
 							logger.error(e.getMessage(), e);
 						}					
 					}
+					break;
 				case location:
 					Set<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
 					for (String companyId : companyIds) {
