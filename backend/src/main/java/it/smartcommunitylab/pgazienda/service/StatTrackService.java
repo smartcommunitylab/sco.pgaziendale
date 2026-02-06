@@ -171,7 +171,7 @@ public class StatTrackService {
 				timeGroupBy, fields, campaignId);
 		}
 		//add all poassibly dataGroupBy value if requested
-		if((allDataGroupBy && GROUP_BY_DATA.company.equals(dataGroupBy)) || 
+		if((allDataGroupBy && GROUP_BY_DATA.company.equals(dataGroupBy) && StringUtils.isEmpty(companyId)) || 
 			(allDataGroupBy && GROUP_BY_DATA.location.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId)) || 
 			(allDataGroupBy && GROUP_BY_DATA.employee.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId))) {
 			fillAllDataGroup(campaignId, companyId, dataGroupBy, dataGroupList);
