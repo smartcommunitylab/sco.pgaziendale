@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,10 +34,7 @@ import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO;
-import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO.Builder;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalValueDTO;
-import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
-import it.smartcommunitylab.pgazienda.dto.StatValueDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
@@ -179,7 +175,7 @@ public class StatMultimodalService {
 			mapStats.put(groupKey, mapBuilders.get(groupKey).updateMainStats().build());
 		}
 		//add all poassibly dataGroupBy value if requested
-		if((allDataGroupBy && GROUP_BY_DATA.company.equals(dataGroupBy)) || 
+		if((allDataGroupBy && GROUP_BY_DATA.company.equals(dataGroupBy) && StringUtils.isEmpty(companyId)) || 
 			(allDataGroupBy && GROUP_BY_DATA.location.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId)) || 
 			(allDataGroupBy && GROUP_BY_DATA.employee.equals(dataGroupBy) && StringUtils.isNotEmpty(companyId))) {
 			fillAllDataGroup(campaignId, companyId, dataGroupBy, dataGroupList);
