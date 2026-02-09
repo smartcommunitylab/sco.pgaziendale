@@ -95,6 +95,12 @@ public class StatTrackDTO {
 			if(doc.containsKey("track")) stats.setTrack(doc.getInteger("track"));
 			if(doc.containsKey("tripCount")) stats.setTripCount(doc.getInteger("tripCount"));
 			if(doc.containsKey("limitedTripCount")) stats.setLimitedTripCount(doc.getInteger("limitedTripCount"));
+			if(doc.containsKey("multimodalCount")) stats.setMultimodalCount(doc.getInteger("multimodalCount"));
+			if(stats.getTripCount() != null && stats.getMultimodalCount() != null) 
+				stats.setSingleCount(stats.getTripCount() - stats.getMultimodalCount());
+			else if(stats.getTripCount() != null)
+				stats.setSingleCount(stats.getTripCount());
+
 			if(doc.containsKey("score")) stats.setScore(FieldDTO.fromValue(doc.getDouble("score")));
 			if(doc.containsKey("limitedScore")) stats.setLimitedScore(FieldDTO.fromValue(doc.getDouble("limitedScore")));
 			if(doc.containsKey("co2")) {
@@ -147,15 +153,23 @@ public class StatTrackDTO {
 			return this;
 		}
 		
-		public Builder updateMainStats(Integer tripCount, Integer limitedTripCount) {
-			if(dto == null)
+		public Builder updateMainStats(Integer tripCount, Integer limitedTripCount, Integer multimodalCount) {
+			if (dto == null)
 				dto = new StatTrackDTO();
 			
 			StatValueDTO stats = new StatValueDTO();
-			if(tripCount != null)
+			if (tripCount != null) {
 				stats.setTripCount(tripCount);
-			if(limitedTripCount != null)
+				if(multimodalCount != null) {
+					stats.setMultimodalCount(multimodalCount);
+					stats.setSingleCount(stats.getTripCount() - multimodalCount);
+				} else {
+					stats.setSingleCount(tripCount);
+				}
+			}
+			if (limitedTripCount != null)
 				stats.setLimitedTripCount(limitedTripCount); 
+			
 			dto.getMeanStatMap().values().forEach(sv -> {
 				if(sv.getScore() != null) {
 					if (stats.getScore() == null) 

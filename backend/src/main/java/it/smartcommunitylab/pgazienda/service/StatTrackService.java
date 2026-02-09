@@ -354,7 +354,8 @@ public class StatTrackService {
 		for(String key :  groupMap.keySet()) {
 			Integer tripCount = mapTrips.get(key);
 			Integer limitedTripCount = mapLimitedTrips.get(key);
-			mapStats.put(key, groupMap.get(key).updateMainStats(tripCount, limitedTripCount).build());
+			Integer multimodalCount = mapTrips.get(key + "_multi");
+			mapStats.put(key, groupMap.get(key).updateMainStats(tripCount, limitedTripCount, multimodalCount).build());
 		}
 	}
 	
@@ -381,6 +382,10 @@ public class StatTrackService {
 				Integer tripCount = mapTrips.get(groupKey);
 				if(tripCount != null) {
 					doc.put("tripCount", tripCount);
+				}
+				Integer multimodalCount = mapTrips.get(groupKey + "_multi");
+				if(multimodalCount != null) {
+					doc.put("multimodalCount", multimodalCount);
 				}
 			}
 			if(fields.contains(STAT_TRACK_FIELD.limitedTripCount)) {
@@ -430,22 +435,21 @@ public class StatTrackService {
 		}
 	}
 
-	private void getTripCount(Criteria criteria, List<String> group, GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, 
-			String campaignId, Map<String, Integer> mapTrips) {
+	private void getTripCount(Criteria criteria, List<String> group, GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, String campaignId, Map<String, Integer> mapTrips) {
 		MatchOperation filterOperation = Aggregation.match(criteria);
+
 		List<String> copyGroup = new ArrayList<>(group);
 		copyGroup.remove("mode");
 		copyGroup.add("multimodalId");
-		GroupOperation groupByOperation = Aggregation.group(copyGroup.toArray(new String[copyGroup.size()]));
+		GroupOperation groupByOperation = Aggregation.group(copyGroup.toArray(new String[copyGroup.size()])).count().as("trackCount");
 		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
 		AggregationResults<Document> aggregationResults = template.aggregate(aggregation, StatTrack.class, Document.class);
 		for(Document doc : aggregationResults.getMappedResults()) {
 			String timeGroup = getGroupByTime(doc, timeGroupBy);
 			String dataGroup = getGroupByData(doc, dataGroupBy);
 			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
-			Integer count = mapTrips.get(groupKey);
-			if(count == null) count = 0;
-			mapTrips.put(groupKey, count + 1);
+			mapTrips.put(groupKey, mapTrips.getOrDefault(groupKey, 0) + 1);
+			mapTrips.put(groupKey + "_multi", mapTrips.getOrDefault(groupKey + "_multi", 0)+1);
 		}
 	}
 
@@ -695,6 +699,8 @@ public class StatTrackService {
 		res.put("track", ds.getStats().getTrack() != null ? ds.getStats().getTrack() : 0);
 		res.put("tripCount", ds.getStats().getTripCount() != null ? ds.getStats().getTripCount() : 0);
 		res.put("limitedTripCount", ds.getStats().getLimitedTripCount() != null ? ds.getStats().getLimitedTripCount() : 0);
+		res.put("mutlimodalCount", ds.getStats().getMultimodalCount() != null ? ds.getStats().getMultimodalCount() : 0);	
+		res.put("singleCount", ds.getStats().getSingleCount() != null ? ds.getStats().getSingleCount() : 0);
 
 		if (ds.getMeanStatMap() != null && !ds.getMeanStatMap().isEmpty()) {
 			for(Map.Entry<String, StatValueDTO> e : ds.getMeanStatMap().entrySet()) {

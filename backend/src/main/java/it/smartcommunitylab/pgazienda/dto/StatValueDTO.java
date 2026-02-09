@@ -2,7 +2,7 @@ package it.smartcommunitylab.pgazienda.dto;
 
 public class StatValueDTO {
     private FieldDTO score, limitedScore, co2, distance, duration;
-    private Integer track, tripCount, limitedTripCount;
+    private Integer track, tripCount, limitedTripCount, singleCount, multimodalCount;
 
     public FieldDTO getScore() {
         return score;
@@ -66,5 +66,21 @@ public class StatValueDTO {
 
     public void setLimitedTripCount(Integer limitedTripCount) {
         this.limitedTripCount = limitedTripCount;
+    }
+
+    public Integer getSingleCount() {
+        return singleCount;
+    }
+
+    public void setSingleCount(Integer singleCount) {
+        this.singleCount = singleCount;
+    }    
+
+    public Integer getMultimodalCount() {
+        return multimodalCount;
+    }    
+
+    public void setMultimodalCount(Integer multimodalCount) {
+        this.multimodalCount = multimodalCount;
     }
 }
