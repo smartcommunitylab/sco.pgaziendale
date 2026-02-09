@@ -2,13 +2,17 @@ package it.smartcommunitylab.pgazienda.service;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,7 +29,6 @@ import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
-
 import com.opencsv.CSVWriter;
 
 import it.smartcommunitylab.pgazienda.domain.Campaign;
@@ -36,6 +39,7 @@ import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
+import it.smartcommunitylab.pgazienda.dto.FieldDTO;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
 import it.smartcommunitylab.pgazienda.dto.StatValueDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
@@ -58,6 +62,10 @@ public class StatTrackService {
 	@Autowired
 	private CampaignRepository campaignRepo;
 
+	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
+	private static final DateTimeFormatter YEAR_PATTERN = DateTimeFormatter.ofPattern("yyyy");
+	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww");
+	
 
 	public List<StatTrackDTO> getTrackStats(
 			String campaignId,
@@ -632,6 +640,294 @@ public class StatTrackService {
 		});
 		return headers.toArray(new String[0]);
 	}
-	
-	
+
+
+	public List<Map<String, Object>> getTrackStatsFlat(
+		String campaignId,
+		String companyId,
+		String locationId,
+		Set<String> means,
+		String way,
+		GROUP_BY_TIME timeGroupBy,
+		GROUP_BY_DATA dataGroupBy,
+		List<STAT_TRACK_FIELD> fields,
+		boolean groupByMean,
+		boolean allDataGroupBy,
+		LocalDate from, 
+		LocalDate to) throws InconsistentDataException 
+	{
+		List<StatTrackDTO> stats = getTrackStats(campaignId, companyId, locationId, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
+		return flattenTrackStats(stats, timeGroupBy, fields);
+	}
+
+	/**
+	 * Flatten the stats in a flat format with all fields exploded
+	 * @param stats the stats to be flattened
+	 * @param timeGroupBy the time group by used for the stats
+	 * @param fields the fields to be included in the result
+	 * @return List of records representing the stats in a flat format
+	 * @throws IOException
+	 * @throws InconsistentDataException
+	*/
+    private List<Map<String, Object>> flattenTrackStats(List<StatTrackDTO> stats, GROUP_BY_TIME timeGroupBy, List<STAT_TRACK_FIELD> fields) {
+		List<Map<String, Object>> res = new java.util.ArrayList<>();
+		for(StatTrackDTO ds : stats) {
+			Map<String, Object> r = flattenStat(ds, timeGroupBy, fields);
+			r.put(timeGroupBy.toString(), mapTimeLabel(timeGroupBy, ds.getTimeGroup()));	
+			r.put("campaign", ds.getCampaign());
+			r.put("id", ds.getDataGroup());
+			r.put("name", ds.getDataGroupName() != null ? ds.getDataGroupName() : ds.getDataGroup());
+			res.add(r);
+		}
+		return res;
+	}
+
+	/**
+	 * Flatten the stat in a flat format with all fields exploded
+	 * @param ds
+	 * @param timeGroupBy
+	 * @param fields
+	 * @return
+	 */
+	private Map<String, Object> flattenStat(StatTrackDTO ds, GROUP_BY_TIME timeGroupBy, List<STAT_TRACK_FIELD> fields) {
+		Map<String, Object> res = new java.util.HashMap<>();
+		adjustStat(ds);
+		res.put("track", ds.getStats().getTrack());
+		res.put("tripCount", ds.getStats().getTripCount() != null ? ds.getStats().getTripCount() : 0);
+		res.put("limitedTripCount", ds.getStats().getLimitedTripCount() != null ? ds.getStats().getLimitedTripCount() : 0);
+
+		if (ds.getMeanStatMap() != null && !ds.getMeanStatMap().isEmpty()) {
+			for(Map.Entry<String, StatValueDTO> e : ds.getMeanStatMap().entrySet()) {
+				String mean = e.getKey();
+				StatValueDTO ms = e.getValue();
+				res.put(mean + "_track", ms.getTrack() != null ? ms.getTrack() : 0);
+				res.put(mean + "_tripCount", ms.getTripCount() != null ? ms.getTripCount() : 0);
+				res.put(mean + "_limitedTripCount", ms.getLimitedTripCount() != null ? ms.getLimitedTripCount() : 0);
+			}
+		}	
+
+		for(STAT_TRACK_FIELD f : fields) {
+			FieldDTO stat = getFieldStat(ds.getStats(), f);
+			if (stat != null) {
+				res.put(f.toString(), stat.getValue() != null ? stat.getValue() : 0);
+				res.put(f.toString() + "__avgTrack", stat.getAvgTrack() != null ? stat.getAvgTrack() : 0);
+				res.put(f.toString() + "__avgTrip", stat.getAvgTrip() != null ? stat.getAvgTrip() : 0);
+			} else {
+				res.put(f.toString(), null);
+				res.put(f.toString() + "__avgTrack", 0);
+				res.put(f.toString() + "__avgTrip", 0);
+			}
+			if (ds.getMeanStatMap() != null && !ds.getMeanStatMap().isEmpty()) {
+				for(Map.Entry<String, StatValueDTO> e : ds.getMeanStatMap().entrySet()) {
+					String mean = e.getKey();
+					StatValueDTO ms = e.getValue();
+					FieldDTO meanStat = getFieldStat(ms, f);
+					if (meanStat != null) {
+						res.put(mean + "_mean_" + f.toString(), meanStat.getValue() != null ? meanStat.getValue() : 0);
+						res.put(mean + "_mean_" + f.toString() + "__avgTrack", meanStat.getAvgTrack() != null ? meanStat.getAvgTrack() : 0);
+						res.put(mean + "_mean_" + f.toString() + "__avgTrip", meanStat.getAvgTrip() != null ? meanStat.getAvgTrip() : 0);
+						res.put(mean + "_mean_" + f.toString() + "__prcValue", meanStat.getPrcValue() != null ? meanStat.getPrcValue() : 0);
+					} else {
+						res.put(mean + "_mean_" + f.toString(), null);
+						res.put(mean + "_mean_" + f.toString() + "__avgTrack", 0);
+						res.put(mean + "_mean_" + f.toString() + "__avgTrip", 0);
+						res.put(mean + "_mean_" + f.toString() + "__prcValue", 0);
+					}
+				}
+			}
+		}
+		return res;
+	}
+
+	private FieldDTO getFieldStat(StatValueDTO sv, STAT_TRACK_FIELD f) {
+		switch (f) {
+			case score:
+				return sv.getScore();
+			case limitedScore:
+				return sv.getLimitedScore();
+			case co2:
+				return sv.getCo2();
+			case distance:
+				return sv.getDistance();
+			case duration:
+				return sv.getDuration();	
+			default:
+				break;
+		}
+		return null;
+	}
+
+	private void adjustStat(StatTrackDTO ds) {
+		// TODO Auto-generated method stub
+	}
+
+	private String mapTimeLabel(GROUP_BY_TIME timeGroupBy, String timeGroup) {
+		if (timeGroupBy == GROUP_BY_TIME.dayOfWeek) {
+			return DayOfWeek.valueOf(timeGroup).getDisplayName(TextStyle.FULL, Locale.ITALIAN);
+		}	
+		return timeGroup;
+	}
+
+	public void csvStatistics(
+		PrintWriter writer, 
+		String campaignId,
+		String companyId,
+		String locationId,
+		Set<String> means,
+		String way,
+		GROUP_BY_TIME timeGroupBy,
+		GROUP_BY_DATA dataGroupBy,
+		List<STAT_TRACK_FIELD> fields,
+		boolean groupByMean,
+		boolean allDataGroupBy,
+		LocalDate from, 
+		LocalDate to) throws InconsistentDataException
+	{
+		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, locationId, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		try{
+			// headers
+			List<String> headers = createHeadersFlat(timeGroupBy, from, to);
+			List<String> fieldHeaders = createSubheaders(headers, fields, means);
+			String nameHeader = "name";
+			// write headers
+			if (!headers.isEmpty()) {
+				String s = ";";
+				for (String h: headers) {
+					s += translateSubHeader(h);
+					for (String f: fieldHeaders) {
+						s += ";";
+					}
+				}
+				csvWriter.writeNext(s.split(";"));
+			}
+			String ss = nameHeader;
+			for (int i = 0; i < Math.max(headers.size(), 1); i++){
+				for (String f: fieldHeaders) {
+					ss += ";" +f;
+				}
+			}
+			csvWriter.writeNext(ss.split(";"));
+			List<String[]> table = new LinkedList<>();
+
+			for (Map<String, Object> r : stats) {
+				String[] row = new String[headers.size() * fieldHeaders.size() + 1];
+				row[0] = r.getOrDefault("name", "").toString();
+			}
+
+			Map<String, List<Map<String, Object>>> groupedById = stats.stream().collect(Collectors.groupingBy(r -> r.getOrDefault("id", "").toString()));
+
+			groupedById.forEach((id, rs) -> {
+				String[] row = new String[headers.size() * fieldHeaders.size() + 1];
+				row[0] = rs.get(0).getOrDefault("name", "").toString();
+				Map<String, Map<String, Object>> timeInstanceMap = rs.stream().collect(Collectors.toMap(r -> r.getOrDefault(timeGroupBy.toString(), "").toString(), r -> r));
+
+				for (int i = 0; i < headers.size(); i++) {
+					 Map<String, Object> r = timeInstanceMap.getOrDefault(headers.get(i), Collections.emptyMap());					 
+					for (int j = 0; j < fieldHeaders.size(); j++) {
+						String key = fieldHeaders.get(j);
+						row[i * fieldHeaders.size() + j + 1] = r.getOrDefault(key, 0).toString();
+					}
+				}
+				table.add(row);
+			});
+			table.sort((a,b) -> a[0].compareToIgnoreCase(b[0]));
+			csvWriter.writeAll(table);
+		} finally  {
+			if (writer != null) {
+				try {
+					writer.close();					
+				} catch (Exception e) {
+				}
+			}
+		}
+
+	}
+
+	private String translateSubHeader(String h) {
+		return h;
+	}
+
+	private List<String> createHeadersFlat(GROUP_BY_TIME timeGroupBy, LocalDate from, LocalDate to) {
+		List<String> list = new LinkedList<>();
+		switch (timeGroupBy) {
+			case day: {
+				LocalDate curr = from;
+				while (!curr.isAfter(to)) {
+					list.add(curr.toString());
+					curr = curr.plusDays(1);
+				}
+				break;
+			}
+			case week: {
+				LocalDate curr = from;
+				while (!curr.isAfter(to)) {
+					list.add(curr.format(WEEK_PATTERN));
+					curr = curr.plusWeeks(1);
+				}
+				break;
+			}
+			case month: {
+				LocalDate curr = from;
+				while (!curr.isAfter(to)) {
+					list.add(curr.format(MONTH_PATTERN));
+					curr = curr.plusMonths(1);
+				}
+				break;
+			}
+			case year: {
+				LocalDate curr = from;
+				while (!curr.isAfter(to)) {
+					list.add(curr.format(YEAR_PATTERN));
+					curr = curr.plusYears(1);
+				}
+				break;
+			}
+			case dayOfWeek: {
+				list = DateUtils.getDateRangeByDayOfWeek(from, to).stream().map(d -> DayOfWeek.valueOf(d).getDisplayName(TextStyle.FULL, Locale.ITALIAN)).collect(Collectors.toList());
+				break;
+			}
+			case hour: {
+				list = DateUtils.getDateRangeByHour(from, to);
+				break;
+			}
+			case total: {
+				list = DateUtils.getDateRangeByTotal(from, to);
+				break;
+			}
+			default:
+		}
+		return list;
+	}
+
+	private List<String> createSubheaders(List<String> headers, List<STAT_TRACK_FIELD> fields, Set<String> means) {
+		List<String> fList = new LinkedList<>();
+		for (STAT_TRACK_FIELD f : fields) {
+			switch (f) {
+				case track:
+				case tripCount:
+				case limitedTripCount:
+					fList.add(f.name());
+					for (String mean : means) {
+						fList.add(mean + "_mean_" + f.name());
+					}
+					break;
+				case score:
+				case limitedScore:
+				case distance:
+				case duration:	
+				case co2:
+					fList.add(f.name());
+					fList.add(f.name() + "__avgTrack");
+					fList.add(f.name() + "__avgTrip");
+					for (String mean : means) {
+						fList.add(mean + "_mean_" + f.name());
+						fList.add(mean + "_mean_" + f.name() + "__avgTrack");
+						fList.add(mean + "_mean_" + f.name() + "__avgTrip");
+						fList.add(mean + "_mean_" + f.name() + "__prcValue");
+					}
+			}
+		}
+		return fList;
+	}
 }

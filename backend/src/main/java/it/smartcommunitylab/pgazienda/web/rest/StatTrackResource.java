@@ -19,6 +19,7 @@ package it.smartcommunitylab.pgazienda.web.rest;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -100,7 +101,51 @@ public class StatTrackResource {
     	return ResponseEntity.ok(dataService.getTrackStats(campaignId, companyId, location, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
 	}
 
-    @GetMapping("/campaigns/{campaignId}/stats/track/csv")
+	/**
+	 * Read all the statistics of the campaign with filters and aggregation in a flat format with all fields exploded
+	 * @param campaignId
+	 * @param companyId
+	 * @param location
+	 * @param employeeId
+	 * @param timeGroupBy
+	 * @param dataGroupBy
+	 * @param fields
+	 * @param from
+	 * @param to
+	 * @return List of records representing the stats
+	 * @throws IOException
+	 * @throws InconsistentDataException
+	 */
+    @GetMapping("/campaigns/{campaignId}/stats/track/flat")
+	public ResponseEntity<List<Map<String, Object>>> statisticsFlat(
+		@PathVariable String campaignId, 
+		@RequestParam(required=false) String companyId,
+		@RequestParam(required=false) String location,
+		@RequestParam(required=false) Set<String> means,
+		@RequestParam(required=false, defaultValue = "all") String way,
+		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
+		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
+		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
+		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
+		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
+		@RequestParam(required=false) String from, 
+		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
+	{
+    	/*if(!userService.isInCampaignRole(campaignId)) {
+    		if(StringUtils.isNotBlank(companyId)) {
+    	    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
+    	    		throw new SecurityException("Insufficient rights");        		
+        	} else {
+        		throw new SecurityException("Insufficient rights");	
+        	}
+    	}*/
+        log.debug("REST request to get statistics");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	return ResponseEntity.ok(dataService.getTrackStatsFlat(campaignId, companyId, location, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
+	}
+
+	@GetMapping("/campaigns/{campaignId}/stats/track/csv")
 	public void statisticsCsv(
 		@PathVariable String campaignId, 
 		@RequestParam(required=false) String companyId,
@@ -130,4 +175,33 @@ public class StatTrackResource {
     	dataService.getTrackStatsCSV(response.getWriter(), campaignId, companyId, location, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 	}
 
+		@GetMapping("/campaigns/{campaignId}/stats/track/csv/flat")
+	public void statisticsCsvFlat(
+		@PathVariable String campaignId, 
+		@RequestParam(required=false) String companyId,
+		@RequestParam(required=false) String location,
+		@RequestParam(required=false) Set<String> means,
+		@RequestParam(required=false, defaultValue = "all") String way,
+		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
+		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
+		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
+		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
+		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
+		@RequestParam(required=false) String from, 
+		@RequestParam(required=false) String to,
+		HttpServletResponse response) throws IOException, InconsistentDataException 
+	{
+    	/*if(!userService.isInCampaignRole(campaignId)) {
+    		if(StringUtils.isNotBlank(companyId)) {
+    	    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
+    	    		throw new SecurityException("Insufficient rights");        		
+        	} else {
+        		throw new SecurityException("Insufficient rights");	
+        	}
+    	}*/
+        log.debug("REST request to get statistics CSV");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	dataService.getTrackStatsCSV(response.getWriter(), campaignId, companyId, location, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
+	}
 }
