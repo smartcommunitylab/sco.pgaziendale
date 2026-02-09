@@ -758,7 +758,12 @@ public class StatTrackService {
 	}
 
 	private void adjustStat(StatTrackDTO ds) {
-		// TODO Auto-generated method stub
+		if (ds.getStats() == null) {
+			ds.setStats(new StatValueDTO());
+			ds.getStats().setTrack(0);
+			ds.getStats().setTripCount(0);
+			ds.getStats().setLimitedTripCount(0);
+		}
 	}
 
 	private String mapTimeLabel(GROUP_BY_TIME timeGroupBy, String timeGroup) {
