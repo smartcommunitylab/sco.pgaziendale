@@ -699,7 +699,7 @@ public class StatTrackService {
 		res.put("track", ds.getStats().getTrack() != null ? ds.getStats().getTrack() : 0);
 		res.put("tripCount", ds.getStats().getTripCount() != null ? ds.getStats().getTripCount() : 0);
 		res.put("limitedTripCount", ds.getStats().getLimitedTripCount() != null ? ds.getStats().getLimitedTripCount() : 0);
-		res.put("mutlimodalCount", ds.getStats().getMultimodalCount() != null ? ds.getStats().getMultimodalCount() : 0);	
+		res.put("multimodalCount", ds.getStats().getMultimodalCount() != null ? ds.getStats().getMultimodalCount() : 0);	
 		res.put("singleCount", ds.getStats().getSingleCount() != null ? ds.getStats().getSingleCount() : 0);
 
 		if (ds.getMeanStatMap() != null && !ds.getMeanStatMap().isEmpty()) {
