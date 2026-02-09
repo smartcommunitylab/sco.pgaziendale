@@ -202,6 +202,6 @@ public class StatTrackResource {
         log.debug("REST request to get statistics CSV");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
-    	dataService.getTrackStatsCSV(response.getWriter(), campaignId, companyId, location, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
+    	dataService.csvStatistics(response.getWriter(), campaignId, companyId, location, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 	}
 }
