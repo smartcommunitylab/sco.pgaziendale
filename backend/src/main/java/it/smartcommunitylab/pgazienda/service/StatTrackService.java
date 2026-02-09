@@ -692,7 +692,7 @@ public class StatTrackService {
 	private Map<String, Object> flattenStat(StatTrackDTO ds, GROUP_BY_TIME timeGroupBy, List<STAT_TRACK_FIELD> fields) {
 		Map<String, Object> res = new java.util.HashMap<>();
 		adjustStat(ds);
-		res.put("track", ds.getStats().getTrack());
+		res.put("track", ds.getStats().getTrack() != null ? ds.getStats().getTrack() : 0);
 		res.put("tripCount", ds.getStats().getTripCount() != null ? ds.getStats().getTripCount() : 0);
 		res.put("limitedTripCount", ds.getStats().getLimitedTripCount() != null ? ds.getStats().getLimitedTripCount() : 0);
 
@@ -700,20 +700,22 @@ public class StatTrackService {
 			for(Map.Entry<String, StatValueDTO> e : ds.getMeanStatMap().entrySet()) {
 				String mean = e.getKey();
 				StatValueDTO ms = e.getValue();
-				res.put(mean + "_track", ms.getTrack() != null ? ms.getTrack() : 0);
-				res.put(mean + "_tripCount", ms.getTripCount() != null ? ms.getTripCount() : 0);
-				res.put(mean + "_limitedTripCount", ms.getLimitedTripCount() != null ? ms.getLimitedTripCount() : 0);
+				res.put(mean + "_mean_track", ms.getTrack() != null ? ms.getTrack() : 0);
+				res.put(mean + "_mean_tripCount", ms.getTripCount() != null ? ms.getTripCount() : 0);
+				res.put(mean + "_mean_limitedTripCount", ms.getLimitedTripCount() != null ? ms.getLimitedTripCount() : 0);
 			}
 		}	
 
-		for(STAT_TRACK_FIELD f : fields) {
+		Set<STAT_TRACK_FIELD> fieldsToAdd = fields.stream().filter(f -> f != STAT_TRACK_FIELD.track && f != STAT_TRACK_FIELD.tripCount && f != STAT_TRACK_FIELD.limitedTripCount).collect(Collectors.toSet());
+
+		for(STAT_TRACK_FIELD f : fieldsToAdd) {
 			FieldDTO stat = getFieldStat(ds.getStats(), f);
 			if (stat != null) {
 				res.put(f.toString(), stat.getValue() != null ? stat.getValue() : 0);
 				res.put(f.toString() + "__avgTrack", stat.getAvgTrack() != null ? stat.getAvgTrack() : 0);
 				res.put(f.toString() + "__avgTrip", stat.getAvgTrip() != null ? stat.getAvgTrip() : 0);
 			} else {
-				res.put(f.toString(), null);
+				res.put(f.toString(), 0);
 				res.put(f.toString() + "__avgTrack", 0);
 				res.put(f.toString() + "__avgTrip", 0);
 			}
@@ -728,7 +730,7 @@ public class StatTrackService {
 						res.put(mean + "_mean_" + f.toString() + "__avgTrip", meanStat.getAvgTrip() != null ? meanStat.getAvgTrip() : 0);
 						res.put(mean + "_mean_" + f.toString() + "__prcValue", meanStat.getPrcValue() != null ? meanStat.getPrcValue() : 0);
 					} else {
-						res.put(mean + "_mean_" + f.toString(), null);
+						res.put(mean + "_mean_" + f.toString(), 0);
 						res.put(mean + "_mean_" + f.toString() + "__avgTrack", 0);
 						res.put(mean + "_mean_" + f.toString() + "__avgTrip", 0);
 						res.put(mean + "_mean_" + f.toString() + "__prcValue", 0);
