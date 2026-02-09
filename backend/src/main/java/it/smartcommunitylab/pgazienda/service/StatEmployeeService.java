@@ -2,15 +2,18 @@ package it.smartcommunitylab.pgazienda.service;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.TextStyle;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -425,4 +428,70 @@ public class StatEmployeeService {
 		return headers.toArray(new String[0]);
 	}
 
+	public List<Map<String, Object>> getEmployeeStatsFlat(
+			String campaignId,
+			String companyId,
+			String locationId,
+			GROUP_BY_TIME timeGroupBy,
+			GROUP_BY_DATA dataGroupBy,
+			LocalDate from, 
+			LocalDate to) throws InconsistentDataException 
+	{
+		List<StatEmployeeDTO> stats = getEmployeeStats(campaignId, companyId, locationId, timeGroupBy, dataGroupBy, from, to);
+		return flattenEmployeeStats(stats, timeGroupBy);
+	}
+
+	/**
+	 * Flatten the stats in a flat format with all fields exploded
+	 * @param stats the stats to be flattened
+	 * @param timeGroupBy the time group by used for the stats
+	 * @param fields the fields to be included in the result
+	 * @return List of records representing the stats in a flat format
+	 * @throws IOException
+	 * @throws InconsistentDataException
+	*/
+    private List<Map<String, Object>> flattenEmployeeStats(List<StatEmployeeDTO> stats, GROUP_BY_TIME timeGroupBy) {
+		List<Map<String, Object>> res = new java.util.ArrayList<>();
+		for(StatEmployeeDTO ds : stats) {
+			Map<String, Object> r = flattenStat(ds, timeGroupBy);
+			r.put(timeGroupBy.toString(), mapTimeLabel(timeGroupBy, ds.getTimeGroup()));	
+			r.put("campaign", ds.getCampaign());
+			r.put("id", ds.getDataGroup());
+			r.put("name", ds.getDataGroupName() != null ? ds.getDataGroupName() : ds.getDataGroup());
+			res.add(r);
+		}
+		return res;
+	}
+	/**
+	 * Flatten the stat in a flat format with all fields exploded
+	 * @param ds
+	 * @param timeGroupBy
+	 * @param fields
+	 * @return
+	 */
+	private Map<String, Object> flattenStat(StatEmployeeDTO ds, GROUP_BY_TIME timeGroupBy) {
+		Map<String, Object> res = new java.util.HashMap<>();
+		List<FieldEmployeeDTO> fieldEmployeeDTOList = List.of(ds.getRegistration(), ds.getActiveUsers(), ds.getDropout());
+		for(FieldEmployeeDTO f : fieldEmployeeDTOList) {
+			if (f != null) {
+				res.put(f.toString(), f.getValue() != null ? f.getValue() : 0);
+				res.put(f.toString() + "__prcTot", f.getPrcTot() != null ? f.getPrcTot() : 0);
+				res.put(f.toString() + "__prcRegistered", f.getPrcRegistered() != null ? f.getPrcRegistered() : 0);
+			} else {
+				res.put(f.toString(), 0);
+				res.put(f.toString() + "__prcTot", 0);
+				res.put(f.toString() + "__prcRegistered", 0);
+			}
+		}
+		return res;
+	}
+
+	
+
+	private String mapTimeLabel(GROUP_BY_TIME timeGroupBy, String timeGroup) {
+		if (timeGroupBy == GROUP_BY_TIME.dayOfWeek) {
+			return DayOfWeek.valueOf(timeGroup).getDisplayName(TextStyle.FULL, Locale.ITALIAN);
+		}	
+		return timeGroup;
+	}
 }
