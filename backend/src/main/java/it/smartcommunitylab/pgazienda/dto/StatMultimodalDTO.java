@@ -113,6 +113,24 @@ public class StatMultimodalDTO {
 					dto.getModeStatMap().put(mode, modeStats);
 				}
 			}
+			if(doc.containsKey("count")) {
+				if (stats.getCount() == null) 
+					stats.setCount(FieldDTO.fromValue((double) doc.getInteger("count")));
+				else
+					stats.getCount().sumValue((double) doc.getInteger("count"));
+				if(dto.getModeStatMap().containsKey(mode)) {
+					StatMultimodalValueDTO modeStats = dto.getModeStatMap().get(mode);
+					if(modeStats.getCount() == null) {
+						modeStats.setCount(FieldDTO.fromValue((double) doc.getInteger("count")));
+					} else {
+						modeStats.getCount().sumValue((double) doc.getInteger("count"));
+					}
+				} else {
+					StatMultimodalValueDTO modeStats = new StatMultimodalValueDTO();
+					modeStats.setCount(FieldDTO.fromValue((double) doc.getInteger("count")));
+					dto.getModeStatMap().put(mode, modeStats);
+				}	
+			}
 			return this;
 		}
 

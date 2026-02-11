@@ -97,9 +97,9 @@ public class StatMultimodalService {
 		
 		GroupOperation groupByOperation = Aggregation.group(group.toArray(new String[group.size()]));
 		groupByOperation = groupByOperation.count().as("count");
-		if(!fields.contains(STAT_TRACK_FIELD.track)) {
-			fields.add(STAT_TRACK_FIELD.track);
-		}
+		//if(!fields.contains(STAT_TRACK_FIELD.track)) {
+		//	fields.add(STAT_TRACK_FIELD.track);
+		//}
 		if (fields.contains(STAT_TRACK_FIELD.distance)) {
 			groupByOperation = groupByOperation.sum("distance").as("distance");
 		}
