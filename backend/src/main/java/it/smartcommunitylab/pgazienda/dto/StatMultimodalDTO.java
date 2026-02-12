@@ -9,6 +9,8 @@ public class StatMultimodalDTO {
 	private String campaign;
 	private String timeGroup;
 	private String dataGroup;
+	private String dataGroupName;
+
 	private StatMultimodalValueDTO stats = new StatMultimodalValueDTO();
 	private Map<String, StatMultimodalValueDTO> modeStatMap = new HashMap<>();
 	
@@ -41,6 +43,13 @@ public class StatMultimodalDTO {
 	}
 	public void setStats(StatMultimodalValueDTO stats) {
 		this.stats = stats;
+	}
+
+	public String getDataGroupName() {
+		return dataGroupName;
+	}
+	public void setDataGroupName(String dataGroupName) {
+		this.dataGroupName = dataGroupName;
 	}
 	
 	public static class Builder {

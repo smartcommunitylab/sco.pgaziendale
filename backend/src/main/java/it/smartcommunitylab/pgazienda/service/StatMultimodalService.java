@@ -2,14 +2,18 @@ package it.smartcommunitylab.pgazienda.service;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,8 +37,11 @@ import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.domain.Employee;
 import it.smartcommunitylab.pgazienda.domain.StatTrack;
+import it.smartcommunitylab.pgazienda.dto.FieldDTO;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalValueDTO;
+import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
+import it.smartcommunitylab.pgazienda.dto.StatValueDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
@@ -190,6 +197,100 @@ public class StatMultimodalService {
 		List<StatMultimodalDTO> result = new ArrayList<>(mapStats.values());
 		Collections.sort(result, comparator);
 		return result;		
+	}
+
+	public List<Map<String, Object>> getMultimodalStatsFlat(
+		String campaignId,
+		String companyId,
+		String locationId,
+		GROUP_BY_TIME timeGroupBy,
+		GROUP_BY_DATA dataGroupBy,
+		List<STAT_TRACK_FIELD> fields,
+		boolean allDataGroupBy,
+		LocalDate from, 
+		LocalDate to) throws InconsistentDataException {
+			List<StatMultimodalDTO> stats = getMultimodalStats(campaignId, companyId, locationId, timeGroupBy, dataGroupBy, fields, allDataGroupBy, from, to);
+			return flattenTrackStats(stats, timeGroupBy);
+		}
+	/**
+	 * Flatten the stats in a flat format with all fields exploded
+	 * @param stats the stats to be flattened
+	 * @param timeGroupBy the time group by used for the stats
+	 * @param fields the fields to be included in the result
+	 * @return List of records representing the stats in a flat format
+	 * @throws IOException
+	 * @throws InconsistentDataException
+	*/
+    private List<Map<String, Object>> flattenTrackStats(List<StatMultimodalDTO> stats, GROUP_BY_TIME timeGroupBy) {
+		List<Map<String, Object>> res = new java.util.ArrayList<>();
+		for(StatMultimodalDTO ds : stats) {
+			Map<String, Object> r = flattenStat(ds, timeGroupBy);
+			r.put(timeGroupBy.toString(), mapTimeLabel(timeGroupBy, ds.getTimeGroup()));	
+			r.put("campaign", ds.getCampaign());
+			r.put("id", ds.getDataGroup());
+			r.put("name", ds.getDataGroupName() != null ? ds.getDataGroupName() : ds.getDataGroup());
+			res.add(r);
+		}
+		return res;
+	}
+
+		/**
+	 * Flatten the stat in a flat format with all fields exploded
+	 * @param ds
+	 * @param timeGroupBy
+	 * @param fields
+	 * @return
+	 */
+	private Map<String, Object> flattenStat(StatMultimodalDTO ds, GROUP_BY_TIME timeGroupBy) {
+		Map<String, Object> res = new java.util.HashMap<>();
+		adjustStat(ds);
+		res.put("count", ds.getStats().getCount() != null ? ds.getStats().getCount().getValue() : 0);
+		res.put("distance", ds.getStats().getDistance() != null ? ds.getStats().getDistance().getValue() : 0);
+		res.put("duration", ds.getStats().getDuration() != null ? ds.getStats().getDuration().getValue() : 0);
+		res.put("distance_avg", ds.getStats().getDistance() != null && ds.getStats().getCount() != null && ds.getStats().getCount().getValue() != 0 ? ds.getStats().getDistance().getValue() / ds.getStats().getCount().getValue() : 0);
+		res.put("duration_avg", ds.getStats().getDuration() != null && ds.getStats().getCount() != null && ds.getStats().getCount().getValue() != 0 ? ds.getStats().getDuration().getValue() / ds.getStats().getCount().getValue() : 0);
+
+		if (ds.getModeStatMap() != null && !ds.getModeStatMap().isEmpty()) {
+			for(Map.Entry<String, StatMultimodalValueDTO> e : ds.getModeStatMap().entrySet()) {
+				String mode = e.getKey();
+				StatMultimodalValueDTO ms = e.getValue();
+				res.put(mode + "_count", ms.getCount() != null && ms.getCount().getValue() != null ? ms.getCount().getValue() : 0);
+				res.put(mode + "_distance", ms.getDistance() != null && ms.getDistance().getValue() != null ? ms.getDistance().getValue() : 0);
+				res.put(mode + "_duration", ms.getDuration() != null && ms.getDuration().getValue() != null ? ms.getDuration().getValue() : 0);
+				res.put(mode + "_distance_avg", ms.getDistance() != null && ms.getDistance().getValue() != 0 && ms.getCount() != null && ms.getCount().getValue() != null && ms.getCount().getValue() != 0 ? ms.getDistance().getValue() / ms.getCount().getValue() : 0);
+				res.put(mode + "_duration_avg", ms.getDuration() != null && ms.getDuration().getValue() != 0 && ms.getCount() != null && ms.getCount().getValue() != null && ms.getCount().getValue() != 0 ? ms.getDuration().getValue() / ms.getCount().getValue() : 0);
+				res.put(mode + "_prcCount", ms.getCount() != null && ms.getCount().getValue() != null && ds.getStats().getCount() != null && ds.getStats().getCount().getValue() != 0 ? (ms.getCount().getValue() / ds.getStats().getCount().getValue()) * 100 : 0);
+				res.put(mode + "_prcDistance", ms.getDistance() != null && ms.getDistance().getValue() != null && ds.getStats().getDistance() != null && ds.getStats().getDistance().getValue() != 0 ? (ms.getDistance().getValue() / ds.getStats().getDistance().getValue()) * 100 : 0);
+				res.put(mode + "_prcDuration", ms.getDuration() != null && ms.getDuration().getValue() != null && ds.getStats().getDuration() != null && ds.getStats().getDuration().getValue() != 0 ? (ms.getDuration().getValue() / ds.getStats().getDuration().getValue()) * 100 : 0);
+
+			}
+		}
+
+		return res;
+	}
+
+	private void adjustStat(StatMultimodalDTO ds) {
+		if (ds.getStats() == null) {
+			ds.setStats(new StatMultimodalValueDTO());
+		}
+		if (ds.getStats().getCount() == null) {
+			ds.getStats().setCount(FieldDTO.fromValue(0.0));
+		}
+		if (ds.getStats().getDistance() == null) {
+			ds.getStats().setDistance(FieldDTO.fromValue(0.0));
+		}	
+		if (ds.getStats().getDuration() == null) {
+			ds.getStats().setDuration(FieldDTO.fromValue(0.0));
+		}
+
+	}
+
+
+	private String mapTimeLabel(GROUP_BY_TIME timeGroupBy, String timeGroup) {
+		if (timeGroupBy == GROUP_BY_TIME.dayOfWeek) {
+			return DayOfWeek.valueOf(timeGroup).getDisplayName(TextStyle.FULL, Locale.ITALIAN);
+		}	
+		return timeGroup;
 	}
 
 	private Integer countMultimodal(List<Document> list) {
