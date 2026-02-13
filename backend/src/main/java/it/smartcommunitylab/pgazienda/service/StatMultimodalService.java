@@ -13,7 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -40,8 +39,6 @@ import it.smartcommunitylab.pgazienda.domain.StatTrack;
 import it.smartcommunitylab.pgazienda.dto.FieldDTO;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalDTO;
 import it.smartcommunitylab.pgazienda.dto.StatMultimodalValueDTO;
-import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
-import it.smartcommunitylab.pgazienda.dto.StatValueDTO;
 import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
@@ -421,7 +418,7 @@ public class StatMultimodalService {
 		List<String> modes = docs.stream().map(doc -> {
 			Document idMap = (Document) doc.get("_id");
 			return idMap.getString("mode");
-		}).collect(Collectors.toList());
+		}).distinct().collect(Collectors.toList());
 		Collections.sort(modes);
 		return String.join("_", modes);
 	}
