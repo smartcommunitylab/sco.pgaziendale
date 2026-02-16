@@ -54,6 +54,15 @@ public class FieldDTO {
         dto.setValue(value);
         return dto;
     }
+    public static FieldDTO fromValue(Object value) {
+        FieldDTO dto = new FieldDTO();
+        if (value instanceof Double) {
+            dto.setValue((Double) value);
+        } else if (value instanceof Integer) {
+            dto.setValue(((Integer) value).doubleValue());
+        }
+        return dto;
+    }
 
     public void sumValue(FieldDTO dto) {
         if (dto != null && dto.getValue() != null) {
