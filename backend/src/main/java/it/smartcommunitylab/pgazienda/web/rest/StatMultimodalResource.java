@@ -19,6 +19,7 @@ package it.smartcommunitylab.pgazienda.web.rest;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -77,6 +78,7 @@ public class StatMultimodalResource {
 		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
 		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
+		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
 		@RequestParam(required=false) String from, 
 		@RequestParam(required=false) String to) throws IOException, InconsistentDataException	{
     	/*if(!userService.isInCampaignRole(campaignId)) {
@@ -90,7 +92,46 @@ public class StatMultimodalResource {
         log.debug("REST request to get statistics");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
-    	return ResponseEntity.ok(dataService.getMultimodalStats(campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, fromDate, toDate));
+    	return ResponseEntity.ok(dataService.getMultimodalStats(campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, allDataGroupBy, fromDate, toDate));
+	}
+
+	/**
+	 * Read all the statistics of the campaign with filters and aggregation
+	 * @param campaignId
+	 * @param companyId
+	 * @param location
+	 * @param timeGroupBy
+	 * @param dataGroupBy
+	 * @param fields
+	 * @param from
+	 * @param to
+	 * @return List of records representing the stats
+	 * @throws IOException
+	 * @throws InconsistentDataException
+	 */
+    @GetMapping("/campaigns/{campaignId}/stats/multimodal/flat")
+	public ResponseEntity<List<Map<String, Object>>> statisticsFlat(
+		@PathVariable String campaignId, 
+		@RequestParam(required=false) String companyId,
+		@RequestParam(required=false) String location,
+		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
+		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
+		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
+		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
+		@RequestParam(required=false) String from, 
+		@RequestParam(required=false) String to) throws IOException, InconsistentDataException	{
+    	/*if(!userService.isInCampaignRole(campaignId)) {
+    		if(StringUtils.isNotBlank(companyId)) {
+    	    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
+    	    		throw new SecurityException("Insufficient rights");        		
+        	} else {
+        		throw new SecurityException("Insufficient rights");	
+        	}
+    	}*/
+        log.debug("REST request to get statistics flat");
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	return ResponseEntity.ok(dataService.getMultimodalStatsFlat(campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, allDataGroupBy, fromDate, toDate));
 	}
     
     @GetMapping("/campaigns/{campaignId}/stats/multimodal/csv")
@@ -101,6 +142,7 @@ public class StatMultimodalResource {
     		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
     		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
     		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
+			@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
     		@RequestParam(required=false) String from, 
     		@RequestParam(required=false) String to,
     		HttpServletResponse response) throws IOException, InconsistentDataException { 
@@ -114,7 +156,7 @@ public class StatMultimodalResource {
 		}*/
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);    	
-    	dataService.getMultimodalStatsCsv(response.getWriter(), campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, fromDate, toDate);
+    	dataService.getMultimodalStatsCsv(response.getWriter(), campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, allDataGroupBy, fromDate, toDate);
     }
 
 }

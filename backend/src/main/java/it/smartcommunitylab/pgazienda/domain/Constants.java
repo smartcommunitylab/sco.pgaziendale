@@ -43,5 +43,5 @@ public class Constants {
 	public enum GROUP_BY_TIME {hour, dayOfWeek, day, week, month, year, total};
 	public enum GROUP_BY_DATA {company, location, employee, campaign};
 	public enum STAT_FIELD  {score, limitedScore, trackCount, limitedTrackCount, co2saved, meanScore, limitedMeanScore, meanDistance, meanDuration, meanCo2, meanTracks}
-	public enum STAT_TRACK_FIELD  {score, track,  co2, distance, duration}
+	public enum STAT_TRACK_FIELD  {score, limitedScore, track, tripCount, limitedTripCount, co2, distance, duration}
 }

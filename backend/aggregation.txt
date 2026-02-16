@@ -81,39 +81,3 @@
       }
   }
 ]
-
-
-
-
-
-
-[
-  {
-    $group:
-      /**
-       * _id: The id of the group.
-       * fieldN: The first field name.
-       */
-      {
-        _id: {
-          date: "$date",
-          mode: "$mode"
-        },
-        score: {
-          $sum: "$score"
-        },
-        duration: {
-          $sum: "$duration"
-        },
-        co2: {
-          $sum: "$co2"
-        },
-        distance: {
-          $sum: "$distance"
-        },
-        count: {
-          $count: {}
-        }
-      }
-  }
-]

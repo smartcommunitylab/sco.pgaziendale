@@ -8,10 +8,11 @@ import org.bson.Document;
 public class StatMultimodalDTO {
 	private String campaign;
 	private String timeGroup;
-	private String modeGroup; 
 	private String dataGroup;
-	private StatValue stats = new StatValue();
-	private Map<String, StatValue>meanStatMap = new HashMap<>();
+	private String dataGroupName;
+
+	private StatMultimodalValueDTO stats = new StatMultimodalValueDTO();
+	private Map<String, StatMultimodalValueDTO> modeStatMap = new HashMap<>();
 	
 	public String getTimeGroup() {
 		return timeGroup;
@@ -19,11 +20,11 @@ public class StatMultimodalDTO {
 	public void setTimeGroup(String timeGroup) {
 		this.timeGroup = timeGroup;
 	}
-	public Map<String, StatValue> getMeanStatMap() {
-		return meanStatMap;
+	public Map<String, StatMultimodalValueDTO> getModeStatMap() {
+		return modeStatMap;
 	}
-	public void setMeanStatMap(Map<String, StatValue> meanStatMap) {
-		this.meanStatMap = meanStatMap;
+	public void setModeStatMap(Map<String, StatMultimodalValueDTO> meanStatMap) {
+		this.modeStatMap = meanStatMap;
 	}
 	public String getCampaign() {
 		return campaign;
@@ -31,71 +32,33 @@ public class StatMultimodalDTO {
 	public void setCampaign(String campaign) {
 		this.campaign = campaign;
 	}
-	public String getModeGroup() {
-		return modeGroup;
-	}
-	public void setModeGroup(String modeGroup) {
-		this.modeGroup = modeGroup;
-	}
 	public String getDataGroup() {
 		return dataGroup;
 	}
 	public void setDataGroup(String dataGroup) {
 		this.dataGroup = dataGroup;
 	}
-	public StatValue getStats() {
+	public StatMultimodalValueDTO getStats() {
 		return stats;
 	}
-	public void setStats(StatValue stats) {
+	public void setStats(StatMultimodalValueDTO stats) {
 		this.stats = stats;
 	}
 
-	public static class StatValue {
-		private Double score, co2, distance;
-		private Long duration;
-		private Integer track;
-		
-		public Double getScore() {
-			return score != null ? score : Double.valueOf(0d);
-		}
-		public void setScore(Double score) {
-			this.score = score;
-		}
-		public Double getCo2() {
-			return co2 != null ? co2 : Double.valueOf(0d);
-		}
-		public void setCo2(Double co2) {
-			this.co2 = co2;
-		}
-		public Double getDistance() {
-			return distance != null ? distance : Double.valueOf(0);
-		}
-		public void setDistance(Double distance) {
-			this.distance = distance;
-		}
-		public Long getDuration() {
-			return duration != null ? duration : Long.valueOf(0);
-		}
-		public void setDuration(Long duration) {
-			this.duration = duration;
-		}
-		public Integer getTrack() {
-			return track != null ? track : Integer.valueOf(0);
-		}
-		public void setTrack(Integer track) {
-			this.track = track;
-		}
-		
+	public String getDataGroupName() {
+		return dataGroupName;
+	}
+	public void setDataGroupName(String dataGroupName) {
+		this.dataGroupName = dataGroupName;
 	}
 	
 	public static class Builder {
 		private StatMultimodalDTO dto;
 		
-		public Builder populateKeyFields(Document doc, String modeGroup) {
+		public Builder populateKeyFields(Document doc) {
 			if(dto == null)
 				dto = new StatMultimodalDTO();
 			
-			dto.setModeGroup(modeGroup);
 			Document idMap = (Document) doc.get("_id");
 			if(idMap.containsKey("campaign")) dto.setCampaign(idMap.getString("campaign"));
 			if(idMap.containsKey("locationKey")) dto.setDataGroup(idMap.getString("locationKey"));
@@ -118,38 +81,75 @@ public class StatMultimodalDTO {
 			return this;
 		}
 		
-		public Builder populateStatFields(Document doc) {
+		public Builder mergeStatModeDoc(Document doc, String mode) {
 			if(dto == null)
 				dto = new StatMultimodalDTO();
 			
-			StatValue stats = new StatValue(); 
-			if(doc.containsKey("score")) stats.setScore(doc.getDouble("score"));
-			if(doc.containsKey("co2")) stats.setCo2(doc.getDouble("co2"));
-			if(doc.containsKey("distance")) stats.setDistance(doc.getDouble("distance"));
-			if(doc.containsKey("duration")) stats.setDuration(doc.getLong("duration"));
-			if(doc.containsKey("track")) stats.setTrack(doc.getInteger("track"));
-			dto.setStats(stats);	
+			StatMultimodalValueDTO stats = dto.getStats();
+			if(doc.containsKey("distance")) {
+				if (stats.getDistance() == null) 
+					stats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")/1000.0));
+				else
+					stats.getDistance().sumValue(doc.getDouble("distance")/1000.0);
+				if(dto.getModeStatMap().containsKey(mode)) {
+					StatMultimodalValueDTO modeStats = dto.getModeStatMap().get(mode);
+					if(modeStats.getDistance() == null) {
+						modeStats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")/1000.0));
+					} else {
+						modeStats.getDistance().sumValue(doc.getDouble("distance")/1000.0);
+					}
+				} else {
+					StatMultimodalValueDTO modeStats = new StatMultimodalValueDTO();
+					modeStats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")/1000.0));
+					dto.getModeStatMap().put(mode, modeStats);
+				}
+			}
+			if(doc.containsKey("duration")) {
+				if (stats.getDuration() == null) 
+					stats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")/3600.0));
+				else
+					stats.getDuration().sumValue((double) doc.getLong("duration")/3600.0);
+				if(dto.getModeStatMap().containsKey(mode)) {
+					StatMultimodalValueDTO modeStats = dto.getModeStatMap().get(mode);
+					if(modeStats.getDuration() == null) {
+						modeStats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")/3600.0));
+					} else {
+						modeStats.getDuration().sumValue((double) doc.getLong("duration")/3600.0);
+					}
+				} else {
+					StatMultimodalValueDTO modeStats = new StatMultimodalValueDTO();
+					modeStats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")/3600.0));
+					dto.getModeStatMap().put(mode, modeStats);
+				}
+			}
+			if(doc.containsKey("count")) {
+				if (stats.getCount() == null) 
+					stats.setCount(FieldDTO.fromValue((double) doc.getInteger("count")));
+				else
+					stats.getCount().sumValue((double) doc.getInteger("count"));
+				if(dto.getModeStatMap().containsKey(mode)) {
+					StatMultimodalValueDTO modeStats = dto.getModeStatMap().get(mode);
+					if(modeStats.getCount() == null) {
+						modeStats.setCount(FieldDTO.fromValue((double) doc.getInteger("count")));
+					} else {
+						modeStats.getCount().sumValue((double) doc.getInteger("count"));
+					}
+				} else {
+					StatMultimodalValueDTO modeStats = new StatMultimodalValueDTO();
+					modeStats.setCount(FieldDTO.fromValue((double) doc.getInteger("count")));
+					dto.getModeStatMap().put(mode, modeStats);
+				}	
+			}
 			return this;
 		}
-		
-		public Builder mergeStatMean(Document doc) {
+
+		public Builder setModeCount(String mode, Integer count) {
 			if(dto == null)
 				dto = new StatMultimodalDTO();
 			
-			Document idMap = (Document) doc.get("_id");
-			if(idMap.containsKey("mode")) {
-				String mode = idMap.getString("mode");			
-				StatValue stats = dto.getMeanStatMap().get(mode);
-				if(stats == null) {
-					stats = new StatValue();
-					 dto.getMeanStatMap().put(mode, stats);
-				}
-				
-				if(doc.containsKey("score")) stats.setScore(stats.getScore() +  doc.getDouble("score"));
-				if(doc.containsKey("co2")) stats.setCo2(stats.getCo2() + doc.getDouble("co2"));
-				if(doc.containsKey("distance")) stats.setDistance(stats.getDistance() + doc.getDouble("distance"));
-				if(doc.containsKey("duration")) stats.setDuration(stats.getDuration() + doc.getLong("duration"));
-				if(doc.containsKey("track")) stats.setTrack(stats.getTrack() + doc.getInteger("track"));
+			if(dto.getModeStatMap().containsKey(mode)) {
+				StatMultimodalValueDTO stats = dto.getModeStatMap().get(mode);
+				stats.setCount(FieldDTO.fromValue((double) count));
 			}
 			return this;
 		}
@@ -158,37 +158,56 @@ public class StatMultimodalDTO {
 			if(dto == null)
 				dto = new StatMultimodalDTO();
 			
-			StatValue stats = new StatValue(); 
-			dto.getMeanStatMap().values().forEach(sv -> {
-				if(sv.getScore() != null) {
-					if (stats.getScore() == null) 
-						stats.setScore(sv.getScore());
+			StatMultimodalValueDTO stats = new StatMultimodalValueDTO(); 
+			dto.getModeStatMap().values().forEach(sv -> {
+				if(sv.getDuration() != null) {
+					if (stats.getDuration() == null) 
+						stats.setDuration(FieldDTO.fromValue(sv.getDuration().getValue()));
 					else
-						stats.setScore(stats.getScore() + sv.getScore());
-				}
-				if(sv.getCo2() != null) {
-					if (stats.getCo2() == null) 
-						stats.setCo2(sv.getCo2());
-					else
-						stats.setCo2(stats.getCo2() + sv.getCo2());
+						stats.getDuration().sumValue(sv.getDuration());
 				}
 				if(sv.getDistance() != null) {
 					if (stats.getDistance() == null) 
-						stats.setDistance(sv.getDistance());
+						stats.setDistance(FieldDTO.fromValue(sv.getDistance().getValue()));
 					else
-						stats.setDistance(stats.getDistance() + sv.getDistance());
+						stats.getDistance().sumValue(sv.getDistance());
 				}
-				if(sv.getTrack() != null) {
-					if (stats.getTrack() == null) 
-						stats.setTrack(sv.getTrack());
+				if(sv.getCount() != null) {
+					if (stats.getCount() == null) 
+						stats.setCount(FieldDTO.fromValue(sv.getCount().getValue()));
 					else
-						stats.setTrack(stats.getTrack() + sv.getTrack());
+						stats.getCount().sumValue(sv.getCount());
+				}
+			});
+			// update main count
+			int totalCount = 0;
+			for(StatMultimodalValueDTO sv : dto.getModeStatMap().values()) {
+				if(sv.getCount() != null) {
+					totalCount += sv.getCount().getValue().intValue();
+				}
+			}
+			stats.setCount(FieldDTO.fromValue((double) totalCount));
+			// update main avg
+			if(stats.getDistance() != null) {
+				stats.getDistance().setAvgTrip(stats.getDistance().getValue() / stats.getCount().getValue());
+			}
+			if(stats.getDuration() != null) {
+				stats.getDuration().setAvgTrip(stats.getDuration().getValue() / stats.getCount().getValue());
+			}
+			// update avg and prc for every mean
+			dto.getModeStatMap().values().forEach(sv -> {
+				if(sv.getCount() != null) {
+					sv.getCount().setPrcValue((sv.getCount().getValue() / stats.getCount().getValue()) * 100.0);
+				}
+				if(sv.getDistance() != null) {
+					sv.getDistance().setAvgTrip(sv.getDistance().getValue() / stats.getCount().getValue());
+					sv.getDistance().setPrcValue((sv.getDistance().getValue() / stats.getDistance().getValue()) * 100.0);
+					sv.getDistance().setPrcAvgTrip((sv.getDistance().getAvgTrip() / stats.getDistance().getAvgTrip()) * 100.0);
 				}
 				if(sv.getDuration() != null) {
-					if (stats.getDuration() == null) 
-						stats.setDuration(sv.getDuration());
-					else
-						stats.setDuration(stats.getDuration() + sv.getDuration());
+					sv.getDuration().setAvgTrip(sv.getDuration().getValue() / stats.getCount().getValue());
+					sv.getDuration().setPrcValue((sv.getDuration().getValue() / stats.getDuration().getValue()) * 100.0);
+					sv.getDuration().setPrcAvgTrip((sv.getDuration().getAvgTrip() / stats.getDuration().getAvgTrip()) * 100.0);
 				}
 			});
 			dto.setStats(stats);

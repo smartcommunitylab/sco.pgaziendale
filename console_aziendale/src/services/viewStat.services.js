@@ -57,14 +57,35 @@ function setMapLocations(array) {
 }
 async function fillTheViewWithValues(values, view, selection, currentCampaign) {
   let viewData = {};
-  viewData.headers = getHeadersTable(values, selection, currentCampaign)
-  viewData.subheaders = getSubHeaders(viewData.headers, selection)
-  viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
+  if (Array.isArray(values) && values.length > 0) {
+    viewData.headers = getHeadersTable(values, selection, currentCampaign)
+    viewData.subheaders = getSubHeaders(viewData.headers, selection)
+    viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
+    viewData.data = await getData(viewData.headers, selection, values)
+  } else {
+    viewData.headers = values.headers;
+    viewData.subheaders = [{ text: 'Nome', value: 'name', class: 'cell-agg'}].concat(values.subheaders); 
+    viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
+    if (values) {
+      const data = []; 
+      // assume headers are complete, subheaders are complete, and values are flat
+      for (let rowIndex = 0; rowIndex < values.values.length; rowIndex++) {
+        //set detail name (it should be done more generic getting a function that could be company or locations or employees)
+        let row = { name: getRowNameValue(values.values, rowIndex) };
+        let found = values.values[rowIndex].values[0] || {};
+        for (let dataColumnsIndex = 1; dataColumnsIndex < viewData.subheaders.length; dataColumnsIndex++) {
+          let dc = viewData.subheaders[dataColumnsIndex];
+          row[dc.value] = parseInt(found[dc.value] || '0')
+        }
+        data.push(row)
+      }
+      viewData.data = data;
+    }
+  }
   for (let i = 0; i < viewData.subheaders.length; i++) {
     let s = viewData.subheaders[i];
     s.class = (i == 0 || (i % viewData.headerNumber == 0)) ? 'cell-agg': '';
   }
-  viewData.data = await getData(viewData.headers, selection, values)
 
   return viewData;
 }
@@ -83,7 +104,7 @@ function getHeadersTable(values, selection, currentCampaign) {
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'year'));
       break;
-    case 'date':
+    case 'day':
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'day'));
       break;
@@ -111,10 +132,13 @@ function getHeadersTable(values, selection, currentCampaign) {
 //based on configuration, return the subheader=header.length*selection.dataColumns
 function getSubHeaders(headers, selection) {
   let subheaders = [{ text: 'Nome', value: 'name', class: 'cell-agg'}];
+  console.log('selection', selection);
   for (let i = 0; i < headers.length; i++) {
     for (let k = 0; k < selection.dataColumns.length; k++) {
       let dc = selection.dataColumns[k];
-      subheaders.push({ text: dc.label, value: dc.value + headers[i]})
+      if (dc.value.indexOf('__prc') == -1 || selection.source == 'employee') {
+        subheaders.push({ text: dc.label, value: dc.value + headers[i]})
+      }
     }
     if (selection.groupByMean) {
       for (let k = 0; k < selection.dataColumns.length; k++) {
@@ -167,13 +191,7 @@ async function getData(headers, selection, values) {
     console.log('values', values);
     for (let rowIndex = 0; rowIndex < values.length; rowIndex++) {
       //set detail name (it should be done more generic getting a function that could be company or locations or employees)
-      let name = values[rowIndex].key;
-      if (name.indexOf(';') > -1) {
-        let code = name.substring(name.indexOf(';') + 1, name.length);
-        name = name.substring(0, name.indexOf(';'));
-        name += '<br><small>(' + code + ')</small>';
-      }
-      let row = { name: name };
+      let row = { name: getRowNameValue(values, rowIndex) };
       for (let columnIndex = 0; columnIndex < headers.length; columnIndex++) {
         // entity corresponding the row and the time aggregation element
         let found = findElementInValues(values, rowIndex, columnIndex, selection, headers);
@@ -192,6 +210,16 @@ async function getData(headers, selection, values) {
     }
   }
   return data;
+}
+
+function getRowNameValue(values, rowIndex) {
+  let name = values[rowIndex].key;
+  if (name.indexOf(';') > -1) {
+    let code = name.substring(name.indexOf(';') + 1, name.length);
+    name = name.substring(0, name.indexOf(';'));
+    name += '<br><small>(' + code + ')</small>';
+  }
+  return name;
 }
 
 //find the element of the row depending if the data has one, 2 dimension (1 or multiple row) or is an aggregation
