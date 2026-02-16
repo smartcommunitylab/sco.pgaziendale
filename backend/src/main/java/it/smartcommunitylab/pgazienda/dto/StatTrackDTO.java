@@ -101,8 +101,8 @@ public class StatTrackDTO {
 			else if(stats.getTripCount() != null)
 				stats.setSingleCount(stats.getTripCount());
 
-			if(doc.containsKey("score")) stats.setScore(FieldDTO.fromValue(doc.getDouble("score")));
-			if(doc.containsKey("limitedScore")) stats.setLimitedScore(FieldDTO.fromValue(doc.getDouble("limitedScore")));
+			if(doc.containsKey("score")) stats.setScore(FieldDTO.fromValue(doc.get("score")));
+			if(doc.containsKey("limitedScore")) stats.setLimitedScore(FieldDTO.fromValue(doc.get("limitedScore")));
 			if(doc.containsKey("co2")) {
 				stats.setCo2(FieldDTO.fromValue(doc.getDouble("co2")));
 				if (stats.getTripCount() != null && stats.getTripCount() > 0) 
@@ -142,9 +142,9 @@ public class StatTrackDTO {
 				Double dist = doc.get("distance") != null ? doc.getDouble("distance")/1000.0 : 0.0; // to km
 				Double duration = doc.get("duration") != null ? (double) doc.getLong("duration")/3600.0 : 0.0; // to hours
 
-				if(doc.containsKey("score")) stats.setScore(FieldDTO.fromValue(doc.getDouble("score")));
-				if(doc.containsKey("limitedScore")) stats.setLimitedScore(FieldDTO.fromValue(doc.getDouble("limitedScore")));
-				if(doc.containsKey("co2")) stats.setCo2(FieldDTO.fromValue(doc.getDouble("co2")));
+				if(doc.containsKey("score")) stats.setScore(FieldDTO.fromValue(doc.get("score")));
+				if(doc.containsKey("limitedScore")) stats.setLimitedScore(FieldDTO.fromValue(doc.get("limitedScore")));
+				if(doc.containsKey("co2")) stats.setCo2(FieldDTO.fromValue(doc.get("co2")));
 				if(doc.containsKey("distance")) stats.setDistance(FieldDTO.fromValue(dist));
 				if(doc.containsKey("duration")) stats.setDuration(FieldDTO.fromValue(duration));
 				if(doc.containsKey("track")) stats.setTrack(doc.getInteger("track"));
