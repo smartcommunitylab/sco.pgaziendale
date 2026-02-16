@@ -513,4 +513,37 @@ export const statsConfigurations = [
     }
     ],
   },    
+    {
+    id: "20_multi_company",
+    name: VARIABLES.STATS.NAME.MULTI,
+    profile: 'company',
+    views: [
+      {
+        dataLevel: [
+          { label: VC.DATALEVEL.COMPANIES, value: "company",  puntualAggregation: [{ label:  PA.NONE, value: 'NONE' } ]},
+          { label: VC.DATALEVEL.LOCATIONS,value: "location", puntualAggregation: [{ label:  PA.NONE,  value: 'NONE' }, {  label:  PA.LOCATIONS,  value: 'LOCATIONS' } ]},            
+        ],
+        dataColumns: [  DC.MM_TRAVEL, DC.MM_DURATION, DC.MM_DISTANCE, DC.MM_DISTANCE_AVG, DC.MM_DURATION_AVG],
+        timeUnit: [
+          { label:VC.TIMEUNIT.CAMPAIGN,value: "campaign",apiField: "total" }
+        ],
+        timePeriod: [
+          {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" }
+        ],
+        source: "multimodal",
+        noGroupByMean: true, 
+        default: {
+          source: "multimodal",
+          dataColumns: [DC.MM_TRAVEL, DC.MM_DURATION, DC.MM_DISTANCE],
+          puntualAggregationSelected:{label:  PA.NONE,value: 'NONE', },
+          dataLevel: {
+            label: VC.DATALEVEL.LOCATIONS,value: "location",
+            puntualAggregation: [{  label:  PA.NONE,  value: 'NONE' }, {  label:  PA.LOCATIONS,  value: 'LOCATIONS'}]
+          },
+          timeUnit:   { label:VC.TIMEUNIT.CAMPAIGN,value: "campaign",apiField: "total" },
+          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        
+      }
+    }
+    ],
+  },    
 ];

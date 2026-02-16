@@ -228,26 +228,40 @@ export const VARIABLES = {
           source: "multimodal"
         },
         MM_DURATION: {
-          label: "Durata",
+          label: "Durata (ore)",
           value: "duration",
           source: "multimodal"
         },
         MM_DISTANCE: {
-          label: "Distanza",
+          label: "Distanza (km)",
           value: "distance",
           source: "multimodal"
         },
         MM_DURATION_AVG: {
-          label: "Durata media",
+          label: "Durata media (ore)",
           value: "duration_avg",
           source: "multimodal"
         },
         MM_DISTANCE_AVG: {
-          label: "Distanza media",
+          label: "Distanza media (km)",
           value: "distance_avg",
           source: "multimodal"
         },
-
+        MM_COUNT_PRC: {
+          label: "Percentuale viaggi",
+          value: "prcCount",
+          source: "multimodal"
+        },
+        MM_DURATION_PRC: {
+          label: "Percentuale durata",
+          value: "prcDuration",
+          source: "multimodal"
+        },
+        MM_DISTANCE_PRC: {
+          label: "Percentuale distanza",
+          value: "prcDistance",
+          source: "multimodal"
+        },
       },
       DATALEVEL: {
         LOCATIONS:  "Sedi",
