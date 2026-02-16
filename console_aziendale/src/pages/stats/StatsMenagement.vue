@@ -174,8 +174,11 @@
                     outlined
                     multiple
                   ></v-autocomplete>
-
-                  <p class="text-subtitle-1">Direzione</p>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+                <v-expansion-panel v-if="view.source == 'tracks'">
+          <v-expansion-panel-header>Direzione</v-expansion-panel-header>
+          <v-expansion-panel-content>
                 <v-radio-group
                   v-model="localSelection.direction"
                 >
@@ -188,12 +191,12 @@
         <v-expansion-panel>
           <v-expansion-panel-header>Colonne dati</v-expansion-panel-header>
           <v-expansion-panel-content>
-                <v-checkbox v-for="dc in view.dataColumns.filter(dc => dc.source == view.source)" :key="dc.value"
+                <v-checkbox v-for="dc in view.dataColumns.filter(dc => dc.source == view.source && (localSelection.groupByMean || dc.value.indexOf('__prc') == -1 || view.source == 'employee') )" :key="dc.value"
                 v-model="localSelection.dataColumns" :value="dc"
                 :label="dc.label" hide-details 
               ></v-checkbox>
               <br>
-              <v-switch v-if="view.source == 'tracks'"
+              <v-switch v-if="view.source == 'tracks' && view.noGroupByMean"
                 v-model="localSelection.groupByMean"
                 label="Dividere per mezzo"
                 hide-details
@@ -435,6 +438,7 @@ export default {
     },
 
     saveFiltersAndRefreshStat() {
+      console.log('localSelection to save', this.localSelection);
       // this.sheet = !this.sheet;
       this.setActiveSelection({ selection: this.copy(this.localSelection) });
       this.getLocalStat(this.localSelection);

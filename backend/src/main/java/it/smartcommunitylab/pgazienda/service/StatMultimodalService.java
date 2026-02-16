@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -50,6 +52,9 @@ import it.smartcommunitylab.pgazienda.util.DateUtils;
 
 @Service
 public class StatMultimodalService {
+
+	private static final Logger logger = LoggerFactory.getLogger(StatMultimodalService.class);
+
 	@Autowired
 	private MongoTemplate template;
 	@Autowired
@@ -195,8 +200,61 @@ public class StatMultimodalService {
 			}
 		};
 		List<StatMultimodalDTO> result = new ArrayList<>(mapStats.values());
+		updateDateGroupNames(result, dataGroupBy, campaignId);
 		Collections.sort(result, comparator);
 		return result;		
+	}
+
+	/**
+	 * Fill the dataGroupName field of the StatTrackDTO objects in the result list 
+	 * by replacing the companyId or employeeKey or locationKey 
+	 * with the corresponding name
+	 * @param result the list of StatTrackDTO objects
+	 * @param dataGroupBy the type of group
+	 * @param campaignId the campaign id
+	 */
+	private void updateDateGroupNames(List<StatMultimodalDTO> result, GROUP_BY_DATA dataGroupBy, String campaignId) {
+		Map<String, String> map = new HashMap<>();
+		if(dataGroupBy != null) {
+			switch (dataGroupBy) {
+				case company:
+					Set<String> allCompanies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup()).collect(Collectors.toSet());
+					for (String companyId : allCompanies) {
+						Company company = companyRepository.findById(companyId).orElse(null);
+						if (company != null) {
+							map.put(companyId, company.getName());
+						}
+					}
+					break;
+				case employee:
+					Set<String> companies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
+					if (companies.size() > 0) {
+						try {
+							map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+						}					
+					}
+					break;
+				case location:
+					Set<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
+					for (String companyId : companyIds) {
+						Company company = companyRepository.findById(companyId).orElse(null);
+						if (company != null) {
+							List<CompanyLocation> locations = company.getLocations();
+							for (CompanyLocation location : locations) {
+								map.put(companyId + StatTrack.KEY_DIV + location.getId(), location.getName());
+							}
+						}
+					}
+				default:
+					break;
+			}
+		}
+		logger.info("Map: {}", map);
+		for (StatMultimodalDTO s : result) {
+			s.setDataGroupName(map.getOrDefault(s.getDataGroup(), s.getDataGroup()));			
+		}
 	}
 
 	public List<Map<String, Object>> getMultimodalStatsFlat(
@@ -421,7 +479,7 @@ public class StatMultimodalService {
 		List<String> modes = docs.stream().map(doc -> {
 			Document idMap = (Document) doc.get("_id");
 			return idMap.getString("mode");
-		}).collect(Collectors.toList());
+		}).distinct().collect(Collectors.toList());
 		Collections.sort(modes);
 		return String.join("_", modes);
 	}

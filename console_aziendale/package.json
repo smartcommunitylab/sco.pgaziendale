@@ -10,12 +10,12 @@
   "dependencies": {
     "@tailwindcss/postcss7-compat": "2.0.2",
     "autoprefixer": "^9.8.6",
-    "axios": "1.11.0",
+    "axios": "1.13.4",
     "core-js": "^3.6.5",
     "dayjs": "^1.10.3",
     "leaflet": "^1.7.1",
     "leaflet-geosearch": "^3.3.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "moment": "^2.29.1",
     "oidc-client-ts": "^2.3.0",
     "plotly.js-dist": "^3.1.0",
@@ -34,7 +34,7 @@
     "vue2-leaflet": "^2.6.0",
     "vue2-leaflet-geosearch": "^1.0.6",
     "vuelidate": "^0.7.6",
-    "vuetify": "^2.7.1",
+    "vuetify": "^2.7.2",
     "vuex": "^3.6.0",
     "vuex-persistedstate": "^4.0.0-beta.3"
   },

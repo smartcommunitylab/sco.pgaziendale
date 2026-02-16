@@ -88,37 +88,37 @@ public class StatMultimodalDTO {
 			StatMultimodalValueDTO stats = dto.getStats();
 			if(doc.containsKey("distance")) {
 				if (stats.getDistance() == null) 
-					stats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
+					stats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")/1000.0));
 				else
-					stats.getDistance().sumValue(doc.getDouble("distance"));
+					stats.getDistance().sumValue(doc.getDouble("distance")/1000.0);
 				if(dto.getModeStatMap().containsKey(mode)) {
 					StatMultimodalValueDTO modeStats = dto.getModeStatMap().get(mode);
 					if(modeStats.getDistance() == null) {
-						modeStats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
+						modeStats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")/1000.0));
 					} else {
-						modeStats.getDistance().sumValue(doc.getDouble("distance"));
+						modeStats.getDistance().sumValue(doc.getDouble("distance")/1000.0);
 					}
 				} else {
 					StatMultimodalValueDTO modeStats = new StatMultimodalValueDTO();
-					modeStats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")));
+					modeStats.setDistance(FieldDTO.fromValue(doc.getDouble("distance")/1000.0));
 					dto.getModeStatMap().put(mode, modeStats);
 				}
 			}
 			if(doc.containsKey("duration")) {
 				if (stats.getDuration() == null) 
-					stats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")));
+					stats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")/3600.0));
 				else
-					stats.getDuration().sumValue((double) doc.getLong("duration"));
+					stats.getDuration().sumValue((double) doc.getLong("duration")/3600.0);
 				if(dto.getModeStatMap().containsKey(mode)) {
 					StatMultimodalValueDTO modeStats = dto.getModeStatMap().get(mode);
 					if(modeStats.getDuration() == null) {
-						modeStats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")));
+						modeStats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")/3600.0));
 					} else {
-						modeStats.getDuration().sumValue((double) doc.getLong("duration"));
+						modeStats.getDuration().sumValue((double) doc.getLong("duration")/3600.0);
 					}
 				} else {
 					StatMultimodalValueDTO modeStats = new StatMultimodalValueDTO();
-					modeStats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")));
+					modeStats.setDuration(FieldDTO.fromValue((double) doc.getLong("duration")/3600.0));
 					dto.getModeStatMap().put(mode, modeStats);
 				}
 			}
