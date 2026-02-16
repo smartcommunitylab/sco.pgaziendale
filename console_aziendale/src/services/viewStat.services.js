@@ -83,7 +83,7 @@ function getHeadersTable(values, selection, currentCampaign) {
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'year'));
       break;
-    case 'date':
+    case 'day':
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'day'));
       break;
@@ -114,7 +114,9 @@ function getSubHeaders(headers, selection) {
   for (let i = 0; i < headers.length; i++) {
     for (let k = 0; k < selection.dataColumns.length; k++) {
       let dc = selection.dataColumns[k];
-      subheaders.push({ text: dc.label, value: dc.value + headers[i]})
+      if (dc.value.indexOf('__prc') == -1 || selection.source == 'employee') {
+        subheaders.push({ text: dc.label, value: dc.value + headers[i]})
+      }
     }
     if (selection.groupByMean) {
       for (let k = 0; k < selection.dataColumns.length; k++) {
