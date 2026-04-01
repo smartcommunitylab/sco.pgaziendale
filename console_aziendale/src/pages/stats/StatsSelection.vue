@@ -109,7 +109,7 @@ export default {
     },
     updateCampaign() {
       console.log('campaign', this.localCampaign);
-      if (this.activeSelection && this.localCampaign) {
+      if (this.localCampaign) {
         // this.activeSelection.campaign = this.localCampaign;
         this.setCurrentCampaign({ campaign: this.localCampaign });
       }
