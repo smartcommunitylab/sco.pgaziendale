@@ -108,8 +108,9 @@ export default {
       this.setActiveConfiguration({configurationId: this.selectedConfiguration})
     },
     updateCampaign() {
-      console.log('campaign', this.localCampaign);
+      console.log('local campaign', this.localCampaign);
       if (this.localCampaign) {
+        console.log('update local campaign', this.localCampaign);
         // this.activeSelection.campaign = this.localCampaign;
         this.setCurrentCampaign({ campaign: this.localCampaign });
       }
