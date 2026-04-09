@@ -61,9 +61,9 @@ export default {
     if (!this.adminCompany) {
       if (this.allCampaigns && this.allCampaigns.items) {
         this.statsCampaigns = this.allCampaigns.items.sort((a, b) => new Date(a?.from).getTime() - new Date(b?.from).getTime()).reverse();
-        this.localCampaign = this.allCampaigns.items[0];
+        //this.localCampaign = this.allCampaigns.items[0];
         console.log('mounted',this.localCampaign);
-        this.updateCampaign();
+        //this.updateCampaign();
       } else {
         this.getAllCampaigns();
       }
