@@ -82,7 +82,7 @@ public class H3Resource {
             @RequestParam(required = false) String mode) {
         
         try {
-            logger.info("Fetching trips data forcampaign: {}", campaignId);
+            logger.info("Fetching trips data for campaign: {}", campaignId);
             
             Map<String, Object> responseMap = h3Service.getTrips(campaignId, h3Res, timeSlot, groupId, mode);
             return ResponseEntity.ok(responseMap);
