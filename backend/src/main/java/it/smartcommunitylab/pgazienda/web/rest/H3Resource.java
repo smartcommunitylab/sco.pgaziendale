@@ -30,7 +30,6 @@ public class H3Resource {
     /**
      * Get average duration data for a specific H3 cell.
      * 
-     * @param territoryId the territory identifier
      * @param campaignId the campaign identifier
      * @param h3Cell the H3 cell identifier
      * @param h3Res the H3 resolution level
@@ -41,7 +40,6 @@ public class H3Resource {
      */
     @GetMapping("/avg-duration")
     public ResponseEntity<Map<String, Object>> getAvgDuration(
-            @RequestParam String territoryId,
             @RequestParam String campaignId,
             @RequestParam String h3Cell,
             @RequestParam(required = false, defaultValue = "8") int h3Res,
@@ -50,10 +48,10 @@ public class H3Resource {
             @RequestParam(required = false, defaultValue = "false") boolean isDeparture) {
         
         try {
-            logger.info("Fetching average duration data for territory: {}, campaign: {}, cell: {}", 
-                territoryId, campaignId, h3Cell);
+            logger.info("Fetching average duration data for campaign: {}, cell: {}", 
+                campaignId, h3Cell);
             
-            Map<String, Object> responseMap = h3Service.getAvgDuration(territoryId, campaignId, h3Cell, h3Res, timeSlot, groupId, isDeparture);
+            Map<String, Object> responseMap = h3Service.getAvgDuration(campaignId, h3Cell, h3Res, timeSlot, groupId, isDeparture);
             return ResponseEntity.ok(responseMap);
             
         } catch (InconsistentDataException e) {
@@ -68,7 +66,6 @@ public class H3Resource {
     /**
      * Get trip data for a specific territory and campaign.
      * 
-     * @param territoryId the territory identifier
      * @param campaignId the campaign identifier
      * @param h3Res the H3 resolution level
      * @param timeSlot the time slot (optional)
@@ -78,7 +75,6 @@ public class H3Resource {
      */
     @GetMapping("/trips")
     public ResponseEntity<Map<String, Object>> getTrips(
-            @RequestParam String territoryId,
             @RequestParam String campaignId,
             @RequestParam(required = false, defaultValue = "8") int h3Res,
             @RequestParam(required = false) String timeSlot,
@@ -86,9 +82,9 @@ public class H3Resource {
             @RequestParam(required = false) String mode) {
         
         try {
-            logger.info("Fetching trips data for territory: {}, campaign: {}", territoryId, campaignId);
+            logger.info("Fetching trips data forcampaign: {}", campaignId);
             
-            Map<String, Object> responseMap = h3Service.getTrips(territoryId, campaignId, h3Res, timeSlot, groupId, mode);
+            Map<String, Object> responseMap = h3Service.getTrips(campaignId, h3Res, timeSlot, groupId, mode);
             return ResponseEntity.ok(responseMap);
             
         } catch (InconsistentDataException e) {
@@ -103,7 +99,6 @@ public class H3Resource {
     /**
      * Get user departure data for a specific H3 cell.
      * 
-     * @param territoryId the territory identifier
      * @param campaignId the campaign identifier
      * @param h3Cell the H3 cell identifier
      * @param h3Res the H3 resolution level
@@ -114,7 +109,6 @@ public class H3Resource {
      */
     @GetMapping("/user-departure")
     public ResponseEntity<Map<String, Object>> getUserDeparture(
-            @RequestParam String territoryId,
             @RequestParam String campaignId,
             @RequestParam String h3Cell,
             @RequestParam(required = false, defaultValue = "8") int h3Res,
@@ -123,10 +117,10 @@ public class H3Resource {
             @RequestParam(required = false, defaultValue = "false") boolean isDeparture) {
         
         try {
-            logger.info("Fetching user departure data for territory: {}, campaign: {}, cell: {}", 
-                territoryId, campaignId, h3Cell);
+            logger.info("Fetching user departure data for campaign: {}, cell: {}", 
+                campaignId, h3Cell);
             
-            Map<String, Object> responseMap = h3Service.getUserDeparture(territoryId, campaignId, h3Cell, h3Res, timeSlot, groupId, isDeparture);
+            Map<String, Object> responseMap = h3Service.getUserDeparture(campaignId, h3Cell, h3Res, timeSlot, groupId, isDeparture);
             return ResponseEntity.ok(responseMap);
             
         } catch (InconsistentDataException e) {

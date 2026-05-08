@@ -12,6 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 
 @Service
@@ -42,6 +44,12 @@ public class H3Service {
 
 	@Value("${app.h3.endpoint:}")
 	private String h3Endpoint;
+
+    @Autowired
+	private UserService userService;
+
+	@Autowired
+	private CampaignRepository campaignRepo;
     
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -120,25 +128,61 @@ public class H3Service {
 		return url;
 	}
 
-    public Map<String, Object> getAvgDuration(String territoryId, String campaignId,
-            String h3Cell, int h3Res, String timeSlot, String groupId, boolean isDeparture) throws InconsistentDataException {
-        // TODO check user role
-        String url = buildUrl(H3API.AVG_DURATION, territoryId, campaignId, h3Cell, h3Res, timeSlot, groupId, isDeparture, 
+    public Map<String, Object> getAvgDuration(
+            String campaignId,
+            String h3Cell, 
+            int h3Res, 
+            String timeSlot, 
+            String groupId, 
+            boolean isDeparture) 
+            throws InconsistentDataException, SecurityException {
+        Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+        if (campaign == null) {
+            throw new SecurityException("Campaign not found");
+        }
+        if (!userService.isInCampaignRole(campaignId)) {
+            throw new SecurityException("User does not have access to this campaign");
+        }
+        String url = buildUrl(H3API.AVG_DURATION, campaign.getTerritoryId(), campaignId, h3Cell, h3Res, timeSlot, groupId, isDeparture, 
             defaultMintracks, null);
         return getGeoJsonData(url);
     }
 
-    public Map<String, Object> getTrips(String territoryId, String campaignId, int h3Res, String timeSlot, String groupId, String mode) throws InconsistentDataException {
-        // TODO check user role
-        String url = buildUrl(H3API.TRIP, territoryId, campaignId, null, h3Res, timeSlot, groupId, false,
+    public Map<String, Object> getTrips(
+            String campaignId, 
+            int h3Res, 
+            String timeSlot, 
+            String groupId, 
+            String mode) 
+            throws InconsistentDataException, SecurityException {
+        Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+        if (campaign == null) {
+            throw new SecurityException("Campaign not found");
+        }
+        if (!userService.isInCampaignRole(campaignId)) {
+            throw new SecurityException("User does not have access to this campaign");
+        }
+        String url = buildUrl(H3API.TRIP, campaign.getTerritoryId(), campaignId, null, h3Res, timeSlot, groupId, false,
             defaultMintracks, mode);
         return getGeoJsonData(url);
     }
 
-    public Map<String, Object> getUserDeparture(String territoryId, String campaignId,
-            String h3Cell, int h3Res, String timeSlot, String groupId, boolean isDeparture) throws InconsistentDataException {
-        // TODO check user role
-        String url = buildUrl(H3API.DEPARTURE, territoryId, campaignId, h3Cell, h3Res, timeSlot, groupId, isDeparture, 
+    public Map<String, Object> getUserDeparture(
+            String campaignId,
+            String h3Cell, 
+            int h3Res, 
+            String timeSlot, 
+            String groupId, 
+            boolean isDeparture) 
+            throws InconsistentDataException, SecurityException  {
+        Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+        if (campaign == null) {
+            throw new SecurityException("Campaign not found");
+        }
+        if (!userService.isInCampaignRole(campaignId)) {
+            throw new SecurityException("User does not have access to this campaign");
+        }
+        String url = buildUrl(H3API.DEPARTURE, campaign.getTerritoryId(), campaignId, h3Cell, h3Res, timeSlot, groupId, isDeparture, 
             defaultMintracks, null);
         return getGeoJsonData(url);
     }
