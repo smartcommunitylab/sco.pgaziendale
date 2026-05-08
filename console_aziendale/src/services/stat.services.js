@@ -229,6 +229,9 @@ function getAllEmployeesStats(configuration) {
 
 function getCompanyStats(configuration) {
   console.log('getCompanyStats', configuration);
+  if (!configuration || !configuration.company || !configuration.company.id) {
+    return Promise.reject('getCompanyStats: company is undefined');
+  }
   return callStatsAPI(
     configuration.campaign.id, 
     configuration.company.id, 

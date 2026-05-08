@@ -1,6 +1,9 @@
 <template>
   <v-row>
     <v-col cols="9">
+      <v-overlay :value="isLoading" absolute z-index="999">
+    <v-progress-circular indeterminate size="64" color="primary"></v-progress-circular>
+  </v-overlay>
       <v-card>
         <v-row>
           <v-col cols="6">
@@ -21,15 +24,12 @@
             </v-tabs>
           </v-col>
           <v-col cols="6">
-            <div class="text-right m-2" v-if="activeSelection && activeSelection.dataLevel">
-              <v-btn
-                color="primary"
-                @click="exportCsv"
-              >
-                Download CSV
-              </v-btn>
+            <div
+              class="text-right m-2"
+              v-if="activeSelection && activeSelection.dataLevel"
+            >
+              <v-btn color="primary" @click="exportCsv"> Download CSV </v-btn>
             </div>
-
           </v-col>
         </v-row>
 
@@ -82,7 +82,8 @@
                 ><br /><span
                   v-for="(agg, index) in activeSelection.puntualAggregationItems"
                   :key="index"
-                  >{{ agg.label }} </span></template
+                  >{{ agg.label }}
+                </span></template
               ><template v-else><br /><span>Nessuno</span></template>
             </p>
           </v-card-text>
@@ -92,183 +93,170 @@
           </v-card-actions>
         </v-card>
 
-        <v-dialog
-          v-model="sheet"
-          persistent
-          max-width="1200px">
+        <v-dialog v-model="sheet" persistent max-width="1200px">
           <v-card>
-          <v-card-title>
-            <span class="text-h4 text-center">Impostazioni</span>
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-    
-            <!-- INPUT - Componenti per il filtraggio -->
+            <v-card-title>
+              <span class="text-h4 text-center">Impostazioni</span>
+            </v-card-title>
+            <v-card-text>
+              <v-container>
+                <!-- INPUT - Componenti per il filtraggio -->
 
-            <v-row justify="center">
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Livello aggregazione</p>
+                <v-row justify="center">
+                  <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
+                    <p class="text-subtitle-1">Livello aggregazione</p>
 
-                <v-autocomplete
-                  label="Livello aggregazione"
-                  name="livelloaggregazione"
-                  id="livelloaggregazione"
-                  v-model="localSelection.dataLevel"
-                  :items="view.dataLevel"
-                  item-text="label"
-                  return-object
-                  outlined
-                  @change="resetPunctualAggregation"
-                ></v-autocomplete>
+                    <v-autocomplete
+                      label="Livello aggregazione"
+                      name="livelloaggregazione"
+                      id="livelloaggregazione"
+                      v-model="localSelection.dataLevel"
+                      :items="view.dataLevel"
+                      item-text="label"
+                      return-object
+                      outlined
+                      @change="resetPunctualAggregation"
+                    ></v-autocomplete>
 
-                <div
-                class="pl-5"
-                v-if="localSelection && localSelection.puntualAggregationSelected"
-              >
-                <p class="text-subtitle-1">Filtri</p>
-                <v-radio-group
-                  v-model="puntualAggregationSelected"
-                  @change="updatePuntualAggregationChange"
-                >
-                  <v-radio
-                    v-for="(agg, index) in localSelection.dataLevel.puntualAggregation"
-                    :key="index"
-                    :label="agg.label"
-                    :value="agg.value"
-                  ></v-radio>
-                </v-radio-group>
-                <div
-                  v-if="
-                    localSelection.puntualAggregationSelected &&
-                    localSelection.puntualAggregationSelected.value != 'NONE' &&
-                    localSelection.itemsAggreation != null
-                  "
-                >
-                  <v-autocomplete
-                    label="Selezione"
-                    name="typeData"
-                    id="typeData"
-                    v-model="localSelection.puntualAggregationItems"
-                    :items="localSelection.itemsAggreation"
-                    :item-text="getItemText"
-                    return-object
-                    outlined
-                    multiple
-                  ></v-autocomplete>
-                </div>
-              </div>
-              </v-col>
+                    <div
+                      class="pl-5"
+                      v-if="localSelection && localSelection.puntualAggregationSelected"
+                    >
+                      <p class="text-subtitle-1">Filtri</p>
+                      <v-radio-group
+                        v-model="puntualAggregationSelected"
+                        @change="updatePuntualAggregationChange"
+                      >
+                        <v-radio
+                          v-for="(agg, index) in localSelection.dataLevel
+                            .puntualAggregation"
+                          :key="index"
+                          :label="agg.label"
+                          :value="agg.value"
+                        ></v-radio>
+                      </v-radio-group>
+                      <div
+                        v-if="
+                          localSelection.puntualAggregationSelected &&
+                          localSelection.puntualAggregationSelected.value != 'NONE' &&
+                          localSelection.itemsAggreation != null
+                        "
+                      >
+                        <v-autocomplete
+                          label="Selezione"
+                          name="typeData"
+                          id="typeData"
+                          v-model="localSelection.puntualAggregationItems"
+                          :items="localSelection.itemsAggreation"
+                          :item-text="getItemText"
+                          return-object
+                          outlined
+                          multiple
+                        ></v-autocomplete>
+                      </div>
+                    </div>
+                  </v-col>
 
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Aggregazione temporale</p>
-                <v-autocomplete
-                  label="Aggregazione temporale"
-                  placeholder="Aggregazione temporale"
-                  name="unitaTemporale"
-                  id="unitaTemporale"
-                  v-model="localSelection.timeUnit"
-                  :items="view.timeUnit"
-                  item-text="label"
-                  return-object
-                  outlined
-                ></v-autocomplete>
+                  <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
+                    <p class="text-subtitle-1">Aggregazione temporale</p>
+                    <v-autocomplete
+                      label="Aggregazione temporale"
+                      placeholder="Aggregazione temporale"
+                      name="unitaTemporale"
+                      id="unitaTemporale"
+                      v-model="localSelection.timeUnit"
+                      :items="view.timeUnit"
+                      item-text="label"
+                      return-object
+                      outlined
+                    ></v-autocomplete>
 
-                <p class="text-subtitle-1">Periodo di tempo</p>
-                <v-radio-group v-model="timePeriod" @change="updateTimePeriod">
-                  <v-radio
-                    v-for="(period, index) in view.timePeriod"
-                    :key="index"
-                    :label="period.label"
-                    :value="period.value"
-                  ></v-radio>
-                </v-radio-group>
-                <div
-                  v-if="
-                    localSelection.timePeriod &&
-                    localSelection.timePeriod.value == 'SPECIFIC'
-                  "
-                >
-                  <v-menu
-                    v-model="showPickerFrom"
-                    :close-on-content-click="false"
-                    :nudge-right="40"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="auto"
-                  >
-                    <template v-slot:activator="{ on }">
-                      <v-text-field
-                        v-model="localSelection.selectedDateFrom"
-                        label="Seleziona la data di inizio"
-                        hint="YYYY/MM/DD/"
-                        persistent-hint
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      v-model="localSelection.selectedDateFrom"
-                      @input="showPickerFrom = false"
-                    ></v-date-picker>
-                  </v-menu>
+                    <p class="text-subtitle-1">Periodo di tempo</p>
+                    <v-radio-group v-model="timePeriod" @change="updateTimePeriod">
+                      <v-radio
+                        v-for="(period, index) in view.timePeriod"
+                        :key="index"
+                        :label="period.label"
+                        :value="period.value"
+                      ></v-radio>
+                    </v-radio-group>
+                    <div
+                      v-if="
+                        localSelection.timePeriod &&
+                        localSelection.timePeriod.value == 'SPECIFIC'
+                      "
+                    >
+                      <v-menu
+                        v-model="showPickerFrom"
+                        :close-on-content-click="false"
+                        :nudge-right="40"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="auto"
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field
+                            v-model="localSelection.selectedDateFrom"
+                            label="Seleziona la data di inizio"
+                            hint="YYYY/MM/DD/"
+                            persistent-hint
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="localSelection.selectedDateFrom"
+                          @input="showPickerFrom = false"
+                        ></v-date-picker>
+                      </v-menu>
 
-                  <v-menu
-                    v-model="showPickerTo"
-                    :close-on-content-click="false"
-                    :nudge-right="40"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="auto"
-                  >
-                    <template v-slot:activator="{ on }">
-                      <v-text-field
-                        v-model="localSelection.selectedDateTo"
-                        label="Seleziona la data di fine"
-                        hint="YYYY/MM/DD"
-                        persistent-hint
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      v-model="localSelection.selectedDateTo"
-                      @input="showPickerTo = false"
-                    ></v-date-picker>
-                  </v-menu>
-                </div>
-              </v-col>
+                      <v-menu
+                        v-model="showPickerTo"
+                        :close-on-content-click="false"
+                        :nudge-right="40"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="auto"
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field
+                            v-model="localSelection.selectedDateTo"
+                            label="Seleziona la data di fine"
+                            hint="YYYY/MM/DD"
+                            persistent-hint
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="localSelection.selectedDateTo"
+                          @input="showPickerTo = false"
+                        ></v-date-picker>
+                      </v-menu>
+                    </div>
+                  </v-col>
 
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Colonne Dati</p>
-                <v-checkbox v-for="dc in view.dataColumns" :key="dc.value"
-                v-model="localSelection.dataColumns" :value="dc"
-                :label="dc.label" hide-details
-              ></v-checkbox>
-              </v-col>
-            </v-row>
-          <!-- </v-sheet>
+                  <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
+                    <p class="text-subtitle-1">Colonne Dati</p>
+                    <v-checkbox
+                      v-for="dc in view.dataColumns"
+                      :key="dc.value"
+                      v-model="localSelection.dataColumns"
+                      :value="dc"
+                      :label="dc.label"
+                      hide-details
+                    ></v-checkbox>
+                  </v-col>
+                </v-row>
+                <!-- </v-sheet>
         </v-bottom-sheet> -->
-            </v-container>
-             </v-card-text>
+              </v-container>
+            </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="sheet = false"
-              >
-                Annulla
-              </v-btn>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="initiSelection()"
-              >
+              <v-btn color="blue darken-1" text @click="sheet = false"> Annulla </v-btn>
+              <v-btn color="blue darken-1" text @click="initiSelection()">
                 Reimposta
               </v-btn>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="saveFiltersAndRefreshStat()"
-              >
+              <v-btn color="blue darken-1" text @click="saveFiltersAndRefreshStat()">
                 Applica
               </v-btn>
             </v-card-actions>
@@ -310,11 +298,12 @@ export default {
 
   data() {
     return {
+      isLoading: false,
       tab: null,
       sheet: false,
       showPickerFrom: false,
       showPickerTo: false,
-      loader: null,
+      // loader: null,
       // puntualAggregationValue: "NONE",
       //timePeriodValue: null,
       localSelection: {
@@ -443,31 +432,27 @@ export default {
       this.updatePuntualAggregationChange();
     },
 
-    fillTheViewWithValues(values, view, activeSelection, currentCampaign, loader) {
-      viewStatService
-        .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
-        .then((viewData) => {
-          this.viewData = viewData;
-          loader.hide();
-        });
-    },
+    fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
+  viewStatService
+    .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
+    .then((viewData) => {
+      this.viewData = viewData;
+    })
+    .catch(err => {
+      console.error(err);
+    })
+    .finally(() => {
+      this.isLoading = false;
+    });
+},
     getLocalStat(selection) {
-      this.loader = this.$loading.show({
-        canCancel: false,
-        backgroundColor: "#000",
-        color: "#fff",
-      });
-      try {
+      this.isLoading = true;
         this.getStatFromServer(selection);
-      } finally {
-        setTimeout(() => {
-          this.loader.hide();
-        }, 5000);
-      }
     },
     getItemText(item) {
       return item.label;
     },
+
     exportCsv() {
       this.downloadCsv(this.localSelection);
     },
@@ -477,7 +462,7 @@ export default {
     },
     updatePuntualAggregationChange() {
       if (!this.localSelection) return;
-      
+
       this.localSelection.puntualAggregationSelected = this.localSelection.dataLevel.puntualAggregation.find((v) => v.value === this.puntualAggregationSelected);
       if (
         this.localSelection &&
@@ -576,29 +561,49 @@ export default {
   },
 
   watch: {
-    statValues: {
-      handler: function (newVal) {
-        if (newVal && newVal.items) {
-          this.fillTheViewWithValues(
-            newVal.items,
-            this.activeViewType,
-            this.activeSelection,
-            this.currentCampaign.item,
-            this.loader
-          );
-        }
-      },
-      deep: true,
-    },
-    activeConfiguration() {
-      this.tab = this.activeViewType;
-      this.baseSelection = this.copy(this.activeSelection);
+  statValues: {
+    handler: function (newVal) {
+      if (!newVal || newVal.loading) return;
 
+      this.isLoading = false;
+
+      if (newVal.items) {
+        this.fillTheViewWithValues(
+          newVal.items,
+          this.activeViewType,
+          this.activeSelection,
+          this.currentCampaign.item
+        );
+      } else if (newVal.error) {
+        console.error('Errore nel caricamento statistiche', newVal.error);
+      }
+    },
+    deep: true,
+  },
+  activeConfiguration: {
+    handler(newVal) {
+      if (!newVal || newVal.items === undefined || newVal.items === null) return;
+      
+      this.tab = this.activeViewType;
+      
+      // ✅ FIX: Salviamo l'intero oggetto "company", non "companyId"
+      const currentCompany = this.activeSelection ? this.activeSelection.company : null;
+      
+      this.baseSelection = this.copy(this.activeSelection);
       this.initiSelection();
+      
+      if (currentCompany && this.localSelection && !this.localSelection.company) {
+        this.localSelection.company = currentCompany;
+        this.activeSelection.company = currentCompany; 
+      }
+
       if (this.activeSelection && this.currentCampaign) {
         this.getLocalStat(this.localSelection);
       }
     },
+    deep: true,
+  },
+
 
     currentCampaign: {
       handler(newValue, oldValue) {

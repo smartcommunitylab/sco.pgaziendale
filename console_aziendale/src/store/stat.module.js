@@ -35,6 +35,7 @@ const actions = {
   },
   getStat({ commit, dispatch,state }, configuration) {
     commit("getStat");
+    if (!state.currentCampaign || !configuration) return;
     if (state.currentCampaign)
       statService.getStat(configuration,state.currentCampaign.item).then(
       (statistics) => {
@@ -198,7 +199,7 @@ const mutations = {
   getConfigurationByUserFailure(state, error) {
     state.configurations = { error };
   },
-  setActiveConfiguration() {
+  setActiveConfiguration(state) {
     state.activeConfiguration = { loading: true };
   },
   setActiveConfigurationSuccess(state, configurationId) {
@@ -207,7 +208,7 @@ const mutations = {
   setActiveConfigurationFailure(state, error) {
     state.activeConfiguration = { error };
   },
-  setActiveViewType() {
+  setActiveViewType(state) {
     state.activeViewType = { loading: true };
   },
   setActiveViewTypeSuccess(state, activeViewType) {

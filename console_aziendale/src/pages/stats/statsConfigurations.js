@@ -126,11 +126,126 @@ export const statsConfigurations = [
     ],
   },
   /*
+  / Configurazione - Punti Fatti e Utili
+  / Specifica per il  ADMIN -> Amministratore di Sistema
+  */
+  {
+    id: 1,
+    name: VARIABLES.STATS.NAME.ENVIRONMENTAL_IMPACT,
+    profile: 'global',
+    views: [
+      {
+        type: VARIABLES.STATS.VIEWS.TYPE.TABLE,
+        dataLevel: [
+          {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANY,
+            value: "company",
+            api: "getCompanyStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value:  'NONE'
+            }],
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.LOCATIONS,
+            value: "locations",
+            api: "getLocationsStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value: 'NONE',
+              function:''
+            },{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.LOCATIONS,
+              value: 'LOCATIONS',
+              function:'aggregateByLocation'
+            }]
+          }
+        ],
+        dataColumns: [
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_N_TRAVEL,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_POINTS,
+          VARIABLES.STATS.VIEWS.DATACOLUMNS.MEAN_CO2_SAVED,
+        ],
+        timeUnit: [
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+            value: "month",
+            apiField: "month"
+          },
+          {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.YEAR,
+            value: "year",
+            apiField: "year"
+          },          {
+            label:VARIABLES.STATS.VIEWS.TIMEUNIT.CAMPAIGN,
+            value: "campaign",
+            apiField: "total"
+          }
+
+        ],
+        timePeriod: [
+          {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+            value: "ALL",
+            apiField: ""
+          },
+          {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.SPECIFIC,
+            value: "SPECIFIC",
+            apiField: "month"
+          },
+        ],
+        
+        default: {
+          dataColumns: [
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.N_TRAVEL,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.POINTS,
+            VARIABLES.STATS.VIEWS.DATACOLUMNS.CO2_SAVED
+  
+          ],
+          puntualAggregationSelected:{
+            label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+            value: 'NONE',
+            function:''
+          },
+          dataLevel: {
+            label: VARIABLES.STATS.VIEWS.DATALEVEL.COMPANIES,
+            value: "companies",
+            api: "getCampaignCompanyStats",
+            puntualAggregation: [{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.NONE,
+              value: 'NONE',
+              function:''
+            },{
+              label:  VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION.COMPANIES,
+              value: 'COMPANIES',
+              function:'aggregateBycompany'
+            }]
+          },
+          timeUnit:  {
+            label: VARIABLES.STATS.VIEWS.TIMEUNIT.MONTH,
+            value: "month",
+            apiField: "month"
+          },
+          timePeriod: {
+            label:VARIABLES.STATS.VIEWS.TIMEPERIOD.ALL,
+            value: "ALL",
+            apiField: ""
+          },
+      }
+    },
+
+    ],
+  },
+  /*
   / Configurazione - Km Fatti e Utili
   / Specifica per il COMPANY ADMIN -> Amministratore Aziendale
   */
   {
-    id: 1,
+    id: 2,
     name: VARIABLES.STATS.NAME.KM_COUNTED,
     profile: 'company',
     views: [
@@ -271,7 +386,7 @@ export const statsConfigurations = [
   / Specifica per il COMPANY ADMIN -> Amministratore Aziendale
   */
   {
-    id: 2,
+    id: 3,
     name: VARIABLES.STATS.NAME.ENVIRONMENTAL_IMPACT,
     profile: 'company',
     views: [
