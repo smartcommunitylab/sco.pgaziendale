@@ -442,7 +442,18 @@ export default {
     copy(obj) {
       return obj ? JSON.parse(JSON.stringify(obj)) : null;
     },
-    closeMenu() {
+    closeMenu(e) {
+      if (e && e.target) {
+        if (
+          e.target.closest('.v-menu__content') || 
+          e.target.closest('.menuable__content__active') || 
+          e.target.closest('.v-select-list') ||
+          e.target.closest('.v-overlay')
+        ) {
+          return;
+        }
+      }
+
       if (!this.mini) {
         this.mini = true;
       }
