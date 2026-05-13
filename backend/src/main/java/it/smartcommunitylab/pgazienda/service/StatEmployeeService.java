@@ -263,9 +263,7 @@ public class StatEmployeeService {
 			for(String timeGroup : timeGroupList) {
 				String groupKey = getGroupKey(campaignId, timeGroup, null);
 				if(!mapStats.containsKey(groupKey)) {
-					StatEmployeeDTO stats = new  StatEmployeeDTO();
-					stats.setCampaign(campaignId);
-					stats.setTimeGroup(timeGroup);
+					StatEmployeeDTO stats = createEmptyStatEmployeeDTO(campaignId, timeGroup, null);
 					mapStats.put(groupKey, stats);
 				}
 			}
@@ -274,15 +272,24 @@ public class StatEmployeeService {
 				for(String timeGroup : timeGroupList) {
 					String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
 					if(!mapStats.containsKey(groupKey)) {
-						StatEmployeeDTO stats = new  StatEmployeeDTO();
-						stats.setCampaign(campaignId);
-						stats.setTimeGroup(timeGroup);
-						stats.setDataGroup(dataGroup);
+						StatEmployeeDTO stats = createEmptyStatEmployeeDTO(campaignId, timeGroup, dataGroup);
 						mapStats.put(groupKey, stats);
 					}					
 				}
 			}
 		}
+	}
+
+	private StatEmployeeDTO createEmptyStatEmployeeDTO(String campaignId, String timeGroup, String dataGroup) {
+		StatEmployeeDTO stats = new  StatEmployeeDTO();
+		if (StringUtils.isNotBlank(campaignId)) stats.setCampaign(campaignId);
+		if (StringUtils.isNotBlank(timeGroup)) stats.setTimeGroup(timeGroup);
+		if (StringUtils.isNotBlank(dataGroup)) stats.setDataGroup(dataGroup);
+		stats.setDropout(FieldEmployeeDTO.fromValue(0));
+		stats.setActiveUsers(FieldEmployeeDTO.fromValue(0));
+		stats.setRegistration(FieldEmployeeDTO.fromValue(0));
+		stats.setRegistered(FieldEmployeeDTO.fromValue(0));		
+		return stats;
 	}
 	
 	private void addDataGroup(List<String> dataGroupList, String dataGroup) {

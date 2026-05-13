@@ -613,9 +613,9 @@ function getStat(configuration) {
       ).then(res => {
         if (agg === 'location' || agg === 'company') {
           const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
-          if (arr.length == 0) return res;
-          return res.filter(e => arr.indexOf(e.key) >= 0);
+          if (arr.length > 0) res = res.filter(e => arr.indexOf(e.key) >= 0);
         }
+        res = expandMulti(res, configuration);
         return res;
       });
   } else if (configuration.source === 'employee') {
@@ -640,6 +640,45 @@ function getStat(configuration) {
   }
   
 }
+
+function expandMulti(res, configuration) {
+  if (res.length == 0 || res[0].values.length == 0) return;
+  const means = [];
+  const obj = res[0].values[0];
+  for (let key in obj) {
+    for (let f of ['count', 'distance', 'duration', 'distance_avg', 'duration_avg', 'prcCount', 'prcDistance', 'prcDuration']) {
+      let idx = key.indexOf('_' + f);
+      if (idx > 0) {
+        let mean = key.substring(0, idx);
+        if (means.indexOf(mean) < 0) {
+          means.push(mean);
+        }
+      }
+    }
+  }
+
+  const subheaders = configuration.dataColumns.map(dc => {
+    return {text: dc.label, value: dc.value};
+  });
+  const headers = ['totale'];
+  means.forEach(m => {
+    configuration.dataColumns.forEach(dc => {
+      subheaders.push({text: dc.label, value: m + '_' + dc.value});
+    });
+    headers.push(m.split('_').join(' / '));
+  });
+
+  // res.forEach(r => {
+  // });
+  console.log('means', means);
+  let result = {
+    values: res,
+    headers: headers,
+    subheaders: subheaders
+  };
+  return result;
+}
+
 function getCsv(configuration) {
   configuration.csv = true;
   return getStat(configuration).finally(() => configuration.csv = false);
