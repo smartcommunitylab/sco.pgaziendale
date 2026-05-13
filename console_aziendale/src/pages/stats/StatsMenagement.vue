@@ -7,13 +7,14 @@
             color="primary"
           ></v-progress-circular>
         </v-overlay>
-    <v-navigation-drawer
+        <v-navigation-drawer
       absolute
       permanent
       right
       v-model="drawer"
       :mini-variant.sync="mini"
       width="384"
+      v-click-outside="closeMenu"
     >
       <v-list-item class="ml-2 px-2">
         <v-list-item-icon>
@@ -441,7 +442,11 @@ export default {
     copy(obj) {
       return obj ? JSON.parse(JSON.stringify(obj)) : null;
     },
-
+    closeMenu() {
+      if (!this.mini) {
+        this.mini = true;
+      }
+    },
     saveFiltersAndRefreshStat() {
       console.log("localSelection to save", this.localSelection);
       // this.sheet = !this.sheet;
