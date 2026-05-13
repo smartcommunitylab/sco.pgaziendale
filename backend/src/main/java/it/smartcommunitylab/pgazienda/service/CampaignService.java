@@ -335,6 +335,7 @@ public class CampaignService {
 	
 	@Scheduled(fixedDelay=1000*60*60) 
 	public void syncExternalCampaigns() {
+		logger.info("syncExternalCampaigns");
 		List<Campaign> campaigns = appService.retrieveExternalCampaigns();
 		for (Campaign c : campaigns) {
 			// do not overwrite legacy campaign data
