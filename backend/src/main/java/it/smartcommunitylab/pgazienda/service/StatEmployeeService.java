@@ -484,10 +484,6 @@ public class StatEmployeeService {
 				res.put(f.toString(), f.getValue() != null ? f.getValue() : 0);
 				res.put(f.toString() + "__prcTot", f.getPrcTot() != null ? f.getPrcTot() : 0);
 				res.put(f.toString() + "__prcRegistered", f.getPrcRegistered() != null ? f.getPrcRegistered() : 0);
-			} else {
-				res.put(f.toString(), 0);
-				res.put(f.toString() + "__prcTot", 0);
-				res.put(f.toString() + "__prcRegistered", 0);
 			}
 		}
 		return res;
