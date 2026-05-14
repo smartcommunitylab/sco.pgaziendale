@@ -100,20 +100,20 @@ export const VARIABLES = {
           source: "tracks"
         },
         DISTANCE: {
-          label: "Distanca totale (km)",
+          label: "Distanza totale (km)",
           meanLabel: "KM per mezzo (_mezzo_)",
           value: "distance",
           source: "tracks"
         },
         DISTANCE_AVG_LEG: {
-          label: "Distanca media per tratta (km)",
+          label: "Distanza media per tratta (km)",
           meanLabel: "KM per mezzo (_mezzo_) per tratta",
           value: "distance__avgTrack",
           baseValue: "distance",
           source: "tracks"
         },
         DISTANCE_AVG_TRIP: {
-          label: "Distanca media per viaggio (km)",
+          label: "Distanza media per viaggio (km)",
           meanLabel: "KM per mezzo (_mezzo_) per viaggio",
           value: "distance__avgTrip",
           baseValue: "distance",
