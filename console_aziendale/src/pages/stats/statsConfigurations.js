@@ -193,6 +193,7 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
+        noGroupByMean: true, 
         default: {
           source: "tracks",
           dataColumns: [DC.DISTANCE ],
@@ -233,6 +234,7 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
+        noGroupByMean: true, 
         default: {
           source: "tracks",
           dataColumns: [DC.DISTANCE ],
