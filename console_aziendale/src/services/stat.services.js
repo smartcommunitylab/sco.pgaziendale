@@ -593,7 +593,7 @@ function getStat(configuration) {
         configuration.csv
       ).then(res => {
         if (agg === 'location' || agg === 'company') {
-          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
+          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.label || e.name || e.id) : [];
           if (arr.length == 0) return res;
           return res.filter(e => arr.indexOf(e.key) >= 0);
         }
@@ -612,7 +612,7 @@ function getStat(configuration) {
         configuration.csv
       ).then(res => {
         if (agg === 'location' || agg === 'company') {
-          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
+          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.label || e.name || e.id) : [];
           if (arr.length > 0) res = res.filter(e => arr.indexOf(e.key) >= 0);
         }
         res = expandMulti(res, configuration);
