@@ -40,7 +40,10 @@ function getConfigurationByUser(user, temporaryAdmin) {
 function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
   switch (itemAggregationValue) {
     case "EMPLOYEES":
-      return employeeService.getAllEmployees(companyId).then((content) => {
+      return employeeService.getAllEmployees(companyId).then((res) => {
+        const content = res.content || res;
+        if (!Array.isArray(content)) return [];
+        
         return content.filter(e => e.campaigns.indexOf(campaignId) >= 0)
         .map(e => {
           e.label = (e.surname && e.surname != '-') 
@@ -593,7 +596,7 @@ function getStat(configuration) {
         configuration.csv
       ).then(res => {
         if (agg === 'location' || agg === 'company') {
-          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
+          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.label || e.name || e.id) : [];
           if (arr.length == 0) return res;
           return res.filter(e => arr.indexOf(e.key) >= 0);
         }
@@ -612,7 +615,7 @@ function getStat(configuration) {
         configuration.csv
       ).then(res => {
         if (agg === 'location' || agg === 'company') {
-          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
+          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.label || e.name || e.id) : [];
           if (arr.length > 0) res = res.filter(e => arr.indexOf(e.key) >= 0);
         }
         res = expandMulti(res, configuration);

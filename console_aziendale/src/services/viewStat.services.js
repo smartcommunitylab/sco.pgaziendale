@@ -9,6 +9,12 @@ let mapEmployees = {};
 let mapCompanies = {};
 let mapLocations = {};
 
+const DOW_MAP = {
+  "MONDAY": "Lunedì", "TUESDAY": "Martedì", "WEDNESDAY": "Mercoledì",
+  "THURSDAY": "Giovedì", "FRIDAY": "Venerdì", "SATURDAY": "Sabato", "SUNDAY": "Domenica"
+};
+const DOW_KEYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+
 function meanLabel(label, mean) {
     switch (mean) {
         case 'bike':
@@ -114,11 +120,11 @@ function getHeadersTable(values, selection, currentCampaign) {
       break;
     case 'dayOfWeek':
       //get all month from selection.company.from to selection.company.to 
-      headers.push(...["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"]);
+      headers.push(...DOW_KEYS);
       break;
     case 'hour':
       //get all month from selection.company.from to selection.company.to 
-      headers.push(...["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"]);
+      headers.push(...["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"]);
       break;
     case 'campaign':
       headers.push('');
@@ -132,19 +138,25 @@ function getHeadersTable(values, selection, currentCampaign) {
 //based on configuration, return the subheader=header.length*selection.dataColumns
 function getSubHeaders(headers, selection) {
   let subheaders = [{ text: 'Nome', value: 'name', class: 'cell-agg'}];
-  console.log('selection', selection);
   for (let i = 0; i < headers.length; i++) {
+    let displayLabel = headers[i];
+    if (selection.timeUnit.value === 'dayOfWeek') {
+      displayLabel = DOW_MAP[headers[i]] || headers[i];
+    } else if (selection.timeUnit.value === 'hour') {
+      displayLabel = headers[i].padStart(2, '0') + ':00';
+    }
+
     for (let k = 0; k < selection.dataColumns.length; k++) {
       let dc = selection.dataColumns[k];
       if (dc.value.indexOf('__prc') == -1 || selection.source == 'employee') {
-        subheaders.push({ text: dc.label, value: dc.value + headers[i]})
+        subheaders.push({ text: dc.label, value: dc.value + headers[i], headerLabel: displayLabel })
       }
     }
     if (selection.groupByMean) {
       for (let k = 0; k < selection.dataColumns.length; k++) {
         let dc = selection.dataColumns[k];
         selection.means.forEach(m => {
-          subheaders.push({ text: meanLabel(dc.meanLabel, m), value: m + '_mean_' + dc.value + headers[i]})
+          subheaders.push({ text: meanLabel(dc.meanLabel, m), value: m + '_mean_' + dc.value + headers[i], headerLabel: displayLabel })
         });
       }
     }
