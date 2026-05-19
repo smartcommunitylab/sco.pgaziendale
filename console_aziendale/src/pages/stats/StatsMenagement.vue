@@ -190,15 +190,29 @@
             <v-expansion-panel-header>Mezzi</v-expansion-panel-header>
             <v-expansion-panel-content>
               <v-autocomplete
-                label="Selezione"
-                name="means"
-                id="means"
-                v-model="localSelection.means"
-                :items="meansList"
-                :item-text="getMeanText"
-                outlined
-                multiple
-              ></v-autocomplete>
+  label="Selezione"
+  name="means"
+  id="means"
+  v-model="localSelection.means"
+  :items="meansList"
+  :item-text="getMeanText"
+  outlined
+  multiple
+>
+  <template v-slot:prepend-item>
+    <v-list-item ripple @mousedown.prevent @click="toggleSelectAllMeans">
+      <v-list-item-action>
+        <v-icon :color="localSelection.means && localSelection.means.length > 0 ? 'primary' : ''">
+          {{ selectAllMeansIcon }}
+        </v-icon>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-title>Seleziona Tutti</v-list-item-title>
+      </v-list-item-content>
+    </v-list-item>
+    <v-divider class="mt-2"></v-divider>
+  </template>
+</v-autocomplete>
             </v-expansion-panel-content>
           </v-expansion-panel>
           <v-expansion-panel v-if="view.source == 'tracks'">
@@ -300,7 +314,8 @@
 
           <v-tabs-items v-model="tab" class="mt-5">
             <v-tab-item key="Tabella">
-              <data-table :dataTableData="viewData"></data-table>
+              <data-table :dataTableData="viewData"
+              :key="viewData ? JSON.stringify(viewData.headers) : 'empty'"></data-table>
             </v-tab-item>
             <v-tab-item key="Grafico">
               <data-chart
@@ -482,6 +497,19 @@ export default {
       !this.$v.email.required && errors.push("E-mail is required");
       return errors;
     },
+    isAllMeansSelected() {
+  if (!this.localSelection.means || !this.meansList) return false;
+  return this.localSelection.means.length === this.meansList.length;
+},
+isSomeMeansSelected() {
+  if (!this.localSelection.means) return false;
+  return this.localSelection.means.length > 0 && !this.isAllMeansSelected;
+},
+selectAllMeansIcon() {
+  if (this.isAllMeansSelected) return 'mdi-checkbox-marked';
+  if (this.isSomeMeansSelected) return 'mdi-minus-box';
+  return 'mdi-checkbox-blank-outline';
+},
   },
 
   methods: {
@@ -496,13 +524,21 @@ export default {
     comparator(a, b) {
       return a.value === b.value;
     },
+    toggleSelectAllMeans() {
+  this.$nextTick(() => {
+    if (this.isAllMeansSelected) {
+      this.localSelection.means = [];
+    } else {
+      // meansList contiene oggetti {value, text, order}, ma means salva solo i value (stringhe)
+      this.localSelection.means = this.meansList.map(m => m.value);
+    }
+  });
+},
     toggleSelectAll() {
       this.$nextTick(() => {
         if (this.isAllSelected) {
-          // Se tutto è selezionato, svuota
           this.localSelection.puntualAggregationItems = [];
         } else {
-          // Altrimenti, seleziona tutto copiando la lista completa
           if (this.localSelection.itemsAggreation) {
             this.localSelection.puntualAggregationItems = this.localSelection.itemsAggreation.slice();
           }
@@ -550,19 +586,15 @@ export default {
     },
 
     fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
-      console.log(
-        "fillTheViewWithValues",
-        values,
-        view,
-        activeSelection,
-        currentCampaign
-      );
       viewStatService
         .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
         .then((viewData) => {
-          this.viewData = viewData;
+          this.$set(this, 'viewData', null); 
+          this.$nextTick(() => {
+            this.$set(this, 'viewData', viewData);
+          });
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err);
         })
         .finally(() => {
@@ -700,7 +732,27 @@ export default {
     this.baseSelection = this.copy(this.activeSelection);
     this.initConfigurationStat();
   },
-  mounted() {},
+  mounted() {
+    if (
+      this.activeConfiguration && this.activeConfiguration.items &&
+      this.currentCampaign && this.currentCampaign.item
+    ) {
+      this.initiSelection();
+      
+      if (this.statValues && this.statValues.items) {
+        this.$nextTick(() => {
+          this.fillTheViewWithValues(
+            this.statValues.items,
+            this.activeViewType,
+            this.localSelection,
+            this.currentCampaign.item
+          );
+        });
+      } else {
+        this.getLocalStat(this.localSelection);
+      }
+    }
+  },
 
   watch: {
     statValues: {
@@ -750,7 +802,9 @@ export default {
 
     currentCampaign: {
       handler(newValue, oldValue) {
-        if ((!oldValue && newValue) || oldValue.item.id !== newValue.item.id) {
+        const oldId = oldValue && oldValue.item ? oldValue.item.id : null;
+        const newId = newValue && newValue.item ? newValue.item.id : null;
+        if (newId && oldId !== newId) {
           this.initiSelection();
           if (this.activeSelection && this.currentCampaign) {
             this.getLocalStat(this.localSelection);

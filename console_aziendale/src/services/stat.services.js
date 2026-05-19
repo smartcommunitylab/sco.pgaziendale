@@ -40,7 +40,10 @@ function getConfigurationByUser(user, temporaryAdmin) {
 function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
   switch (itemAggregationValue) {
     case "EMPLOYEES":
-      return employeeService.getAllEmployees(companyId).then((content) => {
+      return employeeService.getAllEmployees(companyId).then((res) => {
+        const content = res.content || res;
+        if (!Array.isArray(content)) return [];
+        
         return content.filter(e => e.campaigns.indexOf(campaignId) >= 0)
         .map(e => {
           e.label = (e.surname && e.surname != '-') 
