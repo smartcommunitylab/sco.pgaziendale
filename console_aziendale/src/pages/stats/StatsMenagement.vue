@@ -76,11 +76,31 @@
                     id="typeData"
                     v-model="localSelection.puntualAggregationItems"
                     :items="localSelection.itemsAggreation"
+                    :item-disabled="item => item.disabled === true"
                     :item-text="getItemText"
                     return-object
                     multiple
                     outlined
                   >
+                  <template v-slot:item="{ item, attrs, on }">
+                      <v-list-item v-bind="attrs" v-on="on" :disabled="item.disabled">
+                        <v-list-item-action>
+                          <v-checkbox
+                            :input-value="attrs.inputValue"
+                            :disabled="item.disabled"
+                            color="primary"
+                          ></v-checkbox>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                          <v-list-item-title :class="item.disabled ? 'grey--text text--lighten-1' : ''">
+                            {{ item.label }}
+                          </v-list-item-title>
+                          <v-list-item-subtitle v-if="item.disabled" class="error--text mt-1">
+                            Non iscritto alla campagna
+                          </v-list-item-subtitle>
+                        </v-list-item-content>
+                      </v-list-item>
+                    </template>
                     <!-- Slot per il "Seleziona Tutti" -->
                     <template v-slot:prepend-item>
                       <v-list-item ripple @mousedown.prevent @click="toggleSelectAll">
