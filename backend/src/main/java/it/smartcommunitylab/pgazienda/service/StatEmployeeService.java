@@ -79,8 +79,8 @@ public class StatEmployeeService {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		if (from == null) {
-			from = campaign.getFrom();
-			to = campaign.getTo();
+			from = toLocalDate(campaign.getFrom());
+			to = toLocalDate(campaign.getTo());
 		}
 
 		// get employee counts
@@ -305,7 +305,7 @@ public class StatEmployeeService {
 	}
 	
 	private boolean isRegistered(LocalDate registrationDate, LocalDate from, LocalDate to) {
-		if(from.isBefore(registrationDate) && to.isAfter(registrationDate)) return true;
+		if((from.isEqual(registrationDate) || from.isBefore(registrationDate)) && to.isAfter(registrationDate)) return true;
 		return false;
 	}
 	
@@ -317,6 +317,11 @@ public class StatEmployeeService {
 	
 	private LocalDate toLocalDate(Long timestamp) {
 		return Instant.ofEpochMilli(timestamp).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
+	}
+
+	// convert a LocalDate in UTC time zone into a LocalDate in the default time zone
+	private LocalDate toLocalDate(LocalDate localDate) { 
+		return localDate.atStartOfDay(ZoneId.of("Z")).withZoneSameInstant(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
 	}
 	
 	private String getGroupByTime(GROUP_BY_TIME timeGroupBy, LocalDate localDate) {		
