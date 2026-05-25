@@ -30,6 +30,7 @@ import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import com.opencsv.CSVWriter;
@@ -478,12 +479,15 @@ public class StatEmployeeService {
 	 */
 	private Map<String, Object> flattenStat(StatEmployeeDTO ds, GROUP_BY_TIME timeGroupBy) {
 		Map<String, Object> res = new java.util.HashMap<>();
-		List<FieldEmployeeDTO> fieldEmployeeDTOList = List.of(ds.getRegistration(), ds.getActiveUsers(), ds.getDropout());
-		for(FieldEmployeeDTO f : fieldEmployeeDTOList) {
-			if (f != null) {
-				res.put(f.toString(), f.getValue() != null ? f.getValue() : 0);
-				res.put(f.toString() + "__prcTot", f.getPrcTot() != null ? f.getPrcTot() : 0);
-				res.put(f.toString() + "__prcRegistered", f.getPrcRegistered() != null ? f.getPrcRegistered() : 0);
+		List<Pair<String, FieldEmployeeDTO>> fieldList = List.of(
+				Pair.of("registration", ds.getRegistration()), 
+				Pair.of("activeUsers", ds.getActiveUsers()), 
+				Pair.of("dropout", ds.getDropout()));		
+		for(Pair <String, FieldEmployeeDTO> p : fieldList) {
+			if (p.getSecond() != null) {
+				res.put(p.getFirst(), p.getSecond().getValue() != null ? p.getSecond().getValue() : 0);
+				res.put(p.getFirst() + "__prcTot", p.getSecond().getPrcTot() != null ? p.getSecond().getPrcTot() : 0);
+				res.put(p.getFirst() + "__prcRegistered", p.getSecond().getPrcRegistered() != null ? p.getSecond().getPrcRegistered() : 0);
 			}
 		}
 		return res;
