@@ -1,13 +1,9 @@
 <template>
   <div style="margin-right: 56px">
-    <v-overlay :value="isLoading"  z-index="999">
-          <v-progress-circular
-            indeterminate
-            size="64"
-            color="primary"
-          ></v-progress-circular>
-        </v-overlay>
-        <v-navigation-drawer
+    <v-overlay :value="isLoading" z-index="999">
+      <v-progress-circular indeterminate size="64" color="primary"></v-progress-circular>
+    </v-overlay>
+    <v-navigation-drawer
       absolute
       permanent
       right
@@ -80,11 +76,54 @@
                     id="typeData"
                     v-model="localSelection.puntualAggregationItems"
                     :items="localSelection.itemsAggreation"
+                    :item-disabled="item => item.disabled === true"
                     :item-text="getItemText"
                     return-object
-                    outlined
                     multiple
-                  ></v-autocomplete>
+                    outlined
+                  >
+                  <template v-slot:item="{ item, attrs, on }">
+                      <v-list-item v-bind="attrs" v-on="on" :disabled="item.disabled">
+                        <v-list-item-action>
+                          <v-checkbox
+                            :input-value="attrs.inputValue"
+                            :disabled="item.disabled"
+                            color="primary"
+                          ></v-checkbox>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                          <v-list-item-title :class="item.disabled ? 'grey--text text--lighten-1' : ''">
+                            {{ item.label }}
+                          </v-list-item-title>
+                          <v-list-item-subtitle v-if="item.disabled" class="error--text mt-1">
+                            Non iscritto alla campagna
+                          </v-list-item-subtitle>
+                        </v-list-item-content>
+                      </v-list-item>
+                    </template>
+                    <!-- Slot per il "Seleziona Tutti" -->
+                    <template v-slot:prepend-item>
+                      <v-list-item ripple @mousedown.prevent @click="toggleSelectAll">
+                        <v-list-item-action>
+                          <v-icon
+                            :color="
+                              activeSelection &&
+                              activeSelection.puntualAggregationItems &&
+                              activeSelection.puntualAggregationItems.length > 0
+                                ? 'primary'
+                                : ''
+                            "
+                          >
+                            {{ selectAllIcon }}
+                          </v-icon>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                          <v-list-item-title>Seleziona Tutti</v-list-item-title>
+                        </v-list-item-content>
+                      </v-list-item>
+                      <v-divider class="mt-2"></v-divider>
+                    </template>
+                  </v-autocomplete>
                 </div>
               </div>
             </v-expansion-panel-content>
@@ -171,15 +210,29 @@
             <v-expansion-panel-header>Mezzi</v-expansion-panel-header>
             <v-expansion-panel-content>
               <v-autocomplete
-                label="Selezione"
-                name="means"
-                id="means"
-                v-model="localSelection.means"
-                :items="meansList"
-                :item-text="getMeanText"
-                outlined
-                multiple
-              ></v-autocomplete>
+  label="Selezione"
+  name="means"
+  id="means"
+  v-model="localSelection.means"
+  :items="meansList"
+  :item-text="getMeanText"
+  outlined
+  multiple
+>
+  <template v-slot:prepend-item>
+    <v-list-item ripple @mousedown.prevent @click="toggleSelectAllMeans">
+      <v-list-item-action>
+        <v-icon :color="localSelection.means && localSelection.means.length > 0 ? 'primary' : ''">
+          {{ selectAllMeansIcon }}
+        </v-icon>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-title>Seleziona Tutti</v-list-item-title>
+      </v-list-item-content>
+    </v-list-item>
+    <v-divider class="mt-2"></v-divider>
+  </template>
+</v-autocomplete>
             </v-expansion-panel-content>
           </v-expansion-panel>
           <v-expansion-panel v-if="view.source == 'tracks'">
@@ -195,20 +248,37 @@
           <v-expansion-panel>
             <v-expansion-panel-header>Colonne dati</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <v-checkbox
-                v-for="dc in view.dataColumns.filter(
-                  (dc) =>
-                    dc.source == view.source &&
-                    (localSelection.groupByMean ||
-                      dc.value.indexOf('__prc') == -1 ||
-                      view.source == 'employee')
-                )"
+              <div
+                v-for="dc in view.dataColumns.filter((dc) => dc.source == view.source)"
                 :key="dc.value"
-                v-model="localSelection.dataColumns"
-                :value="dc"
-                :label="dc.label"
-                hide-details
-              ></v-checkbox>
+              >
+                <v-tooltip
+                  bottom
+                  :disabled="
+                    localSelection.groupByMean ||
+                    dc.value.indexOf('__prc') == -1 ||
+                    view.source == 'employee'
+                  "
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <div v-bind="attrs" v-on="on">
+                      <v-checkbox
+                        v-model="localSelection.dataColumns"
+                        :value="dc"
+                        :label="dc.label"
+                        :disabled="
+                          !localSelection.groupByMean &&
+                          dc.value.indexOf('__prc') !== -1 &&
+                          view.source !== 'employee'
+                        "
+                        hide-details
+                      ></v-checkbox>
+                    </div>
+                  </template>
+                  <span>Colonna dati disabilitata, selezionare 'Dividere per mezzo'</span>
+                </v-tooltip>
+              </div>
+
               <br />
               <v-switch
                 v-if="view.source == 'tracks' && view.noGroupByMean"
@@ -238,7 +308,6 @@
     </v-navigation-drawer>
     <v-row>
       <v-col cols="12">
-
         <v-card>
           <v-row>
             <v-col cols="6">
@@ -265,7 +334,8 @@
 
           <v-tabs-items v-model="tab" class="mt-5">
             <v-tab-item key="Tabella">
-              <data-table :dataTableData="viewData"></data-table>
+              <data-table :dataTableData="viewData"
+              :key="viewData ? JSON.stringify(viewData.headers) : 'empty'"></data-table>
             </v-tab-item>
             <v-tab-item key="Grafico">
               <data-chart
@@ -310,7 +380,7 @@ export default {
 
   data() {
     return {
-      isLoading: false, 
+      isLoading: false,
       drawer: true,
       mini: true,
       panel: [0],
@@ -397,7 +467,30 @@ export default {
 
       return conf;
     },
-
+    isAllSelected() {
+      if (
+        !this.localSelection ||
+        !this.localSelection.itemsAggreation ||
+        !this.localSelection.puntualAggregationItems
+      )
+        return false;
+      return (
+        this.localSelection.puntualAggregationItems.length ===
+        this.localSelection.itemsAggreation.length
+      );
+    },
+    isSomeSelected() {
+      if (!this.localSelection || !this.localSelection.puntualAggregationItems)
+        return false;
+      return (
+        this.localSelection.puntualAggregationItems.length > 0 && !this.isAllSelected
+      );
+    },
+    selectAllIcon() {
+      if (this.isAllSelected) return "mdi-checkbox-marked";
+      if (this.isSomeSelected) return "mdi-minus-box";
+      return "mdi-checkbox-blank-outline";
+    },
     checkboxErrors() {
       const errors = [];
       if (!this.$v.checkbox.$dirty) return errors;
@@ -424,7 +517,19 @@ export default {
       !this.$v.email.required && errors.push("E-mail is required");
       return errors;
     },
-
+    isAllMeansSelected() {
+  if (!this.localSelection.means || !this.meansList) return false;
+  return this.localSelection.means.length === this.meansList.length;
+},
+isSomeMeansSelected() {
+  if (!this.localSelection.means) return false;
+  return this.localSelection.means.length > 0 && !this.isAllMeansSelected;
+},
+selectAllMeansIcon() {
+  if (this.isAllMeansSelected) return 'mdi-checkbox-marked';
+  if (this.isSomeMeansSelected) return 'mdi-minus-box';
+  return 'mdi-checkbox-blank-outline';
+},
   },
 
   methods: {
@@ -439,10 +544,43 @@ export default {
     comparator(a, b) {
       return a.value === b.value;
     },
+    toggleSelectAllMeans() {
+  this.$nextTick(() => {
+    if (this.isAllMeansSelected) {
+      this.localSelection.means = [];
+    } else {
+      // meansList contiene oggetti {value, text, order}, ma means salva solo i value (stringhe)
+      this.localSelection.means = this.meansList.map(m => m.value);
+    }
+  });
+},
+    toggleSelectAll() {
+      this.$nextTick(() => {
+        if (this.isAllSelected) {
+          this.localSelection.puntualAggregationItems = [];
+        } else {
+          if (this.localSelection.itemsAggreation) {
+            this.localSelection.puntualAggregationItems = this.localSelection.itemsAggreation.slice();
+          }
+        }
+      });
+    },
     copy(obj) {
       return obj ? JSON.parse(JSON.stringify(obj)) : null;
     },
-    closeMenu() {
+    closeMenu(e) {
+      if (e && e.target) {
+        if (
+          e.target.closest(".v-menu__content") ||
+          e.target.closest(".menuable__content__active") ||
+          e.target.closest(".v-select-list") ||
+          e.target.closest(".v-overlay") ||
+          e.target.closest(".v-list-item")
+        ) {
+          return;
+        }
+      }
+
       if (!this.mini) {
         this.mini = true;
       }
@@ -468,18 +606,21 @@ export default {
     },
 
     fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
-  viewStatService
-    .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
-    .then((viewData) => {
-      this.viewData = viewData;
-    })
-    .catch(err => {
-      console.error(err);
-    })
-    .finally(() => {
-      this.isLoading = false;
-    });
-},
+      viewStatService
+        .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
+        .then((viewData) => {
+          this.$set(this, 'viewData', null); 
+          this.$nextTick(() => {
+            this.$set(this, 'viewData', viewData);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    },
     getLocalStat(selection) {
       if (!this.currentCampaign) {
         this.isLoading = false;
@@ -487,7 +628,6 @@ export default {
       }
       this.isLoading = true;
       this.getStatFromServer(selection);
-     
     },
     getItemText(item) {
       return item.label;
@@ -612,30 +752,50 @@ export default {
     this.baseSelection = this.copy(this.activeSelection);
     this.initConfigurationStat();
   },
-  mounted() {},
+  mounted() {
+    if (
+      this.activeConfiguration && this.activeConfiguration.items &&
+      this.currentCampaign && this.currentCampaign.item
+    ) {
+      this.initiSelection();
+      
+      if (this.statValues && this.statValues.items) {
+        this.$nextTick(() => {
+          this.fillTheViewWithValues(
+            this.statValues.items,
+            this.activeViewType,
+            this.localSelection,
+            this.currentCampaign.item
+          );
+        });
+      } else {
+        this.getLocalStat(this.localSelection);
+      }
+    }
+  },
 
   watch: {
     statValues: {
       handler: function (newVal) {
-      if (!newVal || newVal.loading) return;
+        if (!newVal || newVal.loading) return;
 
-      this.isLoading = false;
-
-      if (newVal.items) {
-        this.fillTheViewWithValues(
-          newVal.items,
-          this.activeViewType,
-          this.activeSelection,
-          this.currentCampaign.item
-        );
-      } else {
         this.isLoading = false;
-        if (newVal.error) {
-          console.error('Errore nel caricamento statistiche', newVal.error);
+
+        if (newVal.items) {
+          this.fillTheViewWithValues(
+            newVal.items,
+            this.activeViewType,
+            this.activeSelection,
+            this.currentCampaign.item
+          );
+        } else {
+          this.isLoading = false;
+          if (newVal.error) {
+            console.error("Errore nel caricamento statistiche", newVal.error);
+          }
         }
-      }
-    },
-    deep: true,
+      },
+      deep: true,
     },
     activeConfiguration: {
       handler(newVal) {
@@ -662,7 +822,9 @@ export default {
 
     currentCampaign: {
       handler(newValue, oldValue) {
-        if ((!oldValue && newValue) || oldValue.item.id !== newValue.item.id) {
+        const oldId = oldValue && oldValue.item ? oldValue.item.id : null;
+        const newId = newValue && newValue.item ? newValue.item.id : null;
+        if (newId && oldId !== newId) {
           this.initiSelection();
           if (this.activeSelection && this.currentCampaign) {
             this.getLocalStat(this.localSelection);

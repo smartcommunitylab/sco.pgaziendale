@@ -31,6 +31,7 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
+        noGroupByMean: false,
         default: {
           source: "tracks",
           dataColumns: [DC.POINTS,DC.COUNTING_POINTS],
@@ -68,7 +69,7 @@ export const statsConfigurations = [
           {label:VC.TIMEUNIT.CAMPAIGN,value: "campaign",apiField: "total" },
         ],
         timePeriod: [ {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" }, {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },],
-        
+        noGroupByMean: false,
         default: {
           source: "tracks",
           dataColumns: [DC.POINTS, DC.COUNTING_POINTS],
@@ -193,6 +194,7 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
+        noGroupByMean: true, 
         default: {
           source: "tracks",
           dataColumns: [DC.DISTANCE ],
@@ -233,6 +235,7 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
+        noGroupByMean: true, 
         default: {
           source: "tracks",
           dataColumns: [DC.DISTANCE ],
@@ -273,6 +276,7 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
+        noGroupByMean: true, 
         default: {
           source: "tracks",
           dataColumns: [DC.DURATION ],
@@ -313,6 +317,7 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
+        noGroupByMean: true, 
         default: {
           source: "tracks",
           dataColumns: [DC.DURATION ],
@@ -350,6 +355,8 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
+        noGroupByMean: true, 
+
         default: {
           source: "tracks",
           dataColumns: [DC.CO2_SAVED ],
@@ -386,6 +393,8 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
+        noGroupByMean: true, 
+
         default: {
           source: "tracks",
           dataColumns: [DC.CO2_SAVED ],

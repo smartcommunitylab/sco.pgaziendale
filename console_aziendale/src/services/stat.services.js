@@ -40,9 +40,12 @@ function getConfigurationByUser(user, temporaryAdmin) {
 function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
   switch (itemAggregationValue) {
     case "EMPLOYEES":
-      return employeeService.getAllEmployees(companyId).then((content) => {
-        return content.filter(e => e.campaigns.indexOf(campaignId) >= 0)
-        .map(e => {
+      return employeeService.getAllEmployees(companyId).then((res) => {
+        const content = res.content || res;
+        if (!Array.isArray(content)) return [];
+        
+        return content.map(e => {
+          const isEnrolled = !campaignId || (e.campaigns && e.campaigns.indexOf(campaignId) >= 0);
           e.label = (e.surname && e.surname != '-') 
                   ? `${e.surname} ${e.name}` 
                   : (e.name && e.name != '-') 
@@ -50,6 +53,7 @@ function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
                   : (e.code)
                   ? `- - (${e.code})`
                   : `${e.id}`;
+          e.disabled = !isEnrolled;
           return e;
         });
       });
@@ -569,77 +573,168 @@ function getFields(configuration) {
   .join(',');
 }
 
+function filterByPuntualAggregation(res, configuration) {
+  if (!configuration.puntualAggregationItems?.length) return res;
+  
+  const arr = configuration.puntualAggregationItems.map(e => {
+    if (typeof e === 'string') return e;
+    return e.label || e.name || e.id;
+  });
+  
+  if (!arr.length) return res;
+  return res.filter(e => arr.includes(e.key));
+}
+
+// FIX: funzione helper per le date
+function getDateRange(configuration) {
+  return {
+    from: configuration.timePeriod.value !== 'ALL' ? (configuration.selectedDateFrom || null) : null,
+    to:   configuration.timePeriod.value !== 'ALL' ? (configuration.selectedDateTo   || null) : null,
+  };
+}
+
 function getStat(configuration) {
-  if (!configuration.campaign.id) {
-    return Promise.resolve([]);
-  }
-  const agg = configuration.dataLevel.value;
+  if (!configuration.campaign?.id) return Promise.resolve([]);
+
+  const agg   = configuration.dataLevel.value;
+  const { from, to } = getDateRange(configuration);
+  const companyId = (configuration.company || {}).id;
 
   if (configuration.source === 'tracks') {
+    const employeeIds = agg === 'employee' && configuration.puntualAggregationItems?.length
+      ? configuration.puntualAggregationItems.map(i => i.id).join(',')
+      : null;
+
     return callTrackStatsAPI(
-        configuration.campaign.id, 
-        (configuration.company || {}).id, // companyId is null, filter later
-        null, // locationId is null, filter later
-        configuration.means,       // means
-        agg === 'employee' ? configuration.puntualAggregationItems.map(i => i.id).join(',') : null, // employees
-        configuration.direction, 
-        configuration.timeUnit.apiField, 
-        agg, 
-        configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-        configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-        getFields(configuration), // fields
-        configuration.groupByMean,
-        true, 
-        configuration.csv
-      ).then(res => {
-        if (agg === 'location' || agg === 'company') {
-          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
-          if (arr.length == 0) return res;
-          return res.filter(e => arr.indexOf(e.key) >= 0);
-        }
-        return res;
-      });
+      configuration.campaign.id,
+      companyId,
+      null,
+      configuration.means,
+      employeeIds,
+      configuration.direction,
+      configuration.timeUnit.apiField,
+      agg,
+      from, to,
+      getFields(configuration),
+      configuration.groupByMean,
+      true,
+      configuration.csv
+    ).then(res => {
+      if (['location', 'company', 'employee'].includes(agg)) {
+        return filterByPuntualAggregation(res, configuration);
+      }
+      return res;
+    });
+
   } else if (configuration.source === 'multimodal') {
     return callTrackStatsMultiAPI(
-        configuration.campaign.id, 
-        (configuration.company || {}).id, // companyId is null, filter later
-        null, // locationId is null, filter later
-        configuration.timeUnit.apiField, 
-        agg, 
-        configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-        configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-        true, 
-        configuration.csv
-      ).then(res => {
-        if (agg === 'location' || agg === 'company') {
-          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
-          if (arr.length > 0) res = res.filter(e => arr.indexOf(e.key) >= 0);
-        }
-        res = expandMulti(res, configuration);
-        return res;
-      });
+      configuration.campaign.id,
+      companyId,
+      null,
+      configuration.timeUnit.apiField,
+      agg,
+      from, to,
+      true,
+      configuration.csv
+    ).then(res => {
+      res = filterByPuntualAggregation(res, configuration);
+      res = expandMulti(res, configuration);
+      return res;
+    });
+
   } else if (configuration.source === 'employee') {
-      return callEmployeeStatsAPI(
-        configuration.campaign.id, 
-        (configuration.company || {}).id, // companyId is null, filter later
-        null, // locationId is null, filter later
-        configuration.timeUnit.apiField, 
-        agg, 
-        configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
-        configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
-        getFields(configuration), // fields
-        configuration.csv
-      ).then(res => {
-        if (agg === 'company') {
-          const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
-          if (arr.length == 0) return res;
-          return res.filter(e => arr.indexOf(e.key) >= 0);
-        }
-        return res;
-      });
+    return callEmployeeStatsAPI(
+      configuration.campaign.id,
+      companyId,
+      null,
+      configuration.timeUnit.apiField,
+      agg,
+      from, to,
+      getFields(configuration),
+      true,
+      configuration.csv
+    ).then(res => filterByPuntualAggregation(res, configuration));
   }
-  
+
+  return Promise.resolve([]);
 }
+// old function
+// function getStat(configuration) {
+//   if (!configuration.campaign.id) {
+//     return Promise.resolve([]);
+//   }
+//   const agg = configuration.dataLevel.value;
+
+//   if (configuration.source === 'tracks') {
+    
+//     return callTrackStatsAPI(
+//         configuration.campaign.id, 
+//         (configuration.company || {}).id, // companyId is null, filter later
+//         null, // locationId is null, filter later
+//         configuration.means,       // means
+//         agg === 'employee' ? configuration.puntualAggregationItems.map(i => i.id).join(',') : null, // employees
+//         configuration.direction, 
+//         configuration.timeUnit.apiField, 
+//         agg, 
+//         configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+//         configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+//         getFields(configuration), // fields
+//         configuration.groupByMean,
+//         true, 
+//         configuration.csv
+//       ).then(res => {
+//         if (agg === 'location' || agg === 'company') {
+//           const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.label || e.name || e.id) : [];
+//           if (arr.length == 0) return res;
+//           return res.filter(e => arr.indexOf(e.key) >= 0);
+//         }
+//         if (agg === 'employee' && configuration.puntualAggregationItems && configuration.puntualAggregationItems.length > 0) {
+//           const arr = configuration.puntualAggregationItems.map(e => e.label || e.name);
+//           return res.filter(e => arr.indexOf(e.key) >= 0);
+//         }
+//         return res;
+//             });
+//   } else if (configuration.source === 'multimodal') {
+//     return callTrackStatsMultiAPI(
+//         configuration.campaign.id, 
+//         (configuration.company || {}).id, // companyId is null, filter later
+//         null, // locationId is null, filter later
+//         configuration.timeUnit.apiField, 
+//         agg, 
+//         configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+//         configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+//         true, 
+//         configuration.csv
+//       ).then(res => {
+//         if (agg === 'location' || agg === 'company') {
+//           const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.label || e.name || e.id) : [];
+//           if (arr.length > 0) res = res.filter(e => arr.indexOf(e.key) >= 0);
+//         }
+//         res = expandMulti(res, configuration);
+//         return res;
+//       });
+//   } else if (configuration.source === 'employee') {
+//       return callEmployeeStatsAPI(
+//         configuration.campaign.id, 
+//         (configuration.company || {}).id, // companyId is null, filter later
+//         null, // locationId is null, filter later
+//         configuration.timeUnit.apiField, 
+//         agg, 
+//         configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateFrom ? configuration.selectedDateFrom : null) : null,
+//         configuration.timePeriod.value != 'ALL' ? (configuration.selectedDateTo ? configuration.selectedDateTo : null) : null,
+//         getFields(configuration), // fields
+//         configuration.csv
+//       ).then(res => {
+//         if (agg === 'company') {
+//           const arr = configuration.puntualAggregationItems ? configuration.puntualAggregationItems.map(e => e.id) : [];
+//           if (arr.length == 0) return res;
+//           return res.filter(e => arr.indexOf(e.key) >= 0);
+//         }
+//         return res;
+//       });
+//   }
+  
+// }
 
 function expandMulti(res, configuration) {
   if (res.length == 0 || res[0].values.length == 0) return;
