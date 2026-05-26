@@ -86,6 +86,8 @@ public class StatTrackService {
 			from = campaign.getFrom();
 			to = campaign.getTo();
 		}
+		logger.info("Get track stats for campaign: {}, company: {}, location: {}, means: {}, way: {}, timeGroupBy: {}, dataGroupBy: {}, fields: {}, groupByMean: {}, allDataGroupBy: {}, from: {}, to: {}",
+			campaignId, companyId, locationId, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
 		
 		Criteria criteria = Criteria
 				.where("campaign").is(campaignId)
@@ -775,7 +777,9 @@ public class StatTrackService {
 	}
 
 	private String mapTimeLabel(GROUP_BY_TIME timeGroupBy, String timeGroup) {
-		if (timeGroupBy == GROUP_BY_TIME.dayOfWeek) {
+		if (GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) {
+			if (timeGroup.equalsIgnoreCase("total"))
+				return "Totale";
 			return DayOfWeek.valueOf(timeGroup).getDisplayName(TextStyle.FULL, Locale.ITALIAN);
 		}	
 		return timeGroup;
