@@ -281,7 +281,7 @@
 
               <br />
               <v-switch
-                v-if="view.source == 'tracks' && view.noGroupByMean"
+                v-if="view.noGroupByMean"
                 v-model="localSelection.groupByMean"
                 label="Dividere per mezzo"
                 hide-details
@@ -413,7 +413,6 @@ export default {
       name: "",
       email: "",
       select: null,
-      // items: ["Item 1", "Item 2", "Item 3", "Item 4"],
       checkbox: false,
       viewData: null,
       meansList: [],
@@ -609,8 +608,21 @@ selectAllMeansIcon() {
       viewStatService
         .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
         .then((viewData) => {
+          console.log("viewData", viewData);
           this.$set(this, 'viewData', null); 
           this.$nextTick(() => {
+            if (viewData && viewData.data && Array.isArray(viewData.data)) {
+              viewData.data = viewData.data.map(row => {
+                let cleanRow = { ...row };
+                for (let key in cleanRow) {
+                  if (Number.isNaN(cleanRow[key]) || cleanRow[key] === 'NaN') {
+                    cleanRow[key] = '-';
+                  }
+                }
+                return cleanRow;
+              });
+            }
+
             this.$set(this, 'viewData', viewData);
           });
         })
