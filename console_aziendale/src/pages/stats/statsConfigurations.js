@@ -456,6 +456,7 @@ export const statsConfigurations = [
     views: [
       {
         dataLevel: [
+          { label: VC.DATALEVEL.COMPANIES, value: "company",  puntualAggregation: [{ label:  PA.NONE, value: 'NONE' },  { label:  PA.COMPANIES, value: 'COMPANIES' } ]},
           { label: VC.DATALEVEL.LOCATIONS,value: "location", puntualAggregation: [{ label:  PA.NONE,  value: 'NONE' }, { label:  PA.LOCATIONS,  value: 'LOCATIONS' } ]},            
           { label: VC.DATALEVEL.EMPLOYEES,value: "employee", puntualAggregation: [{ label:  PA.NONE,  value: 'NONE' }, { label:  PA.EMPLOYEES,  value: 'EMPLOYEES',  } ]},
         ],
