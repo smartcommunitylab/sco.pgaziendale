@@ -513,25 +513,25 @@ public class StatTrackService {
 		fields.forEach(f -> {
 			switch (f) {
 			case score:
-				if(stat.getScore() != null)
+				if((stat != null) && (stat.getScore() != null))
 					row.add(String.valueOf(stat.getScore().getValue()));
 				else 
 					row.add("");
 				break;
 			case limitedScore:
-				if(stat.getLimitedScore() != null)
+				if((stat != null) && (stat.getLimitedScore() != null))
 					row.add(String.valueOf(stat.getLimitedScore().getValue()));
 				else	
 					row.add("");
 				break;
 			case track:
-				if(stat.getTrack() != null)
+				if((stat != null) && (stat.getTrack() != null))
 					row.add(String.valueOf(stat.getTrack()));
 				else 
 					row.add("");
 				break;
 			case co2:
-				if(stat.getCo2() != null) {
+				if((stat != null) && (stat.getCo2() != null)) {
 					row.add(String.valueOf(stat.getCo2().getValue()));
 					row.add(String.valueOf(stat.getCo2().getAvgTrip()));
 					if(!mainStats) {
@@ -556,7 +556,7 @@ public class StatTrackService {
 				}
 				break;
 			case distance:
-				if(stat.getDistance() != null) {
+				if((stat != null) && (stat.getDistance() != null)) {
 					row.add(String.valueOf(stat.getDistance().getValue()));
 					row.add(String.valueOf(stat.getDistance().getAvgTrip()));
 					if(!mainStats) {
@@ -581,7 +581,7 @@ public class StatTrackService {
 				}
 				break;
 			case duration:
-				if(stat.getDuration() != null) {
+				if((stat != null) && (stat.getDuration() != null)) {
 					row.add(String.valueOf(stat.getDuration().getValue()));
 					row.add(String.valueOf(stat.getDuration().getAvgTrip()));
 					if(!mainStats) {
@@ -606,13 +606,13 @@ public class StatTrackService {
 				}
 				break;
 			case tripCount:
-				if(stat.getTripCount() != null)
+				if((stat != null) && (stat.getTripCount() != null))
 					row.add(String.valueOf(stat.getTripCount()));
 				else 
 					row.add("");
 				break;
 			case limitedTripCount:
-				if(stat.getLimitedTripCount() != null)
+				if((stat != null) && (stat.getLimitedTripCount() != null))
 					row.add(String.valueOf(stat.getLimitedTripCount()));
 				else
 					row.add("");
