@@ -978,7 +978,7 @@ public class StatTrackService {
 			to = campaign.getTo();
 		}
 		try {
-			List<String> timeHeaders = createHeadersFlat(timeGroupBy, from, to);
+			List<String> timeHeaders = getTimeGroupList(from, to, timeGroupBy);
 			List<String> metricHeaders = getHeadersFromStats(stats, timeGroupBy);
 			List<String> headers = buildPivotHeaders(metricHeaders, timeHeaders);
 			csvWriter.writeNext(headers.toArray(new String[0]));
