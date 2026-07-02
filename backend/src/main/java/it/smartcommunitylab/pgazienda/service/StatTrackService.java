@@ -802,6 +802,12 @@ public class StatTrackService {
 	{
 		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, locationId, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		if (from == null) {
+			from = campaign.getFrom();
+			to = campaign.getTo();
+		}
 		try{
 			// headers
 			List<String> headers = createHeadersFlat(timeGroupBy, from, to);
