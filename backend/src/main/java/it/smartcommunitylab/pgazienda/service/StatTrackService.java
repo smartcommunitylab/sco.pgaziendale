@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -809,11 +810,10 @@ public class StatTrackService {
 			to = campaign.getTo();
 		}
 		try{
-			// headers
+			// existing behavior unchanged
 			List<String> headers = createHeadersFlat(timeGroupBy, from, to);
 			List<String> fieldHeaders = createSubheaders(headers, fields, means);
 			String nameHeader = "name";
-			// write headers
 			if (!headers.isEmpty()) {
 				String s = ";";
 				for (String h: headers) {
@@ -952,5 +952,96 @@ public class StatTrackService {
 			}
 		}
 		return fList;
+	}
+
+	public void csvStatisticsNew(
+		PrintWriter writer, 
+		String campaignId,
+		String companyId,
+		String locationId,
+		Set<String> means,
+		String way,
+		GROUP_BY_TIME timeGroupBy,
+		GROUP_BY_DATA dataGroupBy,
+		List<STAT_TRACK_FIELD> fields,
+		boolean groupByMean,
+		boolean allDataGroupBy,
+		LocalDate from, 
+		LocalDate to) throws InconsistentDataException
+	{
+		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, locationId, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		if (from == null) {
+			from = campaign.getFrom();
+			to = campaign.getTo();
+		}
+		try {
+			List<String> timeHeaders = createHeadersFlat(timeGroupBy, from, to);
+			List<String> metricHeaders = getHeadersFromStats(stats, timeGroupBy);
+			List<String> headers = buildPivotHeaders(metricHeaders, timeHeaders);
+			csvWriter.writeNext(headers.toArray(new String[0]));
+			List<String[]> table = buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
+			csvWriter.writeAll(table);
+		} finally {
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (Exception e) {
+				}
+			}
+		}
+	}
+
+	private List<String> buildPivotHeaders(List<String> metricHeaders, List<String> timeHeaders) {
+		List<String> headers = new ArrayList<>();
+		headers.add("name");
+		headers.add("id");
+		for (String timeHeader : timeHeaders) {
+			for (String metricHeader : metricHeaders) {
+				headers.add(timeHeader + "__" + metricHeader);
+			}
+		}
+		return headers;
+	}
+
+	static List<String[]> buildPivotRows(List<Map<String, Object>> stats, GROUP_BY_TIME timeGroupBy, List<String> timeHeaders, List<String> metricHeaders) {
+		Map<String, List<Map<String, Object>>> groupedById = stats.stream().collect(Collectors.groupingBy(r -> String.valueOf(r.getOrDefault("id", ""))));
+		List<String[]> rows = new ArrayList<>();
+		for (Map.Entry<String, List<Map<String, Object>>> entry : groupedById.entrySet()) {
+			List<String> row = new ArrayList<>();
+			List<Map<String, Object>> groupRows = entry.getValue();
+			row.add(String.valueOf(groupRows.get(0).getOrDefault("name", "")));
+			row.add(entry.getKey());
+			for (String timeHeader : timeHeaders) {
+				Map<String, Object> timeRow = groupRows.stream()
+						.filter(r -> timeHeader.equals(String.valueOf(r.getOrDefault(timeGroupBy.toString(), ""))))
+						.findFirst()
+						.orElse(Collections.emptyMap());
+				for (String metricHeader : metricHeaders) {
+					Object value = timeRow.get(metricHeader);
+					row.add(value == null ? "" : value.toString());
+				}
+			}
+			rows.add(row.toArray(new String[0]));
+		}
+		rows.sort((a, b) -> a[0].compareToIgnoreCase(b[0]));
+		return rows;
+	}
+
+	private List<String> getHeadersFromStats(List<Map<String, Object>> stats, GROUP_BY_TIME timeGroupBy) {
+		Set<String> headers = new LinkedHashSet<>();
+		for (Map<String, Object> r : stats) {
+			for (String key : r.keySet()) {
+				if (!key.equals("campaign") && !key.equals("id") && !key.equals(timeGroupBy.toString())) {
+					headers.add(key);
+				}
+			}
+		}
+		// sort headers to have a consistent order
+		List<String> sortedHeaders = new ArrayList<>(headers);
+		Collections.sort(sortedHeaders);
+		return sortedHeaders;
 	}
 }

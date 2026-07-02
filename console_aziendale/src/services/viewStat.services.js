@@ -226,7 +226,12 @@ async function getData(headers, selection, values) {
 
 function getRowNameValue(values, rowIndex) {
   let name = values[rowIndex].key;
-  if (name.indexOf(';') > -1) {
+  
+  if (!name || name === 'null') {
+    return 'Non specificato'; 
+  }
+
+  if (typeof name === 'string' && name.indexOf(';') > -1) {
     let code = name.substring(name.indexOf(';') + 1, name.length);
     name = name.substring(0, name.indexOf(';'));
     name += '<br><small>(' + code + ')</small>';
