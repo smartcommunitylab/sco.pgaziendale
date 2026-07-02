@@ -979,8 +979,11 @@ public class StatTrackService {
 		}
 		try {
 			List<String> timeHeaders = getTimeGroupList(from, to, timeGroupBy);
+			logger.info("timeHeaders: {}", timeHeaders);
 			List<String> metricHeaders = getHeadersFromStats(stats, timeGroupBy);
+			logger.info("metricHeaders: {}", metricHeaders);
 			List<String> headers = buildPivotHeaders(metricHeaders, timeHeaders);
+			logger.info("headers: {}", headers);
 			csvWriter.writeNext(headers.toArray(new String[0]));
 			List<String[]> table = buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
 			csvWriter.writeAll(table);
@@ -989,6 +992,7 @@ public class StatTrackService {
 				try {
 					writer.close();
 				} catch (Exception e) {
+					logger.error("Error closing writer", e);
 				}
 			}
 		}
