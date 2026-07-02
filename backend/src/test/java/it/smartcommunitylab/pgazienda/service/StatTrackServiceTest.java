@@ -3,6 +3,8 @@ package it.smartcommunitylab.pgazienda.service;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,5 +49,16 @@ public class StatTrackServiceTest {
         assertEquals(2, rows.size());
         assertArrayEquals(new String[] {"Comune A", "abc", "3", "10.5", "4", "11.5"}, rows.get(0));
         assertArrayEquals(new String[] {"Comune B", "def", "6", "12.5", "", ""}, rows.get(1));
+    }
+
+    @Test
+    public void dateTest() {
+        LocalDate date = LocalDate.of(2026, 7, 2);
+        LocalDate nextMonth = date.withDayOfMonth(1).plusMonths(1);
+        System.out.println("Next month: " + nextMonth);
+        LocalDate nextYear = date.withDayOfMonth(1).plusYears(1);
+        System.out.println("Next year: " + nextYear);
+        LocalDate nextWeek = date.with(DayOfWeek.MONDAY).plusWeeks(1);
+        System.out.println("Next week: " + nextWeek);
     }
 }
