@@ -31,6 +31,7 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
+        noGroupByMean: true,
         default: {
           source: "tracks",
           dataColumns: [DC.POINTS,DC.COUNTING_POINTS],
@@ -68,7 +69,7 @@ export const statsConfigurations = [
           {label:VC.TIMEUNIT.CAMPAIGN,value: "campaign",apiField: "total" },
         ],
         timePeriod: [ {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" }, {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },],
-        
+        noGroupByMean: true,
         default: {
           source: "tracks",
           dataColumns: [DC.POINTS, DC.COUNTING_POINTS],
@@ -455,6 +456,7 @@ export const statsConfigurations = [
     views: [
       {
         dataLevel: [
+          { label: VC.DATALEVEL.COMPANIES, value: "company",  puntualAggregation: [{ label:  PA.NONE, value: 'NONE' },  { label:  PA.COMPANIES, value: 'COMPANIES' } ]},
           { label: VC.DATALEVEL.LOCATIONS,value: "location", puntualAggregation: [{ label:  PA.NONE,  value: 'NONE' }, { label:  PA.LOCATIONS,  value: 'LOCATIONS' } ]},            
           { label: VC.DATALEVEL.EMPLOYEES,value: "employee", puntualAggregation: [{ label:  PA.NONE,  value: 'NONE' }, { label:  PA.EMPLOYEES,  value: 'EMPLOYEES',  } ]},
         ],
@@ -472,14 +474,14 @@ export const statsConfigurations = [
           {label:VC.TIMEPERIOD.SPECIFIC,value: "SPECIFIC",apiField: "month" },
         ],
         source: "tracks",
-        noGroupByMean: false, 
+        noGroupByMean: true, 
         default: {
           source: "tracks",
           dataColumns: [DC.N_TRAVEL, DC.N_TRAVEL_SINGLE, DC.N_TRAVEL_MULTI ],
           puntualAggregationSelected:{label:  PA.NONE,value: 'NONE', },
           dataLevel: {
-            label: VC.DATALEVEL.LOCATIONS,value: "location",
-            puntualAggregation: [{  label:  PA.NONE,  value: 'NONE' }, {  label:  PA.LOCATIONS,  value: 'LOCATIONS'}]
+            label: VC.DATALEVEL.LOCATIONS,value: "employee",
+            puntualAggregation: [{ label:  PA.NONE,  value: 'NONE' }, { label:  PA.EMPLOYEES,  value: 'EMPLOYEES'}]
           },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
           timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        

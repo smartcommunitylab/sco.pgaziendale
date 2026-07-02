@@ -30,6 +30,7 @@ import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import com.opencsv.CSVWriter;
@@ -78,8 +79,8 @@ public class StatEmployeeService {
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		if (from == null) {
-			from = campaign.getFrom();
-			to = campaign.getTo();
+			from = toLocalDate(campaign.getFrom());
+			to = toLocalDate(campaign.getTo());
 		}
 
 		// get employee counts
@@ -304,7 +305,7 @@ public class StatEmployeeService {
 	}
 	
 	private boolean isRegistered(LocalDate registrationDate, LocalDate from, LocalDate to) {
-		if(from.isBefore(registrationDate) && to.isAfter(registrationDate)) return true;
+		if((from.isEqual(registrationDate) || from.isBefore(registrationDate)) && to.isAfter(registrationDate)) return true;
 		return false;
 	}
 	
@@ -316,6 +317,11 @@ public class StatEmployeeService {
 	
 	private LocalDate toLocalDate(Long timestamp) {
 		return Instant.ofEpochMilli(timestamp).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
+	}
+
+	// convert a LocalDate in UTC time zone into a LocalDate in the default time zone
+	private LocalDate toLocalDate(LocalDate localDate) { 
+		return localDate.atStartOfDay(ZoneId.of("Z")).withZoneSameInstant(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
 	}
 	
 	private String getGroupByTime(GROUP_BY_TIME timeGroupBy, LocalDate localDate) {		
@@ -478,12 +484,15 @@ public class StatEmployeeService {
 	 */
 	private Map<String, Object> flattenStat(StatEmployeeDTO ds, GROUP_BY_TIME timeGroupBy) {
 		Map<String, Object> res = new java.util.HashMap<>();
-		List<FieldEmployeeDTO> fieldEmployeeDTOList = List.of(ds.getRegistration(), ds.getActiveUsers(), ds.getDropout());
-		for(FieldEmployeeDTO f : fieldEmployeeDTOList) {
-			if (f != null) {
-				res.put(f.toString(), f.getValue() != null ? f.getValue() : 0);
-				res.put(f.toString() + "__prcTot", f.getPrcTot() != null ? f.getPrcTot() : 0);
-				res.put(f.toString() + "__prcRegistered", f.getPrcRegistered() != null ? f.getPrcRegistered() : 0);
+		List<Pair<String, FieldEmployeeDTO>> fieldList = List.of(
+				Pair.of("registration", ds.getRegistration()), 
+				Pair.of("activeUsers", ds.getActiveUsers()), 
+				Pair.of("dropout", ds.getDropout()));		
+		for(Pair <String, FieldEmployeeDTO> p : fieldList) {
+			if (p.getSecond() != null) {
+				res.put(p.getFirst(), p.getSecond().getValue() != null ? p.getSecond().getValue() : 0);
+				res.put(p.getFirst() + "__prcTot", p.getSecond().getPrcTot() != null ? p.getSecond().getPrcTot() : 0);
+				res.put(p.getFirst() + "__prcRegistered", p.getSecond().getPrcRegistered() != null ? p.getSecond().getPrcRegistered() : 0);
 			}
 		}
 		return res;

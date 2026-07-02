@@ -86,6 +86,8 @@ public class StatTrackService {
 			from = campaign.getFrom();
 			to = campaign.getTo();
 		}
+		logger.info("Get track stats for campaign: {}, company: {}, location: {}, means: {}, way: {}, timeGroupBy: {}, dataGroupBy: {}, fields: {}, groupByMean: {}, allDataGroupBy: {}, from: {}, to: {}",
+			campaignId, companyId, locationId, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
 		
 		Criteria criteria = Criteria
 				.where("campaign").is(campaignId)
@@ -511,25 +513,25 @@ public class StatTrackService {
 		fields.forEach(f -> {
 			switch (f) {
 			case score:
-				if(stat.getScore() != null)
+				if((stat != null) && (stat.getScore() != null))
 					row.add(String.valueOf(stat.getScore().getValue()));
 				else 
 					row.add("");
 				break;
 			case limitedScore:
-				if(stat.getLimitedScore() != null)
+				if((stat != null) && (stat.getLimitedScore() != null))
 					row.add(String.valueOf(stat.getLimitedScore().getValue()));
 				else	
 					row.add("");
 				break;
 			case track:
-				if(stat.getTrack() != null)
+				if((stat != null) && (stat.getTrack() != null))
 					row.add(String.valueOf(stat.getTrack()));
 				else 
 					row.add("");
 				break;
 			case co2:
-				if(stat.getCo2() != null) {
+				if((stat != null) && (stat.getCo2() != null)) {
 					row.add(String.valueOf(stat.getCo2().getValue()));
 					row.add(String.valueOf(stat.getCo2().getAvgTrip()));
 					if(!mainStats) {
@@ -554,7 +556,7 @@ public class StatTrackService {
 				}
 				break;
 			case distance:
-				if(stat.getDistance() != null) {
+				if((stat != null) && (stat.getDistance() != null)) {
 					row.add(String.valueOf(stat.getDistance().getValue()));
 					row.add(String.valueOf(stat.getDistance().getAvgTrip()));
 					if(!mainStats) {
@@ -579,7 +581,7 @@ public class StatTrackService {
 				}
 				break;
 			case duration:
-				if(stat.getDuration() != null) {
+				if((stat != null) && (stat.getDuration() != null)) {
 					row.add(String.valueOf(stat.getDuration().getValue()));
 					row.add(String.valueOf(stat.getDuration().getAvgTrip()));
 					if(!mainStats) {
@@ -604,13 +606,13 @@ public class StatTrackService {
 				}
 				break;
 			case tripCount:
-				if(stat.getTripCount() != null)
+				if((stat != null) && (stat.getTripCount() != null))
 					row.add(String.valueOf(stat.getTripCount()));
 				else 
 					row.add("");
 				break;
 			case limitedTripCount:
-				if(stat.getLimitedTripCount() != null)
+				if((stat != null) && (stat.getLimitedTripCount() != null))
 					row.add(String.valueOf(stat.getLimitedTripCount()));
 				else
 					row.add("");
@@ -775,7 +777,9 @@ public class StatTrackService {
 	}
 
 	private String mapTimeLabel(GROUP_BY_TIME timeGroupBy, String timeGroup) {
-		if (timeGroupBy == GROUP_BY_TIME.dayOfWeek) {
+		if (GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) {
+			if (timeGroup.equalsIgnoreCase("total"))
+				return "Totale";
 			return DayOfWeek.valueOf(timeGroup).getDisplayName(TextStyle.FULL, Locale.ITALIAN);
 		}	
 		return timeGroup;
@@ -798,6 +802,12 @@ public class StatTrackService {
 	{
 		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, locationId, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		if (from == null) {
+			from = campaign.getFrom();
+			to = campaign.getTo();
+		}
 		try{
 			// headers
 			List<String> headers = createHeadersFlat(timeGroupBy, from, to);

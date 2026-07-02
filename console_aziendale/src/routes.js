@@ -13,6 +13,7 @@ import GestioneCampagne from "@/pages/campaigns/Campaigns.vue"
 import GestioneUtenti from "@/pages/users/Users.vue"
 import NotFound from "@/pages/NotFound.vue"
 import ResetPwd from "@/pages/login/ResetPwd.vue"
+import RoadUsage from "@/pages/roadUsage/RoadUsage.vue"
 
 Vue.use(Router);
 
@@ -61,6 +62,11 @@ const routes = [
     path: '/Statistiche',
     name: 'Statistiche',
     component: Stats
+},
+{
+  path: '/UtilizzoStrade',
+  name: 'UtilizzoStrade',
+  component: RoadUsage
 },
   {
     path: '/GestioneCampagne',

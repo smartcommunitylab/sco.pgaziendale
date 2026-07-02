@@ -76,11 +76,31 @@
                     id="typeData"
                     v-model="localSelection.puntualAggregationItems"
                     :items="localSelection.itemsAggreation"
+                    :item-disabled="item => item.disabled === true"
                     :item-text="getItemText"
                     return-object
                     multiple
                     outlined
                   >
+                  <template v-slot:item="{ item, attrs, on }">
+                      <v-list-item v-bind="attrs" v-on="on" :disabled="item.disabled">
+                        <v-list-item-action>
+                          <v-checkbox
+                            :input-value="attrs.inputValue"
+                            :disabled="item.disabled"
+                            color="primary"
+                          ></v-checkbox>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                          <v-list-item-title :class="item.disabled ? 'grey--text text--lighten-1' : ''">
+                            {{ item.label }}
+                          </v-list-item-title>
+                          <v-list-item-subtitle v-if="item.disabled" class="error--text mt-1">
+                            Non iscritto alla campagna
+                          </v-list-item-subtitle>
+                        </v-list-item-content>
+                      </v-list-item>
+                    </template>
                     <!-- Slot per il "Seleziona Tutti" -->
                     <template v-slot:prepend-item>
                       <v-list-item ripple @mousedown.prevent @click="toggleSelectAll">
@@ -261,7 +281,7 @@
 
               <br />
               <v-switch
-                v-if="view.source == 'tracks' && view.noGroupByMean"
+                v-if="view.noGroupByMean"
                 v-model="localSelection.groupByMean"
                 label="Dividere per mezzo"
                 hide-details
@@ -393,7 +413,6 @@ export default {
       name: "",
       email: "",
       select: null,
-      // items: ["Item 1", "Item 2", "Item 3", "Item 4"],
       checkbox: false,
       viewData: null,
       meansList: [],
@@ -589,8 +608,21 @@ selectAllMeansIcon() {
       viewStatService
         .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
         .then((viewData) => {
+          console.log("viewData", viewData);
           this.$set(this, 'viewData', null); 
           this.$nextTick(() => {
+            if (viewData && viewData.data && Array.isArray(viewData.data)) {
+              viewData.data = viewData.data.map(row => {
+                let cleanRow = { ...row };
+                for (let key in cleanRow) {
+                  if (Number.isNaN(cleanRow[key]) || cleanRow[key] === 'NaN') {
+                    cleanRow[key] = '-';
+                  }
+                }
+                return cleanRow;
+              });
+            }
+
             this.$set(this, 'viewData', viewData);
           });
         })
