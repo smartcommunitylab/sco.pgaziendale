@@ -159,4 +159,28 @@ public class StatMultimodalResource {
     	dataService.getMultimodalStatsCsv(response.getWriter(), campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, allDataGroupBy, fromDate, toDate);
     }
 
+    @GetMapping("/campaigns/{campaignId}/stats/multimodal/csv/flat")
+    public void statisticsCsvFlat(
+    		@PathVariable String campaignId, 
+    		@RequestParam(required=false) String companyId,
+    		@RequestParam(required=false) String location,
+    		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
+    		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
+    		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
+			@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
+    		@RequestParam(required=false) String from, 
+    		@RequestParam(required=false) String to,
+    		HttpServletResponse response) throws IOException, InconsistentDataException { 
+	    	/*if(!userService.isInCampaignRole(campaignId)) {
+			if(StringUtils.isNotBlank(companyId)) {
+		    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
+		    		throw new SecurityException("Insufficient rights");        		
+	    	} else {
+	    		throw new SecurityException("Insufficient rights");	
+	    	}
+		}*/
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);    	
+    	dataService.getMultimodalStatsCsvFLat(response.getWriter(), campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, allDataGroupBy, fromDate, toDate);
+    }	
 }
