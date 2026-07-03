@@ -13,6 +13,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
+import it.smartcommunitylab.pgazienda.util.StatUtil;
 
 public class StatTrackServiceTest {
 
@@ -44,7 +45,7 @@ public class StatTrackServiceTest {
         third.put("bus_mean_score", 12.5);
         stats.add(third);
 
-        List<String[]> rows = StatTrackService.buildPivotRows(stats, GROUP_BY_TIME.year, List.of("2024", "2025"), List.of("train_mean_tripCount", "bus_mean_score"));
+        List<String[]> rows = StatUtil.buildPivotRows(stats, GROUP_BY_TIME.year, List.of("2024", "2025"), List.of("train_mean_tripCount", "bus_mean_score"));
 
         assertEquals(2, rows.size());
         assertArrayEquals(new String[] {"abc", "Comune A", "3", "10.5", "4", "11.5"}, rows.get(0));
