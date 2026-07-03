@@ -47,8 +47,8 @@ public class StatTrackServiceTest {
         List<String[]> rows = StatTrackService.buildPivotRows(stats, GROUP_BY_TIME.year, List.of("2024", "2025"), List.of("train_mean_tripCount", "bus_mean_score"));
 
         assertEquals(2, rows.size());
-        assertArrayEquals(new String[] {"Comune A", "abc", "3", "10.5", "4", "11.5"}, rows.get(0));
-        assertArrayEquals(new String[] {"Comune B", "def", "6", "12.5", "", ""}, rows.get(1));
+        assertArrayEquals(new String[] {"abc", "Comune A", "3", "10.5", "4", "11.5"}, rows.get(0));
+        assertArrayEquals(new String[] {"def", "Comune B", "6", "12.5", "", ""}, rows.get(1));
     }
 
     @Test
