@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -49,7 +48,7 @@ import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
-import it.smartcommunitylab.pgazienda.util.DateUtils;
+import it.smartcommunitylab.pgazienda.util.StatUtil;
 
 @Service
 public class StatMultimodalService {
@@ -121,7 +120,7 @@ public class StatMultimodalService {
 		}
 		
 		Map<String, StatMultimodalDTO> mapStats = new HashMap<>(); 
-		List<String> timeGroupList = getTimeGroupList(from, to, timeGroupBy);
+		List<String> timeGroupList = StatUtil.getTimeGroupList(from, to, timeGroupBy);
 		List<String> dataGroupList = new ArrayList<>();
 		
 		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
@@ -158,7 +157,7 @@ public class StatMultimodalService {
 				String timeGroup = getGroupByTime(doc, timeGroupBy);
 				String dataGroup = getGroupByData(doc, dataGroupBy);
 				addDataGroup(dataGroupList, dataGroup);
-				String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+				String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 				String modeKey = getModeKey(campaignId, timeGroup, dataGroup, mode);
 				StatMultimodalDTO.Builder builder = mapBuilders.get(groupKey);
 				if(builder == null) {
@@ -398,7 +397,7 @@ public class StatMultimodalService {
 			List<String> timeGroupList, List<String> dataGroupList) {
 		if(dataGroupList.size() == 0) {
 			for(String timeGroup : timeGroupList) {
-				String groupKey = getGroupKey(campaignId, timeGroup, null);
+				String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, null);
 				if(!mapStats.containsKey(groupKey)) {
 					StatMultimodalDTO stats = new  StatMultimodalDTO();
 					stats.setCampaign(campaignId);
@@ -409,7 +408,7 @@ public class StatMultimodalService {
 		} else {
 			for(String dataGroup : dataGroupList) {
 				for(String timeGroup : timeGroupList) {
-					String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+					String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 					if(!mapStats.containsKey(groupKey)) {
 						StatMultimodalDTO stats = new  StatMultimodalDTO();
 						stats.setCampaign(campaignId);
@@ -426,23 +425,6 @@ public class StatMultimodalService {
 		if(StringUtils.isNotBlank(dataGroup) && !dataGroupList.contains(dataGroup)) {
 			dataGroupList.add(dataGroup);
 		}
-	}
-
-	private List<String> getTimeGroupList(LocalDate start, LocalDate end, GROUP_BY_TIME timeGroupBy) {
-		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return DateUtils.getDateRangeStrings(start, end);
-		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return DateUtils.getDateRangeByWeek(start, end);
-		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return DateUtils.getDateRangeByMonth(start, end);
-		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return DateUtils.getDateRangeByYear(start, end);
-		if (GROUP_BY_TIME.hour.equals(timeGroupBy)) return DateUtils.getDateRangeByHour(start, end);
-		if (GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) return DateUtils.getDateRangeByDayOfWeek(start, end); 
-		if (GROUP_BY_TIME.total.equals(timeGroupBy)) return DateUtils.getDateRangeByTotal(start, end);
-		return Collections.emptyList();		
-	}
-
-	private String getGroupKey(String campaignId, String timeGroup, String dataGroup) {
-		String key = campaignId + "_" + timeGroup;
-		if(StringUtils.isNotBlank(dataGroup)) key += "_" + dataGroup;
-		return key;
 	}
 
 	private String getModeKey(String campaignId, String timeGroup, String dataGroup, String mode) {
@@ -634,14 +616,14 @@ public class StatMultimodalService {
 		}
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		try {
-			List<String> timeHeaders = getTimeGroupList(fromDate, toDate, timeGroupBy);
+			List<String> timeHeaders = StatUtil.getTimeGroupList(fromDate, toDate, timeGroupBy);
 			//logger.info("timeHeaders: {}", timeHeaders);
-			List<String> metricHeaders = getHeadersFromStats(stats, timeGroupBy);
+			List<String> metricHeaders = StatUtil.getHeadersFromStats(stats, timeGroupBy);
 			//logger.info("metricHeaders: {}", metricHeaders);
-			List<String> headers = buildPivotHeaders(metricHeaders, timeHeaders);
+			List<String> headers = StatUtil.buildPivotHeaders(metricHeaders, timeHeaders);
 			//logger.info("headers: {}", headers);
 			csvWriter.writeNext(headers.toArray(new String[0]));
-			List<String[]> table = buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
+			List<String[]> table = StatUtil.buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
 			csvWriter.writeAll(table);
 		} finally {
 			if (csvWriter != null) {
@@ -659,58 +641,6 @@ public class StatMultimodalService {
 				}
 			}
 		}
-	}
-
-	private List<String> buildPivotHeaders(List<String> metricHeaders, List<String> timeHeaders) {
-		List<String> headers = new ArrayList<>();
-		headers.add("id");
-		headers.add("name");
-		for (String timeHeader : timeHeaders) {
-			for (String metricHeader : metricHeaders) {
-				headers.add(timeHeader + "__" + metricHeader);
-			}
-		}
-		return headers;
-	}
-
-	static List<String[]> buildPivotRows(List<Map<String, Object>> stats, GROUP_BY_TIME timeGroupBy, List<String> timeHeaders, List<String> metricHeaders) {
-		Map<String, List<Map<String, Object>>> groupedById = stats.stream().collect(Collectors.groupingBy(r -> String.valueOf(r.getOrDefault("id", ""))));
-		List<String[]> rows = new ArrayList<>();
-		for (Map.Entry<String, List<Map<String, Object>>> entry : groupedById.entrySet()) {
-			List<String> row = new ArrayList<>();
-			List<Map<String, Object>> groupRows = entry.getValue();
-			row.add(entry.getKey());
-			row.add(String.valueOf(groupRows.get(0).getOrDefault("name", "")));
-			for (String timeHeader : timeHeaders) {
-				Map<String, Object> timeRow = groupRows.stream()
-						.filter(r -> timeHeader.equals(String.valueOf(r.getOrDefault(timeGroupBy.toString(), ""))))
-						.findFirst()
-						.orElse(Collections.emptyMap());
-				for (String metricHeader : metricHeaders) {
-					Object value = timeRow.get(metricHeader);
-					row.add(value == null ? "" : value.toString());
-				}
-			}
-			rows.add(row.toArray(new String[0]));
-		}
-		rows.sort((a, b) -> a[1].compareToIgnoreCase(b[1]));
-		return rows;
-	}
-
-	private List<String> getHeadersFromStats(List<Map<String, Object>> stats, GROUP_BY_TIME timeGroupBy) {
-		Set<String> headers = new LinkedHashSet<>();
-		for (Map<String, Object> r : stats) {
-			for (String key : r.keySet()) {
-				if (!key.equals("campaign") && !key.equals("id") 
-					&& !key.equals("name") && !key.equals(timeGroupBy.toString())) {
-					headers.add(key);
-				}
-			}
-		}
-		// sort headers to have a consistent order
-		List<String> sortedHeaders = new ArrayList<>(headers);
-		Collections.sort(sortedHeaders);
-		return sortedHeaders;
 	}
 	
 }
