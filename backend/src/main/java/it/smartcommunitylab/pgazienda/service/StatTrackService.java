@@ -969,13 +969,13 @@ public class StatTrackService {
 		LocalDate to) throws InconsistentDataException
 	{
 		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, locationId, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
-		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		if (from == null) {
 			from = campaign.getFrom();
 			to = campaign.getTo();
 		}
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		try {
 			List<String> timeHeaders = getTimeGroupList(from, to, timeGroupBy);
 			//logger.info("timeHeaders: {}", timeHeaders);
@@ -987,6 +987,13 @@ public class StatTrackService {
 			List<String[]> table = buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
 			csvWriter.writeAll(table);
 		} finally {
+			if (csvWriter != null) {
+				try {
+					csvWriter.close();
+				} catch (Exception e) {
+					logger.error("Error closing csvWriter", e);
+				}
+			}
 			if (writer != null) {
 				try {
 					writer.close();
