@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,9 +62,9 @@ public class StatTrackService {
 	@Autowired
 	private CampaignRepository campaignRepo;
 
-	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
-	private static final DateTimeFormatter YEAR_PATTERN = DateTimeFormatter.ofPattern("yyyy");
-	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww");
+	// private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
+	// private static final DateTimeFormatter YEAR_PATTERN = DateTimeFormatter.ofPattern("yyyy");
+	// private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww");
 	
 
 	public List<StatTrackDTO> getTrackStats(
@@ -786,7 +785,7 @@ public class StatTrackService {
 		return timeGroup;
 	}
 
-	public void csvStatistics(
+/* 	public void csvStatistics(
 		PrintWriter writer, 
 		String campaignId,
 		String companyId,
@@ -865,13 +864,13 @@ public class StatTrackService {
 			}
 		}
 
-	}
+	} */
 
-	private String translateSubHeader(String h) {
+/* 	private String translateSubHeader(String h) {
 		return h;
-	}
+	} */
 
-	private List<String> createHeadersFlat(GROUP_BY_TIME timeGroupBy, LocalDate from, LocalDate to) {
+/* 	private List<String> createHeadersFlat(GROUP_BY_TIME timeGroupBy, LocalDate from, LocalDate to) {
 		List<String> list = new LinkedList<>();
 		switch (timeGroupBy) {
 			case day: {
@@ -921,9 +920,9 @@ public class StatTrackService {
 			default:
 		}
 		return list;
-	}
+	} */
 
-	private List<String> createSubheaders(List<String> headers, List<STAT_TRACK_FIELD> fields, Set<String> means) {
+/* 	private List<String> createSubheaders(List<String> headers, List<STAT_TRACK_FIELD> fields, Set<String> means) {
 		List<String> fList = new LinkedList<>();
 		for (STAT_TRACK_FIELD f : fields) {
 			switch (f) {
@@ -952,7 +951,7 @@ public class StatTrackService {
 			}
 		}
 		return fList;
-	}
+	} */
 
 	public void csvStatisticsNew(
 		PrintWriter writer, 
@@ -970,13 +969,13 @@ public class StatTrackService {
 		LocalDate to) throws InconsistentDataException
 	{
 		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, locationId, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
-		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		if (from == null) {
 			from = campaign.getFrom();
 			to = campaign.getTo();
 		}
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		try {
 			List<String> timeHeaders = getTimeGroupList(from, to, timeGroupBy);
 			//logger.info("timeHeaders: {}", timeHeaders);
@@ -988,6 +987,13 @@ public class StatTrackService {
 			List<String[]> table = buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
 			csvWriter.writeAll(table);
 		} finally {
+			if (csvWriter != null) {
+				try {
+					csvWriter.close();
+				} catch (Exception e) {
+					logger.error("Error closing csvWriter", e);
+				}
+			}
 			if (writer != null) {
 				try {
 					writer.close();
