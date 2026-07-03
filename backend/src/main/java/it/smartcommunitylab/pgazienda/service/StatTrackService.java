@@ -433,7 +433,9 @@ public class StatTrackService {
 			String dataGroup = getGroupByData(doc, dataGroupBy);
 			String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 			mapTrips.put(groupKey, mapTrips.getOrDefault(groupKey, 0) + 1);
-			mapTrips.put(groupKey + "_multi", mapTrips.getOrDefault(groupKey + "_multi", 0)+1);
+			if(doc.getInteger("trackCount") > 1) {
+				mapTrips.put(groupKey + "_multi", mapTrips.getOrDefault(groupKey + "_multi", 0)+1);
+			}
 		}
 	}
 
