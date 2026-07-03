@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -506,4 +507,102 @@ public class StatEmployeeService {
 		}	
 		return timeGroup;
 	}
+
+    public void getEmployeeStatsCsvFlat(
+			PrintWriter writer, 
+			String campaignId, 
+			String companyId, 
+			String location,
+        	GROUP_BY_TIME timeGroupBy, 
+			GROUP_BY_DATA dataGroupBy, 
+			LocalDate fromDate, 
+			LocalDate toDate) throws InconsistentDataException
+	{
+		List<Map<String, Object>> stats = getEmployeeStatsFlat(campaignId, companyId, location, timeGroupBy, dataGroupBy, fromDate, toDate);
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		if (fromDate == null) {
+			fromDate = campaign.getFrom();
+			toDate = campaign.getTo();
+		}
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		try {
+			List<String> timeHeaders = getTimeGroupList(fromDate, toDate, timeGroupBy);
+			//logger.info("timeHeaders: {}", timeHeaders);
+			List<String> metricHeaders = getHeadersFromStats(stats, timeGroupBy);
+			//logger.info("metricHeaders: {}", metricHeaders);
+			List<String> headers = buildPivotHeaders(metricHeaders, timeHeaders);
+			//logger.info("headers: {}", headers);
+			csvWriter.writeNext(headers.toArray(new String[0]));
+			List<String[]> table = buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
+			csvWriter.writeAll(table);
+		} finally {
+			if (csvWriter != null) {
+				try {
+					csvWriter.close();
+				} catch (Exception e) {
+					logger.error("Error closing csvWriter", e);
+				}
+			}
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (Exception e) {
+					logger.error("Error closing writer", e);
+				}
+			}
+		}				
+    }
+
+	private List<String> buildPivotHeaders(List<String> metricHeaders, List<String> timeHeaders) {
+		List<String> headers = new ArrayList<>();
+		headers.add("id");
+		headers.add("name");
+		for (String timeHeader : timeHeaders) {
+			for (String metricHeader : metricHeaders) {
+				headers.add(timeHeader + "__" + metricHeader);
+			}
+		}
+		return headers;
+	}
+
+	static List<String[]> buildPivotRows(List<Map<String, Object>> stats, GROUP_BY_TIME timeGroupBy, List<String> timeHeaders, List<String> metricHeaders) {
+		Map<String, List<Map<String, Object>>> groupedById = stats.stream().collect(Collectors.groupingBy(r -> String.valueOf(r.getOrDefault("id", ""))));
+		List<String[]> rows = new ArrayList<>();
+		for (Map.Entry<String, List<Map<String, Object>>> entry : groupedById.entrySet()) {
+			List<String> row = new ArrayList<>();
+			List<Map<String, Object>> groupRows = entry.getValue();
+			row.add(entry.getKey());
+			row.add(String.valueOf(groupRows.get(0).getOrDefault("name", "")));
+			for (String timeHeader : timeHeaders) {
+				Map<String, Object> timeRow = groupRows.stream()
+						.filter(r -> timeHeader.equals(String.valueOf(r.getOrDefault(timeGroupBy.toString(), ""))))
+						.findFirst()
+						.orElse(Collections.emptyMap());
+				for (String metricHeader : metricHeaders) {
+					Object value = timeRow.get(metricHeader);
+					row.add(value == null ? "" : value.toString());
+				}
+			}
+			rows.add(row.toArray(new String[0]));
+		}
+		rows.sort((a, b) -> a[1].compareToIgnoreCase(b[1]));
+		return rows;
+	}
+	
+	private List<String> getHeadersFromStats(List<Map<String, Object>> stats, GROUP_BY_TIME timeGroupBy) {
+		Set<String> headers = new LinkedHashSet<>();
+		for (Map<String, Object> r : stats) {
+			for (String key : r.keySet()) {
+				if (!key.equals("campaign") && !key.equals("id") 
+					&& !key.equals("name") && !key.equals(timeGroupBy.toString())) {
+					headers.add(key);
+				}
+			}
+		}
+		// sort headers to have a consistent order
+		List<String> sortedHeaders = new ArrayList<>(headers);
+		Collections.sort(sortedHeaders);
+		return sortedHeaders;
+	}	
 }
