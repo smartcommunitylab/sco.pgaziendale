@@ -979,11 +979,11 @@ public class StatTrackService {
 		}
 		try {
 			List<String> timeHeaders = getTimeGroupList(from, to, timeGroupBy);
-			logger.info("timeHeaders: {}", timeHeaders);
+			//logger.info("timeHeaders: {}", timeHeaders);
 			List<String> metricHeaders = getHeadersFromStats(stats, timeGroupBy);
-			logger.info("metricHeaders: {}", metricHeaders);
+			//logger.info("metricHeaders: {}", metricHeaders);
 			List<String> headers = buildPivotHeaders(metricHeaders, timeHeaders);
-			logger.info("headers: {}", headers);
+			//logger.info("headers: {}", headers);
 			csvWriter.writeNext(headers.toArray(new String[0]));
 			List<String[]> table = buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
 			csvWriter.writeAll(table);
@@ -1000,8 +1000,8 @@ public class StatTrackService {
 
 	private List<String> buildPivotHeaders(List<String> metricHeaders, List<String> timeHeaders) {
 		List<String> headers = new ArrayList<>();
-		headers.add("name");
 		headers.add("id");
+		headers.add("name");
 		for (String timeHeader : timeHeaders) {
 			for (String metricHeader : metricHeaders) {
 				headers.add(timeHeader + "__" + metricHeader);
@@ -1016,8 +1016,8 @@ public class StatTrackService {
 		for (Map.Entry<String, List<Map<String, Object>>> entry : groupedById.entrySet()) {
 			List<String> row = new ArrayList<>();
 			List<Map<String, Object>> groupRows = entry.getValue();
-			row.add(String.valueOf(groupRows.get(0).getOrDefault("name", "")));
 			row.add(entry.getKey());
+			row.add(String.valueOf(groupRows.get(0).getOrDefault("name", "")));
 			for (String timeHeader : timeHeaders) {
 				Map<String, Object> timeRow = groupRows.stream()
 						.filter(r -> timeHeader.equals(String.valueOf(r.getOrDefault(timeGroupBy.toString(), ""))))
@@ -1030,7 +1030,7 @@ public class StatTrackService {
 			}
 			rows.add(row.toArray(new String[0]));
 		}
-		rows.sort((a, b) -> a[0].compareToIgnoreCase(b[0]));
+		rows.sort((a, b) -> a[1].compareToIgnoreCase(b[1]));
 		return rows;
 	}
 
@@ -1038,7 +1038,8 @@ public class StatTrackService {
 		Set<String> headers = new LinkedHashSet<>();
 		for (Map<String, Object> r : stats) {
 			for (String key : r.keySet()) {
-				if (!key.equals("campaign") && !key.equals("id") && !key.equals(timeGroupBy.toString())) {
+				if (!key.equals("campaign") && !key.equals("id") 
+					&& !key.equals("name") && !key.equals(timeGroupBy.toString())) {
 					headers.add(key);
 				}
 			}
