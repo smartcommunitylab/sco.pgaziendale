@@ -496,6 +496,31 @@ public class CompanyService {
 		}
 	}
 
+	public void exportEmployeesCsv(String companyId, java.io.Writer writer) throws IOException, InconsistentDataException {
+		Company c = companyRepo.findById(companyId).orElse(null);
+		if (c == null) {
+			throw new InconsistentDataException("Company not found", "COMPANY_NOT_FOUND");
+		}
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		try {
+			String[] header = {"Nome", "Cognome", "CodiceDipendente", "CodiceSede"};
+			csvWriter.writeNext(header);
+			List<Employee> employees = employeeRepo.findByCompanyId(companyId);
+			for (Employee employee : employees) {
+				String[] row = {
+					employee.getName() != null ? employee.getName() : "",
+					employee.getSurname() != null ? employee.getSurname() : "",
+					employee.getCode() != null ? employee.getCode() : "",
+					employee.getLocation() != null ? employee.getLocation() : ""
+				};
+				csvWriter.writeNext(row);
+			}
+		} finally {
+			csvWriter.flush();
+			csvWriter.close();
+		}
+	}
+
 	private List<String[]> readCSV(InputStream is, char separator, int columns) throws Exception {
 		CSVParser parser = new CSVParserBuilder()
 			    .withSeparator(separator)
@@ -654,6 +679,7 @@ public class CompanyService {
 			}
 		} finally {
 			csvWriter.flush();
+			csvWriter.close();
 		}
 	}
 
