@@ -3,6 +3,7 @@ import axios from "axios";
 export const employeeService = {
     importEmployees,
     getAllEmployees,
+    getEmployeesCsv ,
     addEmployee,
     updateEmployee,
     deleteEmployee,
@@ -46,7 +47,21 @@ function getAllEmployees(companyId) {
 
     )
 }
-
+//Scarica tutti i dipendenti in CSV
+function getEmployeesCsv(companyId) {
+    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_EMPLOYEES_API + '/' + process.env.VUE_APP_CSV_API, {
+        responseType: 'blob'
+    }).then(
+        res => {
+            if (res && res.data) {
+                return Promise.resolve(res.data);
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+    )
+}
 // //get company byid
 // function getEmployeeById(companyId, employeeId) {
 //     return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API+'/'+companyId+'/'+process.env.VUE_APP_EMPLOYEES_API+'/'+employeeId).then(

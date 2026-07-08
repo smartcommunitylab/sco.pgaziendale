@@ -19,9 +19,20 @@
           rounded
           elevation="6"
           @click="openModal({ type: 'employeeImport', object: null })"
+          class="mr-4"
         >
           <v-icon left>mdi-file-import</v-icon>
           Aggiungi da file
+        </v-btn>
+        <v-btn
+          x-large
+          color="primary"
+          rounded
+          elevation="6"
+          @click="downloadEmployeesCsv"
+        >
+          <v-icon left>mdi-file-export</v-icon>
+          Esporta in CSV
         </v-btn>
       </v-col>
     </v-row>
@@ -49,7 +60,7 @@ import { mapState, mapActions } from "vuex";
 import ProfiloEmployee from "./Employee.vue";
 // import Modal from "@/components/modal/ModalStructure.vue";
 import GenericTable from "@/components/data-table/GenericTable.vue";
-
+import { employeeService } from "@/services/employee.services";
 export default {
   components: { ProfiloEmployee, GenericTable },
 
@@ -127,7 +138,26 @@ export default {
         employeeId: this.actualEmployee.item.id,
       });
     },
+    downloadEmployeesCsv() {
+      if (!this.actualCompany || !this.actualCompany.item) return;
 
+      const companyId = this.actualCompany.item.id;
+
+      employeeService.getEmployeesCsv(companyId)
+        .then((blob) => {
+          const url = window.URL.createObjectURL(new Blob([blob], { type: 'text/csv' }));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `dipendenti_${companyId}_${new Date().toISOString().slice(0, 10)}.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        })
+        .catch((error) => {
+          console.error("Errore durante il download del CSV Dipendenti:", error);
+        });
+    },
     showEmployeeInfo(employee) {
       if (this.currentEmployeeSelected == employee) {
         this.getEmployee(null);
