@@ -51,6 +51,7 @@ import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 
 import it.smartcommunitylab.pgazienda.domain.Company;
@@ -85,6 +86,7 @@ public class CompanyService {
 	private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
 	private static final Map<String, Integer> DW = new LinkedHashMap<>();
+	private static final Map<Integer, String> DWRevert = new LinkedHashMap<>();
 	static {
 		DW.put("lunedi", 1);
 		DW.put("lunedì", 1);
@@ -100,12 +102,20 @@ public class CompanyService {
 		DW.put("gio", 4);
 		DW.put("venerdi", 5);
 		DW.put("venerdì", 5);
-		DW.put("gven", 5);
+		DW.put("ven", 5);
 		DW.put("sabato", 6);
 		DW.put("sab", 6);
 		DW.put("domenica", 7);
 		DW.put("dom", 7);
+		DWRevert.put(1, "lun");
+		DWRevert.put(2, "mar");
+		DWRevert.put(3, "mer");
+		DWRevert.put(4, "gio");
+		DWRevert.put(5, "ven");
+		DWRevert.put(6, "sab");
+		DWRevert.put(7, "dom");
 	}
+
 	
 	@PostConstruct
 	public void init() {
@@ -486,6 +496,31 @@ public class CompanyService {
 		}
 	}
 
+	public void exportEmployeesCsv(String companyId, java.io.Writer writer) throws IOException, InconsistentDataException {
+		Company c = companyRepo.findById(companyId).orElse(null);
+		if (c == null) {
+			throw new InconsistentDataException("Company not found", "COMPANY_NOT_FOUND");
+		}
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		try {
+			String[] header = {"Nome", "Cognome", "CodiceDipendente", "CodiceSede"};
+			csvWriter.writeNext(header);
+			List<Employee> employees = employeeRepo.findByCompanyId(companyId);
+			for (Employee employee : employees) {
+				String[] row = {
+					employee.getName() != null ? employee.getName() : "",
+					employee.getSurname() != null ? employee.getSurname() : "",
+					employee.getCode() != null ? employee.getCode() : "",
+					employee.getLocation() != null ? employee.getLocation() : ""
+				};
+				csvWriter.writeNext(row);
+			}
+		} finally {
+			csvWriter.flush();
+			csvWriter.close();
+		}
+	}
+
 	private List<String[]> readCSV(InputStream is, char separator, int columns) throws Exception {
 		CSVParser parser = new CSVParserBuilder()
 			    .withSeparator(separator)
@@ -592,7 +627,62 @@ public class CompanyService {
 			companyRepo.save(c);
 		}			
 	}
-	
+
+	public void exportLocationsCsv(String companyId, java.io.Writer writer) throws IOException, InconsistentDataException {
+		Company c = companyRepo.findById(companyId).orElse(null);
+		if (c == null) {
+			throw new InconsistentDataException("Company not found", "COMPANY_NOT_FOUND");
+		}
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		try {
+			String[] header = {
+				"CodiceSede",
+				"Denominazione",
+				"Indirizzo",
+				"Numero",
+				"CAP",
+				"Citta",
+				"Provincia",
+				"Regione",
+				"Stato",
+				"Latitudine",
+				"Longitudine",
+				"GiorniNonLavorativi",
+				"GiorniDiChiusura"
+			};
+			csvWriter.writeNext(header);
+			if (c.getLocations() != null) {
+				for (CompanyLocation loc : c.getLocations()) {
+					String nonWorking = loc.getNonWorking() == null ? "" : loc.getNonWorking().stream()
+							.map(d -> DWRevert.get(d))
+							.collect(Collectors.joining(","));
+					String nonWorkingDays = loc.getNonWorkingDays() == null ? "" : loc.getNonWorkingDays().stream()
+							.sorted()
+							.collect(Collectors.joining(","));
+					String[] row = {
+						loc.getId() != null ? loc.getId() : "",
+						loc.getName() != null ? loc.getName() : "",
+						loc.getAddress() != null ? loc.getAddress() : "",
+						loc.getStreetNumber() != null ? loc.getStreetNumber() : "",
+						loc.getZip() != null ? loc.getZip() : "",
+						loc.getCity() != null ? loc.getCity() : "",
+						loc.getProvince() != null ? loc.getProvince() : "",
+						loc.getRegion() != null ? loc.getRegion() : "",
+						loc.getCountry() != null ? loc.getCountry() : "",
+						loc.getLatitude() != null ? loc.getLatitude().toString() : "",
+						loc.getLongitude() != null ? loc.getLongitude().toString() : "",
+						nonWorking,
+						nonWorkingDays
+					};
+					csvWriter.writeNext(row);
+				}
+			}
+		} finally {
+			csvWriter.flush();
+			csvWriter.close();
+		}
+	}
+
 	private CompanyLocation getCompanyLocation(Company c, String locationId) {
 		for(CompanyLocation l : c.getLocations()) {
 			if(l.getId().equalsIgnoreCase(locationId)) {

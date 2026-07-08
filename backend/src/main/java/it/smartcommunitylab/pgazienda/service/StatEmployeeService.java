@@ -52,6 +52,7 @@ import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.util.DateUtils;
+import it.smartcommunitylab.pgazienda.util.StatUtil;
 
 @Service
 public class StatEmployeeService {
@@ -96,7 +97,7 @@ public class StatEmployeeService {
 		
 		Map<String, StatEmployeeDTO> mapStats = new HashMap<>();
 		
-		List<String> timeGroupList = getTimeGroupList(from, to, timeGroupBy);
+		List<String> timeGroupList = StatUtil.getTimeGroupList(from, to, timeGroupBy);
 		List<String> dataGroupList = new ArrayList<>();
 		
 		// set activeUsers
@@ -114,7 +115,7 @@ public class StatEmployeeService {
 			if(emp != null) {
 				String dataGroup = getGroupByData(emp, dataGroupBy);
 				addDataGroup(dataGroupList, dataGroup); 
-				String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+				String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 				StatEmployeeDTO stats = mapStats.get(groupKey);
 				if(stats == null) {
 					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, company, employeeCountMap);
@@ -138,7 +139,7 @@ public class StatEmployeeService {
 			String timeGroup = getGroupByTime(timeGroupBy, registrationDate);
 			String dataGroup = getGroupByData(employee, dataGroupBy);
 			addDataGroup(dataGroupList, dataGroup);
-			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup); 
+			String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
 			StatEmployeeDTO stats = mapStats.get(groupKey);
 			if(stats == null) {
 				stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId(), employeeCountMap);
@@ -149,7 +150,7 @@ public class StatEmployeeService {
 			//set dropout
 			if(dropoutDate != null) {
 				timeGroup = getGroupByTime(timeGroupBy, dropoutDate);
-				groupKey = getGroupKey(campaignId, timeGroup, dataGroup); 
+				groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
 				stats = mapStats.get(groupKey);
 				if(stats == null) {
 					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId(), employeeCountMap);
@@ -262,7 +263,7 @@ public class StatEmployeeService {
 			List<String> timeGroupList, List<String> dataGroupList) {
 		if(dataGroupList.size() == 0) {
 			for(String timeGroup : timeGroupList) {
-				String groupKey = getGroupKey(campaignId, timeGroup, null);
+				String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, null);
 				if(!mapStats.containsKey(groupKey)) {
 					StatEmployeeDTO stats = createEmptyStatEmployeeDTO(campaignId, timeGroup, null);
 					mapStats.put(groupKey, stats);
@@ -271,7 +272,7 @@ public class StatEmployeeService {
 		} else {
 			for(String dataGroup : dataGroupList) {
 				for(String timeGroup : timeGroupList) {
-					String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+					String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 					if(!mapStats.containsKey(groupKey)) {
 						StatEmployeeDTO stats = createEmptyStatEmployeeDTO(campaignId, timeGroup, dataGroup);
 						mapStats.put(groupKey, stats);
@@ -309,12 +310,6 @@ public class StatEmployeeService {
 		return false;
 	}
 	
-	private String getGroupKey(String campaignId, String timeGroup, String dataGroup) {
-		String key = campaignId + "_" + timeGroup;
-		if(StringUtils.isNotBlank(dataGroup)) key += "_" + dataGroup;
-		return key;
-	}
-	
 	private LocalDate toLocalDate(Long timestamp) {
 		return Instant.ofEpochMilli(timestamp).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
 	}
@@ -331,15 +326,6 @@ public class StatEmployeeService {
 		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return localDate.format(DateUtils.YEAR_PATTERN);
 		if (GROUP_BY_TIME.total.equals(timeGroupBy)) return "total";
 		return null;
-	}
-	
-	private List<String> getTimeGroupList(LocalDate start, LocalDate end, GROUP_BY_TIME timeGroupBy) {
-		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return DateUtils.getDateRangeStrings(start, end);
-		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return DateUtils.getDateRangeByWeek(start, end);
-		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return DateUtils.getDateRangeByMonth(start, end);
-		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return DateUtils.getDateRangeByYear(start, end);
-		if (GROUP_BY_TIME.total.equals(timeGroupBy)) return DateUtils.getDateRangeByTotal(start, end);
-		return Collections.emptyList();		
 	}
 	
 	private String getGroupByData(Employee employee, GROUP_BY_DATA dataGroupBy) {
@@ -506,4 +492,51 @@ public class StatEmployeeService {
 		}	
 		return timeGroup;
 	}
+
+    public void getEmployeeStatsCsvFlat(
+			PrintWriter writer, 
+			String campaignId, 
+			String companyId, 
+			String location,
+        	GROUP_BY_TIME timeGroupBy, 
+			GROUP_BY_DATA dataGroupBy, 
+			LocalDate fromDate, 
+			LocalDate toDate) throws InconsistentDataException
+	{
+		List<Map<String, Object>> stats = getEmployeeStatsFlat(campaignId, companyId, location, timeGroupBy, dataGroupBy, fromDate, toDate);
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		if (fromDate == null) {
+			fromDate = campaign.getFrom();
+			toDate = campaign.getTo();
+		}
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		try {
+			List<String> timeHeaders = StatUtil.getTimeGroupList(fromDate, toDate, timeGroupBy);
+			//logger.info("timeHeaders: {}", timeHeaders);
+			List<String> metricHeaders = StatUtil.getHeadersFromStats(stats, timeGroupBy);
+			//logger.info("metricHeaders: {}", metricHeaders);
+			List<String> headers = StatUtil.buildPivotHeaders(metricHeaders, timeHeaders);
+			//logger.info("headers: {}", headers);
+			csvWriter.writeNext(headers.toArray(new String[0]));
+			List<String[]> table = StatUtil.buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
+			csvWriter.writeAll(table);
+		} finally {
+			if (csvWriter != null) {
+				try {
+					csvWriter.close();
+				} catch (Exception e) {
+					logger.error("Error closing csvWriter", e);
+				}
+			}
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (Exception e) {
+					logger.error("Error closing writer", e);
+				}
+			}
+		}				
+    }
+
 }

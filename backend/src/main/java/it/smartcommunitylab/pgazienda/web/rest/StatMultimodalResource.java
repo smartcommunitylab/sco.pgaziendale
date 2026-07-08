@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.smartcommunitylab.pgazienda.Constants;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
@@ -81,14 +83,14 @@ public class StatMultimodalResource {
 		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
 		@RequestParam(required=false) String from, 
 		@RequestParam(required=false) String to) throws IOException, InconsistentDataException	{
-    	/*if(!userService.isInCampaignRole(campaignId)) {
+    	if(!userService.isInCampaignRole(campaignId)) {
     		if(StringUtils.isNotBlank(companyId)) {
     	    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
     	    		throw new SecurityException("Insufficient rights");        		
         	} else {
         		throw new SecurityException("Insufficient rights");	
         	}
-    	}*/
+    	}
         log.debug("REST request to get statistics");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
@@ -120,14 +122,14 @@ public class StatMultimodalResource {
 		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
 		@RequestParam(required=false) String from, 
 		@RequestParam(required=false) String to) throws IOException, InconsistentDataException	{
-    	/*if(!userService.isInCampaignRole(campaignId)) {
+    	if(!userService.isInCampaignRole(campaignId)) {
     		if(StringUtils.isNotBlank(companyId)) {
     	    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
     	    		throw new SecurityException("Insufficient rights");        		
         	} else {
         		throw new SecurityException("Insufficient rights");	
         	}
-    	}*/
+    	}
         log.debug("REST request to get statistics flat");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
@@ -146,17 +148,41 @@ public class StatMultimodalResource {
     		@RequestParam(required=false) String from, 
     		@RequestParam(required=false) String to,
     		HttpServletResponse response) throws IOException, InconsistentDataException { 
-	    	/*if(!userService.isInCampaignRole(campaignId)) {
-			if(StringUtils.isNotBlank(companyId)) {
-		    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
-		    		throw new SecurityException("Insufficient rights");        		
-	    	} else {
-	    		throw new SecurityException("Insufficient rights");	
-	    	}
-		}*/
+	    	if(!userService.isInCampaignRole(campaignId)) {
+				if(StringUtils.isNotBlank(companyId)) {
+					if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
+						throw new SecurityException("Insufficient rights");        		
+				} else {
+					throw new SecurityException("Insufficient rights");	
+				}
+			}
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);    	
     	dataService.getMultimodalStatsCsv(response.getWriter(), campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, allDataGroupBy, fromDate, toDate);
     }
 
+    @GetMapping("/campaigns/{campaignId}/stats/multimodal/csv/flat")
+    public void statisticsCsvFlat(
+    		@PathVariable String campaignId, 
+    		@RequestParam(required=false) String companyId,
+    		@RequestParam(required=false) String location,
+    		@RequestParam(required=false, defaultValue = "month") GROUP_BY_TIME timeGroupBy, 
+    		@RequestParam(required=false) GROUP_BY_DATA dataGroupBy,
+    		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
+			@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
+    		@RequestParam(required=false) String from, 
+    		@RequestParam(required=false) String to,
+    		HttpServletResponse response) throws IOException, InconsistentDataException { 
+	    	if(!userService.isInCampaignRole(campaignId)) {
+				if(StringUtils.isNotBlank(companyId)) {
+					if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
+						throw new SecurityException("Insufficient rights");        		
+				} else {
+					throw new SecurityException("Insufficient rights");	
+				}
+			}
+    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);    	
+    	dataService.getMultimodalStatsCsvFLat(response.getWriter(), campaignId, companyId, location, timeGroupBy, dataGroupBy, fields, allDataGroupBy, fromDate, toDate);
+    }	
 }

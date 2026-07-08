@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +45,7 @@ import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
 import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
 import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
-import it.smartcommunitylab.pgazienda.util.DateUtils;
+import it.smartcommunitylab.pgazienda.util.StatUtil;
 
 @Service
 public class StatTrackService {
@@ -62,9 +61,9 @@ public class StatTrackService {
 	@Autowired
 	private CampaignRepository campaignRepo;
 
-	private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
-	private static final DateTimeFormatter YEAR_PATTERN = DateTimeFormatter.ofPattern("yyyy");
-	private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww");
+	// private static final DateTimeFormatter MONTH_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM");
+	// private static final DateTimeFormatter YEAR_PATTERN = DateTimeFormatter.ofPattern("yyyy");
+	// private static final DateTimeFormatter WEEK_PATTERN = DateTimeFormatter.ofPattern("yyyy-ww");
 	
 
 	public List<StatTrackDTO> getTrackStats(
@@ -168,7 +167,7 @@ public class StatTrackService {
 		}
 
 		Map<String, StatTrackDTO>mapStats = new HashMap<>();
-		List<String> timeGroupList = getTimeGroupList(from, to, timeGroupBy);
+		List<String> timeGroupList = StatUtil.getTimeGroupList(from, to, timeGroupBy);
 		List<String> dataGroupList = new ArrayList<>();
 
 		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
@@ -285,7 +284,7 @@ public class StatTrackService {
 			List<String> dataGroupList) {
 		if(dataGroupList.size() == 0) {
 			for(String timeGroup : timeGroupList) {
-				String groupKey = getGroupKey(campaignId, timeGroup, null);
+				String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, null);
 				if(!mapStats.containsKey(groupKey)) {
 					StatTrackDTO stats = new  StatTrackDTO();
 					stats.setCampaign(campaignId);
@@ -296,7 +295,7 @@ public class StatTrackService {
 		} else {
 			for(String dataGroup : dataGroupList) {
 				for(String timeGroup : timeGroupList) {
-					String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+					String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 					if(!mapStats.containsKey(groupKey)) {
 						StatTrackDTO stats = new  StatTrackDTO();
 						stats.setCampaign(campaignId);
@@ -333,12 +332,6 @@ public class StatTrackService {
 		return null;
 	}
 
-	private String getGroupKey(String campaignId, String timeGroup, String dataGroup) {
-		String key = campaignId + "_" + timeGroup;
-		if(StringUtils.isNotBlank(dataGroup)) key += "_" + dataGroup;
-		return key;
-	}
-
 	private void populateStatsByMean(List<Document> documents, List<String> group, Map<String, StatTrackDTO> mapStats, 
 			Map<String, Integer> mapTrips, Map<String, Integer> mapLimitedTrips, List<String> dataGroupList,
 			GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, List<STAT_TRACK_FIELD> fields, String campaignId) {
@@ -347,7 +340,7 @@ public class StatTrackService {
 			String timeGroup = getGroupByTime(doc, timeGroupBy);
 			String dataGroup = getGroupByData(doc, dataGroupBy);
 			addDataGroup(dataGroupList, dataGroup);
-			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+			String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 			if (!groupMap.containsKey(groupKey)) {
 				groupMap.put(groupKey, new StatTrackDTO.Builder().populateKeyFields(doc, group));
 			}
@@ -379,7 +372,7 @@ public class StatTrackService {
 			String timeGroup = getGroupByTime(doc, timeGroupBy);
 			String dataGroup = getGroupByData(doc, dataGroupBy);
 			addDataGroup(dataGroupList, dataGroup);
-			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+			String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 			if(fields.contains(STAT_TRACK_FIELD.tripCount)) {
 				Integer tripCount = mapTrips.get(groupKey);
 				if(tripCount != null) {
@@ -406,17 +399,6 @@ public class StatTrackService {
 		}
 	}
 
-	private List<String> getTimeGroupList(LocalDate start, LocalDate end, GROUP_BY_TIME timeGroupBy) {
-		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return DateUtils.getDateRangeStrings(start, end);
-		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return DateUtils.getDateRangeByWeek(start, end);
-		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return DateUtils.getDateRangeByMonth(start, end);
-		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return DateUtils.getDateRangeByYear(start, end);
-		if (GROUP_BY_TIME.hour.equals(timeGroupBy)) return DateUtils.getDateRangeByHour(start, end);
-		if (GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) return DateUtils.getDateRangeByDayOfWeek(start, end); 
-		if (GROUP_BY_TIME.total.equals(timeGroupBy)) return DateUtils.getDateRangeByTotal(start, end);
-		return Collections.emptyList();		
-	}
-
 	private void getLimitedTripCount(Criteria criteria, List<String> group, GROUP_BY_DATA dataGroupBy, GROUP_BY_TIME timeGroupBy, 
 			String campaignId, Map<String, Integer> mapLimitedTrips) {
 		criteria = criteria.and("limitedScore").gt(Double.valueOf(0));
@@ -430,7 +412,7 @@ public class StatTrackService {
 		for(Document doc : aggregationResults.getMappedResults()) {
 			String timeGroup = getGroupByTime(doc, timeGroupBy);
 			String dataGroup = getGroupByData(doc, dataGroupBy);
-			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+			String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 			Integer count = mapLimitedTrips.get(groupKey);
 			if(count == null) count = 0;
 			mapLimitedTrips.put(groupKey, count + 1);
@@ -449,9 +431,11 @@ public class StatTrackService {
 		for(Document doc : aggregationResults.getMappedResults()) {
 			String timeGroup = getGroupByTime(doc, timeGroupBy);
 			String dataGroup = getGroupByData(doc, dataGroupBy);
-			String groupKey = getGroupKey(campaignId, timeGroup, dataGroup);
+			String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 			mapTrips.put(groupKey, mapTrips.getOrDefault(groupKey, 0) + 1);
-			mapTrips.put(groupKey + "_multi", mapTrips.getOrDefault(groupKey + "_multi", 0)+1);
+			if(doc.getInteger("trackCount") > 1) {
+				mapTrips.put(groupKey + "_multi", mapTrips.getOrDefault(groupKey + "_multi", 0)+1);
+			}
 		}
 	}
 
@@ -785,7 +769,7 @@ public class StatTrackService {
 		return timeGroup;
 	}
 
-	public void csvStatistics(
+/* 	public void csvStatistics(
 		PrintWriter writer, 
 		String campaignId,
 		String companyId,
@@ -809,11 +793,10 @@ public class StatTrackService {
 			to = campaign.getTo();
 		}
 		try{
-			// headers
+			// existing behavior unchanged
 			List<String> headers = createHeadersFlat(timeGroupBy, from, to);
 			List<String> fieldHeaders = createSubheaders(headers, fields, means);
 			String nameHeader = "name";
-			// write headers
 			if (!headers.isEmpty()) {
 				String s = ";";
 				for (String h: headers) {
@@ -865,13 +848,13 @@ public class StatTrackService {
 			}
 		}
 
-	}
+	} */
 
-	private String translateSubHeader(String h) {
+/* 	private String translateSubHeader(String h) {
 		return h;
-	}
+	} */
 
-	private List<String> createHeadersFlat(GROUP_BY_TIME timeGroupBy, LocalDate from, LocalDate to) {
+/* 	private List<String> createHeadersFlat(GROUP_BY_TIME timeGroupBy, LocalDate from, LocalDate to) {
 		List<String> list = new LinkedList<>();
 		switch (timeGroupBy) {
 			case day: {
@@ -921,9 +904,9 @@ public class StatTrackService {
 			default:
 		}
 		return list;
-	}
+	} */
 
-	private List<String> createSubheaders(List<String> headers, List<STAT_TRACK_FIELD> fields, Set<String> means) {
+/* 	private List<String> createSubheaders(List<String> headers, List<STAT_TRACK_FIELD> fields, Set<String> means) {
 		List<String> fList = new LinkedList<>();
 		for (STAT_TRACK_FIELD f : fields) {
 			switch (f) {
@@ -952,5 +935,57 @@ public class StatTrackService {
 			}
 		}
 		return fList;
+	} */
+
+	public void csvStatisticsNew(
+		PrintWriter writer, 
+		String campaignId,
+		String companyId,
+		String locationId,
+		Set<String> means,
+		String way,
+		GROUP_BY_TIME timeGroupBy,
+		GROUP_BY_DATA dataGroupBy,
+		List<STAT_TRACK_FIELD> fields,
+		boolean groupByMean,
+		boolean allDataGroupBy,
+		LocalDate from, 
+		LocalDate to) throws InconsistentDataException
+	{
+		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, locationId, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		if (from == null) {
+			from = campaign.getFrom();
+			to = campaign.getTo();
+		}
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		try {
+			List<String> timeHeaders = StatUtil.getTimeGroupList(from, to, timeGroupBy);
+			//logger.info("timeHeaders: {}", timeHeaders);
+			List<String> metricHeaders = StatUtil.getHeadersFromStats(stats, timeGroupBy);
+			//logger.info("metricHeaders: {}", metricHeaders);
+			List<String> headers = StatUtil.buildPivotHeaders(metricHeaders, timeHeaders);
+			//logger.info("headers: {}", headers);
+			csvWriter.writeNext(headers.toArray(new String[0]));
+			List<String[]> table = StatUtil.buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
+			csvWriter.writeAll(table);
+		} finally {
+			if (csvWriter != null) {
+				try {
+					csvWriter.close();
+				} catch (Exception e) {
+					logger.error("Error closing csvWriter", e);
+				}
+			}
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (Exception e) {
+					logger.error("Error closing writer", e);
+				}
+			}
+		}
 	}
+
 }

@@ -24,9 +24,21 @@
           rounded
           elevation="6"
           @click="openModal({ type: 'locationImport', object: null })"
+          class="mr-4"
         >
           <v-icon left>mdi-file-import</v-icon>
           Aggiungi da file
+        </v-btn>
+        <v-btn
+          x-large
+          color="primary"
+          rounded
+          elevation="6"
+          @click="downloadLocationsCsv"
+          class="mr-4"
+        >
+          <v-icon left>mdi-file-export</v-icon>
+          Esporta in CSV
         </v-btn>
       </v-col>
     </v-row>
@@ -54,6 +66,7 @@ import ProfiloLocation from "./Location.vue";
 import { mapState, mapActions } from "vuex";
 import GenericTable from "@/components/data-table/GenericTable.vue";
 // import Modal from "@/components/modal/ModalStructure.vue";
+import { locationService } from "@/services/location.services"; 
 
 export default {
   name: "Locations",
@@ -144,6 +157,30 @@ export default {
         companyId: this.actualCompany.item.id,
         locationId: this.actualLocation.item.id,
       });
+    },
+    downloadLocationsCsv() {
+      if (!this.actualCompany || !this.actualCompany.item) return;
+      
+      const companyId = this.actualCompany.item.id;
+      
+      locationService.getLocationsCsv(companyId)
+        .then((blob) => {
+          // Crea il link per forzare il download del Blob in formato file
+          const url = window.URL.createObjectURL(new Blob([blob], { type: 'text/csv' }));
+          const link = document.createElement('a');
+          link.href = url;
+          // Imposta il nome file con data e ora
+          link.setAttribute('download', `sedi_${companyId}_${new Date().toISOString().slice(0, 10)}.csv`);
+          document.body.appendChild(link);
+          link.click();
+          // Pulizia
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        })
+        .catch((error) => {
+          console.error("Errore durante il download del CSV Sedi:", error);
+          // Opzionale: mostrare un alert/snackbar di errore qui
+        });
     },
     // importLocations: function () {
     //   console.log(this.fileUploaded);
