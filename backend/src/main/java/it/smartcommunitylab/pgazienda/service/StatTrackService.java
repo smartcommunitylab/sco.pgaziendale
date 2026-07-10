@@ -652,7 +652,7 @@ public class StatTrackService {
 		LocalDate from, 
 		LocalDate to) throws InconsistentDataException 
 	{
-		List<StatTrackDTO> stats = getTrackStats(campaignId, companyId, means, locations, employeeCodes, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
+		List<StatTrackDTO> stats = getTrackStats(campaignId, companyId, locations, employeeCodes, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
 		return flattenTrackStats(stats, timeGroupBy, fields);
 	}
 
@@ -959,7 +959,7 @@ public class StatTrackService {
 		LocalDate from, 
 		LocalDate to) throws InconsistentDataException
 	{
-		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, means, locations, employeeCodes, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
+		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, locations, employeeCodes, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		if (from == null) {
