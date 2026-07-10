@@ -2,6 +2,7 @@ import axios from "axios";
 
 export const locationService = {
     getAllLocations,
+    getLocationsCsv,
     addLocation,
     updateLocation,
     deleteLocation,
@@ -63,7 +64,21 @@ function getAllLocations(companyId) {
 
     )
 }
-//create a new location
+// Scarica le sedi in formato CSV
+function getLocationsCsv(companyId) {
+    return axios.get(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_LOCATIONS_API + '/csv', {
+        responseType: 'blob' 
+    }).then(
+        res => {
+            if (res && res.data) {
+                return Promise.resolve(res.data);
+            }
+            else return Promise.reject(null);
+        }, err => {
+            return Promise.reject(err);
+        }
+    )
+}//create a new location
 function addLocation(companyId, location) {
     return axios.post(process.env.VUE_APP_BASE_URL + process.env.VUE_APP_COMPANIES_API + '/' + companyId + '/' + process.env.VUE_APP_LOCATIONS_API, location).then(
         res => {

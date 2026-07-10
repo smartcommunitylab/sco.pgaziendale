@@ -134,7 +134,7 @@ function callTrackStatsAPI(
       process.env.VUE_APP_CAMPAIGNS_API +
       "/" +
       campaignId +
-      "/stats/track/csv",
+      "/stats/track/csv/flat",
       { params }
     )
     .then(res => {
@@ -223,7 +223,7 @@ function callTrackStatsMultiAPI(
       process.env.VUE_APP_CAMPAIGNS_API +
       "/" +
       campaignId +
-      "/stats/multimodal/csv",
+      "/stats/multimodal/csv/flat",
       { params }
     )
     .then(res => {
@@ -308,7 +308,7 @@ function callEmployeeStatsAPI(
       process.env.VUE_APP_CAMPAIGNS_API +
       "/" +
       campaignId +
-      "/stats/employee/csv",
+      "/stats/employee/csv/flat",
       { params }
     )
     .then(res => {

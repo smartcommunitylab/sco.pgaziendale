@@ -72,7 +72,8 @@ public class StatEmployeeService {
 	public List<StatEmployeeDTO> getEmployeeStats(
 			String campaignId,
 			String companyId,
-			String locationId,
+			Set<String> locations,
+			Set<String> employeeCodes,
 			GROUP_BY_TIME timeGroupBy,
 			GROUP_BY_DATA dataGroupBy,
 			LocalDate from, 
@@ -90,8 +91,11 @@ public class StatEmployeeService {
 		Criteria criteria = new Criteria("trackingRecord." + campaignId).exists(true);
 		if(StringUtils.isNotBlank(companyId)) {
 			criteria = criteria.and("companyId").is(companyId);
-			if(StringUtils.isNotBlank(locationId)) {
-				criteria = criteria.and("location").is(locationId);
+			if ((locations != null) && !locations.isEmpty()) {
+				criteria = criteria.and("location").in(locations);
+			}
+			if ((employeeCodes != null) && !employeeCodes.isEmpty()) {
+				criteria = criteria.and("code").in(employeeCodes);
 			}
 		}
 		
@@ -101,7 +105,7 @@ public class StatEmployeeService {
 		List<String> dataGroupList = new ArrayList<>();
 		
 		// set activeUsers
-		List<StatTrackDTO> trackStats = statTrackService.getTrackStats(campaignId, companyId, locationId, null, "all", 
+		List<StatTrackDTO> trackStats = statTrackService.getTrackStats(campaignId, companyId, locations, employeeCodes, null, "all", 
 				timeGroupBy, GROUP_BY_DATA.employee, Collections.singletonList(STAT_TRACK_FIELD.track), false, false, from, to);
 		for(StatTrackDTO dto : trackStats) {
 			if(dto.getStats() == null) continue;
@@ -349,9 +353,16 @@ public class StatEmployeeService {
 		return Collections.emptyList();
 	}
 
-	public void getEmployeeStatsCsv(PrintWriter writer, String campaignId, String companyId, String location,
-			GROUP_BY_TIME timeGroupBy, GROUP_BY_DATA dataGroupBy, LocalDate fromDate, LocalDate toDate) throws InconsistentDataException, IOException {
-		List<StatEmployeeDTO> employeeStats = getEmployeeStats(campaignId, companyId, location, timeGroupBy, dataGroupBy, fromDate, toDate);
+	public void getEmployeeStatsCsv(PrintWriter writer, 
+			String campaignId, 
+			String companyId, 
+			Set<String> locations,
+			Set<String> employeeCodes,
+			GROUP_BY_TIME timeGroupBy, 
+			GROUP_BY_DATA dataGroupBy, 
+			LocalDate fromDate, 
+			LocalDate toDate) throws InconsistentDataException, IOException {
+		List<StatEmployeeDTO> employeeStats = getEmployeeStats(campaignId, companyId, locations, employeeCodes, timeGroupBy, dataGroupBy, fromDate, toDate);
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		String[] headers = getHeaders(timeGroupBy, dataGroupBy);
 		csvWriter.writeNext(headers);
@@ -430,13 +441,14 @@ public class StatEmployeeService {
 	public List<Map<String, Object>> getEmployeeStatsFlat(
 			String campaignId,
 			String companyId,
-			String locationId,
+			Set<String> locations,
+			Set<String> employeeCodes,
 			GROUP_BY_TIME timeGroupBy,
 			GROUP_BY_DATA dataGroupBy,
 			LocalDate from, 
 			LocalDate to) throws InconsistentDataException 
 	{
-		List<StatEmployeeDTO> stats = getEmployeeStats(campaignId, companyId, locationId, timeGroupBy, dataGroupBy, from, to);
+		List<StatEmployeeDTO> stats = getEmployeeStats(campaignId, companyId, locations, employeeCodes, timeGroupBy, dataGroupBy, from, to);
 		return flattenEmployeeStats(stats, timeGroupBy);
 	}
 
@@ -484,8 +496,6 @@ public class StatEmployeeService {
 		return res;
 	}
 
-	
-
 	private String mapTimeLabel(GROUP_BY_TIME timeGroupBy, String timeGroup) {
 		if (timeGroupBy == GROUP_BY_TIME.dayOfWeek) {
 			return DayOfWeek.valueOf(timeGroup).getDisplayName(TextStyle.FULL, Locale.ITALIAN);
@@ -497,13 +507,14 @@ public class StatEmployeeService {
 			PrintWriter writer, 
 			String campaignId, 
 			String companyId, 
-			String location,
+			Set<String> locations,
+			Set<String> employeeCodes,
         	GROUP_BY_TIME timeGroupBy, 
 			GROUP_BY_DATA dataGroupBy, 
 			LocalDate fromDate, 
 			LocalDate toDate) throws InconsistentDataException
 	{
-		List<Map<String, Object>> stats = getEmployeeStatsFlat(campaignId, companyId, location, timeGroupBy, dataGroupBy, fromDate, toDate);
+		List<Map<String, Object>> stats = getEmployeeStatsFlat(campaignId, companyId, locations, employeeCodes, timeGroupBy, dataGroupBy, fromDate, toDate);
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		if (fromDate == null) {
