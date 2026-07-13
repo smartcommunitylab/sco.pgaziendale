@@ -31,7 +31,7 @@ export default {
   position: -webkit-sticky; 
   position: sticky;
   top: 64px; 
-  z-index: 4; 
+  z-index: 3; 
   background-color: #FFFFFF; 
   border-bottom: 2px solid #E0E0E0; 
 }
