@@ -86,7 +86,7 @@ public class StatTrackService {
 			from = campaign.getFrom();
 			to = campaign.getTo();
 		}
-		logger.info("Get track stats for campaign: {}, company: {}, means: {}, locations: {}, employees: {}, way: {}, timeGroupBy: {}, dataGroupBy: {}, fields: {}, groupByMean: {}, allDataGroupBy: {}, from: {}, to: {}",
+		logger.info("Get track stats for campaign: {}, company: {}, means: {}, locations: {}, employeeCodes: {}, way: {}, timeGroupBy: {}, dataGroupBy: {}, fields: {}, groupByMean: {}, allDataGroupBy: {}, from: {}, to: {}",
 			campaignId, companyId, means, locations, employeeCodes, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
 		
 		Criteria criteria = Criteria
