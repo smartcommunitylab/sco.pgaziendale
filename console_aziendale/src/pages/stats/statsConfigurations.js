@@ -18,7 +18,7 @@ export const statsConfigurations = [
           { label: VC.DATALEVEL.CAMPAIGN,value: "campaign", puntualAggregation: [{  label:  PA.NONE,  value:  'NONE'}] },
           { label: VC.DATALEVEL.COMPANIES,value: "company", puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'}, { label:  PA.COMPANIES,  value: 'COMPANIES' }]},
         ],
-        dataColumns: [  DC.POINTS, DC.COUNTING_POINTS ],
+        dataColumns: [   DC.COUNTING_POINTS ],
         timeUnit: [
           {label: VC.TIMEUNIT.DAY,value: "day",apiField: "day" },
           {label: VC.TIMEUNIT.WEEK,value: "week",apiField: "week" },
@@ -34,7 +34,7 @@ export const statsConfigurations = [
         noGroupByMean: true,
         default: {
           source: "tracks",
-          dataColumns: [DC.POINTS,DC.COUNTING_POINTS],
+          dataColumns: [DC.COUNTING_POINTS],
           puntualAggregationSelected:{label:  PA.NONE,value: 'NONE'},
           dataLevel: {label: VC.DATALEVEL.COMPANIES,value: "company", puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'},{  label:  PA.COMPANIES,  value: 'COMPANIES' }]
           },
@@ -60,7 +60,7 @@ export const statsConfigurations = [
           { label: VC.DATALEVEL.LOCATIONS,value: "location", puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'}, { label:  PA.LOCATIONS,  value: 'LOCATIONS' }] },
           { label: VC.DATALEVEL.EMPLOYEES,value: "employee", puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'}, { label:  PA.EMPLOYEES,  value: 'EMPLOYEES'}] }
         ],
-        dataColumns: [ DC.POINTS, DC.COUNTING_POINTS ],
+        dataColumns: [  DC.COUNTING_POINTS ],
         timeUnit: [
           {label:VC.TIMEUNIT.DAY,value: "day", apiField: "day" },
           {label: VC.TIMEUNIT.WEEK,value: "week",apiField: "week" },
@@ -72,7 +72,7 @@ export const statsConfigurations = [
         noGroupByMean: true,
         default: {
           source: "tracks",
-          dataColumns: [DC.POINTS, DC.COUNTING_POINTS],
+          dataColumns: [ DC.COUNTING_POINTS],
           puntualAggregationSelected:{label:  PA.NONE,value: 'NONE', },
           dataLevel: {label: VC.DATALEVEL.EMPLOYEES,value: "employee", puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'}, {  label:  PA.EMPLOYEES,  value: 'EMPLOYEES' }] },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
@@ -93,9 +93,8 @@ export const statsConfigurations = [
       {
         source: "employee",
         dataLevel: [
-          {label: VC.DATALEVEL.COMPANY,value: "company", puntualAggregation: [{  label:  PA.NONE,  value:  'NONE'}] },
-          {label: VC.DATALEVEL.LOCATIONS,value: "location", puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'}, { label:  PA.LOCATIONS,  value: 'LOCATIONS' }] },
-        ],
+          { label: VC.DATALEVEL.CAMPAIGN,value: "campaign", puntualAggregation: [{  label:  PA.NONE,  value:  'NONE'}] },
+          {label: VC.DATALEVEL.COMPANY,value: "company", puntualAggregation: [{  label:  PA.NONE,  value:  'NONE'}] }        ],
         dataColumns: [ DC.REGISTERED_EMPLOYEES, DC.ACTIVE_EMPLOYEES, DC.UNSUBSCRIBED_EMPLOYEES, DC.REGISTERED_EMPLOYEES_PERCENTAGE, DC.ACTIVE_EMPLOYEES_PERCENTAGE, DC.UNSUBSCRIBED_EMPLOYEES_PERCENTAGE, DC.ACTIVE_EMPLOYEES_PERCENTAGE_REGISTRATION, DC.UNSUBSCRIBED_EMPLOYEES_PERCENTAGE_REGISTRATION ],
         timeUnit: [
           {label: VC.TIMEUNIT.DAY,value: "day",apiField: "day" },
@@ -380,6 +379,8 @@ export const statsConfigurations = [
         dataLevel: [
           { label: VC.DATALEVEL.COMPANIES, value: "company",  puntualAggregation: [{ label:  PA.NONE, value: 'NONE' },  { label:  PA.COMPANIES, value: 'COMPANIES' } ]},
           { label: VC.DATALEVEL.LOCATIONS,value: "location", puntualAggregation: [{ label:  PA.NONE,  value: 'NONE' }, { label:  PA.LOCATIONS,  value: 'LOCATIONS' } ]},            
+          { label: VC.DATALEVEL.EMPLOYEES,value: "employee", puntualAggregation: [{ label:  PA.NONE,  value: 'NONE' }, { label:  PA.EMPLOYEES,  value: 'EMPLOYEES',  } ]},
+
         ],
         dataColumns: [  DC.CO2_SAVED, DC.CO2_SAVED_AVG_TRIP, DC.CO2_SAVED_AVG_LEG, DC.CO2_SAVED_PERCENTAGE,/* DC.CO2_SAVED_PERCENTAGE_AVG_TRIP, DC.CO2_SAVED_PERCENTAGE_AVG_LEG,*/],
         timeUnit: [

@@ -71,8 +71,8 @@ export const VARIABLES = {
           source: "tracks"
         },
         COUNTING_POINTS: {
-          label:  "Punti utili", 
-          meanLabel: "Utili per mezzo (_mezzo_)",
+          label:  "Punti", 
+          meanLabel: "Punti per mezzo (_mezzo_)",
           value:  "limitedScore",
           source: "tracks"
         },

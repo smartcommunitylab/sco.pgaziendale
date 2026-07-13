@@ -1,7 +1,8 @@
 <template>
   <div>
-    <stats-selection></stats-selection>
-    <stats-menagement></stats-menagement>
+    <div class="sticky-header pa-2">
+      <stats-selection></stats-selection>
+    </div>    <stats-menagement></stats-menagement>
   </div>
 </template>
 
@@ -25,5 +26,13 @@ export default {
 <style>
 .customButton {
   top: 30px;
+}
+.sticky-header {
+  position: -webkit-sticky; 
+  position: sticky;
+  top: 64px; 
+  z-index: 4; 
+  background-color: #FFFFFF; 
+  border-bottom: 2px solid #E0E0E0; 
 }
 </style>
