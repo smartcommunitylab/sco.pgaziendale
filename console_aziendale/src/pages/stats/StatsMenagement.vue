@@ -978,4 +978,14 @@ export default {
   text-align: right !important;
 }
 
+::v-deep .v-data-table th {
+  padding-right: 16px !important;
+}
+
+/* Aggiungiamo ~18px extra al padding della cella vuota per "simulare" l'ingombro della freccia in alto.
+   16px (padding base) + 18px (freccia) = 34px */
+::v-deep .v-data-table td {
+  padding-right: 34px !important;
+}
+
 </style>
