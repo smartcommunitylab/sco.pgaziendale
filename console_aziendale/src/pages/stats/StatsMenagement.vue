@@ -456,7 +456,7 @@ export default {
         puntualAggregation: [],
         puntualAggregationSelected: null,
         puntualAggregationItems: [],
-        itemsAggreation: [],
+        itemsAggreation: null,
         direction: "all",
         groupByMean: false,
       },
@@ -584,11 +584,25 @@ export default {
     },
     isModified() {
       if (!this.localSelection || !this.activeSelection) return false;
-      return JSON.stringify(this.localSelection) !== JSON.stringify(this.activeSelection);
+      
+      const localStr = JSON.stringify(this.localSelection);
+      const activeStr = JSON.stringify(this.activeSelection);
+
+      // DEBUG: Se sono diversi, stampiamo in console i due oggetti
+      if (localStr !== activeStr) {
+        console.warn("⚠️ IS MODIFIED È SCATTATO! Ecco la differenza:");
+        console.log("LOCAL SELECTION (Menu a tendina UI):", JSON.parse(localStr));
+        console.log("ACTIVE SELECTION (Ultimo stato salvato):", JSON.parse(activeStr));
+      }
+      else {
+        console.log("✅ IS MODIFIED: Nessuna differenza tra localSelection e activeSelection.");
+      }
+      return localStr !== activeStr;
     },
 
     // Ritorna TRUE se le impostazioni UI attuali sono DIVERSE dal Default del Profilo (Attiva REIMPOSTA)
     isNotDefault() {
+      console.log("isNotDefault");
       if (!this.localSelection || !this.view || !this.view.default) return false;
       
       const def = this.view.default;
@@ -690,7 +704,7 @@ export default {
       this.initiSelection();
       this.setActiveSelection({ selection: this.copy(this.localSelection) });
       this.getLocalStat(this.localSelection);
-      this.mini = true;
+      // this.mini = true;
     },
 
     resetPunctualAggregation() {
@@ -854,6 +868,8 @@ export default {
           this.localSelection.campaign.means.includes(m.value)
         );
         this.localSelection.means = this.localSelection.campaign.means.slice();
+        this.setActiveSelection({ selection: this.copy(this.localSelection) });
+
       }
     },
 
@@ -960,6 +976,16 @@ export default {
 ::v-deep .v-data-table th,
 ::v-deep .v-data-table td {
   text-align: right !important;
+}
+
+::v-deep .v-data-table th {
+  padding-right: 16px !important;
+}
+
+/* Aggiungiamo ~18px extra al padding della cella vuota per "simulare" l'ingombro della freccia in alto.
+   16px (padding base) + 18px (freccia) = 34px */
+::v-deep .v-data-table td {
+  padding-right: 34px !important;
 }
 
 </style>
