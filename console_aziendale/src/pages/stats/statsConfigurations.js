@@ -39,7 +39,8 @@ export const statsConfigurations = [
           dataLevel: {label: VC.DATALEVEL.COMPANIES,value: "company", puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'},{  label:  PA.COMPANIES,  value: 'COMPANIES' }]
           },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
-          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        
+          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },   
+          direction: "all"     
       }
     }
     ],
@@ -77,6 +78,7 @@ export const statsConfigurations = [
           dataLevel: {label: VC.DATALEVEL.EMPLOYEES,value: "employee", puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'}, {  label:  PA.EMPLOYEES,  value: 'EMPLOYEES' }] },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
           timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },
+           direction: "all"
       }
     },
     ],
@@ -203,7 +205,8 @@ export const statsConfigurations = [
             puntualAggregation: [{  label:  PA.NONE,  value: 'NONE' }, {  label:  PA.COMPANIES,  value: 'COMPANIES'}]
           },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
-          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        
+          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },   
+          direction: "all"     
       }
     }
     ],
@@ -244,7 +247,8 @@ export const statsConfigurations = [
             puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'},{  label:  PA.EMPLOYEES,  value: 'EMPLOYEES'}]  
           },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
-          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        
+          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },   
+          direction: "all"     
       }
     }
     ],
@@ -285,7 +289,8 @@ export const statsConfigurations = [
             puntualAggregation: [{  label:  PA.NONE,  value: 'NONE' }, {  label:  PA.COMPANIES,  value: 'COMPANIES'}]
           },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
-          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        
+          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },   
+          direction: "all"     
       }
     }
     ],
@@ -326,7 +331,8 @@ export const statsConfigurations = [
             puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'},{  label:  PA.EMPLOYEES,  value: 'EMPLOYEES'}]  
           },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
-          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        
+          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" }, 
+          direction: "all"      
       }
     }
     ],
@@ -365,7 +371,8 @@ export const statsConfigurations = [
             puntualAggregation: [{  label:  PA.NONE,  value: 'NONE' }, {  label:  PA.COMPANIES,  value: 'COMPANIES'}]
           },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
-          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        
+          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },       
+          direction: "all" 
       }
     }
     ],
@@ -384,6 +391,8 @@ export const statsConfigurations = [
         ],
         dataColumns: [  DC.CO2_SAVED, DC.CO2_SAVED_AVG_TRIP, DC.CO2_SAVED_AVG_LEG, DC.CO2_SAVED_PERCENTAGE,/* DC.CO2_SAVED_PERCENTAGE_AVG_TRIP, DC.CO2_SAVED_PERCENTAGE_AVG_LEG,*/],
         timeUnit: [
+          { label: VC.TIMEUNIT.HOUR, value: "hour", apiField: "hour" },
+          { label: VC.TIMEUNIT.DOW, value: "dayOfWeek", apiField: "dayOfWeek" },
           { label: VC.TIMEUNIT.WEEK,value: "week",apiField: "week" },
           { label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
           { label: VC.TIMEUNIT.YEAR,value: "year",apiField: "year" },
@@ -405,7 +414,8 @@ export const statsConfigurations = [
             puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'},{  label:  PA.LOCATIONS,  value: 'LOCATIONS'}]  
           },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
-          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        
+          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },    
+          direction: "all"    
       }
     }
     ],
@@ -446,6 +456,7 @@ export const statsConfigurations = [
           },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
           timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        
+           direction: "all"
       }
     }
     ],
@@ -485,7 +496,8 @@ export const statsConfigurations = [
             puntualAggregation: [{ label:  PA.NONE,  value: 'NONE' }, { label:  PA.EMPLOYEES,  value: 'EMPLOYEES'}]
           },
           timeUnit:  {label: VC.TIMEUNIT.MONTH,value: "month",apiField: "month" },
-          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },        
+          timePeriod: {label:VC.TIMEPERIOD.ALL,value: "ALL",apiField: "" },   
+          direction: "all"     
       }
     }
     ],

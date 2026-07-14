@@ -2,7 +2,8 @@
   <div>
     <div class="sticky-header pa-2">
       <stats-selection></stats-selection>
-    </div>    <stats-menagement></stats-menagement>
+    </div>
+    <stats-menagement></stats-menagement>
   </div>
 </template>
 
@@ -13,13 +14,12 @@ import StatsSelection from "@/pages/stats/StatsSelection.vue";
 export default {
   components: {
     "stats-menagement": StatsMenagement,
-    "stats-selection":StatsSelection
+    "stats-selection": StatsSelection,
   },
   data: function () {
-    return {
-    }
+    return {};
   },
-  methods: {},  
+  methods: {},
 };
 </script>
 
@@ -28,11 +28,11 @@ export default {
   top: 30px;
 }
 .sticky-header {
-  position: -webkit-sticky; 
+  position: -webkit-sticky;
   position: sticky;
-  top: 64px; 
-  z-index: 3; 
-  background-color: #FFFFFF; 
-  border-bottom: 2px solid #E0E0E0; 
+  top: 64px;
+  z-index: 3;
+  background-color: #ffffff;
+  border-bottom: 2px solid #e0e0e0;
 }
 </style>
