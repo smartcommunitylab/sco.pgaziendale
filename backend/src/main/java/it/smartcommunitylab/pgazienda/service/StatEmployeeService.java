@@ -136,33 +136,36 @@ public class StatEmployeeService {
 			if(employee.getTrackingRecord().get(campaignId).getLeave() != null) {
 				dropoutDate = toLocalDate(employee.getTrackingRecord().get(campaignId).getLeave());
 			}
-			if(registrationDate.isAfter(to)) continue;
-			if((dropoutDate != null) && (dropoutDate.isBefore(from))) continue;
-			
-			//set registration
-			String timeGroup = getGroupByTime(timeGroupBy, registrationDate);
 			String dataGroup = getGroupByData(employee, dataGroupBy);
 			addDataGroup(dataGroupList, dataGroup);
-			String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
-			StatEmployeeDTO stats = mapStats.get(groupKey);
-			if(stats == null) {
-				stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId(), employeeCountMap);
-				mapStats.put(groupKey, stats);
-			}
-			if(isRegistered(registrationDate, from, to)) stats.getRegistration().addValue();
 			
-			//set dropout
-			if(dropoutDate != null) {
-				timeGroup = getGroupByTime(timeGroupBy, dropoutDate);
-				groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
-				stats = mapStats.get(groupKey);
+			//set registration
+			if(isRegistered(registrationDate, from, to)) {
+				String timeGroup = getGroupByTime(timeGroupBy, registrationDate);
+				String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
+				StatEmployeeDTO stats = mapStats.get(groupKey);
 				if(stats == null) {
 					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId(), employeeCountMap);
 					mapStats.put(groupKey, stats);
 				}
-				if(isDropout(dropoutDate, from, to)) stats.getDropout().addValue();
+				stats.getRegistration().addValue();
+			}
+			
+			//set dropout
+			if(dropoutDate != null) {
+				if(isDropout(dropoutDate, from, to)) {
+					String timeGroup = getGroupByTime(timeGroupBy, dropoutDate);
+					String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
+					StatEmployeeDTO stats = mapStats.get(groupKey);
+					if(stats == null) {
+						stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId(), employeeCountMap);
+						mapStats.put(groupKey, stats);
+					}
+					stats.getDropout().addValue();
+				}
 			}
 		}
+
 		// set percentages
 		for(StatEmployeeDTO stats : mapStats.values()) {
 			stats.getRegistration().setPrcTot((stats.getRegistration().getValue() / (double) stats.getEmployee()) * 100.0);
@@ -175,7 +178,35 @@ public class StatEmployeeService {
 				stats.getActiveUsers().setPrcRegistered(((double) stats.getActiveUsers().getValue() / (double) stats.getRegistration().getValue()) * 100.0);
 			}
 		}
-		fillEmptyDate(campaignId, mapStats, timeGroupList, dataGroupList);
+
+		fillEmptyDate(campaignId, companyId, mapStats, timeGroupList, dataGroupList, employeeCountMap);
+
+		// set progressive values
+		if (((dataGroupBy == null) || !GROUP_BY_DATA.employee.equals(dataGroupBy)) && 
+				(GROUP_BY_TIME.day.equals(timeGroupBy) || GROUP_BY_TIME.week.equals(timeGroupBy) || 
+				GROUP_BY_TIME.month.equals(timeGroupBy) || GROUP_BY_TIME.year.equals(timeGroupBy))) {
+			if(dataGroupList.size() == 0) {
+				String dataGroup = null;
+				for (String timeGroup : timeGroupList) {
+					String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
+					StatEmployeeDTO stats = mapStats.get(groupKey);
+					if (stats != null) {
+						getProgressiveCount(campaignId, stats, timeGroup, timeGroupBy, dataGroup, dataGroupBy, list);
+					}
+				}
+			} else {
+				for (String dataGroup : dataGroupList) {
+					for (String timeGroup : timeGroupList) {
+						String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
+						StatEmployeeDTO stats = mapStats.get(groupKey);
+						if (stats != null) {
+							getProgressiveCount(campaignId, stats, timeGroup, timeGroupBy, dataGroup, dataGroupBy, list);
+						}
+					}
+				}
+			}
+		}
+
 		Comparator<StatEmployeeDTO> comparator = new Comparator<StatEmployeeDTO>() {
 			@Override
 			public int compare(StatEmployeeDTO o1, StatEmployeeDTO o2) {
@@ -228,34 +259,36 @@ public class StatEmployeeService {
 	 */
 	private void updateDateGroupNames(List<StatEmployeeDTO> result, GROUP_BY_DATA dataGroupBy, String campaignId) {
 		Map<String, String> map = new HashMap<>();
-		switch (dataGroupBy) {
-			case company:
-				Set<String> allCompanies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup()).collect(Collectors.toSet());
-				for (String companyId : allCompanies) {
-					Company company = companyRepository.findById(companyId).orElse(null);
-					if (company != null) {
-						map.put(companyId, company.getName());
-					}
-				}
-				break;
-			case employee:
-				List<String> companies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
-				if (companies.size() > 0) {
-					map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));					
-				}
-			case location:
-				Set<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
-				for (String companyId : companyIds) {
-					Company company = companyRepository.findById(companyId).orElse(null);
-					if (company != null) {
-						List<CompanyLocation> locations = company.getLocations();
-						for (CompanyLocation location : locations) {
-							map.put(companyId + StatTrack.KEY_DIV + location.getId(), location.getName());
+		if (dataGroupBy != null) {
+			switch (dataGroupBy) {
+				case company:
+					Set<String> allCompanies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup()).collect(Collectors.toSet());
+					for (String companyId : allCompanies) {
+						Company company = companyRepository.findById(companyId).orElse(null);
+						if (company != null) {
+							map.put(companyId, company.getName());
 						}
 					}
-				}
-			default:
-				break;
+					break;
+				case employee:
+					List<String> companies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
+					if (companies.size() > 0) {
+						map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));					
+					}
+				case location:
+					Set<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
+					for (String companyId : companyIds) {
+						Company company = companyRepository.findById(companyId).orElse(null);
+						if (company != null) {
+							List<CompanyLocation> locations = company.getLocations();
+							for (CompanyLocation location : locations) {
+								map.put(companyId + StatTrack.KEY_DIV + location.getId(), location.getName());
+							}
+						}
+					}
+				default:
+					break;
+			}
 		}
 		logger.info("Map: {}", map);
 		for (StatEmployeeDTO s : result) {
@@ -263,13 +296,13 @@ public class StatEmployeeService {
 		}
 	}
 
-	private void fillEmptyDate(String campaignId, Map<String, StatEmployeeDTO>mapStats, 
-			List<String> timeGroupList, List<String> dataGroupList) {
+	private void fillEmptyDate(String campaignId, String companyId, Map<String, StatEmployeeDTO>mapStats, 
+			List<String> timeGroupList, List<String> dataGroupList, Map<String, Integer> employeeCountMap) {
 		if(dataGroupList.size() == 0) {
 			for(String timeGroup : timeGroupList) {
 				String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, null);
 				if(!mapStats.containsKey(groupKey)) {
-					StatEmployeeDTO stats = createEmptyStatEmployeeDTO(campaignId, timeGroup, null);
+					StatEmployeeDTO stats = addNewEmployeeStats(campaignId, timeGroup, null, companyId, employeeCountMap);
 					mapStats.put(groupKey, stats);
 				}
 			}
@@ -278,7 +311,7 @@ public class StatEmployeeService {
 				for(String timeGroup : timeGroupList) {
 					String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
 					if(!mapStats.containsKey(groupKey)) {
-						StatEmployeeDTO stats = createEmptyStatEmployeeDTO(campaignId, timeGroup, dataGroup);
+						StatEmployeeDTO stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, companyId, employeeCountMap);
 						mapStats.put(groupKey, stats);
 					}					
 				}
@@ -286,7 +319,7 @@ public class StatEmployeeService {
 		}
 	}
 
-	private StatEmployeeDTO createEmptyStatEmployeeDTO(String campaignId, String timeGroup, String dataGroup) {
+	/*private StatEmployeeDTO createEmptyStatEmployeeDTO(String campaignId, String timeGroup, String dataGroup) {
 		StatEmployeeDTO stats = new  StatEmployeeDTO();
 		if (StringUtils.isNotBlank(campaignId)) stats.setCampaign(campaignId);
 		if (StringUtils.isNotBlank(timeGroup)) stats.setTimeGroup(timeGroup);
@@ -296,7 +329,7 @@ public class StatEmployeeService {
 		stats.setRegistration(FieldEmployeeDTO.fromValue(0));
 		stats.setRegistered(FieldEmployeeDTO.fromValue(0));		
 		return stats;
-	}
+	}*/
 	
 	private void addDataGroup(List<String> dataGroupList, String dataGroup) {
 		if(StringUtils.isNotBlank(dataGroup) && !dataGroupList.contains(dataGroup)) {
@@ -336,6 +369,43 @@ public class StatEmployeeService {
 		if (GROUP_BY_DATA.company.equals(dataGroupBy)) return employee.getCompanyId();
 		if (GROUP_BY_DATA.location.equals(dataGroupBy)) return employee.getCompanyId() + StatTrack.KEY_DIV + employee.getLocation();
 		return null;
+	}
+
+	private void getProgressiveCount(String campaignId, StatEmployeeDTO stats, 
+			String timeGroup, GROUP_BY_TIME timeGroupBy, String dataGroup, GROUP_BY_DATA dataGroupBy, List<Employee> list) {
+		int countRegistered = 0;
+		int countRegistration = 0;
+		int countDropout = 0;
+		for(Employee employee : list) {
+			if (dataGroup != null) {
+				String empDataGroup = getGroupByData(employee, dataGroupBy);
+				if (!dataGroup.equals(empDataGroup)) continue;
+			}
+			LocalDate registrationDate = toLocalDate(employee.getTrackingRecord().get(campaignId).getRegistration());
+			LocalDate dropoutDate = null;
+			if(employee.getTrackingRecord().get(campaignId).getLeave() != null) {
+				dropoutDate = toLocalDate(employee.getTrackingRecord().get(campaignId).getLeave());
+			}
+			if (isInTimeGroup(timeGroupBy, registrationDate, timeGroup) && 
+					(dropoutDate == null || !isInTimeGroup(timeGroupBy, dropoutDate, timeGroup))) {
+				countRegistered++;
+			}
+			if (isInTimeGroup(timeGroupBy, registrationDate, timeGroup)) {
+				countRegistration++;
+			}
+			if (dropoutDate != null && isInTimeGroup(timeGroupBy, dropoutDate, timeGroup)) {
+				countDropout++;
+			}
+		}
+		stats.getRegistered().setProgressive(countRegistered);
+		stats.getRegistration().setProgressive(countRegistration);
+		stats.getDropout().setProgressive(countDropout);
+	}
+	
+	private boolean isInTimeGroup(GROUP_BY_TIME timeGroupBy, LocalDate date, String timeGroup) {
+		String group = getGroupByTime(timeGroupBy, date);
+		if (group.equals(timeGroup) || group.compareTo(timeGroup) < 0) return true;
+		return false;
 	}
 	
 	public List<Entry<String, Long>> getEmployeeCount(String campaignId, String companyId) {
@@ -384,14 +454,17 @@ public class StatEmployeeService {
 		row.add(String.valueOf(dto.getEmployee()));
 		row.add(getValue(dto.getRegistration()));
 		row.add(getPrcTot(dto.getRegistration()));
+		row.add(getProgressive(dto.getRegistration()));
 		row.add(getValue(dto.getRegistered()));
 		row.add(getPrcTot(dto.getRegistered()));
+		row.add(getProgressive(dto.getRegistered()));
 		row.add(getValue(dto.getActiveUsers()));
 		row.add(getPrcTot(dto.getActiveUsers()));
 		row.add(getPrcRegistered(dto.getActiveUsers()));
 		row.add(getValue(dto.getDropout()));
 		row.add(getPrcTot(dto.getDropout()));
 		row.add(getPrcRegistered(dto.getDropout()));
+		row.add(getProgressive(dto.getDropout()));
 		return row.toArray(new String[0]);
 	}
 
@@ -416,6 +489,13 @@ public class StatEmployeeService {
 		return "";
 	}
 
+	private String getProgressive(FieldEmployeeDTO field) {
+		if(field != null && field.getProgressive() != null) {
+			return String.valueOf(field.getProgressive());
+		}
+		return "";
+	}
+
 	private String[] getHeaders(GROUP_BY_TIME timeGroupBy, GROUP_BY_DATA dataGroupBy) {
 		List<String>headers = new ArrayList<>();
 		headers.add("campaign"); 
@@ -427,14 +507,17 @@ public class StatEmployeeService {
 		headers.add("employee");
 		headers.add("registration");
 		headers.add("registration_prcTot");
+		headers.add("registration_progressive");
 		headers.add("registered");
 		headers.add("registered_prcTot");
+		headers.add("registered_progressive");
 		headers.add("activeUsers");
 		headers.add("activeUsers_prcTot");
 		headers.add("activeUsers_prcRegistered");
 		headers.add("dropout");
 		headers.add("dropout_prcTot");
 		headers.add("dropout_prcRegistered");
+		headers.add("dropout_progressive");
 		return headers.toArray(new String[0]);
 	}
 
@@ -485,12 +568,14 @@ public class StatEmployeeService {
 		List<Pair<String, FieldEmployeeDTO>> fieldList = List.of(
 				Pair.of("registration", ds.getRegistration()), 
 				Pair.of("activeUsers", ds.getActiveUsers()), 
-				Pair.of("dropout", ds.getDropout()));		
+				Pair.of("dropout", ds.getDropout()),
+				Pair.of("registered", ds.getRegistered()));
 		for(Pair <String, FieldEmployeeDTO> p : fieldList) {
 			if (p.getSecond() != null) {
 				res.put(p.getFirst(), p.getSecond().getValue() != null ? p.getSecond().getValue() : 0);
 				res.put(p.getFirst() + "__prcTot", p.getSecond().getPrcTot() != null ? p.getSecond().getPrcTot() : 0);
 				res.put(p.getFirst() + "__prcRegistered", p.getSecond().getPrcRegistered() != null ? p.getSecond().getPrcRegistered() : 0);
+				res.put(p.getFirst() + "__progressive", p.getSecond().getProgressive() != null ? p.getSecond().getProgressive() : 0);
 			}
 		}
 		return res;
