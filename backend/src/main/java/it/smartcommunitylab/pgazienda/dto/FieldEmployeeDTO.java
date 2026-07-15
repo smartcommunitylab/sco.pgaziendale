@@ -1,7 +1,7 @@
 package it.smartcommunitylab.pgazienda.dto;
 
 public class FieldEmployeeDTO {
-    private Integer value;
+    private Integer value, progressive;
     private Double prcTot, prcRegistered;
 
     public Integer getValue() {
@@ -22,12 +22,26 @@ public class FieldEmployeeDTO {
     public void setPrcRegistered(Double prcRegistered) {
         this.prcRegistered = prcRegistered;
     }
+    public Integer getProgressive() {
+        return progressive;
+    }
+    public void setProgressive(Integer progressive) {
+        this.progressive = progressive;
+    }
 
     public void addValue() {
         if(this.value == null) {
             this.value = 1;
         } else {
             this.value++;
+        }
+    }
+
+    public void addProgressive() {
+        if(this.progressive == null) {
+            this.progressive = 1;
+        } else {
+            this.progressive++;
         }
     }
 

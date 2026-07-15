@@ -71,8 +71,8 @@ export const VARIABLES = {
           source: "tracks"
         },
         COUNTING_POINTS: {
-          label:  "Punti utili", 
-          meanLabel: "Utili per mezzo (_mezzo_)",
+          label:  "Punti", 
+          meanLabel: "Punti per mezzo (_mezzo_)",
           value:  "limitedScore",
           source: "tracks"
         },
@@ -88,7 +88,7 @@ export const VARIABLES = {
           source: "tracks"
         },
         N_TRAVEL_SINGLE: {
-          label: "Viaggi singoli",
+          label: "Viaggi monomodali",
           value: "singleCount",
           baseValue: "tripCount",
           source: "tracks"
@@ -264,11 +264,11 @@ export const VARIABLES = {
         },
       },
       DATALEVEL: {
-        LOCATIONS:  "Sedi",
+        LOCATIONS:  "Sede",
         COMPANY:  "Azienda", 
-        EMPLOYEES: "Dipendenti",
+        EMPLOYEES: "Dipendente",
         CAMPAIGN: "Campagna",
-        COMPANIES: "Aziende",
+        COMPANIES: "Azienda",
       },
       TIMEUNIT: {
         HOUR: "Fascia oraria",
