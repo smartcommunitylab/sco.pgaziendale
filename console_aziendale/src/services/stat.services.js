@@ -120,7 +120,7 @@ function callTrackStatsAPI(
     ...(locations ? { locations } : {}),
     ...(employeeCodes ? { employeeCodes } : {}),
     ...(means ? { means: means.join(',') } : {}),
-    ...(way ? { way } : {}),
+    ...(way ? { way: Array.isArray(way) ? way.join(',') : way } : {}),
     ...(groupByMean ? { groupByMean } : {}),
     ...(from ? { from } : {}),
     ...(to ? { to } : {}),
