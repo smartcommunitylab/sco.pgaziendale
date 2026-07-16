@@ -12,27 +12,27 @@ export const VARIABLES = {
       EMPLOYEES_PARTECIPATION: "Partecipazione dipendenti",
       ENVIRONMENTAL_IMPACT: "Impatto ambientale",
       POINTS_COUNTED: "Punteggio campagna",
-      PERFORMANCE_KM:"Performance KM totali",
-      PERFORMANCE_HOURS:"Performance ore totali",
+      PERFORMANCE_KM: "Performance KM totali",
+      PERFORMANCE_HOURS: "Performance ore totali",
       TRIPS: "Viaggi",
       MULTI: "Multimodalità",
     },
     VIEWS: {
       DATACOLUMNS: {
-        REGISTERED_EMPLOYEES: { 
-          label: "Dipendenti registrati", 
-          value: "registration", 
-          source: 'employee' 
+        REGISTERED_EMPLOYEES: {
+          label: "Dipendenti registrati",
+          value: "registration",
+          source: 'employee'
         },
-        ACTIVE_EMPLOYEES: { 
-          label: "Dipendenti attivi", 
-          value: "activeUsers", 
-          source: 'employee' 
+        ACTIVE_EMPLOYEES: {
+          label: "Dipendenti attivi",
+          value: "activeUsers",
+          source: 'employee'
         },
-        UNSUBSCRIBED_EMPLOYEES: { 
-          label: "Dipendenti rimossi", 
-          value: "dropout", 
-          source: 'employee' 
+        UNSUBSCRIBED_EMPLOYEES: {
+          label: "Dipendenti rimossi",
+          value: "dropout",
+          source: 'employee'
         },
         REGISTERED_EMPLOYEES_PERCENTAGE: {
           label: "Percentuale dipendenti registrati",
@@ -40,6 +40,26 @@ export const VARIABLES = {
           baseValue: "registration",
           source: "employee"
         },
+        //nuovi
+        REGISTRATION_PROGRESSIVE: {
+          label: "Progressivo iscrizioni",
+          value: "registration__progressive",
+          source: "employee"
+
+        },
+        DROPOUT_PROGRESSIVE: {
+          label: "Progressivo abbandoni",
+          value: "dropout__progressive",
+          source: "employee"
+
+        },
+        REGISTERED_PROGRESSIVE: {
+          label: "Iscritti attuali",
+          value: "registered__progressive",
+          source: "employee"
+
+        },
+        //fine nuovi
         ACTIVE_EMPLOYEES_PERCENTAGE: {
           label: "Percentuale dipendenti attivi",
           value: "activeUsers__prcTot",
@@ -58,7 +78,7 @@ export const VARIABLES = {
           baseValue: "activeUsers",
           source: "employee"
         },
-         UNSUBSCRIBED_EMPLOYEES_PERCENTAGE_REGISTRATION: {
+        UNSUBSCRIBED_EMPLOYEES_PERCENTAGE_REGISTRATION: {
           label: "Percentuale dipendenti rimossi su registrati",
           value: "dropout__prcRegistered",
           baseValue: "dropout",
@@ -71,13 +91,13 @@ export const VARIABLES = {
           source: "tracks"
         },
         COUNTING_POINTS: {
-          label:  "Punti", 
+          label: "Punti",
           meanLabel: "Punti per mezzo (_mezzo_)",
-          value:  "limitedScore",
+          value: "limitedScore",
           source: "tracks"
         },
         N_COUNTING_TRAVEL: {
-          label:  "Viaggi utili", 
+          label: "Viaggi utili",
           value: "limitedTripCount",
           source: "tracks"
         },
@@ -221,7 +241,7 @@ export const VARIABLES = {
           value: "co2__prcAvgTrack",
           baseValue: "co2",
           source: "tracks"
-        }, 
+        },
         MM_TRAVEL: {
           label: "Viaggi",
           value: "count",
@@ -264,8 +284,8 @@ export const VARIABLES = {
         },
       },
       DATALEVEL: {
-        LOCATIONS:  "Sede",
-        COMPANY:  "Azienda", 
+        LOCATIONS: "Sede",
+        COMPANY: "Azienda",
         EMPLOYEES: "Dipendente",
         CAMPAIGN: "Campagna",
         COMPANIES: "Azienda",
@@ -273,20 +293,20 @@ export const VARIABLES = {
       TIMEUNIT: {
         HOUR: "Fascia oraria",
         DOW: "Giorno della settimana",
-        DAY: "Giorno", 
+        DAY: "Giorno",
         WEEK: "Settimana",
-        MONTH: "Mese", 
+        MONTH: "Mese",
         YEAR: "Anno",
-        CAMPAIGN:  "Campagna", 
+        CAMPAIGN: "Campagna",
       },
       TIMEPERIOD: {
-        ALL:  "Intera durata campagna", 
-        SPECIFIC: "Imposta periodo" 
+        ALL: "Intera durata campagna",
+        SPECIFIC: "Imposta periodo"
       },
       PUNTUALAGGREGATION: {
-        NONE:  "Nessuno", 
-        EMPLOYEES:  "Selezione dipendente/i", 
-        LOCATIONS: "Sedi", 
+        NONE: "Nessuno",
+        EMPLOYEES: "Selezione dipendente/i",
+        LOCATIONS: "Sedi",
         COMPANIES: "Aziende",
       },
     },
