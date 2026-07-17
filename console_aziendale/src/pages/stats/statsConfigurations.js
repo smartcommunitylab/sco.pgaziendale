@@ -359,6 +359,8 @@ export const statsConfigurations = [
         ],
         dataColumns: [DC.CO2_SAVED, DC.CO2_SAVED_AVG_TRIP, DC.CO2_SAVED_AVG_LEG, DC.CO2_SAVED_PERCENTAGE,/* DC.CO2_SAVED_PERCENTAGE_AVG_TRIP, DC.CO2_SAVED_PERCENTAGE_AVG_LEG,*/],
         timeUnit: [
+          { label: VC.TIMEUNIT.HOUR, value: "hour", apiField: "hour" },
+          { label: VC.TIMEUNIT.DOW, value: "dayOfWeek", apiField: "dayOfWeek" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
           { label: VC.TIMEUNIT.MONTH, value: "month", apiField: "month" },
           { label: VC.TIMEUNIT.YEAR, value: "year", apiField: "year" },

@@ -183,8 +183,7 @@ public class StatEmployeeService {
 
 		// set progressive values
 		if (((dataGroupBy == null) || !GROUP_BY_DATA.employee.equals(dataGroupBy)) && 
-				(GROUP_BY_TIME.day.equals(timeGroupBy) || GROUP_BY_TIME.week.equals(timeGroupBy) || 
-				GROUP_BY_TIME.month.equals(timeGroupBy) || GROUP_BY_TIME.year.equals(timeGroupBy))) {
+				!GROUP_BY_TIME.hour.equals(timeGroupBy) && !GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) {
 			if(dataGroupList.size() == 0) {
 				String dataGroup = null;
 				for (String timeGroup : timeGroupList) {
