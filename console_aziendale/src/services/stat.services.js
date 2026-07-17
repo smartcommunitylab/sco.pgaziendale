@@ -382,7 +382,7 @@ function filterByPuntualAggregation(res, configuration) {
   
   // if (!arr.length) return res;
   // return res.filter(e => arr.includes(e.key));
-  return res;
+  return res.filter(e => e.key && e.key !== 'null' && e.key.trim() !== '');
 
 }
 

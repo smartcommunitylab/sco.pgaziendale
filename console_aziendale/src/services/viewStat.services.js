@@ -63,6 +63,12 @@ function setMapLocations(array) {
 }
 async function fillTheViewWithValues(values, view, selection, currentCampaign) {
   let viewData = {};
+  if (!values || (Array.isArray(values) && values.length === 0) || (values.headers === undefined && !Array.isArray(values))) {
+    viewData.headers = [];
+    viewData.subheaders = [];
+    viewData.data = [];
+    return viewData; // Essendo async farà automaticamente il Wrap in Promise
+  }
   if (Array.isArray(values) && values.length > 0) {
     viewData.headers = getHeadersTable(values, selection, currentCampaign)
     viewData.subheaders = getSubHeaders(viewData.headers, selection)
