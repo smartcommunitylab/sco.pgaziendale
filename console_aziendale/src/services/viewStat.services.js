@@ -234,7 +234,7 @@ function getRowNameValue(values, rowIndex) {
   let name = values[rowIndex].key;
   
   if (!name || name === 'null') {
-    return 'Non specificato'; 
+    return 'Nessun dato da visualizzare'; 
   }
 
   if (typeof name === 'string' && name.indexOf(';') > -1) {
