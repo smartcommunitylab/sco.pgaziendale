@@ -698,6 +698,7 @@ export default {
       this.setActiveSelection({ selection: this.copy(this.localSelection) });
       this.getLocalStat(this.localSelection);
       // this.mini = true;
+      this.panel = [];
     },
 
     resetFilterAndRefreshStat() {
@@ -705,6 +706,7 @@ export default {
       this.setActiveSelection({ selection: this.copy(this.localSelection) });
       this.getLocalStat(this.localSelection);
       // this.mini = true;
+      this.panel = [];
     },
 
     resetPunctualAggregation() {
@@ -805,6 +807,8 @@ export default {
       if (this.activeSelection) {
         this.localSelection = this.copy(this.activeSelection);
       }
+      this.panel = [];
+
     },
     getItemsAggregation() {
       if (this.localSelection) {
@@ -973,19 +977,27 @@ export default {
 </script>
 
 <style scoped>
-::v-deep .v-data-table th,
-::v-deep .v-data-table td {
+/* Header: testo allineato a destra con spazio per l'icona di ordinamento */
+::v-deep .v-data-table th {
   text-align: right !important;
 }
 
-::v-deep .v-data-table th {
+/* L'icona di sort va PRIMA del testo quando si è allineati a destra */
+::v-deep .v-data-table-header th .v-data-table-header__icon {
+  float: left !important;
+  margin-right: 4px !important;
+  margin-left: 0 !important;
+}
+
+/* Celle dati: stesso padding-right dell'header per allinearsi visivamente */
+::v-deep .v-data-table td {
+  text-align: right !important;
   padding-right: 16px !important;
 }
 
-/* Aggiungiamo ~18px extra al padding della cella vuota per "simulare" l'ingombro della freccia in alto.
-   16px (padding base) + 18px (freccia) = 34px */
-::v-deep .v-data-table td {
-  padding-right: 34px !important;
+/* Prima colonna (nome dipendente/sede) rimane a sinistra */
+::v-deep .v-data-table th:first-child,
+::v-deep .v-data-table td:first-child {
+  text-align: left !important;
 }
-
 </style>
