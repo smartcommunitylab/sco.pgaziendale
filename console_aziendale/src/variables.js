@@ -17,20 +17,29 @@ export const VARIABLES = {
       TRIPS: "Viaggi",
       MULTI: "Multimodalità",
     },
+    DESCRIPTION: {
+      EMPLOYEES_PARTECIPATION: " missing description",
+      ENVIRONMENTAL_IMPACT: "Questa statistica include tutti i viaggi validati indipendentemente dal loro contributo in termini di punti, dunque include anche viaggi che, in base ai limiti impostati per la campagna, non hanno prodotto alcun punteggio utile. Si precisa che i valori di CO2 esposti sono indicativi e vengono computati in base alle indicazioni fornite dal Ministero / EU.",
+      POINTS_COUNTED: "missing description",
+      PERFORMANCE_KM: "Questa statistica include tutti i viaggi validati indipendentemente dal loro contributo in termini di punti, dunque include anche viaggi che, in base ai limiti impostati per la campagna, non hanno prodotto alcun punteggio utile.",
+      PERFORMANCE_HOURS: "Questa statistica include tutti i viaggi validati indipendentemente dal loro contributo in termini di punti, dunque include anche viaggi che, in base ai limiti impostati per la campagna, non hanno prodotto alcun punteggio utile.",
+      TRIPS: "Questa statistica include tutti i viaggi validati indipendentemente dal loro contributo in termini di punti, dunque include anche viaggi che, in base ai limiti impostati per la campagna, non hanno prodotto alcun punteggio utile.",
+      MULTI: "Questa statistica include tutti i viaggi validati indipendentemente dal loro contributo in termini di punti, dunque include anche viaggi che, in base ai limiti impostati per la campagna, non hanno prodotto alcun punteggio utile.",
+    },
     VIEWS: {
       DATACOLUMNS: {
         REGISTERED_EMPLOYEES: {
-          label: "Dipendenti registrati",
+          label: "Iscrizioni",
           value: "registration",
           source: 'employee'
         },
         ACTIVE_EMPLOYEES: {
-          label: "Dipendenti attivi",
+          label: "Attivi",
           value: "activeUsers",
           source: 'employee'
         },
         UNSUBSCRIBED_EMPLOYEES: {
-          label: "Dipendenti rimossi",
+          label: "Abbandoni",
           value: "dropout",
           source: 'employee'
         },
