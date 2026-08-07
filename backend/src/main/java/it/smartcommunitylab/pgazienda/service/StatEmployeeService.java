@@ -105,7 +105,7 @@ public class StatEmployeeService {
 		List<String> dataGroupList = new ArrayList<>();
 		
 		// set activeUsers
-		List<StatTrackDTO> trackStats = statTrackService.getTrackStats(campaignId, companyId, locations, employeeCodes, null, "all", 
+		List<StatTrackDTO> trackStats = statTrackService.getTrackStats(campaignId, companyId, locations, employeeCodes, null, null, "all", 
 				timeGroupBy, GROUP_BY_DATA.employee, Collections.singletonList(STAT_TRACK_FIELD.track), false, false, from, to);
 		for(StatTrackDTO dto : trackStats) {
 			if(dto.getStats() == null) continue;

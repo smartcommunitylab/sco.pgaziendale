@@ -60,7 +60,7 @@ function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
     case "LOCATIONS":
       return locationService.getAllLocations(companyId).then(content => {
         return content.map(l => {
-          l.label = l.id;
+          l.label = l.name || l.id;
           return l;
         });
   
@@ -100,6 +100,7 @@ function getItemsAggregation(itemAggregationValue, campaignId, companyId) {
 function callTrackStatsAPI(
   campaignId, 
   companyId, 
+  companies,
   locations, 
   means,
   employeeCodes, 
@@ -112,11 +113,12 @@ function callTrackStatsAPI(
   groupByMean, 
   all, 
   csv) {
-    const hasSpecificFilters = (locations?.length > 0) || (employeeCodes?.length > 0);
-  const finalAll = hasSpecificFilters ? false : all;
+    const hasSpecificFilters = (locations?.length > 0) || (employeeCodes?.length > 0) || (companies?.length > 0);
+    const finalAll = hasSpecificFilters ? false : all;
 
   let params = {
     ...(companyId ? { companyId } : {}),
+    ...(companies ? { companies } : {}),
     ...(locations ? { locations } : {}),
     ...(employeeCodes ? { employeeCodes } : {}),
     ...(means ? { means: means.join(',') } : {}),
@@ -201,6 +203,7 @@ function callTrackStatsAPI(
 function callTrackStatsMultiAPI(
   campaignId, 
   companyId, 
+  companies,
   locations, 
   timeGroupBy, 
   dataGroupBy, 
@@ -208,11 +211,12 @@ function callTrackStatsMultiAPI(
   to, 
   all, 
   csv) {
-    const hasSpecificFilters = (locations?.length > 0) ;
+    const hasSpecificFilters = (locations?.length > 0) || (companies?.length > 0);
     const finalAll = hasSpecificFilters ? false : all;
   
   let params = {
     ...(companyId ? { companyId } : {}),
+    ...(companies ? { companies } : {}), 
     ...(locations ? { locations } : {}),             
     ...(from ? { from } : {}),
     ...(to ? { to } : {}),
@@ -291,6 +295,7 @@ function callTrackStatsMultiAPI(
 function callEmployeeStatsAPI(
   campaignId, 
   companyId, 
+  companies, 
   locations, 
   employeeCodes,
   timeGroupBy, 
@@ -301,6 +306,7 @@ function callEmployeeStatsAPI(
   csv) {
   let params = {
     ...(companyId ? { companyId } : {}),
+    ...(companies ? { companies } : {}),
     ...(locations?.length ? { locations } : {}),
     ...(employeeCodes?.length ? { employeeCodes } : {}),
       ...(from ? { from } : {}),
@@ -413,11 +419,15 @@ function getStat(configuration) {
     ? configuration.puntualAggregationItems.map(i => i.code || i.id).join(',')
     : null;
     
+    const companies = (!companyId && filterType === 'COMPANIES' && configuration.puntualAggregationItems?.length)
+    ? configuration.puntualAggregationItems.map(i => i.id).join(',')
+    : null;
   if (configuration.source === 'tracks') {
 
     return callTrackStatsAPI(
       configuration.campaign.id,
       companyId,
+      companies,
       locations,
       configuration.means,
       employeeCodes, 
@@ -440,6 +450,7 @@ function getStat(configuration) {
     return callTrackStatsMultiAPI(
       configuration.campaign.id,
       companyId,
+      companies,
       locations,
       employeeCodes, 
       configuration.timeUnit.apiField,
@@ -457,6 +468,7 @@ function getStat(configuration) {
     return callEmployeeStatsAPI(
       configuration.campaign.id,
       companyId,
+      companies,
       locations,
       employeeCodes,
       configuration.timeUnit.apiField,
