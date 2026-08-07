@@ -71,6 +71,7 @@ public class StatTrackService {
 			String companyId,
 			Set<String> locations,
 			Set<String> employeeCodes,
+			Set<String> companies,
 			Set<String> means,
 			String way,
 			GROUP_BY_TIME timeGroupBy,
@@ -100,7 +101,9 @@ public class StatTrackService {
 			if ((employeeCodes != null) && !employeeCodes.isEmpty()) {
 				criteria = criteria.and("employeeCode").in(employeeCodes);
 			}
-		}		
+		} else if ((companies != null) && !companies.isEmpty()) {
+			criteria = criteria.and("company").in(companies);
+		}
 		if ((means != null) && !means.isEmpty()) {
 			criteria = criteria.and("mode").in(means);
 		}
@@ -448,6 +451,7 @@ public class StatTrackService {
 			String companyId, 
 			Set<String> locations,
 			Set<String> employeeCodes,
+			Set<String> companies,
 			Set<String> means, 
 			String way, 
 			GROUP_BY_TIME timeGroupBy, 
@@ -457,7 +461,7 @@ public class StatTrackService {
 			boolean allDataGroupBy,
 			LocalDate fromDate, 
 			LocalDate toDate) throws InconsistentDataException, IOException {
-		List<StatTrackDTO> trackStats = getTrackStats(campaignId, companyId, locations, employeeCodes, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
+		List<StatTrackDTO> trackStats = getTrackStats(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
 		String[] headers = getHeaders(timeGroupBy, dataGroupBy, groupByMean, fields);
 		csvWriter.writeNext(headers);
@@ -642,6 +646,7 @@ public class StatTrackService {
 		String companyId,
 		Set<String> locations,
 		Set<String> employeeCodes,
+		Set<String> companies,
 		Set<String> means,
 		String way,
 		GROUP_BY_TIME timeGroupBy,
@@ -652,7 +657,7 @@ public class StatTrackService {
 		LocalDate from, 
 		LocalDate to) throws InconsistentDataException 
 	{
-		List<StatTrackDTO> stats = getTrackStats(campaignId, companyId, locations, employeeCodes, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
+		List<StatTrackDTO> stats = getTrackStats(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
 		return flattenTrackStats(stats, timeGroupBy, fields);
 	}
 
@@ -949,6 +954,7 @@ public class StatTrackService {
 		String companyId,
 		Set<String> locations,
 		Set<String> employeeCodes,
+		Set<String> companies,
 		Set<String> means,
 		String way,
 		GROUP_BY_TIME timeGroupBy,
@@ -959,7 +965,7 @@ public class StatTrackService {
 		LocalDate from, 
 		LocalDate to) throws InconsistentDataException
 	{
-		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, locations, employeeCodes, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
+		List<Map<String, Object>> stats = getTrackStatsFlat(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, from, to);
 		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
 		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		if (from == null) {

@@ -3,6 +3,8 @@ import { VARIABLES } from "../../variables";
 const VC = VARIABLES.STATS.VIEWS;
 const PA = VARIABLES.STATS.VIEWS.PUNTUALAGGREGATION;
 const DC = VARIABLES.STATS.VIEWS.DATACOLUMNS;
+const DESC = VARIABLES.STATS.DESCRIPTION;
+
 export const statsConfigurations = [
   /*
   / Configurazione - Punti Fatti e Utili
@@ -11,6 +13,7 @@ export const statsConfigurations = [
   {
     id: '1_punti_global',
     name: VARIABLES.STATS.NAME.POINTS_COUNTED,
+    description: DESC.POINTS_COUNTED,
     profile: 'global',
     views: [
       {
@@ -53,6 +56,7 @@ export const statsConfigurations = [
   {
     id: '2_punti_company',
     name: VARIABLES.STATS.NAME.POINTS_COUNTED,
+    description: DESC.POINTS_COUNTED,
     profile: 'company',
     views: [
       {
@@ -91,6 +95,7 @@ export const statsConfigurations = [
   {
     id: '3_utenti_global',
     name: VARIABLES.STATS.NAME.EMPLOYEES_PARTECIPATION,
+    description: DESC.EMPLOYEES_PARTECIPATION,
     profile: 'global',
     views: [
       {
@@ -99,10 +104,12 @@ export const statsConfigurations = [
           { label: VC.DATALEVEL.CAMPAIGN, value: "campaign", puntualAggregation: [{ label: PA.NONE, value: 'NONE' }] },
           { label: VC.DATALEVEL.COMPANY, value: "company", puntualAggregation: [{ label: PA.NONE, value: 'NONE' }] }],
         dataColumns: [
-          DC.REGISTERED_EMPLOYEES, DC.ACTIVE_EMPLOYEES, DC.UNSUBSCRIBED_EMPLOYEES,
-          DC.REGISTRATION_PROGRESSIVE, DC.DROPOUT_PROGRESSIVE, DC.REGISTERED_PROGRESSIVE,
-
-          DC.REGISTERED_EMPLOYEES_PERCENTAGE, DC.ACTIVE_EMPLOYEES_PERCENTAGE, DC.UNSUBSCRIBED_EMPLOYEES_PERCENTAGE,
+          DC.REGISTERED_EMPLOYEES, DC.REGISTRATION_PROGRESSIVE,
+         DC.UNSUBSCRIBED_EMPLOYEES, DC.UNSUBSCRIBED_EMPLOYEES_PERCENTAGE,
+         DC.REGISTERED_PROGRESSIVE,
+          DC.ACTIVE_EMPLOYEES, DC.ACTIVE_EMPLOYEES_PERCENTAGE,
+           DC.DROPOUT_PROGRESSIVE, 
+          DC.REGISTERED_EMPLOYEES_PERCENTAGE,  
           DC.ACTIVE_EMPLOYEES_PERCENTAGE_REGISTRATION, DC.UNSUBSCRIBED_EMPLOYEES_PERCENTAGE_REGISTRATION
         ], timeUnit: [
           { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
@@ -140,6 +147,7 @@ export const statsConfigurations = [
   {
     id: '4_utenti_company',
     name: VARIABLES.STATS.NAME.EMPLOYEES_PARTECIPATION,
+    description: DESC.EMPLOYEES_PARTECIPATION,
     profile: 'company',
     views: [
       {
@@ -150,9 +158,12 @@ export const statsConfigurations = [
           // {label: VC.DATALEVEL.EMPLOYEES,value: "employee", puntualAggregation: [{  label:  PA.NONE,  value: 'NONE'}, { label:  PA.EMPLOYEES,  value: 'EMPLOYEES'}] }
         ],
         dataColumns: [ 
-          DC.REGISTERED_EMPLOYEES, DC.ACTIVE_EMPLOYEES, DC.UNSUBSCRIBED_EMPLOYEES, 
-          DC.REGISTRATION_PROGRESSIVE, DC.DROPOUT_PROGRESSIVE, DC.REGISTERED_PROGRESSIVE,
-          DC.REGISTERED_EMPLOYEES_PERCENTAGE, DC.ACTIVE_EMPLOYEES_PERCENTAGE, DC.UNSUBSCRIBED_EMPLOYEES_PERCENTAGE, 
+          DC.REGISTERED_EMPLOYEES, DC.REGISTRATION_PROGRESSIVE,
+          DC.UNSUBSCRIBED_EMPLOYEES, DC.UNSUBSCRIBED_EMPLOYEES_PERCENTAGE,
+          DC.REGISTERED_PROGRESSIVE,
+          DC.ACTIVE_EMPLOYEES, DC.ACTIVE_EMPLOYEES_PERCENTAGE,
+           DC.DROPOUT_PROGRESSIVE, 
+          DC.REGISTERED_EMPLOYEES_PERCENTAGE, 
           DC.ACTIVE_EMPLOYEES_PERCENTAGE_REGISTRATION, DC.UNSUBSCRIBED_EMPLOYEES_PERCENTAGE_REGISTRATION        ],        timeUnit: [
           { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
@@ -181,6 +192,7 @@ export const statsConfigurations = [
   {
     id: "11_performance_km_global",
     name: VARIABLES.STATS.NAME.PERFORMANCE_KM,
+    description: DESC.PERFORMANCE_KM,
     profile: 'global',
     views: [
       {
@@ -223,6 +235,7 @@ export const statsConfigurations = [
   {
     id: "12_performance_km_company",
     name: VARIABLES.STATS.NAME.PERFORMANCE_KM,
+    description: DESC.PERFORMANCE_KM,
     profile: 'company',
     views: [
       {
@@ -265,6 +278,7 @@ export const statsConfigurations = [
   {
     id: "13_performance_ore_global",
     name: VARIABLES.STATS.NAME.PERFORMANCE_HOURS,
+    description: DESC.PERFORMANCE_HOURS,
     profile: 'global',
     views: [
       {
@@ -307,6 +321,7 @@ export const statsConfigurations = [
   {
     id: "14_performance_hours_company",
     name: VARIABLES.STATS.NAME.PERFORMANCE_HOURS,
+    description: DESC.PERFORMANCE_HOURS,
     profile: 'company',
     views: [
       {
@@ -349,6 +364,7 @@ export const statsConfigurations = [
   {
     id: "15_co2_global",
     name: VARIABLES.STATS.NAME.ENVIRONMENTAL_IMPACT,
+    description: DESC.ENVIRONMENTAL_IMPACT,
     profile: 'global',
     views: [
       {
@@ -359,6 +375,8 @@ export const statsConfigurations = [
         ],
         dataColumns: [DC.CO2_SAVED, DC.CO2_SAVED_AVG_TRIP, DC.CO2_SAVED_AVG_LEG, DC.CO2_SAVED_PERCENTAGE,/* DC.CO2_SAVED_PERCENTAGE_AVG_TRIP, DC.CO2_SAVED_PERCENTAGE_AVG_LEG,*/],
         timeUnit: [
+          { label: VC.TIMEUNIT.HOUR, value: "hour", apiField: "hour" },
+          { label: VC.TIMEUNIT.DOW, value: "dayOfWeek", apiField: "dayOfWeek" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
           { label: VC.TIMEUNIT.MONTH, value: "month", apiField: "month" },
           { label: VC.TIMEUNIT.YEAR, value: "year", apiField: "year" },
@@ -389,6 +407,7 @@ export const statsConfigurations = [
   {
     id: "16_co2_company",
     name: VARIABLES.STATS.NAME.ENVIRONMENTAL_IMPACT,
+    description: DESC.ENVIRONMENTAL_IMPACT,
     profile: 'company',
     views: [
       {
@@ -432,6 +451,7 @@ export const statsConfigurations = [
   {
     id: "17_trips_global",
     name: VARIABLES.STATS.NAME.TRIPS,
+    description: DESC.TRIPS,
     profile: 'global',
     views: [
       {
@@ -473,6 +493,7 @@ export const statsConfigurations = [
   {
     id: "18_trips_company",
     name: VARIABLES.STATS.NAME.TRIPS,
+    description: DESC.TRIPS,
     profile: 'company',
     views: [
       {
@@ -514,6 +535,7 @@ export const statsConfigurations = [
   {
     id: "19_multi_global",
     name: VARIABLES.STATS.NAME.MULTI,
+    description: DESC.MULTI,
     profile: 'global',
     views: [
       {
@@ -548,6 +570,7 @@ export const statsConfigurations = [
   {
     id: "20_multi_company",
     name: VARIABLES.STATS.NAME.MULTI,
+    description: DESC.MULTI,
     profile: 'company',
     views: [
       {
