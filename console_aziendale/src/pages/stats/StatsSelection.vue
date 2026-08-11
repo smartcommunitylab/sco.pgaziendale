@@ -61,8 +61,16 @@ export default {
     if (!this.adminCompany) {
       if (this.allCampaigns && this.allCampaigns.items) {
         this.statsCampaigns = this.allCampaigns.items.sort((a, b) => new Date(a?.from).getTime() - new Date(b?.from).getTime()).reverse();
-        this.localCampaign = this.allCampaigns.items[0];
-        console.log('mounted',this.localCampaign);
+        
+        // INIT SALVATO
+        const saved = this.getSavedPrefs();
+        if (saved && saved.campaignId) {
+           const found = this.statsCampaigns.find(c => c.id === saved.campaignId);
+           this.localCampaign = found || this.statsCampaigns[0];
+        } else {
+           this.localCampaign = this.statsCampaigns[0];
+        }
+        
         this.updateCampaign();
       } else {
         this.getAllCampaigns();
@@ -78,12 +86,31 @@ export default {
       handler: function (newValue, oldValue) {
         if (oldValue && oldValue.loading && newValue.items) {
           this.statsCampaigns = newValue.items.sort((a, b) => new Date(a?.from).getTime() - new Date(b?.from).getTime()).reverse();
-          this.localCampaign = newValue.items[0];
-          console.log('watched',this.localCampaign);
+          
+          // INIT SALVATO
+          const saved = this.getSavedPrefs();
+          if (saved && saved.campaignId) {
+             const found = this.statsCampaigns.find(c => c.id === saved.campaignId);
+             this.localCampaign = found || this.statsCampaigns[0];
+          } else {
+             this.localCampaign = this.statsCampaigns[0];
+          }
           this.updateCampaign();
         }
       },
       deep: true,
+    },
+    configurations(val) {
+      if (val && val.items) {
+        const saved = this.getSavedPrefs();
+        if (saved && saved.configurationId) {
+           const found = val.items.find(c => c.id === saved.configurationId);
+           if (found) {
+               this.selectedConfiguration = found.id;
+               this.selectConfiguration();
+           }
+        }
+      }
     },
     activeConfiguration() {
       if (this.activeConfiguration) {
@@ -91,6 +118,7 @@ export default {
       }
     }
   },
+  
   methods: {
     ...mapActions("campaign", {
       getAllCampaigns: "getAll",
@@ -100,7 +128,21 @@ export default {
       getConfigurationByUser:"getConfigurationByUser",
       setActiveConfiguration:"setActiveConfiguration"
     }),
-
+    getSavedPrefs() {
+      try {
+        return JSON.parse(localStorage.getItem('pg_stats_prefs'));
+      } catch(e) { return null; }
+    },
+    savePartialPrefs() {
+      try {
+        let prefs = this.getSavedPrefs() || {};
+        prefs.campaignId = this.localCampaign?.id;
+        prefs.configurationId = this.selectedConfiguration;
+        localStorage.setItem('pg_stats_prefs', JSON.stringify(prefs));
+      } catch(e) {
+        console.error('Error saving preferences', e);
+      }
+    },
     loadConfiguration(){
       this.getConfigurationByUser({user: this.user, temporaryAdmin: this.temporaryAdmin});
     },

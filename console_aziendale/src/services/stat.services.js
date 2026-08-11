@@ -452,7 +452,6 @@ function getStat(configuration) {
       companyId,
       companies,
       locations,
-      employeeCodes, 
       configuration.timeUnit.apiField,
       agg,
       from, to,
