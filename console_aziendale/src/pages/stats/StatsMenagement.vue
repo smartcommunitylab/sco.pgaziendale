@@ -61,6 +61,7 @@
                 ></data-table>
               </v-tab-item>
               <v-tab-item key="Grafico">
+              
                 <data-chart
                   :dataChartData="viewData"
                   :configuration="localSelection"
