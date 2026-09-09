@@ -759,6 +759,7 @@ export default {
           configurationId: this.activeConfiguration?.items,
           selection: this.localSelection,
         };
+        console.log("Preferences saved:", prefs);
         localStorage.setItem(`pg_stats_prefs`, JSON.stringify(prefs));
       } catch (e) {
         console.error("Error saving preferences", e);
