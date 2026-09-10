@@ -282,6 +282,9 @@
                       @input="showPickerTo = false"
                     ></v-date-picker>
                   </v-menu>
+                  <v-alert v-if="errorMessage" type="error" dense outlined class="mt-2">
+                    {{ errorMessage }}
+                  </v-alert>
                 </div>
               </v-expansion-panel-content>
             </v-expansion-panel>
@@ -382,8 +385,7 @@
         <v-divider class="flex-shrink-0"></v-divider>
 
         <!-- FOOTER  -->
-        <div class="flex-shrink-0 pa-2" style="background-color: white;">
-          
+        <div class="flex-shrink-0 pa-2" style="background-color: white">
           <!-- MESSAGGIO PRIVACY NEI FILTRI -->
           <v-alert
             v-if="isPrivacyRestrictedLocal"
@@ -397,7 +399,14 @@
 
           <v-row class="ma-0" justify="center" dense>
             <v-col cols="4" class="px-1 text-center">
-              <v-btn block small color="grey darken-1" text @click="cancelFilters" :disabled="!isModified">
+              <v-btn
+                block
+                small
+                color="grey darken-1"
+                text
+                @click="cancelFilters"
+                :disabled="!isModified"
+              >
                 Annulla
               </v-btn>
             </v-col>
@@ -420,7 +429,7 @@
                 small
                 color="primary"
                 @click="saveFiltersAndRefreshStat()"
-                :disabled="!isModified"
+                :disabled="isApplyDisabled || !isModified"
               >
                 Applica
               </v-btn>
@@ -470,6 +479,7 @@ export default {
       showPickerFrom: false,
       showPickerTo: false,
       loader: null,
+      errorMessage: null,
       // puntualAggregationValue: "NONE",
       //timePeriodValue: null,
       localSelection: {
@@ -524,14 +534,17 @@ export default {
       if (!this.localSelection) return false;
       const dl = this.localSelection.dataLevel?.value || this.localSelection.dataLevel;
       const tu = this.localSelection.timeUnit?.value || this.localSelection.timeUnit;
-      return dl === 'employee' && tu === 'day';
+      return dl === "employee" && tu === "day";
     },
-
+    isApplyDisabled() {
+      console.log("isApplyDisabled", this.errorMessage);
+      return !!this.errorMessage;
+    },
     isPrivacyRestricted() {
       if (!this.activeSelection) return false;
       const dl = this.activeSelection.dataLevel?.value || this.activeSelection.dataLevel;
       const tu = this.activeSelection.timeUnit?.value || this.activeSelection.timeUnit;
-      return dl === 'employee' && tu === 'day';
+      return dl === "employee" && tu === "day";
     },
     timeSelected() {
       return (
@@ -629,17 +642,9 @@ export default {
       const localStr = JSON.stringify(this.localSelection);
       const activeStr = JSON.stringify(this.activeSelection);
 
-      // DEBUG: Se sono diversi, stampiamo in console i due oggetti
-      if (localStr !== activeStr) {
-        console.warn("⚠️ IS MODIFIED È SCATTATO! Ecco la differenza:");
-        console.log("LOCAL SELECTION (Menu a tendina UI):", JSON.parse(localStr));
-        console.log("ACTIVE SELECTION (Ultimo stato salvato):", JSON.parse(activeStr));
-      } else {
-        console.log(
-          "✅ IS MODIFIED: Nessuna differenza tra localSelection e activeSelection."
-        );
-      }
-      return localStr !== activeStr;
+      const modified = localStr !== activeStr;
+      console.log("isModified:", modified);
+      return modified;
     },
 
     // Ritorna TRUE se le impostazioni UI attuali sono DIVERSE dal Default del Profilo (Attiva REIMPOSTA)
@@ -693,6 +698,53 @@ export default {
     ...mapActions("stat", { getConfigurationByUser: "getConfigurationByUser" }),
     comparator(a, b) {
       return a.value === b.value;
+    },
+
+    validateDateRange() {
+      console.log("validateDateRange");
+
+      const from = new Date(this.localSelection.selectedDateFrom);
+      const to = new Date(this.localSelection.selectedDateTo);
+
+      // Normalizza gli orari per confrontare solo le date
+      from.setHours(0, 0, 0, 0);
+      to.setHours(0, 0, 0, 0);
+
+      // Selezione non valida
+      if (from > to) {
+        this.errorMessage = "La data iniziale deve essere precedente alla data finale.";
+        return false;
+      }
+
+      // Giorno della settimana:
+      // 0 = Domenica
+      // 1 = Lunedì
+      // ...
+      // 6 = Sabato
+      const fromDay = from.getDay();
+
+      // Trova il primo lunedì presente nel range
+      const firstMonday = new Date(from);
+
+      if (fromDay !== 1) {
+        const daysUntilMonday = (8 - fromDay) % 7;
+        firstMonday.setDate(firstMonday.getDate() + daysUntilMonday);
+      }
+
+      // La domenica della settimana che inizia da firstMonday
+      const firstSunday = new Date(firstMonday);
+      firstSunday.setDate(firstSunday.getDate() + 6);
+
+      // Il range deve contenere tutta la settimana lunedì -> domenica
+      if (firstSunday > to) {
+        this.errorMessage =
+          "Il periodo selezionato deve includere almeno una settimana completa (da lunedì a domenica).";
+        return false;
+      }
+
+      // Tutto ok
+      this.errorMessage = null;
+      return true;
     },
     toggleSelectAllMeans() {
       this.$nextTick(() => {
@@ -758,6 +810,7 @@ export default {
           configurationId: this.activeConfiguration?.items,
           selection: this.localSelection,
         };
+        console.log("Preferences saved:", prefs);
         localStorage.setItem(`pg_stats_prefs`, JSON.stringify(prefs));
       } catch (e) {
         console.error("Error saving preferences", e);
@@ -813,7 +866,7 @@ export default {
       }
       const dl = selection.dataLevel?.value || selection.dataLevel;
       const tu = selection.timeUnit?.value || selection.timeUnit;
-      if (dl === 'employee' && tu === 'day') {
+      if (dl === "employee" && tu === "day") {
         this.isLoading = false;
         this.$set(this, "viewData", null);
         return;
@@ -1009,6 +1062,12 @@ export default {
         }
       },
       deep: true,
+    },
+    "localSelection.selectedDateFrom": function () {
+      this.validateDateRange();
+    },
+    "localSelection.selectedDateTo": function () {
+      this.validateDateRange();
     },
     activeConfiguration: {
       handler(newVal) {
