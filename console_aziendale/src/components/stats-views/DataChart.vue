@@ -77,8 +77,10 @@ Visualization:
       },
       createGroup(mean) {
         const elems = this.configuration.dataColumns.map(dc => this.createChart(dc, mean));
-        const width = elems.length <=4 ? 12 / elems.length : 3;
-        elems.forEach(element => element.width = width);
+        // const width = elems.length <=4 ? 12 / elems.length : 3;
+        // elems.forEach(element => element.width = width);
+        elems.forEach(element => element.width = 12);
+
         return elems;
       },
       createChart(dc, mean) {
@@ -113,7 +115,9 @@ Visualization:
           chart.data = this.dataChartData.data.map(row => this.row2chartData(row, this.dataChartData.headers, prefix, chart.type));
         }
         chart.layout = {
-          title: {text: chart.title}
+          title: {text: chart.title},
+          height: 400,
+          autosize: true
         }
         if (chart.type === 'bar') {
           chart.layout.barmode = 'stack';

@@ -23,7 +23,7 @@ export const statsConfigurations = [
         ],
         dataColumns: [DC.COUNTING_POINTS],
         timeUnit: [
-          { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
+          // { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
           { label: VC.TIMEUNIT.MONTH, value: "month", apiField: "month" },
           { label: VC.TIMEUNIT.YEAR, value: "year", apiField: "year" },
@@ -68,7 +68,7 @@ export const statsConfigurations = [
         ],
         dataColumns: [DC.COUNTING_POINTS],
         timeUnit: [
-          { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
+          // { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
           { label: VC.TIMEUNIT.MONTH, value: "month", apiField: "month" },
           { label: VC.TIMEUNIT.YEAR, value: "year", apiField: "year" },
@@ -112,7 +112,7 @@ export const statsConfigurations = [
           DC.REGISTERED_EMPLOYEES_PERCENTAGE,  
           DC.ACTIVE_EMPLOYEES_PERCENTAGE_REGISTRATION, DC.UNSUBSCRIBED_EMPLOYEES_PERCENTAGE_REGISTRATION
         ], timeUnit: [
-          { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
+          // { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
           { label: VC.TIMEUNIT.MONTH, value: "month", apiField: "month" },
           { label: VC.TIMEUNIT.YEAR, value: "year", apiField: "year" },
@@ -165,7 +165,7 @@ export const statsConfigurations = [
            DC.DROPOUT_PROGRESSIVE, 
           DC.REGISTERED_EMPLOYEES_PERCENTAGE, 
           DC.ACTIVE_EMPLOYEES_PERCENTAGE_REGISTRATION, DC.UNSUBSCRIBED_EMPLOYEES_PERCENTAGE_REGISTRATION        ],        timeUnit: [
-          { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
+          // { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
           { label: VC.TIMEUNIT.MONTH, value: "month", apiField: "month" },
           { label: VC.TIMEUNIT.YEAR, value: "year", apiField: "year" },
@@ -205,7 +205,7 @@ export const statsConfigurations = [
         timeUnit: [
           { label: VC.TIMEUNIT.HOUR, value: "hour", apiField: "hour" },
           { label: VC.TIMEUNIT.DOW, value: "dayOfWeek", apiField: "dayOfWeek" },
-          { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
+          // { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
           { label: VC.TIMEUNIT.MONTH, value: "month", apiField: "month" },
           { label: VC.TIMEUNIT.YEAR, value: "year", apiField: "year" },
@@ -248,7 +248,7 @@ export const statsConfigurations = [
         timeUnit: [
           { label: VC.TIMEUNIT.HOUR, value: "hour", apiField: "hour" },
           { label: VC.TIMEUNIT.DOW, value: "dayOfWeek", apiField: "dayOfWeek" },
-          { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
+          // { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
           { label: VC.TIMEUNIT.MONTH, value: "month", apiField: "month" },
           { label: VC.TIMEUNIT.YEAR, value: "year", apiField: "year" },
@@ -291,7 +291,7 @@ export const statsConfigurations = [
         timeUnit: [
           { label: VC.TIMEUNIT.HOUR, value: "hour", apiField: "hour" },
           { label: VC.TIMEUNIT.DOW, value: "dayOfWeek", apiField: "dayOfWeek" },
-          { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
+          // { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
           { label: VC.TIMEUNIT.MONTH, value: "month", apiField: "month" },
           { label: VC.TIMEUNIT.YEAR, value: "year", apiField: "year" },
@@ -334,7 +334,7 @@ export const statsConfigurations = [
         timeUnit: [
           { label: VC.TIMEUNIT.HOUR, value: "hour", apiField: "hour" },
           { label: VC.TIMEUNIT.DOW, value: "dayOfWeek", apiField: "dayOfWeek" },
-          { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
+          // { label: VC.TIMEUNIT.DAY, value: "day", apiField: "day" },
           { label: VC.TIMEUNIT.WEEK, value: "week", apiField: "week" },
           { label: VC.TIMEUNIT.MONTH, value: "month", apiField: "month" },
           { label: VC.TIMEUNIT.YEAR, value: "year", apiField: "year" },

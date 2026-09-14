@@ -419,7 +419,7 @@ function getStat(configuration) {
     ? configuration.puntualAggregationItems.map(i => i.code || i.id).join(',')
     : null;
     
-  const companies = (filterType === 'COMPANIES' && configuration.puntualAggregationItems?.length)
+    const companies = (!companyId && filterType === 'COMPANIES' && configuration.puntualAggregationItems?.length)
     ? configuration.puntualAggregationItems.map(i => i.id).join(',')
     : null;
   if (configuration.source === 'tracks') {
@@ -452,7 +452,6 @@ function getStat(configuration) {
       companyId,
       companies,
       locations,
-      employeeCodes, 
       configuration.timeUnit.apiField,
       agg,
       from, to,
