@@ -36,10 +36,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.smartcommunitylab.pgazienda.Constants;
+import it.smartcommunitylab.pgazienda.domain.Campaign;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
 import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
 import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
 import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
+import it.smartcommunitylab.pgazienda.service.CampaignService;
 import it.smartcommunitylab.pgazienda.service.StatTrackService;
 import it.smartcommunitylab.pgazienda.service.UserService;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
@@ -56,6 +58,8 @@ public class StatTrackResource {
 	
 	@Autowired
 	private StatTrackService dataService;
+	@Autowired
+	private CampaignService campaignService;
 	@Autowired
 	private UserService userService;
 
@@ -91,17 +95,10 @@ public class StatTrackResource {
 		@RequestParam(required=false) String from, 
 		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
 	{
-    	if(!userService.isInCampaignRole(campaignId)) {
-    		if(StringUtils.isNotBlank(companyId)) {
-    	    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
-    	    		throw new SecurityException("Insufficient rights");        		
-        	} else {
-        		throw new SecurityException("Insufficient rights");	
-        	}
-    	}
         log.debug("REST request to get statistics");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	return ResponseEntity.ok(dataService.getTrackStats(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
 	}
 
@@ -137,17 +134,10 @@ public class StatTrackResource {
 		@RequestParam(required=false) String from, 
 		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
 	{
-    	if(!userService.isInCampaignRole(campaignId)) {
-    		if(StringUtils.isNotBlank(companyId)) {
-    	    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
-    	    		throw new SecurityException("Insufficient rights");        		
-        	} else {
-        		throw new SecurityException("Insufficient rights");	
-        	}
-    	}
         log.debug("REST request to get statistics");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	return ResponseEntity.ok(dataService.getTrackStatsFlat(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
 	}
 
@@ -169,17 +159,10 @@ public class StatTrackResource {
 		@RequestParam(required=false) String to,
 		HttpServletResponse response) throws IOException, InconsistentDataException 
 	{
-    	if(!userService.isInCampaignRole(campaignId)) {
-    		if(StringUtils.isNotBlank(companyId)) {
-    	    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
-    	    		throw new SecurityException("Insufficient rights");        		
-        	} else {
-        		throw new SecurityException("Insufficient rights");	
-        	}
-    	}
         log.debug("REST request to get statistics CSV");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	dataService.getTrackStatsCSV(response.getWriter(), campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 	}
 
@@ -201,17 +184,52 @@ public class StatTrackResource {
 		@RequestParam(required=false) String to,
 		HttpServletResponse response) throws IOException, InconsistentDataException 
 	{
-    	if(!userService.isInCampaignRole(campaignId)) {
-    		if(StringUtils.isNotBlank(companyId)) {
-    	    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) 
-    	    		throw new SecurityException("Insufficient rights");        		
-        	} else {
-        		throw new SecurityException("Insufficient rights");	
-        	}
-    	}
         log.debug("REST request to get statistics CSV");
     	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	dataService.csvStatisticsNew(response.getWriter(), campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 	}
+
+	private void checkUserPermissions(String campaignId, String companyId, GROUP_BY_TIME timeGroupBy,
+			GROUP_BY_DATA dataGroupBy, LocalDate fromDate, LocalDate toDate) throws InconsistentDataException {
+		if (!userService.isInCampaignRole(campaignId)) {
+			if (StringUtils.isNotBlank(companyId)) {
+				if (!userService.isInCompanyRole(companyId, Constants.ROLE_MOBILITY_MANAGER)) {
+					throw new SecurityException("Insufficient rights");
+				}
+			} else {
+				throw new SecurityException("Insufficient rights");
+			}
+		}
+
+		if (!GROUP_BY_DATA.employee.equals(dataGroupBy)) {
+			return;
+		}
+
+		Campaign campaign = campaignService.getCampaign(campaignId).orElse(null);
+		if (campaign == null) {
+			throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		}
+
+		LocalDate effectiveFromDate = fromDate == null ? campaign.getFrom() : fromDate;
+		LocalDate effectiveToDate = toDate == null ? campaign.getTo() : toDate;
+
+		if (effectiveFromDate.isBefore(campaign.getFrom()) || effectiveToDate.isAfter(campaign.getTo())) {
+			throw new InconsistentDataException("Date range must be inside campaign dates", "INVALID_DATE_RANGE");
+		}
+
+		if (effectiveFromDate.isAfter(effectiveToDate)) {
+			throw new InconsistentDataException("Invalid date range: from is after to", "INVALID_DATE_RANGE");
+		}
+
+		if (GROUP_BY_TIME.day.equals(timeGroupBy) && !userService.isAdminUser()) {
+			throw new SecurityException("Insufficient rights");
+		}
+
+		if (effectiveToDate.isBefore(effectiveFromDate.plusDays(14)) && !userService.isAdminUser()) {
+			throw new InconsistentDataException("Date range for employee grouping must be at least two weeks", "INVALID_DATE_RANGE");
+		}
+	}
+
 }
