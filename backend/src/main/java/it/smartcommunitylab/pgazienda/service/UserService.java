@@ -370,6 +370,13 @@ public class UserService {
     public UserInfo getUserDetail() {
     	return SecurityUtils.getCurrentUserInfo();
     }
+	
+	public boolean isAdminUser() {
+		UserInfo user = getUserDetail();
+		return user != null && user.getRoles() != null
+				&& user.getRoles().stream().anyMatch(r -> Constants.ROLE_ADMIN.equals(r.getRole()));
+	}
+	
     public List<User> getUserByEmployeeCode(String campaign, String companyCode, String userCode) {
         return userRepository.findByCampaignAndCompanyAndEmployeeCode(campaign, companyCode, "^" + userCode+"$");
     }

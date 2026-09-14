@@ -701,48 +701,62 @@ export default {
     },
 
     validateDateRange() {
-      console.log("validateDateRange");
+      const dateFromRaw = this.localSelection?.selectedDateFrom;
+      const dateToRaw = this.localSelection?.selectedDateTo;
 
-      const from = new Date(this.localSelection.selectedDateFrom);
-      const to = new Date(this.localSelection.selectedDateTo);
+      // Se entrambe sono vuote, equivale al periodo intero della campagna -> Valido
+      if (!dateFromRaw && !dateToRaw) {
+        this.errorMessage = null;
+        return true;
+      }
 
-      // Normalizza gli orari per confrontare solo le date
+      // Se solo una delle due date è specificata
+      if (!dateFromRaw || !dateToRaw) {
+        this.errorMessage = "Specificare sia la data di inizio che la data di fine.";
+        return false;
+      }
+
+      const from = new Date(dateFromRaw);
+      const to = new Date(dateToRaw);
       from.setHours(0, 0, 0, 0);
       to.setHours(0, 0, 0, 0);
 
-      // Selezione non valida
+      // Data inizio successiva a data fine
       if (from > to) {
         this.errorMessage = "La data iniziale deve essere precedente alla data finale.";
         return false;
       }
 
-      // Giorno della settimana:
-      // 0 = Domenica
-      // 1 = Lunedì
-      // ...
-      // 6 = Sabato
-      const fromDay = from.getDay();
+      // 1. Controllo rispetto ai limiti della campagna
+      const campaign = this.localSelection?.campaign || this.activeSelection?.campaign;
+      if (campaign) {
+        if (campaign.from) {
+          const campaignFrom = new Date(campaign.from);
+          campaignFrom.setHours(0, 0, 0, 0);
+          if (from < campaignFrom) {
+            this.errorMessage = "La data di inizio non può essere precedente all'inizio della campagna.";
+            return false;
+          }
+        }
 
-      // Trova il primo lunedì presente nel range
-      const firstMonday = new Date(from);
-
-      if (fromDay !== 1) {
-        const daysUntilMonday = (8 - fromDay) % 7;
-        firstMonday.setDate(firstMonday.getDate() + daysUntilMonday);
+        if (campaign.to) {
+          const campaignTo = new Date(campaign.to);
+          campaignTo.setHours(0, 0, 0, 0);
+          if (to > campaignTo) {
+            this.errorMessage = "La data di fine non può essere successiva alla fine della campagna.";
+            return false;
+          }
+        }
       }
 
-      // La domenica della settimana che inizia da firstMonday
-      const firstSunday = new Date(firstMonday);
-      firstSunday.setDate(firstSunday.getDate() + 6);
-
-      // Il range deve contenere tutta la settimana lunedì -> domenica
-      if (firstSunday > to) {
-        this.errorMessage =
-          "Il periodo selezionato deve includere almeno una settimana completa (da lunedì a domenica).";
+      // 2. Controllo durata minima di 14 giorni (estremi inclusi)
+      const diffDays = Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      if (diffDays < 14) {
+        this.errorMessage = "Il periodo selezionato deve avere una durata minima di 14 giorni.";
         return false;
       }
 
-      // Tutto ok
+      // Nessun errore
       this.errorMessage = null;
       return true;
     },
