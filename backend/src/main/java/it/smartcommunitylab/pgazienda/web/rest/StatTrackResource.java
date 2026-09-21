@@ -17,6 +17,7 @@
 package it.smartcommunitylab.pgazienda.web.rest;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -207,6 +208,11 @@ public class StatTrackResource {
 			return;
 		}
 
+		// group by employee requires checking campaign date range
+		if (GROUP_BY_TIME.day.equals(timeGroupBy) && !userService.isAdminUser()) {
+			throw new SecurityException("Insufficient rights");
+		}
+
 		Campaign campaign = campaignService.getCampaign(campaignId).orElse(null);
 		if (campaign == null) {
 			throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
@@ -223,12 +229,38 @@ public class StatTrackResource {
 			throw new InconsistentDataException("Invalid date range: from is after to", "INVALID_DATE_RANGE");
 		}
 
-		if (GROUP_BY_TIME.day.equals(timeGroupBy) && !userService.isAdminUser()) {
-			throw new SecurityException("Insufficient rights");
+		if (!userService.isAdminUser()) {
+			checkDateRange(effectiveFromDate, effectiveToDate, timeGroupBy);
 		}
+	}
 
-		if (effectiveToDate.isBefore(effectiveFromDate.plusDays(14)) && !userService.isAdminUser()) {
-			throw new InconsistentDataException("Date range for employee grouping must be at least two weeks", "INVALID_DATE_RANGE");
+	private void checkDateRange(LocalDate fromDate, LocalDate toDate, GROUP_BY_TIME timeGroupBy) throws InconsistentDataException {
+		if (GROUP_BY_TIME.hour.equals(timeGroupBy) || GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy) || GROUP_BY_TIME.year.equals(timeGroupBy)) {
+			if (toDate.isBefore(fromDate.plusDays(14))) {
+				throw new InconsistentDataException("Date range for employee grouping must be at least two weeks", "INVALID_DATE_RANGE");
+			}
+		}
+		if (GROUP_BY_TIME.total.equals(timeGroupBy)) {
+			if (toDate.isBefore(fromDate.plusDays(7))) {
+				throw new InconsistentDataException("Date range for employee grouping must be at least one week", "INVALID_DATE_RANGE");
+			}
+		}
+		if (GROUP_BY_TIME.week.equals(timeGroupBy)) {
+			if (!DayOfWeek.MONDAY.equals(fromDate.getDayOfWeek()) || !DayOfWeek.SUNDAY.equals(toDate.getDayOfWeek())) {
+				throw new InconsistentDataException("Date range for weekly grouping must start on Monday and end on Sunday", "INVALID_DATE_RANGE");
+			}
+		}
+		if (GROUP_BY_TIME.month.equals(timeGroupBy)) {
+			LocalDate monthEndDate = fromDate.withDayOfMonth(fromDate.lengthOfMonth());
+			if (!fromDate.isBefore(monthEndDate.minusDays(7))) {
+				throw new InconsistentDataException("Date range for monthly grouping must start before the last week of the month", "INVALID_DATE_RANGE");
+			}
+			if (toDate.isBefore(monthEndDate.plusDays(7))) {
+				throw new InconsistentDataException("Date range for monthly grouping must end at least one week after the end of the month", "INVALID_DATE_RANGE");
+			}
+			if (toDate.isBefore(fromDate.plusDays(7))) {
+				throw new InconsistentDataException("Date range for monthly grouping must be at least one week", "INVALID_DATE_RANGE");
+			}
 		}
 	}
 
