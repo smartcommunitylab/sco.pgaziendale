@@ -247,15 +247,17 @@
                   >
                     <template v-slot:activator="{ on }">
                       <v-text-field
-                        v-model="localSelection.selectedDateFrom"
+                        :value="formatDate(localSelection.selectedDateFrom)"
                         label="Seleziona la data di inizio"
-                        hint="YYYY/MM/DD/"
+                        hint="GG/MM/AAAA"
                         persistent-hint
                         v-on="on"
                       ></v-text-field>
                     </template>
                     <v-date-picker
                       v-model="localSelection.selectedDateFrom"
+                      locale="it-IT"
+                      first-day-of-week="1"
                       @input="showPickerFrom = false"
                     ></v-date-picker>
                   </v-menu>
@@ -270,15 +272,17 @@
                   >
                     <template v-slot:activator="{ on }">
                       <v-text-field
-                        v-model="localSelection.selectedDateTo"
+                        :value="formatDate(localSelection.selectedDateTo)"
                         label="Seleziona la data di fine"
-                        hint="YYYY/MM/DD"
+                        hint="GG/MM/AAAA"
                         persistent-hint
                         v-on="on"
                       ></v-text-field>
                     </template>
                     <v-date-picker
                       v-model="localSelection.selectedDateTo"
+                      locale="it-IT"
+                      first-day-of-week="1"
                       @input="showPickerTo = false"
                     ></v-date-picker>
                   </v-menu>
@@ -699,7 +703,11 @@ export default {
     comparator(a, b) {
       return a.value === b.value;
     },
-
+    formatDate(date) {
+      if (!date) return "";
+      const [year, month, day] = date.split("-");
+      return `${day}/${month}/${year}`;
+    },
     validateDateRange() {
       const dateFromRaw = this.localSelection?.selectedDateFrom;
       const dateToRaw = this.localSelection?.selectedDateTo;
@@ -721,39 +729,104 @@ export default {
       from.setHours(0, 0, 0, 0);
       to.setHours(0, 0, 0, 0);
 
-      // Data inizio successiva a data fine
-      if (from > to) {
-        this.errorMessage = "La data iniziale deve essere precedente alla data finale.";
-        return false;
-      }
-
-      // 1. Controllo rispetto ai limiti della campagna
+      // Controllo rispetto ai limiti della campagna (come da backend)
       const campaign = this.localSelection?.campaign || this.activeSelection?.campaign;
       if (campaign) {
         if (campaign.from) {
           const campaignFrom = new Date(campaign.from);
           campaignFrom.setHours(0, 0, 0, 0);
           if (from < campaignFrom) {
-            this.errorMessage = "La data di inizio non può essere precedente all'inizio della campagna.";
+            this.errorMessage =
+              "La data di inizio non può essere precedente all'inizio della campagna.";
             return false;
           }
         }
-
         if (campaign.to) {
           const campaignTo = new Date(campaign.to);
           campaignTo.setHours(0, 0, 0, 0);
           if (to > campaignTo) {
-            this.errorMessage = "La data di fine non può essere successiva alla fine della campagna.";
+            this.errorMessage =
+              "La data di fine non può essere successiva alla fine della campagna.";
             return false;
           }
         }
       }
 
-      // 2. Controllo durata minima di 14 giorni (estremi inclusi)
-      const diffDays = Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      if (diffDays < 14) {
-        this.errorMessage = "Il periodo selezionato deve avere una durata minima di 14 giorni.";
+      // Data inizio successiva a data fine
+      if (from > to) {
+        this.errorMessage = "La data iniziale deve essere precedente alla data finale.";
         return false;
+      }
+
+      const diffDays = Math.round(
+        (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const timeGroupBy = this.localSelection?.timeUnit?.apiField;
+
+      // hour, dayOfWeek, year --> almeno 14 giorni
+      if (
+        timeGroupBy === "hour" ||
+        timeGroupBy === "dayOfWeek" ||
+        timeGroupBy === "year"
+      ) {
+        if (diffDays < 14) {
+          this.errorMessage =
+            "Il periodo selezionato deve avere una durata minima di 14 giorni per questo tipo di aggregazione.";
+          return false;
+        }
+      }
+
+      // total (campagna) --> almeno 7 giorni
+      if (timeGroupBy === "total") {
+        if (diffDays < 7) {
+          this.errorMessage =
+            "Il periodo selezionato deve avere una durata minima di 7 giorni.";
+          return false;
+        }
+      }
+
+      // week --> deve iniziare di lunedì e finire di domenica
+      if (timeGroupBy === "week") {
+        const fromDay = from.getDay(); // 0=Domenica, 1=Lunedì, ...
+        const toDay = to.getDay();
+        if (fromDay !== 1 || toDay !== 0) {
+          this.errorMessage =
+            "Il periodo per l'aggregazione settimanale deve iniziare di lunedì e terminare di domenica.";
+          return false;
+        }
+      }
+
+      // month --> vincoli rispetto all'inizio/fine mese
+      if (timeGroupBy === "month") {
+        const monthEndDate = new Date(from.getFullYear(), from.getMonth() + 1, 0); // ultimo giorno del mese di "from"
+        monthEndDate.setHours(0, 0, 0, 0);
+
+        const monthEndMinus7 = new Date(monthEndDate);
+        monthEndMinus7.setDate(monthEndMinus7.getDate() - 7);
+
+        const monthEndPlus7 = new Date(monthEndDate);
+        monthEndPlus7.setDate(monthEndPlus7.getDate() + 7);
+
+        // from deve essere prima di (fine mese - 7 giorni)
+        if (from >= monthEndMinus7) {
+          this.errorMessage =
+            "La data di inizio deve precedere l'ultima settimana del mese.";
+          return false;
+        }
+
+        // to deve essere dopo (fine mese + 7 giorni)
+        if (to < monthEndPlus7) {
+          this.errorMessage =
+            "La data di fine deve essere almeno una settimana dopo la fine del mese.";
+          return false;
+        }
+
+        // durata minima di 7 giorni
+        if (diffDays < 7) {
+          this.errorMessage =
+            "Il periodo selezionato deve avere una durata minima di 7 giorni.";
+          return false;
+        }
       }
 
       // Nessun errore
