@@ -14,6 +14,7 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -28,7 +29,7 @@ import it.smartcommunitylab.pgazienda.repository.StatTrackRepository;
 public class StatTrackAggregationProcedureTest {
 
 	@Test
-	public void rebuildStatTrackCollectionReadsAllDayStatsWithoutDeletingExistingStatTracks() {
+	public void rebuildStatTrackCollectionClearsAllStatTracksBeforeReadingAllDayStats() {
 		DayStatRepository dayStatRepository = mock(DayStatRepository.class);
 		StatTrackRepository statTrackRepository = mock(StatTrackRepository.class);
 		StatTrackAggregationProcedure procedure = createProcedure(dayStatRepository, statTrackRepository);
@@ -41,12 +42,14 @@ public class StatTrackAggregationProcedureTest {
 		verify(dayStatRepository).findAll(pageableCaptor.capture());
 		assertDayStatSort(pageableCaptor.getValue().getSort());
 		verify(dayStatRepository, never()).findByCampaign(any(String.class), any(Pageable.class));
-		verify(statTrackRepository, never()).deleteAll();
 		verify(statTrackRepository).saveAll(any(Iterable.class));
+		InOrder inOrder = org.mockito.Mockito.inOrder(statTrackRepository, dayStatRepository);
+		inOrder.verify(statTrackRepository).deleteAll();
+		inOrder.verify(dayStatRepository).findAll(any(Pageable.class));
 	}
 
 	@Test
-	public void rebuildStatTrackCollectionReadsOnlyCampaignDayStatsWhenCampaignIsProvided() {
+	public void rebuildStatTrackCollectionClearsCampaignStatTracksBeforeReadingCampaignDayStats() {
 		DayStatRepository dayStatRepository = mock(DayStatRepository.class);
 		StatTrackRepository statTrackRepository = mock(StatTrackRepository.class);
 		StatTrackAggregationProcedure procedure = createProcedure(dayStatRepository, statTrackRepository);
@@ -59,8 +62,11 @@ public class StatTrackAggregationProcedureTest {
 		ArgumentCaptor<Pageable> pageableCaptor = forClass(Pageable.class);
 		verify(dayStatRepository).findByCampaign(eq("campaign"), pageableCaptor.capture());
 		assertDayStatSort(pageableCaptor.getValue().getSort());
-		verify(statTrackRepository, never()).deleteAll();
+		verify(statTrackRepository).deleteByCampaign("campaign");
 		verify(statTrackRepository).saveAll(any(Iterable.class));
+		InOrder inOrder = org.mockito.Mockito.inOrder(statTrackRepository, dayStatRepository);
+		inOrder.verify(statTrackRepository).deleteByCampaign("campaign");
+		inOrder.verify(dayStatRepository).findByCampaign(eq("campaign"), any(Pageable.class));
 	}
 
 	@Test

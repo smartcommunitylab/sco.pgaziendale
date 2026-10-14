@@ -3,6 +3,8 @@ package it.smartcommunitylab.pgazienda.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +28,14 @@ public class StatTrackAggregationProcedure {
 	@Autowired
 	private StatTrackRepository statTrackRepository;
 
+	private static final Logger logger = LoggerFactory.getLogger(StatTrackAggregationProcedure.class);
+
 	public long rebuildStatTrackCollection(String campaign) {
+		logger.info("Rebuilding stat track collection for campaign: {}", campaign);
+		if (campaign != null && !campaign.trim().isEmpty()) {
+			statTrackRepository.deleteByCampaign(campaign);
+		}
+
 		long count = 0;
 		int pageNumber = 0;
 		Page<DayStat> page;
@@ -46,15 +55,12 @@ public class StatTrackAggregationProcedure {
 			}
 
 			statTrackRepository.saveAll(statTracks);
+			logger.info("Saved {} stat tracks for page number {}", statTracks.size(), pageNumber);
 			count += statTracks.size();
 			pageNumber++;
 		} while (page.hasNext());
 
 		return count;
-	}
-
-	public long rebuildStatTrackCollection() {
-		return rebuildStatTrackCollection(null);
 	}
 
 	private Page<DayStat> findDayStatPage(String campaign, int pageNumber) {
