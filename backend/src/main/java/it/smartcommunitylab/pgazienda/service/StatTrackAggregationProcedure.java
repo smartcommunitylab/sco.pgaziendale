@@ -27,6 +27,10 @@ public class StatTrackAggregationProcedure {
 	private StatTrackRepository statTrackRepository;
 
 	public long rebuildStatTrackCollection(String campaign) {
+		if (campaign != null && !campaign.trim().isEmpty()) {
+			statTrackRepository.deleteByCampaign(campaign);
+		}
+
 		long count = 0;
 		int pageNumber = 0;
 		Page<DayStat> page;
@@ -51,10 +55,6 @@ public class StatTrackAggregationProcedure {
 		} while (page.hasNext());
 
 		return count;
-	}
-
-	public long rebuildStatTrackCollection() {
-		return rebuildStatTrackCollection(null);
 	}
 
 	private Page<DayStat> findDayStatPage(String campaign, int pageNumber) {
