@@ -114,6 +114,25 @@ public class EmployeeResourceITest {
         assertThat(updated.getLocation()).isEqualTo(e.getLocation());
 
     }
+
+    @Test
+    public void testUpdateWithDuplicateCode() throws Exception {
+        Employee employeeToUpdate = employeeRepo.save(testEmployee());
+        Employee otherEmployee = testEmployee();
+        otherEmployee.setCode("5678");
+        employeeRepo.save(otherEmployee);
+
+        employeeToUpdate.setCode("5678");
+        restMockMvc.perform(
+                        put("/api/companies/{companyId}/employees/{id}", company.getId(), employeeToUpdate.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(TestUtil.convertObjectToJsonBytes(employeeToUpdate)))
+                .andExpect(status().isBadRequest());
+
+        Employee unchangedEmployee = employeeRepo.findById(employeeToUpdate.getId()).orElseThrow();
+        assertThat(unchangedEmployee.getCode()).isEqualTo("1234");
+        assertThat(employeeRepo.findAll()).hasSize(2);
+    }
     
     /**
      * Test that an existing employee can be deleted with DELETE /api/companies/{companyId}/employees/{id}.

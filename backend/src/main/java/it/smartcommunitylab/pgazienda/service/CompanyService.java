@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -399,8 +400,12 @@ public class CompanyService {
 				if(loc == null) {
 					throw new InconsistentDataException("Location not found", "LOCATION_NOT_FOUND");
 				}
+				// check if there is another employee with the same code
+				List<Employee> existing = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, employee.getCode());
+				if (existing.stream().anyMatch(existingEmployee -> !Objects.equals(existingEmployee.getId(), employee.getId()))) {
+					throw new InconsistentDataException("Duplicate employee code", "INVALID_COMPANY_DATA_DUPLICATE_EMPLOYEE");
+				}
 				e.setCompanyEmail(employee.getCompanyEmail());
-				e.setCode(employee.getCode());
 				e.setLocation(employee.getLocation());
 				e.setName(employee.getName());
 				e.setSurname(employee.getSurname());
