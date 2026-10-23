@@ -133,6 +133,41 @@ public class EmployeeResourceITest {
         assertThat(unchangedEmployee.getCode()).isEqualTo("1234");
         assertThat(employeeRepo.findAll()).hasSize(2);
     }
+
+    @Test
+    public void testUpdateWithTrackingRecordCannotChangeCode() throws Exception {
+        Employee employeeToUpdate = testEmployee();
+        employeeToUpdate.setTrackingRecord(Collections.singletonMap("campaign-1", new Employee.TrackingRecord()));
+        employeeToUpdate = employeeRepo.save(employeeToUpdate);
+        employeeToUpdate.setCode("5678");
+
+        restMockMvc.perform(
+                        put("/api/companies/{companyId}/employees/{id}", company.getId(), employeeToUpdate.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(TestUtil.convertObjectToJsonBytes(employeeToUpdate)))
+                .andExpect(status().isBadRequest());
+
+        Employee unchangedEmployee = employeeRepo.findById(employeeToUpdate.getId()).orElseThrow();
+        assertThat(unchangedEmployee.getCode()).isEqualTo("1234");
+    }
+
+    @Test
+    public void testUpdateWithTrackingRecordAllowsKeepingCode() throws Exception {
+        Employee employeeToUpdate = testEmployee();
+        employeeToUpdate.setTrackingRecord(Collections.singletonMap("campaign-1", new Employee.TrackingRecord()));
+        employeeToUpdate = employeeRepo.save(employeeToUpdate);
+        employeeToUpdate.setName("Updated name");
+
+        restMockMvc.perform(
+                        put("/api/companies/{companyId}/employees/{id}", company.getId(), employeeToUpdate.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(TestUtil.convertObjectToJsonBytes(employeeToUpdate)))
+                .andExpect(status().isOk());
+
+        Employee updatedEmployee = employeeRepo.findById(employeeToUpdate.getId()).orElseThrow();
+        assertThat(updatedEmployee.getCode()).isEqualTo("1234");
+        assertThat(updatedEmployee.getName()).isEqualTo("Updated name");
+    }
     
     /**
      * Test that an existing employee can be deleted with DELETE /api/companies/{companyId}/employees/{id}.

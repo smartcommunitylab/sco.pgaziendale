@@ -400,11 +400,17 @@ public class CompanyService {
 				if(loc == null) {
 					throw new InconsistentDataException("Location not found", "LOCATION_NOT_FOUND");
 				}
+				if (e.getTrackingRecord() != null && !e.getTrackingRecord().isEmpty()
+						&& !Objects.equals(e.getCode(), employee.getCode())) {
+					throw new InconsistentDataException("Employee code cannot be changed when tracking records exist",
+							"INVALID_COMPANY_DATA_EMPLOYEE");
+				}
 				// check if there is another employee with the same code
 				List<Employee> existing = employeeRepo.findByCompanyIdAndCodeIgnoreCase(companyId, employee.getCode());
 				if (existing.stream().anyMatch(existingEmployee -> !Objects.equals(existingEmployee.getId(), employee.getId()))) {
 					throw new InconsistentDataException("Duplicate employee code", "INVALID_COMPANY_DATA_DUPLICATE_EMPLOYEE");
 				}
+				e.setCode(employee.getCode());
 				e.setCompanyEmail(employee.getCompanyEmail());
 				e.setLocation(employee.getLocation());
 				e.setName(employee.getName());
