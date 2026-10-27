@@ -153,7 +153,7 @@ pagine dall'utente in base al suo login.
             to="/UtilizzoStrade"
             v-if="user.canDo('view', 'stats', adminCompany ? adminCompany.item.id : null)"
           >
-        <v-list-item link>
+        <!-- <v-list-item link>
           <v-list-item-icon>
             <v-icon
               color = "primary"
@@ -165,7 +165,7 @@ pagine dall'utente in base al suo login.
             </v-icon>
           </v-list-item-icon>
           <v-list-item-title :class="{ active: isActiveUtilizzoStrade }">Utilizzo Strade</v-list-item-title>
-        </v-list-item>
+        </v-list-item> -->
       </router-link>
         <v-list-item link  @click="doLogout">
           <v-list-item-icon>
