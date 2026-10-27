@@ -97,7 +97,7 @@ public class StatTrackResource {
 		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics");
-    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	return ResponseEntity.ok(dataService.getTrackStats(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
@@ -136,7 +136,7 @@ public class StatTrackResource {
 		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics");
-    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	return ResponseEntity.ok(dataService.getTrackStatsFlat(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
@@ -161,7 +161,7 @@ public class StatTrackResource {
 		HttpServletResponse response) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics CSV");
-    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	dataService.getTrackStatsCSV(response.getWriter(), campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
@@ -186,7 +186,7 @@ public class StatTrackResource {
 		HttpServletResponse response) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics CSV");
-    	LocalDate toDate = to == null ? LocalDate.now() : LocalDate.parse(to);
+    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
     	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	dataService.csvStatisticsNew(response.getWriter(), campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
