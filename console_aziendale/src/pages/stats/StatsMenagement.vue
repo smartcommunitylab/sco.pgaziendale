@@ -18,7 +18,7 @@
                 >
                   <v-tabs-slider color="primary"></v-tabs-slider>
                   <v-tab @click.prevent="setNewActiveView('Tabella')">Tabella</v-tab>
-                  <v-tab @click.prevent="setNewActiveView('Grafico')">Grafico</v-tab>
+                  <!-- <v-tab @click.prevent="setNewActiveView('Grafico')">Grafico</v-tab> -->
                 </v-tabs>
               </v-col>
               <v-col cols="6">
@@ -905,10 +905,8 @@ export default {
     },
 
     resetFilterAndRefreshStat() {
-      this.initiSelection();
-      this.setActiveSelection({ selection: this.copy(this.localSelection) });
+      this.initiSelection(true);
       this.getLocalStat(this.localSelection);
-      // this.mini = true;
       this.panel = [];
     },
 
@@ -978,18 +976,21 @@ export default {
       );
     },
     updatePuntualAggregationChange() {
-      if (!this.localSelection) return;
+      if (!this.localSelection || !this.localSelection.dataLevel) return;
 
-      this.localSelection.puntualAggregationSelected = this.localSelection.dataLevel.puntualAggregation.find(
+      const items = this.localSelection.dataLevel.puntualAggregation || [];
+      this.localSelection.puntualAggregationSelected = items.find(
         (v) => v.value === this.puntualAggregationSelected
-      );
+      ) || { label: "Nessuno", value: "NONE" };
+
       if (
-        this.localSelection &&
         this.localSelection.puntualAggregationSelected &&
-        this.localSelection.puntualAggregationSelected.value == "NONE"
-      )
+        this.localSelection.puntualAggregationSelected.value === "NONE"
+      ) {
         this.localSelection.puntualAggregationItems = [];
-      else this.getItemsAggregation();
+      } else {
+        this.getItemsAggregation();
+      }
     },
     setNewActiveView(view) {
       console.log(view);
@@ -1050,23 +1051,36 @@ export default {
       this.localSelection.selectedDateFrom = this.currentCampaign.item.from;
       this.localSelection.selectedDateTo = this.currentCampaign.item.to;
     },
-    initiSelection() {
+    initiSelection(forceDefault = false) {
       this.tab = this.activeViewType;
-      if (this.baseSelection && this.currentCampaign) {
-        //init with view configuration
 
-        console.log("baseSelection", this.baseSelection);
+      const def = this.view?.default || {};
+      const base = forceDefault ? {} : (this.baseSelection || {});
 
-        this.localSelection.company = this.baseSelection.company
-          ? this.baseSelection.company
-          : this.actualCompany
+      if (this.currentCampaign && this.currentCampaign.item) {
+        this.localSelection.company = this.actualCompany
           ? this.actualCompany.item
-          : undefined;
-        this.localSelection.source = this.baseSelection.source;
+          : (base.company || undefined);
+
+        this.localSelection.source = forceDefault
+          ? (def.source || this.view?.source)
+          : (base.source || def.source || this.view?.source);
+
         this.localSelection.campaign = this.currentCampaign.item;
-        this.localSelection.dataLevel = this.baseSelection.dataLevel;
-        this.localSelection.timeUnit = this.baseSelection.timeUnit;
-        this.localSelection.dataColumns = this.baseSelection.dataColumns;
+
+        this.localSelection.dataLevel = (forceDefault || !base.dataLevel)
+          ? this.copy(def.dataLevel)
+          : this.copy(base.dataLevel);
+
+        this.localSelection.timeUnit = (forceDefault || !base.timeUnit)
+          ? this.copy(def.timeUnit)
+          : this.copy(base.timeUnit);
+
+        const cols = (forceDefault || !base.dataColumns?.length)
+          ? (def.dataColumns || [])
+          : base.dataColumns;
+        this.localSelection.dataColumns = this.copy(cols);
+
         if (this.view && this.view.dataColumns && this.localSelection.dataColumns) {
           this.localSelection.dataColumns.sort((a, b) => {
             const indexA = this.view.dataColumns.findIndex(
@@ -1078,21 +1092,50 @@ export default {
             return indexA - indexB;
           });
         }
-        console.log("timePeriod", this.baseSelection.timePeriod);
-        this.localSelection.selectedDateFrom = this.baseSelection.selectedDateFrom;
-        this.localSelection.selectedDateTo = this.baseSelection.selectedDateTo;
-        this.puntualAggregationSelected = this.baseSelection.puntualAggregationSelected.value;
+
+        this.localSelection.selectedDateFrom = (!forceDefault && base.selectedDateFrom) || this.currentCampaign.item.from;
+        this.localSelection.selectedDateTo = (!forceDefault && base.selectedDateTo) || this.currentCampaign.item.to;
+
+        // LETTURA SICURA del filtro puntuale
+        const puntAgg = (forceDefault || !base.puntualAggregationSelected)
+          ? def.puntualAggregationSelected
+          : base.puntualAggregationSelected;
+        this.puntualAggregationSelected = puntAgg?.value || puntAgg || "NONE";
         this.updatePuntualAggregationChange();
-        this.timePeriod = this.baseSelection.timePeriod.value;
-        this.localSelection.timePeriod = this.baseSelection.timePeriod;
-        //load specific values
+
+        // Periodo
+        const tp = (forceDefault || !base.timePeriod) ? def.timePeriod : base.timePeriod;
+        this.timePeriod = tp?.value || tp || "ALL";
+        this.localSelection.timePeriod = typeof tp === "object" ? this.copy(tp) : { label: "Campagna", value: tp };
+
+        this.localSelection.direction = (forceDefault || !base.direction)
+          ? (def.direction || "all")
+          : base.direction;
+
+        this.localSelection.groupByMean = (forceDefault || base.groupByMean === undefined)
+          ? (def.groupByMean || false)
+          : base.groupByMean;
+
+        this.errorMessage = null;
+
+        // Reset puntuale items
+        if (forceDefault) {
+          this.localSelection.puntualAggregationItems = [];
+        }
+
+        // load specific values
         this.getItemsAggregation();
         this.getDataRange();
-        console.log("Configurations loaded: " + this.localSelection.campaign);
-        this.meansList = this.allMeans.filter((m) =>
-          this.localSelection.campaign.means.includes(m.value)
-        );
-        this.localSelection.means = this.localSelection.campaign.means.slice();
+
+        if (this.localSelection.campaign?.means) {
+          this.meansList = this.allMeans.filter((m) =>
+            this.localSelection.campaign.means.includes(m.value)
+          );
+          this.localSelection.means = (!forceDefault && base.means?.length)
+            ? base.means.slice()
+            : this.localSelection.campaign.means.slice();
+        }
+
         this.setActiveSelection({ selection: this.copy(this.localSelection) });
       }
     },
@@ -1160,33 +1203,19 @@ export default {
       handler(newVal) {
         if (!newVal || newVal.items === undefined || newVal.items === null) return;
 
-        // TENTA DI RECUPERARE LA SELEZIONE SALVATA
-        try {
-          const prefsStr = localStorage.getItem("pg_stats_prefs");
-          if (prefsStr) {
-            const prefs = JSON.parse(prefsStr);
-            // Solo se la configurazione è uguale a quella del momento in cui è stata salvata ripristiniamo i filtri
-            if (prefs.configurationId === newVal.items && prefs.selection) {
-              this.setActiveSelection({ selection: prefs.selection });
-            }
-          }
-        } catch (e) {
-          console.error("Error loading preferences", e);
-        }
-
         this.tab = this.activeViewType;
-        const currentCompany = this.activeSelection ? this.activeSelection.company : null;
 
-        this.baseSelection = this.copy(this.activeSelection);
+        // Reset completo: azzera la selezione precedente e forza i default della nuova configurazione
+        this.baseSelection = null;
+        this.panel = [];
+        this.initiSelection(true);
 
-        this.initiSelection();
-
-        if (currentCompany && this.localSelection && !this.localSelection.company) {
+        const currentCompany = this.actualCompany ? this.actualCompany.item : null;
+        if (currentCompany && this.localSelection) {
           this.localSelection.company = currentCompany;
-          this.activeSelection.company = currentCompany;
         }
 
-        if (this.activeSelection && this.currentCampaign) {
+        if (this.currentCampaign) {
           this.getLocalStat(this.localSelection);
         }
       },

@@ -394,36 +394,39 @@ function filterByPuntualAggregation(res, configuration) {
 
 // FIX: funzione helper per le date
 function getDateRange(configuration) {
+  const periodVal = configuration.timePeriod?.value || configuration.timePeriod;
   return {
-    from: configuration.timePeriod.value !== 'ALL' ? (configuration.selectedDateFrom || null) : null,
-    to:   configuration.timePeriod.value !== 'ALL' ? (configuration.selectedDateTo   || null) : null,
+    from: periodVal && periodVal !== 'ALL' ? (configuration.selectedDateFrom || null) : null,
+    to:   periodVal && periodVal !== 'ALL' ? (configuration.selectedDateTo   || null) : null,
   };
 }
 
 function getStat(configuration) {
-  if (!configuration.campaign?.id) return Promise.resolve([]);
+  if (!configuration || !configuration.campaign?.id) return Promise.resolve([]);
 
-  const agg   = configuration.dataLevel.value;
+  // FIX: evita TypeError se dataLevel è null o stringa
+  const agg = configuration.dataLevel?.value || configuration.dataLevel;
+  if (!agg) return Promise.resolve([]);
+
   const { from, to } = getDateRange(configuration);
   const companyId = (configuration.company || {}).id;
-  // Intercetta il tipo di filtro ('LOCATIONS', 'EMPLOYEES', 'COMPANIES', ecc.)
-  const filterType = configuration.puntualAggregationSelected?.value;
+  const filterType = configuration.puntualAggregationSelected?.value || configuration.puntualAggregationSelected;
 
-  // Estrai gli ID delle location come stringa separata da virgole
   const locations = (filterType === 'LOCATIONS' && configuration.puntualAggregationItems?.length)
     ? configuration.puntualAggregationItems.map(i => i.id).join(',')
     : null;
 
-  // Estrai i CODICI dei dipendenti (uso code con fallback su id se non presente)
   const employeeCodes = (filterType === 'EMPLOYEES' && configuration.puntualAggregationItems?.length)
     ? configuration.puntualAggregationItems.map(i => i.code || i.id).join(',')
     : null;
     
-    const companies = (!companyId && filterType === 'COMPANIES' && configuration.puntualAggregationItems?.length)
+  const companies = (!companyId && filterType === 'COMPANIES' && configuration.puntualAggregationItems?.length)
     ? configuration.puntualAggregationItems.map(i => i.id).join(',')
     : null;
-  if (configuration.source === 'tracks') {
 
+  const timeUnitApi = configuration.timeUnit?.apiField || configuration.timeUnit?.value || configuration.timeUnit;
+
+  if (configuration.source === 'tracks') {
     return callTrackStatsAPI(
       configuration.campaign.id,
       companyId,
@@ -432,7 +435,7 @@ function getStat(configuration) {
       configuration.means,
       employeeCodes, 
       configuration.direction,
-      configuration.timeUnit.apiField,
+      timeUnitApi,
       agg,
       from, to,
       getFields(configuration),
@@ -452,7 +455,7 @@ function getStat(configuration) {
       companyId,
       companies,
       locations,
-      configuration.timeUnit.apiField,
+      timeUnitApi,
       agg,
       from, to,
       true,
@@ -470,7 +473,7 @@ function getStat(configuration) {
       companies,
       locations,
       employeeCodes,
-      configuration.timeUnit.apiField,
+      timeUnitApi,
       agg,
       from, to,
       getFields(configuration),
@@ -480,6 +483,7 @@ function getStat(configuration) {
 
   return Promise.resolve([]);
 }
+
 
 function expandMulti(res, configuration) {
   if (res.length == 0 || res[0].values.length == 0) return;
