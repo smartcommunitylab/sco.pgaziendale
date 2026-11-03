@@ -85,7 +85,7 @@ public class StatMultimodalService {
 				.and("date").lte(to.toString()).gte(from.toString());
 		
 		if(StringUtils.isNotBlank(companyId)) {
-			criteria = criteria.and("companyId").is(companyId);
+			criteria = criteria.and("company").is(companyId);
 			if(StringUtils.isNotBlank(locationId)) {
 				criteria = criteria.and("location").is(locationId);
 			}
