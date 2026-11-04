@@ -491,6 +491,7 @@ export default {
       // puntualAggregationValue: "NONE",
       //timePeriodValue: null,
       localSelection: {
+          campaign: null,
         source: null,
         dataLevel: null,
         timeUnit: null,
@@ -570,22 +571,24 @@ export default {
       return view;
     },
     minCampaignDate() {
-      const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
-      if (!campaign?.from) return undefined;
-      return campaign.from.split("T")[0];
-    },
-    maxCampaignDate() {
-      const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
-      
-      // Calcola "oggi" in fuso orario locale YYYY-MM-DD
-      const now = new Date();
-      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const campaign = this.currentCampaign?.item;
+  return campaign?.from ? campaign.from.split("T")[0] : undefined;
+},
+maxCampaignDate() {
+  const campaign = this.currentCampaign?.item;
+  const now = new Date();
+  const today = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+  ].join("-");
 
-      const campaignTo = campaign?.to ? campaign.to.split("T")[0] : today;
+  const campaignTo = campaign?.to
+    ? campaign.to.split("T")[0]
+    : today;
 
-      // Il limite massimo assoluto non può superare né la fine della campagna né oggi
-      return campaignTo < today ? campaignTo : today;
-    },
+  return campaignTo < today ? campaignTo : today;
+},
     getConfigurationById() {
       let conf = {};
       if (this.configurations && this.configurations.items && this.activeConfiguration)
@@ -1196,12 +1199,35 @@ onDateToChange(newVal) {
           });
         }
 
-        const defaultDateTo = this.maxCampaignDate || (this.currentCampaign.item.to ? this.currentCampaign.item.to.split("T")[0] : undefined);
-        const candidateDateTo = (!forceDefault && base.selectedDateTo) || defaultDateTo;
+const campaign = this.currentCampaign.item;
+const sameCampaign = base.campaign?.id === campaign.id;
+const restoreDates = !forceDefault && sameCampaign;
 
-        this.localSelection.selectedDateFrom = (!forceDefault && base.selectedDateFrom) || (this.currentCampaign.item.from ? this.currentCampaign.item.from.split("T")[0] : undefined);
-        this.localSelection.selectedDateTo = (this.maxCampaignDate && candidateDateTo > this.maxCampaignDate) ? this.maxCampaignDate : candidateDateTo;
- 
+const defaultDateFrom = campaign.from
+  ? campaign.from.split("T")[0]
+  : undefined;
+const defaultDateTo = this.maxCampaignDate;
+
+const savedDateFrom = restoreDates && base.selectedDateFrom
+  ? String(base.selectedDateFrom).split("T")[0]
+  : null;
+const savedDateTo = restoreDates && base.selectedDateTo
+  ? String(base.selectedDateTo).split("T")[0]
+  : null;
+
+this.localSelection.selectedDateFrom =
+  savedDateFrom &&
+  savedDateFrom >= defaultDateFrom &&
+  savedDateFrom <= defaultDateTo
+    ? savedDateFrom
+    : defaultDateFrom;
+
+this.localSelection.selectedDateTo =
+  savedDateTo &&
+  savedDateTo >= this.localSelection.selectedDateFrom &&
+  savedDateTo <= defaultDateTo
+    ? savedDateTo
+    : defaultDateTo;
         // LETTURA SICURA del filtro puntuale
         const puntAgg =
           forceDefault || !base.puntualAggregationSelected
