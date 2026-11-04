@@ -52,7 +52,14 @@
             <v-alert v-if="isPrivacyRestricted" type="warning" class="ma-4" outlined>
               Non è possibile visualizzare i dati per motivi di privacy.
             </v-alert>
-
+<v-alert
+  v-if="dateWarning"
+  color="amber lighten-5"
+  class="date-warning ma-4"
+  border="left"
+>
+  {{ dateWarning }}
+</v-alert>
             <v-tabs-items v-show="!isPrivacyRestricted" v-model="tab" class="mt-5">
               <v-tab-item key="Tabella">
                 <data-table
@@ -862,7 +869,13 @@ onDateToChange(newVal) {
         (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)
       );
       const timeGroupBy = this.localSelection?.timeUnit?.apiField;
-
+const period = this.localSelection.timePeriod?.value ||
+  this.localSelection.timePeriod;
+const automaticDateAdjustment =
+  period === "ALL" &&
+  (timeGroupBy === "total" ||
+    (this.localSelection.source === "employee" &&
+      ["month", "week"].includes(timeGroupBy)));
       // hour, dayOfWeek, year --> almeno 14 giorni
       if (
         timeGroupBy === "hour" ||
@@ -877,7 +890,7 @@ onDateToChange(newVal) {
       }
 
       // total (campagna) --> almeno 7 giorni
-      if (timeGroupBy === "total") {
+if (!automaticDateAdjustment && timeGroupBy === "total") {
         if (diffDays < 7) {
           this.errorMessage =
             "Il periodo selezionato deve avere una durata minima di 7 giorni.";
@@ -886,7 +899,7 @@ onDateToChange(newVal) {
       }
 
       // week --> deve iniziare di lunedì e finire di domenica
-      if (timeGroupBy === "week") {
+if (!automaticDateAdjustment && timeGroupBy === "week") {
         const fromDay = from.getDay(); // 0=Domenica, 1=Lunedì, ...
         const toDay = to.getDay();
         if (fromDay !== 1 || toDay !== 0) {
@@ -897,7 +910,7 @@ onDateToChange(newVal) {
       }
 
       // month --> vincoli rispetto all'inizio/fine mese
-      if (timeGroupBy === "month") {
+if (!automaticDateAdjustment && timeGroupBy === "month") {
         // 1. Data inizio: devono esserci almeno 7 giorni nel mese di inizio
         const fromMonthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
         fromMonthEnd.setHours(0, 0, 0, 0);
@@ -1013,9 +1026,16 @@ onDateToChange(newVal) {
     },
 
     fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
-      viewStatService
-        .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
-        .then((viewData) => {
+      const dateRange = statService.getDateRange(activeSelection);
+
+viewStatService
+  .fillTheViewWithValues(
+    values,
+    view,
+    activeSelection,
+    currentCampaign,
+    dateRange
+  ).then((viewData) => {
           console.log("viewData", viewData);
           this.$set(this, "viewData", null);
           this.$nextTick(() => {
@@ -1055,6 +1075,14 @@ onDateToChange(newVal) {
       }
 
       this.isLoading = true;
+      const dateRange = statService.getDateRange(selection);
+this.dateWarning = dateRange.warning;
+
+if (!dateRange.valid) {
+  this.isLoading = false;
+  this.$set(this, "viewData", null);
+  return;
+}
       this.getStatFromServer(selection);
     },
     getItemText(item) {
@@ -1064,6 +1092,9 @@ onDateToChange(newVal) {
       return item.text;
     },
     exportCsv() {
+      const dateRange = statService.getDateRange(this.localSelection);
+this.dateWarning = dateRange.warning;
+if (!dateRange.valid) return;
       this.downloadCsv(this.localSelection);
     },
     updateTimePeriod() {
@@ -1403,5 +1434,9 @@ this.localSelection.selectedDateTo =
 ::v-deep .v-data-table th:first-child,
 ::v-deep .v-data-table td:first-child {
   text-align: left !important;
+}
+.date-warning {
+  color: #3e2723;
+  border-left: 4px solid #8d4a00 !important;
 }
 </style>
