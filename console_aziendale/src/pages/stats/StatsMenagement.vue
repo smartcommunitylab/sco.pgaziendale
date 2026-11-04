@@ -256,6 +256,8 @@
                     </template>
                     <v-date-picker
                       v-model="localSelection.selectedDateFrom"
+                      :min="minCampaignDate"
+                      :max="maxCampaignDate"
                       locale="it-IT"
                       first-day-of-week="1"
                       @input="showPickerFrom = false"
@@ -282,6 +284,8 @@
                     <v-date-picker
                       v-model="localSelection.selectedDateTo"
                       locale="it-IT"
+                      :min="minCampaignDate"
+                      :max="maxCampaignDate"
                       first-day-of-week="1"
                       @input="showPickerTo = false"
                     ></v-date-picker>
@@ -565,7 +569,23 @@ export default {
 
       return view;
     },
+    minCampaignDate() {
+      const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
+      if (!campaign?.from) return undefined;
+      return campaign.from.split("T")[0];
+    },
+    maxCampaignDate() {
+      const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
+      
+      // Calcola "oggi" in fuso orario locale YYYY-MM-DD
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
+      const campaignTo = campaign?.to ? campaign.to.split("T")[0] : today;
+
+      // Il limite massimo assoluto non può superare né la fine della campagna né oggi
+      return campaignTo < today ? campaignTo : today;
+    },
     getConfigurationById() {
       let conf = {};
       if (this.configurations && this.configurations.items && this.activeConfiguration)
@@ -700,6 +720,83 @@ export default {
       downloadCsv: "getCsv",
     }),
     ...mapActions("stat", { getConfigurationByUser: "getConfigurationByUser" }),
+    ...mapActions("alert", { showAlertError: "error" }),
+    checkDateValidity(dateStr) {
+  if (!dateStr) return { valid: false, message: "Data non valida." };
+  
+  const selected = new Date(dateStr);
+  selected.setHours(0, 0, 0, 0);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
+
+  if (campaign?.from) {
+    const from = new Date(campaign.from);
+    from.setHours(0, 0, 0, 0);
+    if (selected < from) {
+      return {
+        valid: false,
+        message: "La data non può essere antecedente all'inizio della campagna.",
+      };
+    }
+  }
+
+  if (campaign?.to) {
+    const to = new Date(campaign.to);
+    to.setHours(0, 0, 0, 0);
+    if (selected > to) {
+      return {
+        valid: false,
+        message: "La data non può essere successiva alla fine della campagna.",
+      };
+    }
+  }
+
+  if (selected > today) {
+    return {
+      valid: false,
+      message: "La data non può essere successiva alla data odierna.",
+    };
+  }
+
+  return { valid: true };
+},
+
+onDateFromChange(newVal) {
+  this.showPickerFrom = false;
+  const check = this.checkDateValidity(newVal);
+  if (!check.valid) {
+    if (this.showAlertError) {
+      this.showAlertError(check.message);
+    } else {
+      this.$store.dispatch("alert/error", check.message);
+    }
+    // Forza il ripristino della data precedente
+    const prev = this.localSelection.selectedDateFrom;
+    this.$set(this.localSelection, "selectedDateFrom", prev);
+    return;
+  }
+  this.$set(this.localSelection, "selectedDateFrom", newVal);
+},
+
+onDateToChange(newVal) {
+  this.showPickerTo = false;
+  const check = this.checkDateValidity(newVal);
+  if (!check.valid) {
+    if (this.showAlertError) {
+      this.showAlertError(check.message);
+    } else {
+      this.$store.dispatch("alert/error", check.message);
+    }
+    // Forza il ripristino della data precedente
+    const prev = this.localSelection.selectedDateTo;
+    this.$set(this.localSelection, "selectedDateTo", prev);
+    return;
+  }
+  this.$set(this.localSelection, "selectedDateTo", newVal);
+},
     comparator(a, b) {
       return a.value === b.value;
     },
@@ -798,30 +895,27 @@ export default {
 
       // month --> vincoli rispetto all'inizio/fine mese
       if (timeGroupBy === "month") {
-        const monthEndDate = new Date(from.getFullYear(), from.getMonth() + 1, 0); // ultimo giorno del mese di "from"
-        monthEndDate.setHours(0, 0, 0, 0);
+        // 1. Data inizio: devono esserci almeno 7 giorni nel mese di inizio
+        const fromMonthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
+        fromMonthEnd.setHours(0, 0, 0, 0);
 
-        const monthEndMinus7 = new Date(monthEndDate);
-        monthEndMinus7.setDate(monthEndMinus7.getDate() - 7);
+        const fromMonthEndMinus7 = new Date(fromMonthEnd);
+        fromMonthEndMinus7.setDate(fromMonthEndMinus7.getDate() - 6);
 
-        const monthEndPlus7 = new Date(monthEndDate);
-        monthEndPlus7.setDate(monthEndPlus7.getDate() + 7);
-
-        // from deve essere prima di (fine mese - 7 giorni)
-        if (from >= monthEndMinus7) {
+        if (from > fromMonthEndMinus7) {
           this.errorMessage =
-            "La data di inizio deve precedere l'ultima settimana del mese.";
+            "La data di inizio deve comprendere almeno 7 giorni nel mese di partenza.";
           return false;
         }
 
-        // to deve essere dopo (fine mese + 7 giorni)
-        if (to < monthEndPlus7) {
+        // 2. Data fine: devono esserci almeno 7 giorni nel mese di fine (almeno il 7 del mese)
+        if (to.getDate() < 7) {
           this.errorMessage =
-            "La data di fine deve essere almeno una settimana dopo la fine del mese.";
+            "La data di fine deve comprendere almeno una settimana dall'inizio del mese.";
           return false;
         }
 
-        // durata minima di 7 giorni
+        // 3. Durata minima complessiva di 7 giorni
         if (diffDays < 7) {
           this.errorMessage =
             "Il periodo selezionato deve avere una durata minima di 7 giorni.";
@@ -1048,37 +1142,46 @@ export default {
       }
     },
     getDataRange() {
-      this.localSelection.selectedDateFrom = this.currentCampaign.item.from;
-      this.localSelection.selectedDateTo = this.currentCampaign.item.to;
+      if (this.currentCampaign && this.currentCampaign.item) {
+        if (!this.localSelection.selectedDateFrom) {
+          this.localSelection.selectedDateFrom = this.currentCampaign.item.from ? this.currentCampaign.item.from.split("T")[0] : undefined;
+        }
+        if (!this.localSelection.selectedDateTo || (this.maxCampaignDate && this.localSelection.selectedDateTo > this.maxCampaignDate)) {
+          this.localSelection.selectedDateTo = this.maxCampaignDate;
+        }
+      }
     },
     initiSelection(forceDefault = false) {
       this.tab = this.activeViewType;
 
       const def = this.view?.default || {};
-      const base = forceDefault ? {} : (this.baseSelection || {});
+      const base = forceDefault ? {} : this.baseSelection || {};
 
       if (this.currentCampaign && this.currentCampaign.item) {
         this.localSelection.company = this.actualCompany
           ? this.actualCompany.item
-          : (base.company || undefined);
+          : base.company || undefined;
 
         this.localSelection.source = forceDefault
-          ? (def.source || this.view?.source)
-          : (base.source || def.source || this.view?.source);
+          ? def.source || this.view?.source
+          : base.source || def.source || this.view?.source;
 
         this.localSelection.campaign = this.currentCampaign.item;
 
-        this.localSelection.dataLevel = (forceDefault || !base.dataLevel)
-          ? this.copy(def.dataLevel)
-          : this.copy(base.dataLevel);
+        this.localSelection.dataLevel =
+          forceDefault || !base.dataLevel
+            ? this.copy(def.dataLevel)
+            : this.copy(base.dataLevel);
 
-        this.localSelection.timeUnit = (forceDefault || !base.timeUnit)
-          ? this.copy(def.timeUnit)
-          : this.copy(base.timeUnit);
+        this.localSelection.timeUnit =
+          forceDefault || !base.timeUnit
+            ? this.copy(def.timeUnit)
+            : this.copy(base.timeUnit);
 
-        const cols = (forceDefault || !base.dataColumns?.length)
-          ? (def.dataColumns || [])
-          : base.dataColumns;
+        const cols =
+          forceDefault || !base.dataColumns?.length
+            ? def.dataColumns || []
+            : base.dataColumns;
         this.localSelection.dataColumns = this.copy(cols);
 
         if (this.view && this.view.dataColumns && this.localSelection.dataColumns) {
@@ -1093,28 +1196,33 @@ export default {
           });
         }
 
-        this.localSelection.selectedDateFrom = (!forceDefault && base.selectedDateFrom) || this.currentCampaign.item.from;
-        this.localSelection.selectedDateTo = (!forceDefault && base.selectedDateTo) || this.currentCampaign.item.to;
+        const defaultDateTo = this.maxCampaignDate || (this.currentCampaign.item.to ? this.currentCampaign.item.to.split("T")[0] : undefined);
+        const candidateDateTo = (!forceDefault && base.selectedDateTo) || defaultDateTo;
 
+        this.localSelection.selectedDateFrom = (!forceDefault && base.selectedDateFrom) || (this.currentCampaign.item.from ? this.currentCampaign.item.from.split("T")[0] : undefined);
+        this.localSelection.selectedDateTo = (this.maxCampaignDate && candidateDateTo > this.maxCampaignDate) ? this.maxCampaignDate : candidateDateTo;
+ 
         // LETTURA SICURA del filtro puntuale
-        const puntAgg = (forceDefault || !base.puntualAggregationSelected)
-          ? def.puntualAggregationSelected
-          : base.puntualAggregationSelected;
+        const puntAgg =
+          forceDefault || !base.puntualAggregationSelected
+            ? def.puntualAggregationSelected
+            : base.puntualAggregationSelected;
         this.puntualAggregationSelected = puntAgg?.value || puntAgg || "NONE";
         this.updatePuntualAggregationChange();
 
         // Periodo
-        const tp = (forceDefault || !base.timePeriod) ? def.timePeriod : base.timePeriod;
+        const tp = forceDefault || !base.timePeriod ? def.timePeriod : base.timePeriod;
         this.timePeriod = tp?.value || tp || "ALL";
-        this.localSelection.timePeriod = typeof tp === "object" ? this.copy(tp) : { label: "Campagna", value: tp };
+        this.localSelection.timePeriod =
+          typeof tp === "object" ? this.copy(tp) : { label: "Campagna", value: tp };
 
-        this.localSelection.direction = (forceDefault || !base.direction)
-          ? (def.direction || "all")
-          : base.direction;
+        this.localSelection.direction =
+          forceDefault || !base.direction ? def.direction || "all" : base.direction;
 
-        this.localSelection.groupByMean = (forceDefault || base.groupByMean === undefined)
-          ? (def.groupByMean || false)
-          : base.groupByMean;
+        this.localSelection.groupByMean =
+          forceDefault || base.groupByMean === undefined
+            ? def.groupByMean || false
+            : base.groupByMean;
 
         this.errorMessage = null;
 
@@ -1131,9 +1239,10 @@ export default {
           this.meansList = this.allMeans.filter((m) =>
             this.localSelection.campaign.means.includes(m.value)
           );
-          this.localSelection.means = (!forceDefault && base.means?.length)
-            ? base.means.slice()
-            : this.localSelection.campaign.means.slice();
+          this.localSelection.means =
+            !forceDefault && base.means?.length
+              ? base.means.slice()
+              : this.localSelection.campaign.means.slice();
         }
 
         this.setActiveSelection({ selection: this.copy(this.localSelection) });

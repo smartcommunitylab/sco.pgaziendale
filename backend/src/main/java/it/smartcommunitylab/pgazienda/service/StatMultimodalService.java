@@ -166,7 +166,7 @@ public class StatMultimodalService {
 					mapBuilders.put(groupKey, builder);
 				}
 				builder.mergeStatModeDoc(doc, mode);
-				List<Document> docList = mapModeKeyDocs.get(groupKey);
+				List<Document> docList = mapModeKeyDocs.get(modeKey);
 				if(docList == null) {
 					docList = new ArrayList<>();
 					mapModeKeyDocs.put(modeKey, docList);
