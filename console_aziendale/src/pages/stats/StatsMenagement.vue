@@ -253,13 +253,14 @@
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
-                      <v-text-field
-                        :value="formatDate(localSelection.selectedDateFrom)"
-                        label="Seleziona la data di inizio"
-                        hint="GG/MM/AAAA"
-                        persistent-hint
-                        v-on="on"
-                      ></v-text-field>
+<v-text-field
+  v-model="dateFromInput"
+  label="Seleziona la data di inizio"
+  hint="GG/MM/AAAA"
+  persistent-hint
+  v-on="on"
+  @blur="commitTypedDate('from')"
+></v-text-field>
                     </template>
                     <v-date-picker
                       v-model="localSelection.selectedDateFrom"
@@ -280,13 +281,14 @@
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
-                      <v-text-field
-                        :value="formatDate(localSelection.selectedDateTo)"
-                        label="Seleziona la data di fine"
-                        hint="GG/MM/AAAA"
-                        persistent-hint
-                        v-on="on"
-                      ></v-text-field>
+<v-text-field
+  v-model="dateToInput"
+  label="Seleziona la data di fine"
+  hint="GG/MM/AAAA"
+  persistent-hint
+  v-on="on"
+  @blur="commitTypedDate('to')"
+></v-text-field>
                     </template>
                     <v-date-picker
                       v-model="localSelection.selectedDateTo"
@@ -773,7 +775,52 @@ maxCampaignDate() {
 
   return { valid: true };
 },
+parseItalianDate(value) {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+  if (!match) return null;
 
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+},
+
+commitTypedDate(which) {
+  const inputKey = which === "from" ? "dateFromInput" : "dateToInput";
+  const selectionKey =
+    which === "from" ? "selectedDateFrom" : "selectedDateTo";
+  const isoDate = this.parseItalianDate(this[inputKey]);
+
+  const restoreInput = () => {
+    this[inputKey] = this.formatDate(this.localSelection[selectionKey]);
+  };
+
+  if (!isoDate) {
+    this.showAlertError("Attenzione, la data inserita non è valida");
+    restoreInput();
+    return;
+  }
+
+  const check = this.checkDateValidity(isoDate);
+  if (!check.valid) {
+    this.showAlertError(check.message);
+    restoreInput();
+    return;
+  }
+
+  this.$set(this.localSelection, selectionKey, isoDate);
+  this.validateDateRange();
+},
 onDateFromChange(newVal) {
   this.showPickerFrom = false;
   const check = this.checkDateValidity(newVal);
@@ -1359,12 +1406,14 @@ this.localSelection.selectedDateTo =
       },
       deep: true,
     },
-    "localSelection.selectedDateFrom": function () {
-      this.validateDateRange();
-    },
-    "localSelection.selectedDateTo": function () {
-      this.validateDateRange();
-    },
+"localSelection.selectedDateFrom": function (value) {
+  this.dateFromInput = this.formatDate(value);
+  this.validateDateRange();
+},
+"localSelection.selectedDateTo": function (value) {
+  this.dateToInput = this.formatDate(value);
+  this.validateDateRange();
+},
     activeConfiguration: {
       handler(newVal) {
         if (!newVal || newVal.items === undefined || newVal.items === null) return;

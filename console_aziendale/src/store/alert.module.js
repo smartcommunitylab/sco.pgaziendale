@@ -67,13 +67,25 @@ const mutations = {
         state.type = 'success';
         state.message = message;
     },
-    error(state, message) {
-        state.type = 'error';
-        if (!!message && message.response && !!message.response.data.type && HttpErrors[message.response.data.type]) {
-            state.message = HttpErrors[message.response.data.type] + mapErrorData(message.response.data.type, message.response.data.errorData);
-        }
-        else { state.message = HttpErrors['GENERIC_ERROR']; }
-    },
+error(state, message) {
+  state.type = "error";
+
+  if (
+    message?.response?.data?.type &&
+    HttpErrors[message.response.data.type]
+  ) {
+    state.message =
+      HttpErrors[message.response.data.type] +
+      mapErrorData(
+        message.response.data.type,
+        message.response.data.errorData
+      );
+  } else if (typeof message === "string") {
+    state.message = message;
+  } else {
+    state.message = HttpErrors.GENERIC_ERROR;
+  }
+},
     clear(state) {
         state.type = null;
         state.message = null;
