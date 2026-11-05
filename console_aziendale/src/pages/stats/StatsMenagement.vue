@@ -915,14 +915,19 @@ onDateToChange(newVal) {
       const diffDays = Math.round(
         (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)
       );
-      const timeGroupBy = this.localSelection?.timeUnit?.apiField;
-const period = this.localSelection.timePeriod?.value ||
+const timeGroupBy =
+  this.localSelection?.timeUnit?.apiField ||
+  this.localSelection?.timeUnit?.value ||
+  this.localSelection?.timeUnit;
+const period =
+  this.localSelection.timePeriod?.value ||
   this.localSelection.timePeriod;
+
+// L'arrotondamento automatico vale per tutta la campagna su 'total',
+// e sempre su 'month' e 'week' a prescindere dal dataLevel
 const automaticDateAdjustment =
-  period === "ALL" &&
-  (timeGroupBy === "total" ||
-    (this.localSelection.source === "employee" &&
-      ["month", "week"].includes(timeGroupBy)));
+  (period === "ALL" && timeGroupBy === "total") ||
+  ["month", "week"].includes(timeGroupBy);
       // hour, dayOfWeek, year --> almeno 14 giorni
       if (
         timeGroupBy === "hour" ||
