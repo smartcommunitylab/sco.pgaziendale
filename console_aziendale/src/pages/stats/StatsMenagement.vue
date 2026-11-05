@@ -491,6 +491,8 @@ export default {
   data() {
     return {
       permissionError: false,
+        dateWarning: null,
+
       isLoading: false,
       drawer: true,
       mini: false,
