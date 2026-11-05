@@ -7,6 +7,7 @@ spring:
     mongodb:
       uri: ${MONGO_URI:}
       database: ${MONGO_DATABASE:}
+      auto-index-creation: true
     web:
       pageable:
         max-page-size: 10000      
@@ -84,4 +85,8 @@ app:
 
   legacyCampaign: ferrara_bike2work
   engineEndpoint: ${ENGINE_ENDPOINT:}
+
+  h3:
+    endpoint: ${H3_ENDPOINT:http://localhost:8078/api/geo/duck}
+    minTracks: ${H3_MIN_TRACKS:15}
       

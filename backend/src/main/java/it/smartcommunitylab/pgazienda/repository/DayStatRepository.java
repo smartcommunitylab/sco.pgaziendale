@@ -18,6 +18,8 @@ package it.smartcommunitylab.pgazienda.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -46,6 +48,8 @@ public interface DayStatRepository  extends MongoRepository<DayStat, String> {
 	public void deleteByCampaign(String campaignId);
 
 	public List<DayStat> findByCampaign(String campaignId);
+
+	public Page<DayStat> findByCampaign(String campaignId, Pageable pageable);
 	
 	@Query(value = "{playerId: ?0, company:?1}", count = true)
 	public long countByPlayerIdAndCompany(String playerId, String company);

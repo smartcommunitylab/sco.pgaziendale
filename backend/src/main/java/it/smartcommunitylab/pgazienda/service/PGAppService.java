@@ -73,8 +73,13 @@ public class PGAppService {
 		final List<Campaign> list = new LinkedList<>(); 
 		Map[] campaigns = restTemplate.getForObject(engineEndpoint + "/publicapi/campaign?type=company", Map[].class);
 		for (Map cm: campaigns) {
-			Campaign converted = convertCampaign(cm);
-			list.add(converted);
+			try {
+				Campaign converted = convertCampaign(cm);
+				list.add(converted);
+				logger.info(String.format("Successfully converted campaign [%s]", cm.get("campaignId")));				
+			} catch (Exception e) {
+				logger.error(String.format("Failed to convert campaign [%s]: %s", cm.get("campaignId"), e.getMessage()));
+			}
 		}
 		return list;
 	}

@@ -116,8 +116,16 @@ public class LocationResource {
     @PostMapping("/companies/{companyId}/locations/csv")
     public ResponseEntity<Void> uploadLocations(@PathVariable String companyId, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws Exception {
     	log.debug("import csv locations {}", companyId);
+        if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
     	companyService.importLocations(companyId, file.getInputStream());
     	return ResponseEntity.ok(null);
+    }
+
+    @GetMapping("/companies/{companyId}/locations/csv")
+    public void exportLocations(@PathVariable String companyId, HttpServletRequest request, javax.servlet.http.HttpServletResponse response) throws Exception {
+        if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	log.debug("export csv locations {}", companyId);
+    	companyService.exportLocationsCsv(companyId, response.getWriter());
     }
 
     

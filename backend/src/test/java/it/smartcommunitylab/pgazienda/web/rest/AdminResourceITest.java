@@ -126,6 +126,13 @@ public class AdminResourceITest {
 				.andExpect(status().isOk());
 	}
 
+	@Test
+	public void testRebuildStatTrackCollection() throws Exception {
+		restMockMvc.perform(post("/api/admin/rebuild-stattrack").param("campaign_", "campaign"))
+				.andExpect(status().isOk())
+				.andExpect(content().string("0"));
+	}
+
 	/**
 	 * Tests the {@link AdminResource#load(DataModelDTO)} endpoint.
 	 *

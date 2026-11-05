@@ -198,7 +198,7 @@ const mutations = {
   getConfigurationByUserFailure(state, error) {
     state.configurations = { error };
   },
-  setActiveConfiguration() {
+  setActiveConfiguration(state) {
     state.activeConfiguration = { loading: true };
   },
   setActiveConfigurationSuccess(state, configurationId) {
@@ -207,7 +207,7 @@ const mutations = {
   setActiveConfigurationFailure(state, error) {
     state.activeConfiguration = { error };
   },
-  setActiveViewType() {
+  setActiveViewType(state) {
     state.activeViewType = { loading: true };
   },
   setActiveViewTypeSuccess(state, activeViewType) {

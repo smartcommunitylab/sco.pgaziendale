@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 /**
  * @author raman
@@ -32,7 +33,10 @@ public class Employee {
 	@Id
 	private String id;
 	
-	private String name, surname, companyEmail, companyId, code;
+	private String name, surname, companyEmail; 
+	@Indexed
+	private String companyId;
+	private String code;
 	private String location;
 	private List<String> campaigns;
 

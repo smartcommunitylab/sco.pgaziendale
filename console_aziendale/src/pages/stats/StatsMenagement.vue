@@ -1,114 +1,124 @@
 <template>
-  <v-row>
-    <v-col cols="9">
-      <v-card>
-        <v-row>
-          <v-col cols="6">
-            <v-tabs
-              v-model="tab"
-              align-with-title
-              v-if="configurations && configurations.items"
-            >
-              <v-tabs-slider color="primary"></v-tabs-slider>
+  <div class="d-flex align-start w-100" style="position: relative">
+    <v-overlay :value="isLoading" z-index="999" absolute>
+      <v-progress-circular indeterminate size="64" color="primary"></v-progress-circular>
+    </v-overlay>
 
-              <v-tab
-                v-for="item in configurations.items[0].views"
-                :key="item.type"
-                @click.prevent="setNewActiveView(item.type)"
-              >
-                {{ item.type }}
-              </v-tab>
-            </v-tabs>
-          </v-col>
-          <v-col cols="6">
-            <div class="text-right m-2" v-if="activeSelection && activeSelection.dataLevel">
-              <v-btn
-                color="primary"
-                @click="exportCsv"
-              >
-                Download CSV
-              </v-btn>
-            </div>
-
-          </v-col>
-        </v-row>
-
-        <v-tabs-items v-model="tab" class="mt-5">
-          <v-tab-item key="Tabella">
-            <data-table :dataTableData="viewData"></data-table>
-          </v-tab-item>
-          <v-tab-item key="Grafico a Linee">
-            <line-chart></line-chart>
-          </v-tab-item>
-          <v-tab-item key="Grafico a Barre">
-            <bar-chart></bar-chart>
-          </v-tab-item>
-          <v-tab-item key="Mappa???"> </v-tab-item>
-        </v-tabs-items>
-      </v-card>
-    </v-col>
-    <v-col cols="3">
-      <div>
-        <v-card v-if="activeViewType && activeSelection">
-          <div>
-            <v-card-title> Impostazioni</v-card-title>
-          </div>
-          <v-card-text class="px-5 py-4" v-if="activeSelection">
-            <p v-if="activeSelection.dataColumns" class="p-0">
-              <b>Colonne dati</b>:
-              <span v-for="(column, index) in activeSelection.dataColumns" :key="index"
-                ><br />{{ column.label }}</span
-              >
-            </p>
-            <p v-if="activeSelection.timeUnit" class="p-0">
-              <b>Aggregazione temporale</b>:<br />
-              {{ activeSelection.timeUnit.label }}
-            </p>
-            <p v-if="activeSelection.timePeriod" class="p-0">
-              <b>Periodo di tempo</b>:
-              <template v-if="timeSelected"
-                ><br /><span>{{ activeSelection.selectedDateFrom }}<br /></span>
-                <span>{{ activeSelection.selectedDateTo }}<br /></span> </template
-              ><template v-else
-                ><br /><span>{{ activeSelection.timePeriod.label }}</span></template
-              >
-            </p>
-            <p v-if="activeSelection.dataLevel" class="p-0">
-              <b>Livello aggregazione</b>: {{ activeSelection.dataLevel.label }}
-            </p>
-            <p v-if="activeSelection.puntualAggregationSelected" class="p-0">
-              <b>Filtri</b>:
-              <template v-if="activeSelection.puntualAggregationSelected.value != 'NONE'"
-                ><br /><span
-                  v-for="(agg, index) in activeSelection.puntualAggregationItems"
-                  :key="index"
-                  >{{ agg.label }} </span></template
-              ><template v-else><br /><span>Nessuno</span></template>
-            </p>
-          </v-card-text>
-
-          <v-card-actions>
-            <v-btn color="primary" text @click="sheet = !sheet"> Modifica </v-btn>
-          </v-card-actions>
-        </v-card>
-
-        <v-dialog
-          v-model="sheet"
-          persistent
-          max-width="1200px">
+    <!-- CONTENT PRINCIPALE (Tabella, Grafico, Bottoni) -->
+    <div class="flex-grow-1 pr-4" style="min-width: 0">
+      <v-row>
+        <v-col cols="12">
           <v-card>
-          <v-card-title>
-            <span class="text-h4 text-center">Impostazioni</span>
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-    
-            <!-- INPUT - Componenti per il filtraggio -->
+            <v-row class="ma-0 align-center">
+              <v-col cols="6">
+                <v-tabs
+                  v-model="tab"
+                  align-with-title
+                  v-if="configurations && configurations.items"
+                >
+                  <v-tabs-slider color="primary"></v-tabs-slider>
+                  <v-tab @click.prevent="setNewActiveView('Tabella')">Tabella</v-tab>
+                  <!-- <v-tab @click.prevent="setNewActiveView('Grafico')">Grafico</v-tab> -->
+                </v-tabs>
+              </v-col>
+              <v-col cols="6">
+                <!-- Toolbar dei bottoni -->
+                <div class="text-right pa-3 d-flex align-center justify-end">
+                  <v-btn
+                    color="primary"
+                    @click="exportCsv"
+                    v-if="activeSelection && activeSelection.dataLevel"
+                    class="mr-4"
+                  >
+                    <v-icon left>mdi-file-export</v-icon> Download CSV
+                  </v-btn>
 
-            <v-row justify="center">
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Livello aggregazione</p>
+                  <!-- Bottone Tondo per APRIRE i filtri. Visibile solo se la colonna è chiusa -->
+                  <v-btn
+                    v-show="mini"
+                    fab
+                    small
+                    color="secondary"
+                    elevation="3"
+                    @click="mini = false"
+                  >
+                    <v-icon>mdi-filter-variant</v-icon>
+                  </v-btn>
+                </div>
+              </v-col>
+            </v-row>
+            <!-- MESSAGGIO ERRORE PERMESSI -->
+            <v-alert v-if="permissionError" type="error" class="ma-4" outlined>
+              Non si hanno i permessi necessari per visualizzare questi dati.
+            </v-alert>
+            <!-- MESSAGGIO PRIVACY CENTRALE -->
+            <v-alert v-if="isPrivacyRestricted" type="warning" class="ma-4" outlined>
+              Non è possibile visualizzare i dati per motivi di privacy.
+            </v-alert>
+            <v-alert
+              v-if="dateWarning"
+              color="amber lighten-5"
+              class="date-warning ma-4"
+              border="left"
+            >
+              {{ dateWarning }}
+            </v-alert>
+            <v-tabs-items v-show="!isPrivacyRestricted" v-model="tab" class="mt-5">
+              <v-tab-item key="Tabella">
+                <data-table
+                  :dataTableData="viewData"
+                  :key="viewData ? JSON.stringify(viewData.headers) : 'empty'"
+                ></data-table>
+              </v-tab-item>
+              <v-tab-item key="Grafico">
+                <data-chart
+                  :dataChartData="viewData"
+                  :configuration="localSelection"
+                ></data-chart>
+              </v-tab-item>
+              <v-tab-item key="Mappa">Mappa</v-tab-item>
+            </v-tabs-items>
+          </v-card>
+        </v-col>
+      </v-row>
+    </div>
 
+    <!-- PANNELLO FILTRI LATERALE -->
+    <v-navigation-drawer
+      permanent
+      :mini-variant="mini"
+      mini-variant-width="0"
+      width="384"
+      :class="[
+        'transition-swing',
+        'flex-shrink-0',
+        mini ? 'elevation-0' : 'elevation-2 ml-4',
+      ]"
+      :style="{ height: mini ? '0px' : 'calc(100vh - 200px)' }"
+    >
+      <div v-show="!mini" class="d-flex flex-column fill-height">
+        <!-- HEADER: Intestazione classica con la X per chiudere -->
+        <v-list-item class="px-4" style="max-height: 64px">
+          <v-list-item-title class="font-weight-bold text-h6">
+            <v-icon class="mr-2">mdi-tune</v-icon> Filtri
+          </v-list-item-title>
+
+          <v-spacer></v-spacer>
+
+          <!-- Bottone CHIUDI -->
+          <v-btn icon @click="mini = true">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-list-item>
+
+        <v-divider></v-divider>
+
+        <!-- CONTENUTI DEI FILTRI -->
+        <div v-show="!mini" class="pa-2 flex-grow-1 overflow-y-auto">
+          <v-expansion-panels v-if="localSelection && view" v-model="panel" multiple>
+            <v-expansion-panel>
+              <v-expansion-panel-header>Livello aggregazione</v-expansion-panel-header>
+              <v-expansion-panel-content>
                 <v-autocomplete
                   label="Livello aggregazione"
                   name="livelloaggregazione"
@@ -122,45 +132,94 @@
                 ></v-autocomplete>
 
                 <div
-                class="pl-5"
-                v-if="localSelection && localSelection.puntualAggregationSelected"
-              >
-                <p class="text-subtitle-1">Filtri</p>
-                <v-radio-group
-                  v-model="puntualAggregationSelected"
-                  @change="updatePuntualAggregationChange"
+                  class="pl-5"
+                  v-if="localSelection && localSelection.puntualAggregationSelected"
                 >
-                  <v-radio
-                    v-for="(agg, index) in localSelection.dataLevel.puntualAggregation"
-                    :key="index"
-                    :label="agg.label"
-                    :value="agg.value"
-                  ></v-radio>
-                </v-radio-group>
-                <div
-                  v-if="
-                    localSelection.puntualAggregationSelected &&
-                    localSelection.puntualAggregationSelected.value != 'NONE' &&
-                    localSelection.itemsAggreation != null
-                  "
-                >
-                  <v-autocomplete
-                    label="Selezione"
-                    name="typeData"
-                    id="typeData"
-                    v-model="localSelection.puntualAggregationItems"
-                    :items="localSelection.itemsAggreation"
-                    :item-text="getItemText"
-                    return-object
-                    outlined
-                    multiple
-                  ></v-autocomplete>
+                  <p class="text-subtitle-1">Filtri</p>
+                  <v-radio-group
+                    v-model="puntualAggregationSelected"
+                    @change="updatePuntualAggregationChange"
+                  >
+                    <v-radio
+                      v-for="(agg, index) in localSelection.dataLevel.puntualAggregation"
+                      :key="index"
+                      :label="agg.label"
+                      :value="agg.value"
+                    ></v-radio>
+                  </v-radio-group>
+                  <div
+                    v-if="
+                      localSelection.puntualAggregationSelected &&
+                      localSelection.puntualAggregationSelected.value != 'NONE' &&
+                      localSelection.itemsAggreation != null
+                    "
+                  >
+                    <v-autocomplete
+                      label="Selezione"
+                      name="typeData"
+                      id="typeData"
+                      v-model="localSelection.puntualAggregationItems"
+                      :items="localSelection.itemsAggreation"
+                      :item-disabled="(item) => item.disabled === true"
+                      :item-text="getItemText"
+                      return-object
+                      multiple
+                      outlined
+                    >
+                      <template v-slot:item="{ item, attrs, on }">
+                        <v-list-item v-bind="attrs" v-on="on" :disabled="item.disabled">
+                          <v-list-item-action>
+                            <v-checkbox
+                              :input-value="attrs.inputValue"
+                              :disabled="item.disabled"
+                              color="primary"
+                            ></v-checkbox>
+                          </v-list-item-action>
+                          <v-list-item-content>
+                            <v-list-item-title
+                              :class="item.disabled ? 'grey--text text--lighten-1' : ''"
+                            >
+                              {{ item.label }}
+                            </v-list-item-title>
+                            <v-list-item-subtitle
+                              v-if="item.disabled"
+                              class="error--text mt-1"
+                            >
+                              Non iscritto alla campagna
+                            </v-list-item-subtitle>
+                          </v-list-item-content>
+                        </v-list-item>
+                      </template>
+                      <!-- Slot per il "Seleziona Tutti" -->
+                      <template v-slot:prepend-item>
+                        <v-list-item ripple @mousedown.prevent @click="toggleSelectAll">
+                          <v-list-item-action>
+                            <v-icon
+                              :color="
+                                activeSelection &&
+                                activeSelection.puntualAggregationItems &&
+                                activeSelection.puntualAggregationItems.length > 0
+                                  ? 'primary'
+                                  : ''
+                              "
+                            >
+                              {{ selectAllIcon }}
+                            </v-icon>
+                          </v-list-item-action>
+                          <v-list-item-content>
+                            <v-list-item-title>Seleziona Tutti</v-list-item-title>
+                          </v-list-item-content>
+                        </v-list-item>
+                        <v-divider class="mt-2"></v-divider>
+                      </template>
+                    </v-autocomplete>
+                  </div>
                 </div>
-              </div>
-              </v-col>
-
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Aggregazione temporale</p>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+            <v-expansion-panel>
+              <v-expansion-panel-header>Aggregazione temporale</v-expansion-panel-header>
+              <v-expansion-panel-content>
                 <v-autocomplete
                   label="Aggregazione temporale"
                   placeholder="Aggregazione temporale"
@@ -198,15 +257,20 @@
                   >
                     <template v-slot:activator="{ on }">
                       <v-text-field
-                        v-model="localSelection.selectedDateFrom"
+                        v-model="dateFromInput"
                         label="Seleziona la data di inizio"
-                        hint="YYYY/MM/DD/"
+                        hint="GG/MM/AAAA"
                         persistent-hint
                         v-on="on"
+                        @blur="commitTypedDate('from')"
                       ></v-text-field>
                     </template>
                     <v-date-picker
                       v-model="localSelection.selectedDateFrom"
+                      :min="minCampaignDate"
+                      :max="maxCampaignDate"
+                      locale="it-IT"
+                      first-day-of-week="1"
                       @input="showPickerFrom = false"
                     ></v-date-picker>
                   </v-menu>
@@ -221,62 +285,180 @@
                   >
                     <template v-slot:activator="{ on }">
                       <v-text-field
-                        v-model="localSelection.selectedDateTo"
+                        v-model="dateToInput"
                         label="Seleziona la data di fine"
-                        hint="YYYY/MM/DD"
+                        hint="GG/MM/AAAA"
                         persistent-hint
                         v-on="on"
+                        @blur="commitTypedDate('to')"
                       ></v-text-field>
                     </template>
                     <v-date-picker
                       v-model="localSelection.selectedDateTo"
+                      locale="it-IT"
+                      :min="minCampaignDate"
+                      :max="maxCampaignDate"
+                      first-day-of-week="1"
                       @input="showPickerTo = false"
                     ></v-date-picker>
                   </v-menu>
+                  <v-alert v-if="errorMessage" type="error" dense outlined class="mt-2">
+                    {{ errorMessage }}
+                  </v-alert>
                 </div>
-              </v-col>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+            <v-expansion-panel v-if="view.source == 'tracks'">
+              <v-expansion-panel-header>Mezzi</v-expansion-panel-header>
+              <v-expansion-panel-content>
+                <v-autocomplete
+                  label="Selezione"
+                  name="means"
+                  id="means"
+                  v-model="localSelection.means"
+                  :items="meansList"
+                  :item-text="getMeanText"
+                  outlined
+                  multiple
+                >
+                  <template v-slot:prepend-item>
+                    <v-list-item ripple @mousedown.prevent @click="toggleSelectAllMeans">
+                      <v-list-item-action>
+                        <v-icon
+                          :color="
+                            localSelection.means && localSelection.means.length > 0
+                              ? 'primary'
+                              : ''
+                          "
+                        >
+                          {{ selectAllMeansIcon }}
+                        </v-icon>
+                      </v-list-item-action>
+                      <v-list-item-content>
+                        <v-list-item-title>Seleziona Tutti</v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-divider class="mt-2"></v-divider>
+                  </template>
+                </v-autocomplete>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+            <v-expansion-panel v-if="view.source == 'tracks'">
+              <v-expansion-panel-header>Direzione</v-expansion-panel-header>
+              <v-expansion-panel-content>
+                <v-radio-group v-model="localSelection.direction">
+                  <v-radio label="Tutti" value="all"></v-radio>
+                  <v-radio label="Verso sede" value="wayThere"></v-radio>
+                  <v-radio label="Da sede" value="wayBack"></v-radio>
+                </v-radio-group>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+            <v-expansion-panel>
+              <v-expansion-panel-header>Colonne dati</v-expansion-panel-header>
+              <v-expansion-panel-content>
+                <div
+                  v-for="dc in view.dataColumns.filter((dc) => dc.source == view.source)"
+                  :key="dc.value"
+                >
+                  <v-tooltip
+                    bottom
+                    :disabled="
+                      localSelection.groupByMean ||
+                      dc.value.indexOf('__prc') == -1 ||
+                      view.source == 'employee'
+                    "
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <div v-bind="attrs" v-on="on">
+                        <v-checkbox
+                          v-model="localSelection.dataColumns"
+                          :value="dc"
+                          :label="dc.label"
+                          :disabled="
+                            !localSelection.groupByMean &&
+                            dc.value.indexOf('__prc') !== -1 &&
+                            view.source !== 'employee'
+                          "
+                          hide-details
+                        ></v-checkbox>
+                      </div>
+                    </template>
+                    <span
+                      >Colonna dati disabilitata, selezionare 'Dividere per mezzo'</span
+                    >
+                  </v-tooltip>
+                </div>
 
-              <v-col cols="4" class="pl-5 pr-20" v-if="localSelection && view">
-                <p class="text-subtitle-1">Colonne Dati</p>
-                <v-checkbox v-for="dc in view.dataColumns" :key="dc.value"
-                v-model="localSelection.dataColumns" :value="dc"
-                :label="dc.label" hide-details
-              ></v-checkbox>
-              </v-col>
-            </v-row>
-          <!-- </v-sheet>
-        </v-bottom-sheet> -->
-            </v-container>
-             </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
+                <br />
+                <v-switch
+                  v-if="view.noGroupByMean"
+                  v-model="localSelection.groupByMean"
+                  label="Dividere per mezzo"
+                  hide-details
+                  inset
+                ></v-switch>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </div>
+
+        <v-divider class="flex-shrink-0"></v-divider>
+
+        <!-- FOOTER  -->
+        <div class="flex-shrink-0 pa-2" style="background-color: white">
+          <!-- MESSAGGIO PRIVACY NEI FILTRI -->
+          <v-alert
+            v-if="isPrivacyRestrictedLocal"
+            type="error"
+            dense
+            text
+            class="mb-2 caption"
+          >
+            Non è possibile visualizzare i dati per motivi di privacy.
+          </v-alert>
+
+          <v-row class="ma-0" justify="center" dense>
+            <v-col cols="4" class="px-1 text-center">
               <v-btn
-                color="blue darken-1"
+                block
+                small
+                color="grey darken-1"
                 text
-                @click="sheet = false"
+                @click="cancelFilters"
+                :disabled="!isModified"
               >
                 Annulla
               </v-btn>
+            </v-col>
+            <v-col cols="4" class="px-1 text-center">
+              <!-- Tasto Reimposta legato a isNotDefault -->
               <v-btn
+                block
+                small
                 color="blue darken-1"
                 text
-                @click="initiSelection()"
+                @click="resetFilterAndRefreshStat()"
+                :disabled="!isNotDefault"
               >
                 Reimposta
               </v-btn>
+            </v-col>
+            <v-col cols="4" class="px-1 text-center">
               <v-btn
-                color="blue darken-1"
-                text
+                block
+                small
+                color="primary"
                 @click="saveFiltersAndRefreshStat()"
+                :disabled="isApplyDisabled || !isModified"
               >
                 Applica
               </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+            </v-col>
+          </v-row>
+        </div>
       </div>
-    </v-col>
-  </v-row>
+    </v-navigation-drawer>
+  </div>
 </template>
 
 <script>
@@ -284,8 +466,7 @@ import { mapState, mapActions } from "vuex";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
 import DataTable from "@/components/stats-views/DataTable.vue";
-import LineChart from "@/components/stats-views/LineChart.vue";
-import BarChart from "@/components/stats-views/BarChart.vue";
+import DataChart from "@/components/stats-views/DataChart.vue";
 import { statService } from "../../services";
 import { viewStatService } from "../../services";
 export default {
@@ -304,30 +485,40 @@ export default {
 
   components: {
     "data-table": DataTable,
-    "line-chart": LineChart,
-    "bar-chart": BarChart,
+    "data-chart": DataChart,
   },
 
   data() {
     return {
+      permissionError: false,
+      isLoading: false,
+      drawer: true,
+      mini: false,
+      panel: [],
       tab: null,
       sheet: false,
       showPickerFrom: false,
       showPickerTo: false,
       loader: null,
+      errorMessage: null,
       // puntualAggregationValue: "NONE",
       //timePeriodValue: null,
       localSelection: {
+        campaign: null,
+        source: null,
         dataLevel: null,
         timeUnit: null,
         dataColumns: [],
+        means: [],
         timePeriod: null,
         selectedDateFrom: new Date(),
         selectedDateTo: new Date(),
         puntualAggregation: [],
         puntualAggregationSelected: null,
         puntualAggregationItems: [],
-        itemsAggreation: [],
+        itemsAggreation: null,
+        direction: "all",
+        groupByMean: false,
       },
       baseSelection: null,
       puntualAggregationSelected: null,
@@ -335,9 +526,17 @@ export default {
       name: "",
       email: "",
       select: null,
-      // items: ["Item 1", "Item 2", "Item 3", "Item 4"],
       checkbox: false,
       viewData: null,
+      meansList: [],
+      allMeans: [
+        { value: "bike", text: "Bici", order: 2 },
+        { value: "car", text: "Auto", order: 5 },
+        { value: "train", text: "Treno", order: 4 },
+        { value: "walk", text: "Piedi", order: 1 },
+        { value: "bus", text: "Autobus", order: 3 },
+        { value: "boat", text: "Barca", order: 6 },
+      ],
     };
   },
   computed: {
@@ -353,6 +552,22 @@ export default {
     ...mapState("navigation", ["page"]),
     ...mapState("navigation", ["page"]),
     ...mapState("account", ["user", "temporaryAdmin"]),
+    isPrivacyRestrictedLocal() {
+      if (!this.localSelection) return false;
+      const dl = this.localSelection.dataLevel?.value || this.localSelection.dataLevel;
+      const tu = this.localSelection.timeUnit?.value || this.localSelection.timeUnit;
+      return dl === "employee" && tu === "day";
+    },
+    isApplyDisabled() {
+      console.log("isApplyDisabled", this.errorMessage);
+      return !!this.errorMessage;
+    },
+    isPrivacyRestricted() {
+      if (!this.activeSelection) return false;
+      const dl = this.activeSelection.dataLevel?.value || this.activeSelection.dataLevel;
+      const tu = this.activeSelection.timeUnit?.value || this.activeSelection.timeUnit;
+      return dl === "employee" && tu === "day";
+    },
     timeSelected() {
       return (
         this.activeSelection &&
@@ -362,19 +577,29 @@ export default {
     },
     view() {
       let view = null;
-      if (
-        this.getConfigurationById &&
-        this.getConfigurationById.views &&
-        this.activeViewType!=null
-      ) {
-        view = this.getConfigurationById.views.find(
-          (element) => element.type === this.activeViewType.item
-        );
+      if (this.getConfigurationById && this.getConfigurationById.views) {
+        view = this.getConfigurationById.views[0];
       }
 
       return view;
     },
+    minCampaignDate() {
+      const campaign = this.currentCampaign?.item;
+      return campaign?.from ? campaign.from.split("T")[0] : undefined;
+    },
+    maxCampaignDate() {
+      const campaign = this.currentCampaign?.item;
+      const now = new Date();
+      const today = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0"),
+      ].join("-");
 
+      const campaignTo = campaign?.to ? campaign.to.split("T")[0] : today;
+
+      return campaignTo < today ? campaignTo : today;
+    },
     getConfigurationById() {
       let conf = {};
       if (this.configurations && this.configurations.items && this.activeConfiguration)
@@ -386,7 +611,30 @@ export default {
 
       return conf;
     },
-
+    isAllSelected() {
+      if (
+        !this.localSelection ||
+        !this.localSelection.itemsAggreation ||
+        !this.localSelection.puntualAggregationItems
+      )
+        return false;
+      return (
+        this.localSelection.puntualAggregationItems.length ===
+        this.localSelection.itemsAggreation.length
+      );
+    },
+    isSomeSelected() {
+      if (!this.localSelection || !this.localSelection.puntualAggregationItems)
+        return false;
+      return (
+        this.localSelection.puntualAggregationItems.length > 0 && !this.isAllSelected
+      );
+    },
+    selectAllIcon() {
+      if (this.isAllSelected) return "mdi-checkbox-marked";
+      if (this.isSomeSelected) return "mdi-minus-box";
+      return "mdi-checkbox-blank-outline";
+    },
     checkboxErrors() {
       const errors = [];
       if (!this.$v.checkbox.$dirty) return errors;
@@ -413,6 +661,68 @@ export default {
       !this.$v.email.required && errors.push("E-mail is required");
       return errors;
     },
+    isAllMeansSelected() {
+      if (!this.localSelection.means || !this.meansList) return false;
+      return this.localSelection.means.length === this.meansList.length;
+    },
+    isSomeMeansSelected() {
+      if (!this.localSelection.means) return false;
+      return this.localSelection.means.length > 0 && !this.isAllMeansSelected;
+    },
+    selectAllMeansIcon() {
+      if (this.isAllMeansSelected) return "mdi-checkbox-marked";
+      if (this.isSomeMeansSelected) return "mdi-minus-box";
+      return "mdi-checkbox-blank-outline";
+    },
+    isModified() {
+      if (!this.localSelection || !this.activeSelection) return false;
+
+      const localStr = JSON.stringify(this.localSelection);
+      const activeStr = JSON.stringify(this.activeSelection);
+
+      const modified = localStr !== activeStr;
+      console.log("isModified:", modified);
+      return modified;
+    },
+
+    // Ritorna TRUE se le impostazioni UI attuali sono DIVERSE dal Default del Profilo (Attiva REIMPOSTA)
+    isNotDefault() {
+      console.log("isNotDefault");
+      if (!this.localSelection || !this.view || !this.view.default) return false;
+
+      const def = this.view.default;
+      const loc = this.localSelection;
+
+      try {
+        const locTimeUnit = loc.timeUnit?.value || loc.timeUnit;
+        const defTimeUnit = def.timeUnit?.value || def.timeUnit;
+        if (locTimeUnit !== defTimeUnit) return true;
+
+        const locTimePeriod = loc.timePeriod?.value || loc.timePeriod;
+        const defTimePeriod = def.timePeriod?.value || def.timePeriod;
+        if (locTimePeriod !== defTimePeriod) return true;
+
+        const locDataLevel = loc.dataLevel?.value || loc.dataLevel;
+        const defDataLevel = def.dataLevel?.value || def.dataLevel;
+        if (locDataLevel !== defDataLevel) return true;
+
+        const locPuntAgg =
+          loc.puntualAggregationSelected?.value || loc.puntualAggregationSelected;
+        const defPuntAgg =
+          def.puntualAggregationSelected?.value || def.puntualAggregationSelected;
+        if (locPuntAgg !== defPuntAgg) return true;
+
+        const locColsLength = loc.dataColumns ? loc.dataColumns.length : 0;
+        const defColsLength = def.dataColumns ? def.dataColumns.length : 0;
+        if (locColsLength !== defColsLength) return true;
+
+        if (defTimePeriod === "ALL" && locTimePeriod === "SPECIFIC") return true;
+
+        return false;
+      } catch (e) {
+        return true;
+      }
+    },
   },
 
   methods: {
@@ -424,71 +734,443 @@ export default {
       downloadCsv: "getCsv",
     }),
     ...mapActions("stat", { getConfigurationByUser: "getConfigurationByUser" }),
+    ...mapActions("alert", { showAlertError: "error" }),
+    checkDateValidity(dateStr) {
+      if (!dateStr) return { valid: false, message: "Data non valida." };
 
+      const selected = new Date(dateStr);
+      selected.setHours(0, 0, 0, 0);
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
+
+      if (campaign?.from) {
+        const from = new Date(campaign.from);
+        from.setHours(0, 0, 0, 0);
+        if (selected < from) {
+          return {
+            valid: false,
+            message: "La data non può essere antecedente all'inizio della campagna.",
+          };
+        }
+      }
+
+      if (campaign?.to) {
+        const to = new Date(campaign.to);
+        to.setHours(0, 0, 0, 0);
+        if (selected > to) {
+          return {
+            valid: false,
+            message: "La data non può essere successiva alla fine della campagna.",
+          };
+        }
+      }
+
+      if (selected > today) {
+        return {
+          valid: false,
+          message: "La data non può essere successiva alla data odierna.",
+        };
+      }
+
+      return { valid: true };
+    },
+    parseItalianDate(value) {
+      const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+      if (!match) return null;
+
+      const day = Number(match[1]);
+      const month = Number(match[2]);
+      const year = Number(match[3]);
+      const date = new Date(year, month - 1, day);
+
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        return null;
+      }
+
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    },
+
+    commitTypedDate(which) {
+      const inputKey = which === "from" ? "dateFromInput" : "dateToInput";
+      const selectionKey = which === "from" ? "selectedDateFrom" : "selectedDateTo";
+      const isoDate = this.parseItalianDate(this[inputKey]);
+
+      const restoreInput = () => {
+        this[inputKey] = this.formatDate(this.localSelection[selectionKey]);
+      };
+
+      if (!isoDate) {
+        this.showAlertError("Attenzione, la data inserita non è valida");
+        restoreInput();
+        return;
+      }
+
+      const check = this.checkDateValidity(isoDate);
+      if (!check.valid) {
+        this.showAlertError(check.message);
+        restoreInput();
+        return;
+      }
+
+      this.$set(this.localSelection, selectionKey, isoDate);
+      this.validateDateRange();
+    },
+    onDateFromChange(newVal) {
+      this.showPickerFrom = false;
+      const check = this.checkDateValidity(newVal);
+      if (!check.valid) {
+        if (this.showAlertError) {
+          this.showAlertError(check.message);
+        } else {
+          this.$store.dispatch("alert/error", check.message);
+        }
+        // Forza il ripristino della data precedente
+        const prev = this.localSelection.selectedDateFrom;
+        this.$set(this.localSelection, "selectedDateFrom", prev);
+        return;
+      }
+      this.$set(this.localSelection, "selectedDateFrom", newVal);
+    },
+
+    onDateToChange(newVal) {
+      this.showPickerTo = false;
+      const check = this.checkDateValidity(newVal);
+      if (!check.valid) {
+        if (this.showAlertError) {
+          this.showAlertError(check.message);
+        } else {
+          this.$store.dispatch("alert/error", check.message);
+        }
+        // Forza il ripristino della data precedente
+        const prev = this.localSelection.selectedDateTo;
+        this.$set(this.localSelection, "selectedDateTo", prev);
+        return;
+      }
+      this.$set(this.localSelection, "selectedDateTo", newVal);
+    },
     comparator(a, b) {
       return a.value === b.value;
+    },
+    formatDate(date) {
+      if (!date) return "";
+      const [year, month, day] = date.split("-");
+      return `${day}/${month}/${year}`;
+    },
+    validateDateRange() {
+      const dateFromRaw = this.localSelection?.selectedDateFrom;
+      const dateToRaw = this.localSelection?.selectedDateTo;
+
+      // Se entrambe sono vuote, equivale al periodo intero della campagna -> Valido
+      if (!dateFromRaw && !dateToRaw) {
+        this.errorMessage = null;
+        return true;
+      }
+
+      // Se solo una delle due date è specificata
+      if (!dateFromRaw || !dateToRaw) {
+        this.errorMessage = "Specificare sia la data di inizio che la data di fine.";
+        return false;
+      }
+
+      const from = new Date(dateFromRaw);
+      const to = new Date(dateToRaw);
+      from.setHours(0, 0, 0, 0);
+      to.setHours(0, 0, 0, 0);
+
+      // Controllo rispetto ai limiti della campagna (come da backend)
+      const campaign = this.localSelection?.campaign || this.activeSelection?.campaign;
+      if (campaign) {
+        if (campaign.from) {
+          const campaignFrom = new Date(campaign.from);
+          campaignFrom.setHours(0, 0, 0, 0);
+          if (from < campaignFrom) {
+            this.errorMessage =
+              "La data di inizio non può essere precedente all'inizio della campagna.";
+            return false;
+          }
+        }
+        if (campaign.to) {
+          const campaignTo = new Date(campaign.to);
+          campaignTo.setHours(0, 0, 0, 0);
+          if (to > campaignTo) {
+            this.errorMessage =
+              "La data di fine non può essere successiva alla fine della campagna.";
+            return false;
+          }
+        }
+      }
+
+      // Data inizio successiva a data fine
+      if (from > to) {
+        this.errorMessage = "La data iniziale deve essere precedente alla data finale.";
+        return false;
+      }
+
+      const diffDays = Math.round(
+        (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const timeGroupBy =
+        this.localSelection?.timeUnit?.apiField ||
+        this.localSelection?.timeUnit?.value ||
+        this.localSelection?.timeUnit;
+      const period =
+        this.localSelection.timePeriod?.value || this.localSelection.timePeriod;
+
+      // L'arrotondamento automatico vale per tutta la campagna su 'total',
+      // e sempre su 'month' e 'week' a prescindere dal dataLevel
+      const automaticDateAdjustment =
+        (period === "ALL" && timeGroupBy === "total") ||
+        ["month", "week"].includes(timeGroupBy);
+      // hour, dayOfWeek, year --> almeno 14 giorni
+      if (
+        timeGroupBy === "hour" ||
+        timeGroupBy === "dayOfWeek" ||
+        timeGroupBy === "year"
+      ) {
+        if (diffDays < 14) {
+          this.errorMessage =
+            "Il periodo selezionato deve avere una durata minima di 14 giorni per questo tipo di aggregazione.";
+          return false;
+        }
+      }
+
+      // total (campagna) --> almeno 7 giorni
+      if (!automaticDateAdjustment && timeGroupBy === "total") {
+        if (diffDays < 7) {
+          this.errorMessage =
+            "Il periodo selezionato deve avere una durata minima di 7 giorni.";
+          return false;
+        }
+      }
+
+      // week --> deve iniziare di lunedì e finire di domenica
+      if (!automaticDateAdjustment && timeGroupBy === "week") {
+        const fromDay = from.getDay(); // 0=Domenica, 1=Lunedì, ...
+        const toDay = to.getDay();
+        if (fromDay !== 1 || toDay !== 0) {
+          this.errorMessage =
+            "Il periodo per l'aggregazione settimanale deve iniziare di lunedì e terminare di domenica.";
+          return false;
+        }
+      }
+
+      // month --> vincoli rispetto all'inizio/fine mese
+      if (!automaticDateAdjustment && timeGroupBy === "month") {
+        // 1. Data inizio: devono esserci almeno 7 giorni nel mese di inizio
+        const fromMonthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
+        fromMonthEnd.setHours(0, 0, 0, 0);
+
+        const fromMonthEndMinus7 = new Date(fromMonthEnd);
+        fromMonthEndMinus7.setDate(fromMonthEndMinus7.getDate() - 6);
+
+        if (from > fromMonthEndMinus7) {
+          this.errorMessage =
+            "La data di inizio deve comprendere almeno 7 giorni nel mese di partenza.";
+          return false;
+        }
+
+        // 2. Data fine: devono esserci almeno 7 giorni nel mese di fine (almeno il 7 del mese)
+        if (to.getDate() < 7) {
+          this.errorMessage =
+            "La data di fine deve comprendere almeno una settimana dall'inizio del mese.";
+          return false;
+        }
+
+        // 3. Durata minima complessiva di 7 giorni
+        if (diffDays < 7) {
+          this.errorMessage =
+            "Il periodo selezionato deve avere una durata minima di 7 giorni.";
+          return false;
+        }
+      }
+
+      // Nessun errore
+      this.errorMessage = null;
+      return true;
+    },
+    toggleSelectAllMeans() {
+      this.$nextTick(() => {
+        if (this.isAllMeansSelected) {
+          this.localSelection.means = [];
+        } else {
+          // meansList contiene oggetti {value, text, order}, ma means salva solo i value (stringhe)
+          this.localSelection.means = this.meansList.map((m) => m.value);
+        }
+      });
+    },
+    toggleSelectAll() {
+      this.$nextTick(() => {
+        if (this.isAllSelected) {
+          this.localSelection.puntualAggregationItems = [];
+        } else {
+          if (this.localSelection.itemsAggreation) {
+            this.localSelection.puntualAggregationItems = this.localSelection.itemsAggreation.slice();
+          }
+        }
+      });
     },
     copy(obj) {
       return obj ? JSON.parse(JSON.stringify(obj)) : null;
     },
+    closeMenu(e) {
+      if (e && e.target) {
+        if (
+          e.target.closest(".v-menu__content") ||
+          e.target.closest(".menuable__content__active") ||
+          e.target.closest(".v-select-list") ||
+          e.target.closest(".v-overlay") ||
+          e.target.closest(".v-list-item")
+        ) {
+          return;
+        }
+      }
 
+      if (!this.mini) {
+        this.mini = true;
+      }
+    },
     saveFiltersAndRefreshStat() {
-      this.sheet = !this.sheet;
+      console.log("localSelection to save", this.localSelection);
+
+      // FORZA L'ORDINE DELLE COLONNE in base a come sono state scritte in statsConfigurations.js
+      if (this.view && this.view.dataColumns) {
+        this.localSelection.dataColumns.sort((a, b) => {
+          const indexA = this.view.dataColumns.findIndex((col) => col.value === a.value);
+          const indexB = this.view.dataColumns.findIndex((col) => col.value === b.value);
+          return indexA - indexB;
+        });
+      }
+
       this.setActiveSelection({ selection: this.copy(this.localSelection) });
       this.getLocalStat(this.localSelection);
+      // this.mini = true;
+      this.panel = [];
+      // SALVA TUTTO NEL LOCAL STORAGE
+      try {
+        const prefs = {
+          campaignId: this.currentCampaign?.item?.id,
+          configurationId: this.activeConfiguration?.items,
+          selection: this.localSelection,
+        };
+        console.log("Preferences saved:", prefs);
+        localStorage.setItem(`pg_stats_prefs`, JSON.stringify(prefs));
+      } catch (e) {
+        console.error("Error saving preferences", e);
+      }
+    },
+
+    resetFilterAndRefreshStat() {
+      this.initiSelection(true);
+      this.getLocalStat(this.localSelection);
+      this.panel = [];
     },
 
     resetPunctualAggregation() {
-      this.puntualAggregationSelected = 'NONE';
+      this.puntualAggregationSelected = "NONE";
       this.updatePuntualAggregationChange();
     },
 
-    fillTheViewWithValues(values, view, activeSelection, currentCampaign, loader) {
+    fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
+      const dateRange = statService.getDateRange(activeSelection);
+
       viewStatService
-        .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
+        .fillTheViewWithValues(values, view, activeSelection, currentCampaign, dateRange)
         .then((viewData) => {
-          this.viewData = viewData;
-          loader.hide();
+          console.log("viewData", viewData);
+          this.$set(this, "viewData", null);
+          this.$nextTick(() => {
+            if (viewData && viewData.data && Array.isArray(viewData.data)) {
+              viewData.data = viewData.data.map((row) => {
+                let cleanRow = { ...row };
+                for (let key in cleanRow) {
+                  if (Number.isNaN(cleanRow[key]) || cleanRow[key] === "NaN") {
+                    cleanRow[key] = "-";
+                  }
+                }
+                return cleanRow;
+              });
+            }
+
+            this.$set(this, "viewData", viewData);
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     getLocalStat(selection) {
-      this.loader = this.$loading.show({
-        canCancel: false,
-        backgroundColor: "#000",
-        color: "#fff",
-      });
-      try {
-        this.getStatFromServer(selection);
-      } finally {
-        setTimeout(() => {
-          this.loader.hide();
-        }, 5000);
+      if (!this.currentCampaign) {
+        this.isLoading = false;
+        return;
       }
+      const dl = selection.dataLevel?.value || selection.dataLevel;
+      const tu = selection.timeUnit?.value || selection.timeUnit;
+      if (dl === "employee" && tu === "day") {
+        this.isLoading = false;
+        this.$set(this, "viewData", null);
+        return;
+      }
+
+      this.isLoading = true;
+      const dateRange = statService.getDateRange(selection);
+      this.dateWarning = dateRange.warning;
+
+      if (!dateRange.valid) {
+        this.isLoading = false;
+        this.$set(this, "viewData", null);
+        return;
+      }
+      this.permissionError = false;
+      this.getStatFromServer(selection);
     },
     getItemText(item) {
       return item.label;
     },
+    getMeanText(item) {
+      return item.text;
+    },
     exportCsv() {
+      const dateRange = statService.getDateRange(this.localSelection);
+      this.dateWarning = dateRange.warning;
+      if (!dateRange.valid) return;
       this.downloadCsv(this.localSelection);
     },
     updateTimePeriod() {
       if (!this.localSelection || !this.view) return;
-      this.localSelection.timePeriod = this.view.timePeriod.find((v) => v.value === this.timePeriod);
+      this.localSelection.timePeriod = this.view.timePeriod.find(
+        (v) => v.value === this.timePeriod
+      );
     },
     updatePuntualAggregationChange() {
-      if (!this.localSelection) return;
-      
-      this.localSelection.puntualAggregationSelected = this.localSelection.dataLevel.puntualAggregation.find((v) => v.value === this.puntualAggregationSelected);
+      if (!this.localSelection || !this.localSelection.dataLevel) return;
+
+      const items = this.localSelection.dataLevel.puntualAggregation || [];
+      this.localSelection.puntualAggregationSelected = items.find(
+        (v) => v.value === this.puntualAggregationSelected
+      ) || { label: "Nessuno", value: "NONE" };
+
       if (
-        this.localSelection &&
         this.localSelection.puntualAggregationSelected &&
-        this.localSelection.puntualAggregationSelected.value == "NONE"
-      )
+        this.localSelection.puntualAggregationSelected.value === "NONE"
+      ) {
         this.localSelection.puntualAggregationItems = [];
-      else this.getItemsAggregation();
+      } else {
+        this.getItemsAggregation();
+      }
     },
     setNewActiveView(view) {
-      this.setActiveViewType({ activeViewType: view });
+      console.log(view);
+      // this.setActiveViewType({ activeViewType: view });
     },
 
     initConfigurationStat() {
@@ -509,14 +1191,20 @@ export default {
       this.select = null;
       this.checkbox = false;
     },
+    cancelFilters() {
+      if (this.activeSelection) {
+        this.localSelection = this.copy(this.activeSelection);
+      }
+      this.panel = [];
+    },
     getItemsAggregation() {
-      if (this.localSelection){
-        if (!this.localSelection.puntualAggregationSelected){
-          this.localSelection.puntualAggregationSelected= {
-          function: "",
-          label: "Nessuno",
-          value: "NONE",
-          }
+      if (this.localSelection) {
+        if (!this.localSelection.puntualAggregationSelected) {
+          this.localSelection.puntualAggregationSelected = {
+            function: "",
+            label: "Nessuno",
+            value: "NONE",
+          };
         }
         statService
           .getItemsAggregation(
@@ -526,7 +1214,7 @@ export default {
           )
           .then(
             (values) => {
-              values?.sort((a,b) => a?.label?.localeCompare(b.label));
+              values?.sort((a, b) => a?.label?.localeCompare(b.label));
               this.localSelection.itemsAggreation = values;
             },
             (err) => {
@@ -536,33 +1224,139 @@ export default {
       }
     },
     getDataRange() {
-      this.localSelection.selectedDateFrom = this.currentCampaign.item.from;
-      this.localSelection.selectedDateTo = this.currentCampaign.item.to;
+      if (this.currentCampaign && this.currentCampaign.item) {
+        if (!this.localSelection.selectedDateFrom) {
+          this.localSelection.selectedDateFrom = this.currentCampaign.item.from
+            ? this.currentCampaign.item.from.split("T")[0]
+            : undefined;
+        }
+        if (
+          !this.localSelection.selectedDateTo ||
+          (this.maxCampaignDate &&
+            this.localSelection.selectedDateTo > this.maxCampaignDate)
+        ) {
+          this.localSelection.selectedDateTo = this.maxCampaignDate;
+        }
+      }
     },
-    initiSelection() {
+    initiSelection(forceDefault = false) {
       this.tab = this.activeViewType;
-      if (this.baseSelection && this.currentCampaign) {
-        //init with view configuration
 
-        this.localSelection.company = this.baseSelection.company
-          ? this.baseSelection.company
-          : this.actualCompany
+      const def = this.view?.default || {};
+      const base = forceDefault ? {} : this.baseSelection || {};
+
+      if (this.currentCampaign && this.currentCampaign.item) {
+        this.localSelection.company = this.actualCompany
           ? this.actualCompany.item
-          : undefined;
+          : base.company || undefined;
+
+        this.localSelection.source = forceDefault
+          ? def.source || this.view?.source
+          : base.source || def.source || this.view?.source;
+
         this.localSelection.campaign = this.currentCampaign.item;
-        this.localSelection.dataLevel = this.baseSelection.dataLevel;
-        this.localSelection.timeUnit = this.baseSelection.timeUnit;
-        this.localSelection.dataColumns = this.baseSelection.dataColumns;
-        console.log('timePeriod', this.baseSelection.timePeriod);
-        this.localSelection.selectedDateFrom = this.baseSelection.selectedDateFrom;
-        this.localSelection.selectedDateTo = this.baseSelection.selectedDateTo;
-        this.puntualAggregationSelected = this.baseSelection.puntualAggregationSelected.value;
+
+        this.localSelection.dataLevel =
+          forceDefault || !base.dataLevel
+            ? this.copy(def.dataLevel)
+            : this.copy(base.dataLevel);
+
+        this.localSelection.timeUnit =
+          forceDefault || !base.timeUnit
+            ? this.copy(def.timeUnit)
+            : this.copy(base.timeUnit);
+
+        const cols =
+          forceDefault || !base.dataColumns?.length
+            ? def.dataColumns || []
+            : base.dataColumns;
+        this.localSelection.dataColumns = this.copy(cols);
+
+        if (this.view && this.view.dataColumns && this.localSelection.dataColumns) {
+          this.localSelection.dataColumns.sort((a, b) => {
+            const indexA = this.view.dataColumns.findIndex(
+              (col) => col.value === a.value
+            );
+            const indexB = this.view.dataColumns.findIndex(
+              (col) => col.value === b.value
+            );
+            return indexA - indexB;
+          });
+        }
+
+        const campaign = this.currentCampaign.item;
+        const sameCampaign = base.campaign?.id === campaign.id;
+        const restoreDates = !forceDefault && sameCampaign;
+
+        const defaultDateFrom = campaign.from ? campaign.from.split("T")[0] : undefined;
+        const defaultDateTo = this.maxCampaignDate;
+
+        const savedDateFrom =
+          restoreDates && base.selectedDateFrom
+            ? String(base.selectedDateFrom).split("T")[0]
+            : null;
+        const savedDateTo =
+          restoreDates && base.selectedDateTo
+            ? String(base.selectedDateTo).split("T")[0]
+            : null;
+
+        this.localSelection.selectedDateFrom =
+          savedDateFrom &&
+          savedDateFrom >= defaultDateFrom &&
+          savedDateFrom <= defaultDateTo
+            ? savedDateFrom
+            : defaultDateFrom;
+
+        this.localSelection.selectedDateTo =
+          savedDateTo &&
+          savedDateTo >= this.localSelection.selectedDateFrom &&
+          savedDateTo <= defaultDateTo
+            ? savedDateTo
+            : defaultDateTo;
+        // LETTURA SICURA del filtro puntuale
+        const puntAgg =
+          forceDefault || !base.puntualAggregationSelected
+            ? def.puntualAggregationSelected
+            : base.puntualAggregationSelected;
+        this.puntualAggregationSelected = puntAgg?.value || puntAgg || "NONE";
         this.updatePuntualAggregationChange();
-        this.timePeriod = this.baseSelection.timePeriod.value;
-        this.localSelection.timePeriod = this.baseSelection.timePeriod;
-        //load specific values
+
+        // Periodo
+        const tp = forceDefault || !base.timePeriod ? def.timePeriod : base.timePeriod;
+        this.timePeriod = tp?.value || tp || "ALL";
+        this.localSelection.timePeriod =
+          typeof tp === "object" ? this.copy(tp) : { label: "Campagna", value: tp };
+
+        this.localSelection.direction =
+          forceDefault || !base.direction ? def.direction || "all" : base.direction;
+
+        this.localSelection.groupByMean =
+          forceDefault || base.groupByMean === undefined
+            ? def.groupByMean || false
+            : base.groupByMean;
+
+        this.errorMessage = null;
+
+        // Reset puntuale items
+        if (forceDefault) {
+          this.localSelection.puntualAggregationItems = [];
+        }
+
+        // load specific values
         this.getItemsAggregation();
         this.getDataRange();
+
+        if (this.localSelection.campaign?.means) {
+          this.meansList = this.allMeans.filter((m) =>
+            this.localSelection.campaign.means.includes(m.value)
+          );
+          this.localSelection.means =
+            !forceDefault && base.means?.length
+              ? base.means.slice()
+              : this.localSelection.campaign.means.slice();
+        }
+
+        this.setActiveSelection({ selection: this.copy(this.localSelection) });
       }
     },
 
@@ -573,36 +1367,94 @@ export default {
     this.initConfigurationStat();
   },
   mounted() {
+    if (
+      this.activeConfiguration &&
+      this.activeConfiguration.items &&
+      this.currentCampaign &&
+      this.currentCampaign.item
+    ) {
+      this.initiSelection();
+
+      if (this.statValues && this.statValues.items) {
+        this.$nextTick(() => {
+          this.fillTheViewWithValues(
+            this.statValues.items,
+            this.activeViewType,
+            this.localSelection,
+            this.currentCampaign.item
+          );
+        });
+      } else {
+        this.getLocalStat(this.localSelection);
+      }
+    }
   },
 
   watch: {
     statValues: {
-      handler: function (newVal) {
-        if (newVal && newVal.items) {
-          this.fillTheViewWithValues(
-            newVal.items,
-            this.activeViewType,
-            this.activeSelection,
-            this.currentCampaign.item,
-            this.loader
-          );
+        handler: function (newVal) {
+    if (!newVal || newVal.loading) return;
+
+    this.isLoading = false;
+
+    if (newVal.error) {
+      if (newVal.error.response && newVal.error.response.status === 403) {
+        this.permissionError = true;
+        this.dateWarning = null;
+        this.$set(this, "viewData", null);
+      }
+      return;
+    }
+
+    this.permissionError = false;
+
+    if (newVal.items) {
+      this.fillTheViewWithValues(
+        newVal.items,
+        this.activeViewType,
+        this.activeSelection,
+        this.currentCampaign.item
+      );
+    }
+  },
+  deep: true,
+    },
+    "localSelection.selectedDateFrom": function (value) {
+      this.dateFromInput = this.formatDate(value);
+      this.validateDateRange();
+    },
+    "localSelection.selectedDateTo": function (value) {
+      this.dateToInput = this.formatDate(value);
+      this.validateDateRange();
+    },
+    activeConfiguration: {
+      handler(newVal) {
+        if (!newVal || newVal.items === undefined || newVal.items === null) return;
+
+        this.tab = this.activeViewType;
+
+        // Reset completo: azzera la selezione precedente e forza i default della nuova configurazione
+        this.baseSelection = null;
+        this.panel = [];
+        this.initiSelection(true);
+
+        const currentCompany = this.actualCompany ? this.actualCompany.item : null;
+        if (currentCompany && this.localSelection) {
+          this.localSelection.company = currentCompany;
+        }
+
+        if (this.currentCampaign) {
+          this.getLocalStat(this.localSelection);
         }
       },
       deep: true,
     },
-    activeConfiguration() {
-      this.tab = this.activeViewType;
-      this.baseSelection = this.copy(this.activeSelection);
-
-      this.initiSelection();
-      if (this.activeSelection && this.currentCampaign) {
-        this.getLocalStat(this.localSelection);
-      }
-    },
 
     currentCampaign: {
       handler(newValue, oldValue) {
-        if (!oldValue && newValue || oldValue.item.id !== newValue.item.id) {
+        const oldId = oldValue && oldValue.item ? oldValue.item.id : null;
+        const newId = newValue && newValue.item ? newValue.item.id : null;
+        if (newId && oldId !== newId) {
           this.initiSelection();
           if (this.activeSelection && this.currentCampaign) {
             this.getLocalStat(this.localSelection);
@@ -620,3 +1472,33 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Header: testo allineato a destra con spazio per l'icona di ordinamento */
+::v-deep .v-data-table th {
+  text-align: right !important;
+}
+
+/* L'icona di sort va PRIMA del testo quando si è allineati a destra */
+::v-deep .v-data-table-header th .v-data-table-header__icon {
+  float: left !important;
+  margin-right: 4px !important;
+  margin-left: 0 !important;
+}
+
+/* Celle dati: stesso padding-right dell'header per allinearsi visivamente */
+::v-deep .v-data-table td {
+  text-align: right !important;
+  padding-right: 16px !important;
+}
+
+/* Prima colonna (nome dipendente/sede) rimane a sinistra */
+::v-deep .v-data-table th:first-child,
+::v-deep .v-data-table td:first-child {
+  text-align: left !important;
+}
+.date-warning {
+  color: #3e2723;
+  border-left: 4px solid #8d4a00 !important;
+}
+</style>
