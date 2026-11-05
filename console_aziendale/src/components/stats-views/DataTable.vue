@@ -23,9 +23,12 @@
       </tr>
     </template>
 
-    <!-- <template v-slot:item.name="{ item }">
-        <span style="white-space: nowrap;">{{ item.name }}</span>
-    </template> -->
+    <template v-slot:no-data>
+      <div class="pa-8 text-center">
+        <v-icon large color="grey lighten-1" class="mb-2">mdi-chart-box-outline</v-icon>
+        <div class="text-h6 grey--text darken-1">Nessun dato da visualizzare</div>
+      </div>
+    </template>
 
 
   </v-data-table>

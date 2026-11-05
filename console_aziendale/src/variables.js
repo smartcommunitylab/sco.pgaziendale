@@ -9,110 +9,314 @@ export const VARIABLES = {
 
   STATS: {
     NAME: {
-      EMPLOYEES_PARTECIPATION: "Partecipazione Dipendenti",
-      ENVIRONMENTAL_IMPACT: "Impatto Ambientale",
-      KM_COUNTED: "Punteggio Campagna",
+      EMPLOYEES_PARTECIPATION: "Partecipazione dipendenti",
+      ENVIRONMENTAL_IMPACT: "Impatto ambientale",
+      POINTS_COUNTED: "Punteggio campagna",
+      PERFORMANCE_KM: "Performance KM totali",
+      PERFORMANCE_HOURS: "Performance ore totali",
+      TRIPS: "Viaggi",
+      MULTI: "Multimodalità",
+    },
+    DESCRIPTION: {
+      EMPLOYEES_PARTECIPATION: " missing description",
+      ENVIRONMENTAL_IMPACT: "Questa statistica include tutti i viaggi validati indipendentemente dal loro contributo in termini di punti, dunque include anche viaggi che, in base ai limiti impostati per la campagna, non hanno prodotto alcun punteggio utile. Si precisa che i valori di CO2 esposti sono indicativi e vengono computati in base alle indicazioni fornite dal Ministero / EU.",
+      POINTS_COUNTED: "missing description",
+      PERFORMANCE_KM: "Questa statistica include tutti i viaggi validati indipendentemente dal loro contributo in termini di punti, dunque include anche viaggi che, in base ai limiti impostati per la campagna, non hanno prodotto alcun punteggio utile.",
+      PERFORMANCE_HOURS: "Questa statistica include tutti i viaggi validati indipendentemente dal loro contributo in termini di punti, dunque include anche viaggi che, in base ai limiti impostati per la campagna, non hanno prodotto alcun punteggio utile.",
+      TRIPS: "Questa statistica include tutti i viaggi validati indipendentemente dal loro contributo in termini di punti, dunque include anche viaggi che, in base ai limiti impostati per la campagna, non hanno prodotto alcun punteggio utile.",
+      MULTI: "Questa statistica include tutti i viaggi validati indipendentemente dal loro contributo in termini di punti, dunque include anche viaggi che, in base ai limiti impostati per la campagna, non hanno prodotto alcun punteggio utile.",
     },
     VIEWS: {
-      TYPE: {
-        TABLE: "Tabella",
-        HORIZONTAL_STACKED_BARS: "Grafico a Barre Orizzontali",
-        LINE_CHART: "Grafico a Linee",
-        BAR_CHART: "Grafico a Barre",
-      },
       DATACOLUMNS: {
-        REGISTERED_EMPLOYEES: { label: "dipendenti registrati", value: "dipendenti registrati" },
-        SUBSCRIBED_EMPLOYEES: { label: "dipendenti iscritti", value: "dipendenti iscritti" },
-        ACTIVE_EMPLOYEES: { label: "dipendenti attivi", value: "dipendenti attivi" },
-        ACTIVE_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti iscritti attivi", value: "% dipendenti iscritti attivi" },
-        INACTIVE_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti iscritti inattivi", value: "% dipendenti iscritti inattivi" },
-        NOT_SUBSCRIBED_EMPLOYEES: { label: "% dipendenti non iscritti", value: "% dipendenti non iscritti" },
-        PERCENTAGE_EMPLOYEES: { label: "% dipendenti", value: "% dipendenti" },
-        CO2_SAVED: {
-          label: "kg CO2 risparmiata",
-          value: "co2saved",
-          apiField: "co2saved"
-        }, 
+        REGISTERED_EMPLOYEES: {
+          label: "Iscrizioni",
+          value: "registration",
+          source: 'employee'
+        },
+        ACTIVE_EMPLOYEES: {
+          label: "Attivi",
+          value: "activeUsers",
+          source: 'employee'
+        },
+        UNSUBSCRIBED_EMPLOYEES: {
+          label: "Abbandoni",
+          value: "dropout",
+          source: 'employee'
+        },
+        REGISTERED_EMPLOYEES_PERCENTAGE: {
+          label: "Percentuale dipendenti registrati",
+          value: "registration__prcTot",
+          baseValue: "registration",
+          source: "employee"
+        },
+        //nuovi
+        REGISTRATION_PROGRESSIVE: {
+          label: "Progressivo iscrizioni",
+          value: "registration__progressive",
+          source: "employee"
+
+        },
+        DROPOUT_PROGRESSIVE: {
+          label: "Progressivo abbandoni",
+          value: "dropout__progressive",
+          source: "employee"
+
+        },
+        REGISTERED_PROGRESSIVE: {
+          label: "Iscritti attuali",
+          value: "registered__progressive",
+          source: "employee"
+
+        },
+        //fine nuovi
+        ACTIVE_EMPLOYEES_PERCENTAGE: {
+          label: "Percentuale dipendenti attivi",
+          value: "activeUsers__prcTot",
+          baseValue: "activeUsers",
+          source: "employee"
+        },
+        UNSUBSCRIBED_EMPLOYEES_PERCENTAGE: {
+          label: "Percentuale dipendenti rimossi",
+          value: "dropout__prcTot",
+          baseValue: "dropout",
+          source: "employee"
+        },
+        ACTIVE_EMPLOYEES_PERCENTAGE_REGISTRATION: {
+          label: "Percentuale dipendenti attivi su registrati",
+          value: "activeUsers__prcRegistered",
+          baseValue: "activeUsers",
+          source: "employee"
+        },
+        UNSUBSCRIBED_EMPLOYEES_PERCENTAGE_REGISTRATION: {
+          label: "Percentuale dipendenti rimossi su registrati",
+          value: "dropout__prcRegistered",
+          baseValue: "dropout",
+          source: "employee"
+        },
         POINTS: {
-          label: "Punti totali",
+          label: "Punti potenziali",
+          meanLabel: "Potenziali per mezzo (_mezzo_)",
           value: "score",
-          apiField: "score"
+          source: "tracks"
         },
         COUNTING_POINTS: {
-          label:  "Punti utili", 
-          value:  "limitedScore",
-          apiField: "limitedScore"
+          label: "Punti",
+          meanLabel: "Punti per mezzo (_mezzo_)",
+          value: "limitedScore",
+          source: "tracks"
         },
         N_COUNTING_TRAVEL: {
-          label:  "Viaggi utili", 
-          value: "limitedTrackCount",
-          apiField: "limitedTrackCount"
+          label: "Viaggi utili",
+          value: "limitedTripCount",
+          source: "tracks"
         },
         N_TRAVEL: {
           label: "Viaggi totali",
-          value: "trackCount",
-          apiField: "trackCount"
+          meanLabel: "Tratte per mezzo (_mezzo_)",
+          value: "tripCount",
+          source: "tracks"
         },
-        MEAN_POINTS: {
-          label: "Punti totali per mezzo",
-          value: "meanScore",
-          apiField: "meanScore",
-          mean: true
+        N_TRAVEL_SINGLE: {
+          label: "Viaggi monomodali",
+          value: "singleCount",
+          baseValue: "tripCount",
+          source: "tracks"
         },
-        MEAN_COUNTING_POINTS: {
-          label: "Punti utili per mezzo",
-          value: "limitedMeanScore",
-          apiField: "limitedMeanScore",
-          mean: true
+        N_TRAVEL_MULTI: {
+          label: "Viaggi multimodali",
+          value: "multimodalCount",
+          baseValue: "tripCount",
+          source: "tracks"
         },
-        MEAN_DISTANCE: {
-          label: "Km per mezzo",
-          value: "meanDistance",
-          apiField: "meanDistance",
-          mean: true
+        DISTANCE: {
+          label: "Distanza totale (km)",
+          meanLabel: "KM per mezzo (_mezzo_)",
+          value: "distance",
+          source: "tracks"
         },
-        MEAN_DURATION: {
-          label: "Ore per mezzo",
-          value: "meanDuration",
-          apiField: "meanDuration",
-          mean: true
+        DISTANCE_AVG_LEG: {
+          label: "Distanza media per tratta (km)",
+          meanLabel: "KM per mezzo (_mezzo_) per tratta",
+          value: "distance__avgTrack",
+          baseValue: "distance",
+          source: "tracks"
         },
-        MEAN_CO2_SAVED: {
-          label: "CO2 salvata per mezzo",
-          value: "meanCo2",
-          apiField: "meanCo2",
-          mean: true
+        DISTANCE_AVG_TRIP: {
+          label: "Distanza media per viaggio (km)",
+          meanLabel: "KM per mezzo (_mezzo_) per viaggio",
+          value: "distance__avgTrip",
+          baseValue: "distance",
+          source: "tracks"
         },
-        MEAN_N_TRAVEL: {
-          label: "Tratte per mezzo",
-          value: "meanTracks",
-          apiField: "meanTracks",
-          mean: true
+        DISTANCE_PERCENTAGE: {
+          label: "Percentuale distanza tracciata",
+          meanLabel: "Percentuale distanza tracciata per mezzo (_mezzo_)",
+          value: "distance__prcValue",
+          baseValue: "distance",
+          source: "tracks"
+        },
+        DISTANCE_PERCENTAGE_AVG_TRIP: {
+          label: "Percentuale distanza media per viaggio",
+          meanLabel: "Percentuale distanza media per viaggio per mezzo (_mezzo_)",
+          value: "distance__prcAvgTrip",
+          baseValue: "distance",
+          source: "tracks"
+        },
+        DISTANCE_PERCENTAGE_AVG_LEG: {
+          label: "Percentuale distanza media per tratta",
+          meanLabel: "Percentuale distanza media per tratta per mezzo (_mezzo_)",
+          value: "distance__prcAvgTrack",
+          baseValue: "distance",
+          source: "tracks"
+        },
+        DURATION: {
+          label: "Durata totale (ore)",
+          meanLabel: "Ore per mezzo (_mezzo_)",
+          value: "duration",
+          source: "tracks"
+        },
+        DURATION_AVG_LEG: {
+          label: "Durata media per tratta (ore)",
+          meanLabel: "Ore per mezzo (_mezzo_) per tratta",
+          value: "duration__avgTrack",
+          baseValue: "duration",
+          source: "tracks"
+        },
+        DURATION_AVG_TRIP: {
+          label: "Durata media per viaggio (ore)",
+          meanLabel: "Ore per mezzo (_mezzo_) per viaggio",
+          value: "duration__avgTrip",
+          baseValue: "duration",
+          source: "tracks"
+        },
+        DURATION_PERCENTAGE: {
+          label: "Percentuale durata tracciata",
+          meanLabel: "Percentuale durata tracciata per mezzo (_mezzo_)",
+          value: "duration__prcValue",
+          baseValue: "duration",
+          source: "tracks"
+        },
+        DURATION_PERCENTAGE_AVG_TRIP: {
+          label: "Percentuale durata media per viaggio",
+          meanLabel: "Percentuale durata media per viaggio per mezzo (_mezzo_)",
+          value: "duration__prcAvgTrip",
+          baseValue: "duration",
+          source: "tracks"
+        },
+        DURATION_PERCENTAGE_AVG_LEG: {
+          label: "Percentuale durata media per tratta",
+          meanLabel: "Percentuale durata media per tratta per mezzo (_mezzo_)",
+          value: "duration__prcAvgTrack",
+          baseValue: "duration",
+          source: "tracks"
+        },
+        CO2_SAVED: {
+          label: "kg CO2 risparmiata",
+          meanLabel: "CO2 per mezzo (_mezzo_)",
+          value: "co2",
+          source: "tracks"
+        },
+        CO2_SAVED_AVG_LEG: {
+          label: "kg CO2 media per tratta",
+          meanLabel: "CO2 per mezzo (_mezzo_) per tratta",
+          value: "co2__avgTrack",
+          baseValue: "co2",
+          source: "tracks"
+        },
+        CO2_SAVED_AVG_TRIP: {
+          label: "kg CO2 media per viaggio",
+          meanLabel: "CO2 per mezzo (_mezzo_) per viaggio",
+          value: "co2__avgTrip",
+          baseValue: "co2",
+          source: "tracks"
+        },
+        CO2_SAVED_PERCENTAGE: {
+          label: "Percentuale CO2 risparmiata",
+          meanLabel: "Percentuale CO2 risparmiata per mezzo (_mezzo_)",
+          value: "co2__prcValue",
+          baseValue: "co2",
+          source: "tracks"
+        },
+        CO2_SAVED_PERCENTAGE_AVG_TRIP: {
+          label: "Percentuale CO2 media per viaggio",
+          meanLabel: "Percentuale CO2 media per viaggio per mezzo (_mezzo_)",
+          value: "co2__prcAvgTrip",
+          baseValue: "co2",
+          source: "tracks"
+        },
+        CO2_SAVED_PERCENTAGE_AVG_LEG: {
+          label: "Percentuale CO2 media per tratta",
+          meanLabel: "Percentuale CO2 media per tratta per mezzo (_mezzo_)",
+          value: "co2__prcAvgTrack",
+          baseValue: "co2",
+          source: "tracks"
+        },
+        MM_TRAVEL: {
+          label: "Viaggi",
+          value: "count",
+          source: "multimodal"
+        },
+        MM_DURATION: {
+          label: "Durata (ore)",
+          value: "duration",
+          source: "multimodal"
+        },
+        MM_DISTANCE: {
+          label: "Distanza (km)",
+          value: "distance",
+          source: "multimodal"
+        },
+        MM_DURATION_AVG: {
+          label: "Durata media (ore)",
+          value: "duration_avg",
+          source: "multimodal"
+        },
+        MM_DISTANCE_AVG: {
+          label: "Distanza media (km)",
+          value: "distance_avg",
+          source: "multimodal"
+        },
+        MM_COUNT_PRC: {
+          label: "Percentuale viaggi",
+          value: "prcCount",
+          source: "multimodal"
+        },
+        MM_DURATION_PRC: {
+          label: "Percentuale durata",
+          value: "prcDuration",
+          source: "multimodal"
+        },
+        MM_DISTANCE_PRC: {
+          label: "Percentuale distanza",
+          value: "prcDistance",
+          source: "multimodal"
         },
       },
       DATALEVEL: {
-        LOCATIONS:  "Sedi",
-        COMPANY:  "Azienda", 
-        EMPLOYEES: "Dipendenti",
+        LOCATIONS: "Sede",
+        COMPANY: "Azienda",
+        EMPLOYEES: "Dipendente",
         CAMPAIGN: "Campagna",
-        COMPANIES: "Aziende",
+        COMPANIES: "Azienda",
       },
       TIMEUNIT: {
-        DAY: "Giorno", 
+        HOUR: "Fascia oraria",
+        DOW: "Giorno della settimana",
+        DAY: "Giorno",
         WEEK: "Settimana",
-        MONTH: "Mese", 
+        MONTH: "Mese",
         YEAR: "Anno",
-        CAMPAIGN:  "Campagna", 
+        CAMPAIGN: "Campagna",
       },
       TIMEPERIOD: {
-        ALL:  "Intera durata campagna", 
-        SPECIFIC: "Imposta periodo" 
+        ALL: "Intera durata campagna",
+        SPECIFIC: "Imposta periodo"
       },
       PUNTUALAGGREGATION: {
-        NONE:  "Nessuno", 
-        EMPLOYEES:  "Selezione dipendente/i", 
-        LOCATIONS: "Sedi", 
-        COMPANIES: "Aziende"
+        NONE: "Nessuno",
+        EMPLOYEES: "Selezione dipendente/i",
+        LOCATIONS: "Sedi",
+        COMPANIES: "Aziende",
       },
     },
   },

@@ -123,13 +123,16 @@ axios.interceptors.response.use(
       return response;
   },
   error => {
-      let response = error.response;
-
-      if (response.config.showLoader) {
-          store.dispatch('loader/done');
-      }
-
+    if (!error.response) {
+      store.dispatch('loader/done');
       return Promise.reject(error);
+    }
+
+    let response = error.response;
+    if (response.config.showLoader) {
+        store.dispatch('loader/done');
+    }
+    return Promise.reject(error);
   }
 )
 Vue.use(Vuelidate)

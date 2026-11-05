@@ -132,4 +132,11 @@ public class EmployeeResource {
     	return ResponseEntity.ok(null);
     }
 
+    @GetMapping("/companies/{companyId}/employees/csv")
+    public void exportEmployees(@PathVariable String companyId, HttpServletRequest request, javax.servlet.http.HttpServletResponse response) throws Exception {
+    	log.debug("export csv employees {}", companyId);
+    	if (!userService.isInCompanyRole(companyId, Constants.ROLE_TERRITORY_MANAGER, Constants.ROLE_MOBILITY_MANAGER)) throw new SecurityException("Insufficient rights");
+    	companyService.exportEmployeesCsv(companyId, response.getWriter());
+    }
+
 }

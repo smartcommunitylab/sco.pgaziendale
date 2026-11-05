@@ -9,6 +9,31 @@ let mapEmployees = {};
 let mapCompanies = {};
 let mapLocations = {};
 
+const DOW_MAP = {
+  "MONDAY": "Lunedì", "TUESDAY": "Martedì", "WEDNESDAY": "Mercoledì",
+  "THURSDAY": "Giovedì", "FRIDAY": "Venerdì", "SATURDAY": "Sabato", "SUNDAY": "Domenica"
+};
+const DOW_KEYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+
+function meanLabel(label, mean) {
+    switch (mean) {
+        case 'bike':
+            return label.replace('_mezzo_', 'bici');
+        case 'car':
+            return label.replace('_mezzo_', 'auto');
+        case 'train':
+            return label.replace('_mezzo_', 'treno');
+        case 'walk':
+            return label.replace('_mezzo_', 'piedi');
+        case 'bus':
+            return label.replace('_mezzo_', 'autobus');
+        case 'boat':
+            return label.replace('_mezzo_', 'barca');
+        default:
+            return label;
+    }
+}
+
 function setMapEmployees(array) {
   mapEmployees = {};
   array.map(el => {
@@ -36,31 +61,62 @@ function setMapLocations(array) {
     });
   })
 }
-async function fillTheViewWithValues(values, view, selection, currentCampaign) {
+async function fillTheViewWithValues(values, view, selection, currentCampaign, dateRange) {
   let viewData = {};
-  switch (view.item) {
-    case 'Tabella':
-      viewData.headers = getHeadersTable(values, selection, currentCampaign)
-      viewData.subheaders = getSubHeaders(viewData.headers, selection, currentCampaign)
-      viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
-      for (let i = 0; i < viewData.subheaders.length; i++) {
-        let s = viewData.subheaders[i];
-        s.class = (i == 0 || (i % viewData.headerNumber == 0)) ? 'cell-agg': '';
-      }
-      viewData.data = await getData(viewData.headers, selection, values, currentCampaign)
-      break;
-
-    default:
-      break;
+  if (!values || (Array.isArray(values) && values.length === 0) || (values.headers === undefined && !Array.isArray(values))) {
+    viewData.headers = [];
+    viewData.subheaders = [];
+    viewData.data = [];
+    return viewData; // Essendo async farà automaticamente il Wrap in Promise
   }
+  if (Array.isArray(values) && values.length > 0) {
+    viewData.headers = getHeadersTable(values, selection, currentCampaign, dateRange)
+    viewData.subheaders = getSubHeaders(viewData.headers, selection)
+    viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
+    viewData.data = await getData(viewData.headers, selection, values)
+  } else {
+    viewData.headers = values.headers;
+    viewData.subheaders = [{ text: 'Nome', value: 'name', class: 'cell-agg'}].concat(values.subheaders); 
+    viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
+    if (values) {
+      const data = []; 
+      // assume headers are complete, subheaders are complete, and values are flat
+      for (let rowIndex = 0; rowIndex < values.values.length; rowIndex++) {
+        //set detail name (it should be done more generic getting a function that could be company or locations or employees)
+        let row = { name: getRowNameValue(values.values, rowIndex) };
+        let found = values.values[rowIndex].values[0] || {};
+        for (let dataColumnsIndex = 1; dataColumnsIndex < viewData.subheaders.length; dataColumnsIndex++) {
+          let dc = viewData.subheaders[dataColumnsIndex];
+          row[dc.value] = parseInt(found[dc.value] || '0')
+        }
+        data.push(row)
+      }
+      viewData.data = data;
+    }
+  }
+  for (let i = 0; i < viewData.subheaders.length; i++) {
+    let s = viewData.subheaders[i];
+    s.class = (i == 0 || (i % viewData.headerNumber == 0)) ? 'cell-agg': '';
+  }
+
   return viewData;
 }
 
 // based on values and selection, return the right headers for the table (day, month or Campaign)
-function getHeadersTable(values, selection, currentCampaign) {
-  let from = selection.timePeriod.value == 'SPECIFIC' ? selection.selectedDateFrom : currentCampaign.from
-  let to = selection.timePeriod.value == 'SPECIFIC' ? selection.selectedDateTo : currentCampaign.to
-  let headers = [];
+function getHeadersTable(values, selection, currentCampaign, dateRange) {
+  const defaultFrom =
+    selection.timePeriod.value === "SPECIFIC"
+      ? selection.selectedDateFrom
+      : currentCampaign.from;
+  const defaultTo =
+    selection.timePeriod.value === "SPECIFIC"
+      ? selection.selectedDateTo
+      : currentCampaign.to;
+
+  const from = dateRange?.from || defaultFrom;
+  const to = dateRange?.to || defaultTo;
+  const headers = [];
+
   switch (selection.timeUnit.value) {
     case 'month':
       //get all month from selection.company.from to selection.company.to 
@@ -70,13 +126,21 @@ function getHeadersTable(values, selection, currentCampaign) {
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'year'));
       break;
-    case 'date':
+    case 'day':
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'day'));
       break;
     case 'week':
       //get all month from selection.company.from to selection.company.to 
       headers.push(...getPeriodBetweenDates(moment(from), moment(to), 'week'));
+      break;
+    case 'dayOfWeek':
+      //get all month from selection.company.from to selection.company.to 
+      headers.push(...DOW_KEYS);
+      break;
+    case 'hour':
+      //get all month from selection.company.from to selection.company.to 
+      headers.push(...["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"]);
       break;
     case 'campaign':
       headers.push('');
@@ -88,16 +152,27 @@ function getHeadersTable(values, selection, currentCampaign) {
   return headers;
 }
 //based on configuration, return the subheader=header.length*selection.dataColumns
-function getSubHeaders(headers, selection, currentCampaign) {
+function getSubHeaders(headers, selection) {
   let subheaders = [{ text: 'Nome', value: 'name', class: 'cell-agg'}];
   for (let i = 0; i < headers.length; i++) {
+    let displayLabel = headers[i];
+    if (selection.timeUnit.value === 'dayOfWeek') {
+      displayLabel = DOW_MAP[headers[i]] || headers[i];
+    } else if (selection.timeUnit.value === 'hour') {
+      displayLabel = headers[i].padStart(2, '0') + ':00';
+    }
+
     for (let k = 0; k < selection.dataColumns.length; k++) {
       let dc = selection.dataColumns[k];
-      if (!dc.mean) {
-        subheaders.push({ text: dc.label, value: dc.value + headers[i]})
-      } else {
-        currentCampaign.means.forEach(m => {
-          subheaders.push({ text: dc.label + ' ('+ m +')', value: dc.value + m + headers[i]})
+      if (dc.value.indexOf('__prc') == -1 || selection.source == 'employee') {
+        subheaders.push({ text: dc.label, value: dc.value + headers[i], headerLabel: displayLabel })
+      }
+    }
+    if (selection.groupByMean) {
+      for (let k = 0; k < selection.dataColumns.length; k++) {
+        let dc = selection.dataColumns[k];
+        selection.means.forEach(m => {
+          subheaders.push({ text: meanLabel(dc.meanLabel, m), value: m + '_mean_' + dc.value + headers[i], headerLabel: displayLabel })
         });
       }
     }
@@ -138,29 +213,23 @@ function getPeriodBetweenDates(startDate, endDate, type) {
   return timeValues;
 }
 // return the data array with all the elements row for the table
-async function getData(headers, selection, values, currentCampaign) {
+async function getData(headers, selection, values) {
   let data = []
   if (values) {
+    console.log('values', values);
     for (let rowIndex = 0; rowIndex < values.length; rowIndex++) {
       //set detail name (it should be done more generic getting a function that could be company or locations or employees)
-      let name = values[rowIndex].key;
-      if (name.indexOf(';') > -1) {
-        let code = name.substring(name.indexOf(';') + 1, name.length);
-        name = name.substring(0, name.indexOf(';'));
-        name += '<br><small>(' + code + ')</small>';
-      }
-      let row = { name: name };
+      let row = { name: getRowNameValue(values, rowIndex) };
       for (let columnIndex = 0; columnIndex < headers.length; columnIndex++) {
         // entity corresponding the row and the time aggregation element
         let found = findElementInValues(values, rowIndex, columnIndex, selection, headers);
         //set values for that row for every dataColumns
         for (let dataColumnsIndex = 0; dataColumnsIndex < selection.dataColumns.length; dataColumnsIndex++) {
           let dc = selection.dataColumns[dataColumnsIndex];
-          if (!dc.mean) {
-            row[dc.value + headers[columnIndex]] = (found ? parseInt(found[dc.apiField]) : 0)
-          } else {
-            currentCampaign.means.forEach(m => {
-              row[dc.value + m + headers[columnIndex]] = (found ? parseInt(found[m+ '_'+dc.apiField ]) : 0)
+          row[dc.value + headers[columnIndex]] = (found ? parseInt(found[dc.value]) : 0)
+          if (selection.groupByMean) {
+            selection.means.forEach(m => {
+              row[m + '_mean_' + dc.value + headers[columnIndex]] = (found ? parseInt(found[m+ '_mean_'+dc.value ]) : 0)
             });
           }
         }
@@ -169,6 +238,21 @@ async function getData(headers, selection, values, currentCampaign) {
     }
   }
   return data;
+}
+
+function getRowNameValue(values, rowIndex) {
+  let name = values[rowIndex].key;
+  
+  if (!name || name === 'null') {
+    return 'Nessun dato da visualizzare'; 
+  }
+
+  if (typeof name === 'string' && name.indexOf(';') > -1) {
+    let code = name.substring(name.indexOf(';') + 1, name.length);
+    name = name.substring(0, name.indexOf(';'));
+    name += '<br><small>(' + code + ')</small>';
+  }
+  return name;
 }
 
 //find the element of the row depending if the data has one, 2 dimension (1 or multiple row) or is an aggregation

@@ -39,20 +39,15 @@ e la snackbar.
     <navigation-drawer/>
 
     <v-main class="">
-      <!-- <v-container class="p-0 m-0 " :class="{'blockScroll': $route.path != '/Login'}"> -->
-        <!-- NON VIENE MAI UTILIZZATO - Componente inutile (?)-->
-        <!-- <Loader v-if="loading" /> -->
+
         <transition name="fade">
           <snackbar  :snackbar="message" :text="message">
           </snackbar>
         </transition>
 
-        <!-- INIZIO ESEMPIO: Nuovo componente modale-->
         <modal-center v-show="active" :modalType="type" :modalObject="object"/>
-        <!-- FINE ESEMPIO: Nuovo componente modale-->
 
         <router-view class="min-h-screen px-5 py-5 pb-10"/>
-      <!-- </v-container> -->
     </v-main>
 
     <app-footer class="positionFooter"/>

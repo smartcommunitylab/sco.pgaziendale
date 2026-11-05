@@ -40,6 +40,7 @@ import it.smartcommunitylab.pgazienda.dto.TrackDTO;
 import it.smartcommunitylab.pgazienda.dto.TrackValidityDTO;
 import it.smartcommunitylab.pgazienda.service.AdminService;
 import it.smartcommunitylab.pgazienda.service.CampaignService;
+import it.smartcommunitylab.pgazienda.service.StatTrackAggregationProcedure;
 import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
 import it.smartcommunitylab.pgazienda.service.errors.RepeatingSubscriptionException;
 
@@ -55,6 +56,8 @@ public class AdminResource {
 	private AdminService service;
 	@Autowired
 	private CampaignService campaignService;
+	@Autowired
+	private StatTrackAggregationProcedure statTrackAggregationProcedure;
 	
 	private static final Logger logger = LoggerFactory.getLogger(AdminResource.class); 
 	
@@ -82,6 +85,13 @@ public class AdminResource {
 	public @ResponseBody ResponseEntity<Void> syncCampaigns() {
 		campaignService.syncExternalCampaigns();
 		return ResponseEntity.ok(null);
+	}
+
+	@PostMapping("/admin/rebuild-stattrack")
+    @PreAuthorize("hasAnyAuthority(\"" + Constants.ROLE_ADMIN +"\")")
+	public ResponseEntity<Long> rebuildStatTrackCollection(
+			@RequestParam(name = "campaign", required = true) String campaign) {
+		return ResponseEntity.ok(statTrackAggregationProcedure.rebuildStatTrackCollection(campaign));
 	}
 	
 	@PostMapping("/admin/unsubscribe/{campaignId}/{playerId}")

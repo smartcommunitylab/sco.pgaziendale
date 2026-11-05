@@ -1,0 +1,637 @@
+package it.smartcommunitylab.pgazienda.service;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
+
+import com.opencsv.CSVWriter;
+
+import it.smartcommunitylab.pgazienda.domain.Campaign;
+import it.smartcommunitylab.pgazienda.domain.Company;
+import it.smartcommunitylab.pgazienda.domain.CompanyLocation;
+import it.smartcommunitylab.pgazienda.domain.Constants;
+import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_DATA;
+import it.smartcommunitylab.pgazienda.domain.Constants.GROUP_BY_TIME;
+import it.smartcommunitylab.pgazienda.domain.Constants.STAT_TRACK_FIELD;
+import it.smartcommunitylab.pgazienda.domain.Employee;
+import it.smartcommunitylab.pgazienda.domain.StatTrack;
+import it.smartcommunitylab.pgazienda.dto.FieldEmployeeDTO;
+import it.smartcommunitylab.pgazienda.dto.StatEmployeeDTO;
+import it.smartcommunitylab.pgazienda.dto.StatTrackDTO;
+import it.smartcommunitylab.pgazienda.repository.CampaignRepository;
+import it.smartcommunitylab.pgazienda.repository.CompanyRepository;
+import it.smartcommunitylab.pgazienda.repository.EmployeeRepository;
+import it.smartcommunitylab.pgazienda.service.errors.InconsistentDataException;
+import it.smartcommunitylab.pgazienda.util.DateUtils;
+import it.smartcommunitylab.pgazienda.util.StatUtil;
+
+@Service
+public class StatEmployeeService {
+	private static final Logger logger = LoggerFactory.getLogger(TrackingDataService.class);
+
+	@Autowired
+	private MongoTemplate template;
+	@Autowired
+	private CampaignRepository campaignRepo;
+	@Autowired
+	private EmployeeRepository employeeRepository;
+	@Autowired
+	private CompanyRepository companyRepository;
+	@Autowired
+	private StatTrackService statTrackService;
+
+	public List<StatEmployeeDTO> getEmployeeStats(
+			String campaignId,
+			String companyId,
+			Set<String> locations,
+			Set<String> employeeCodes,
+			GROUP_BY_TIME timeGroupBy,
+			GROUP_BY_DATA dataGroupBy,
+			LocalDate from, 
+			LocalDate to) throws InconsistentDataException {
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		if (from == null) {
+			from = toLocalDate(campaign.getFrom());
+			to = toLocalDate(campaign.getTo());
+		}
+
+		// get employee counts
+		Map<String, Integer> employeeCountMap = getEmployeeCountByCompany(campaignId);
+		
+		Criteria criteria = new Criteria("trackingRecord." + campaignId).exists(true);
+		if(StringUtils.isNotBlank(companyId)) {
+			criteria = criteria.and("companyId").is(companyId);
+			if ((locations != null) && !locations.isEmpty()) {
+				criteria = criteria.and("location").in(locations);
+			}
+			if ((employeeCodes != null) && !employeeCodes.isEmpty()) {
+				criteria = criteria.and("code").in(employeeCodes);
+			}
+		}
+		
+		Map<String, StatEmployeeDTO> mapStats = new HashMap<>();
+		
+		List<String> timeGroupList = StatUtil.getTimeGroupList(from, to, timeGroupBy);
+		List<String> dataGroupList = new ArrayList<>();
+		
+		// set activeUsers
+		List<StatTrackDTO> trackStats = statTrackService.getTrackStats(campaignId, companyId, locations, employeeCodes, null, null, "all", 
+				timeGroupBy, GROUP_BY_DATA.employee, Collections.singletonList(STAT_TRACK_FIELD.track), false, false, from, to);
+		for(StatTrackDTO dto : trackStats) {
+			if(dto.getStats() == null) continue;
+			if(dto.getStats().getTrack() == 0) continue;
+			String timeGroup = dto.getTimeGroup();
+			String employeeKey = dto.getDataGroup();
+			String[] split = employeeKey.split(StatTrack.KEY_DIV);
+			String company = split[0];
+			String employeeCode = split[1];
+			Employee emp = employeeRepository.findByCompanyIdAndCodeIgnoreCase(company, employeeCode).stream().findAny().orElse(null);
+			if(emp != null) {
+				String dataGroup = getGroupByData(emp, dataGroupBy);
+				addDataGroup(dataGroupList, dataGroup); 
+				String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
+				StatEmployeeDTO stats = mapStats.get(groupKey);
+				if(stats == null) {
+					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, company, employeeCountMap);
+					mapStats.put(groupKey, stats);
+				}
+				stats.getActiveUsers().addValue();
+			}
+		}
+		
+		List<Employee> list = template.find(new Query(criteria), Employee.class);
+		for(Employee employee : list) {
+			LocalDate registrationDate = toLocalDate(employee.getTrackingRecord().get(campaignId).getRegistration());
+			LocalDate dropoutDate = null;
+			if(employee.getTrackingRecord().get(campaignId).getLeave() != null) {
+				dropoutDate = toLocalDate(employee.getTrackingRecord().get(campaignId).getLeave());
+			}
+			String dataGroup = getGroupByData(employee, dataGroupBy);
+			addDataGroup(dataGroupList, dataGroup);
+			
+			//set registration
+			if(isRegistered(registrationDate, from, to)) {
+				String timeGroup = getGroupByTime(timeGroupBy, registrationDate);
+				String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
+				StatEmployeeDTO stats = mapStats.get(groupKey);
+				if(stats == null) {
+					stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId(), employeeCountMap);
+					mapStats.put(groupKey, stats);
+				}
+				stats.getRegistration().addValue();
+			}
+			
+			//set dropout
+			if(dropoutDate != null) {
+				if(isDropout(dropoutDate, from, to)) {
+					String timeGroup = getGroupByTime(timeGroupBy, dropoutDate);
+					String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
+					StatEmployeeDTO stats = mapStats.get(groupKey);
+					if(stats == null) {
+						stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, employee.getCompanyId(), employeeCountMap);
+						mapStats.put(groupKey, stats);
+					}
+					stats.getDropout().addValue();
+				}
+			}
+		}
+
+		// set percentages
+		for(StatEmployeeDTO stats : mapStats.values()) {
+			stats.getRegistration().setPrcTot((stats.getRegistration().getValue() / (double) stats.getEmployee()) * 100.0);
+			stats.getDropout().setPrcTot((stats.getDropout().getValue() / (double) stats.getEmployee()) * 100.0);
+			stats.setRegistered(FieldEmployeeDTO.fromValue(stats.getRegistration().getValue() - stats.getDropout().getValue()));
+			stats.getRegistered().setPrcTot((stats.getRegistered().getValue() / (double) stats.getEmployee()) * 100.0);
+			stats.getActiveUsers().setPrcTot((stats.getActiveUsers().getValue() / (double) stats.getEmployee()) * 100.0);
+			if(stats.getRegistration().getValue() > 0) {
+				stats.getDropout().setPrcRegistered(((double) stats.getDropout().getValue() / (double) stats.getRegistration().getValue()) * 100.0);
+				stats.getActiveUsers().setPrcRegistered(((double) stats.getActiveUsers().getValue() / (double) stats.getRegistration().getValue()) * 100.0);
+			}
+		}
+
+		fillEmptyDate(campaignId, companyId, mapStats, timeGroupList, dataGroupList, employeeCountMap);
+
+		// set progressive values
+		if (((dataGroupBy == null) || !GROUP_BY_DATA.employee.equals(dataGroupBy)) && 
+				!GROUP_BY_TIME.hour.equals(timeGroupBy) && !GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) {
+			if(dataGroupList.size() == 0) {
+				String dataGroup = null;
+				for (String timeGroup : timeGroupList) {
+					String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
+					StatEmployeeDTO stats = mapStats.get(groupKey);
+					if (stats != null) {
+						getProgressiveCount(campaignId, stats, timeGroup, timeGroupBy, dataGroup, dataGroupBy, list);
+					}
+				}
+			} else {
+				for (String dataGroup : dataGroupList) {
+					for (String timeGroup : timeGroupList) {
+						String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup); 
+						StatEmployeeDTO stats = mapStats.get(groupKey);
+						if (stats != null) {
+							getProgressiveCount(campaignId, stats, timeGroup, timeGroupBy, dataGroup, dataGroupBy, list);
+						}
+					}
+				}
+			}
+		}
+
+		Comparator<StatEmployeeDTO> comparator = new Comparator<StatEmployeeDTO>() {
+			@Override
+			public int compare(StatEmployeeDTO o1, StatEmployeeDTO o2) {
+				return o1.getTimeGroup().compareTo(o2.getTimeGroup());
+			}
+		};
+		List<StatEmployeeDTO>  result = new ArrayList<StatEmployeeDTO>(mapStats.values());
+		updateDateGroupNames(result, dataGroupBy, campaignId);
+		Collections.sort(result, comparator);
+		return result;
+	}
+
+	private StatEmployeeDTO addNewEmployeeStats(String campaignId, String timeGroup, String dataGroup, 
+			String companyId, Map<String, Integer> employeeCountMap) {
+		StatEmployeeDTO stats = new  StatEmployeeDTO();
+		stats.setCampaign(campaignId);
+		stats.setTimeGroup(timeGroup);
+		if(StringUtils.isNotBlank(dataGroup)) stats.setDataGroup(dataGroup);
+		if(StringUtils.isNotBlank(companyId)) stats.setEmployee(employeeCountMap.getOrDefault(companyId, 0));
+		stats.setDropout(FieldEmployeeDTO.fromValue(0));
+		stats.setActiveUsers(FieldEmployeeDTO.fromValue(0));
+		stats.setRegistration(FieldEmployeeDTO.fromValue(0));
+		stats.setRegistered(FieldEmployeeDTO.fromValue(0));
+		return stats;
+	}
+
+	private Map<String, Integer> getEmployeeCountByCompany(String campaignId) {
+		Criteria criteria = new Criteria("trackingRecord." + campaignId).exists(true);
+		MatchOperation filterOperation = Aggregation.match(criteria);
+		GroupOperation groupByOperation = Aggregation.group("companyId")
+				.count().as("employeeCount");
+		Aggregation aggregation = Aggregation.newAggregation(filterOperation, groupByOperation);
+		List<Document> results = template.aggregate(aggregation, Employee.class, Document.class).getMappedResults();
+		Map<String, Integer> map = new HashMap<>();
+		for(Document doc : results) {
+			String companyId = doc.getString("_id");
+			Integer count = doc.getInteger("employeeCount", 0);
+			map.put(companyId, count);
+		}
+		return map;
+	}
+	
+/**
+	 * Fill the dataGroupName field of the StatTrackDTO objects in the result list 
+	 * by replacing the companyId or employeeKey or locationKey 
+	 * with the corresponding name
+	 * @param result the list of StatTrackDTO objects
+	 * @param dataGroupBy the type of group
+	 * @param campaignId the campaign id
+	 */
+	private void updateDateGroupNames(List<StatEmployeeDTO> result, GROUP_BY_DATA dataGroupBy, String campaignId) {
+		Map<String, String> map = new HashMap<>();
+		if (dataGroupBy != null) {
+			switch (dataGroupBy) {
+				case company:
+					Set<String> allCompanies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup()).collect(Collectors.toSet());
+					for (String companyId : allCompanies) {
+						Company company = companyRepository.findById(companyId).orElse(null);
+						if (company != null) {
+							map.put(companyId, company.getName());
+						}
+					}
+					break;
+				case employee:
+					List<String> companies = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toList());
+					if (companies.size() > 0) {
+						map = employeeRepository.findByCompanyIdIn(companies).stream().collect(Collectors.toMap(e -> e.getCompanyId() + StatTrack.KEY_DIV + e.getCode(), e -> e.getSurname() + " " + e.getName()));					
+					}
+				case location:
+					Set<String> companyIds = result.stream().filter(s -> s.getDataGroup() != null).map(s -> s.getDataGroup().split(StatTrack.KEY_DIV)[0]).collect(Collectors.toSet());
+					for (String companyId : companyIds) {
+						Company company = companyRepository.findById(companyId).orElse(null);
+						if (company != null) {
+							List<CompanyLocation> locations = company.getLocations();
+							for (CompanyLocation location : locations) {
+								map.put(companyId + StatTrack.KEY_DIV + location.getId(), location.getName());
+							}
+						}
+					}
+				default:
+					break;
+			}
+		}
+		logger.info("Map: {}", map);
+		for (StatEmployeeDTO s : result) {
+			s.setDataGroupName(map.getOrDefault(s.getDataGroup(), s.getDataGroup()));			
+		}
+	}
+
+	private void fillEmptyDate(String campaignId, String companyId, Map<String, StatEmployeeDTO>mapStats, 
+			List<String> timeGroupList, List<String> dataGroupList, Map<String, Integer> employeeCountMap) {
+		if(dataGroupList.size() == 0) {
+			for(String timeGroup : timeGroupList) {
+				String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, null);
+				if(!mapStats.containsKey(groupKey)) {
+					StatEmployeeDTO stats = addNewEmployeeStats(campaignId, timeGroup, null, companyId, employeeCountMap);
+					mapStats.put(groupKey, stats);
+				}
+			}
+		} else {
+			for(String dataGroup : dataGroupList) {
+				for(String timeGroup : timeGroupList) {
+					String groupKey = StatUtil.getGroupKey(campaignId, timeGroup, dataGroup);
+					if(!mapStats.containsKey(groupKey)) {
+						StatEmployeeDTO stats = addNewEmployeeStats(campaignId, timeGroup, dataGroup, companyId, employeeCountMap);
+						mapStats.put(groupKey, stats);
+					}					
+				}
+			}
+		}
+	}
+
+	/*private StatEmployeeDTO createEmptyStatEmployeeDTO(String campaignId, String timeGroup, String dataGroup) {
+		StatEmployeeDTO stats = new  StatEmployeeDTO();
+		if (StringUtils.isNotBlank(campaignId)) stats.setCampaign(campaignId);
+		if (StringUtils.isNotBlank(timeGroup)) stats.setTimeGroup(timeGroup);
+		if (StringUtils.isNotBlank(dataGroup)) stats.setDataGroup(dataGroup);
+		stats.setDropout(FieldEmployeeDTO.fromValue(0));
+		stats.setActiveUsers(FieldEmployeeDTO.fromValue(0));
+		stats.setRegistration(FieldEmployeeDTO.fromValue(0));
+		stats.setRegistered(FieldEmployeeDTO.fromValue(0));		
+		return stats;
+	}*/
+	
+	private void addDataGroup(List<String> dataGroupList, String dataGroup) {
+		if(StringUtils.isNotBlank(dataGroup) && !dataGroupList.contains(dataGroup)) {
+			dataGroupList.add(dataGroup);
+		}
+	}
+	
+	private boolean isDropout(LocalDate dropoutDate, LocalDate from, LocalDate to) {
+		if((dropoutDate != null) && from.isBefore(dropoutDate) && to.isAfter(dropoutDate)) return true;
+		return false;
+	}
+	
+	private boolean isRegistered(LocalDate registrationDate, LocalDate from, LocalDate to) {
+		if((from.isEqual(registrationDate) || from.isBefore(registrationDate)) && to.isAfter(registrationDate)) return true;
+		return false;
+	}
+	
+	private LocalDate toLocalDate(Long timestamp) {
+		return Instant.ofEpochMilli(timestamp).atZone(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
+	}
+
+	// convert a LocalDate in UTC time zone into a LocalDate in the default time zone
+	private LocalDate toLocalDate(LocalDate localDate) { 
+		return localDate.atStartOfDay(ZoneId.of("Z")).withZoneSameInstant(ZoneId.of(Constants.DEFAULT_TIME_ZONE)).toLocalDate();
+	}
+	
+	private String getGroupByTime(GROUP_BY_TIME timeGroupBy, LocalDate localDate) {		
+		if (GROUP_BY_TIME.day.equals(timeGroupBy)) return localDate.toString();
+		if (GROUP_BY_TIME.week.equals(timeGroupBy)) return localDate.format(DateUtils.WEEK_PATTERN);
+		if (GROUP_BY_TIME.month.equals(timeGroupBy)) return localDate.format(DateUtils.MONTH_PATTERN);
+		if (GROUP_BY_TIME.year.equals(timeGroupBy)) return localDate.format(DateUtils.YEAR_PATTERN);
+		if (GROUP_BY_TIME.total.equals(timeGroupBy)) return "total";
+		return null;
+	}
+	
+	private String getGroupByData(Employee employee, GROUP_BY_DATA dataGroupBy) {
+		if (GROUP_BY_DATA.company.equals(dataGroupBy)) return employee.getCompanyId();
+		if (GROUP_BY_DATA.location.equals(dataGroupBy)) return employee.getCompanyId() + StatTrack.KEY_DIV + employee.getLocation();
+		return null;
+	}
+
+	private void getProgressiveCount(String campaignId, StatEmployeeDTO stats, 
+			String timeGroup, GROUP_BY_TIME timeGroupBy, String dataGroup, GROUP_BY_DATA dataGroupBy, List<Employee> list) {
+		int countRegistered = 0;
+		int countRegistration = 0;
+		int countDropout = 0;
+		for(Employee employee : list) {
+			if (dataGroup != null) {
+				String empDataGroup = getGroupByData(employee, dataGroupBy);
+				if (!dataGroup.equals(empDataGroup)) continue;
+			}
+			LocalDate registrationDate = toLocalDate(employee.getTrackingRecord().get(campaignId).getRegistration());
+			LocalDate dropoutDate = null;
+			if(employee.getTrackingRecord().get(campaignId).getLeave() != null) {
+				dropoutDate = toLocalDate(employee.getTrackingRecord().get(campaignId).getLeave());
+			}
+			if (isInTimeGroup(timeGroupBy, registrationDate, timeGroup) && 
+					(dropoutDate == null || !isInTimeGroup(timeGroupBy, dropoutDate, timeGroup))) {
+				countRegistered++;
+			}
+			if (isInTimeGroup(timeGroupBy, registrationDate, timeGroup)) {
+				countRegistration++;
+			}
+			if (dropoutDate != null && isInTimeGroup(timeGroupBy, dropoutDate, timeGroup)) {
+				countDropout++;
+			}
+		}
+		stats.getRegistered().setProgressive(countRegistered);
+		stats.getRegistration().setProgressive(countRegistration);
+		stats.getDropout().setProgressive(countDropout);
+	}
+	
+	private boolean isInTimeGroup(GROUP_BY_TIME timeGroupBy, LocalDate date, String timeGroup) {
+		String group = getGroupByTime(timeGroupBy, date);
+		if (group.equals(timeGroup) || group.compareTo(timeGroup) < 0) return true;
+		return false;
+	}
+	
+	public List<Entry<String, Long>> getEmployeeCount(String campaignId, String companyId) {
+		if(StringUtils.isNotBlank(companyId)) {
+			Company company = companyRepository.findById(companyId).orElse(null);
+			if(company != null) {
+				Entry<String, Long> entry = new AbstractMap.SimpleEntry<>(companyId, employeeRepository.countByCompanyId(companyId));
+				return Collections.singletonList(entry);
+			}
+		} else {
+			List<Company> list = companyRepository.findByCampaign(campaignId);
+			return list.stream().map(c -> {return (Entry<String, Long>) new AbstractMap.SimpleEntry<String, Long>(c.getId(), employeeRepository.countByCompanyId(c.getId()));})
+					.collect(Collectors.toList());
+		}
+		return Collections.emptyList();
+	}
+
+	public void getEmployeeStatsCsv(PrintWriter writer, 
+			String campaignId, 
+			String companyId, 
+			Set<String> locations,
+			Set<String> employeeCodes,
+			GROUP_BY_TIME timeGroupBy, 
+			GROUP_BY_DATA dataGroupBy, 
+			LocalDate fromDate, 
+			LocalDate toDate) throws InconsistentDataException, IOException {
+		List<StatEmployeeDTO> employeeStats = getEmployeeStats(campaignId, companyId, locations, employeeCodes, timeGroupBy, dataGroupBy, fromDate, toDate);
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		String[] headers = getHeaders(timeGroupBy, dataGroupBy);
+		csvWriter.writeNext(headers);
+		for(StatEmployeeDTO dto : employeeStats) {
+			String[] row = getCSV(dto);
+			csvWriter.writeNext(row);
+		}
+		csvWriter.close();
+	}
+ 
+	private String[] getCSV(StatEmployeeDTO dto) {
+		List<String> row = new ArrayList<>();
+		row.add(dto.getCampaign());
+		row.add(dto.getTimeGroup());
+		if(dto.getDataGroup() != null) {
+			row.add(dto.getDataGroup());
+			row.add(dto.getDataGroupName());
+		}
+		row.add(String.valueOf(dto.getEmployee()));
+		row.add(getValue(dto.getRegistration()));
+		row.add(getPrcTot(dto.getRegistration()));
+		row.add(getProgressive(dto.getRegistration()));
+		row.add(getValue(dto.getRegistered()));
+		row.add(getPrcTot(dto.getRegistered()));
+		row.add(getProgressive(dto.getRegistered()));
+		row.add(getValue(dto.getActiveUsers()));
+		row.add(getPrcTot(dto.getActiveUsers()));
+		row.add(getPrcRegistered(dto.getActiveUsers()));
+		row.add(getValue(dto.getDropout()));
+		row.add(getPrcTot(dto.getDropout()));
+		row.add(getPrcRegistered(dto.getDropout()));
+		row.add(getProgressive(dto.getDropout()));
+		return row.toArray(new String[0]);
+	}
+
+	private String getValue(FieldEmployeeDTO field) {
+		if(field != null && field.getValue() != null) {
+			return String.valueOf(field.getValue());
+		}
+		return "";
+	}
+
+	private String getPrcTot(FieldEmployeeDTO field) {
+		if(field != null && field.getPrcTot() != null) {
+			return String.valueOf(field.getPrcTot());
+		}
+		return "";
+	}
+
+	private String getPrcRegistered(FieldEmployeeDTO field) {
+		if(field != null && field.getPrcRegistered() != null) {
+			return String.valueOf(field.getPrcRegistered());
+		}
+		return "";
+	}
+
+	private String getProgressive(FieldEmployeeDTO field) {
+		if(field != null && field.getProgressive() != null) {
+			return String.valueOf(field.getProgressive());
+		}
+		return "";
+	}
+
+	private String[] getHeaders(GROUP_BY_TIME timeGroupBy, GROUP_BY_DATA dataGroupBy) {
+		List<String>headers = new ArrayList<>();
+		headers.add("campaign"); 
+		headers.add("timeGroup"); 
+		if(dataGroupBy != null) {
+			headers.add("dataGroup");
+			headers.add("dataGroupName");
+		}
+		headers.add("employee");
+		headers.add("registration");
+		headers.add("registration_prcTot");
+		headers.add("registration_progressive");
+		headers.add("registered");
+		headers.add("registered_prcTot");
+		headers.add("registered_progressive");
+		headers.add("activeUsers");
+		headers.add("activeUsers_prcTot");
+		headers.add("activeUsers_prcRegistered");
+		headers.add("dropout");
+		headers.add("dropout_prcTot");
+		headers.add("dropout_prcRegistered");
+		headers.add("dropout_progressive");
+		return headers.toArray(new String[0]);
+	}
+
+	public List<Map<String, Object>> getEmployeeStatsFlat(
+			String campaignId,
+			String companyId,
+			Set<String> locations,
+			Set<String> employeeCodes,
+			GROUP_BY_TIME timeGroupBy,
+			GROUP_BY_DATA dataGroupBy,
+			LocalDate from, 
+			LocalDate to) throws InconsistentDataException 
+	{
+		List<StatEmployeeDTO> stats = getEmployeeStats(campaignId, companyId, locations, employeeCodes, timeGroupBy, dataGroupBy, from, to);
+		return flattenEmployeeStats(stats, timeGroupBy);
+	}
+
+	/**
+	 * Flatten the stats in a flat format with all fields exploded
+	 * @param stats the stats to be flattened
+	 * @param timeGroupBy the time group by used for the stats
+	 * @param fields the fields to be included in the result
+	 * @return List of records representing the stats in a flat format
+	 * @throws IOException
+	 * @throws InconsistentDataException
+	*/
+    private List<Map<String, Object>> flattenEmployeeStats(List<StatEmployeeDTO> stats, GROUP_BY_TIME timeGroupBy) {
+		List<Map<String, Object>> res = new java.util.ArrayList<>();
+		for(StatEmployeeDTO ds : stats) {
+			Map<String, Object> r = flattenStat(ds, timeGroupBy);
+			r.put(timeGroupBy.toString(), mapTimeLabel(timeGroupBy, ds.getTimeGroup()));	
+			r.put("campaign", ds.getCampaign());
+			r.put("id", ds.getDataGroup());
+			r.put("name", ds.getDataGroupName() != null ? ds.getDataGroupName() : ds.getDataGroup());
+			res.add(r);
+		}
+		return res;
+	}
+	/**
+	 * Flatten the stat in a flat format with all fields exploded
+	 * @param ds
+	 * @param timeGroupBy
+	 * @param fields
+	 * @return
+	 */
+	private Map<String, Object> flattenStat(StatEmployeeDTO ds, GROUP_BY_TIME timeGroupBy) {
+		Map<String, Object> res = new java.util.HashMap<>();
+		List<Pair<String, FieldEmployeeDTO>> fieldList = List.of(
+				Pair.of("registration", ds.getRegistration()), 
+				Pair.of("activeUsers", ds.getActiveUsers()), 
+				Pair.of("dropout", ds.getDropout()),
+				Pair.of("registered", ds.getRegistered()));
+		for(Pair <String, FieldEmployeeDTO> p : fieldList) {
+			if (p.getSecond() != null) {
+				res.put(p.getFirst(), p.getSecond().getValue() != null ? p.getSecond().getValue() : 0);
+				res.put(p.getFirst() + "__prcTot", p.getSecond().getPrcTot() != null ? p.getSecond().getPrcTot() : 0);
+				res.put(p.getFirst() + "__prcRegistered", p.getSecond().getPrcRegistered() != null ? p.getSecond().getPrcRegistered() : 0);
+				res.put(p.getFirst() + "__progressive", p.getSecond().getProgressive() != null ? p.getSecond().getProgressive() : 0);
+			}
+		}
+		return res;
+	}
+
+	private String mapTimeLabel(GROUP_BY_TIME timeGroupBy, String timeGroup) {
+		if (timeGroupBy == GROUP_BY_TIME.dayOfWeek) {
+			return DayOfWeek.valueOf(timeGroup).getDisplayName(TextStyle.FULL, Locale.ITALIAN);
+		}	
+		return timeGroup;
+	}
+
+    public void getEmployeeStatsCsvFlat(
+			PrintWriter writer, 
+			String campaignId, 
+			String companyId, 
+			Set<String> locations,
+			Set<String> employeeCodes,
+        	GROUP_BY_TIME timeGroupBy, 
+			GROUP_BY_DATA dataGroupBy, 
+			LocalDate fromDate, 
+			LocalDate toDate) throws InconsistentDataException
+	{
+		List<Map<String, Object>> stats = getEmployeeStatsFlat(campaignId, companyId, locations, employeeCodes, timeGroupBy, dataGroupBy, fromDate, toDate);
+		Campaign campaign = campaignRepo.findById(campaignId).orElse(null);
+		if (campaign == null) throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
+		if (fromDate == null) {
+			fromDate = campaign.getFrom();
+			toDate = campaign.getTo();
+		}
+		CSVWriter csvWriter = new CSVWriter(writer, ';', '"', '"', "\n");
+		try {
+			List<String> timeHeaders = StatUtil.getTimeGroupList(fromDate, toDate, timeGroupBy);
+			//logger.info("timeHeaders: {}", timeHeaders);
+			List<String> metricHeaders = StatUtil.getHeadersFromStats(stats, timeGroupBy);
+			//logger.info("metricHeaders: {}", metricHeaders);
+			List<String> headers = StatUtil.buildPivotHeaders(metricHeaders, timeHeaders);
+			//logger.info("headers: {}", headers);
+			csvWriter.writeNext(headers.toArray(new String[0]));
+			List<String[]> table = StatUtil.buildPivotRows(stats, timeGroupBy, timeHeaders, metricHeaders);
+			csvWriter.writeAll(table);
+		} finally {
+			if (csvWriter != null) {
+				try {
+					csvWriter.close();
+				} catch (Exception e) {
+					logger.error("Error closing csvWriter", e);
+				}
+			}
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (Exception e) {
+					logger.error("Error closing writer", e);
+				}
+			}
+		}				
+    }
+
+}
