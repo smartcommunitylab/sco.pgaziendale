@@ -146,9 +146,6 @@ function callTrackStatsAPI(
     .then(res => {
       if (res && res.data) return Promise.resolve(res.data);
       else return Promise.reject(null);
-    })  
-    .catch(()=>{
-      Promise.resolve(null);
     })
   }
 
@@ -176,9 +173,6 @@ function callTrackStatsAPI(
     });
     array.sort((a,b) => a.key.localeCompare(b.key));
     return array;
-  })
-  .catch(()=>{
-    Promise.resolve(null);
   })
 }
 
@@ -241,9 +235,6 @@ function callTrackStatsMultiAPI(
       if (res && res.data) return Promise.resolve(res.data);
       else return Promise.reject(null);
     })  
-    .catch(()=>{
-      Promise.resolve(null);
-    })
   }
 
   return axios
@@ -329,9 +320,6 @@ function callEmployeeStatsAPI(
     .then(res => {
       if (res && res.data) return Promise.resolve(res.data);
       else return Promise.reject(null);
-    })  
-    .catch(()=>{
-      Promise.resolve(null);
     })
   }
 
@@ -358,9 +346,6 @@ function callEmployeeStatsAPI(
     });
     array.sort((a,b) => a.key.localeCompare(b.key));
     return array;
-  })
-  .catch(()=>{
-    Promise.resolve(null);
   })
 }
 
@@ -460,14 +445,14 @@ if (isCalendarAggregation) {
       start.setDate(1);
       start.setMonth(start.getMonth() + 1);
       from = formatLocalDate(start);
-      warnings.push("Il mese iniziale parziale è stato escluso per motivi di privacy.");
+      warnings.push("Il primo mese è parziale ed è stato escluso.");
     }
 
     // se giorno(a) < 7: passa l'ultimo del mese precedente
     const end = parseLocalDate(to);
     if (end.getDate() < 7) {
       to = formatLocalDate(new Date(end.getFullYear(), end.getMonth(), 0));
-      warnings.push("Il mese finale parziale è stato escluso per motivi di privacy.");
+      warnings.push("L'ultimo mese è parziale ed è stato escluso.");
     }
   }
 
@@ -476,26 +461,28 @@ if (isCalendarAggregation) {
     if (start.getDay() !== 1) {
       start.setDate(start.getDate() + ((8 - start.getDay()) % 7));
       from = formatLocalDate(start);
-      warnings.push("La settimana iniziale parziale è stata esclusa per motivi di privacy.");
+      warnings.push("La prima settimana è parziale ed è stata esclusa.");
     }
 
     const end = parseLocalDate(to);
     if (end.getDay() !== 0) {
       end.setDate(end.getDate() - end.getDay());
       to = formatLocalDate(end);
-      warnings.push("La settimana finale parziale è stata esclusa per motivi di privacy.");
+      warnings.push("L'ultima settimana è parziale ed è stata esclusa.");
     }
   }
+
+  const warning = warnings.length
+    ? `Per motivi di privacy non possono essere esposti dati inferiori a una settimana. ${warnings.join(" ")}`
+    : null;
 
   return {
     from,
     to,
-    warning: warnings.join(" "),
+    warning,
     valid: !!from && !!to && from <= to,
   };
-
-
-  }
+}
 
   return {
     from: period && period !== "ALL" ? dateOnly(configuration.selectedDateFrom) : null,

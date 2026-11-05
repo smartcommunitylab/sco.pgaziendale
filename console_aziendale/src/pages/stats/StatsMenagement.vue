@@ -47,19 +47,22 @@
                 </div>
               </v-col>
             </v-row>
-
+            <!-- MESSAGGIO ERRORE PERMESSI -->
+            <v-alert v-if="permissionError" type="error" class="ma-4" outlined>
+              Non si hanno i permessi necessari per visualizzare questi dati.
+            </v-alert>
             <!-- MESSAGGIO PRIVACY CENTRALE -->
             <v-alert v-if="isPrivacyRestricted" type="warning" class="ma-4" outlined>
               Non è possibile visualizzare i dati per motivi di privacy.
             </v-alert>
-<v-alert
-  v-if="dateWarning"
-  color="amber lighten-5"
-  class="date-warning ma-4"
-  border="left"
->
-  {{ dateWarning }}
-</v-alert>
+            <v-alert
+              v-if="dateWarning"
+              color="amber lighten-5"
+              class="date-warning ma-4"
+              border="left"
+            >
+              {{ dateWarning }}
+            </v-alert>
             <v-tabs-items v-show="!isPrivacyRestricted" v-model="tab" class="mt-5">
               <v-tab-item key="Tabella">
                 <data-table
@@ -253,14 +256,14 @@
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
-<v-text-field
-  v-model="dateFromInput"
-  label="Seleziona la data di inizio"
-  hint="GG/MM/AAAA"
-  persistent-hint
-  v-on="on"
-  @blur="commitTypedDate('from')"
-></v-text-field>
+                      <v-text-field
+                        v-model="dateFromInput"
+                        label="Seleziona la data di inizio"
+                        hint="GG/MM/AAAA"
+                        persistent-hint
+                        v-on="on"
+                        @blur="commitTypedDate('from')"
+                      ></v-text-field>
                     </template>
                     <v-date-picker
                       v-model="localSelection.selectedDateFrom"
@@ -281,14 +284,14 @@
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
-<v-text-field
-  v-model="dateToInput"
-  label="Seleziona la data di fine"
-  hint="GG/MM/AAAA"
-  persistent-hint
-  v-on="on"
-  @blur="commitTypedDate('to')"
-></v-text-field>
+                      <v-text-field
+                        v-model="dateToInput"
+                        label="Seleziona la data di fine"
+                        hint="GG/MM/AAAA"
+                        persistent-hint
+                        v-on="on"
+                        @blur="commitTypedDate('to')"
+                      ></v-text-field>
                     </template>
                     <v-date-picker
                       v-model="localSelection.selectedDateTo"
@@ -487,6 +490,7 @@ export default {
 
   data() {
     return {
+      permissionError: false,
       isLoading: false,
       drawer: true,
       mini: false,
@@ -500,7 +504,7 @@ export default {
       // puntualAggregationValue: "NONE",
       //timePeriodValue: null,
       localSelection: {
-          campaign: null,
+        campaign: null,
         source: null,
         dataLevel: null,
         timeUnit: null,
@@ -580,24 +584,22 @@ export default {
       return view;
     },
     minCampaignDate() {
-  const campaign = this.currentCampaign?.item;
-  return campaign?.from ? campaign.from.split("T")[0] : undefined;
-},
-maxCampaignDate() {
-  const campaign = this.currentCampaign?.item;
-  const now = new Date();
-  const today = [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0"),
-  ].join("-");
+      const campaign = this.currentCampaign?.item;
+      return campaign?.from ? campaign.from.split("T")[0] : undefined;
+    },
+    maxCampaignDate() {
+      const campaign = this.currentCampaign?.item;
+      const now = new Date();
+      const today = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0"),
+      ].join("-");
 
-  const campaignTo = campaign?.to
-    ? campaign.to.split("T")[0]
-    : today;
+      const campaignTo = campaign?.to ? campaign.to.split("T")[0] : today;
 
-  return campaignTo < today ? campaignTo : today;
-},
+      return campaignTo < today ? campaignTo : today;
+    },
     getConfigurationById() {
       let conf = {};
       if (this.configurations && this.configurations.items && this.activeConfiguration)
@@ -734,126 +736,125 @@ maxCampaignDate() {
     ...mapActions("stat", { getConfigurationByUser: "getConfigurationByUser" }),
     ...mapActions("alert", { showAlertError: "error" }),
     checkDateValidity(dateStr) {
-  if (!dateStr) return { valid: false, message: "Data non valida." };
-  
-  const selected = new Date(dateStr);
-  selected.setHours(0, 0, 0, 0);
+      if (!dateStr) return { valid: false, message: "Data non valida." };
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+      const selected = new Date(dateStr);
+      selected.setHours(0, 0, 0, 0);
 
-  const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-  if (campaign?.from) {
-    const from = new Date(campaign.from);
-    from.setHours(0, 0, 0, 0);
-    if (selected < from) {
-      return {
-        valid: false,
-        message: "La data non può essere antecedente all'inizio della campagna.",
+      const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
+
+      if (campaign?.from) {
+        const from = new Date(campaign.from);
+        from.setHours(0, 0, 0, 0);
+        if (selected < from) {
+          return {
+            valid: false,
+            message: "La data non può essere antecedente all'inizio della campagna.",
+          };
+        }
+      }
+
+      if (campaign?.to) {
+        const to = new Date(campaign.to);
+        to.setHours(0, 0, 0, 0);
+        if (selected > to) {
+          return {
+            valid: false,
+            message: "La data non può essere successiva alla fine della campagna.",
+          };
+        }
+      }
+
+      if (selected > today) {
+        return {
+          valid: false,
+          message: "La data non può essere successiva alla data odierna.",
+        };
+      }
+
+      return { valid: true };
+    },
+    parseItalianDate(value) {
+      const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+      if (!match) return null;
+
+      const day = Number(match[1]);
+      const month = Number(match[2]);
+      const year = Number(match[3]);
+      const date = new Date(year, month - 1, day);
+
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        return null;
+      }
+
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    },
+
+    commitTypedDate(which) {
+      const inputKey = which === "from" ? "dateFromInput" : "dateToInput";
+      const selectionKey = which === "from" ? "selectedDateFrom" : "selectedDateTo";
+      const isoDate = this.parseItalianDate(this[inputKey]);
+
+      const restoreInput = () => {
+        this[inputKey] = this.formatDate(this.localSelection[selectionKey]);
       };
-    }
-  }
 
-  if (campaign?.to) {
-    const to = new Date(campaign.to);
-    to.setHours(0, 0, 0, 0);
-    if (selected > to) {
-      return {
-        valid: false,
-        message: "La data non può essere successiva alla fine della campagna.",
-      };
-    }
-  }
+      if (!isoDate) {
+        this.showAlertError("Attenzione, la data inserita non è valida");
+        restoreInput();
+        return;
+      }
 
-  if (selected > today) {
-    return {
-      valid: false,
-      message: "La data non può essere successiva alla data odierna.",
-    };
-  }
+      const check = this.checkDateValidity(isoDate);
+      if (!check.valid) {
+        this.showAlertError(check.message);
+        restoreInput();
+        return;
+      }
 
-  return { valid: true };
-},
-parseItalianDate(value) {
-  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
-  if (!match) return null;
+      this.$set(this.localSelection, selectionKey, isoDate);
+      this.validateDateRange();
+    },
+    onDateFromChange(newVal) {
+      this.showPickerFrom = false;
+      const check = this.checkDateValidity(newVal);
+      if (!check.valid) {
+        if (this.showAlertError) {
+          this.showAlertError(check.message);
+        } else {
+          this.$store.dispatch("alert/error", check.message);
+        }
+        // Forza il ripristino della data precedente
+        const prev = this.localSelection.selectedDateFrom;
+        this.$set(this.localSelection, "selectedDateFrom", prev);
+        return;
+      }
+      this.$set(this.localSelection, "selectedDateFrom", newVal);
+    },
 
-  const day = Number(match[1]);
-  const month = Number(match[2]);
-  const year = Number(match[3]);
-  const date = new Date(year, month - 1, day);
-
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day
-  ) {
-    return null;
-  }
-
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-},
-
-commitTypedDate(which) {
-  const inputKey = which === "from" ? "dateFromInput" : "dateToInput";
-  const selectionKey =
-    which === "from" ? "selectedDateFrom" : "selectedDateTo";
-  const isoDate = this.parseItalianDate(this[inputKey]);
-
-  const restoreInput = () => {
-    this[inputKey] = this.formatDate(this.localSelection[selectionKey]);
-  };
-
-  if (!isoDate) {
-    this.showAlertError("Attenzione, la data inserita non è valida");
-    restoreInput();
-    return;
-  }
-
-  const check = this.checkDateValidity(isoDate);
-  if (!check.valid) {
-    this.showAlertError(check.message);
-    restoreInput();
-    return;
-  }
-
-  this.$set(this.localSelection, selectionKey, isoDate);
-  this.validateDateRange();
-},
-onDateFromChange(newVal) {
-  this.showPickerFrom = false;
-  const check = this.checkDateValidity(newVal);
-  if (!check.valid) {
-    if (this.showAlertError) {
-      this.showAlertError(check.message);
-    } else {
-      this.$store.dispatch("alert/error", check.message);
-    }
-    // Forza il ripristino della data precedente
-    const prev = this.localSelection.selectedDateFrom;
-    this.$set(this.localSelection, "selectedDateFrom", prev);
-    return;
-  }
-  this.$set(this.localSelection, "selectedDateFrom", newVal);
-},
-
-onDateToChange(newVal) {
-  this.showPickerTo = false;
-  const check = this.checkDateValidity(newVal);
-  if (!check.valid) {
-    if (this.showAlertError) {
-      this.showAlertError(check.message);
-    } else {
-      this.$store.dispatch("alert/error", check.message);
-    }
-    // Forza il ripristino della data precedente
-    const prev = this.localSelection.selectedDateTo;
-    this.$set(this.localSelection, "selectedDateTo", prev);
-    return;
-  }
-  this.$set(this.localSelection, "selectedDateTo", newVal);
-},
+    onDateToChange(newVal) {
+      this.showPickerTo = false;
+      const check = this.checkDateValidity(newVal);
+      if (!check.valid) {
+        if (this.showAlertError) {
+          this.showAlertError(check.message);
+        } else {
+          this.$store.dispatch("alert/error", check.message);
+        }
+        // Forza il ripristino della data precedente
+        const prev = this.localSelection.selectedDateTo;
+        this.$set(this.localSelection, "selectedDateTo", prev);
+        return;
+      }
+      this.$set(this.localSelection, "selectedDateTo", newVal);
+    },
     comparator(a, b) {
       return a.value === b.value;
     },
@@ -915,19 +916,18 @@ onDateToChange(newVal) {
       const diffDays = Math.round(
         (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)
       );
-const timeGroupBy =
-  this.localSelection?.timeUnit?.apiField ||
-  this.localSelection?.timeUnit?.value ||
-  this.localSelection?.timeUnit;
-const period =
-  this.localSelection.timePeriod?.value ||
-  this.localSelection.timePeriod;
+      const timeGroupBy =
+        this.localSelection?.timeUnit?.apiField ||
+        this.localSelection?.timeUnit?.value ||
+        this.localSelection?.timeUnit;
+      const period =
+        this.localSelection.timePeriod?.value || this.localSelection.timePeriod;
 
-// L'arrotondamento automatico vale per tutta la campagna su 'total',
-// e sempre su 'month' e 'week' a prescindere dal dataLevel
-const automaticDateAdjustment =
-  (period === "ALL" && timeGroupBy === "total") ||
-  ["month", "week"].includes(timeGroupBy);
+      // L'arrotondamento automatico vale per tutta la campagna su 'total',
+      // e sempre su 'month' e 'week' a prescindere dal dataLevel
+      const automaticDateAdjustment =
+        (period === "ALL" && timeGroupBy === "total") ||
+        ["month", "week"].includes(timeGroupBy);
       // hour, dayOfWeek, year --> almeno 14 giorni
       if (
         timeGroupBy === "hour" ||
@@ -942,7 +942,7 @@ const automaticDateAdjustment =
       }
 
       // total (campagna) --> almeno 7 giorni
-if (!automaticDateAdjustment && timeGroupBy === "total") {
+      if (!automaticDateAdjustment && timeGroupBy === "total") {
         if (diffDays < 7) {
           this.errorMessage =
             "Il periodo selezionato deve avere una durata minima di 7 giorni.";
@@ -951,7 +951,7 @@ if (!automaticDateAdjustment && timeGroupBy === "total") {
       }
 
       // week --> deve iniziare di lunedì e finire di domenica
-if (!automaticDateAdjustment && timeGroupBy === "week") {
+      if (!automaticDateAdjustment && timeGroupBy === "week") {
         const fromDay = from.getDay(); // 0=Domenica, 1=Lunedì, ...
         const toDay = to.getDay();
         if (fromDay !== 1 || toDay !== 0) {
@@ -962,7 +962,7 @@ if (!automaticDateAdjustment && timeGroupBy === "week") {
       }
 
       // month --> vincoli rispetto all'inizio/fine mese
-if (!automaticDateAdjustment && timeGroupBy === "month") {
+      if (!automaticDateAdjustment && timeGroupBy === "month") {
         // 1. Data inizio: devono esserci almeno 7 giorni nel mese di inizio
         const fromMonthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
         fromMonthEnd.setHours(0, 0, 0, 0);
@@ -1080,14 +1080,9 @@ if (!automaticDateAdjustment && timeGroupBy === "month") {
     fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
       const dateRange = statService.getDateRange(activeSelection);
 
-viewStatService
-  .fillTheViewWithValues(
-    values,
-    view,
-    activeSelection,
-    currentCampaign,
-    dateRange
-  ).then((viewData) => {
+      viewStatService
+        .fillTheViewWithValues(values, view, activeSelection, currentCampaign, dateRange)
+        .then((viewData) => {
           console.log("viewData", viewData);
           this.$set(this, "viewData", null);
           this.$nextTick(() => {
@@ -1128,13 +1123,14 @@ viewStatService
 
       this.isLoading = true;
       const dateRange = statService.getDateRange(selection);
-this.dateWarning = dateRange.warning;
+      this.dateWarning = dateRange.warning;
 
-if (!dateRange.valid) {
-  this.isLoading = false;
-  this.$set(this, "viewData", null);
-  return;
-}
+      if (!dateRange.valid) {
+        this.isLoading = false;
+        this.$set(this, "viewData", null);
+        return;
+      }
+      this.permissionError = false;
       this.getStatFromServer(selection);
     },
     getItemText(item) {
@@ -1145,8 +1141,8 @@ if (!dateRange.valid) {
     },
     exportCsv() {
       const dateRange = statService.getDateRange(this.localSelection);
-this.dateWarning = dateRange.warning;
-if (!dateRange.valid) return;
+      this.dateWarning = dateRange.warning;
+      if (!dateRange.valid) return;
       this.downloadCsv(this.localSelection);
     },
     updateTimePeriod() {
@@ -1230,9 +1226,15 @@ if (!dateRange.valid) return;
     getDataRange() {
       if (this.currentCampaign && this.currentCampaign.item) {
         if (!this.localSelection.selectedDateFrom) {
-          this.localSelection.selectedDateFrom = this.currentCampaign.item.from ? this.currentCampaign.item.from.split("T")[0] : undefined;
+          this.localSelection.selectedDateFrom = this.currentCampaign.item.from
+            ? this.currentCampaign.item.from.split("T")[0]
+            : undefined;
         }
-        if (!this.localSelection.selectedDateTo || (this.maxCampaignDate && this.localSelection.selectedDateTo > this.maxCampaignDate)) {
+        if (
+          !this.localSelection.selectedDateTo ||
+          (this.maxCampaignDate &&
+            this.localSelection.selectedDateTo > this.maxCampaignDate)
+        ) {
           this.localSelection.selectedDateTo = this.maxCampaignDate;
         }
       }
@@ -1282,35 +1284,35 @@ if (!dateRange.valid) return;
           });
         }
 
-const campaign = this.currentCampaign.item;
-const sameCampaign = base.campaign?.id === campaign.id;
-const restoreDates = !forceDefault && sameCampaign;
+        const campaign = this.currentCampaign.item;
+        const sameCampaign = base.campaign?.id === campaign.id;
+        const restoreDates = !forceDefault && sameCampaign;
 
-const defaultDateFrom = campaign.from
-  ? campaign.from.split("T")[0]
-  : undefined;
-const defaultDateTo = this.maxCampaignDate;
+        const defaultDateFrom = campaign.from ? campaign.from.split("T")[0] : undefined;
+        const defaultDateTo = this.maxCampaignDate;
 
-const savedDateFrom = restoreDates && base.selectedDateFrom
-  ? String(base.selectedDateFrom).split("T")[0]
-  : null;
-const savedDateTo = restoreDates && base.selectedDateTo
-  ? String(base.selectedDateTo).split("T")[0]
-  : null;
+        const savedDateFrom =
+          restoreDates && base.selectedDateFrom
+            ? String(base.selectedDateFrom).split("T")[0]
+            : null;
+        const savedDateTo =
+          restoreDates && base.selectedDateTo
+            ? String(base.selectedDateTo).split("T")[0]
+            : null;
 
-this.localSelection.selectedDateFrom =
-  savedDateFrom &&
-  savedDateFrom >= defaultDateFrom &&
-  savedDateFrom <= defaultDateTo
-    ? savedDateFrom
-    : defaultDateFrom;
+        this.localSelection.selectedDateFrom =
+          savedDateFrom &&
+          savedDateFrom >= defaultDateFrom &&
+          savedDateFrom <= defaultDateTo
+            ? savedDateFrom
+            : defaultDateFrom;
 
-this.localSelection.selectedDateTo =
-  savedDateTo &&
-  savedDateTo >= this.localSelection.selectedDateFrom &&
-  savedDateTo <= defaultDateTo
-    ? savedDateTo
-    : defaultDateTo;
+        this.localSelection.selectedDateTo =
+          savedDateTo &&
+          savedDateTo >= this.localSelection.selectedDateFrom &&
+          savedDateTo <= defaultDateTo
+            ? savedDateTo
+            : defaultDateTo;
         // LETTURA SICURA del filtro puntuale
         const puntAgg =
           forceDefault || !base.puntualAggregationSelected
@@ -1390,35 +1392,41 @@ this.localSelection.selectedDateTo =
 
   watch: {
     statValues: {
-      handler: function (newVal) {
-        if (!newVal || newVal.loading) return;
+        handler: function (newVal) {
+    if (!newVal || newVal.loading) return;
 
-        this.isLoading = false;
+    this.isLoading = false;
 
-        if (newVal.items) {
-          this.fillTheViewWithValues(
-            newVal.items,
-            this.activeViewType,
-            this.activeSelection,
-            this.currentCampaign.item
-          );
-        } else {
-          this.isLoading = false;
-          if (newVal.error) {
-            console.error("Errore nel caricamento statistiche", newVal.error);
-          }
-        }
-      },
-      deep: true,
+    if (newVal.error) {
+      if (newVal.error.response && newVal.error.response.status === 403) {
+        this.permissionError = true;
+        this.dateWarning = null;
+        this.$set(this, "viewData", null);
+      }
+      return;
+    }
+
+    this.permissionError = false;
+
+    if (newVal.items) {
+      this.fillTheViewWithValues(
+        newVal.items,
+        this.activeViewType,
+        this.activeSelection,
+        this.currentCampaign.item
+      );
+    }
+  },
+  deep: true,
     },
-"localSelection.selectedDateFrom": function (value) {
-  this.dateFromInput = this.formatDate(value);
-  this.validateDateRange();
-},
-"localSelection.selectedDateTo": function (value) {
-  this.dateToInput = this.formatDate(value);
-  this.validateDateRange();
-},
+    "localSelection.selectedDateFrom": function (value) {
+      this.dateFromInput = this.formatDate(value);
+      this.validateDateRange();
+    },
+    "localSelection.selectedDateTo": function (value) {
+      this.dateToInput = this.formatDate(value);
+      this.validateDateRange();
+    },
     activeConfiguration: {
       handler(newVal) {
         if (!newVal || newVal.items === undefined || newVal.items === null) return;
