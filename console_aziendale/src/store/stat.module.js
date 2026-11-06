@@ -185,6 +185,7 @@ const mutations = {
     state.activeConfiguration = null;
     state.activeViewType =null;
     state.activeSelection=null;
+    state.currentCampaign = null;
   },
   getConfigurationByUser() {
     state.configurations = { loading: true };
