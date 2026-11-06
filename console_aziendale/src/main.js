@@ -50,7 +50,7 @@ Icon.Default.mergeOptions({
 });
 import moment from 'moment'
 import vuetify from './plugins/vuetify'
-console.info("[PG Aziendale] deploy-check", "2026-11-06");
+console.log("[PG Aziendale] deploy-check", "2026-11-06");
 Vue.prototype.moment = moment
 
 Vue.component('l-map', LMap);
