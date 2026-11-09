@@ -68,7 +68,7 @@
             >
               {{ dateWarning }}
             </v-alert>
-            <v-tabs-items v-show="!isPrivacyRestricted" v-model="tab" class="mt-5">
+            <v-tabs-items v-show="!isPrivacyRestricted && !privacyError" v-model="tab" class="mt-5">
               <v-tab-item key="Tabella">
                 <data-table
                   :dataTableData="viewData"
@@ -226,16 +226,17 @@
               <v-expansion-panel-header>Aggregazione temporale</v-expansion-panel-header>
               <v-expansion-panel-content>
                 <v-autocomplete
-                  label="Aggregazione temporale"
-                  placeholder="Aggregazione temporale"
-                  name="unitaTemporale"
-                  id="unitaTemporale"
-                  v-model="localSelection.timeUnit"
-                  :items="view.timeUnit"
-                  item-text="label"
-                  return-object
-                  outlined
-                ></v-autocomplete>
+  label="Aggregazione temporale"
+  placeholder="Aggregazione temporale"
+  name="unitaTemporale"
+  id="unitaTemporale"
+  v-model="localSelection.timeUnit"
+  :items="view.timeUnit"
+  item-text="label"
+  return-object
+  outlined
+  @change="validateDateRange"
+></v-autocomplete>
 
                 <p class="text-subtitle-1">Periodo di tempo</p>
                 <v-radio-group v-model="timePeriod" @change="updateTimePeriod">
@@ -412,7 +413,7 @@
         <!-- FOOTER  -->
         <div class="flex-shrink-0 pa-2" style="background-color: white">
           <!-- MESSAGGIO PRIVACY NEI FILTRI -->
-          <v-alert
+          <!-- <v-alert
             v-if="isPrivacyRestrictedLocal"
             type="error"
             dense
@@ -420,7 +421,7 @@
             class="mb-2 caption"
           >
             Non è possibile visualizzare i dati per motivi di privacy.
-          </v-alert>
+          </v-alert> -->
 
           <v-row class="ma-0" justify="center" dense>
             <v-col cols="4" class="px-1 text-center">
@@ -559,21 +560,22 @@ export default {
     ...mapState("navigation", ["page"]),
     ...mapState("navigation", ["page"]),
     ...mapState("account", ["user", "temporaryAdmin"]),
-    isPrivacyRestrictedLocal() {
-      if (!this.localSelection) return false;
-      const dl = this.localSelection.dataLevel?.value || this.localSelection.dataLevel;
-      const tu = this.localSelection.timeUnit?.value || this.localSelection.timeUnit;
-      return dl === "employee" && tu === "day";
-    },
+    //     isPrivacyRestrictedLocal() {
+    //   if (!this.localSelection) return false;
+    //   const dl = this.localSelection.dataLevel?.value || this.localSelection.dataLevel;
+    //   const tu = this.localSelection.timeUnit?.value || this.localSelection.timeUnit;
+    //   if (dl === "employee" && tu === "day") return true;
+    //   return this.isEmployeeUnderAWeek(this.localSelection);
+    // },
     isApplyDisabled() {
-      console.log("isApplyDisabled", this.errorMessage);
       return !!this.errorMessage;
     },
     isPrivacyRestricted() {
       if (!this.activeSelection) return false;
       const dl = this.activeSelection.dataLevel?.value || this.activeSelection.dataLevel;
       const tu = this.activeSelection.timeUnit?.value || this.activeSelection.timeUnit;
-      return dl === "employee" && tu === "day";
+      if (dl === "employee" && tu === "day") return true;
+      return this.isEmployeeUnderAWeek(this.activeSelection);
     },
     timeSelected() {
       return (
@@ -618,6 +620,7 @@ export default {
 
       return conf;
     },
+     
     isAllSelected() {
       if (
         !this.localSelection ||
@@ -784,6 +787,22 @@ export default {
 
       return { valid: true };
     },
+    isEmployeeUnderAWeek(selection) {
+      if (!selection) return false;
+      const dl = selection.dataLevel?.value || selection.dataLevel;
+      if (dl !== "employee") return false;
+
+      const dateRange = statService.getDateRange(selection);
+      if (!dateRange || !dateRange.from || !dateRange.to) return false;
+
+      const [y1, m1, d1] = dateRange.from.split("-").map(Number);
+      const [y2, m2, d2] = dateRange.to.split("-").map(Number);
+      const from = new Date(y1, m1 - 1, d1);
+      const to = new Date(y2, m2 - 1, d2);
+
+      const diffDays = Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
+      return diffDays < 7;
+    },
     parseItalianDate(value) {
       const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
       if (!match) return null;
@@ -871,10 +890,18 @@ export default {
       return `${day}/${month}/${year}`;
     },
     validateDateRange() {
+
+
+      // Se il periodo è ALL, i selettori data manuali non sono attivi: nessun errore di form
+      if (period !== "SPECIFIC") {
+        this.errorMessage = null;
+        return true;
+      }
+
       const dateFromRaw = this.localSelection?.selectedDateFrom;
       const dateToRaw = this.localSelection?.selectedDateTo;
 
-      // Se entrambe sono vuote, equivale al periodo intero della campagna -> Valido
+      // Se entrambe sono vuote -> Valido
       if (!dateFromRaw && !dateToRaw) {
         this.errorMessage = null;
         return true;
@@ -920,7 +947,7 @@ export default {
         return false;
       }
 
-      const diffDays = Math.round(
+            const diffDays = Math.round(
         (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)
       );
       const timeGroupBy =
@@ -929,13 +956,24 @@ export default {
         this.localSelection?.timeUnit;
       const period =
         this.localSelection.timePeriod?.value || this.localSelection.timePeriod;
+      const dataLevel =
+        this.localSelection?.dataLevel?.value || this.localSelection?.dataLevel;
+
+      // 1. REGOLA GENERALE PER I DIPENDENTI: qualsiasi aggregazione sotto i 7 giorni viola la privacy
+      if (dataLevel === "employee" && diffDays < 7) {
+        this.errorMessage =
+          "Per motivi di privacy l'intervallo temporale per le statistiche dei dipendenti deve essere di almeno 7 giorni.";
+        return false;
+      }
 
       // L'arrotondamento automatico vale per tutta la campagna su 'total',
-      // e sempre su 'month' e 'week' a prescindere dal dataLevel
+      // e sempre su 'month' e 'week' quando NON è employee
       const automaticDateAdjustment =
-        (period === "ALL" && timeGroupBy === "total") ||
-        ["month", "week"].includes(timeGroupBy);
-      // hour, dayOfWeek, year --> almeno 14 giorni
+        dataLevel !== "employee" &&
+        ((period === "ALL" && timeGroupBy === "total") ||
+          ["month", "week"].includes(timeGroupBy));
+
+      // 2. hour, dayOfWeek, year --> almeno 14 giorni
       if (
         timeGroupBy === "hour" ||
         timeGroupBy === "dayOfWeek" ||
@@ -948,7 +986,7 @@ export default {
         }
       }
 
-      // total (campagna) --> almeno 7 giorni
+      // 3. total (campagna) --> almeno 7 giorni
       if (!automaticDateAdjustment && timeGroupBy === "total") {
         if (diffDays < 7) {
           this.errorMessage =
@@ -957,7 +995,7 @@ export default {
         }
       }
 
-      // week --> deve iniziare di lunedì e finire di domenica
+      // 4. week --> deve iniziare di lunedì e finire di domenica
       if (!automaticDateAdjustment && timeGroupBy === "week") {
         const fromDay = from.getDay(); // 0=Domenica, 1=Lunedì, ...
         const toDay = to.getDay();
@@ -968,7 +1006,7 @@ export default {
         }
       }
 
-      // month --> vincoli rispetto all'inizio/fine mese
+      // 5. month --> vincoli rispetto all'inizio/fine mese
       if (!automaticDateAdjustment && timeGroupBy === "month") {
         // 1. Data inizio: devono esserci almeno 7 giorni nel mese di inizio
         const fromMonthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
@@ -1082,6 +1120,7 @@ export default {
     resetPunctualAggregation() {
       this.puntualAggregationSelected = "NONE";
       this.updatePuntualAggregationChange();
+      this.validateDateRange();
     },
 
     fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
@@ -1115,17 +1154,22 @@ export default {
           this.isLoading = false;
         });
     },
-    getLocalStat(selection) {
+     getLocalStat(selection) {
       if (!this.currentCampaign) {
         this.isLoading = false;
         return;
       }
       const dl = selection.dataLevel?.value || selection.dataLevel;
       const tu = selection.timeUnit?.value || selection.timeUnit;
-      if (dl === "employee" && tu === "day") {
+
+      // BLOCCO PRIVACY EMPLOYEE: sia se tu === 'day' sia se l'intervallo è sotto i 7 giorni
+      if (dl === "employee" && (tu === "day" || this.isEmployeeUnderAWeek(selection))) {
         this.isLoading = false;
+      this.permissionError = false;
+      this.privacyError = false;
+      this.getStatFromServer(selection);
         this.$set(this, "viewData", null);
-        return;
+        return; // La chiamata NON parte!
       }
 
       this.isLoading = true;
@@ -1160,6 +1204,7 @@ export default {
       this.localSelection.timePeriod = this.view.timePeriod.find(
         (v) => v.value === this.timePeriod
       );
+      this.validateDateRange();
     },
     updatePuntualAggregationChange() {
       if (!this.localSelection || !this.localSelection.dataLevel) return;
@@ -1414,6 +1459,7 @@ export default {
             this.dateWarning = null;
             this.$set(this, "viewData", null);
           } else if (newVal.error.response?.data?.type === "INVALID_DATE_RANGE") {
+            // IL BACKEND HA DETTO CHE L'INTERVALLO NON RISPETTA LA PRIVACY
             this.privacyError = true;
             this.permissionError = false;
             this.dateWarning = null;
@@ -1442,6 +1488,12 @@ export default {
     },
     "localSelection.selectedDateTo": function (value) {
       this.dateToInput = this.formatDate(value);
+      this.validateDateRange();
+    },
+        "localSelection.timeUnit": function () {
+      this.validateDateRange();
+    },
+    "localSelection.dataLevel": function () {
       this.validateDateRange();
     },
     activeConfiguration: {
