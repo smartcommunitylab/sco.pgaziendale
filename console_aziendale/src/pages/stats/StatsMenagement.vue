@@ -52,7 +52,12 @@
               Non si hanno i permessi necessari per visualizzare questi dati.
             </v-alert>
             <!-- MESSAGGIO PRIVACY CENTRALE -->
-            <v-alert v-if="isPrivacyRestricted" type="warning" class="ma-4" outlined>
+            <v-alert
+              v-if="isPrivacyRestricted || privacyError"
+              type="warning"
+              class="ma-4"
+              outlined
+            >
               Non è possibile visualizzare i dati per motivi di privacy.
             </v-alert>
             <v-alert
@@ -491,13 +496,13 @@ export default {
   data() {
     return {
       permissionError: false,
-        dateWarning: null,
-
+      privacyError: false,
+      dateWarning: null,
+      tab: 0,
       isLoading: false,
       drawer: true,
       mini: false,
       panel: [],
-      tab: null,
       sheet: false,
       showPickerFrom: false,
       showPickerTo: false,
@@ -1130,9 +1135,12 @@ export default {
       if (!dateRange.valid) {
         this.isLoading = false;
         this.$set(this, "viewData", null);
+        this.dateWarning =
+          "La campagna selezionata non è ancora iniziata o il periodo non è valido.";
         return;
       }
       this.permissionError = false;
+      this.privacyError = false;
       this.getStatFromServer(selection);
     },
     getItemText(item) {
@@ -1242,7 +1250,7 @@ export default {
       }
     },
     initiSelection(forceDefault = false) {
-      this.tab = this.activeViewType;
+      this.tab = 0;
 
       const def = this.view?.default || {};
       const base = forceDefault ? {} : this.baseSelection || {};
@@ -1394,32 +1402,39 @@ export default {
 
   watch: {
     statValues: {
-        handler: function (newVal) {
-    if (!newVal || newVal.loading) return;
+      handler: function (newVal) {
+        if (!newVal || newVal.loading) return;
 
-    this.isLoading = false;
+        this.isLoading = false;
 
-    if (newVal.error) {
-      if (newVal.error.response && newVal.error.response.status === 403) {
-        this.permissionError = true;
-        this.dateWarning = null;
-        this.$set(this, "viewData", null);
-      }
-      return;
-    }
+        if (newVal.error) {
+          if (newVal.error.response && newVal.error.response.status === 403) {
+            this.permissionError = true;
+            this.privacyError = false;
+            this.dateWarning = null;
+            this.$set(this, "viewData", null);
+          } else if (newVal.error.response?.data?.type === "INVALID_DATE_RANGE") {
+            this.privacyError = true;
+            this.permissionError = false;
+            this.dateWarning = null;
+            this.$set(this, "viewData", null);
+          }
+          return;
+        }
 
-    this.permissionError = false;
+        this.permissionError = false;
+        this.privacyError = false;
 
-    if (newVal.items) {
-      this.fillTheViewWithValues(
-        newVal.items,
-        this.activeViewType,
-        this.activeSelection,
-        this.currentCampaign.item
-      );
-    }
-  },
-  deep: true,
+        if (newVal.items) {
+          this.fillTheViewWithValues(
+            newVal.items,
+            this.activeViewType,
+            this.activeSelection || this.localSelection,
+            this.currentCampaign.item
+          );
+        }
+      },
+      deep: true,
     },
     "localSelection.selectedDateFrom": function (value) {
       this.dateFromInput = this.formatDate(value);
@@ -1433,7 +1448,7 @@ export default {
       handler(newVal) {
         if (!newVal || newVal.items === undefined || newVal.items === null) return;
 
-        this.tab = this.activeViewType;
+        this.tab = 0;
 
         // Reset completo: azzera la selezione precedente e forza i default della nuova configurazione
         this.baseSelection = null;
@@ -1469,7 +1484,7 @@ export default {
     $route() {
       console.log("E' cambiata la root, ora sei in: ");
       console.log(this.page);
-      this.tab = this.activeViewType;
+      this.tab = 0;
     },
   },
 };
