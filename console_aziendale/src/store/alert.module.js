@@ -24,6 +24,7 @@ const HttpErrors = {
     "INVALID_CSV_DUPLICATE_EMPLOYEES": 'Attenzione, il formato del file CSV caricato non é valido! Sono presenti dipendenti con lo stesso codice',
     'INVALID_CSV_DUPLICATE_LOCATIONS': "Attenzione, il formato del file CSV caricato non é valido! Sono presenti sedi con lo stesso codice",
     'INVALID_GROUPING_DATA': 'Attenzione, parametro non valido!',
+    'INVALID_DATE_RANGE': 'Attenzione, i dati non possono essere mostrati per motivi di privacy.',
     'EMPTY_ROLES': 'Attenzione, nessun ruolo specificato per l\'utente!',
     'NO_EMPLOYEE': 'Attenzione, il dipendente specificato non esiste!',
     'NO_SUBSCRIPTION': 'Attenzione, nessuna registrazione attiva per il codice specificato!',

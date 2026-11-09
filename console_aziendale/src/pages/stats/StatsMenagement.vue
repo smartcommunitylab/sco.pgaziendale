@@ -52,7 +52,12 @@
               Non si hanno i permessi necessari per visualizzare questi dati.
             </v-alert>
             <!-- MESSAGGIO PRIVACY CENTRALE -->
-            <v-alert v-if="isPrivacyRestricted" type="warning" class="ma-4" outlined>
+            <v-alert
+              v-if="isPrivacyRestricted || privacyError"
+              type="warning"
+              class="ma-4"
+              outlined
+            >
               Non è possibile visualizzare i dati per motivi di privacy.
             </v-alert>
             <v-alert
@@ -491,6 +496,7 @@ export default {
   data() {
     return {
       permissionError: false,
+      privacyError: false,
       dateWarning: null,
       tab: 0,
       isLoading: false,
@@ -1134,6 +1140,7 @@ export default {
         return;
       }
       this.permissionError = false;
+      this.privacyError = false;
       this.getStatFromServer(selection);
     },
     getItemText(item) {
@@ -1403,6 +1410,12 @@ export default {
         if (newVal.error) {
           if (newVal.error.response && newVal.error.response.status === 403) {
             this.permissionError = true;
+            this.privacyError = false;
+            this.dateWarning = null;
+            this.$set(this, "viewData", null);
+          } else if (newVal.error.response?.data?.type === "INVALID_DATE_RANGE") {
+            this.privacyError = true;
+            this.permissionError = false;
             this.dateWarning = null;
             this.$set(this, "viewData", null);
           }
@@ -1410,6 +1423,7 @@ export default {
         }
 
         this.permissionError = false;
+        this.privacyError = false;
 
         if (newVal.items) {
           this.fillTheViewWithValues(
