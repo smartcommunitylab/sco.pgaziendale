@@ -47,13 +47,28 @@
                 </div>
               </v-col>
             </v-row>
-
+            <!-- MESSAGGIO ERRORE PERMESSI -->
+            <v-alert v-if="permissionError" type="error" class="ma-4" outlined>
+              Non si hanno i permessi necessari per visualizzare questi dati.
+            </v-alert>
             <!-- MESSAGGIO PRIVACY CENTRALE -->
-            <v-alert v-if="isPrivacyRestricted" type="warning" class="ma-4" outlined>
+            <v-alert
+              v-if="isPrivacyRestricted || privacyError"
+              type="warning"
+              class="ma-4"
+              outlined
+            >
               Non è possibile visualizzare i dati per motivi di privacy.
             </v-alert>
-
-            <v-tabs-items v-show="!isPrivacyRestricted" v-model="tab" class="mt-5">
+            <v-alert
+              v-if="dateWarning"
+              color="amber lighten-5"
+              class="date-warning ma-4"
+              border="left"
+            >
+              {{ dateWarning }}
+            </v-alert>
+            <v-tabs-items v-show="!isPrivacyRestricted && !privacyError" v-model="tab" class="mt-5">
               <v-tab-item key="Tabella">
                 <data-table
                   :dataTableData="viewData"
@@ -211,16 +226,17 @@
               <v-expansion-panel-header>Aggregazione temporale</v-expansion-panel-header>
               <v-expansion-panel-content>
                 <v-autocomplete
-                  label="Aggregazione temporale"
-                  placeholder="Aggregazione temporale"
-                  name="unitaTemporale"
-                  id="unitaTemporale"
-                  v-model="localSelection.timeUnit"
-                  :items="view.timeUnit"
-                  item-text="label"
-                  return-object
-                  outlined
-                ></v-autocomplete>
+  label="Aggregazione temporale"
+  placeholder="Aggregazione temporale"
+  name="unitaTemporale"
+  id="unitaTemporale"
+  v-model="localSelection.timeUnit"
+  :items="view.timeUnit"
+  item-text="label"
+  return-object
+  outlined
+  @change="validateDateRange"
+></v-autocomplete>
 
                 <p class="text-subtitle-1">Periodo di tempo</p>
                 <v-radio-group v-model="timePeriod" @change="updateTimePeriod">
@@ -247,11 +263,12 @@
                   >
                     <template v-slot:activator="{ on }">
                       <v-text-field
-                        :value="formatDate(localSelection.selectedDateFrom)"
+                        v-model="dateFromInput"
                         label="Seleziona la data di inizio"
                         hint="GG/MM/AAAA"
                         persistent-hint
                         v-on="on"
+                        @blur="commitTypedDate('from')"
                       ></v-text-field>
                     </template>
                     <v-date-picker
@@ -274,11 +291,12 @@
                   >
                     <template v-slot:activator="{ on }">
                       <v-text-field
-                        :value="formatDate(localSelection.selectedDateTo)"
+                        v-model="dateToInput"
                         label="Seleziona la data di fine"
                         hint="GG/MM/AAAA"
                         persistent-hint
                         v-on="on"
+                        @blur="commitTypedDate('to')"
                       ></v-text-field>
                     </template>
                     <v-date-picker
@@ -395,7 +413,7 @@
         <!-- FOOTER  -->
         <div class="flex-shrink-0 pa-2" style="background-color: white">
           <!-- MESSAGGIO PRIVACY NEI FILTRI -->
-          <v-alert
+          <!-- <v-alert
             v-if="isPrivacyRestrictedLocal"
             type="error"
             dense
@@ -403,7 +421,7 @@
             class="mb-2 caption"
           >
             Non è possibile visualizzare i dati per motivi di privacy.
-          </v-alert>
+          </v-alert> -->
 
           <v-row class="ma-0" justify="center" dense>
             <v-col cols="4" class="px-1 text-center">
@@ -478,11 +496,14 @@ export default {
 
   data() {
     return {
+      permissionError: false,
+      privacyError: false,
+      dateWarning: null,
+      tab: 0,
       isLoading: false,
       drawer: true,
       mini: false,
       panel: [],
-      tab: null,
       sheet: false,
       showPickerFrom: false,
       showPickerTo: false,
@@ -491,6 +512,7 @@ export default {
       // puntualAggregationValue: "NONE",
       //timePeriodValue: null,
       localSelection: {
+        campaign: null,
         source: null,
         dataLevel: null,
         timeUnit: null,
@@ -538,21 +560,22 @@ export default {
     ...mapState("navigation", ["page"]),
     ...mapState("navigation", ["page"]),
     ...mapState("account", ["user", "temporaryAdmin"]),
-    isPrivacyRestrictedLocal() {
-      if (!this.localSelection) return false;
-      const dl = this.localSelection.dataLevel?.value || this.localSelection.dataLevel;
-      const tu = this.localSelection.timeUnit?.value || this.localSelection.timeUnit;
-      return dl === "employee" && tu === "day";
-    },
+    //     isPrivacyRestrictedLocal() {
+    //   if (!this.localSelection) return false;
+    //   const dl = this.localSelection.dataLevel?.value || this.localSelection.dataLevel;
+    //   const tu = this.localSelection.timeUnit?.value || this.localSelection.timeUnit;
+    //   if (dl === "employee" && tu === "day") return true;
+    //   return this.isEmployeeUnderAWeek(this.localSelection);
+    // },
     isApplyDisabled() {
-      console.log("isApplyDisabled", this.errorMessage);
       return !!this.errorMessage;
     },
     isPrivacyRestricted() {
       if (!this.activeSelection) return false;
       const dl = this.activeSelection.dataLevel?.value || this.activeSelection.dataLevel;
       const tu = this.activeSelection.timeUnit?.value || this.activeSelection.timeUnit;
-      return dl === "employee" && tu === "day";
+      if (dl === "employee" && tu === "day") return true;
+      return this.isEmployeeUnderAWeek(this.activeSelection);
     },
     timeSelected() {
       return (
@@ -570,20 +593,20 @@ export default {
       return view;
     },
     minCampaignDate() {
-      const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
-      if (!campaign?.from) return undefined;
-      return campaign.from.split("T")[0];
+      const campaign = this.currentCampaign?.item;
+      return campaign?.from ? campaign.from.split("T")[0] : undefined;
     },
     maxCampaignDate() {
-      const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
-      
-      // Calcola "oggi" in fuso orario locale YYYY-MM-DD
+      const campaign = this.currentCampaign?.item;
       const now = new Date();
-      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      const today = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0"),
+      ].join("-");
 
       const campaignTo = campaign?.to ? campaign.to.split("T")[0] : today;
 
-      // Il limite massimo assoluto non può superare né la fine della campagna né oggi
       return campaignTo < today ? campaignTo : today;
     },
     getConfigurationById() {
@@ -597,6 +620,7 @@ export default {
 
       return conf;
     },
+     
     isAllSelected() {
       if (
         !this.localSelection ||
@@ -722,81 +746,141 @@ export default {
     ...mapActions("stat", { getConfigurationByUser: "getConfigurationByUser" }),
     ...mapActions("alert", { showAlertError: "error" }),
     checkDateValidity(dateStr) {
-  if (!dateStr) return { valid: false, message: "Data non valida." };
-  
-  const selected = new Date(dateStr);
-  selected.setHours(0, 0, 0, 0);
+      if (!dateStr) return { valid: false, message: "Data non valida." };
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+      const selected = new Date(dateStr);
+      selected.setHours(0, 0, 0, 0);
 
-  const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-  if (campaign?.from) {
-    const from = new Date(campaign.from);
-    from.setHours(0, 0, 0, 0);
-    if (selected < from) {
-      return {
-        valid: false,
-        message: "La data non può essere antecedente all'inizio della campagna.",
+      const campaign = this.localSelection?.campaign || this.currentCampaign?.item;
+
+      if (campaign?.from) {
+        const from = new Date(campaign.from);
+        from.setHours(0, 0, 0, 0);
+        if (selected < from) {
+          return {
+            valid: false,
+            message: "La data non può essere antecedente all'inizio della campagna.",
+          };
+        }
+      }
+
+      if (campaign?.to) {
+        const to = new Date(campaign.to);
+        to.setHours(0, 0, 0, 0);
+        if (selected > to) {
+          return {
+            valid: false,
+            message: "La data non può essere successiva alla fine della campagna.",
+          };
+        }
+      }
+
+      if (selected > today) {
+        return {
+          valid: false,
+          message: "La data non può essere successiva alla data odierna.",
+        };
+      }
+
+      return { valid: true };
+    },
+    isEmployeeUnderAWeek(selection) {
+      if (!selection) return false;
+      const dl = selection.dataLevel?.value || selection.dataLevel;
+      if (dl !== "employee") return false;
+
+      const dateRange = statService.getDateRange(selection);
+      if (!dateRange || !dateRange.from || !dateRange.to) return false;
+
+      const [y1, m1, d1] = dateRange.from.split("-").map(Number);
+      const [y2, m2, d2] = dateRange.to.split("-").map(Number);
+      const from = new Date(y1, m1 - 1, d1);
+      const to = new Date(y2, m2 - 1, d2);
+
+      const diffDays = Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
+      return diffDays < 7;
+    },
+    parseItalianDate(value) {
+      const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+      if (!match) return null;
+
+      const day = Number(match[1]);
+      const month = Number(match[2]);
+      const year = Number(match[3]);
+      const date = new Date(year, month - 1, day);
+
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        return null;
+      }
+
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    },
+
+    commitTypedDate(which) {
+      const inputKey = which === "from" ? "dateFromInput" : "dateToInput";
+      const selectionKey = which === "from" ? "selectedDateFrom" : "selectedDateTo";
+      const isoDate = this.parseItalianDate(this[inputKey]);
+
+      const restoreInput = () => {
+        this[inputKey] = this.formatDate(this.localSelection[selectionKey]);
       };
-    }
-  }
 
-  if (campaign?.to) {
-    const to = new Date(campaign.to);
-    to.setHours(0, 0, 0, 0);
-    if (selected > to) {
-      return {
-        valid: false,
-        message: "La data non può essere successiva alla fine della campagna.",
-      };
-    }
-  }
+      if (!isoDate) {
+        this.showAlertError("Attenzione, la data inserita non è valida");
+        restoreInput();
+        return;
+      }
 
-  if (selected > today) {
-    return {
-      valid: false,
-      message: "La data non può essere successiva alla data odierna.",
-    };
-  }
+      const check = this.checkDateValidity(isoDate);
+      if (!check.valid) {
+        this.showAlertError(check.message);
+        restoreInput();
+        return;
+      }
 
-  return { valid: true };
-},
+      this.$set(this.localSelection, selectionKey, isoDate);
+      this.validateDateRange();
+    },
+    onDateFromChange(newVal) {
+      this.showPickerFrom = false;
+      const check = this.checkDateValidity(newVal);
+      if (!check.valid) {
+        if (this.showAlertError) {
+          this.showAlertError(check.message);
+        } else {
+          this.$store.dispatch("alert/error", check.message);
+        }
+        // Forza il ripristino della data precedente
+        const prev = this.localSelection.selectedDateFrom;
+        this.$set(this.localSelection, "selectedDateFrom", prev);
+        return;
+      }
+      this.$set(this.localSelection, "selectedDateFrom", newVal);
+    },
 
-onDateFromChange(newVal) {
-  this.showPickerFrom = false;
-  const check = this.checkDateValidity(newVal);
-  if (!check.valid) {
-    if (this.showAlertError) {
-      this.showAlertError(check.message);
-    } else {
-      this.$store.dispatch("alert/error", check.message);
-    }
-    // Forza il ripristino della data precedente
-    const prev = this.localSelection.selectedDateFrom;
-    this.$set(this.localSelection, "selectedDateFrom", prev);
-    return;
-  }
-  this.$set(this.localSelection, "selectedDateFrom", newVal);
-},
-
-onDateToChange(newVal) {
-  this.showPickerTo = false;
-  const check = this.checkDateValidity(newVal);
-  if (!check.valid) {
-    if (this.showAlertError) {
-      this.showAlertError(check.message);
-    } else {
-      this.$store.dispatch("alert/error", check.message);
-    }
-    // Forza il ripristino della data precedente
-    const prev = this.localSelection.selectedDateTo;
-    this.$set(this.localSelection, "selectedDateTo", prev);
-    return;
-  }
-  this.$set(this.localSelection, "selectedDateTo", newVal);
-},
+    onDateToChange(newVal) {
+      this.showPickerTo = false;
+      const check = this.checkDateValidity(newVal);
+      if (!check.valid) {
+        if (this.showAlertError) {
+          this.showAlertError(check.message);
+        } else {
+          this.$store.dispatch("alert/error", check.message);
+        }
+        // Forza il ripristino della data precedente
+        const prev = this.localSelection.selectedDateTo;
+        this.$set(this.localSelection, "selectedDateTo", prev);
+        return;
+      }
+      this.$set(this.localSelection, "selectedDateTo", newVal);
+    },
     comparator(a, b) {
       return a.value === b.value;
     },
@@ -806,10 +890,18 @@ onDateToChange(newVal) {
       return `${day}/${month}/${year}`;
     },
     validateDateRange() {
+
+
+      // Se il periodo è ALL, i selettori data manuali non sono attivi: nessun errore di form
+      if (period !== "SPECIFIC") {
+        this.errorMessage = null;
+        return true;
+      }
+
       const dateFromRaw = this.localSelection?.selectedDateFrom;
       const dateToRaw = this.localSelection?.selectedDateTo;
 
-      // Se entrambe sono vuote, equivale al periodo intero della campagna -> Valido
+      // Se entrambe sono vuote -> Valido
       if (!dateFromRaw && !dateToRaw) {
         this.errorMessage = null;
         return true;
@@ -855,12 +947,33 @@ onDateToChange(newVal) {
         return false;
       }
 
-      const diffDays = Math.round(
+            const diffDays = Math.round(
         (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)
       );
-      const timeGroupBy = this.localSelection?.timeUnit?.apiField;
+      const timeGroupBy =
+        this.localSelection?.timeUnit?.apiField ||
+        this.localSelection?.timeUnit?.value ||
+        this.localSelection?.timeUnit;
+      const period =
+        this.localSelection.timePeriod?.value || this.localSelection.timePeriod;
+      const dataLevel =
+        this.localSelection?.dataLevel?.value || this.localSelection?.dataLevel;
 
-      // hour, dayOfWeek, year --> almeno 14 giorni
+      // 1. REGOLA GENERALE PER I DIPENDENTI: qualsiasi aggregazione sotto i 7 giorni viola la privacy
+      if (dataLevel === "employee" && diffDays < 7) {
+        this.errorMessage =
+          "Per motivi di privacy l'intervallo temporale per le statistiche dei dipendenti deve essere di almeno 7 giorni.";
+        return false;
+      }
+
+      // L'arrotondamento automatico vale per tutta la campagna su 'total',
+      // e sempre su 'month' e 'week' quando NON è employee
+      const automaticDateAdjustment =
+        dataLevel !== "employee" &&
+        ((period === "ALL" && timeGroupBy === "total") ||
+          ["month", "week"].includes(timeGroupBy));
+
+      // 2. hour, dayOfWeek, year --> almeno 14 giorni
       if (
         timeGroupBy === "hour" ||
         timeGroupBy === "dayOfWeek" ||
@@ -873,8 +986,8 @@ onDateToChange(newVal) {
         }
       }
 
-      // total (campagna) --> almeno 7 giorni
-      if (timeGroupBy === "total") {
+      // 3. total (campagna) --> almeno 7 giorni
+      if (!automaticDateAdjustment && timeGroupBy === "total") {
         if (diffDays < 7) {
           this.errorMessage =
             "Il periodo selezionato deve avere una durata minima di 7 giorni.";
@@ -882,8 +995,8 @@ onDateToChange(newVal) {
         }
       }
 
-      // week --> deve iniziare di lunedì e finire di domenica
-      if (timeGroupBy === "week") {
+      // 4. week --> deve iniziare di lunedì e finire di domenica
+      if (!automaticDateAdjustment && timeGroupBy === "week") {
         const fromDay = from.getDay(); // 0=Domenica, 1=Lunedì, ...
         const toDay = to.getDay();
         if (fromDay !== 1 || toDay !== 0) {
@@ -893,8 +1006,8 @@ onDateToChange(newVal) {
         }
       }
 
-      // month --> vincoli rispetto all'inizio/fine mese
-      if (timeGroupBy === "month") {
+      // 5. month --> vincoli rispetto all'inizio/fine mese
+      if (!automaticDateAdjustment && timeGroupBy === "month") {
         // 1. Data inizio: devono esserci almeno 7 giorni nel mese di inizio
         const fromMonthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
         fromMonthEnd.setHours(0, 0, 0, 0);
@@ -1007,11 +1120,14 @@ onDateToChange(newVal) {
     resetPunctualAggregation() {
       this.puntualAggregationSelected = "NONE";
       this.updatePuntualAggregationChange();
+      this.validateDateRange();
     },
 
     fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
+      const dateRange = statService.getDateRange(activeSelection);
+
       viewStatService
-        .fillTheViewWithValues(values, view, activeSelection, currentCampaign)
+        .fillTheViewWithValues(values, view, activeSelection, currentCampaign, dateRange)
         .then((viewData) => {
           console.log("viewData", viewData);
           this.$set(this, "viewData", null);
@@ -1038,20 +1154,37 @@ onDateToChange(newVal) {
           this.isLoading = false;
         });
     },
-    getLocalStat(selection) {
+     getLocalStat(selection) {
       if (!this.currentCampaign) {
         this.isLoading = false;
         return;
       }
       const dl = selection.dataLevel?.value || selection.dataLevel;
       const tu = selection.timeUnit?.value || selection.timeUnit;
-      if (dl === "employee" && tu === "day") {
+
+      // BLOCCO PRIVACY EMPLOYEE: sia se tu === 'day' sia se l'intervallo è sotto i 7 giorni
+      if (dl === "employee" && (tu === "day" || this.isEmployeeUnderAWeek(selection))) {
         this.isLoading = false;
+      this.permissionError = false;
+      this.privacyError = false;
+      this.getStatFromServer(selection);
         this.$set(this, "viewData", null);
-        return;
+        return; // La chiamata NON parte!
       }
 
       this.isLoading = true;
+      const dateRange = statService.getDateRange(selection);
+      this.dateWarning = dateRange.warning;
+
+      if (!dateRange.valid) {
+        this.isLoading = false;
+        this.$set(this, "viewData", null);
+        this.dateWarning =
+          "La campagna selezionata non è ancora iniziata o il periodo non è valido.";
+        return;
+      }
+      this.permissionError = false;
+      this.privacyError = false;
       this.getStatFromServer(selection);
     },
     getItemText(item) {
@@ -1061,6 +1194,9 @@ onDateToChange(newVal) {
       return item.text;
     },
     exportCsv() {
+      const dateRange = statService.getDateRange(this.localSelection);
+      this.dateWarning = dateRange.warning;
+      if (!dateRange.valid) return;
       this.downloadCsv(this.localSelection);
     },
     updateTimePeriod() {
@@ -1068,6 +1204,7 @@ onDateToChange(newVal) {
       this.localSelection.timePeriod = this.view.timePeriod.find(
         (v) => v.value === this.timePeriod
       );
+      this.validateDateRange();
     },
     updatePuntualAggregationChange() {
       if (!this.localSelection || !this.localSelection.dataLevel) return;
@@ -1144,15 +1281,21 @@ onDateToChange(newVal) {
     getDataRange() {
       if (this.currentCampaign && this.currentCampaign.item) {
         if (!this.localSelection.selectedDateFrom) {
-          this.localSelection.selectedDateFrom = this.currentCampaign.item.from ? this.currentCampaign.item.from.split("T")[0] : undefined;
+          this.localSelection.selectedDateFrom = this.currentCampaign.item.from
+            ? this.currentCampaign.item.from.split("T")[0]
+            : undefined;
         }
-        if (!this.localSelection.selectedDateTo || (this.maxCampaignDate && this.localSelection.selectedDateTo > this.maxCampaignDate)) {
+        if (
+          !this.localSelection.selectedDateTo ||
+          (this.maxCampaignDate &&
+            this.localSelection.selectedDateTo > this.maxCampaignDate)
+        ) {
           this.localSelection.selectedDateTo = this.maxCampaignDate;
         }
       }
     },
     initiSelection(forceDefault = false) {
-      this.tab = this.activeViewType;
+      this.tab = 0;
 
       const def = this.view?.default || {};
       const base = forceDefault ? {} : this.baseSelection || {};
@@ -1196,12 +1339,35 @@ onDateToChange(newVal) {
           });
         }
 
-        const defaultDateTo = this.maxCampaignDate || (this.currentCampaign.item.to ? this.currentCampaign.item.to.split("T")[0] : undefined);
-        const candidateDateTo = (!forceDefault && base.selectedDateTo) || defaultDateTo;
+        const campaign = this.currentCampaign.item;
+        const sameCampaign = base.campaign?.id === campaign.id;
+        const restoreDates = !forceDefault && sameCampaign;
 
-        this.localSelection.selectedDateFrom = (!forceDefault && base.selectedDateFrom) || (this.currentCampaign.item.from ? this.currentCampaign.item.from.split("T")[0] : undefined);
-        this.localSelection.selectedDateTo = (this.maxCampaignDate && candidateDateTo > this.maxCampaignDate) ? this.maxCampaignDate : candidateDateTo;
- 
+        const defaultDateFrom = campaign.from ? campaign.from.split("T")[0] : undefined;
+        const defaultDateTo = this.maxCampaignDate;
+
+        const savedDateFrom =
+          restoreDates && base.selectedDateFrom
+            ? String(base.selectedDateFrom).split("T")[0]
+            : null;
+        const savedDateTo =
+          restoreDates && base.selectedDateTo
+            ? String(base.selectedDateTo).split("T")[0]
+            : null;
+
+        this.localSelection.selectedDateFrom =
+          savedDateFrom &&
+          savedDateFrom >= defaultDateFrom &&
+          savedDateFrom <= defaultDateTo
+            ? savedDateFrom
+            : defaultDateFrom;
+
+        this.localSelection.selectedDateTo =
+          savedDateTo &&
+          savedDateTo >= this.localSelection.selectedDateFrom &&
+          savedDateTo <= defaultDateTo
+            ? savedDateTo
+            : defaultDateTo;
         // LETTURA SICURA del filtro puntuale
         const puntAgg =
           forceDefault || !base.puntualAggregationSelected
@@ -1286,33 +1452,55 @@ onDateToChange(newVal) {
 
         this.isLoading = false;
 
+        if (newVal.error) {
+          if (newVal.error.response && newVal.error.response.status === 403) {
+            this.permissionError = true;
+            this.privacyError = false;
+            this.dateWarning = null;
+            this.$set(this, "viewData", null);
+          } else if (newVal.error.response?.data?.type === "INVALID_DATE_RANGE") {
+            // IL BACKEND HA DETTO CHE L'INTERVALLO NON RISPETTA LA PRIVACY
+            this.privacyError = true;
+            this.permissionError = false;
+            this.dateWarning = null;
+            this.$set(this, "viewData", null);
+          }
+          return;
+        }
+
+        this.permissionError = false;
+        this.privacyError = false;
+
         if (newVal.items) {
           this.fillTheViewWithValues(
             newVal.items,
             this.activeViewType,
-            this.activeSelection,
+            this.activeSelection || this.localSelection,
             this.currentCampaign.item
           );
-        } else {
-          this.isLoading = false;
-          if (newVal.error) {
-            console.error("Errore nel caricamento statistiche", newVal.error);
-          }
         }
       },
       deep: true,
     },
-    "localSelection.selectedDateFrom": function () {
+    "localSelection.selectedDateFrom": function (value) {
+      this.dateFromInput = this.formatDate(value);
       this.validateDateRange();
     },
-    "localSelection.selectedDateTo": function () {
+    "localSelection.selectedDateTo": function (value) {
+      this.dateToInput = this.formatDate(value);
+      this.validateDateRange();
+    },
+        "localSelection.timeUnit": function () {
+      this.validateDateRange();
+    },
+    "localSelection.dataLevel": function () {
       this.validateDateRange();
     },
     activeConfiguration: {
       handler(newVal) {
         if (!newVal || newVal.items === undefined || newVal.items === null) return;
 
-        this.tab = this.activeViewType;
+        this.tab = 0;
 
         // Reset completo: azzera la selezione precedente e forza i default della nuova configurazione
         this.baseSelection = null;
@@ -1348,7 +1536,7 @@ onDateToChange(newVal) {
     $route() {
       console.log("E' cambiata la root, ora sei in: ");
       console.log(this.page);
-      this.tab = this.activeViewType;
+      this.tab = 0;
     },
   },
 };
@@ -1377,5 +1565,9 @@ onDateToChange(newVal) {
 ::v-deep .v-data-table th:first-child,
 ::v-deep .v-data-table td:first-child {
   text-align: left !important;
+}
+.date-warning {
+  color: #3e2723;
+  border-left: 4px solid #8d4a00 !important;
 }
 </style>

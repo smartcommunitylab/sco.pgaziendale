@@ -14,6 +14,7 @@ export const statService = {
   getStat,
   getCsv,
   getItemsAggregation,
+  getDateRange,
 };
 
 
@@ -145,9 +146,6 @@ function callTrackStatsAPI(
     .then(res => {
       if (res && res.data) return Promise.resolve(res.data);
       else return Promise.reject(null);
-    })  
-    .catch(()=>{
-      Promise.resolve(null);
     })
   }
 
@@ -175,9 +173,6 @@ function callTrackStatsAPI(
     });
     array.sort((a,b) => a.key.localeCompare(b.key));
     return array;
-  })
-  .catch(()=>{
-    Promise.resolve(null);
   })
 }
 
@@ -240,9 +235,6 @@ function callTrackStatsMultiAPI(
       if (res && res.data) return Promise.resolve(res.data);
       else return Promise.reject(null);
     })  
-    .catch(()=>{
-      Promise.resolve(null);
-    })
   }
 
   return axios
@@ -328,9 +320,6 @@ function callEmployeeStatsAPI(
     .then(res => {
       if (res && res.data) return Promise.resolve(res.data);
       else return Promise.reject(null);
-    })  
-    .catch(()=>{
-      Promise.resolve(null);
     })
   }
 
@@ -357,9 +346,6 @@ function callEmployeeStatsAPI(
     });
     array.sort((a,b) => a.key.localeCompare(b.key));
     return array;
-  })
-  .catch(()=>{
-    Promise.resolve(null);
   })
 }
 
@@ -391,15 +377,121 @@ function filterByPuntualAggregation(res, configuration) {
   return res.filter(e => e.key && e.key !== 'null' && e.key.trim() !== '');
 
 }
+function dateOnly(value) {
+  if (!value) return null;
+  if (value instanceof Date) {
+    return [
+      value.getFullYear(),
+      String(value.getMonth() + 1).padStart(2, "0"),
+      String(value.getDate()).padStart(2, "0"),
+    ].join("-");
+  }
+  return String(value).slice(0, 10);
+}
 
-// FIX: funzione helper per le date
+function parseLocalDate(value) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function formatLocalDate(date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-");
+}
+
 function getDateRange(configuration) {
-  const periodVal = configuration.timePeriod?.value || configuration.timePeriod;
+  const period = configuration.timePeriod?.value || configuration.timePeriod;
+  const unit =
+    configuration.timeUnit?.apiField ||
+    configuration.timeUnit?.value ||
+    configuration.timeUnit;
+  const campaign = configuration.campaign || {};
+  const today = formatLocalDate(new Date());
+  const campaignFrom = dateOnly(campaign.from);
+  const campaignTo = dateOnly(campaign.to);
+  const maxCampaignDate =
+    campaignTo && campaignTo < today ? campaignTo : today;
+  const warnings = [];
+
+  if (period === "ALL" && unit === "total") {
+    return {
+      from: campaignFrom,
+      to: maxCampaignDate,
+      warning: null,
+      valid: !campaignFrom || campaignFrom <= maxCampaignDate,
+    };
+  }
+
+
+const isCalendarAggregation = ["month", "week"].includes(unit);
+
+if (isCalendarAggregation) {
+  let from = dateOnly(configuration.selectedDateFrom) || campaignFrom;
+  let to = dateOnly(configuration.selectedDateTo) || maxCampaignDate;
+
+  if (unit === "month") {
+    const start = parseLocalDate(from);
+    const daysInStartMonth = new Date(
+      start.getFullYear(),
+      start.getMonth() + 1,
+      0
+    ).getDate();
+
+    // se giorno(da) > giorni_mese - 7: passa il primo del mese successivo
+    if (start.getDate() > daysInStartMonth - 7) {
+      start.setDate(1);
+      start.setMonth(start.getMonth() + 1);
+      from = formatLocalDate(start);
+      warnings.push("Il primo mese è parziale ed è stato escluso.");
+    }
+
+    // se giorno(a) < 7: passa l'ultimo del mese precedente
+    const end = parseLocalDate(to);
+    if (end.getDate() < 7) {
+      to = formatLocalDate(new Date(end.getFullYear(), end.getMonth(), 0));
+      warnings.push("L'ultimo mese è parziale ed è stato escluso.");
+    }
+  }
+
+  if (unit === "week") {
+    const start = parseLocalDate(from);
+    if (start.getDay() !== 1) {
+      start.setDate(start.getDate() + ((8 - start.getDay()) % 7));
+      from = formatLocalDate(start);
+      warnings.push("La prima settimana è parziale ed è stata esclusa.");
+    }
+
+    const end = parseLocalDate(to);
+    if (end.getDay() !== 0) {
+      end.setDate(end.getDate() - end.getDay());
+      to = formatLocalDate(end);
+      warnings.push("L'ultima settimana è parziale ed è stata esclusa.");
+    }
+  }
+
+  const warning = warnings.length
+    ? `Per motivi di privacy non possono essere esposti dati inferiori a una settimana. ${warnings.join(" ")}`
+    : null;
+
   return {
-    from: periodVal && periodVal !== 'ALL' ? (configuration.selectedDateFrom || null) : null,
-    to:   periodVal && periodVal !== 'ALL' ? (configuration.selectedDateTo   || null) : null,
+    from,
+    to,
+    warning,
+    valid: !!from && !!to && from <= to,
   };
 }
+
+  return {
+    from: period && period !== "ALL" ? dateOnly(configuration.selectedDateFrom) : null,
+    to: period && period !== "ALL" ? dateOnly(configuration.selectedDateTo) : null,
+    warning: null,
+    valid: true,
+  };
+}
+
 
 function getStat(configuration) {
   if (!configuration || !configuration.campaign?.id) return Promise.resolve([]);
@@ -408,7 +500,10 @@ function getStat(configuration) {
   const agg = configuration.dataLevel?.value || configuration.dataLevel;
   if (!agg) return Promise.resolve([]);
 
-  const { from, to } = getDateRange(configuration);
+const dateRange = getDateRange(configuration);
+if (!dateRange.valid) return Promise.resolve([]);
+
+const { from, to } = dateRange;
   const companyId = (configuration.company || {}).id;
   const filterType = configuration.puntualAggregationSelected?.value || configuration.puntualAggregationSelected;
 

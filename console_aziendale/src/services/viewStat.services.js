@@ -61,7 +61,7 @@ function setMapLocations(array) {
     });
   })
 }
-async function fillTheViewWithValues(values, view, selection, currentCampaign) {
+async function fillTheViewWithValues(values, view, selection, currentCampaign, dateRange) {
   let viewData = {};
   if (!values || (Array.isArray(values) && values.length === 0) || (values.headers === undefined && !Array.isArray(values))) {
     viewData.headers = [];
@@ -70,7 +70,7 @@ async function fillTheViewWithValues(values, view, selection, currentCampaign) {
     return viewData; // Essendo async farà automaticamente il Wrap in Promise
   }
   if (Array.isArray(values) && values.length > 0) {
-    viewData.headers = getHeadersTable(values, selection, currentCampaign)
+    viewData.headers = getHeadersTable(values, selection, currentCampaign, dateRange)
     viewData.subheaders = getSubHeaders(viewData.headers, selection)
     viewData.headerNumber = Math.floor(viewData.subheaders.length / viewData.headers.length);
     viewData.data = await getData(viewData.headers, selection, values)
@@ -103,10 +103,20 @@ async function fillTheViewWithValues(values, view, selection, currentCampaign) {
 }
 
 // based on values and selection, return the right headers for the table (day, month or Campaign)
-function getHeadersTable(values, selection, currentCampaign) {
-  let from = selection.timePeriod.value == 'SPECIFIC' ? selection.selectedDateFrom : currentCampaign.from
-  let to = selection.timePeriod.value == 'SPECIFIC' ? selection.selectedDateTo : currentCampaign.to
-  let headers = [];
+function getHeadersTable(values, selection, currentCampaign, dateRange) {
+  const defaultFrom =
+    selection.timePeriod.value === "SPECIFIC"
+      ? selection.selectedDateFrom
+      : currentCampaign.from;
+  const defaultTo =
+    selection.timePeriod.value === "SPECIFIC"
+      ? selection.selectedDateTo
+      : currentCampaign.to;
+
+  const from = dateRange?.from || defaultFrom;
+  const to = dateRange?.to || defaultTo;
+  const headers = [];
+
   switch (selection.timeUnit.value) {
     case 'month':
       //get all month from selection.company.from to selection.company.to 
