@@ -93,12 +93,12 @@ public class StatTrackResource {
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
 		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
 		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
-		@RequestParam(required=false) String from, 
-		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
+		@RequestParam String from, 
+		@RequestParam String to) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics");
-    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
-    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	LocalDate toDate = LocalDate.parse(to);
+    	LocalDate fromDate = LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	return ResponseEntity.ok(dataService.getTrackStats(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
 	}
@@ -132,12 +132,12 @@ public class StatTrackResource {
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
 		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
 		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
-		@RequestParam(required=false) String from, 
-		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
+		@RequestParam String from, 
+		@RequestParam String to) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics");
-    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
-    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	LocalDate toDate = LocalDate.parse(to);
+    	LocalDate fromDate = LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	return ResponseEntity.ok(dataService.getTrackStatsFlat(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
 	}
@@ -156,13 +156,13 @@ public class StatTrackResource {
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
 		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
 		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
-		@RequestParam(required=false) String from, 
-		@RequestParam(required=false) String to,
+		@RequestParam String from, 
+		@RequestParam String to,
 		HttpServletResponse response) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics CSV");
-    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
-    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	LocalDate toDate = LocalDate.parse(to);
+    	LocalDate fromDate = LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	dataService.getTrackStatsCSV(response.getWriter(), campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 	}
@@ -181,13 +181,13 @@ public class StatTrackResource {
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
 		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
 		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
-		@RequestParam(required=false) String from, 
-		@RequestParam(required=false) String to,
+		@RequestParam String from, 
+		@RequestParam String to,
 		HttpServletResponse response) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics CSV");
-    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
-    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	LocalDate toDate = LocalDate.parse(to);
+    	LocalDate fromDate = LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	dataService.csvStatisticsNew(response.getWriter(), campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 	}
@@ -218,8 +218,10 @@ public class StatTrackResource {
 			throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		}
 
-		LocalDate effectiveFromDate = fromDate == null ? campaign.getFrom() : fromDate;
-		LocalDate effectiveToDate = toDate == null ? campaign.getTo() : toDate;
+		LocalDate effectiveFromDate = fromDate;
+		// effectiveToDate must be the minimum between now and toDate
+		LocalDate now = LocalDate.now().atStartOfDay().toLocalDate();
+		LocalDate effectiveToDate = toDate.isAfter(now) ? now : toDate;
 
 		if (effectiveFromDate.isBefore(campaign.getFrom()) || effectiveToDate.isAfter(campaign.getTo())) {
 			throw new InconsistentDataException("Date range must be inside campaign dates", "INVALID_DATE_RANGE");

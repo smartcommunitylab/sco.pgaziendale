@@ -567,10 +567,14 @@ export default {
     //   if (dl === "employee" && tu === "day") return true;
     //   return this.isEmployeeUnderAWeek(this.localSelection);
     // },
+    isAdmin() {
+      return !!(this.user?.permissions?.admin);
+    },
     isApplyDisabled() {
       return !!this.errorMessage;
     },
     isPrivacyRestricted() {
+      if (this.isAdmin) return false; // Admin: nessun blocco
       if (!this.activeSelection) return false;
       const dl = this.activeSelection.dataLevel?.value || this.activeSelection.dataLevel;
       const tu = this.activeSelection.timeUnit?.value || this.activeSelection.timeUnit;
@@ -788,11 +792,12 @@ export default {
       return { valid: true };
     },
     isEmployeeUnderAWeek(selection) {
+      if (this.isAdmin) return false; // Admin: nessun blocco
       if (!selection) return false;
       const dl = selection.dataLevel?.value || selection.dataLevel;
       if (dl !== "employee") return false;
 
-      const dateRange = statService.getDateRange(selection);
+      const dateRange = statService.getDateRange(selection, this.isAdmin);
       if (!dateRange || !dateRange.from || !dateRange.to) return false;
 
       const [y1, m1, d1] = dateRange.from.split("-").map(Number);
@@ -889,10 +894,10 @@ export default {
       const [year, month, day] = date.split("-");
       return `${day}/${month}/${year}`;
     },
-    validateDateRange() {
-
-
-      // Se il periodo è ALL, i selettori data manuali non sono attivi: nessun errore di form
+        validateDateRange() {
+      // Se non siamo in selezione specifica (es. periodo ALL), nessun controllo sul form
+      const period =
+        this.localSelection?.timePeriod?.value || this.localSelection?.timePeriod;
       if (period !== "SPECIFIC") {
         this.errorMessage = null;
         return true;
@@ -901,7 +906,7 @@ export default {
       const dateFromRaw = this.localSelection?.selectedDateFrom;
       const dateToRaw = this.localSelection?.selectedDateTo;
 
-      // Se entrambe sono vuote -> Valido
+      // Se entrambe sono vuote
       if (!dateFromRaw && !dateToRaw) {
         this.errorMessage = null;
         return true;
@@ -918,125 +923,13 @@ export default {
       from.setHours(0, 0, 0, 0);
       to.setHours(0, 0, 0, 0);
 
-      // Controllo rispetto ai limiti della campagna (come da backend)
-      const campaign = this.localSelection?.campaign || this.activeSelection?.campaign;
-      if (campaign) {
-        if (campaign.from) {
-          const campaignFrom = new Date(campaign.from);
-          campaignFrom.setHours(0, 0, 0, 0);
-          if (from < campaignFrom) {
-            this.errorMessage =
-              "La data di inizio non può essere precedente all'inizio della campagna.";
-            return false;
-          }
-        }
-        if (campaign.to) {
-          const campaignTo = new Date(campaign.to);
-          campaignTo.setHours(0, 0, 0, 0);
-          if (to > campaignTo) {
-            this.errorMessage =
-              "La data di fine non può essere successiva alla fine della campagna.";
-            return false;
-          }
-        }
-      }
-
       // Data inizio successiva a data fine
       if (from > to) {
         this.errorMessage = "La data iniziale deve essere precedente alla data finale.";
         return false;
       }
 
-            const diffDays = Math.round(
-        (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      const timeGroupBy =
-        this.localSelection?.timeUnit?.apiField ||
-        this.localSelection?.timeUnit?.value ||
-        this.localSelection?.timeUnit;
-      const period =
-        this.localSelection.timePeriod?.value || this.localSelection.timePeriod;
-      const dataLevel =
-        this.localSelection?.dataLevel?.value || this.localSelection?.dataLevel;
-
-      // 1. REGOLA GENERALE PER I DIPENDENTI: qualsiasi aggregazione sotto i 7 giorni viola la privacy
-      if (dataLevel === "employee" && diffDays < 7) {
-        this.errorMessage =
-          "Per motivi di privacy l'intervallo temporale per le statistiche dei dipendenti deve essere di almeno 7 giorni.";
-        return false;
-      }
-
-      // L'arrotondamento automatico vale per tutta la campagna su 'total',
-      // e sempre su 'month' e 'week' quando NON è employee
-      const automaticDateAdjustment =
-        dataLevel !== "employee" &&
-        ((period === "ALL" && timeGroupBy === "total") ||
-          ["month", "week"].includes(timeGroupBy));
-
-      // 2. hour, dayOfWeek, year --> almeno 14 giorni
-      if (
-        timeGroupBy === "hour" ||
-        timeGroupBy === "dayOfWeek" ||
-        timeGroupBy === "year"
-      ) {
-        if (diffDays < 14) {
-          this.errorMessage =
-            "Il periodo selezionato deve avere una durata minima di 14 giorni per questo tipo di aggregazione.";
-          return false;
-        }
-      }
-
-      // 3. total (campagna) --> almeno 7 giorni
-      if (!automaticDateAdjustment && timeGroupBy === "total") {
-        if (diffDays < 7) {
-          this.errorMessage =
-            "Il periodo selezionato deve avere una durata minima di 7 giorni.";
-          return false;
-        }
-      }
-
-      // 4. week --> deve iniziare di lunedì e finire di domenica
-      if (!automaticDateAdjustment && timeGroupBy === "week") {
-        const fromDay = from.getDay(); // 0=Domenica, 1=Lunedì, ...
-        const toDay = to.getDay();
-        if (fromDay !== 1 || toDay !== 0) {
-          this.errorMessage =
-            "Il periodo per l'aggregazione settimanale deve iniziare di lunedì e terminare di domenica.";
-          return false;
-        }
-      }
-
-      // 5. month --> vincoli rispetto all'inizio/fine mese
-      if (!automaticDateAdjustment && timeGroupBy === "month") {
-        // 1. Data inizio: devono esserci almeno 7 giorni nel mese di inizio
-        const fromMonthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
-        fromMonthEnd.setHours(0, 0, 0, 0);
-
-        const fromMonthEndMinus7 = new Date(fromMonthEnd);
-        fromMonthEndMinus7.setDate(fromMonthEndMinus7.getDate() - 6);
-
-        if (from > fromMonthEndMinus7) {
-          this.errorMessage =
-            "La data di inizio deve comprendere almeno 7 giorni nel mese di partenza.";
-          return false;
-        }
-
-        // 2. Data fine: devono esserci almeno 7 giorni nel mese di fine (almeno il 7 del mese)
-        if (to.getDate() < 7) {
-          this.errorMessage =
-            "La data di fine deve comprendere almeno una settimana dall'inizio del mese.";
-          return false;
-        }
-
-        // 3. Durata minima complessiva di 7 giorni
-        if (diffDays < 7) {
-          this.errorMessage =
-            "Il periodo selezionato deve avere una durata minima di 7 giorni.";
-          return false;
-        }
-      }
-
-      // Nessun errore
+      // Tutto ok: nessun errore nel form, Applica resta abilitato
       this.errorMessage = null;
       return true;
     },
@@ -1124,7 +1017,7 @@ export default {
     },
 
     fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
-      const dateRange = statService.getDateRange(activeSelection);
+      const dateRange = statService.getDateRange(activeSelection, this.isAdmin);
 
       viewStatService
         .fillTheViewWithValues(values, view, activeSelection, currentCampaign, dateRange)
@@ -1154,7 +1047,7 @@ export default {
           this.isLoading = false;
         });
     },
-     getLocalStat(selection) {
+          getLocalStat(selection) {
       if (!this.currentCampaign) {
         this.isLoading = false;
         return;
@@ -1162,29 +1055,32 @@ export default {
       const dl = selection.dataLevel?.value || selection.dataLevel;
       const tu = selection.timeUnit?.value || selection.timeUnit;
 
-      // BLOCCO PRIVACY EMPLOYEE: sia se tu === 'day' sia se l'intervallo è sotto i 7 giorni
-      if (dl === "employee" && (tu === "day" || this.isEmployeeUnderAWeek(selection))) {
+      // BLOCCO PRIVACY EMPLOYEE: solo per utenti non-admin
+      if (!this.isAdmin && dl === "employee" && (tu === "day" || this.isEmployeeUnderAWeek(selection))) {
         this.isLoading = false;
-      this.permissionError = false;
-      this.privacyError = false;
-      this.getStatFromServer(selection);
+        this.privacyError = false;
+        this.permissionError = false;
+        this.dateWarning = null;
         this.$set(this, "viewData", null);
-        return; // La chiamata NON parte!
+        return;
       }
 
       this.isLoading = true;
-      const dateRange = statService.getDateRange(selection);
-      this.dateWarning = dateRange.warning;
+      const dateRange = statService.getDateRange(selection, this.isAdmin);
+      this.dateWarning = this.isAdmin ? null : dateRange.warning;
 
       if (!dateRange.valid) {
         this.isLoading = false;
         this.$set(this, "viewData", null);
-        this.dateWarning =
-          "La campagna selezionata non è ancora iniziata o il periodo non è valido.";
+        this.dateWarning = this.isAdmin
+          ? null
+          : "La campagna selezionata non è ancora iniziata o il periodo non è valido.";
         return;
       }
       this.permissionError = false;
       this.privacyError = false;
+
+      selection.isAdmin = this.isAdmin;
       this.getStatFromServer(selection);
     },
     getItemText(item) {
@@ -1194,9 +1090,10 @@ export default {
       return item.text;
     },
     exportCsv() {
-      const dateRange = statService.getDateRange(this.localSelection);
-      this.dateWarning = dateRange.warning;
+      const dateRange = statService.getDateRange(this.localSelection, this.isAdmin);
+      this.dateWarning = this.isAdmin ? null : dateRange.warning;
       if (!dateRange.valid) return;
+      this.localSelection.isAdmin = this.isAdmin;
       this.downloadCsv(this.localSelection);
     },
     updateTimePeriod() {

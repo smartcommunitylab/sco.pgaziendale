@@ -402,7 +402,7 @@ function formatLocalDate(date) {
   ].join("-");
 }
 
-function getDateRange(configuration) {
+function getDateRange(configuration, isAdmin = false) {
   const period = configuration.timePeriod?.value || configuration.timePeriod;
   const unit =
     configuration.timeUnit?.apiField ||
@@ -416,6 +416,25 @@ function getDateRange(configuration) {
     campaignTo && campaignTo < today ? campaignTo : today;
   const warnings = [];
 
+  let from =
+    period && period !== "ALL"
+      ? dateOnly(configuration.selectedDateFrom)
+      : campaignFrom;
+  let to =
+    period && period !== "ALL"
+      ? dateOnly(configuration.selectedDateTo)
+      : maxCampaignDate;
+
+  // Se è ADMIN, nessun arrotondamento privacy e nessun warning
+  if (isAdmin || configuration?.isAdmin) {
+    return {
+      from,
+      to,
+      warning: null,
+      valid: !!from && !!to && from <= to,
+    };
+  }
+
   if (period === "ALL" && unit === "total") {
     return {
       from: campaignFrom,
@@ -425,68 +444,64 @@ function getDateRange(configuration) {
     };
   }
 
+  const isCalendarAggregation = ["month", "week"].includes(unit);
 
-const isCalendarAggregation = ["month", "week"].includes(unit);
+  if (isCalendarAggregation) {
+    if (unit === "month") {
+      const start = parseLocalDate(from);
+      const daysInStartMonth = new Date(
+        start.getFullYear(),
+        start.getMonth() + 1,
+        0
+      ).getDate();
 
-if (isCalendarAggregation) {
-  let from = dateOnly(configuration.selectedDateFrom) || campaignFrom;
-  let to = dateOnly(configuration.selectedDateTo) || maxCampaignDate;
+      // se giorno(da) > giorni_mese - 7: passa il primo del mese successivo
+      if (start.getDate() > daysInStartMonth - 7) {
+        start.setDate(1);
+        start.setMonth(start.getMonth() + 1);
+        from = formatLocalDate(start);
+        warnings.push("Il primo mese è parziale ed è stato escluso.");
+      }
 
-  if (unit === "month") {
-    const start = parseLocalDate(from);
-    const daysInStartMonth = new Date(
-      start.getFullYear(),
-      start.getMonth() + 1,
-      0
-    ).getDate();
-
-    // se giorno(da) > giorni_mese - 7: passa il primo del mese successivo
-    if (start.getDate() > daysInStartMonth - 7) {
-      start.setDate(1);
-      start.setMonth(start.getMonth() + 1);
-      from = formatLocalDate(start);
-      warnings.push("Il primo mese è parziale ed è stato escluso.");
+      // se giorno(a) < 7: passa l'ultimo del mese precedente
+      const end = parseLocalDate(to);
+      if (end.getDate() < 7) {
+        to = formatLocalDate(new Date(end.getFullYear(), end.getMonth(), 0));
+        warnings.push("L'ultimo mese è parziale ed è stato escluso.");
+      }
     }
 
-    // se giorno(a) < 7: passa l'ultimo del mese precedente
-    const end = parseLocalDate(to);
-    if (end.getDate() < 7) {
-      to = formatLocalDate(new Date(end.getFullYear(), end.getMonth(), 0));
-      warnings.push("L'ultimo mese è parziale ed è stato escluso.");
+    if (unit === "week") {
+      const start = parseLocalDate(from);
+      if (start.getDay() !== 1) {
+        start.setDate(start.getDate() + ((8 - start.getDay()) % 7));
+        from = formatLocalDate(start);
+        warnings.push("La prima settimana è parziale ed è stata esclusa.");
+      }
+
+      const end = parseLocalDate(to);
+      if (end.getDay() !== 0) {
+        end.setDate(end.getDate() - end.getDay());
+        to = formatLocalDate(end);
+        warnings.push("L'ultima settimana è parziale ed è stata esclusa.");
+      }
     }
+
+    const warning = warnings.length
+      ? `Per motivi di privacy non possono essere esposti dati inferiori a una settimana. ${warnings.join(" ")}`
+      : null;
+
+    return {
+      from,
+      to,
+      warning,
+      valid: !!from && !!to && from <= to,
+    };
   }
-
-  if (unit === "week") {
-    const start = parseLocalDate(from);
-    if (start.getDay() !== 1) {
-      start.setDate(start.getDate() + ((8 - start.getDay()) % 7));
-      from = formatLocalDate(start);
-      warnings.push("La prima settimana è parziale ed è stata esclusa.");
-    }
-
-    const end = parseLocalDate(to);
-    if (end.getDay() !== 0) {
-      end.setDate(end.getDate() - end.getDay());
-      to = formatLocalDate(end);
-      warnings.push("L'ultima settimana è parziale ed è stata esclusa.");
-    }
-  }
-
-  const warning = warnings.length
-    ? `Per motivi di privacy non possono essere esposti dati inferiori a una settimana. ${warnings.join(" ")}`
-    : null;
 
   return {
     from,
     to,
-    warning,
-    valid: !!from && !!to && from <= to,
-  };
-}
-
-  return {
-    from: period && period !== "ALL" ? dateOnly(configuration.selectedDateFrom) : null,
-    to: period && period !== "ALL" ? dateOnly(configuration.selectedDateTo) : null,
     warning: null,
     valid: true,
   };
@@ -496,14 +511,13 @@ if (isCalendarAggregation) {
 function getStat(configuration) {
   if (!configuration || !configuration.campaign?.id) return Promise.resolve([]);
 
-  // FIX: evita TypeError se dataLevel è null o stringa
   const agg = configuration.dataLevel?.value || configuration.dataLevel;
   if (!agg) return Promise.resolve([]);
 
-const dateRange = getDateRange(configuration);
-if (!dateRange.valid) return Promise.resolve([]);
+  const dateRange = getDateRange(configuration, configuration.isAdmin);
+  if (!dateRange.valid) return Promise.resolve([]);
 
-const { from, to } = dateRange;
+  const { from, to } = dateRange;
   const companyId = (configuration.company || {}).id;
   const filterType = configuration.puntualAggregationSelected?.value || configuration.puntualAggregationSelected;
 
