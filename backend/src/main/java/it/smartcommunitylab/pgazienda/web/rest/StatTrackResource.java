@@ -238,12 +238,12 @@ public class StatTrackResource {
 
 	private void checkDateRange(LocalDate fromDate, LocalDate toDate, GROUP_BY_TIME timeGroupBy) throws InconsistentDataException {
 		if (GROUP_BY_TIME.hour.equals(timeGroupBy) || GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy) || GROUP_BY_TIME.year.equals(timeGroupBy)) {
-			if (toDate.isBefore(fromDate.plusDays(13))) {
+			if (toDate.isBefore(fromDate.plusDays(14))) {
 				throw new InconsistentDataException("Date range for employee grouping must be at least two weeks", "INVALID_DATE_RANGE");
 			}
 		}
 		if (GROUP_BY_TIME.total.equals(timeGroupBy)) {
-			if (toDate.isBefore(fromDate.plusDays(6))) {
+			if (toDate.isBefore(fromDate.plusDays(7))) {
 				throw new InconsistentDataException("Date range for employee grouping must be at least one week", "INVALID_DATE_RANGE");
 			}
 		}
@@ -255,13 +255,13 @@ public class StatTrackResource {
 		if (GROUP_BY_TIME.month.equals(timeGroupBy)) {
 			LocalDate monthEndDate = fromDate.withDayOfMonth(fromDate.lengthOfMonth());
 			LocalDate monthStartDate = toDate.withDayOfMonth(1);
-			if (fromDate.isAfter(monthEndDate.minusDays(6))) {
+			if (fromDate.isAfter(monthEndDate.minusDays(7))) {
 				throw new InconsistentDataException("Date range for monthly grouping must start before the last week of the month", "INVALID_DATE_RANGE");
 			}
-			if (toDate.isBefore(monthStartDate.plusDays(6))) {
+			if (toDate.isBefore(monthStartDate.plusDays(7))) {
 				throw new InconsistentDataException("Date range for monthly grouping must end at least one week after the start of the month", "INVALID_DATE_RANGE");
 			}
-			if (toDate.isBefore(fromDate.plusDays(6))) {
+			if (toDate.isBefore(fromDate.plusDays(7))) {
 				throw new InconsistentDataException("Date range for monthly grouping must be at least one week", "INVALID_DATE_RANGE");
 			}
 		}
