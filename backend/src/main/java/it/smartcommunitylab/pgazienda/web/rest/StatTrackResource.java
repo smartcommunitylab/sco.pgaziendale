@@ -254,10 +254,11 @@ public class StatTrackResource {
 		}
 		if (GROUP_BY_TIME.month.equals(timeGroupBy)) {
 			LocalDate monthEndDate = fromDate.withDayOfMonth(fromDate.lengthOfMonth());
-			if (!fromDate.isBefore(monthEndDate.minusDays(7))) {
+			LocalDate monthStartDate = toDate.withDayOfMonth(1);
+			if (!fromDate.isAfter(monthEndDate.minusDays(7))) {
 				throw new InconsistentDataException("Date range for monthly grouping must start before the last week of the month", "INVALID_DATE_RANGE");
 			}
-			if (toDate.isBefore(monthEndDate.plusDays(7))) {
+			if (toDate.isBefore(monthStartDate.plusDays(7))) {
 				throw new InconsistentDataException("Date range for monthly grouping must end at least one week after the end of the month", "INVALID_DATE_RANGE");
 			}
 			if (toDate.isBefore(fromDate.plusDays(7))) {
