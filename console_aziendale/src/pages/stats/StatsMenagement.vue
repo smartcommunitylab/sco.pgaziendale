@@ -802,11 +802,15 @@ export default {
 
       const [y1, m1, d1] = dateRange.from.split("-").map(Number);
       const [y2, m2, d2] = dateRange.to.split("-").map(Number);
-      const from = new Date(y1, m1 - 1, d1);
-      const to = new Date(y2, m2 - 1, d2);
+      // const from = new Date(y1, m1 - 1, d1);
+      // const to = new Date(y2, m2 - 1, d2);
 
-      const diffDays = Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
-      return diffDays < 7;
+const inclusiveDays =
+  (Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) /
+    (1000 * 60 * 60 * 24) +
+  1;
+
+return inclusiveDays < 7;
     },
     parseItalianDate(value) {
       const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
