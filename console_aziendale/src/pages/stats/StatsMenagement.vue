@@ -1102,6 +1102,16 @@ return inclusiveDays < 7;
     },
     updateTimePeriod() {
       if (!this.localSelection || !this.view) return;
+      const previousPeriod =
+        this.localSelection.timePeriod?.value || this.localSelection.timePeriod;
+      if (this.timePeriod === "SPECIFIC" && previousPeriod === "ALL") {
+        const campaign = this.currentCampaign?.item || this.localSelection.campaign;
+        const campaignStart = campaign?.from
+          ? String(campaign.from).split("T")[0]
+          : undefined;
+        this.$set(this.localSelection, "selectedDateFrom", campaignStart);
+        this.$set(this.localSelection, "selectedDateTo", this.maxCampaignDate);
+      }
       this.localSelection.timePeriod = this.view.timePeriod.find(
         (v) => v.value === this.timePeriod
       );
