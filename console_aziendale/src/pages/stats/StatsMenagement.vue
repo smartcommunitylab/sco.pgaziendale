@@ -257,9 +257,11 @@
                     v-model="showPickerFrom"
                     :close-on-content-click="false"
                     :nudge-right="40"
-                    transition="scale-transition"
+                                        transition="scale-transition"
+
                     offset-y
                     :z-index="20"
+                    
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
@@ -286,9 +288,10 @@
                     v-model="showPickerTo"
                     :close-on-content-click="false"
                     :nudge-right="40"
-                    transition="scale-transition"
+                    :transition="false"
                     offset-y
                     :z-index="20"
+                    eager
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
