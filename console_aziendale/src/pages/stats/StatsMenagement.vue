@@ -259,6 +259,7 @@
                     :nudge-right="40"
                     transition="scale-transition"
                     offset-y
+                    :z-index="20"
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
@@ -287,6 +288,7 @@
                     :nudge-right="40"
                     transition="scale-transition"
                     offset-y
+                    :z-index="20"
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
