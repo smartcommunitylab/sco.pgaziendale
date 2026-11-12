@@ -235,7 +235,7 @@
   item-text="label"
   return-object
   outlined
-  @change="validateDateRange"
+  @change="onTimeUnitChange"
 ></v-autocomplete>
 
                 <p class="text-subtitle-1">Periodo di tempo</p>
@@ -1106,6 +1106,10 @@ return inclusiveDays < 7;
         (v) => v.value === this.timePeriod
       );
       this.validateDateRange();
+    },
+    onTimeUnitChange() {
+      this.timePeriod = "ALL";
+      this.updateTimePeriod();
     },
     updatePuntualAggregationChange() {
       if (!this.localSelection || !this.localSelection.dataLevel) return;
