@@ -235,7 +235,7 @@
   item-text="label"
   return-object
   outlined
-  @change="validateDateRange"
+  @change="onTimeUnitChange"
 ></v-autocomplete>
 
                 <p class="text-subtitle-1">Periodo di tempo</p>
@@ -257,8 +257,11 @@
                     v-model="showPickerFrom"
                     :close-on-content-click="false"
                     :nudge-right="40"
-                    transition="scale-transition"
+                                        transition="scale-transition"
+
                     offset-y
+                    :z-index="20"
+                    
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
@@ -285,8 +288,10 @@
                     v-model="showPickerTo"
                     :close-on-content-click="false"
                     :nudge-right="40"
-                    transition="scale-transition"
+                    :transition="false"
                     offset-y
+                    :z-index="20"
+                    eager
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
@@ -802,11 +807,15 @@ export default {
 
       const [y1, m1, d1] = dateRange.from.split("-").map(Number);
       const [y2, m2, d2] = dateRange.to.split("-").map(Number);
-      const from = new Date(y1, m1 - 1, d1);
-      const to = new Date(y2, m2 - 1, d2);
+      // const from = new Date(y1, m1 - 1, d1);
+      // const to = new Date(y2, m2 - 1, d2);
 
-      const diffDays = Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
-      return diffDays < 7;
+const inclusiveDays =
+  (Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) /
+    (1000 * 60 * 60 * 24) +
+  1;
+
+return inclusiveDays < 7;
     },
     parseItalianDate(value) {
       const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
@@ -1098,10 +1107,24 @@ export default {
     },
     updateTimePeriod() {
       if (!this.localSelection || !this.view) return;
+      const previousPeriod =
+        this.localSelection.timePeriod?.value || this.localSelection.timePeriod;
+      if (this.timePeriod === "SPECIFIC" && previousPeriod === "ALL") {
+        const campaign = this.currentCampaign?.item || this.localSelection.campaign;
+        const campaignStart = campaign?.from
+          ? String(campaign.from).split("T")[0]
+          : undefined;
+        this.$set(this.localSelection, "selectedDateFrom", campaignStart);
+        this.$set(this.localSelection, "selectedDateTo", this.maxCampaignDate);
+      }
       this.localSelection.timePeriod = this.view.timePeriod.find(
         (v) => v.value === this.timePeriod
       );
       this.validateDateRange();
+    },
+    onTimeUnitChange() {
+      this.timePeriod = "ALL";
+      this.updateTimePeriod();
     },
     updatePuntualAggregationChange() {
       if (!this.localSelection || !this.localSelection.dataLevel) return;
