@@ -98,24 +98,26 @@ export default {
       this.savePartialPrefs();
     }
   },
-    allCampaigns: {
-      handler: function (newValue, oldValue) {
-        if (oldValue && oldValue.loading && newValue.items) {
-          this.statsCampaigns = newValue.items.sort((a, b) => new Date(a?.from).getTime() - new Date(b?.from).getTime()).reverse();
-          
-          // INIT SALVATO
-          const saved = this.getSavedPrefs();
-          if (saved && saved.campaignId) {
-             const found = this.statsCampaigns.find(c => c.id === saved.campaignId);
-             this.localCampaign = found || this.statsCampaigns[0];
-          } else {
-             this.localCampaign = this.statsCampaigns[0];
-          }
-          this.updateCampaign();
-        }
-      },
-      deep: true,
-    },
+   allCampaigns: {
+  handler: function (newValue, oldValue) {
+    if (oldValue && oldValue.loading && newValue.items) {
+      this.statsCampaigns = newValue.items
+        .sort((a, b) => new Date(a?.from).getTime() - new Date(b?.from).getTime())
+        .reverse();
+
+      const defaultCamp = this.getDefaultCampaign();
+      const saved = this.getSavedPrefs();
+      if (saved && saved.campaignId) {
+        const found = this.statsCampaigns.find((c) => c.id === saved.campaignId);
+        this.localCampaign = found || defaultCamp;
+      } else {
+        this.localCampaign = defaultCamp;
+      }
+      this.updateCampaign();
+    }
+  },
+  deep: true,
+},
     configurations(val) {
       if (val && val.items) {
         const saved = this.getSavedPrefs();
@@ -167,21 +169,32 @@ export default {
     console.error("Error saving preferences", e);
   }
 },
+getDefaultCampaign() {
+  if (!this.statsCampaigns || !this.statsCampaigns.length) return null;
+  const today = new Date().toISOString().split("T")[0];
+  return (
+    this.statsCampaigns.find(
+      (c) => c.active && (!c.from || c.from.split("T")[0] <= today)
+    ) ||
+    this.statsCampaigns.find((c) => !c.from || c.from.split("T")[0] <= today) ||
+    this.statsCampaigns[0]
+  );
+},
   loadSavedPreferences() {
-  this.isLoadingPreferences = true; // Inizio caricamento
+  this.isLoadingPreferences = true;
   const saved = this.getSavedPrefs();
+  const defaultCamp = this.getDefaultCampaign();
+
   if (saved) {
-    // Carica la campagna salvata
     if (saved.campaignId) {
       const foundCampaign = this.statsCampaigns?.find(
         (c) => c.id === saved.campaignId
       );
-      this.localCampaign = foundCampaign || this.statsCampaigns?.[0];
+      this.localCampaign = foundCampaign || defaultCamp;
     } else {
-      this.localCampaign = this.statsCampaigns?.[0];
+      this.localCampaign = defaultCamp;
     }
 
-    // Carica la configurazione salvata
     if (saved.configurationId) {
       const foundConfig = this.configurations?.items?.find(
         (c) => c.id === saved.configurationId
@@ -189,16 +202,14 @@ export default {
       if (foundConfig) {
         this.selectedConfiguration = foundConfig.id;
       } else {
-        console.warn("Saved configuration not found, defaulting to null");
         this.selectedConfiguration = null;
       }
     }
   } else {
-    // Nessuna preferenza salvata, usa i valori predefiniti
-    this.localCampaign = this.statsCampaigns?.[0];
+    this.localCampaign = defaultCamp;
     this.selectedConfiguration = null;
   }
-  this.isLoadingPreferences = false; // Fine caricamento
+  this.isLoadingPreferences = false;
 },
     loadConfiguration(){
       this.getConfigurationByUser({user: this.user, temporaryAdmin: this.temporaryAdmin});
@@ -207,12 +218,11 @@ export default {
     selectConfiguration(){
       this.setActiveConfiguration({configurationId: this.selectedConfiguration})
     },
+
     updateCampaign() {
-      console.log('campaign', this.localCampaign);
-      if (this.activeSelection && this.localCampaign) {
-        // this.activeSelection.campaign = this.localCampaign;
-        this.setCurrentCampaign({ campaign: this.localCampaign });
-      }
+  if (this.localCampaign) {
+    this.setCurrentCampaign({ campaign: this.localCampaign });
+  }
     },
   },
 };
