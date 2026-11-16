@@ -492,9 +492,9 @@ function getDateRange(configuration, isAdmin = false) {
       const firstYearDays =
         (Date.UTC(start.getFullYear(), 11, 31) -
           Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())) /
-          (1000 * 60 * 60 * 24) +
+        (1000 * 60 * 60 * 24) +
         1;
-      if (firstYearDays <= 7) {
+      if (firstYearDays < 7) {
         from = formatLocalDate(new Date(start.getFullYear() + 1, 0, 1));
         warnings.push("Il primo anno parziale è stato escluso.");
       }
@@ -503,9 +503,9 @@ function getDateRange(configuration, isAdmin = false) {
       const lastYearDays =
         (Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()) -
           Date.UTC(end.getFullYear(), 0, 1)) /
-          (1000 * 60 * 60 * 24) +
+        (1000 * 60 * 60 * 24) +
         1;
-      if (lastYearDays <= 7) {
+      if (lastYearDays < 7) {
         to = formatLocalDate(new Date(end.getFullYear(), 0, 0));
         warnings.push("L'ultimo anno parziale è stato escluso.");
       }
