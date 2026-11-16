@@ -637,7 +637,7 @@ function expandMulti(res, configuration) {
   const subheaders = configuration.dataColumns.map(dc => {
     return {text: dc.label, value: dc.value};
   });
-  const headers = ['totale'];
+  const headers = ['Totale'];
   means.forEach(m => {
     configuration.dataColumns.forEach(dc => {
       subheaders.push({text: dc.label, value: m + '_' + dc.value});
