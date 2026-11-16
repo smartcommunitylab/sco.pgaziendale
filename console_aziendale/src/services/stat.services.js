@@ -444,7 +444,7 @@ function getDateRange(configuration, isAdmin = false) {
     };
   }
 
-  const isCalendarAggregation = ["month", "week"].includes(unit);
+  const isCalendarAggregation = ["month", "week", "year"].includes(unit);
 
   if (isCalendarAggregation) {
     if (unit === "month") {
@@ -455,8 +455,8 @@ function getDateRange(configuration, isAdmin = false) {
         0
       ).getDate();
 
-      // se giorno(da) > giorni_mese - 7: passa il primo del mese successivo
-      if (start.getDate() > daysInStartMonth - 7) {
+      // Esclude il primo mese solo se restano meno di 7 giorni, estremi inclusi.
+      if (daysInStartMonth - start.getDate() + 1 < 7) {
         start.setDate(1);
         start.setMonth(start.getMonth() + 1);
         from = formatLocalDate(start);
@@ -484,6 +484,30 @@ function getDateRange(configuration, isAdmin = false) {
         end.setDate(end.getDate() - end.getDay());
         to = formatLocalDate(end);
         warnings.push("L'ultima settimana è parziale ed è stata esclusa.");
+      }
+    }
+
+    if (unit === "year") {
+      const start = parseLocalDate(from);
+      const firstYearDays =
+        (Date.UTC(start.getFullYear(), 11, 31) -
+          Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())) /
+          (1000 * 60 * 60 * 24) +
+        1;
+      if (firstYearDays <= 7) {
+        from = formatLocalDate(new Date(start.getFullYear() + 1, 0, 1));
+        warnings.push("Il primo anno parziale è stato escluso.");
+      }
+
+      const end = parseLocalDate(to);
+      const lastYearDays =
+        (Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()) -
+          Date.UTC(end.getFullYear(), 0, 1)) /
+          (1000 * 60 * 60 * 24) +
+        1;
+      if (lastYearDays <= 7) {
+        to = formatLocalDate(new Date(end.getFullYear(), 0, 0));
+        warnings.push("L'ultimo anno parziale è stato escluso.");
       }
     }
 
