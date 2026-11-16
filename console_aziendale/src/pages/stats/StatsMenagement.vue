@@ -58,7 +58,7 @@
               class="ma-4"
               outlined
             >
-              Non è possibile visualizzare i dati per motivi di privacy.
+              Non è possibile visualizzare i dati. Per motivi di privacy non possono essere esposti dati inferiori a una settimana.
             </v-alert>
             <v-alert
               v-if="dateWarning"

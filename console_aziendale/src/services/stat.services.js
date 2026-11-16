@@ -460,14 +460,14 @@ function getDateRange(configuration, isAdmin = false) {
         start.setDate(1);
         start.setMonth(start.getMonth() + 1);
         from = formatLocalDate(start);
-        warnings.push("Il primo mese è parziale ed è stato escluso.");
+        warnings.push("Il primo mese è stato escluso perché il periodo da visualizzare è inferiore a 7 giorni.");
       }
 
       // se giorno(a) < 7: passa l'ultimo del mese precedente
       const end = parseLocalDate(to);
       if (end.getDate() < 7) {
         to = formatLocalDate(new Date(end.getFullYear(), end.getMonth(), 0));
-        warnings.push("L'ultimo mese è parziale ed è stato escluso.");
+        warnings.push("L’ultimo mese è stato escluso perché il periodo da visualizzare è inferiore a 7 giorni.");
       }
     }
 
@@ -496,7 +496,7 @@ function getDateRange(configuration, isAdmin = false) {
         1;
       if (firstYearDays < 7) {
         from = formatLocalDate(new Date(start.getFullYear() + 1, 0, 1));
-        warnings.push("Il primo anno parziale è stato escluso.");
+        warnings.push("Il primo anno è stato escluso perché il periodo da visualizzare è inferiore a 7 giorni.");
       }
 
       const end = parseLocalDate(to);
@@ -507,12 +507,12 @@ function getDateRange(configuration, isAdmin = false) {
         1;
       if (lastYearDays < 7) {
         to = formatLocalDate(new Date(end.getFullYear(), 0, 0));
-        warnings.push("L'ultimo anno parziale è stato escluso.");
+        warnings.push("L’ultimo anno è stato escluso perché il periodo da visualizzare è inferiore a 7 giorni.");
       }
     }
 
     const warning = warnings.length
-      ? `Per motivi di privacy non possono essere esposti dati inferiori a una settimana. ${warnings.join(" ")}`
+      ? `Per motivi di privacy non possono essere esposti dati inferiori a 7 giorni. ${warnings.join(" ")}`
       : null;
 
     return {
