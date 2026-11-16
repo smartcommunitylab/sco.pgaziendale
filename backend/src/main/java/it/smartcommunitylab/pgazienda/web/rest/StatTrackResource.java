@@ -93,12 +93,12 @@ public class StatTrackResource {
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
 		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
 		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
-		@RequestParam(required=false) String from, 
-		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
+		@RequestParam String from, 
+		@RequestParam String to) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics");
-    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
-    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	LocalDate toDate = LocalDate.parse(to);
+    	LocalDate fromDate = LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	return ResponseEntity.ok(dataService.getTrackStats(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
 	}
@@ -132,12 +132,12 @@ public class StatTrackResource {
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
 		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
 		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
-		@RequestParam(required=false) String from, 
-		@RequestParam(required=false) String to) throws IOException, InconsistentDataException 
+		@RequestParam String from, 
+		@RequestParam String to) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics");
-    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
-    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	LocalDate toDate = LocalDate.parse(to);
+    	LocalDate fromDate = LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	return ResponseEntity.ok(dataService.getTrackStatsFlat(campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate));
 	}
@@ -156,13 +156,13 @@ public class StatTrackResource {
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
 		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
 		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
-		@RequestParam(required=false) String from, 
-		@RequestParam(required=false) String to,
+		@RequestParam String from, 
+		@RequestParam String to,
 		HttpServletResponse response) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics CSV");
-    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
-    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	LocalDate toDate = LocalDate.parse(to);
+    	LocalDate fromDate = LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	dataService.getTrackStatsCSV(response.getWriter(), campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 	}
@@ -181,13 +181,13 @@ public class StatTrackResource {
 		@RequestParam(required=false, defaultValue = "score") List<STAT_TRACK_FIELD> fields,
 		@RequestParam(required=false, defaultValue = "false") boolean groupByMean,
 		@RequestParam(required=false, defaultValue = "false") boolean allDataGroupBy,
-		@RequestParam(required=false) String from, 
-		@RequestParam(required=false) String to,
+		@RequestParam String from, 
+		@RequestParam String to,
 		HttpServletResponse response) throws IOException, InconsistentDataException 
 	{
         log.debug("REST request to get statistics CSV");
-    	LocalDate toDate = to == null ? null : LocalDate.parse(to);
-    	LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+    	LocalDate toDate = LocalDate.parse(to);
+    	LocalDate fromDate = LocalDate.parse(from);
 	    checkUserPermissions(campaignId, companyId, timeGroupBy, dataGroupBy, fromDate, toDate);
     	dataService.csvStatisticsNew(response.getWriter(), campaignId, companyId, locations, employeeCodes, companies, means, way, timeGroupBy, dataGroupBy, fields, groupByMean, allDataGroupBy, fromDate, toDate);
 	}
@@ -218,8 +218,10 @@ public class StatTrackResource {
 			throw new InconsistentDataException("Invalid campaign: " + campaignId, "NO_CAMPAIGN");
 		}
 
-		LocalDate effectiveFromDate = fromDate == null ? campaign.getFrom() : fromDate;
-		LocalDate effectiveToDate = toDate == null ? campaign.getTo() : toDate;
+		LocalDate effectiveFromDate = fromDate;
+		// effectiveToDate must be the minimum between now and toDate
+		LocalDate now = LocalDate.now().atStartOfDay().toLocalDate();
+		LocalDate effectiveToDate = toDate.isAfter(now) ? now : toDate;
 
 		if (effectiveFromDate.isBefore(campaign.getFrom()) || effectiveToDate.isAfter(campaign.getTo())) {
 			throw new InconsistentDataException("Date range must be inside campaign dates", "INVALID_DATE_RANGE");
@@ -235,13 +237,26 @@ public class StatTrackResource {
 	}
 
 	private void checkDateRange(LocalDate fromDate, LocalDate toDate, GROUP_BY_TIME timeGroupBy) throws InconsistentDataException {
-		if (GROUP_BY_TIME.hour.equals(timeGroupBy) || GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy) || GROUP_BY_TIME.year.equals(timeGroupBy)) {
-			if (toDate.isBefore(fromDate.plusDays(14))) {
+		if (GROUP_BY_TIME.hour.equals(timeGroupBy) || GROUP_BY_TIME.dayOfWeek.equals(timeGroupBy)) {
+			if (toDate.isBefore(fromDate.plusDays(13))) {
 				throw new InconsistentDataException("Date range for employee grouping must be at least two weeks", "INVALID_DATE_RANGE");
 			}
 		}
+		if (GROUP_BY_TIME.year.equals(timeGroupBy)) {
+			LocalDate yearEndDate = fromDate.withDayOfYear(fromDate.lengthOfYear());
+			LocalDate yearStartDate = toDate.withDayOfYear(1);
+			if (fromDate.isAfter(yearEndDate.minusDays(6))) {
+				throw new InconsistentDataException("Date range for yearly grouping must start before the last week of the year", "INVALID_DATE_RANGE");
+			}
+			if (toDate.isBefore(yearStartDate.plusDays(6))) {
+				throw new InconsistentDataException("Date range for yearly grouping must end at least one week after the start of the year", "INVALID_DATE_RANGE");
+			}
+			if (toDate.isBefore(fromDate.plusDays(6))) {
+				throw new InconsistentDataException("Date range for employee grouping must be at least one week", "INVALID_DATE_RANGE");
+			}
+		}
 		if (GROUP_BY_TIME.total.equals(timeGroupBy)) {
-			if (toDate.isBefore(fromDate.plusDays(7))) {
+			if (toDate.isBefore(fromDate.plusDays(6))) {
 				throw new InconsistentDataException("Date range for employee grouping must be at least one week", "INVALID_DATE_RANGE");
 			}
 		}
@@ -252,13 +267,14 @@ public class StatTrackResource {
 		}
 		if (GROUP_BY_TIME.month.equals(timeGroupBy)) {
 			LocalDate monthEndDate = fromDate.withDayOfMonth(fromDate.lengthOfMonth());
-			if (!fromDate.isBefore(monthEndDate.minusDays(7))) {
+			LocalDate monthStartDate = toDate.withDayOfMonth(1);
+			if (fromDate.isAfter(monthEndDate.minusDays(6))) {
 				throw new InconsistentDataException("Date range for monthly grouping must start before the last week of the month", "INVALID_DATE_RANGE");
 			}
-			if (toDate.isBefore(monthEndDate.plusDays(7))) {
-				throw new InconsistentDataException("Date range for monthly grouping must end at least one week after the end of the month", "INVALID_DATE_RANGE");
+			if (toDate.isBefore(monthStartDate.plusDays(6))) {
+				throw new InconsistentDataException("Date range for monthly grouping must end at least one week after the start of the month", "INVALID_DATE_RANGE");
 			}
-			if (toDate.isBefore(fromDate.plusDays(7))) {
+			if (toDate.isBefore(fromDate.plusDays(6))) {
 				throw new InconsistentDataException("Date range for monthly grouping must be at least one week", "INVALID_DATE_RANGE");
 			}
 		}

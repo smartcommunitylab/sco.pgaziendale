@@ -3,23 +3,62 @@
     :headers="dataTableData.subheaders"
     :items="dataTableData.data"
     :items-per-page="10"
+    hide-default-header
+    :class="{ 'has-total-group': dataTableData.headers[0] === 'Totale' }"
     class="statstable elevation-1"
   >
     <template v-slot:header >
     <thead>
       <tr>
         <th class="cell-agg" colspan="1"></th>
-        <th class="cell-agg" :colspan="dataTableData.headerNumber" v-for="(header,index) in dataTableData.headers" :key="index">{{header}}</th>
+        <th
+          v-for="(header, index) in dataTableData.headers"
+          :key="index"
+          class="cell-agg"
+          :class="{ 'total-column': header === 'Totale' }"
+          :colspan="dataTableData.headerNumber"
+        >
+          <strong v-if="header === 'Totale'">{{ header }}</strong>
+          <span v-else>{{ header }}</span>
+        </th>
       </tr>
-      <!-- <tr>
-        <th v-for="(header,index) in dataTableData.subheaders" :key="index">{{header.text}}</th>
-      </tr> -->
+      <tr>
+        <th
+          v-for="(header, index) in dataTableData.subheaders"
+          :key="index"
+          :class="{
+            'total-column':
+              dataTableData.headers[0] === 'Totale' &&
+              index > 0 &&
+              index <= dataTableData.headerNumber,
+          }"
+        >
+          <strong
+            v-if="dataTableData.headers[0] === 'Totale' && index > 0 && index <= dataTableData.headerNumber"
+          >{{ header.text }}</strong>
+          <span v-else>{{ header.text }}</span>
+        </th>
+      </tr>
     </thead>
   </template>
 
     <template v-slot:item="{ item, headers }">
       <tr>
-        <td :class="index == 0 || ((index) % Math.floor(dataTableData.headerNumber) ==0) ? 'cell-agg': ''" v-for="(header,index) in headers" :key="index" v-html="item[header.value]"></td>
+        <td
+          v-for="(header, index) in headers"
+          :key="index"
+          :class="[
+            index === 0 || index % Math.floor(dataTableData.headerNumber) === 0
+              ? 'cell-agg'
+              : '',
+            dataTableData.headers[0] === 'Totale' &&
+            index > 0 &&
+            index <= dataTableData.headerNumber
+              ? 'total-column'
+              : '',
+          ]"
+          v-html="item[header.value]"
+        ></td>
       </tr>
     </template>
 
@@ -68,6 +107,9 @@
    .statstable table .cell-agg {
     border-right: 1px solid rgba(0, 0, 0, 0.12);
    }
+  .statstable table .total-column {
+    font-weight: 900 !important;
+  }
    .statstable table td, .statstable table th {
     white-space: nowrap;
    }

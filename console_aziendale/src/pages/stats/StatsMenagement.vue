@@ -52,8 +52,13 @@
               Non si hanno i permessi necessari per visualizzare questi dati.
             </v-alert>
             <!-- MESSAGGIO PRIVACY CENTRALE -->
-            <v-alert v-if="isPrivacyRestricted" type="warning" class="ma-4" outlined>
-              Non è possibile visualizzare i dati per motivi di privacy.
+            <v-alert
+              v-if="isPrivacyRestricted || privacyError"
+              type="warning"
+              class="ma-4"
+              outlined
+            >
+              Non è possibile visualizzare i dati. Per motivi di privacy non possono essere esposti dati inferiori a una settimana.
             </v-alert>
             <v-alert
               v-if="dateWarning"
@@ -63,7 +68,7 @@
             >
               {{ dateWarning }}
             </v-alert>
-            <v-tabs-items v-show="!isPrivacyRestricted" v-model="tab" class="mt-5">
+            <v-tabs-items v-show="!isPrivacyRestricted && !privacyError" v-model="tab" class="mt-5">
               <v-tab-item key="Tabella">
                 <data-table
                   :dataTableData="viewData"
@@ -221,16 +226,17 @@
               <v-expansion-panel-header>Aggregazione temporale</v-expansion-panel-header>
               <v-expansion-panel-content>
                 <v-autocomplete
-                  label="Aggregazione temporale"
-                  placeholder="Aggregazione temporale"
-                  name="unitaTemporale"
-                  id="unitaTemporale"
-                  v-model="localSelection.timeUnit"
-                  :items="view.timeUnit"
-                  item-text="label"
-                  return-object
-                  outlined
-                ></v-autocomplete>
+  label="Aggregazione temporale"
+  placeholder="Aggregazione temporale"
+  name="unitaTemporale"
+  id="unitaTemporale"
+  v-model="localSelection.timeUnit"
+  :items="view.timeUnit"
+  item-text="label"
+  return-object
+  outlined
+  @change="onTimeUnitChange"
+></v-autocomplete>
 
                 <p class="text-subtitle-1">Periodo di tempo</p>
                 <v-radio-group v-model="timePeriod" @change="updateTimePeriod">
@@ -251,8 +257,11 @@
                     v-model="showPickerFrom"
                     :close-on-content-click="false"
                     :nudge-right="40"
-                    transition="scale-transition"
+                                        transition="scale-transition"
+
                     offset-y
+                    :z-index="20"
+                    
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
@@ -279,8 +288,10 @@
                     v-model="showPickerTo"
                     :close-on-content-click="false"
                     :nudge-right="40"
-                    transition="scale-transition"
+                    :transition="false"
                     offset-y
+                    :z-index="20"
+                    eager
                     min-width="auto"
                   >
                     <template v-slot:activator="{ on }">
@@ -407,7 +418,7 @@
         <!-- FOOTER  -->
         <div class="flex-shrink-0 pa-2" style="background-color: white">
           <!-- MESSAGGIO PRIVACY NEI FILTRI -->
-          <v-alert
+          <!-- <v-alert
             v-if="isPrivacyRestrictedLocal"
             type="error"
             dense
@@ -415,7 +426,7 @@
             class="mb-2 caption"
           >
             Non è possibile visualizzare i dati per motivi di privacy.
-          </v-alert>
+          </v-alert> -->
 
           <v-row class="ma-0" justify="center" dense>
             <v-col cols="4" class="px-1 text-center">
@@ -491,6 +502,7 @@ export default {
   data() {
     return {
       permissionError: false,
+      privacyError: false,
       dateWarning: null,
       tab: 0,
       isLoading: false,
@@ -553,21 +565,26 @@ export default {
     ...mapState("navigation", ["page"]),
     ...mapState("navigation", ["page"]),
     ...mapState("account", ["user", "temporaryAdmin"]),
-    isPrivacyRestrictedLocal() {
-      if (!this.localSelection) return false;
-      const dl = this.localSelection.dataLevel?.value || this.localSelection.dataLevel;
-      const tu = this.localSelection.timeUnit?.value || this.localSelection.timeUnit;
-      return dl === "employee" && tu === "day";
+    //     isPrivacyRestrictedLocal() {
+    //   if (!this.localSelection) return false;
+    //   const dl = this.localSelection.dataLevel?.value || this.localSelection.dataLevel;
+    //   const tu = this.localSelection.timeUnit?.value || this.localSelection.timeUnit;
+    //   if (dl === "employee" && tu === "day") return true;
+    //   return this.isEmployeeUnderAWeek(this.localSelection);
+    // },
+    isAdmin() {
+      return !!(this.user?.permissions?.admin);
     },
     isApplyDisabled() {
-      console.log("isApplyDisabled", this.errorMessage);
       return !!this.errorMessage;
     },
     isPrivacyRestricted() {
+      if (this.isAdmin) return false; // Admin: nessun blocco
       if (!this.activeSelection) return false;
       const dl = this.activeSelection.dataLevel?.value || this.activeSelection.dataLevel;
       const tu = this.activeSelection.timeUnit?.value || this.activeSelection.timeUnit;
-      return dl === "employee" && tu === "day";
+      if (dl === "employee" && tu === "day") return true;
+      return this.isEmployeeUnderAWeek(this.activeSelection);
     },
     timeSelected() {
       return (
@@ -612,6 +629,7 @@ export default {
 
       return conf;
     },
+     
     isAllSelected() {
       if (
         !this.localSelection ||
@@ -778,6 +796,27 @@ export default {
 
       return { valid: true };
     },
+    isEmployeeUnderAWeek(selection) {
+      if (this.isAdmin) return false; // Admin: nessun blocco
+      if (!selection) return false;
+      const dl = selection.dataLevel?.value || selection.dataLevel;
+      if (dl !== "employee") return false;
+
+      const dateRange = statService.getDateRange(selection, this.isAdmin);
+      if (!dateRange || !dateRange.from || !dateRange.to) return false;
+
+      const [y1, m1, d1] = dateRange.from.split("-").map(Number);
+      const [y2, m2, d2] = dateRange.to.split("-").map(Number);
+      // const from = new Date(y1, m1 - 1, d1);
+      // const to = new Date(y2, m2 - 1, d2);
+
+const inclusiveDays =
+  (Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) /
+    (1000 * 60 * 60 * 24) +
+  1;
+
+return inclusiveDays < 7;
+    },
     parseItalianDate(value) {
       const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
       if (!match) return null;
@@ -864,11 +903,19 @@ export default {
       const [year, month, day] = date.split("-");
       return `${day}/${month}/${year}`;
     },
-    validateDateRange() {
+        validateDateRange() {
+      // Se non siamo in selezione specifica (es. periodo ALL), nessun controllo sul form
+      const period =
+        this.localSelection?.timePeriod?.value || this.localSelection?.timePeriod;
+      if (period !== "SPECIFIC") {
+        this.errorMessage = null;
+        return true;
+      }
+
       const dateFromRaw = this.localSelection?.selectedDateFrom;
       const dateToRaw = this.localSelection?.selectedDateTo;
 
-      // Se entrambe sono vuote, equivale al periodo intero della campagna -> Valido
+      // Se entrambe sono vuote
       if (!dateFromRaw && !dateToRaw) {
         this.errorMessage = null;
         return true;
@@ -885,114 +932,13 @@ export default {
       from.setHours(0, 0, 0, 0);
       to.setHours(0, 0, 0, 0);
 
-      // Controllo rispetto ai limiti della campagna (come da backend)
-      const campaign = this.localSelection?.campaign || this.activeSelection?.campaign;
-      if (campaign) {
-        if (campaign.from) {
-          const campaignFrom = new Date(campaign.from);
-          campaignFrom.setHours(0, 0, 0, 0);
-          if (from < campaignFrom) {
-            this.errorMessage =
-              "La data di inizio non può essere precedente all'inizio della campagna.";
-            return false;
-          }
-        }
-        if (campaign.to) {
-          const campaignTo = new Date(campaign.to);
-          campaignTo.setHours(0, 0, 0, 0);
-          if (to > campaignTo) {
-            this.errorMessage =
-              "La data di fine non può essere successiva alla fine della campagna.";
-            return false;
-          }
-        }
-      }
-
       // Data inizio successiva a data fine
       if (from > to) {
         this.errorMessage = "La data iniziale deve essere precedente alla data finale.";
         return false;
       }
 
-      const diffDays = Math.round(
-        (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      const timeGroupBy =
-        this.localSelection?.timeUnit?.apiField ||
-        this.localSelection?.timeUnit?.value ||
-        this.localSelection?.timeUnit;
-      const period =
-        this.localSelection.timePeriod?.value || this.localSelection.timePeriod;
-
-      // L'arrotondamento automatico vale per tutta la campagna su 'total',
-      // e sempre su 'month' e 'week' a prescindere dal dataLevel
-      const automaticDateAdjustment =
-        (period === "ALL" && timeGroupBy === "total") ||
-        ["month", "week"].includes(timeGroupBy);
-      // hour, dayOfWeek, year --> almeno 14 giorni
-      if (
-        timeGroupBy === "hour" ||
-        timeGroupBy === "dayOfWeek" ||
-        timeGroupBy === "year"
-      ) {
-        if (diffDays < 14) {
-          this.errorMessage =
-            "Il periodo selezionato deve avere una durata minima di 14 giorni per questo tipo di aggregazione.";
-          return false;
-        }
-      }
-
-      // total (campagna) --> almeno 7 giorni
-      if (!automaticDateAdjustment && timeGroupBy === "total") {
-        if (diffDays < 7) {
-          this.errorMessage =
-            "Il periodo selezionato deve avere una durata minima di 7 giorni.";
-          return false;
-        }
-      }
-
-      // week --> deve iniziare di lunedì e finire di domenica
-      if (!automaticDateAdjustment && timeGroupBy === "week") {
-        const fromDay = from.getDay(); // 0=Domenica, 1=Lunedì, ...
-        const toDay = to.getDay();
-        if (fromDay !== 1 || toDay !== 0) {
-          this.errorMessage =
-            "Il periodo per l'aggregazione settimanale deve iniziare di lunedì e terminare di domenica.";
-          return false;
-        }
-      }
-
-      // month --> vincoli rispetto all'inizio/fine mese
-      if (!automaticDateAdjustment && timeGroupBy === "month") {
-        // 1. Data inizio: devono esserci almeno 7 giorni nel mese di inizio
-        const fromMonthEnd = new Date(from.getFullYear(), from.getMonth() + 1, 0);
-        fromMonthEnd.setHours(0, 0, 0, 0);
-
-        const fromMonthEndMinus7 = new Date(fromMonthEnd);
-        fromMonthEndMinus7.setDate(fromMonthEndMinus7.getDate() - 6);
-
-        if (from > fromMonthEndMinus7) {
-          this.errorMessage =
-            "La data di inizio deve comprendere almeno 7 giorni nel mese di partenza.";
-          return false;
-        }
-
-        // 2. Data fine: devono esserci almeno 7 giorni nel mese di fine (almeno il 7 del mese)
-        if (to.getDate() < 7) {
-          this.errorMessage =
-            "La data di fine deve comprendere almeno una settimana dall'inizio del mese.";
-          return false;
-        }
-
-        // 3. Durata minima complessiva di 7 giorni
-        if (diffDays < 7) {
-          this.errorMessage =
-            "Il periodo selezionato deve avere una durata minima di 7 giorni.";
-          return false;
-        }
-      }
-
-      // Nessun errore
+      // Tutto ok: nessun errore nel form, Applica resta abilitato
       this.errorMessage = null;
       return true;
     },
@@ -1076,10 +1022,11 @@ export default {
     resetPunctualAggregation() {
       this.puntualAggregationSelected = "NONE";
       this.updatePuntualAggregationChange();
+      this.validateDateRange();
     },
 
     fillTheViewWithValues(values, view, activeSelection, currentCampaign) {
-      const dateRange = statService.getDateRange(activeSelection);
+      const dateRange = statService.getDateRange(activeSelection, this.isAdmin);
 
       viewStatService
         .fillTheViewWithValues(values, view, activeSelection, currentCampaign, dateRange)
@@ -1109,31 +1056,40 @@ export default {
           this.isLoading = false;
         });
     },
-    getLocalStat(selection) {
+          getLocalStat(selection) {
       if (!this.currentCampaign) {
         this.isLoading = false;
         return;
       }
       const dl = selection.dataLevel?.value || selection.dataLevel;
       const tu = selection.timeUnit?.value || selection.timeUnit;
-      if (dl === "employee" && tu === "day") {
+
+      // BLOCCO PRIVACY EMPLOYEE: solo per utenti non-admin
+      if (!this.isAdmin && dl === "employee" && (tu === "day" || this.isEmployeeUnderAWeek(selection))) {
         this.isLoading = false;
+        this.privacyError = false;
+        this.permissionError = false;
+        this.dateWarning = null;
         this.$set(this, "viewData", null);
         return;
       }
 
       this.isLoading = true;
-      const dateRange = statService.getDateRange(selection);
-      this.dateWarning = dateRange.warning;
+      const dateRange = statService.getDateRange(selection, this.isAdmin);
+      this.dateWarning = this.isAdmin ? null : dateRange.warning;
 
       if (!dateRange.valid) {
         this.isLoading = false;
         this.$set(this, "viewData", null);
-        this.dateWarning =
-          "La campagna selezionata non è ancora iniziata o il periodo non è valido.";
+        this.dateWarning = this.isAdmin
+          ? null
+          : "La campagna selezionata non è ancora iniziata o il periodo non è valido.";
         return;
       }
       this.permissionError = false;
+      this.privacyError = false;
+
+      selection.isAdmin = this.isAdmin;
       this.getStatFromServer(selection);
     },
     getItemText(item) {
@@ -1143,16 +1099,32 @@ export default {
       return item.text;
     },
     exportCsv() {
-      const dateRange = statService.getDateRange(this.localSelection);
-      this.dateWarning = dateRange.warning;
+      const dateRange = statService.getDateRange(this.localSelection, this.isAdmin);
+      this.dateWarning = this.isAdmin ? null : dateRange.warning;
       if (!dateRange.valid) return;
+      this.localSelection.isAdmin = this.isAdmin;
       this.downloadCsv(this.localSelection);
     },
     updateTimePeriod() {
       if (!this.localSelection || !this.view) return;
+      const previousPeriod =
+        this.localSelection.timePeriod?.value || this.localSelection.timePeriod;
+      if (this.timePeriod === "SPECIFIC" && previousPeriod === "ALL") {
+        const campaign = this.currentCampaign?.item || this.localSelection.campaign;
+        const campaignStart = campaign?.from
+          ? String(campaign.from).split("T")[0]
+          : undefined;
+        this.$set(this.localSelection, "selectedDateFrom", campaignStart);
+        this.$set(this.localSelection, "selectedDateTo", this.maxCampaignDate);
+      }
       this.localSelection.timePeriod = this.view.timePeriod.find(
         (v) => v.value === this.timePeriod
       );
+      this.validateDateRange();
+    },
+    onTimeUnitChange() {
+      this.timePeriod = "ALL";
+      this.updateTimePeriod();
     },
     updatePuntualAggregationChange() {
       if (!this.localSelection || !this.localSelection.dataLevel) return;
@@ -1403,6 +1375,13 @@ export default {
         if (newVal.error) {
           if (newVal.error.response && newVal.error.response.status === 403) {
             this.permissionError = true;
+            this.privacyError = false;
+            this.dateWarning = null;
+            this.$set(this, "viewData", null);
+          } else if (newVal.error.response?.data?.type === "INVALID_DATE_RANGE") {
+            // IL BACKEND HA DETTO CHE L'INTERVALLO NON RISPETTA LA PRIVACY
+            this.privacyError = true;
+            this.permissionError = false;
             this.dateWarning = null;
             this.$set(this, "viewData", null);
           }
@@ -1410,6 +1389,7 @@ export default {
         }
 
         this.permissionError = false;
+        this.privacyError = false;
 
         if (newVal.items) {
           this.fillTheViewWithValues(
@@ -1428,6 +1408,12 @@ export default {
     },
     "localSelection.selectedDateTo": function (value) {
       this.dateToInput = this.formatDate(value);
+      this.validateDateRange();
+    },
+        "localSelection.timeUnit": function () {
+      this.validateDateRange();
+    },
+    "localSelection.dataLevel": function () {
       this.validateDateRange();
     },
     activeConfiguration: {
